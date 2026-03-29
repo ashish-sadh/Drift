@@ -12,15 +12,16 @@ struct DriftApp: App {
                 .task {
                     if !hasRequestedHealthKit {
                         hasRequestedHealthKit = true
+                        #if !targetEnvironment(simulator)
                         do {
                             try await HealthKitService.shared.requestAuthorization()
                             let count = try await HealthKitService.shared.syncWeight()
                             Log.app.info("Initial sync: \(count) weight entries")
-                            syncComplete = true
                         } catch {
                             Log.app.error("Initial sync failed: \(error.localizedDescription)")
-                            syncComplete = true
                         }
+                        #endif
+                        syncComplete = true
                     }
                 }
         }
