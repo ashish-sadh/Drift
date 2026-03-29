@@ -155,8 +155,9 @@ final class HealthKitService {
         guard isAvailable, let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else { return 0 }
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: date)
-        let previousEvening = calendar.date(byAdding: .hour, value: -12, to: startOfDay)!
-        let predicate = HKQuery.predicateForSamples(withStart: previousEvening, end: startOfDay, options: .strictStartDate)
+        let evening = calendar.date(byAdding: .hour, value: -6, to: startOfDay)! // 6pm yesterday
+        let noon = calendar.date(byAdding: .hour, value: 12, to: startOfDay)!    // noon today
+        let predicate = HKQuery.predicateForSamples(withStart: evening, end: noon, options: [])
 
         let hours: Double = try await withCheckedThrowingContinuation { continuation in
             let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, error in
@@ -189,11 +190,13 @@ final class HealthKitService {
         guard isAvailable, let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else {
             return SleepDetail(totalHours: 0, remHours: 0, deepHours: 0, lightHours: 0, awakeHours: 0, bedStart: nil, bedEnd: nil)
         }
+        // Last night's sleep: look from 6pm yesterday to noon today
+        // This catches sleep that starts late evening and ends in the morning
         let cal = Calendar.current
         let startOfDay = cal.startOfDay(for: date)
-        let evening = cal.date(byAdding: .hour, value: -14, to: startOfDay)!
-        let morning = cal.date(byAdding: .hour, value: 14, to: startOfDay)!
-        let predicate = HKQuery.predicateForSamples(withStart: evening, end: morning, options: .strictStartDate)
+        let evening = cal.date(byAdding: .hour, value: -6, to: startOfDay)! // 6pm previous day
+        let noon = cal.date(byAdding: .hour, value: 12, to: startOfDay)!    // noon today
+        let predicate = HKQuery.predicateForSamples(withStart: evening, end: noon, options: [])
 
         return try await withCheckedThrowingContinuation { continuation in
             let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: true)]) { _, samples, error in

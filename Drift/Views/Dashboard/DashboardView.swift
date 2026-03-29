@@ -20,6 +20,11 @@ struct DashboardView: View {
                     // Health row
                     healthRow
 
+                    // Sleep & Recovery mini
+                    if viewModel.sleepHours > 0 {
+                        sleepRecoveryCard
+                    }
+
                     // Supplements
                     if viewModel.supplementsTotal > 0 {
                         supplementCard
@@ -258,6 +263,56 @@ struct DashboardView: View {
                     }
                 }
                 .card()
+            }
+        }
+    }
+
+    // MARK: - Supplements
+
+    // MARK: - Sleep & Recovery
+
+    private var sleepRecoveryCard: some View {
+        HStack(spacing: 10) {
+            // Sleep
+            VStack(spacing: 3) {
+                Image(systemName: "bed.double.fill").font(.caption).foregroundStyle(Theme.sleepIndigo)
+                Text(String(format: "%.1fh", viewModel.sleepHours))
+                    .font(.subheadline.weight(.bold).monospacedDigit())
+                Text("Sleep").font(.caption2).foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity).card()
+
+            // Recovery
+            let recoveryColor: Color = viewModel.recoveryLevel == .green ? Theme.deficit : viewModel.recoveryLevel == .yellow ? Theme.fatYellow : Theme.surplus
+            VStack(spacing: 3) {
+                Image(systemName: "heart.circle.fill").font(.caption).foregroundStyle(recoveryColor)
+                Text("\(viewModel.recoveryScore)%")
+                    .font(.subheadline.weight(.bold).monospacedDigit())
+                    .foregroundStyle(recoveryColor)
+                Text("Recovery").font(.caption2).foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity).card()
+
+            // HRV
+            if viewModel.hrvMs > 0 {
+                VStack(spacing: 3) {
+                    Image(systemName: "waveform.path").font(.caption).foregroundStyle(Theme.deficit)
+                    Text("\(Int(viewModel.hrvMs))ms")
+                        .font(.subheadline.weight(.bold).monospacedDigit())
+                    Text("HRV").font(.caption2).foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity).card()
+            }
+
+            // RHR
+            if viewModel.restingHR > 0 {
+                VStack(spacing: 3) {
+                    Image(systemName: "heart.fill").font(.caption).foregroundStyle(Theme.heartRed)
+                    Text("\(Int(viewModel.restingHR))")
+                        .font(.subheadline.weight(.bold).monospacedDigit())
+                    Text("RHR").font(.caption2).foregroundStyle(.secondary)
+                }
+                .frame(maxWidth: .infinity).card()
             }
         }
     }

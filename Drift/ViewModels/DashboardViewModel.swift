@@ -18,6 +18,11 @@ final class DashboardViewModel {
     var supplementsTaken: Int = 0
     var supplementsTotal: Int = 0
     var isHealthKitAvailable: Bool = false
+    // Recovery
+    var recoveryScore: Int = 0
+    var recoveryLevel: RecoveryEstimator.DailyRecovery.Level = .red
+    var hrvMs: Double = 0
+    var restingHR: Double = 0
 
     var calorieBalance: Double {
         todayNutrition.calories - caloriesBurned
@@ -83,6 +88,15 @@ final class DashboardViewModel {
 
                 steps = try await hkService.fetchSteps(for: Date())
                 sleepHours = try await hkService.fetchSleepHours(for: Date())
+
+                // Recovery
+                hrvMs = try await hkService.fetchHRV(for: Date())
+                restingHR = try await hkService.fetchRestingHeartRate(for: Date())
+                let (score, level) = RecoveryEstimator.calculateRecovery(
+                    hrvMs: hrvMs, restingHR: restingHR, sleepHours: sleepHours
+                )
+                recoveryScore = score
+                recoveryLevel = level
             } catch {
                 Log.healthKit.error("HealthKit fetch failed: \(error.localizedDescription)")
             }
