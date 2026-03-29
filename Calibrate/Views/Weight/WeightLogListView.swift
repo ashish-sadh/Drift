@@ -7,75 +7,57 @@ struct WeightLogListView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Weight Log")
-                .font(.headline)
+            Text("Log")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
 
-            ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("\(String(format: "%.1f", unit.convert(fromKg: entry.weightKg))) \(unit.displayName)")
-                            .font(.body.bold().monospacedDigit())
-                        Text(formatDate(entry.date))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    // Day-over-day change
-                    if index < entries.count - 1 {
-                        let previous = entries[index + 1] // entries are desc
-                        let change = entry.weightKg - previous.weightKg
-                        let displayChange = unit.convert(fromKg: change)
-
-                        HStack(spacing: 4) {
-                            Image(systemName: change < -0.01 ? "arrow.down.right" : change > 0.01 ? "arrow.up.right" : "arrow.right")
-                                .font(.caption)
-                            Text("\(displayChange >= 0 ? "+" : "")\(String(format: "%.1f", displayChange)) \(unit.displayName)")
-                                .font(.caption.monospacedDigit())
+            VStack(spacing: 0) {
+                ForEach(Array(entries.prefix(15).enumerated()), id: \.element.id) { index, entry in
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("\(String(format: "%.1f", unit.convert(fromKg: entry.weightKg))) \(unit.displayName)")
+                                .font(.subheadline.weight(.semibold).monospacedDigit())
+                            Text(formatDate(entry.date))
+                                .font(.caption2)
+                                .foregroundStyle(.tertiary)
                         }
-                        .foregroundStyle(change < -0.01 ? .green : change > 0.01 ? .red : .secondary)
-                    } else {
-                        Text("--")
-                            .font(.caption)
-                            .foregroundStyle(.tertiary)
-                    }
 
-                    // Source badge
-                    if entry.syncedFromHk {
-                        Image(systemName: "heart.fill")
-                            .font(.caption2)
-                            .foregroundStyle(.red.opacity(0.6))
-                    }
+                        Spacer()
 
-                    // Delete button (only for manual entries)
-                    if !entry.syncedFromHk, let id = entry.id {
-                        Button {
-                            onDelete(id)
-                        } label: {
-                            Image(systemName: "xmark.circle")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                        if index < entries.count - 1 {
+                            let prev = entries[index + 1]
+                            let change = unit.convert(fromKg: entry.weightKg - prev.weightKg)
+                            HStack(spacing: 3) {
+                                Image(systemName: change < -0.01 ? "arrow.down.right" : change > 0.01 ? "arrow.up.right" : "arrow.right")
+                                    .font(.caption2)
+                                Text("\(change >= 0 ? "+" : "")\(String(format: "%.1f", change))")
+                                    .font(.caption.monospacedDigit())
+                            }
+                            .foregroundStyle(change < -0.01 ? Theme.deficit : change > 0.01 ? Theme.surplus : .secondary)
                         }
-                        .buttonStyle(.plain)
-                    }
-                }
-                .padding(.vertical, 6)
 
-                if index < entries.count - 1 {
-                    Divider()
+                        if entry.syncedFromHk {
+                            Image(systemName: "heart.fill")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.heartRed.opacity(0.6))
+                        }
+                    }
+                    .padding(.vertical, 8)
+
+                    if index < min(entries.count, 15) - 1 {
+                        Divider().overlay(Color.white.opacity(0.05))
+                    }
                 }
             }
+            .card()
         }
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
     }
 
-    private func formatDate(_ dateString: String) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        guard let date = formatter.date(from: dateString) else { return dateString }
-        return DateFormatters.dayDisplay.string(from: date)
+    private func formatDate(_ s: String) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "yyyy-MM-dd"
+        f.locale = Locale(identifier: "en_US_POSIX")
+        guard let d = f.date(from: s) else { return s }
+        return DateFormatters.dayDisplay.string(from: d)
     }
 }

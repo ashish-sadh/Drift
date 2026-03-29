@@ -2,49 +2,94 @@ import SwiftUI
 
 struct SupplementsTabView: View {
     @State private var viewModel = SupplementViewModel()
-    @State private var showingAddSupplement = false
+    @State private var showingAdd = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
-                    // Status header
+                VStack(spacing: 14) {
+                    // Status
                     HStack {
-                        Text("Today")
-                            .font(.headline)
-                        Spacer()
-                        Text("\(viewModel.takenCount)/\(viewModel.totalCount) taken")
-                            .font(.subheadline.monospacedDigit())
+                        Text("\(viewModel.takenCount)/\(viewModel.totalCount)")
+                            .font(.title.weight(.bold).monospacedDigit())
+                            .foregroundStyle(viewModel.takenCount == viewModel.totalCount && viewModel.totalCount > 0 ? Theme.deficit : .primary)
+                        Text("taken today")
+                            .font(.subheadline)
                             .foregroundStyle(.secondary)
+                        Spacer()
                     }
-                    .padding(.horizontal)
+                    .card()
 
                     // Checklist
-                    ForEach(viewModel.supplements) { supplement in
-                        supplementRow(supplement)
+                    VStack(spacing: 0) {
+                        ForEach(Array(viewModel.supplements.enumerated()), id: \.element.id) { index, supplement in
+                            Button {
+                                if let id = supplement.id { viewModel.toggleTaken(supplementId: id) }
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: viewModel.isTaken(supplement.id ?? 0) ? "checkmark.circle.fill" : "circle")
+                                        .font(.title3)
+                                        .foregroundStyle(viewModel.isTaken(supplement.id ?? 0) ? Theme.deficit : .secondary)
+
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(supplement.name)
+                                            .font(.subheadline.weight(.medium))
+                                            .foregroundStyle(.primary)
+                                        if !supplement.dosageDisplay.isEmpty {
+                                            Text(supplement.dosageDisplay)
+                                                .font(.caption)
+                                                .foregroundStyle(.tertiary)
+                                        }
+                                    }
+
+                                    Spacer()
+
+                                    if viewModel.isTaken(supplement.id ?? 0),
+                                       let log = viewModel.todayLogs[supplement.id ?? 0],
+                                       let takenAt = log.takenAt {
+                                        Text(formatTime(takenAt))
+                                            .font(.caption2.monospacedDigit())
+                                            .foregroundStyle(.tertiary)
+                                    }
+                                }
+                                .padding(.vertical, 12)
+                            }
+                            .buttonStyle(.plain)
+
+                            if index < viewModel.supplements.count - 1 {
+                                Divider().overlay(Color.white.opacity(0.05))
+                            }
+                        }
                     }
+                    .card()
 
                     if viewModel.supplements.isEmpty {
-                        ContentUnavailableView(
-                            "No Supplements",
-                            systemImage: "pill",
-                            description: Text("Add supplements to track your daily intake.")
-                        )
+                        VStack(spacing: 12) {
+                            Image(systemName: "pill")
+                                .font(.system(size: 40))
+                                .foregroundStyle(Theme.accent.opacity(0.5))
+                            Text("No supplements yet")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.top, 40)
                     }
                 }
-                .padding(.vertical)
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 24)
             }
+            .background(Theme.background)
             .navigationTitle("Supplements")
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showingAddSupplement = true
-                    } label: {
-                        Image(systemName: "plus")
+                    Button { showingAdd = true } label: {
+                        Image(systemName: "plus.circle.fill").foregroundStyle(Theme.accent)
                     }
                 }
             }
-            .sheet(isPresented: $showingAddSupplement) {
+            .sheet(isPresented: $showingAdd) {
                 AddSupplementView(viewModel: viewModel)
             }
             .onAppear {
@@ -54,49 +99,10 @@ struct SupplementsTabView: View {
         }
     }
 
-    private func supplementRow(_ supplement: Supplement) -> some View {
-        Button {
-            if let id = supplement.id {
-                viewModel.toggleTaken(supplementId: id)
-            }
-        } label: {
-            HStack {
-                Image(systemName: viewModel.isTaken(supplement.id ?? 0) ? "checkmark.circle.fill" : "circle")
-                    .font(.title2)
-                    .foregroundStyle(viewModel.isTaken(supplement.id ?? 0) ? .green : .secondary)
-
-                VStack(alignment: .leading) {
-                    Text(supplement.name)
-                        .font(.body)
-                        .foregroundStyle(.primary)
-                    if !supplement.dosageDisplay.isEmpty {
-                        Text(supplement.dosageDisplay)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-
-                Spacer()
-
-                if viewModel.isTaken(supplement.id ?? 0),
-                   let log = viewModel.todayLogs[supplement.id ?? 0],
-                   let takenAt = log.takenAt {
-                    Text(formatTime(takenAt))
-                        .font(.caption)
-                        .foregroundStyle(.tertiary)
-                }
-            }
-            .padding()
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-            .padding(.horizontal)
-        }
-        .buttonStyle(.plain)
-    }
-
-    private func formatTime(_ isoString: String) -> String {
-        guard let date = ISO8601DateFormatter().date(from: isoString) else { return "" }
-        let formatter = DateFormatter()
-        formatter.dateFormat = "h:mm a"
-        return formatter.string(from: date)
+    private func formatTime(_ iso: String) -> String {
+        guard let d = ISO8601DateFormatter().date(from: iso) else { return "" }
+        let f = DateFormatter()
+        f.dateFormat = "h:mm a"
+        return f.string(from: d)
     }
 }

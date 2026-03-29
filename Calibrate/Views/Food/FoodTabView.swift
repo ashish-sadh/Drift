@@ -8,33 +8,32 @@ struct FoodTabView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
-                    // Daily totals
+                VStack(spacing: 14) {
                     dailyTotalsCard
 
-                    // Meals
                     ForEach(MealType.allCases, id: \.self) { mealType in
                         mealSection(mealType)
                     }
                 }
-                .padding()
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 24)
             }
+            .background(Theme.background)
             .navigationTitle("Food")
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
-                        Button {
-                            showingSearch = true
-                        } label: {
+                        Button { showingSearch = true } label: {
                             Label("Search Food", systemImage: "magnifyingglass")
                         }
-                        Button {
-                            showingQuickAdd = true
-                        } label: {
+                        Button { showingQuickAdd = true } label: {
                             Label("Quick Add", systemImage: "plus.circle")
                         }
                     } label: {
-                        Image(systemName: "plus")
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundStyle(Theme.accent)
                     }
                 }
             }
@@ -44,81 +43,82 @@ struct FoodTabView: View {
             .sheet(isPresented: $showingQuickAdd) {
                 QuickAddView(viewModel: viewModel)
             }
-            .onAppear {
-                viewModel.loadTodayMeals()
-            }
+            .onAppear { viewModel.loadTodayMeals() }
         }
     }
 
     private var dailyTotalsCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Today's Nutrition")
-                .font(.subheadline.bold())
+        VStack(spacing: 10) {
+            HStack {
+                Text("\(Int(viewModel.todayNutrition.calories))")
+                    .font(.title.weight(.bold).monospacedDigit())
+                Text("kcal")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
 
-            HStack(spacing: 12) {
-                nutrientPill("\(Int(viewModel.todayNutrition.calories))", label: "cal", color: .blue)
-                nutrientPill("\(Int(viewModel.todayNutrition.proteinG))g", label: "P", color: .red)
-                nutrientPill("\(Int(viewModel.todayNutrition.fatG))g", label: "F", color: .yellow)
-                nutrientPill("\(Int(viewModel.todayNutrition.carbsG))g", label: "C", color: .green)
-                nutrientPill("\(Int(viewModel.todayNutrition.fiberG))g", label: "Fiber", color: .brown)
+            HStack(spacing: 8) {
+                macroPill("P", value: viewModel.todayNutrition.proteinG, color: Theme.proteinRed)
+                macroPill("C", value: viewModel.todayNutrition.carbsG, color: Theme.carbsGreen)
+                macroPill("F", value: viewModel.todayNutrition.fatG, color: Theme.fatYellow)
+                macroPill("Fiber", value: viewModel.todayNutrition.fiberG, color: Theme.fiberBrown)
             }
         }
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .card()
     }
 
-    private func nutrientPill(_ value: String, label: String, color: Color) -> some View {
-        VStack(spacing: 2) {
-            Text(value)
-                .font(.subheadline.bold().monospacedDigit())
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+    private func macroPill(_ label: String, value: Double, color: Color) -> some View {
+        HStack(spacing: 3) {
+            RoundedRectangle(cornerRadius: 1.5).fill(color).frame(width: 3, height: 14)
+            Text("\(Int(value))g \(label)")
+                .font(.caption.weight(.medium).monospacedDigit())
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 6)
-        .background(color.opacity(0.15), in: RoundedRectangle(cornerRadius: 8))
+        .padding(.horizontal, 6)
+        .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
     }
 
     private func mealSection(_ mealType: MealType) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: mealType.icon)
-                    .foregroundStyle(.secondary)
-                Text(mealType.displayName)
-                    .font(.subheadline.bold())
-                Spacer()
+        let entries = viewModel.todayMeals[mealType] ?? []
+        let totalCal = entries.reduce(0) { $0 + $1.totalCalories }
 
-                let entries = viewModel.todayMeals[mealType] ?? []
-                let totalCal = entries.reduce(0) { $0 + $1.totalCalories }
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Image(systemName: mealType.icon)
+                    .font(.caption)
+                    .foregroundStyle(Theme.accent)
+                Text(mealType.displayName)
+                    .font(.subheadline.weight(.semibold))
+                Spacer()
                 if totalCal > 0 {
                     Text("\(Int(totalCal)) cal")
-                        .font(.caption.monospacedDigit())
+                        .font(.caption.weight(.medium).monospacedDigit())
                         .foregroundStyle(.secondary)
                 }
             }
 
-            let entries = viewModel.todayMeals[mealType] ?? []
             if entries.isEmpty {
-                Text("No items logged")
+                Text("Tap + to log food")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
+                    .padding(.vertical, 4)
             } else {
                 ForEach(entries, id: \.id) { entry in
                     HStack {
                         Text(entry.foodName)
                             .font(.subheadline)
+                            .lineLimit(1)
                         Spacer()
-                        Text("\(Int(entry.totalCalories))cal \(Int(entry.totalProtein))P \(Int(entry.totalFat))F \(Int(entry.totalCarbs))C")
-                            .font(.caption.monospacedDigit())
+                        Text("\(Int(entry.totalCalories)) \u{2022} \(Int(entry.totalProtein))P \(Int(entry.totalCarbs))C \(Int(entry.totalFat))F")
+                            .font(.caption2.monospacedDigit())
                             .foregroundStyle(.secondary)
                         if let id = entry.id {
-                            Button {
-                                viewModel.deleteEntry(id: id)
-                            } label: {
-                                Image(systemName: "xmark.circle")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                            Button { viewModel.deleteEntry(id: id) } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
                             }
                             .buttonStyle(.plain)
                         }
@@ -126,7 +126,6 @@ struct FoodTabView: View {
                 }
             }
         }
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .card()
     }
 }

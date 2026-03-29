@@ -6,226 +6,219 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 16) {
-                    // Calorie Balance Card
+                VStack(spacing: 14) {
+                    // Calorie Balance
                     calorieBalanceCard
 
-                    // Weight Trend Card
-                    weightTrendCard
+                    // Weight + Deficit
+                    weightDeficitCard
 
-                    // Macro Summary
-                    macroSummaryCard
+                    // Macros
+                    macroCard
 
-                    // Health Data (from Apple Health)
-                    if viewModel.isHealthKitAvailable {
-                        healthDataCard
-                    } else {
-                        healthKitPromptCard
-                    }
+                    // Health row
+                    healthRow
 
-                    // Supplements Status
+                    // Supplements
                     if viewModel.supplementsTotal > 0 {
-                        supplementStatusCard
+                        supplementCard
                     }
                 }
-                .padding()
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 24)
             }
+            .background(Theme.background)
             .navigationTitle("Dashboard")
-            .task {
-                await viewModel.loadToday()
-            }
-            .refreshable {
-                await viewModel.loadToday()
-            }
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .task { await viewModel.loadToday() }
+            .refreshable { await viewModel.loadToday() }
         }
     }
 
-    // MARK: - Cards
+    // MARK: - Calorie Balance
 
     private var calorieBalanceCard: some View {
-        VStack(spacing: 12) {
-            Text("Today's Energy Balance")
-                .font(.subheadline.bold())
-                .frame(maxWidth: .infinity, alignment: .leading)
-
-            HStack(spacing: 20) {
-                VStack {
-                    Text("\(Int(viewModel.todayNutrition.calories))")
-                        .font(.title.bold().monospacedDigit())
-                    Text("Consumed")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
-                Text("-")
-                    .font(.title2)
+        VStack(spacing: 14) {
+            HStack {
+                Text("Energy Balance")
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.secondary)
+                Spacer()
+                Text("Today")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            }
 
-                VStack {
-                    Text("\(Int(viewModel.caloriesBurned))")
-                        .font(.title.bold().monospacedDigit())
-                    Text("Burned")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-
+            HStack(spacing: 0) {
+                calorieColumn(value: Int(viewModel.todayNutrition.calories), label: "Eaten", color: Theme.calorieBlue)
+                Spacer()
+                Text("\u{2212}")
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                calorieColumn(value: Int(viewModel.caloriesBurned), label: "Burned", color: Theme.stepsOrange)
+                Spacer()
                 Text("=")
-                    .font(.title2)
+                    .font(.title3)
                     .foregroundStyle(.secondary)
-
-                VStack {
-                    Text("\(Int(viewModel.calorieBalance))")
-                        .font(.title.bold().monospacedDigit())
-                        .foregroundStyle(viewModel.calorieBalance < 0 ? .green : .red)
-                    Text(viewModel.calorieBalance < 0 ? "Deficit" : "Surplus")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
+                Spacer()
+                let balance = Int(viewModel.calorieBalance)
+                calorieColumn(
+                    value: abs(balance),
+                    label: balance <= 0 ? "Deficit" : "Surplus",
+                    color: balance <= 0 ? Theme.deficit : Theme.surplus,
+                    prefix: balance < 0 ? "-" : "+"
+                )
             }
         }
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .card()
     }
 
-    private var weightTrendCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Weight Trend")
-                .font(.subheadline.bold())
-
-            if let weight = viewModel.currentWeight {
-                HStack {
-                    VStack(alignment: .leading) {
-                        Text("\(String(format: "%.1f", Preferences.weightUnit.convert(fromKg: weight))) \(Preferences.weightUnit.displayName)")
-                            .font(.title2.bold().monospacedDigit())
-                        Text("Current (smoothed)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-
-                    Spacer()
-
-                    if let rate = viewModel.weeklyRate {
-                        VStack(alignment: .trailing) {
-                            Text("\(rate >= 0 ? "+" : "")\(String(format: "%.2f", Preferences.weightUnit.convert(fromKg: rate)))")
-                                .font(.title3.bold().monospacedDigit())
-                                .foregroundStyle(rate < 0 ? .green : rate > 0 ? .red : .primary)
-                            Text("\(Preferences.weightUnit.displayName)/week")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                }
-
-                if let deficit = viewModel.dailyDeficit {
-                    Text("\(Int(deficit) >= 0 ? "+" : "")\(Int(deficit)) kcal/day from weight trend")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            } else {
-                Text("Log weight to see trends")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-    }
-
-    private var macroSummaryCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("Today's Macros")
-                .font(.subheadline.bold())
-
-            HStack(spacing: 16) {
-                macroItem("Protein", value: viewModel.todayNutrition.proteinG, color: .red)
-                macroItem("Carbs", value: viewModel.todayNutrition.carbsG, color: .green)
-                macroItem("Fat", value: viewModel.todayNutrition.fatG, color: .yellow)
-                macroItem("Fiber", value: viewModel.todayNutrition.fiberG, color: .brown)
-            }
-        }
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
-    }
-
-    private func macroItem(_ name: String, value: Double, color: Color) -> some View {
-        VStack {
-            Text("\(Int(value))g")
-                .font(.headline.monospacedDigit())
-            Text(name)
+    private func calorieColumn(value: Int, label: String, color: Color, prefix: String = "") -> some View {
+        VStack(spacing: 2) {
+            Text("\(prefix)\(value)")
+                .font(.title3.weight(.bold).monospacedDigit())
+                .foregroundStyle(color)
+                .minimumScaleFactor(0.7)
+                .lineLimit(1)
+            Text(label)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
-            RoundedRectangle(cornerRadius: 2)
-                .fill(color)
-                .frame(height: 3)
         }
-        .frame(maxWidth: .infinity)
+        .frame(minWidth: 50)
     }
 
-    private var healthDataCard: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text("From Apple Health")
-                .font(.subheadline.bold())
+    // MARK: - Weight + Deficit
 
-            HStack(spacing: 16) {
-                healthItem(icon: "flame.fill", value: "\(Int(viewModel.activeCalories))", label: "Active cal", color: .orange)
-                healthItem(icon: "bed.double.fill", value: String(format: "%.1fh", viewModel.sleepHours), label: "Sleep", color: .indigo)
-                healthItem(icon: "figure.walk", value: "\(Int(viewModel.steps))", label: "Steps", color: .teal)
+    private var weightDeficitCard: some View {
+        HStack(spacing: 12) {
+            // Current weight
+            VStack(alignment: .leading, spacing: 4) {
+                Label("Weight", systemImage: "scalemass")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                if let w = viewModel.currentWeight {
+                    Text(String(format: "%.1f", Preferences.weightUnit.convert(fromKg: w)))
+                        .font(.title.weight(.bold).monospacedDigit())
+                    Text(Preferences.weightUnit.displayName)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                } else {
+                    Text("--")
+                        .font(.title.weight(.bold))
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .card()
+
+            // Weekly rate + deficit
+            VStack(alignment: .leading, spacing: 4) {
+                Label("Trend", systemImage: "chart.line.downtrend.xyaxis")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                if let rate = viewModel.weeklyRate {
+                    let display = Preferences.weightUnit.convert(fromKg: rate)
+                    Text(String(format: "%+.2f", display))
+                        .font(.title.weight(.bold).monospacedDigit())
+                        .foregroundStyle(rate < 0 ? Theme.deficit : rate > 0 ? Theme.surplus : .primary)
+                    Text("\(Preferences.weightUnit.displayName)/wk")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                } else {
+                    Text("--")
+                        .font(.title.weight(.bold))
+                        .foregroundStyle(.tertiary)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .card()
+        }
+    }
+
+    // MARK: - Macros
+
+    private var macroCard: some View {
+        VStack(spacing: 10) {
+            HStack {
+                Text("Macros")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                Spacer()
+            }
+
+            HStack(spacing: 10) {
+                macroPill("P", value: viewModel.todayNutrition.proteinG, color: Theme.proteinRed)
+                macroPill("C", value: viewModel.todayNutrition.carbsG, color: Theme.carbsGreen)
+                macroPill("F", value: viewModel.todayNutrition.fatG, color: Theme.fatYellow)
+                macroPill("Fiber", value: viewModel.todayNutrition.fiberG, color: Theme.fiberBrown)
             }
         }
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .card()
     }
 
-    private func healthItem(icon: String, value: String, label: String, color: Color) -> some View {
+    private func macroPill(_ label: String, value: Double, color: Color) -> some View {
+        VStack(spacing: 3) {
+            Text("\(Int(value))g")
+                .font(.subheadline.weight(.bold).monospacedDigit())
+            Text(label)
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
+        .background(color.opacity(0.15), in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    // MARK: - Health
+
+    private var healthRow: some View {
+        HStack(spacing: 12) {
+            healthPill(icon: "flame.fill", value: "\(Int(viewModel.activeCalories))", label: "Active", color: Theme.stepsOrange)
+            healthPill(icon: "bed.double.fill", value: String(format: "%.1fh", viewModel.sleepHours), label: "Sleep", color: Theme.sleepIndigo)
+            healthPill(icon: "figure.walk", value: formatSteps(viewModel.steps), label: "Steps", color: Theme.deficit)
+        }
+    }
+
+    private func healthPill(icon: String, value: String, label: String, color: Color) -> some View {
         VStack(spacing: 4) {
             Image(systemName: icon)
+                .font(.caption)
                 .foregroundStyle(color)
             Text(value)
-                .font(.subheadline.bold().monospacedDigit())
+                .font(.subheadline.weight(.bold).monospacedDigit())
             Text(label)
                 .font(.caption2)
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity)
+        .card()
     }
 
-    private var healthKitPromptCard: some View {
-        VStack(spacing: 8) {
-            Image(systemName: "heart.text.clipboard")
-                .font(.largeTitle)
-                .foregroundStyle(.red.opacity(0.6))
-            Text("Connect Apple Health")
-                .font(.subheadline.bold())
-            Text("Grant access to see calories burned, sleep, and steps.")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-
-            Button("Grant Access") {
-                Task {
-                    try? await HealthKitService.shared.requestAuthorization()
-                    await viewModel.loadToday()
-                }
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(.red)
+    private func formatSteps(_ steps: Double) -> String {
+        if steps >= 1000 {
+            return String(format: "%.1fk", steps / 1000)
         }
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        return "\(Int(steps))"
     }
 
-    private var supplementStatusCard: some View {
-        HStack {
-            Image(systemName: "pill")
+    // MARK: - Supplements
+
+    private var supplementCard: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "pill.fill")
                 .foregroundStyle(.mint)
             Text("Supplements")
-                .font(.subheadline.bold())
+                .font(.subheadline.weight(.semibold))
             Spacer()
-            Text("\(viewModel.supplementsTaken)/\(viewModel.supplementsTotal) taken")
-                .font(.subheadline.monospacedDigit())
+            Text("\(viewModel.supplementsTaken)/\(viewModel.supplementsTotal)")
+                .font(.subheadline.weight(.bold).monospacedDigit())
+                .foregroundStyle(viewModel.supplementsTaken == viewModel.supplementsTotal ? Theme.deficit : .secondary)
+            Text("taken")
+                .font(.caption)
                 .foregroundStyle(.secondary)
         }
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .card()
     }
 }

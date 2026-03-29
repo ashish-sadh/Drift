@@ -8,64 +8,64 @@ struct WeightTabView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 20) {
-                    // Time range picker
-                    Picker("Time Range", selection: $viewModel.selectedTimeRange) {
-                        ForEach(WeightViewModel.TimeRange.allCases, id: \.self) { range in
-                            Text(range.rawValue).tag(range)
+                VStack(spacing: 14) {
+                    // Time range
+                    Picker("Range", selection: $viewModel.selectedTimeRange) {
+                        ForEach(WeightViewModel.TimeRange.allCases, id: \.self) {
+                            Text($0.rawValue).tag($0)
                         }
                     }
                     .pickerStyle(.segmented)
-                    .padding(.horizontal)
-                    .onChange(of: viewModel.selectedTimeRange) { _, _ in
-                        viewModel.loadEntries()
-                    }
+                    .onChange(of: viewModel.selectedTimeRange) { _, _ in viewModel.loadEntries() }
 
-                    // Chart
                     if let trend = viewModel.trend {
                         WeightChartView(trend: trend, unit: viewModel.weightUnit)
-                            .frame(height: 250)
-                            .padding(.horizontal)
+                            .frame(height: 220)
 
-                        // Insights section
                         WeightInsightsView(trend: trend, unit: viewModel.weightUnit)
-                            .padding(.horizontal)
 
-                        // Daily log
                         WeightLogListView(
                             entries: viewModel.entries,
                             unit: viewModel.weightUnit,
                             onDelete: { viewModel.deleteWeight(id: $0) }
                         )
-                        .padding(.horizontal)
                     } else {
-                        ContentUnavailableView(
-                            "No Weight Data",
-                            systemImage: "scalemass",
-                            description: Text("Log your first weight or connect Apple Health to get started.")
-                        )
+                        VStack(spacing: 16) {
+                            Image(systemName: "scalemass")
+                                .font(.system(size: 48))
+                                .foregroundStyle(Theme.accent.opacity(0.5))
+                            Text("No Weight Data")
+                                .font(.headline)
+                            Text("Log your first weight or connect Apple Health.")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                            Button("Log Weight") { showingAddWeight = true }
+                                .buttonStyle(.borderedProminent)
+                                .tint(Theme.accent)
+                        }
+                        .padding(.top, 60)
                     }
                 }
-                .padding(.vertical)
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 24)
             }
+            .background(Theme.background)
             .navigationTitle("Weight")
+            .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showingAddWeight = true
-                    } label: {
-                        Image(systemName: "plus")
+                    Button { showingAddWeight = true } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundStyle(Theme.accent)
                     }
                 }
             }
             .sheet(isPresented: $showingAddWeight) {
-                WeightEntryView(unit: viewModel.weightUnit) { value in
-                    viewModel.addWeight(value: value)
-                }
+                WeightEntryView(unit: viewModel.weightUnit) { viewModel.addWeight(value: $0) }
             }
-            .onAppear {
-                viewModel.loadEntries()
-            }
+            .onAppear { viewModel.loadEntries() }
         }
     }
 }

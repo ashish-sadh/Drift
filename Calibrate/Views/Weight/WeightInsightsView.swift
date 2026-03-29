@@ -1,61 +1,56 @@
 import SwiftUI
 
-/// MacroFactor-inspired weight insights panel.
 struct WeightInsightsView: View {
     let trend: WeightTrendCalculator.WeightTrend
     let unit: WeightUnit
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Insights & Data")
-                .font(.headline)
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Insights")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.secondary)
 
-            // Weight Changes table
+            // Weight changes
             VStack(spacing: 0) {
-                Text("Weight Changes")
-                    .font(.subheadline.bold())
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.bottom, 8)
-
                 changeRow("3-day", value: trend.weightChanges.threeDay)
+                Divider().overlay(Color.white.opacity(0.05))
                 changeRow("7-day", value: trend.weightChanges.sevenDay)
+                Divider().overlay(Color.white.opacity(0.05))
                 changeRow("14-day", value: trend.weightChanges.fourteenDay)
+                Divider().overlay(Color.white.opacity(0.05))
                 changeRow("30-day", value: trend.weightChanges.thirtyDay)
+                Divider().overlay(Color.white.opacity(0.05))
                 changeRow("90-day", value: trend.weightChanges.ninetyDay)
             }
-            .padding()
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+            .card()
 
-            // Key metrics
-            HStack(spacing: 12) {
+            // Key metrics grid
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 metricCard(
+                    title: "Current Weight",
                     value: String(format: "%.1f", unit.convert(fromKg: trend.currentEMA)),
-                    unit: unit.displayName,
-                    label: "Current Weight",
-                    detail: "Smoothed estimate"
+                    subtitle: unit.displayName,
+                    detail: "Smoothed"
                 )
-
                 metricCard(
-                    value: String(format: "%.2f", unit.convert(fromKg: trend.weeklyRateKg)),
-                    unit: "\(unit.displayName)/week",
-                    label: "Weekly Change",
-                    detail: trend.trendDirection.displayText
+                    title: "Weekly Change",
+                    value: String(format: "%+.2f", unit.convert(fromKg: trend.weeklyRateKg)),
+                    subtitle: "\(unit.displayName)/wk",
+                    detail: trend.trendDirection.displayText,
+                    valueColor: trend.weeklyRateKg < -0.05 ? Theme.deficit : trend.weeklyRateKg > 0.05 ? Theme.surplus : .primary
                 )
-            }
-
-            HStack(spacing: 12) {
                 metricCard(
+                    title: trend.estimatedDailyDeficit < 0 ? "Daily Deficit" : "Daily Surplus",
                     value: String(format: "%+.0f", trend.estimatedDailyDeficit),
-                    unit: "kcal/day",
-                    label: "Energy \(trend.estimatedDailyDeficit < 0 ? "Deficit" : "Surplus")",
-                    detail: "From weight trend"
+                    subtitle: "kcal/day",
+                    detail: "From trend",
+                    valueColor: trend.estimatedDailyDeficit < 0 ? Theme.deficit : Theme.surplus
                 )
-
-                if let projection = trend.projection30Day {
+                if let proj = trend.projection30Day {
                     metricCard(
-                        value: String(format: "%.1f", unit.convert(fromKg: projection)),
-                        unit: unit.displayName,
-                        label: "30-Day Projection",
+                        title: "30-Day Projection",
+                        value: String(format: "%.1f", unit.convert(fromKg: proj)),
+                        subtitle: unit.displayName,
                         detail: "At current rate"
                     )
                 }
@@ -63,29 +58,22 @@ struct WeightInsightsView: View {
         }
     }
 
-    @ViewBuilder
     private func changeRow(_ period: String, value: Double?) -> some View {
         HStack {
             Text(period)
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-                .frame(width: 60, alignment: .leading)
+                .frame(width: 55, alignment: .leading)
 
             if let value {
-                let display = unit.convert(fromKg: value)
-                Text("\(display >= 0 ? "+" : "")\(String(format: "%.1f", display)) \(unit.displayName)")
-                    .font(.subheadline.monospacedDigit())
-                    .foregroundStyle(display < 0 ? .green : display > 0 ? .red : .primary)
-
+                let d = unit.convert(fromKg: value)
+                Text("\(d >= 0 ? "+" : "")\(String(format: "%.1f", d)) \(unit.displayName)")
+                    .font(.subheadline.weight(.medium).monospacedDigit())
+                    .foregroundStyle(d < -0.01 ? Theme.deficit : d > 0.01 ? Theme.surplus : .primary)
                 Spacer()
-
-                Image(systemName: display < -0.01 ? "arrow.down.right" : display > 0.01 ? "arrow.up.right" : "arrow.right")
-                    .font(.caption)
-                    .foregroundStyle(display < -0.01 ? .green : display > 0.01 ? .red : .secondary)
-
-                Text(display < -0.01 ? "Decrease" : display > 0.01 ? "Increase" : "Stable")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                Image(systemName: d < -0.01 ? "arrow.down.right" : d > 0.01 ? "arrow.up.right" : "arrow.right")
+                    .font(.caption2)
+                    .foregroundStyle(d < -0.01 ? Theme.deficit : d > 0.01 ? Theme.surplus : .secondary)
             } else {
                 Text("--")
                     .font(.subheadline)
@@ -93,26 +81,27 @@ struct WeightInsightsView: View {
                 Spacer()
             }
         }
-        .padding(.vertical, 4)
+        .padding(.vertical, 8)
     }
 
-    private func metricCard(value: String, unit: String, label: String, detail: String) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                Text(value)
-                    .font(.title2.bold().monospacedDigit())
-                Text(unit)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            Text(label)
-                .font(.subheadline.bold())
-            Text(detail)
+    private func metricCard(title: String, value: String, subtitle: String, detail: String, valueColor: Color = .primary) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(title)
                 .font(.caption)
                 .foregroundStyle(.secondary)
+            HStack(alignment: .firstTextBaseline, spacing: 3) {
+                Text(value)
+                    .font(.title3.weight(.bold).monospacedDigit())
+                    .foregroundStyle(valueColor)
+                Text(subtitle)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            Text(detail)
+                .font(.caption2)
+                .foregroundStyle(.tertiary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .card()
     }
 }

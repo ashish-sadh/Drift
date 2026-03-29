@@ -25,6 +25,7 @@
 		59DE2D330C3D423023F5E0CA /* WeightTrendCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A787B7BA3A899220248AA37 /* WeightTrendCalculator.swift */; };
 		5A499C232ED9F7B22FB048EA /* Food.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE1DE2A3B5BF4FC647C3E521 /* Food.swift */; };
 		5C19116B9D313EF06176739B /* WeightInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01E543D2EF8D93A4794165BB /* WeightInsightsView.swift */; };
+		62E78F485D34159F9B468BF8 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = ADB8A7918C19EF9936B36528 /* Theme.swift */; };
 		6524F0200F21D85BDAFFCE7C /* Units.swift in Sources */ = {isa = PBXBuildFile; fileRef = CFD7DA5D4729C92EAF2ABC7C /* Units.swift */; };
 		697D238D9EB39A9F8D6E7916 /* CalibrateTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55465C0BD3BE1BACA0573551 /* CalibrateTests.swift */; };
 		76C08C513EC7E180867E0CED /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE4D585421FA33E5527760D2 /* CSVParser.swift */; };
@@ -96,6 +97,7 @@
 		A5E3C71A37CCE6FF27D6D4E7 /* FoodEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodEntry.swift; sourceTree = "<group>"; };
 		A9F71A07D46F0DA0B26018D1 /* CalibrateTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = CalibrateTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AD96DB56F1936E6A3F6B4245 /* SupplementViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementViewModel.swift; sourceTree = "<group>"; };
+		ADB8A7918C19EF9936B36528 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		AE1DE2A3B5BF4FC647C3E521 /* Food.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Food.swift; sourceTree = "<group>"; };
 		AE4D585421FA33E5527760D2 /* CSVParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVParser.swift; sourceTree = "<group>"; };
 		B5D92BAD2A14EDC4C6CB41CB /* GlucoseReading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseReading.swift; sourceTree = "<group>"; };
@@ -254,6 +256,7 @@
 			children = (
 				AE4D585421FA33E5527760D2 /* CSVParser.swift */,
 				6AD6CE795CE574C899472ECD /* DateFormatters.swift */,
+				ADB8A7918C19EF9936B36528 /* Theme.swift */,
 				CFD7DA5D4729C92EAF2ABC7C /* Units.swift */,
 			);
 			path = Utilities;
@@ -476,6 +479,7 @@
 				59C68A3EA0202ED060258FA2 /* SupplementLog.swift in Sources */,
 				B8CA9DA1D84469F280AC9D3E /* SupplementViewModel.swift in Sources */,
 				C515F7F9FC7250075358C17B /* SupplementsTabView.swift in Sources */,
+				62E78F485D34159F9B468BF8 /* Theme.swift in Sources */,
 				6524F0200F21D85BDAFFCE7C /* Units.swift in Sources */,
 				DAC71639C53CE62EF689B954 /* WeightChartView.swift in Sources */,
 				B3C3019B771F656D0010DD23 /* WeightEntry.swift in Sources */,

@@ -3,40 +3,69 @@ import SwiftUI
 struct MoreTabView: View {
     var body: some View {
         NavigationStack {
-            List {
-                Section("Data") {
-                    NavigationLink {
-                        DEXAOverviewView()
-                    } label: {
-                        Label("Body Composition", systemImage: "figure.stand")
+            ScrollView {
+                VStack(spacing: 14) {
+                    // Data section
+                    VStack(spacing: 0) {
+                        navRow(icon: "figure.stand", title: "Body Composition", subtitle: "DEXA scan data", color: Theme.accent) {
+                            DEXAOverviewView()
+                        }
+                        Divider().overlay(Color.white.opacity(0.05))
+                        navRow(icon: "waveform.path.ecg", title: "Glucose", subtitle: "Lingo CGM data", color: Theme.calorieBlue) {
+                            GlucoseTabView()
+                        }
                     }
+                    .card()
 
-                    NavigationLink {
-                        GlucoseTabView()
-                    } label: {
-                        Label("Glucose (CGM)", systemImage: "waveform.path.ecg")
+                    // Settings
+                    VStack(spacing: 0) {
+                        navRow(icon: "gear", title: "Settings", subtitle: "Units, Health access", color: .secondary) {
+                            SettingsView()
+                        }
                     }
-                }
+                    .card()
 
-                Section("Settings") {
-                    NavigationLink {
-                        SettingsView()
-                    } label: {
-                        Label("Settings", systemImage: "gear")
-                    }
+                    // Version
+                    Text("Calibrate v0.1.0")
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                        .padding(.top, 8)
                 }
-
-                Section("About") {
-                    HStack {
-                        Text("Version")
-                        Spacer()
-                        Text("0.1.0")
-                            .foregroundStyle(.secondary)
-                    }
-                }
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
+                .padding(.bottom, 24)
             }
+            .background(Theme.background)
             .navigationTitle("More")
+            .toolbarColorScheme(.dark, for: .navigationBar)
         }
+    }
+
+    private func navRow<Dest: View>(icon: String, title: String, subtitle: String, color: Color, @ViewBuilder destination: () -> Dest) -> some View {
+        NavigationLink {
+            destination()
+        } label: {
+            HStack(spacing: 12) {
+                Image(systemName: icon)
+                    .font(.subheadline)
+                    .foregroundStyle(color)
+                    .frame(width: 24)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.subheadline.weight(.medium))
+                        .foregroundStyle(.primary)
+                    Text(subtitle)
+                        .font(.caption2)
+                        .foregroundStyle(.tertiary)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.vertical, 10)
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -44,32 +73,53 @@ struct SettingsView: View {
     @State private var weightUnit: WeightUnit = Preferences.weightUnit
 
     var body: some View {
-        Form {
-            Section("Units") {
-                Picker("Weight Unit", selection: $weightUnit) {
-                    Text("kg").tag(WeightUnit.kg)
-                    Text("lbs").tag(WeightUnit.lbs)
+        ScrollView {
+            VStack(spacing: 14) {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Units")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                    Picker("Weight Unit", selection: $weightUnit) {
+                        Text("kg").tag(WeightUnit.kg)
+                        Text("lbs").tag(WeightUnit.lbs)
+                    }
+                    .pickerStyle(.segmented)
+                    .onChange(of: weightUnit) { _, v in Preferences.weightUnit = v }
                 }
-                .onChange(of: weightUnit) { _, newValue in
-                    Preferences.weightUnit = newValue
-                }
-            }
+                .card()
 
-            Section("Apple Health") {
-                Button("Request HealthKit Access") {
-                    Task {
-                        try? await HealthKitService.shared.requestAuthorization()
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Apple Health")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+
+                    Button {
+                        Task { try? await HealthKitService.shared.requestAuthorization() }
+                    } label: {
+                        HStack {
+                            Image(systemName: "heart.fill").foregroundStyle(Theme.heartRed)
+                            Text("Request Health Access")
+                            Spacer()
+                        }
+                    }
+
+                    Button {
+                        Task { _ = try? await HealthKitService.shared.syncWeight() }
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.triangle.2.circlepath").foregroundStyle(Theme.accent)
+                            Text("Sync Weight")
+                            Spacer()
+                        }
                     }
                 }
-
-                Button("Sync Weight from Health") {
-                    Task {
-                        let count = try? await HealthKitService.shared.syncWeight()
-                        print("Synced \(count ?? 0) weight entries")
-                    }
-                }
+                .card()
             }
+            .padding(.horizontal, 16)
+            .padding(.top, 8)
         }
+        .background(Theme.background)
         .navigationTitle("Settings")
+        .toolbarColorScheme(.dark, for: .navigationBar)
     }
 }
