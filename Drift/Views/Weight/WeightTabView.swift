@@ -118,26 +118,24 @@ struct WeightTabView: View {
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(.secondary)
 
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
                 if let thisWeek = weeklyAvgs.first {
                     averageCard(
                         title: "This Week",
                         value: String(format: "%.1f", viewModel.weightUnit.convert(fromKg: thisWeek.average)),
                         unit: viewModel.weightUnit.displayName,
-                        detail: "\(thisWeek.count) weigh-ins"
+                        detail: "\(thisWeek.count) weigh-ins",
+                        highlight: true
                     )
                 }
 
                 if let lastWeek = weeklyAvgs.dropFirst().first {
-                    let change = weeklyAvgs.first.map { $0.average - lastWeek.average }
+                    let change = weeklyAvgs.first.map { viewModel.weightUnit.convert(fromKg: $0.average - lastWeek.average) }
                     averageCard(
                         title: "Last Week",
                         value: String(format: "%.1f", viewModel.weightUnit.convert(fromKg: lastWeek.average)),
                         unit: viewModel.weightUnit.displayName,
-                        detail: change.map { c in
-                            let d = viewModel.weightUnit.convert(fromKg: c)
-                            return "\(d >= 0 ? "+" : "")\(String(format: "%.1f", d)) vs this week"
-                        } ?? ""
+                        detail: change.map { "\($0 >= 0 ? "+" : "")\(String(format: "%.1f", $0))" } ?? ""
                     )
                 }
 
@@ -153,11 +151,11 @@ struct WeightTabView: View {
         }
     }
 
-    private func averageCard(title: String, value: String, unit: String, detail: String) -> some View {
-        VStack(alignment: .leading, spacing: 3) {
+    private func averageCard(title: String, value: String, unit: String, detail: String, highlight: Bool = false) -> some View {
+        VStack(spacing: 3) {
             Text(title)
                 .font(.caption2)
-                .foregroundStyle(.tertiary)
+                .foregroundStyle(highlight ? Theme.accent : .tertiary)
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(value)
                     .font(.subheadline.weight(.bold).monospacedDigit())
@@ -165,11 +163,14 @@ struct WeightTabView: View {
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
             }
-            Text(detail)
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
+            if !detail.isEmpty {
+                Text(detail)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .lineLimit(1)
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity)
         .card()
     }
 
