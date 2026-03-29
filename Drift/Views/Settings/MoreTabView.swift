@@ -13,6 +13,14 @@ struct MoreTabView: View {
                     }
                     .card()
 
+                    // Workouts
+                    VStack(spacing: 0) {
+                        navRow(icon: "dumbbell.fill", title: "Workouts", subtitle: "Log exercises, track PRs, import from Strong", color: Theme.stepsOrange) {
+                            WorkoutView()
+                        }
+                    }
+                    .card()
+
                     // Data section
                     VStack(spacing: 0) {
                         navRow(icon: "bed.double.fill", title: "Sleep & Recovery", subtitle: "Sleep stages, HRV, recovery score", color: Theme.sleepIndigo) {

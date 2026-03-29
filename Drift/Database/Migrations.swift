@@ -191,5 +191,45 @@ enum Migrations {
                 t.column("created_at", .text).notNull().defaults(sql: "(datetime('now'))")
             }
         }
+
+        // v10: Workout tracker
+        migrator.registerMigration("v10_workouts") { db in
+            try db.create(table: "exercise") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("name", .text).notNull().unique()
+                t.column("body_part", .text).notNull()  // chest, back, legs, shoulders, arms, core, full_body
+                t.column("category", .text).notNull()    // barbell, dumbbell, machine, cable, bodyweight, other
+                t.column("is_custom", .boolean).notNull().defaults(to: false)
+            }
+
+            try db.create(table: "workout") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("name", .text).notNull()
+                t.column("date", .text).notNull()
+                t.column("duration_seconds", .integer)
+                t.column("notes", .text)
+                t.column("created_at", .text).notNull().defaults(sql: "(datetime('now'))")
+            }
+            try db.create(index: "idx_workout_date", on: "workout", columns: ["date"])
+
+            try db.create(table: "workout_set") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("workout_id", .integer).notNull().references("workout", onDelete: .cascade)
+                t.column("exercise_name", .text).notNull()
+                t.column("set_order", .integer).notNull()
+                t.column("weight_lbs", .double)
+                t.column("reps", .integer)
+                t.column("is_warmup", .boolean).notNull().defaults(to: false)
+                t.column("rpe", .double)
+            }
+            try db.create(index: "idx_workout_set_workout", on: "workout_set", columns: ["workout_id"])
+
+            try db.create(table: "workout_template") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("name", .text).notNull()
+                t.column("exercises_json", .text).notNull() // JSON array of exercise names + default sets
+                t.column("created_at", .text).notNull().defaults(sql: "(datetime('now'))")
+            }
+        }
     }
 }
