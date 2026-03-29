@@ -15,6 +15,9 @@ struct WorkoutView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 14) {
+                // Body recovery map
+                BodyMapView()
+
                 if !weeklyCounts.isEmpty { consistencyChart }
 
                 // Start buttons
@@ -249,115 +252,83 @@ struct ActiveWorkoutView: View {
     let onComplete: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var workoutName = "Workout"
-    @State private var exercises: [(name: String, sets: [(weight: String, reps: String, done: Bool)])] = []
+    @State private var exercises: [ActiveExercise] = []
     @State private var showingExercisePicker = false
     @State private var startTime = Date()
     @State private var elapsedSeconds = 0
-    @State private var restSeconds = 0
-    @State private var restTimerActive = false
     @State private var workoutTimer: Timer?
+    // Global rest timer state
+    @State private var restSeconds = 0
+    @State private var restTotalSeconds = 90
+    @State private var restTimerActive = false
     @State private var restTimer: Timer?
+    @State private var activeRestExerciseIndex: Int? = nil
+    @State private var activeRestSetIndex: Int? = nil
+
+    struct ActiveExercise: Identifiable {
+        let id = UUID()
+        var name: String
+        var restTime: Int = 90 // seconds, customizable per exercise
+        var sets: [ActiveSet]
+        var previousSets: [String] // display strings like "35 lb × 10"
+    }
+
+    struct ActiveSet: Identifiable {
+        let id = UUID()
+        var weight: String
+        var reps: String
+        var done: Bool = false
+    }
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 12) {
-                    // Live timer + rest
-                    HStack {
-                        HStack(spacing: 4) {
-                            Image(systemName: "timer").font(.caption)
-                            Text(formatDuration(elapsedSeconds)).font(.subheadline.weight(.bold).monospacedDigit())
-                        }.foregroundStyle(Theme.accent)
-
-                        Spacer()
-
-                        if restTimerActive {
-                            HStack(spacing: 4) {
-                                Image(systemName: "bed.double").font(.caption)
-                                Text("Rest \(restSeconds)s").font(.subheadline.weight(.bold).monospacedDigit())
-                            }.foregroundStyle(restSeconds <= 10 ? Theme.surplus : Theme.deficit)
+                    // Workout header
+                    VStack(spacing: 6) {
+                        TextField("Workout name", text: $workoutName)
+                            .font(.title3.weight(.bold))
+                            .multilineTextAlignment(.center)
+                        HStack(spacing: 12) {
+                            Label(DateFormatters.dayDisplay.string(from: Date()), systemImage: "calendar")
+                            Label(formatDuration(elapsedSeconds), systemImage: "clock")
                         }
+                        .font(.caption).foregroundStyle(.secondary)
                     }.padding(.horizontal, 12)
-
-                    TextField("Workout name", text: $workoutName).textFieldStyle(.roundedBorder).padding(.horizontal, 12)
 
                     // Exercises
                     ForEach(exercises.indices, id: \.self) { ei in
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack {
-                                Text(exercises[ei].name).font(.subheadline.weight(.semibold))
-                                Text(muscleGroupLabel(exercises[ei].name)).font(.caption2).foregroundStyle(.tertiary)
-                                Spacer()
-                                Button { exercises.remove(at: ei) } label: {
-                                    Image(systemName: "xmark.circle").font(.caption).foregroundStyle(.tertiary)
-                                }.buttonStyle(.plain)
-                            }
-
-                            // Header
-                            HStack(spacing: 8) {
-                                Text("Set").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 25)
-                                Text("Weight").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 65)
-                                Text("").frame(width: 10)
-                                Text("Reps").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 55)
-                                Spacer()
-                                Text("✓").font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
-                            }
-
-                            ForEach(exercises[ei].sets.indices, id: \.self) { si in
-                                HStack(spacing: 8) {
-                                    Text("\(si + 1)").font(.caption.weight(.bold)).foregroundStyle(.secondary).frame(width: 25)
-                                    TextField("lbs", text: $exercises[ei].sets[si].weight)
-                                        .keyboardType(.decimalPad).textFieldStyle(.roundedBorder).frame(width: 65)
-                                        .foregroundStyle(exercises[ei].sets[si].weight.isEmpty ? .tertiary : .primary)
-                                    Text("×").foregroundStyle(.secondary).frame(width: 10)
-                                    TextField("reps", text: $exercises[ei].sets[si].reps)
-                                        .keyboardType(.numberPad).textFieldStyle(.roundedBorder).frame(width: 55)
-                                    Spacer()
-                                    Button {
-                                        exercises[ei].sets[si].done.toggle()
-                                        if exercises[ei].sets[si].done { startRest() }
-                                    } label: {
-                                        Image(systemName: exercises[ei].sets[si].done ? "checkmark.circle.fill" : "circle")
-                                            .foregroundStyle(exercises[ei].sets[si].done ? Theme.deficit : .secondary)
-                                    }
-                                }
-                            }
-
-                            Button { exercises[ei].sets.append(("", "", false)) } label: {
-                                Label("Add Set", systemImage: "plus").font(.caption)
-                            }
-                        }.card().padding(.horizontal, 12)
+                        exerciseSection(ei)
                     }
 
+                    // Add exercise
                     Button { showingExercisePicker = true } label: {
-                        Label("Add Exercise", systemImage: "plus.circle").frame(maxWidth: .infinity)
-                    }.buttonStyle(.bordered).padding(.horizontal, 12)
+                        Text("Add Exercise").frame(maxWidth: .infinity)
+                    }.buttonStyle(.bordered).tint(Theme.accent).padding(.horizontal, 12)
 
                     if !exercises.isEmpty {
                         Button { saveWorkout() } label: {
-                            Label("Finish Workout", systemImage: "checkmark.circle.fill").frame(maxWidth: .infinity)
+                            Text("Finish").frame(maxWidth: .infinity)
                         }.buttonStyle(.borderedProminent).tint(Theme.deficit).padding(.horizontal, 12)
+
+                        Button("Cancel Workout", role: .destructive) { stopTimers(); dismiss() }
+                            .font(.caption).padding(.top, 4)
                     }
                 }.padding(.top, 8).padding(.bottom, 24)
             }
             .background(Theme.background)
-            .navigationTitle("Log Workout").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { stopTimers(); dismiss() } } }
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { stopTimers(); dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    if !exercises.isEmpty {
+                        Button("Finish") { saveWorkout() }.foregroundStyle(Theme.deficit)
+                    }
+                }
+            }
             .sheet(isPresented: $showingExercisePicker) {
                 ExercisePickerView { name in
-                    // Prefill with last weights
-                    let lastSets = (try? WorkoutService.fetchExerciseHistory(name: name).prefix(5)) ?? []
-                    let prefilled: [(String, String, Bool)]
-                    if lastSets.isEmpty {
-                        prefilled = [("", "", false), ("", "", false), ("", "", false)]
-                    } else {
-                        // Group by last workout's sets
-                        let unique = Array(Set(lastSets.map { "\(Int($0.weightLbs ?? 0))|\($0.reps ?? 0)" })).prefix(5)
-                        prefilled = lastSets.prefix(3).map { s in
-                            (s.weightLbs.map { String(Int($0)) } ?? "", s.reps.map { String($0) } ?? "", false)
-                        }
-                    }
-                    exercises.append((name, prefilled))
+                    addExercise(name: name)
                 }
             }
             .onAppear { startWorkoutTimer() }
@@ -365,16 +336,154 @@ struct ActiveWorkoutView: View {
         }
     }
 
-    private func muscleGroupLabel(_ name: String) -> String {
+    // MARK: - Exercise Section
+
+    private func exerciseSection(_ ei: Int) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            // Exercise header
+            HStack {
+                Text(exercises[ei].name).font(.subheadline.weight(.bold)).foregroundStyle(Theme.calorieBlue)
+                Text(guessGroup(exercises[ei].name)).font(.caption2).foregroundStyle(.tertiary)
+                Spacer()
+                // Rest time customizer
+                Menu {
+                    ForEach([30, 60, 90, 120, 150, 180], id: \.self) { sec in
+                        Button("\(sec / 60):\(String(format: "%02d", sec % 60))") {
+                            exercises[ei].restTime = sec
+                        }
+                    }
+                } label: {
+                    Text("\(exercises[ei].restTime / 60):\(String(format: "%02d", exercises[ei].restTime % 60))")
+                        .font(.caption2.monospacedDigit()).foregroundStyle(Theme.accent)
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(Theme.accent.opacity(0.15), in: RoundedRectangle(cornerRadius: 4))
+                }
+                Button { exercises.remove(at: ei) } label: {
+                    Image(systemName: "ellipsis").font(.caption).foregroundStyle(.secondary)
+                }
+            }
+
+            // Column headers
+            HStack(spacing: 0) {
+                Text("Set").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 28, alignment: .leading)
+                Text("Previous").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 85, alignment: .leading)
+                Text("lbs").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 55)
+                Text("Reps").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 50)
+                Spacer()
+                Text("✓").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 30)
+            }
+
+            // Sets
+            ForEach(exercises[ei].sets.indices, id: \.self) { si in
+                VStack(spacing: 0) {
+                    HStack(spacing: 0) {
+                        Text("\(si + 1)").font(.caption.weight(.bold)).foregroundStyle(.secondary).frame(width: 28, alignment: .leading)
+
+                        // Previous
+                        Text(si < exercises[ei].previousSets.count ? exercises[ei].previousSets[si] : "—")
+                            .font(.caption2.monospacedDigit()).foregroundStyle(.tertiary).frame(width: 85, alignment: .leading)
+
+                        // Weight
+                        TextField(si < exercises[ei].previousSets.count ? prevWeight(exercises[ei].previousSets[si]) : "0",
+                                  text: $exercises[ei].sets[si].weight)
+                            .keyboardType(.decimalPad).font(.subheadline.monospacedDigit())
+                            .multilineTextAlignment(.center).frame(width: 55)
+                            .padding(.vertical, 4)
+                            .background(exercises[ei].sets[si].done ? Theme.deficit.opacity(0.1) : Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 4))
+
+                        // Reps
+                        TextField(si < exercises[ei].previousSets.count ? prevReps(exercises[ei].previousSets[si]) : "0",
+                                  text: $exercises[ei].sets[si].reps)
+                            .keyboardType(.numberPad).font(.subheadline.monospacedDigit())
+                            .multilineTextAlignment(.center).frame(width: 50)
+                            .padding(.vertical, 4).padding(.leading, 4)
+                            .background(exercises[ei].sets[si].done ? Theme.deficit.opacity(0.1) : Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 4))
+
+                        Spacer()
+
+                        // Done button
+                        Button {
+                            exercises[ei].sets[si].done.toggle()
+                            if exercises[ei].sets[si].done {
+                                startRest(exerciseIndex: ei, setIndex: si, duration: exercises[ei].restTime)
+                            }
+                        } label: {
+                            Image(systemName: exercises[ei].sets[si].done ? "checkmark.circle.fill" : "circle")
+                                .font(.title3)
+                                .foregroundStyle(exercises[ei].sets[si].done ? Theme.deficit : .secondary)
+                        }.frame(width: 30)
+                    }
+                    .padding(.vertical, 2)
+
+                    // Inline rest timer bar (shows after this set if active)
+                    if restTimerActive && activeRestExerciseIndex == ei && activeRestSetIndex == si {
+                        restTimerBar
+                    }
+                }
+            }
+
+            // Add set button with rest time
+            Button {
+                exercises[ei].sets.append(ActiveSet(weight: "", reps: ""))
+            } label: {
+                Text("+ Add Set (\(exercises[ei].restTime / 60):\(String(format: "%02d", exercises[ei].restTime % 60)))")
+                    .font(.caption).foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 6)
+                    .background(Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 6))
+            }.buttonStyle(.plain)
+        }
+        .card().padding(.horizontal, 12)
+    }
+
+    // MARK: - Rest Timer Bar (inline, like Strong)
+
+    private var restTimerBar: some View {
+        let progress = restTotalSeconds > 0 ? Double(restSeconds) / Double(restTotalSeconds) : 0
+
+        return VStack(spacing: 2) {
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 4).fill(Theme.cardBackgroundElevated)
+                    RoundedRectangle(cornerRadius: 4).fill(Theme.calorieBlue)
+                        .frame(width: geo.size.width * progress)
+                }
+            }
+            .frame(height: 28)
+            .overlay {
+                Text(formatRestTime(restSeconds))
+                    .font(.subheadline.weight(.bold).monospacedDigit())
+                    .foregroundStyle(.white)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+
+    private func formatRestTime(_ s: Int) -> String {
+        "\(s / 60):\(String(format: "%02d", s % 60))"
+    }
+
+    private func prevWeight(_ prev: String) -> String {
+        prev.components(separatedBy: " ").first ?? "0"
+    }
+
+    private func prevReps(_ prev: String) -> String {
+        let parts = prev.components(separatedBy: "× ")
+        return parts.count > 1 ? parts[1].trimmingCharacters(in: .whitespaces) : "0"
+    }
+
+    private func guessGroup(_ name: String) -> String {
         let e = name.lowercased()
-        if e.contains("bench") || e.contains("chest") || e.contains("fly") { return "· Chest" }
-        if e.contains("squat") || e.contains("leg") || e.contains("calf") || e.contains("deadlift") { return "· Legs" }
+        if e.contains("bench") || e.contains("chest") || e.contains("fly") || e.contains("dip") { return "· Chest" }
+        if e.contains("squat") || e.contains("leg") || e.contains("calf") || e.contains("deadlift") || e.contains("hip") || e.contains("lunge") { return "· Legs" }
         if e.contains("lat") || e.contains("row") || e.contains("pull") || e.contains("back") { return "· Back" }
-        if e.contains("shoulder") || e.contains("lateral") || e.contains("overhead") { return "· Shoulders" }
-        if e.contains("bicep") || e.contains("curl") || e.contains("tricep") { return "· Arms" }
-        if e.contains("crunch") || e.contains("plank") || e.contains("ab") { return "· Core" }
+        if e.contains("shoulder") || e.contains("lateral") || e.contains("overhead") || e.contains("face pull") { return "· Shoulders" }
+        if e.contains("bicep") || e.contains("curl") || e.contains("tricep") || e.contains("hammer") { return "· Arms" }
+        if e.contains("crunch") || e.contains("plank") || e.contains("ab") || e.contains("leg raise") { return "· Core" }
         return ""
     }
+
+    // MARK: - Timers
 
     private func startWorkoutTimer() {
         workoutTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
@@ -382,21 +491,41 @@ struct ActiveWorkoutView: View {
         }
     }
 
-    private func startRest() {
-        restSeconds = 90; restTimerActive = true
+    private func startRest(exerciseIndex: Int, setIndex: Int, duration: Int) {
+        restTotalSeconds = duration
+        restSeconds = duration
+        activeRestExerciseIndex = exerciseIndex
+        activeRestSetIndex = setIndex
+        restTimerActive = true
         restTimer?.invalidate()
         restTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { t in
             if restSeconds > 0 {
                 restSeconds -= 1
             } else {
-                t.invalidate(); restTimerActive = false
-                // Vibrate when rest is done
+                t.invalidate()
+                restTimerActive = false
                 AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
             }
         }
     }
 
     private func stopTimers() { workoutTimer?.invalidate(); restTimer?.invalidate() }
+
+    // MARK: - Add Exercise (with prefill)
+
+    private func addExercise(name: String) {
+        let history = (try? WorkoutService.fetchExerciseHistory(name: name).prefix(10)) ?? []
+        let previous = history.prefix(3).map { s in
+            "\(Int(s.weightLbs ?? 0)) lb × \(s.reps ?? 0)"
+        }
+
+        let prefilled = history.prefix(3).map { s in
+            ActiveSet(weight: s.weightLbs.map { String(Int($0)) } ?? "", reps: s.reps.map { String($0) } ?? "")
+        }
+        let sets = prefilled.isEmpty ? [ActiveSet(weight: "", reps: ""), ActiveSet(weight: "", reps: ""), ActiveSet(weight: "", reps: "")] : Array(prefilled)
+
+        exercises.append(ActiveExercise(name: name, sets: sets, previousSets: Array(previous)))
+    }
 
     private func saveWorkout() {
         stopTimers()

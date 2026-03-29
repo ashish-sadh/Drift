@@ -58,6 +58,8 @@ struct FoodTabView: View {
         }
     }
 
+    @State private var showingDatePicker = false
+
     // MARK: - Date Navigator
 
     private var dateNav: some View {
@@ -68,15 +70,38 @@ struct FoodTabView: View {
 
             Spacer()
 
-            VStack(spacing: 1) {
-                if viewModel.isToday {
-                    Text("Today").font(.subheadline.weight(.semibold))
-                } else {
-                    Text(DateFormatters.dayDisplay.string(from: viewModel.selectedDate))
-                        .font(.subheadline.weight(.semibold))
+            // Tappable date → date picker
+            Button { showingDatePicker = true } label: {
+                VStack(spacing: 1) {
+                    if viewModel.isToday {
+                        Text("Today").font(.subheadline.weight(.semibold))
+                    } else {
+                        Text(DateFormatters.dayDisplay.string(from: viewModel.selectedDate))
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    Text(DateFormatters.dateOnly.string(from: viewModel.selectedDate))
+                        .font(.caption2).foregroundStyle(.tertiary)
                 }
-                Text(DateFormatters.dateOnly.string(from: viewModel.selectedDate))
-                    .font(.caption2).foregroundStyle(.tertiary)
+            }
+            .tint(.primary)
+            .sheet(isPresented: $showingDatePicker) {
+                NavigationStack {
+                    DatePicker("Go to date", selection: Binding(
+                        get: { viewModel.selectedDate },
+                        set: { viewModel.goToDate($0); loggedDays = viewModel.loggedDays(last: 30) }
+                    ), displayedComponents: .date)
+                    .datePickerStyle(.graphical)
+                    .padding()
+                    .navigationTitle("Select Date").navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) { Button("Done") { showingDatePicker = false } }
+                        ToolbarItem(placement: .confirmationAction) {
+                            Button("Today") { viewModel.goToDate(Date()); loggedDays = viewModel.loggedDays(last: 30); showingDatePicker = false }
+                                .foregroundStyle(Theme.accent)
+                        }
+                    }
+                }
+                .presentationDetents([.medium])
             }
 
             Spacer()
@@ -84,8 +109,13 @@ struct FoodTabView: View {
             if viewModel.isToday {
                 Color.clear.frame(width: 30)
             } else {
-                Button { viewModel.goToNextDay() } label: {
-                    Image(systemName: "chevron.right").font(.caption.weight(.bold))
+                HStack(spacing: 8) {
+                    Button { viewModel.goToNextDay() } label: {
+                        Image(systemName: "chevron.right").font(.caption.weight(.bold))
+                    }
+                    Button { viewModel.goToDate(Date()); loggedDays = viewModel.loggedDays(last: 30) } label: {
+                        Text("Today").font(.caption.weight(.bold)).foregroundStyle(Theme.accent)
+                    }
                 }
             }
         }
@@ -130,17 +160,22 @@ struct FoodTabView: View {
         let totalCal = entries.reduce(0) { $0 + $1.totalCalories }
 
         return VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Image(systemName: mealType.icon).font(.caption).foregroundStyle(Theme.accent)
-                Text(mealType.displayName).font(.subheadline.weight(.semibold))
-                Spacer()
-                if totalCal > 0 {
-                    Text("\(Int(totalCal)) cal").font(.caption.weight(.medium).monospacedDigit()).foregroundStyle(.secondary)
+            Button { showingSearch = true } label: {
+                HStack(spacing: 6) {
+                    Image(systemName: mealType.icon).font(.caption).foregroundStyle(Theme.accent)
+                    Text(mealType.displayName).font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
+                    Spacer()
+                    if totalCal > 0 {
+                        Text("\(Int(totalCal)) cal").font(.caption.weight(.medium).monospacedDigit()).foregroundStyle(.secondary)
+                    }
+                    Image(systemName: "plus").font(.caption).foregroundStyle(Theme.accent)
                 }
-            }
+            }.buttonStyle(.plain)
 
             if entries.isEmpty {
-                Text("Tap + to log food").font(.caption).foregroundStyle(.tertiary).padding(.vertical, 4)
+                Button { showingSearch = true } label: {
+                    Text("Tap to add food").font(.caption).foregroundStyle(.tertiary).padding(.vertical, 4)
+                }.buttonStyle(.plain)
             } else {
                 ForEach(entries, id: \.id) { entry in
                     HStack {
