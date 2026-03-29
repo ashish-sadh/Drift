@@ -155,7 +155,7 @@ struct WeightTabView: View {
         VStack(spacing: 3) {
             Text(title)
                 .font(.caption2)
-                .foregroundStyle(highlight ? Theme.accent : .tertiary)
+                .foregroundStyle(highlight ? AnyShapeStyle(Theme.accent) : AnyShapeStyle(.tertiary))
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(value)
                     .font(.subheadline.weight(.bold).monospacedDigit())
