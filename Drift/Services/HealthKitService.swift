@@ -162,9 +162,13 @@ final class HealthKitService {
         let hours: Double = try await withCheckedThrowingContinuation { continuation in
             let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, error in
                 if let error { continuation.resume(throwing: error); return }
-                let totalSeconds = (samples ?? []).compactMap { $0 as? HKCategorySample }
-                    .filter { $0.value != HKCategoryValueSleepAnalysis.inBed.rawValue }
+                let sleepSamples = (samples ?? []).compactMap { $0 as? HKCategorySample }
+                // Count everything except explicit "awake" - includes inBed, asleep, asleepREM, asleepDeep, asleepCore, asleepUnspecified
+                let awakeRaw = HKCategoryValueSleepAnalysis.awake.rawValue
+                let totalSeconds = sleepSamples
+                    .filter { $0.value != awakeRaw }
                     .reduce(0.0) { $0 + $1.endDate.timeIntervalSince($1.startDate) }
+                Log.healthKit.info("Sleep query: \(sleepSamples.count) samples, values: \(sleepSamples.map(\.value)), totalHours: \(totalSeconds/3600)")
                 continuation.resume(returning: totalSeconds / 3600)
             }
             healthStore.execute(query)
@@ -206,6 +210,8 @@ final class HealthKitService {
                 var rem = 0.0, deep = 0.0, light = 0.0, awake = 0.0, asleep = 0.0
                 var earliest: Date?, latest: Date?
 
+                Log.healthKit.info("Sleep detail: \(sleepSamples.count) samples, values: \(sleepSamples.map(\.value))")
+
                 for s in sleepSamples {
                     let dur = s.endDate.timeIntervalSince(s.startDate) / 3600
                     if earliest == nil || s.startDate < earliest! { earliest = s.startDate }
@@ -217,7 +223,8 @@ final class HealthKitService {
                     case HKCategoryValueSleepAnalysis.asleepCore.rawValue: light += dur
                     case HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue: asleep += dur
                     case HKCategoryValueSleepAnalysis.awake.rawValue: awake += dur
-                    default: break
+                    case HKCategoryValueSleepAnalysis.inBed.rawValue: asleep += dur // count inBed as asleep
+                    default: asleep += dur // unknown types count as sleep
                     }
                 }
 
