@@ -36,6 +36,7 @@
 		70F621B0C5089E738C2DEA5E /* FoodTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A981E37D718D28A6679F9C8 /* FoodTabView.swift */; };
 		7BDC02B8C99F8B719546A8A1 /* WeightEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = F237A2E1C7747DBE102B665C /* WeightEntry.swift */; };
 		8224D8220B6D9328EDDDB648 /* DEXAOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5893DE4C163CA3CF50E74C1A /* DEXAOverviewView.swift */; };
+		87B4A86A2CDE6196B42015A4 /* FavoriteFood.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2C63097444CD8E010008D65 /* FavoriteFood.swift */; };
 		8A8CF11C6A7AF26DCABECF6A /* CSVParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D6B07DD56345F8A5F5448BC /* CSVParserTests.swift */; };
 		8CB8BF68CE3F11B2CFBDDB16 /* sample_lingo_export.csv in Resources */ = {isa = PBXBuildFile; fileRef = E6B95CCD0C984C915051F482 /* sample_lingo_export.csv */; };
 		8D8FB3814300848676740EC6 /* AddSupplementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4BD88646DFE4A17724D4407 /* AddSupplementView.swift */; };
@@ -127,6 +128,7 @@
 		B0DAF3E5EFC6C85282C084A8 /* GlucoseTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseTabView.swift; sourceTree = "<group>"; };
 		B58C97F6B46397BDA539E78C /* SupplementsTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementsTabView.swift; sourceTree = "<group>"; };
 		C182889F4730B18DE0244F02 /* MealLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealLog.swift; sourceTree = "<group>"; };
+		C2C63097444CD8E010008D65 /* FavoriteFood.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFood.swift; sourceTree = "<group>"; };
 		CB475E92982AD4F8897D5D8E /* RecoveryEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryEstimator.swift; sourceTree = "<group>"; };
 		D0E8B598BCB7486A2C75848E /* WeightViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightViewModel.swift; sourceTree = "<group>"; };
 		DC6712FB46945A6FE1AAB0E0 /* DriftApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriftApp.swift; sourceTree = "<group>"; };
@@ -301,6 +303,7 @@
 				1053BB3F19E5D50A27C74DDE /* DailyNutrition.swift */,
 				AE42BE067CE617760E08B051 /* DEXARegion.swift */,
 				1E0A2B843D779BCA23400645 /* DEXAScan.swift */,
+				C2C63097444CD8E010008D65 /* FavoriteFood.swift */,
 				6A797FB70463B0909C9C34E3 /* Food.swift */,
 				DF03B01EDE878137C97C5012 /* FoodEntry.swift */,
 				491E711DE9CBB80FC1BF1AE9 /* GlucoseReading.swift */,
@@ -498,6 +501,7 @@
 				2CCF5E1D415E462AE9997DD4 /* DashboardViewModel.swift in Sources */,
 				DAD2FB33C19A3574C2643082 /* DateFormatters.swift in Sources */,
 				4C31E5F32057829ABAA0840A /* DriftApp.swift in Sources */,
+				87B4A86A2CDE6196B42015A4 /* FavoriteFood.swift in Sources */,
 				DB3B28E9FBF4531A10E67AA9 /* Food.swift in Sources */,
 				E083B1E037CD15A623ABFF2D /* FoodEntry.swift in Sources */,
 				A2ACB0BE8811077162EBE463 /* FoodLogViewModel.swift in Sources */,

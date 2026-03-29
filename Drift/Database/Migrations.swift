@@ -174,5 +174,22 @@ enum Migrations {
                 t.add(column: "serving_unit_3", .text)
             }
         }
+
+        // v9: Favorites and recipes
+        migrator.registerMigration("v9_favorites_recipes") { db in
+            try db.create(table: "favorite_food") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("name", .text).notNull()
+                t.column("calories", .double).notNull()
+                t.column("protein_g", .double).notNull().defaults(to: 0)
+                t.column("carbs_g", .double).notNull().defaults(to: 0)
+                t.column("fat_g", .double).notNull().defaults(to: 0)
+                t.column("fiber_g", .double).notNull().defaults(to: 0)
+                t.column("default_servings", .double).notNull().defaults(to: 1)
+                t.column("is_recipe", .boolean).notNull().defaults(to: false)
+                t.column("sort_order", .integer).notNull().defaults(to: 0)
+                t.column("created_at", .text).notNull().defaults(sql: "(datetime('now'))")
+            }
+        }
     }
 }

@@ -414,6 +414,32 @@ extension AppDatabase {
     }
 }
 
+// MARK: - Favorites & Recipes
+
+extension AppDatabase {
+    func saveFavorite(_ fav: inout FavoriteFood) throws {
+        try dbWriter.write { [fav] db in
+            var m = fav
+            try m.save(db)
+        }
+        fav = try dbWriter.read { db in
+            try FavoriteFood.filter(Column("name") == fav.name).order(Column("created_at").desc).fetchOne(db)
+        } ?? fav
+    }
+
+    func fetchFavorites() throws -> [FavoriteFood] {
+        try dbWriter.read { db in
+            try FavoriteFood.order(Column("sort_order")).fetchAll(db)
+        }
+    }
+
+    func deleteFavorite(id: Int64) throws {
+        try dbWriter.write { db in
+            _ = try FavoriteFood.deleteOne(db, id: id)
+        }
+    }
+}
+
 // MARK: - Barcode Cache
 
 extension AppDatabase {
