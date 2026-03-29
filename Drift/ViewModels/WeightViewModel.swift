@@ -7,11 +7,29 @@ import Observation
 final class WeightViewModel {
     private let database: AppDatabase
 
-    var entries: [WeightEntry] = []
-    var trend: WeightTrendCalculator.WeightTrend?
+    var entries: [WeightEntry] = []          // filtered by time range (for chart + log)
+    var allEntries: [WeightEntry] = []       // ALL entries (for insights)
+    var trend: WeightTrendCalculator.WeightTrend?        // from filtered entries (chart)
+    var fullTrend: WeightTrendCalculator.WeightTrend?    // from ALL entries (insights)
     var selectedTimeRange: TimeRange = .threeMonths
     var granularity: Granularity = .daily
     var weightUnit: WeightUnit = Preferences.weightUnit
+    var goal: WeightGoal? = WeightGoal.load()
+
+    /// Is the user trying to lose weight? Default true if no goal set.
+    var isLosing: Bool {
+        if let goal { return goal.totalChangeKg < 0 }
+        return true // default assumption
+    }
+
+    /// Goal-aware color: is this change "good"?
+    func changeColor(for change: Double) -> String {
+        if isLosing {
+            return change < -0.01 ? "deficit" : change > 0.01 ? "surplus" : "neutral"
+        } else {
+            return change > 0.01 ? "deficit" : change < -0.01 ? "surplus" : "neutral"
+        }
+    }
 
     enum TimeRange: String, CaseIterable, Sendable {
         case oneWeek = "1W"
@@ -44,18 +62,18 @@ final class WeightViewModel {
         let count: Int
     }
 
-    struct MonthlyAverage: Sendable {
-        let month: Date
-        let average: Double
-        let count: Int
-    }
-
     init(database: AppDatabase = .shared) {
         self.database = database
     }
 
     func loadEntries() {
         do {
+            // Always load ALL entries for insights
+            allEntries = try database.fetchWeightEntries(from: nil)
+            let allInput = allEntries.map { (date: $0.date, weightKg: $0.weightKg) }
+            fullTrend = WeightTrendCalculator.calculateTrend(entries: allInput)
+
+            // Load filtered entries for chart
             let startDate: String?
             if let days = selectedTimeRange.days {
                 let date = Calendar.current.date(byAdding: .day, value: -days, to: Date())!
@@ -64,8 +82,11 @@ final class WeightViewModel {
                 startDate = nil
             }
             entries = try database.fetchWeightEntries(from: startDate)
-            calculateTrend()
-            Log.weightTrend.info("Loaded \(self.entries.count) weight entries")
+            let input = entries.map { (date: $0.date, weightKg: $0.weightKg) }
+            trend = WeightTrendCalculator.calculateTrend(entries: input)
+
+            goal = WeightGoal.load()
+            Log.weightTrend.info("Loaded \(self.entries.count)/\(self.allEntries.count) entries")
         } catch {
             Log.weightTrend.error("Failed to load: \(error.localizedDescription)")
         }
@@ -93,7 +114,7 @@ final class WeightViewModel {
 
     func displayWeight(_ kg: Double) -> Double { weightUnit.convert(fromKg: kg) }
 
-    // MARK: - Weekly Averages (most recent first)
+    // MARK: - Weekly Averages (from filtered entries)
 
     var weeklyAverages: [WeeklyAverage] {
         let calendar = Calendar.current
@@ -107,18 +128,17 @@ final class WeightViewModel {
             .sorted { $0.weekStart > $1.weekStart }
     }
 
-    var currentMonthAverage: MonthlyAverage? {
+    var currentMonthAverage: (average: Double, count: Int)? {
         let now = Date()
         let monthEntries = entries.filter { entry in
             guard let date = DateFormatters.dateOnly.date(from: entry.date) else { return false }
             return Calendar.current.isDate(date, equalTo: now, toGranularity: .month)
         }
         guard !monthEntries.isEmpty else { return nil }
-        let avg = monthEntries.map(\.weightKg).reduce(0, +) / Double(monthEntries.count)
-        return MonthlyAverage(month: Calendar.current.dateInterval(of: .month, for: now)?.start ?? now, average: avg, count: monthEntries.count)
+        return (monthEntries.map(\.weightKg).reduce(0, +) / Double(monthEntries.count), monthEntries.count)
     }
 
-    // MARK: - Entries grouped by month (for log view)
+    // MARK: - Entries grouped by month
 
     struct MonthGroup: Identifiable {
         let id: String
@@ -139,10 +159,5 @@ final class WeightViewModel {
         return groups.map { (key, val) in
             MonthGroup(id: key, title: val.title, entries: val.entries, average: val.entries.map(\.weightKg).reduce(0, +) / Double(val.entries.count))
         }.sorted { $0.id > $1.id }
-    }
-
-    private func calculateTrend() {
-        let input = entries.map { (date: $0.date, weightKg: $0.weightKg) }
-        trend = WeightTrendCalculator.calculateTrend(entries: input)
     }
 }

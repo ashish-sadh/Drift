@@ -24,16 +24,17 @@ struct WeightTabView: View {
                         // Weekly/Monthly averages
                         averagesSection
 
-                        // Insights (MacroFactor style)
-                        if let trend = viewModel.trend {
-                            WeightInsightsView(trend: trend, unit: viewModel.weightUnit)
+                        // Insights always from ALL data (not filtered by time range)
+                        if let fullTrend = viewModel.fullTrend {
+                            WeightInsightsView(trend: fullTrend, unit: viewModel.weightUnit, isLosing: viewModel.isLosing)
                         }
 
                         // Monthly grouped log
                         WeightLogListView(
                             entries: viewModel.entries,
                             unit: viewModel.weightUnit,
-                            onDelete: { viewModel.deleteWeight(id: $0) }
+                            onDelete: { viewModel.deleteWeight(id: $0) },
+                            isLosing: viewModel.isLosing
                         )
                     }
                     .padding(.horizontal, 16)

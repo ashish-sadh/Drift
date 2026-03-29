@@ -4,6 +4,17 @@ struct WeightLogListView: View {
     let entries: [WeightEntry]
     let unit: WeightUnit
     let onDelete: (Int64) -> Void
+    var isLosing: Bool = true
+
+    private func changeColor(_ change: Double) -> Color {
+        let isDecrease = change < -0.01
+        let isIncrease = change > 0.01
+        if isLosing {
+            return isDecrease ? Theme.deficit : isIncrease ? Theme.surplus : .secondary
+        } else {
+            return isIncrease ? Theme.deficit : isDecrease ? Theme.surplus : .secondary
+        }
+    }
 
     private var monthGroups: [MonthGroup] {
         let calendar = Calendar.current
@@ -81,7 +92,7 @@ struct WeightLogListView: View {
                             .font(.caption.monospacedDigit())
                     }
                 }
-                .foregroundStyle(change < -0.01 ? Theme.deficit : change > 0.01 ? Theme.surplus : .secondary)
+                .foregroundStyle(changeColor(change))
             }
 
             if entry.syncedFromHk {

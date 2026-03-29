@@ -86,20 +86,28 @@ struct WeightChartView: View {
                         }
                 }
 
-                // Scale weight points
+                // Scale weight points (larger, more visible)
                 ForEach(displayPoints.indices, id: \.self) { i in
                     if let actual = displayPoints[i].actual {
                         PointMark(x: .value("", displayPoints[i].date), y: .value("", actual))
-                            .foregroundStyle(Theme.accent.opacity(0.4))
-                            .symbolSize(granularity == .weekly ? 30 : 16)
+                            .foregroundStyle(.white.opacity(0.5))
+                            .symbolSize(granularity == .weekly ? 40 : 24)
                     }
                 }
 
-                // Trend line
+                // Trend line (thicker, brighter)
                 ForEach(displayPoints.indices, id: \.self) { i in
                     LineMark(x: .value("", displayPoints[i].date), y: .value("", displayPoints[i].ema))
                         .foregroundStyle(Theme.accent)
-                        .lineStyle(StrokeStyle(lineWidth: 2.5))
+                        .lineStyle(StrokeStyle(lineWidth: 3))
+                        .interpolationMethod(.catmullRom)
+                }
+
+                // Trend line glow (subtle shadow for depth)
+                ForEach(displayPoints.indices, id: \.self) { i in
+                    LineMark(x: .value("", displayPoints[i].date), y: .value("", displayPoints[i].ema))
+                        .foregroundStyle(Theme.accent.opacity(0.3))
+                        .lineStyle(StrokeStyle(lineWidth: 8))
                         .interpolationMethod(.catmullRom)
                 }
             }
