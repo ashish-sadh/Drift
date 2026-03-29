@@ -9,6 +9,7 @@ struct DEXAOverviewView: View {
     @State private var showingManualEntry = false
     @State private var isImporting = false
     @State private var importMessage: ImportMessage?
+    @State private var showingDeleteAll = false
     private let database = AppDatabase.shared
 
     struct ImportMessage: Identifiable {
@@ -330,46 +331,68 @@ struct DEXAOverviewView: View {
 
     private var scanComparison: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("All Scans").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+            HStack {
+                Text("All Scans (\(scans.count))").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+                Spacer()
+                if scans.count > 0 {
+                    Button { showingDeleteAll = true } label: {
+                        Text("Clear All")
+                            .font(.caption2)
+                            .foregroundStyle(Theme.surplus.opacity(0.7))
+                    }
+                    .alert("Delete all DEXA scans?", isPresented: $showingDeleteAll) {
+                        Button("Delete All", role: .destructive) {
+                            try? database.deleteAllDEXAScans()
+                            loadScans()
+                        }
+                        Button("Cancel", role: .cancel) {}
+                    } message: {
+                        Text("This will remove all \(scans.count) scans. You can re-import from PDF.")
+                    }
+                }
+            }
 
             VStack(spacing: 0) {
-                HStack {
-                    Text("Date").font(.caption2.weight(.semibold)).frame(width: 65, alignment: .leading)
-                    Text("BF%").font(.caption2.weight(.semibold)).frame(width: 38)
-                    Text("Fat").font(.caption2.weight(.semibold)).frame(width: 38)
-                    Text("Lean").font(.caption2.weight(.semibold)).frame(width: 38)
-                    Text("Total").font(.caption2.weight(.semibold)).frame(width: 42)
-                    Text("BMC").font(.caption2.weight(.semibold)).frame(width: 32)
-                }
-                .foregroundStyle(.tertiary)
-                .padding(.bottom, 4)
-
                 ForEach(scans, id: \.id) { scan in
                     HStack {
                         Text(formatDateShort(scan.scanDate))
-                            .font(.caption.monospacedDigit()).frame(width: 65, alignment: .leading)
-                        Text(scan.bodyFatPct.map { String(format: "%.1f", $0) } ?? "--")
-                            .font(.caption.weight(.bold).monospacedDigit()).frame(width: 38)
+                            .font(.caption.monospacedDigit()).frame(width: 55, alignment: .leading)
+                        Text(scan.bodyFatPct.map { String(format: "%.1f%%", $0) } ?? "--")
+                            .font(.caption.weight(.bold).monospacedDigit()).frame(width: 42)
                         Text(scan.fatMassLbs.map { String(format: "%.1f", $0) } ?? "--")
-                            .font(.caption.monospacedDigit()).foregroundStyle(Theme.surplus).frame(width: 38)
+                            .font(.caption.monospacedDigit()).foregroundStyle(Theme.surplus).frame(width: 35)
                         Text(scan.leanMassLbs.map { String(format: "%.1f", $0) } ?? "--")
-                            .font(.caption.monospacedDigit()).foregroundStyle(Theme.deficit).frame(width: 38)
+                            .font(.caption.monospacedDigit()).foregroundStyle(Theme.deficit).frame(width: 35)
                         Text(scan.totalMassLbs.map { String(format: "%.1f", $0) } ?? "--")
-                            .font(.caption.monospacedDigit()).frame(width: 42)
-                        Text(scan.bmcLbs.map { String(format: "%.1f", $0) } ?? "--")
-                            .font(.caption2.monospacedDigit()).foregroundStyle(.tertiary).frame(width: 32)
+                            .font(.caption.monospacedDigit()).frame(width: 40)
+
+                        Spacer()
+
+                        // Delete single scan
+                        if let id = scan.id {
+                            Button {
+                                try? database.deleteDEXAScan(id: id)
+                                loadScans()
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary.opacity(0.5))
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
-                    .padding(.vertical, 3)
+                    .padding(.vertical, 4)
+
+                    if scan.id != scans.last?.id {
+                        Divider().overlay(Color.white.opacity(0.05))
+                    }
                 }
             }
             .card()
         }
     }
 
-
-    // MARK: - Scan History (delete support)
-
-    private var scanHistory: some View { EmptyView() } // Merged into scanComparison
+    private var scanHistory: some View { EmptyView() }
 
     // MARK: - Empty + Import
 

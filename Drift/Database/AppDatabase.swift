@@ -266,6 +266,20 @@ extension AppDatabase {
         }
     }
 
+    func deleteDEXAScan(id: Int64) throws {
+        try dbWriter.write { db in
+            // Regions cascade-delete via foreign key
+            _ = try DEXAScan.deleteOne(db, id: id)
+        }
+    }
+
+    func deleteAllDEXAScans() throws {
+        try dbWriter.write { db in
+            _ = try DEXARegion.deleteAll(db)
+            _ = try DEXAScan.deleteAll(db)
+        }
+    }
+
     func fetchDEXARegions(forScanId scanId: Int64) throws -> [DEXARegion] {
         try dbWriter.read { db in
             try DEXARegion.filter(Column("scan_id") == scanId).fetchAll(db)
