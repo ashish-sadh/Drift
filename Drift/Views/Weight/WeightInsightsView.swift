@@ -90,7 +90,8 @@ struct WeightInsightsView: View {
         HStack {
             Text(period)
                 .font(.subheadline).foregroundStyle(.secondary)
-                .frame(width: 50, alignment: .leading)
+                .lineLimit(1).fixedSize()
+                .frame(width: 55, alignment: .leading)
 
             if let value {
                 let d = unit.convert(fromKg: value)
