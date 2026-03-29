@@ -107,9 +107,9 @@ enum WeightTrendCalculator {
         let currentEMA = dataPoints.last!.emaWeight
         let previousEMA = dataPoints.count >= 2 ? dataPoints[dataPoints.count - 2].emaWeight : currentEMA
 
-        // Calculate weekly rate via linear regression on last 14 days of EMA
-        let fourteenDaysAgo = Calendar.current.date(byAdding: .day, value: -14, to: Date())!
-        let recentPoints = dataPoints.filter { $0.date >= fourteenDaysAgo }
+        // Calculate weekly rate via linear regression on last 21 days (3 weeks) of EMA
+        let threeWeeksAgo = Calendar.current.date(byAdding: .day, value: -21, to: Date())!
+        let recentPoints = dataPoints.filter { $0.date >= threeWeeksAgo }
 
         let weeklyRateKg: Double
         if recentPoints.count >= 3 {
@@ -123,6 +123,7 @@ enum WeightTrendCalculator {
             weeklyRateKg = 0
         }
 
+        // Energy deficit always based on last 3 weeks of weight trend
         let estimatedDailyDeficit = weeklyRateKg * kcalPerKg / 7
 
         let trendDirection: TrendDirection
