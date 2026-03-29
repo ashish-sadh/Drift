@@ -1,17 +1,17 @@
-# Calibrate - Testing Guide
+# Drift - Testing Guide
 
 ## Test Strategy
 
 ### Unit Tests (automated, run in CI/locally)
-Run via: `xcodebuild test -project Calibrate.xcodeproj -scheme Calibrate -destination 'platform=iOS Simulator,name=iPhone 16'`
+Run via: `xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 16'`
 
 | Component | What to Test | Location |
 |-----------|-------------|----------|
-| WeightTrendCalculator | EMA calculation, linear regression, deficit estimate, edge cases | `CalibrateTests/WeightTrendCalculatorTests.swift` |
-| FoodDatabase | JSON loading, search results, serving math | `CalibrateTests/FoodDatabaseTests.swift` |
-| CGMImportService | CSV parsing, duplicate detection, malformed rows | `CalibrateTests/CGMImportServiceTests.swift` |
-| Models | GRDB record round-trips (insert, fetch, update, delete) | `CalibrateTests/ModelTests.swift` |
-| Migrations | All migrations run cleanly on empty DB | `CalibrateTests/MigrationTests.swift` |
+| WeightTrendCalculator | EMA calculation, linear regression, deficit estimate, edge cases | `DriftTests/WeightTrendCalculatorTests.swift` |
+| FoodDatabase | JSON loading, search results, serving math | `DriftTests/FoodDatabaseTests.swift` |
+| CGMImportService | CSV parsing, duplicate detection, malformed rows | `DriftTests/CGMImportServiceTests.swift` |
+| Models | GRDB record round-trips (insert, fetch, update, delete) | `DriftTests/ModelTests.swift` |
+| Migrations | All migrations run cleanly on empty DB | `DriftTests/MigrationTests.swift` |
 
 ### On-Device Tests (manual, requires iPhone)
 
@@ -91,16 +91,16 @@ timestamp,glucose_mg_dl
 
 ```bash
 # All tests
-xcodebuild test -project Calibrate.xcodeproj -scheme Calibrate \
+xcodebuild test -project Drift.xcodeproj -scheme Drift \
   -destination 'platform=iOS Simulator,name=iPhone 16'
 
 # Specific test class
-xcodebuild test -project Calibrate.xcodeproj -scheme Calibrate \
+xcodebuild test -project Drift.xcodeproj -scheme Drift \
   -destination 'platform=iOS Simulator,name=iPhone 16' \
-  -only-testing:CalibrateTests/WeightTrendCalculatorTests
+  -only-testing:DriftTests/WeightTrendCalculatorTests
 
 # With verbose output
-xcodebuild test -project Calibrate.xcodeproj -scheme Calibrate \
+xcodebuild test -project Drift.xcodeproj -scheme Drift \
   -destination 'platform=iOS Simulator,name=iPhone 16' \
   -resultBundlePath TestResults.xcresult
 ```

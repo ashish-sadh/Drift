@@ -34,7 +34,7 @@ final class SupplementViewModel {
                 (log.supplementId, log)
             })
         } catch {
-            print("Failed to load supplements: \(error)")
+            Log.supplements.error("Failed to load supplements: \(error.localizedDescription)")
         }
     }
 
@@ -65,7 +65,7 @@ final class SupplementViewModel {
             }
             loadSupplements()
         } catch {
-            print("Failed to seed supplements: \(error)")
+            Log.supplements.error("Failed to seed supplements: \(error.localizedDescription)")
         }
     }
 
@@ -74,7 +74,7 @@ final class SupplementViewModel {
             try database.toggleSupplementTaken(supplementId: supplementId, date: dateString)
             loadSupplements()
         } catch {
-            print("Failed to toggle: \(error)")
+            Log.supplements.error("Failed to toggle supplement: \(error.localizedDescription)")
         }
     }
 
@@ -89,7 +89,7 @@ final class SupplementViewModel {
             try database.saveSupplement(&supplement)
             loadSupplements()
         } catch {
-            print("Failed to add supplement: \(error)")
+            Log.supplements.error("Failed to add supplement: \(error.localizedDescription)")
         }
     }
 

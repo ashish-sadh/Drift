@@ -44,7 +44,7 @@ final class DashboardViewModel {
         do {
             todayNutrition = try database.fetchDailyNutrition(for: today)
         } catch {
-            print("Failed to load nutrition: \(error)")
+            Log.app.error("Failed to load nutrition: \(error.localizedDescription)")
         }
 
         // Load supplements
@@ -54,7 +54,7 @@ final class DashboardViewModel {
             supplementsTotal = supplements.count
             supplementsTaken = logs.filter(\.taken).count
         } catch {
-            print("Failed to load supplements: \(error)")
+            Log.supplements.error("Failed to load supplements: \(error.localizedDescription)")
         }
 
         // Load weight trend
@@ -67,7 +67,7 @@ final class DashboardViewModel {
                 dailyDeficit = trend.estimatedDailyDeficit
             }
         } catch {
-            print("Failed to load weight trend: \(error)")
+            Log.weightTrend.error("Failed to load weight trend: \(error.localizedDescription)")
         }
 
         // Load HealthKit data
@@ -84,7 +84,7 @@ final class DashboardViewModel {
                 steps = try await hkService.fetchSteps(for: Date())
                 sleepHours = try await hkService.fetchSleepHours(for: Date())
             } catch {
-                print("HealthKit fetch failed: \(error)")
+                Log.healthKit.error("HealthKit fetch failed: \(error.localizedDescription)")
             }
         }
     }

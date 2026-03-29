@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import Calibrate
+@testable import Drift
 
 // Test the core data flows end-to-end with an in-memory database
 

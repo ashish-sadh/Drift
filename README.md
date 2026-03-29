@@ -1,4 +1,4 @@
-# Calibrate
+# Drift
 
 Local-first iOS app for weight tracking, nutrition, and body composition analysis. Powered by Apple Health data.
 
@@ -18,10 +18,10 @@ Local-first iOS app for weight tracking, nutrition, and body composition analysi
 sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 
 # Open in Xcode
-open Calibrate.xcodeproj
+open Drift.xcodeproj
 
 # Or build from CLI
-xcodebuild -project Calibrate.xcodeproj -scheme Calibrate \
+xcodebuild -project Drift.xcodeproj -scheme Drift \
   -destination 'platform=iOS Simulator,name=iPhone 16' build
 ```
 

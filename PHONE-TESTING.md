@@ -1,4 +1,4 @@
-# Testing Calibrate on Your iPhone
+# Testing Drift on Your iPhone
 
 ## Prerequisites
 
@@ -23,13 +23,13 @@
 
 ### Generate the Xcode Project
 ```bash
-cd /Users/ashishsadh/workspace/Calibrate
+cd /Users/ashishsadh/workspace/Drift
 xcodegen generate
 ```
 
 ### Option 1: Build from Xcode (Recommended for Device)
 ```bash
-open Calibrate.xcodeproj
+open Drift.xcodeproj
 ```
 1. Select your iPhone as the build target (top bar)
 2. Go to **Signing & Capabilities** in the target settings
@@ -40,16 +40,16 @@ open Calibrate.xcodeproj
 
 ### Option 2: Build from Command Line (Simulator)
 ```bash
-xcodebuild -project Calibrate.xcodeproj \
-  -scheme Calibrate \
+xcodebuild -project Drift.xcodeproj \
+  -scheme Drift \
   -destination 'platform=iOS Simulator,name=iPhone 16' \
   build
 ```
 
 ### Option 3: Build for Device (CLI)
 ```bash
-xcodebuild -project Calibrate.xcodeproj \
-  -scheme Calibrate \
+xcodebuild -project Drift.xcodeproj \
+  -scheme Drift \
   -destination 'generic/platform=iOS' \
   -configuration Debug \
   DEVELOPMENT_TEAM=YOUR_TEAM_ID \
@@ -122,12 +122,12 @@ In Xcode: Target > Signing & Capabilities > Select "Automatically manage signing
 
 ### HealthKit returns no data
 - HealthKit returns empty (not errors) when permission is denied
-- Check iPhone Settings > Privacy & Security > Health > Calibrate
+- Check iPhone Settings > Privacy & Security > Health > Drift
 
 ### GRDB build errors
 ```bash
 # Clean and resolve packages
-xcodebuild clean -project Calibrate.xcodeproj -scheme Calibrate
+xcodebuild clean -project Drift.xcodeproj -scheme Drift
 swift package resolve
 xcodegen generate
 ```
@@ -135,8 +135,8 @@ xcodegen generate
 ## Architecture
 
 ```
-Calibrate/
-├── CalibrateApp.swift          # App entry
+Drift/
+├── DriftApp.swift          # App entry
 ├── ContentView.swift           # Tab navigation
 ├── Models/                     # GRDB data models
 ├── Views/                      # SwiftUI views by feature

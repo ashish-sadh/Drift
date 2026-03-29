@@ -26,7 +26,7 @@ struct MoreTabView: View {
                     .card()
 
                     // Version
-                    Text("Calibrate v0.1.0")
+                    Text("Drift v0.1.0")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
                         .padding(.top, 8)

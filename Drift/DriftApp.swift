@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct CalibrateApp: App {
+struct DriftApp: App {
     @State private var hasRequestedHealthKit = false
 
     var body: some Scene {

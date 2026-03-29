@@ -28,7 +28,7 @@ final class FoodLogViewModel {
         do {
             searchResults = try database.searchFoods(query: searchQuery)
         } catch {
-            print("Search failed: \(error)")
+            Log.foodLog.error("Search failed: \(error.localizedDescription)")
         }
     }
 
@@ -48,7 +48,7 @@ final class FoodLogViewModel {
             todayMeals = grouped
             todayNutrition = try database.fetchDailyNutrition(for: date)
         } catch {
-            print("Failed to load meals: \(error)")
+            Log.foodLog.error("Failed to load meals: \(error.localizedDescription)")
         }
     }
 
@@ -83,7 +83,7 @@ final class FoodLogViewModel {
             try database.saveFoodEntry(&entry)
             loadTodayMeals()
         } catch {
-            print("Failed to log food: \(error)")
+            Log.foodLog.error("Failed to log food: \(error.localizedDescription)")
         }
     }
 
@@ -115,7 +115,7 @@ final class FoodLogViewModel {
             try database.saveFoodEntry(&entry)
             loadTodayMeals()
         } catch {
-            print("Failed to quick add: \(error)")
+            Log.foodLog.error("Failed to quick add: \(error.localizedDescription)")
         }
     }
 
@@ -124,7 +124,7 @@ final class FoodLogViewModel {
             try database.deleteFoodEntry(id: id)
             loadTodayMeals()
         } catch {
-            print("Failed to delete entry: \(error)")
+            Log.foodLog.error("Failed to delete entry: \(error.localizedDescription)")
         }
     }
 }

@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import Calibrate
+@testable import Drift
 
 @Test func emaWithSingleEntry() async throws {
     let entries = [

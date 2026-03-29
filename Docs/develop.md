@@ -1,4 +1,4 @@
-# Calibrate - Development Guide
+# Drift - Development Guide
 
 ## Prerequisites
 - macOS with Xcode 16+ installed
@@ -10,17 +10,17 @@
 
 ```bash
 # 1. Generate Xcode project
-cd /Users/ashishsadh/workspace/Calibrate
+cd /Users/ashishsadh/workspace/Drift
 xcodegen generate
 
 # 2. Open in Xcode
-open Calibrate.xcodeproj
+open Drift.xcodeproj
 
 # 3. Build (CLI)
-xcodebuild -project Calibrate.xcodeproj -scheme Calibrate -destination 'platform=iOS Simulator,name=iPhone 16' build
+xcodebuild -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 16' build
 
 # 4. Run tests
-xcodebuild -project Calibrate.xcodeproj -scheme Calibrate -destination 'platform=iOS Simulator,name=iPhone 16' test
+xcodebuild -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 16' test
 ```
 
 ## Architecture
@@ -57,7 +57,7 @@ MVVM + Services
 4. Create service in `Services/` (if needed)
 5. Create ViewModel in `ViewModels/`
 6. Create View in `Views/`
-7. Write tests in `CalibrateTests/`
+7. Write tests in `DriftTests/`
 8. Update `ContentView.swift` tab structure if needed
 
 ## Dependencies
@@ -68,8 +68,8 @@ MVVM + Services
 
 ```bash
 # Build for device (requires signing)
-xcodebuild -project Calibrate.xcodeproj \
-  -scheme Calibrate \
+xcodebuild -project Drift.xcodeproj \
+  -scheme Drift \
   -destination 'generic/platform=iOS' \
   -configuration Debug \
   CODE_SIGN_IDENTITY="-" \

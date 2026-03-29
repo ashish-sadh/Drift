@@ -14,18 +14,21 @@ extension AppDatabase {
                 appropriateFor: nil,
                 create: true
             )
-            let directoryURL = appSupportURL.appendingPathComponent("Calibrate", isDirectory: true)
+            let directoryURL = appSupportURL.appendingPathComponent("Drift", isDirectory: true)
             try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
 
-            let databaseURL = directoryURL.appendingPathComponent("calibrate.sqlite")
+            let databaseURL = directoryURL.appendingPathComponent("drift.sqlite")
+            Log.database.info("Opening database at \(databaseURL.path)")
             let dbPool = try DatabasePool(path: databaseURL.path, configuration: makeConfiguration())
             let database = try AppDatabase(dbPool)
 
             // Seed foods from bundled JSON on first launch
             try database.seedFoodsFromJSON()
+            Log.database.info("Database ready")
 
             return database
         } catch {
+            Log.database.fault("Database setup failed: \(error.localizedDescription)")
             fatalError("Database setup failed: \(error)")
         }
     }
@@ -39,12 +42,6 @@ extension AppDatabase {
     private static func makeConfiguration() -> Configuration {
         var config = Configuration()
         config.foreignKeysEnabled = true
-        #if DEBUG
-        // Only trace SQL in debug builds
-        config.prepareDatabase { db in
-            db.trace { print("SQL: \($0)") }
-        }
-        #endif
         return config
     }
 }

@@ -1,0 +1,763 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0884D534B3ADDE47643801F8 /* WeightTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96402659F73046846B409D5 /* WeightTabView.swift */; };
+		12608375BDCD57D211C64849 /* WeightLogListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E78D132A90B0FDC35353646 /* WeightLogListView.swift */; };
+		1E11E5682458FC83023281D7 /* WeightInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A039993077E4BE9F83149249 /* WeightInsightsView.swift */; };
+		2159F8ABA37706FCF57C3A63 /* SupplementsTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58C97F6B46397BDA539E78C /* SupplementsTabView.swift */; };
+		24CF74D9CA0E8A4555F1EC68 /* SupplementViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D783FD1AF8952C1C8CECD29 /* SupplementViewModel.swift */; };
+		24D454E75E424F7ACA736A91 /* GlucoseTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0DAF3E5EFC6C85282C084A8 /* GlucoseTabView.swift */; };
+		27536FF4DD83AB95ADECF5AB /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFFBCB3D524DCFEA822DB53 /* Persistence.swift */; };
+		2CCF5E1D415E462AE9997DD4 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C555B3F9005A7C75FAAD51 /* DashboardViewModel.swift */; };
+		2D12F440CE4CBEB4B91023D2 /* default_supplements.json in Resources */ = {isa = PBXBuildFile; fileRef = 8810FAA67FDEA57FF05E2989 /* default_supplements.json */; };
+		30F7D3160F146CA92713AD13 /* MoreTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F6D2AA89F46A33EAE39DEAC /* MoreTabView.swift */; };
+		310C2BA2AF1BB8CC25FCC976 /* DriftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1AB1D48F6D71EC9854629ED /* DriftTests.swift */; };
+		33EC5B66DF492493925C24CA /* CGMImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16A8D46F9E08C1960010A695 /* CGMImportService.swift */; };
+		37AE19FE7D95B7FA8B8477DE /* DailyNutrition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1053BB3F19E5D50A27C74DDE /* DailyNutrition.swift */; };
+		3A45CB30EFB91DF5C4E468AD /* QuickAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20576FEB4A7F0371596D08E6 /* QuickAddView.swift */; };
+		3BBB59B401ACCCDB35D323F3 /* DEXAScan.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1E0A2B843D779BCA23400645 /* DEXAScan.swift */; };
+		3EF98591577370706EFB2940 /* GlucoseReading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 491E711DE9CBB80FC1BF1AE9 /* GlucoseReading.swift */; };
+		49D0426489D97845E43EA8B9 /* Supplement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 790C2D3452366D6B473DE2B1 /* Supplement.swift */; };
+		4C31E5F32057829ABAA0840A /* DriftApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6712FB46945A6FE1AAB0E0 /* DriftApp.swift */; };
+		5F4476C2F1B7DC3E662A1DBC /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24385DF0FF7F89584AE40020 /* Theme.swift */; };
+		6A4AC25199199579681FCAD4 /* WeightViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E8B598BCB7486A2C75848E /* WeightViewModel.swift */; };
+		70F621B0C5089E738C2DEA5E /* FoodTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A981E37D718D28A6679F9C8 /* FoodTabView.swift */; };
+		7BDC02B8C99F8B719546A8A1 /* WeightEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = F237A2E1C7747DBE102B665C /* WeightEntry.swift */; };
+		8224D8220B6D9328EDDDB648 /* DEXAOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5893DE4C163CA3CF50E74C1A /* DEXAOverviewView.swift */; };
+		8A8CF11C6A7AF26DCABECF6A /* CSVParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D6B07DD56345F8A5F5448BC /* CSVParserTests.swift */; };
+		8CB8BF68CE3F11B2CFBDDB16 /* sample_lingo_export.csv in Resources */ = {isa = PBXBuildFile; fileRef = E6B95CCD0C984C915051F482 /* sample_lingo_export.csv */; };
+		8D8FB3814300848676740EC6 /* AddSupplementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4BD88646DFE4A17724D4407 /* AddSupplementView.swift */; };
+		98FF97CFE71A6BBCFF976259 /* UIFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A5DA3E3543A99260250279 /* UIFlowTests.swift */; };
+		9ACECC13D2365A3DF7F2C28C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78E3B6C1497F6A200DF8095 /* ContentView.swift */; };
+		9CBCD31AD1998B4E5237C1A6 /* Units.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88A19640FB19F5628DC8B824 /* Units.swift */; };
+		A2ACB0BE8811077162EBE463 /* FoodLogViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE2809389EE890A3F01ED675 /* FoodLogViewModel.swift */; };
+		AA43792497E2FC36FF55F58C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 08E33CA6BE80D735A37ED745 /* Assets.xcassets */; };
+		ADFD099AC0AEB4154AF6063B /* WeightTrendCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD5DFCD5C5ED2C0D7E5CD8EF /* WeightTrendCalculator.swift */; };
+		B3B780A670DA8D354A057699 /* foods.json in Resources */ = {isa = PBXBuildFile; fileRef = FD7026C3D8745999EED9478E /* foods.json */; };
+		B8666DFAC44BA801AF626FE7 /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D45209A3DCC7F6659E6E367 /* CSVParser.swift */; };
+		BA4A49D33CF87342C8F00DCD /* SupplementLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E0BC3660040DBB4942437D /* SupplementLog.swift */; };
+		C4412538AE3E1E269685CB2A /* Log.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99C89E28D8FBE125273FB677 /* Log.swift */; };
+		D681045AF7657C38E75D4D86 /* FoodSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42A6CAF4720F61DC0C9BD2E7 /* FoodSearchView.swift */; };
+		D7C81264B1FEDD6E3701FD13 /* Migrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FDCCAED76696ACF2A89F445 /* Migrations.swift */; };
+		DAD2FB33C19A3574C2643082 /* DateFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35CA37F54FABF8B93BB278BB /* DateFormatters.swift */; };
+		DB3B28E9FBF4531A10E67AA9 /* Food.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A797FB70463B0909C9C34E3 /* Food.swift */; };
+		DF025680665178535364944C /* WeightTrendCalculatorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F51E9EC49412B4F96068D35 /* WeightTrendCalculatorTests.swift */; };
+		DFCF8C1D8A9F7A20072F37C0 /* HealthKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F57B8BA8C0B119CF10614F14 /* HealthKitService.swift */; };
+		DFFA7CC42D60E67CB40222E8 /* WeightChartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ABDC86BA4516AA3699FE080 /* WeightChartView.swift */; };
+		E083B1E037CD15A623ABFF2D /* FoodEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF03B01EDE878137C97C5012 /* FoodEntry.swift */; };
+		E10A3A33C9E718C1D077AC02 /* WeightEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217B3F5DA6C6AA9BB267D9F3 /* WeightEntryView.swift */; };
+		EA461A149CE8C537C738BF00 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 8D44ABA58001AC21A70DEA3A /* GRDB */; };
+		EB2A292ED2019794749E4839 /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A19AD32FF007540A79C20BC /* AppDatabase.swift */; };
+		EE7CBD2147B65BED5FC0047C /* MealLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = C182889F4730B18DE0244F02 /* MealLog.swift */; };
+		FE2EC2B62CB693DA85CD1544 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2565511DFA43570D0CE9EA /* DashboardView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		315C2652D757491C8E1F51A7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C57AFFDCB18AE227A2FF2ECA /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = CAEDCE34417A91D973F68377;
+			remoteInfo = Drift;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0207D73F0C177B95B548B321 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		08E33CA6BE80D735A37ED745 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		0D45209A3DCC7F6659E6E367 /* CSVParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVParser.swift; sourceTree = "<group>"; };
+		1053BB3F19E5D50A27C74DDE /* DailyNutrition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyNutrition.swift; sourceTree = "<group>"; };
+		16A8D46F9E08C1960010A695 /* CGMImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGMImportService.swift; sourceTree = "<group>"; };
+		1ABDC86BA4516AA3699FE080 /* WeightChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightChartView.swift; sourceTree = "<group>"; };
+		1D783FD1AF8952C1C8CECD29 /* SupplementViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementViewModel.swift; sourceTree = "<group>"; };
+		1E0A2B843D779BCA23400645 /* DEXAScan.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DEXAScan.swift; sourceTree = "<group>"; };
+		20576FEB4A7F0371596D08E6 /* QuickAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddView.swift; sourceTree = "<group>"; };
+		217B3F5DA6C6AA9BB267D9F3 /* WeightEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightEntryView.swift; sourceTree = "<group>"; };
+		24385DF0FF7F89584AE40020 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
+		2A19AD32FF007540A79C20BC /* AppDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabase.swift; sourceTree = "<group>"; };
+		35CA37F54FABF8B93BB278BB /* DateFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatters.swift; sourceTree = "<group>"; };
+		3F51E9EC49412B4F96068D35 /* WeightTrendCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightTrendCalculatorTests.swift; sourceTree = "<group>"; };
+		42A6CAF4720F61DC0C9BD2E7 /* FoodSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSearchView.swift; sourceTree = "<group>"; };
+		491E711DE9CBB80FC1BF1AE9 /* GlucoseReading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseReading.swift; sourceTree = "<group>"; };
+		552F5AE6789DA294DDB91E8B /* Drift.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Drift.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		5893DE4C163CA3CF50E74C1A /* DEXAOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DEXAOverviewView.swift; sourceTree = "<group>"; };
+		5A981E37D718D28A6679F9C8 /* FoodTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodTabView.swift; sourceTree = "<group>"; };
+		5F6D2AA89F46A33EAE39DEAC /* MoreTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreTabView.swift; sourceTree = "<group>"; };
+		668D8D5951EB119A1624DDB2 /* DriftTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DriftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6A797FB70463B0909C9C34E3 /* Food.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Food.swift; sourceTree = "<group>"; };
+		6D6B07DD56345F8A5F5448BC /* CSVParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVParserTests.swift; sourceTree = "<group>"; };
+		790C2D3452366D6B473DE2B1 /* Supplement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Supplement.swift; sourceTree = "<group>"; };
+		8810FAA67FDEA57FF05E2989 /* default_supplements.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = default_supplements.json; sourceTree = "<group>"; };
+		88A19640FB19F5628DC8B824 /* Units.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Units.swift; sourceTree = "<group>"; };
+		8E78D132A90B0FDC35353646 /* WeightLogListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightLogListView.swift; sourceTree = "<group>"; };
+		99C89E28D8FBE125273FB677 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
+		9FDCCAED76696ACF2A89F445 /* Migrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Migrations.swift; sourceTree = "<group>"; };
+		A039993077E4BE9F83149249 /* WeightInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightInsightsView.swift; sourceTree = "<group>"; };
+		A1AB1D48F6D71EC9854629ED /* DriftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriftTests.swift; sourceTree = "<group>"; };
+		AE2809389EE890A3F01ED675 /* FoodLogViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodLogViewModel.swift; sourceTree = "<group>"; };
+		B0C555B3F9005A7C75FAAD51 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
+		B0DAF3E5EFC6C85282C084A8 /* GlucoseTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseTabView.swift; sourceTree = "<group>"; };
+		B58C97F6B46397BDA539E78C /* SupplementsTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementsTabView.swift; sourceTree = "<group>"; };
+		C182889F4730B18DE0244F02 /* MealLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealLog.swift; sourceTree = "<group>"; };
+		D0E8B598BCB7486A2C75848E /* WeightViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightViewModel.swift; sourceTree = "<group>"; };
+		DC6712FB46945A6FE1AAB0E0 /* DriftApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriftApp.swift; sourceTree = "<group>"; };
+		DD2565511DFA43570D0CE9EA /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		DDFFBCB3D524DCFEA822DB53 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
+		DF03B01EDE878137C97C5012 /* FoodEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodEntry.swift; sourceTree = "<group>"; };
+		E1A5DA3E3543A99260250279 /* UIFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIFlowTests.swift; sourceTree = "<group>"; };
+		E4BD88646DFE4A17724D4407 /* AddSupplementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSupplementView.swift; sourceTree = "<group>"; };
+		E6B95CCD0C984C915051F482 /* sample_lingo_export.csv */ = {isa = PBXFileReference; path = sample_lingo_export.csv; sourceTree = "<group>"; };
+		E96402659F73046846B409D5 /* WeightTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightTabView.swift; sourceTree = "<group>"; };
+		F237A2E1C7747DBE102B665C /* WeightEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightEntry.swift; sourceTree = "<group>"; };
+		F3E0BC3660040DBB4942437D /* SupplementLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementLog.swift; sourceTree = "<group>"; };
+		F57B8BA8C0B119CF10614F14 /* HealthKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
+		F78E3B6C1497F6A200DF8095 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		FD5DFCD5C5ED2C0D7E5CD8EF /* WeightTrendCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightTrendCalculator.swift; sourceTree = "<group>"; };
+		FD7026C3D8745999EED9478E /* foods.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = foods.json; sourceTree = "<group>"; };
+		FF0DB0809C7110E3644208F2 /* Drift.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Drift.entitlements; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		188A35C15589F9B39A3AD2F7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EA461A149CE8C537C738BF00 /* GRDB in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		03744AEC99F92BFD0D34F049 /* Weight */ = {
+			isa = PBXGroup;
+			children = (
+				1ABDC86BA4516AA3699FE080 /* WeightChartView.swift */,
+				217B3F5DA6C6AA9BB267D9F3 /* WeightEntryView.swift */,
+				A039993077E4BE9F83149249 /* WeightInsightsView.swift */,
+				8E78D132A90B0FDC35353646 /* WeightLogListView.swift */,
+				E96402659F73046846B409D5 /* WeightTabView.swift */,
+			);
+			path = Weight;
+			sourceTree = "<group>";
+		};
+		0722BA8BD8D3FCE6E6A0257D /* Supplements */ = {
+			isa = PBXGroup;
+			children = (
+				E4BD88646DFE4A17724D4407 /* AddSupplementView.swift */,
+				B58C97F6B46397BDA539E78C /* SupplementsTabView.swift */,
+			);
+			path = Supplements;
+			sourceTree = "<group>";
+		};
+		0EA67573775347F2DA7F1A99 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				552F5AE6789DA294DDB91E8B /* Drift.app */,
+				668D8D5951EB119A1624DDB2 /* DriftTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1DCFB184D941DDFAE30E78F8 = {
+			isa = PBXGroup;
+			children = (
+				DF13210FEF8ED80B93DD4A50 /* Drift */,
+				230C4300561292D969C89B4E /* DriftTests */,
+				0EA67573775347F2DA7F1A99 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1E13B73313706E9254470E88 /* Food */ = {
+			isa = PBXGroup;
+			children = (
+				42A6CAF4720F61DC0C9BD2E7 /* FoodSearchView.swift */,
+				5A981E37D718D28A6679F9C8 /* FoodTabView.swift */,
+				20576FEB4A7F0371596D08E6 /* QuickAddView.swift */,
+			);
+			path = Food;
+			sourceTree = "<group>";
+		};
+		230C4300561292D969C89B4E /* DriftTests */ = {
+			isa = PBXGroup;
+			children = (
+				6D6B07DD56345F8A5F5448BC /* CSVParserTests.swift */,
+				A1AB1D48F6D71EC9854629ED /* DriftTests.swift */,
+				E1A5DA3E3543A99260250279 /* UIFlowTests.swift */,
+				3F51E9EC49412B4F96068D35 /* WeightTrendCalculatorTests.swift */,
+				A42C87894C6E122BBE55A961 /* Fixtures */,
+			);
+			path = DriftTests;
+			sourceTree = "<group>";
+		};
+		2F1F69058370BC9D552D932D /* Database */ = {
+			isa = PBXGroup;
+			children = (
+				2A19AD32FF007540A79C20BC /* AppDatabase.swift */,
+				9FDCCAED76696ACF2A89F445 /* Migrations.swift */,
+				DDFFBCB3D524DCFEA822DB53 /* Persistence.swift */,
+			);
+			path = Database;
+			sourceTree = "<group>";
+		};
+		3A14444424F2FA5FA56661DB /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				B0C555B3F9005A7C75FAAD51 /* DashboardViewModel.swift */,
+				AE2809389EE890A3F01ED675 /* FoodLogViewModel.swift */,
+				1D783FD1AF8952C1C8CECD29 /* SupplementViewModel.swift */,
+				D0E8B598BCB7486A2C75848E /* WeightViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		4A7204948841850DFF3D940D /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				8935B2C63DFF003BB6300F49 /* BodyComposition */,
+				79C427A9E8C6F8EEFCEEA012 /* Dashboard */,
+				1E13B73313706E9254470E88 /* Food */,
+				FA9DF84BE5D84C9597FCFFA3 /* Glucose */,
+				EC70F8F8DC436EB14CAB3F97 /* Settings */,
+				0722BA8BD8D3FCE6E6A0257D /* Supplements */,
+				03744AEC99F92BFD0D34F049 /* Weight */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		79C427A9E8C6F8EEFCEEA012 /* Dashboard */ = {
+			isa = PBXGroup;
+			children = (
+				DD2565511DFA43570D0CE9EA /* DashboardView.swift */,
+			);
+			path = Dashboard;
+			sourceTree = "<group>";
+		};
+		8935B2C63DFF003BB6300F49 /* BodyComposition */ = {
+			isa = PBXGroup;
+			children = (
+				5893DE4C163CA3CF50E74C1A /* DEXAOverviewView.swift */,
+			);
+			path = BodyComposition;
+			sourceTree = "<group>";
+		};
+		A42C87894C6E122BBE55A961 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				E6B95CCD0C984C915051F482 /* sample_lingo_export.csv */,
+			);
+			path = Fixtures;
+			sourceTree = "<group>";
+		};
+		D719A19F032AC96C3ADB1AD3 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				08E33CA6BE80D735A37ED745 /* Assets.xcassets */,
+				8810FAA67FDEA57FF05E2989 /* default_supplements.json */,
+				FD7026C3D8745999EED9478E /* foods.json */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		D758CFE75CAB274413E181F9 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				1053BB3F19E5D50A27C74DDE /* DailyNutrition.swift */,
+				1E0A2B843D779BCA23400645 /* DEXAScan.swift */,
+				6A797FB70463B0909C9C34E3 /* Food.swift */,
+				DF03B01EDE878137C97C5012 /* FoodEntry.swift */,
+				491E711DE9CBB80FC1BF1AE9 /* GlucoseReading.swift */,
+				C182889F4730B18DE0244F02 /* MealLog.swift */,
+				790C2D3452366D6B473DE2B1 /* Supplement.swift */,
+				F3E0BC3660040DBB4942437D /* SupplementLog.swift */,
+				F237A2E1C7747DBE102B665C /* WeightEntry.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		DF13210FEF8ED80B93DD4A50 /* Drift */ = {
+			isa = PBXGroup;
+			children = (
+				F78E3B6C1497F6A200DF8095 /* ContentView.swift */,
+				FF0DB0809C7110E3644208F2 /* Drift.entitlements */,
+				DC6712FB46945A6FE1AAB0E0 /* DriftApp.swift */,
+				0207D73F0C177B95B548B321 /* Info.plist */,
+				2F1F69058370BC9D552D932D /* Database */,
+				D758CFE75CAB274413E181F9 /* Models */,
+				D719A19F032AC96C3ADB1AD3 /* Resources */,
+				E9AB1B657564FD836D16BAB5 /* Services */,
+				F9B297018B5B54AC793D14FB /* Utilities */,
+				3A14444424F2FA5FA56661DB /* ViewModels */,
+				4A7204948841850DFF3D940D /* Views */,
+			);
+			path = Drift;
+			sourceTree = "<group>";
+		};
+		E9AB1B657564FD836D16BAB5 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				16A8D46F9E08C1960010A695 /* CGMImportService.swift */,
+				F57B8BA8C0B119CF10614F14 /* HealthKitService.swift */,
+				FD5DFCD5C5ED2C0D7E5CD8EF /* WeightTrendCalculator.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		EC70F8F8DC436EB14CAB3F97 /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				5F6D2AA89F46A33EAE39DEAC /* MoreTabView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		F9B297018B5B54AC793D14FB /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				0D45209A3DCC7F6659E6E367 /* CSVParser.swift */,
+				35CA37F54FABF8B93BB278BB /* DateFormatters.swift */,
+				99C89E28D8FBE125273FB677 /* Log.swift */,
+				24385DF0FF7F89584AE40020 /* Theme.swift */,
+				88A19640FB19F5628DC8B824 /* Units.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		FA9DF84BE5D84C9597FCFFA3 /* Glucose */ = {
+			isa = PBXGroup;
+			children = (
+				B0DAF3E5EFC6C85282C084A8 /* GlucoseTabView.swift */,
+			);
+			path = Glucose;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		50A0CCC2E8C96C468D93CEF8 /* DriftTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 879E54EDE3CD8FA31DF9345C /* Build configuration list for PBXNativeTarget "DriftTests" */;
+			buildPhases = (
+				87691D3C6A78A69CA49E70CB /* Sources */,
+				A7B9D64A23B371278E2EFB8C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				A2F4FA2AB0193C1E986DD906 /* PBXTargetDependency */,
+			);
+			name = DriftTests;
+			packageProductDependencies = (
+			);
+			productName = DriftTests;
+			productReference = 668D8D5951EB119A1624DDB2 /* DriftTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		CAEDCE34417A91D973F68377 /* Drift */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F406649AF13D92F90944A7F1 /* Build configuration list for PBXNativeTarget "Drift" */;
+			buildPhases = (
+				271ED68B29D0DA60F5E3CB98 /* Sources */,
+				F72ECFB3C1B5BC2EFDA4A82C /* Resources */,
+				188A35C15589F9B39A3AD2F7 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Drift;
+			packageProductDependencies = (
+				8D44ABA58001AC21A70DEA3A /* GRDB */,
+			);
+			productName = Drift;
+			productReference = 552F5AE6789DA294DDB91E8B /* Drift.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C57AFFDCB18AE227A2FF2ECA /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					CAEDCE34417A91D973F68377 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = 68F4AD629CB425B82407650A /* Build configuration list for PBXProject "Drift" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 1DCFB184D941DDFAE30E78F8;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A0800830A85682E9EA5E8575 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 0EA67573775347F2DA7F1A99 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				CAEDCE34417A91D973F68377 /* Drift */,
+				50A0CCC2E8C96C468D93CEF8 /* DriftTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A7B9D64A23B371278E2EFB8C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8CB8BF68CE3F11B2CFBDDB16 /* sample_lingo_export.csv in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F72ECFB3C1B5BC2EFDA4A82C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AA43792497E2FC36FF55F58C /* Assets.xcassets in Resources */,
+				2D12F440CE4CBEB4B91023D2 /* default_supplements.json in Resources */,
+				B3B780A670DA8D354A057699 /* foods.json in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		271ED68B29D0DA60F5E3CB98 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8D8FB3814300848676740EC6 /* AddSupplementView.swift in Sources */,
+				EB2A292ED2019794749E4839 /* AppDatabase.swift in Sources */,
+				33EC5B66DF492493925C24CA /* CGMImportService.swift in Sources */,
+				B8666DFAC44BA801AF626FE7 /* CSVParser.swift in Sources */,
+				9ACECC13D2365A3DF7F2C28C /* ContentView.swift in Sources */,
+				8224D8220B6D9328EDDDB648 /* DEXAOverviewView.swift in Sources */,
+				3BBB59B401ACCCDB35D323F3 /* DEXAScan.swift in Sources */,
+				37AE19FE7D95B7FA8B8477DE /* DailyNutrition.swift in Sources */,
+				FE2EC2B62CB693DA85CD1544 /* DashboardView.swift in Sources */,
+				2CCF5E1D415E462AE9997DD4 /* DashboardViewModel.swift in Sources */,
+				DAD2FB33C19A3574C2643082 /* DateFormatters.swift in Sources */,
+				4C31E5F32057829ABAA0840A /* DriftApp.swift in Sources */,
+				DB3B28E9FBF4531A10E67AA9 /* Food.swift in Sources */,
+				E083B1E037CD15A623ABFF2D /* FoodEntry.swift in Sources */,
+				A2ACB0BE8811077162EBE463 /* FoodLogViewModel.swift in Sources */,
+				D681045AF7657C38E75D4D86 /* FoodSearchView.swift in Sources */,
+				70F621B0C5089E738C2DEA5E /* FoodTabView.swift in Sources */,
+				3EF98591577370706EFB2940 /* GlucoseReading.swift in Sources */,
+				24D454E75E424F7ACA736A91 /* GlucoseTabView.swift in Sources */,
+				DFCF8C1D8A9F7A20072F37C0 /* HealthKitService.swift in Sources */,
+				C4412538AE3E1E269685CB2A /* Log.swift in Sources */,
+				EE7CBD2147B65BED5FC0047C /* MealLog.swift in Sources */,
+				D7C81264B1FEDD6E3701FD13 /* Migrations.swift in Sources */,
+				30F7D3160F146CA92713AD13 /* MoreTabView.swift in Sources */,
+				27536FF4DD83AB95ADECF5AB /* Persistence.swift in Sources */,
+				3A45CB30EFB91DF5C4E468AD /* QuickAddView.swift in Sources */,
+				49D0426489D97845E43EA8B9 /* Supplement.swift in Sources */,
+				BA4A49D33CF87342C8F00DCD /* SupplementLog.swift in Sources */,
+				24CF74D9CA0E8A4555F1EC68 /* SupplementViewModel.swift in Sources */,
+				2159F8ABA37706FCF57C3A63 /* SupplementsTabView.swift in Sources */,
+				5F4476C2F1B7DC3E662A1DBC /* Theme.swift in Sources */,
+				9CBCD31AD1998B4E5237C1A6 /* Units.swift in Sources */,
+				DFFA7CC42D60E67CB40222E8 /* WeightChartView.swift in Sources */,
+				7BDC02B8C99F8B719546A8A1 /* WeightEntry.swift in Sources */,
+				E10A3A33C9E718C1D077AC02 /* WeightEntryView.swift in Sources */,
+				1E11E5682458FC83023281D7 /* WeightInsightsView.swift in Sources */,
+				12608375BDCD57D211C64849 /* WeightLogListView.swift in Sources */,
+				0884D534B3ADDE47643801F8 /* WeightTabView.swift in Sources */,
+				ADFD099AC0AEB4154AF6063B /* WeightTrendCalculator.swift in Sources */,
+				6A4AC25199199579681FCAD4 /* WeightViewModel.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		87691D3C6A78A69CA49E70CB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8A8CF11C6A7AF26DCABECF6A /* CSVParserTests.swift in Sources */,
+				310C2BA2AF1BB8CC25FCC976 /* DriftTests.swift in Sources */,
+				98FF97CFE71A6BBCFF976259 /* UIFlowTests.swift in Sources */,
+				DF025680665178535364944C /* WeightTrendCalculatorTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A2F4FA2AB0193C1E986DD906 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = CAEDCE34417A91D973F68377 /* Drift */;
+			targetProxy = 315C2652D757491C8E1F51A7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1BA2EF094074FE68869BD7E3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.drift.DriftTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Drift.app/Drift";
+			};
+			name = Debug;
+		};
+		1C9B0CB149C7B02DC969D4FD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		593F12B4C11F2DF5725E88BE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.drift.DriftTests;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Drift.app/Drift";
+			};
+			name = Release;
+		};
+		7C190047C04497DC44F492BC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Drift/Drift.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Drift/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Drift;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.drift.health;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		D2C48B12CC940FCA05A8E07F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D912882FFA52AB5EEF2B7B2D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Drift/Drift.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Drift/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Drift;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.drift.health;
+				SDKROOT = iphoneos;
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		68F4AD629CB425B82407650A /* Build configuration list for PBXProject "Drift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D2C48B12CC940FCA05A8E07F /* Debug */,
+				1C9B0CB149C7B02DC969D4FD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		879E54EDE3CD8FA31DF9345C /* Build configuration list for PBXNativeTarget "DriftTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1BA2EF094074FE68869BD7E3 /* Debug */,
+				593F12B4C11F2DF5725E88BE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F406649AF13D92F90944A7F1 /* Build configuration list for PBXNativeTarget "Drift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D912882FFA52AB5EEF2B7B2D /* Debug */,
+				7C190047C04497DC44F492BC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A0800830A85682E9EA5E8575 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/groue/GRDB.swift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8D44ABA58001AC21A70DEA3A /* GRDB */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A0800830A85682E9EA5E8575 /* XCRemoteSwiftPackageReference "GRDB.swift" */;
+			productName = GRDB;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = C57AFFDCB18AE227A2FF2ECA /* Project object */;
+}

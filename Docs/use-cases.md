@@ -1,4 +1,4 @@
-# Calibrate - Use Cases
+# Drift - Use Cases
 
 ## Core Use Cases
 
@@ -99,7 +99,7 @@
 **Actor**: User wearing Lingo CGM sensor
 **Flow**:
 1. User exports CSV from Lingo app to Files
-2. Opens Calibrate → More → Glucose
+2. Opens Drift → More → Glucose
 3. Taps "Import CGM Data" → picks CSV
 4. App parses and imports glucose readings
 5. Shows glucose chart with color bands (green 70-100, yellow 100-140, orange 140+)

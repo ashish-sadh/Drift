@@ -1,6 +1,6 @@
-name: Calibrate
+name: Drift
 options:
-  bundleIdPrefix: com.calibrate
+  bundleIdPrefix: com.drift
   deploymentTarget:
     iOS: "17.0"
   xcodeVersion: "16.0"
@@ -12,41 +12,41 @@ packages:
     from: "7.0.0"
 
 targets:
-  Calibrate:
+  Drift:
     type: application
     platform: iOS
     sources:
-      - path: Calibrate
+      - path: Drift
     resources:
-      - path: Calibrate/Resources
+      - path: Drift/Resources
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.calibrate.app
+        PRODUCT_BUNDLE_IDENTIFIER: com.drift.health
         MARKETING_VERSION: "0.1.0"
         CURRENT_PROJECT_VERSION: "1"
         SWIFT_VERSION: "6.0"
         GENERATE_INFOPLIST_FILE: YES
-        INFOPLIST_FILE: Calibrate/Info.plist
-        INFOPLIST_KEY_CFBundleDisplayName: Calibrate
-        CODE_SIGN_ENTITLEMENTS: Calibrate/Calibrate.entitlements
+        INFOPLIST_FILE: Drift/Info.plist
+        INFOPLIST_KEY_CFBundleDisplayName: Drift
+        CODE_SIGN_ENTITLEMENTS: Drift/Drift.entitlements
         DEVELOPMENT_TEAM: ""
     dependencies:
       - package: GRDB
     entitlements:
-      path: Calibrate/Calibrate.entitlements
+      path: Drift/Drift.entitlements
       properties:
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.background-delivery: true
         com.apple.developer.healthkit.access:
           - health-records
 
-  CalibrateTests:
+  DriftTests:
     type: bundle.unit-test
     platform: iOS
     sources:
-      - path: CalibrateTests
+      - path: DriftTests
     dependencies:
-      - target: Calibrate
+      - target: Drift
     settings:
       base:
         SWIFT_VERSION: "6.0"

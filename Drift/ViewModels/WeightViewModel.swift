@@ -49,7 +49,7 @@ final class WeightViewModel {
             entries = try database.fetchWeightEntries(from: startDate)
             calculateTrend()
         } catch {
-            print("Failed to load weight entries: \(error)")
+            Log.weightTrend.error("Failed to load weight entries: \(error.localizedDescription)")
         }
     }
 
@@ -64,7 +64,7 @@ final class WeightViewModel {
             try database.saveWeightEntry(&entry)
             loadEntries()
         } catch {
-            print("Failed to save weight: \(error)")
+            Log.weightTrend.error("Failed to save weight: \(error.localizedDescription)")
         }
     }
 
@@ -73,7 +73,7 @@ final class WeightViewModel {
             try database.deleteWeightEntry(id: id)
             loadEntries()
         } catch {
-            print("Failed to delete weight: \(error)")
+            Log.weightTrend.error("Failed to delete weight: \(error.localizedDescription)")
         }
     }
 

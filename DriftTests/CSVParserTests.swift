@@ -1,5 +1,5 @@
 import Testing
-@testable import Calibrate
+@testable import Drift
 
 @Test func parseSimpleCSV() async throws {
     let csv = """
