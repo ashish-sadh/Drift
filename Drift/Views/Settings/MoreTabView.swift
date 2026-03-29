@@ -37,11 +37,28 @@ struct MoreTabView: View {
                     }
                     .card()
 
+                    // Privacy
+                    VStack(spacing: 6) {
+                        HStack(spacing: 6) {
+                            Image(systemName: "lock.shield.fill")
+                                .foregroundStyle(Theme.deficit)
+                                .font(.caption)
+                            Text("Your data stays on your device")
+                                .font(.caption.weight(.medium))
+                        }
+                        Text("Drift stores all data locally on your iPhone and Apple Health. No accounts, no cloud, no tracking. Barcode lookups use Open Food Facts (open-source) and only send the barcode number.")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .card()
+
                     // Version
                     Text("Drift v0.1.0")
                         .font(.caption2)
                         .foregroundStyle(.tertiary)
-                        .padding(.top, 8)
+                        .padding(.top, 4)
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 8)

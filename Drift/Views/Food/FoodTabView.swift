@@ -4,6 +4,7 @@ struct FoodTabView: View {
     @State private var viewModel = FoodLogViewModel()
     @State private var showingSearch = false
     @State private var showingQuickAdd = false
+    @State private var showingScanner = false
 
     var body: some View {
         NavigationStack {
@@ -27,6 +28,9 @@ struct FoodTabView: View {
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
+                        Button { showingScanner = true } label: {
+                            Label("Scan Barcode", systemImage: "barcode.viewfinder")
+                        }
                         Button { showingSearch = true } label: {
                             Label("Search Food", systemImage: "magnifyingglass")
                         }
@@ -38,6 +42,9 @@ struct FoodTabView: View {
                             .foregroundStyle(Theme.accent)
                     }
                 }
+            }
+            .fullScreenCover(isPresented: $showingScanner) {
+                BarcodeLookupView(viewModel: viewModel)
             }
             .sheet(isPresented: $showingSearch) {
                 FoodSearchView(viewModel: viewModel)
