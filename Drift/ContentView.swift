@@ -47,14 +47,9 @@ struct ContentView: View {
                 .tabItem { Label("Food", systemImage: "fork.knife") }
                 .tag(3)
 
-            SleepRecoveryView()
-                .wrapInNav()
-                .tabItem { Label("Recovery", systemImage: "bed.double.fill") }
-                .tag(4)
-
             MoreTabView()
                 .tabItem { Label("More", systemImage: "ellipsis") }
-                .tag(5)
+                .tag(4)
         }
         .tint(Theme.accent)
         .background(Theme.background.ignoresSafeArea())

@@ -21,9 +21,9 @@ struct DashboardView: View {
                     // Health row
                     healthRow
 
-                    // Sleep & Recovery → Recovery tab
+                    // Sleep & Recovery → SleepRecoveryView
                     if viewModel.sleepHours > 0 || viewModel.recoveryScore > 0 {
-                        Button { selectedTab = 4 } label: { sleepRecoveryCard }.buttonStyle(.plain)
+                        NavigationLink { SleepRecoveryView() } label: { sleepRecoveryCard }
                     }
 
                     // Supplements → More > Supplements

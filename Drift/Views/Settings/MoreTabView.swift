@@ -5,20 +5,24 @@ struct MoreTabView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
-                    // Supplements + Goal
+                    // Goal
                     VStack(spacing: 0) {
-                        navRow(icon: "pill.fill", title: "Supplements", subtitle: "Daily checklist, consistency tracking", color: .mint) {
-                            SupplementsTabView()
-                        }
-                        Divider().overlay(Color.white.opacity(0.05))
                         navRow(icon: "target", title: "Weight Goal", subtitle: "Target weight, timeline, deficit plan", color: Theme.deficit) {
                             GoalView()
                         }
                     }
                     .card()
 
-                    // Data section
+                    // Health & Data
                     VStack(spacing: 0) {
+                        navRow(icon: "bed.double.fill", title: "Sleep & Recovery", subtitle: "Sleep stages, HRV, recovery score", color: Theme.sleepIndigo) {
+                            SleepRecoveryView()
+                        }
+                        Divider().overlay(Color.white.opacity(0.05))
+                        navRow(icon: "pill.fill", title: "Supplements", subtitle: "Daily checklist, consistency", color: .mint) {
+                            SupplementsTabView()
+                        }
+                        Divider().overlay(Color.white.opacity(0.05))
                         navRow(icon: "figure.stand", title: "Body Composition", subtitle: "DEXA scan data", color: Theme.accent) {
                             DEXAOverviewView()
                         }
