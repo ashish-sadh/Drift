@@ -53,10 +53,24 @@ final class HealthKitService {
         formatter.dateFormat = "yyyy-MM-dd"
         formatter.locale = Locale(identifier: "en_US_POSIX")
 
-        var count = 0
+        // Group by date, keep the most recent sample per day
+        var byDate: [String: HKQuantitySample] = [:]
         for sample in samples {
-            let kg = sample.quantity.doubleValue(for: .gramUnit(with: .kilo))
             let dateString = formatter.string(from: sample.startDate)
+            if let existing = byDate[dateString] {
+                if sample.startDate > existing.startDate {
+                    byDate[dateString] = sample
+                }
+            } else {
+                byDate[dateString] = sample
+            }
+        }
+
+        Log.healthKit.info("HealthKit returned \(samples.count) samples across \(byDate.count) unique days")
+
+        var count = 0
+        for (dateString, sample) in byDate {
+            let kg = sample.quantity.doubleValue(for: .gramUnit(with: .kilo))
             var entry = WeightEntry(date: dateString, weightKg: kg, source: "healthkit", syncedFromHk: true)
             try database.saveWeightEntry(&entry)
             count += 1
@@ -67,6 +81,14 @@ final class HealthKitService {
         }
         Log.healthKit.info("Synced \(count) weight entries from HealthKit")
         return count
+    }
+
+    /// Force a full re-sync by clearing the saved anchor.
+    func fullResyncWeight() async throws -> Int {
+        let database = AppDatabase.shared
+        try database.saveAnchor(dataType: "bodyMass", anchor: Data())
+        Log.healthKit.info("Cleared weight sync anchor, performing full re-sync")
+        return try await syncWeight()
     }
 
     private func queryAnchoredWeight(type: HKQuantityType, anchor: HKQueryAnchor?) async throws -> ([HKQuantitySample], HKQueryAnchor?) {

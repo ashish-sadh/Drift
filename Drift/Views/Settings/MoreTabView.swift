@@ -112,6 +112,16 @@ struct SettingsView: View {
                             Spacer()
                         }
                     }
+
+                    Button {
+                        Task { _ = try? await HealthKitService.shared.fullResyncWeight() }
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.clockwise").foregroundStyle(.orange)
+                            Text("Full Re-sync (all history)")
+                            Spacer()
+                        }
+                    }
                 }
                 .card()
             }
