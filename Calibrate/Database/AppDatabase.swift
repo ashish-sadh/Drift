@@ -2,7 +2,7 @@ import Foundation
 import GRDB
 
 /// The main application database providing read-write access to all user data.
-struct AppDatabase: Sendable {
+struct AppDatabase: @unchecked Sendable {
     private let dbWriter: any DatabaseWriter
 
     init(_ dbWriter: any DatabaseWriter) throws {

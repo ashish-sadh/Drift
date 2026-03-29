@@ -9,6 +9,13 @@ struct WeightEntry: Identifiable, Codable, Sendable {
     var createdAt: String
     var syncedFromHk: Bool
 
+    enum CodingKeys: String, CodingKey {
+        case id, date, source
+        case weightKg = "weight_kg"
+        case createdAt = "created_at"
+        case syncedFromHk = "synced_from_hk"
+    }
+
     init(
         id: Int64? = nil,
         date: String,

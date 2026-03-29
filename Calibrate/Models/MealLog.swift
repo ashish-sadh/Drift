@@ -7,6 +7,12 @@ struct MealLog: Identifiable, Codable, Sendable {
     var mealType: String     // "breakfast" | "lunch" | "dinner" | "snack"
     var createdAt: String
 
+    enum CodingKeys: String, CodingKey {
+        case id, date
+        case mealType = "meal_type"
+        case createdAt = "created_at"
+    }
+
     init(
         id: Int64? = nil,
         date: String,

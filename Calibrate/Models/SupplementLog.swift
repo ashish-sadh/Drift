@@ -9,6 +9,12 @@ struct SupplementLog: Identifiable, Codable, Sendable {
     var takenAt: String?     // ISO 8601 datetime
     var notes: String?
 
+    enum CodingKeys: String, CodingKey {
+        case id, date, taken, notes
+        case supplementId = "supplement_id"
+        case takenAt = "taken_at"
+    }
+
     init(
         id: Int64? = nil,
         supplementId: Int64,

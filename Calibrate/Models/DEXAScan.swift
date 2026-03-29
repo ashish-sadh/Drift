@@ -18,6 +18,22 @@ struct DEXAScan: Identifiable, Codable, Sendable {
     var notes: String?
     var createdAt: String
 
+    enum CodingKeys: String, CodingKey {
+        case id, location, notes
+        case scanDate = "scan_date"
+        case totalMassKg = "total_mass_kg"
+        case fatMassKg = "fat_mass_kg"
+        case leanMassKg = "lean_mass_kg"
+        case boneMassKg = "bone_mass_kg"
+        case bodyFatPct = "body_fat_pct"
+        case visceralFatKg = "visceral_fat_kg"
+        case trunkFatPct = "trunk_fat_pct"
+        case armsFatPct = "arms_fat_pct"
+        case legsFatPct = "legs_fat_pct"
+        case boneDensityTotal = "bone_density_total"
+        case createdAt = "created_at"
+    }
+
     init(
         id: Int64? = nil,
         scanDate: String,

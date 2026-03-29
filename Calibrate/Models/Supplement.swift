@@ -9,6 +9,12 @@ struct Supplement: Identifiable, Codable, Sendable {
     var isActive: Bool
     var sortOrder: Int
 
+    enum CodingKeys: String, CodingKey {
+        case id, name, dosage, unit
+        case isActive = "is_active"
+        case sortOrder = "sort_order"
+    }
+
     init(
         id: Int64? = nil,
         name: String,

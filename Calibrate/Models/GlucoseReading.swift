@@ -8,6 +8,12 @@ struct GlucoseReading: Identifiable, Codable, Sendable {
     var source: String        // "lingo_csv"
     var importBatch: String?  // UUID grouping readings from same import
 
+    enum CodingKeys: String, CodingKey {
+        case id, timestamp, source
+        case glucoseMgdl = "glucose_mgdl"
+        case importBatch = "import_batch"
+    }
+
     init(
         id: Int64? = nil,
         timestamp: String,

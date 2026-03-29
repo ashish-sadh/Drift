@@ -39,9 +39,12 @@ extension AppDatabase {
     private static func makeConfiguration() -> Configuration {
         var config = Configuration()
         config.foreignKeysEnabled = true
+        #if DEBUG
+        // Only trace SQL in debug builds
         config.prepareDatabase { db in
             db.trace { print("SQL: \($0)") }
         }
+        #endif
         return config
     }
 }

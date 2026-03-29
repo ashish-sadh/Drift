@@ -13,6 +13,16 @@ struct Food: Identifiable, Codable, Sendable {
     var fatG: Double
     var fiberG: Double
 
+    enum CodingKeys: String, CodingKey {
+        case id, name, category, calories
+        case servingSize = "serving_size"
+        case servingUnit = "serving_unit"
+        case proteinG = "protein_g"
+        case carbsG = "carbs_g"
+        case fatG = "fat_g"
+        case fiberG = "fiber_g"
+    }
+
     init(
         id: Int64? = nil,
         name: String,

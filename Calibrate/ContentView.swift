@@ -3,25 +3,30 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         TabView {
-            Tab("Dashboard", systemImage: "chart.line.uptrend.xyaxis") {
-                DashboardView()
-            }
+            DashboardView()
+                .tabItem {
+                    Label("Dashboard", systemImage: "chart.line.uptrend.xyaxis")
+                }
 
-            Tab("Weight", systemImage: "scalemass") {
-                WeightTabView()
-            }
+            WeightTabView()
+                .tabItem {
+                    Label("Weight", systemImage: "scalemass")
+                }
 
-            Tab("Food", systemImage: "fork.knife") {
-                FoodTabView()
-            }
+            FoodTabView()
+                .tabItem {
+                    Label("Food", systemImage: "fork.knife")
+                }
 
-            Tab("Supplements", systemImage: "pill") {
-                SupplementsTabView()
-            }
+            SupplementsTabView()
+                .tabItem {
+                    Label("Supplements", systemImage: "pill")
+                }
 
-            Tab("More", systemImage: "ellipsis") {
-                MoreTabView()
-            }
+            MoreTabView()
+                .tabItem {
+                    Label("More", systemImage: "ellipsis")
+                }
         }
     }
 }

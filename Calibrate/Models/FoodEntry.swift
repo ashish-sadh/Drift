@@ -15,6 +15,19 @@ struct FoodEntry: Identifiable, Codable, Sendable {
     var fiberG: Double
     var createdAt: String
 
+    enum CodingKeys: String, CodingKey {
+        case id, servings, calories
+        case mealLogId = "meal_log_id"
+        case foodId = "food_id"
+        case foodName = "food_name"
+        case servingSizeG = "serving_size_g"
+        case proteinG = "protein_g"
+        case carbsG = "carbs_g"
+        case fatG = "fat_g"
+        case fiberG = "fiber_g"
+        case createdAt = "created_at"
+    }
+
     init(
         id: Int64? = nil,
         mealLogId: Int64,
