@@ -2,6 +2,7 @@ import SwiftUI
 import Charts
 
 struct WeightTabView: View {
+    @Binding var syncComplete: Bool
     @State private var viewModel = WeightViewModel()
     @State private var showingAddWeight = false
 
@@ -40,9 +41,18 @@ struct WeightTabView: View {
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                                 .multilineTextAlignment(.center)
-                            Button("Log Weight") { showingAddWeight = true }
-                                .buttonStyle(.borderedProminent)
-                                .tint(Theme.accent)
+
+                            Button("Sync from Apple Health") {
+                                Task {
+                                    _ = try? await HealthKitService.shared.syncWeight()
+                                    viewModel.loadEntries()
+                                }
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(Theme.accent)
+
+                            Button("Log Weight Manually") { showingAddWeight = true }
+                                .buttonStyle(.bordered)
                         }
                         .padding(.top, 60)
                     }
@@ -66,6 +76,9 @@ struct WeightTabView: View {
                 WeightEntryView(unit: viewModel.weightUnit) { viewModel.addWeight(value: $0) }
             }
             .onAppear { viewModel.loadEntries() }
+            .onChange(of: syncComplete) { _, done in
+                if done { viewModel.loadEntries() }
+            }
         }
     }
 }

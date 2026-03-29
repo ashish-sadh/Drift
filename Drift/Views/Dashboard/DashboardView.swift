@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct DashboardView: View {
+    @Binding var syncComplete: Bool
     @State private var viewModel = DashboardViewModel()
 
     var body: some View {
@@ -33,6 +34,9 @@ struct DashboardView: View {
             .toolbarColorScheme(.dark, for: .navigationBar)
             .task { await viewModel.loadToday() }
             .refreshable { await viewModel.loadToday() }
+            .onChange(of: syncComplete) { _, done in
+                if done { Task { await viewModel.loadToday() } }
+            }
         }
     }
 

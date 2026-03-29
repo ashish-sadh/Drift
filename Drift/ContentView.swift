@@ -1,14 +1,16 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Binding var syncComplete: Bool
+
     var body: some View {
         TabView {
-            DashboardView()
+            DashboardView(syncComplete: $syncComplete)
                 .tabItem {
                     Label("Dashboard", systemImage: "chart.line.uptrend.xyaxis")
                 }
 
-            WeightTabView()
+            WeightTabView(syncComplete: $syncComplete)
                 .tabItem {
                     Label("Weight", systemImage: "scalemass")
                 }
@@ -32,5 +34,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView()
+    ContentView(syncComplete: .constant(true))
 }

@@ -38,15 +38,21 @@ extension AppDatabase {
 extension AppDatabase {
     func saveWeightEntry(_ entry: inout WeightEntry) throws {
         try dbWriter.write { [entry] db in
-            var mutable = entry
-            try mutable.save(db)
+            // Upsert: if date already exists, update the weight
+            if let existing = try WeightEntry.filter(Column("date") == entry.date).fetchOne(db) {
+                var updated = existing
+                updated.weightKg = entry.weightKg
+                updated.source = entry.source
+                updated.syncedFromHk = entry.syncedFromHk
+                try updated.update(db)
+            } else {
+                var mutable = entry
+                try mutable.insert(db)
+            }
         }
-        // Re-fetch to get the assigned id
-        if entry.id == nil {
-            entry = try dbWriter.read { db in
-                try WeightEntry.filter(Column("date") == entry.date).fetchOne(db)
-            } ?? entry
-        }
+        entry = try dbWriter.read { db in
+            try WeightEntry.filter(Column("date") == entry.date).fetchOne(db)
+        } ?? entry
     }
 
     func deleteWeightEntry(id: Int64) throws {
