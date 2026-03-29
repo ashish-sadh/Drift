@@ -389,7 +389,7 @@
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
 					CAEDCE34417A91D973F68377 = {
-						DevelopmentTeam = "";
+						DevelopmentTeam = ZJ5H5XH82A;
 					};
 				};
 			};
@@ -606,7 +606,7 @@
 				CODE_SIGN_ENTITLEMENTS = Drift/Drift.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Drift/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Drift;
@@ -692,7 +692,7 @@
 				CODE_SIGN_ENTITLEMENTS = Drift/Drift.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Drift/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Drift;

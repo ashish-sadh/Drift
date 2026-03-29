@@ -29,7 +29,7 @@ targets:
         INFOPLIST_FILE: Drift/Info.plist
         INFOPLIST_KEY_CFBundleDisplayName: Drift
         CODE_SIGN_ENTITLEMENTS: Drift/Drift.entitlements
-        DEVELOPMENT_TEAM: ""
+        DEVELOPMENT_TEAM: ZJ5H5XH82A
     dependencies:
       - package: GRDB
     entitlements:
@@ -37,8 +37,6 @@ targets:
       properties:
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.background-delivery: true
-        com.apple.developer.healthkit.access:
-          - health-records
 
   DriftTests:
     type: bundle.unit-test
