@@ -37,8 +37,15 @@ extension AppDatabase {
 
 extension AppDatabase {
     func saveWeightEntry(_ entry: inout WeightEntry) throws {
-        try dbWriter.write { db in
-            try entry.save(db)
+        try dbWriter.write { [entry] db in
+            var mutable = entry
+            try mutable.save(db)
+        }
+        // Re-fetch to get the assigned id
+        if entry.id == nil {
+            entry = try dbWriter.read { db in
+                try WeightEntry.filter(Column("date") == entry.date).fetchOne(db)
+            } ?? entry
         }
     }
 
@@ -72,14 +79,22 @@ extension AppDatabase {
 
 extension AppDatabase {
     func saveMealLog(_ log: inout MealLog) throws {
-        try dbWriter.write { db in
-            try log.save(db)
+        let isNew = log.id == nil
+        try dbWriter.write { [log] db in
+            var mutable = log
+            try mutable.save(db)
+        }
+        if isNew {
+            log = try dbWriter.read { db in
+                try MealLog.filter(Column("date") == log.date).filter(Column("meal_type") == log.mealType).fetchOne(db)
+            } ?? log
         }
     }
 
     func saveFoodEntry(_ entry: inout FoodEntry) throws {
-        try dbWriter.write { db in
-            try entry.save(db)
+        try dbWriter.write { [entry] db in
+            var mutable = entry
+            try mutable.save(db)
         }
     }
 
@@ -130,14 +145,22 @@ extension AppDatabase {
 
 extension AppDatabase {
     func saveSupplement(_ supplement: inout Supplement) throws {
-        try dbWriter.write { db in
-            try supplement.save(db)
+        let isNew = supplement.id == nil
+        try dbWriter.write { [supplement] db in
+            var mutable = supplement
+            try mutable.save(db)
+        }
+        if isNew {
+            supplement = try dbWriter.read { db in
+                try Supplement.filter(Column("name") == supplement.name).fetchOne(db)
+            } ?? supplement
         }
     }
 
     func saveSupplementLog(_ log: inout SupplementLog) throws {
-        try dbWriter.write { db in
-            try log.save(db)
+        try dbWriter.write { [log] db in
+            var mutable = log
+            try mutable.save(db)
         }
     }
 
@@ -203,8 +226,9 @@ extension AppDatabase {
 
 extension AppDatabase {
     func saveDEXAScan(_ scan: inout DEXAScan) throws {
-        try dbWriter.write { db in
-            try scan.save(db)
+        try dbWriter.write { [scan] db in
+            var mutable = scan
+            try mutable.save(db)
         }
     }
 

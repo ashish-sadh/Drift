@@ -35,6 +35,7 @@
 		95549B4A9F8F1E05B9155E65 /* CGMImportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F970464F3A45C0705359428 /* CGMImportService.swift */; };
 		9CE104C1FD01BC2A41FD6584 /* GlucoseReading.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5D92BAD2A14EDC4C6CB41CB /* GlucoseReading.swift */; };
 		9FDCB5D4BE57DA537749C0A8 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = E7CF32A54A78076B2B75635C /* GRDB */; };
+		A56DCE76FEBA63F6F79C8310 /* UIFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E4FCE6EE420ACB6A182A7D8 /* UIFlowTests.swift */; };
 		B3C3019B771F656D0010DD23 /* WeightEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 533328ABF67CADB2FE94E215 /* WeightEntry.swift */; };
 		B8CA9DA1D84469F280AC9D3E /* SupplementViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD96DB56F1936E6A3F6B4245 /* SupplementViewModel.swift */; };
 		C515F7F9FC7250075358C17B /* SupplementsTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94AEDEB81D9DBEDDCF763A3A /* SupplementsTabView.swift */; };
@@ -89,6 +90,7 @@
 		94AEDEB81D9DBEDDCF763A3A /* SupplementsTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementsTabView.swift; sourceTree = "<group>"; };
 		9630B74BA6550831BCE0C8FD /* AppDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabase.swift; sourceTree = "<group>"; };
 		9BD6AFEC96CDEEBB736CF831 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		9E4FCE6EE420ACB6A182A7D8 /* UIFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIFlowTests.swift; sourceTree = "<group>"; };
 		A346A9B2C4EBEC63D0B4E69E /* Calibrate.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Calibrate.entitlements; sourceTree = "<group>"; };
 		A56E8E6E5732031FD1F3F346 /* CalibrateApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrateApp.swift; sourceTree = "<group>"; };
 		A5E3C71A37CCE6FF27D6D4E7 /* FoodEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodEntry.swift; sourceTree = "<group>"; };
@@ -231,6 +233,7 @@
 			children = (
 				55465C0BD3BE1BACA0573551 /* CalibrateTests.swift */,
 				F111BF5572832CB0B7758EDF /* CSVParserTests.swift */,
+				9E4FCE6EE420ACB6A182A7D8 /* UIFlowTests.swift */,
 				5057D21F75CD6750C313FE2B /* WeightTrendCalculatorTests.swift */,
 				25635D9B39EF0E1EB3A97D48 /* Fixtures */,
 			);
@@ -435,6 +438,7 @@
 			files = (
 				F3623B19102360F63B06AF41 /* CSVParserTests.swift in Sources */,
 				697D238D9EB39A9F8D6E7916 /* CalibrateTests.swift in Sources */,
+				A56DCE76FEBA63F6F79C8310 /* UIFlowTests.swift in Sources */,
 				486BCC773CD89F852CFC70C7 /* WeightTrendCalculatorTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
