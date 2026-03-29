@@ -47,17 +47,20 @@ struct WeightLogListView: View {
                             .font(.caption2)
                             .foregroundStyle(.red.opacity(0.6))
                     }
-                }
-                .padding(.vertical, 6)
-                .swipeActions(edge: .trailing) {
-                    if let id = entry.id {
-                        Button(role: .destructive) {
+
+                    // Delete button (only for manual entries)
+                    if !entry.syncedFromHk, let id = entry.id {
+                        Button {
                             onDelete(id)
                         } label: {
-                            Label("Delete", systemImage: "trash")
+                            Image(systemName: "xmark.circle")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
+                        .buttonStyle(.plain)
                     }
                 }
+                .padding(.vertical, 6)
 
                 if index < entries.count - 1 {
                     Divider()

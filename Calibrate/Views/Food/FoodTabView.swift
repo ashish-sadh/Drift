@@ -112,14 +112,15 @@ struct FoodTabView: View {
                         Text("\(Int(entry.totalCalories))cal \(Int(entry.totalProtein))P \(Int(entry.totalFat))F \(Int(entry.totalCarbs))C")
                             .font(.caption.monospacedDigit())
                             .foregroundStyle(.secondary)
-                    }
-                    .swipeActions {
                         if let id = entry.id {
-                            Button(role: .destructive) {
+                            Button {
                                 viewModel.deleteEntry(id: id)
                             } label: {
-                                Label("Delete", systemImage: "trash")
+                                Image(systemName: "xmark.circle")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
                             }
+                            .buttonStyle(.plain)
                         }
                     }
                 }

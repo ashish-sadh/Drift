@@ -4,6 +4,7 @@ struct FoodSearchView: View {
     @Bindable var viewModel: FoodLogViewModel
     @Environment(\.dismiss) private var dismiss
     @State private var selectedFood: Food?
+    @State private var showingLogSheet = false
     @State private var servings: Double = 1.0
     @State private var selectedMealType: MealType = .lunch
 
@@ -37,6 +38,7 @@ struct FoodSearchView: View {
                     ForEach(viewModel.searchResults) { food in
                         Button {
                             selectedFood = food
+                            showingLogSheet = true
                         } label: {
                             HStack {
                                 VStack(alignment: .leading) {
@@ -63,8 +65,10 @@ struct FoodSearchView: View {
                     Button("Cancel") { dismiss() }
                 }
             }
-            .sheet(item: $selectedFood) { food in
-                logFoodSheet(food)
+            .sheet(isPresented: $showingLogSheet) {
+                if let food = selectedFood {
+                    logFoodSheet(food)
+                }
             }
         }
     }
@@ -112,12 +116,12 @@ struct FoodSearchView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { selectedFood = nil }
+                    Button("Cancel") { showingLogSheet = false }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Log") {
                         viewModel.logFood(food, servings: servings, mealType: selectedMealType)
-                        selectedFood = nil
+                        showingLogSheet = false
                         dismiss()
                     }
                 }
