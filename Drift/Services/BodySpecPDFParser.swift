@@ -96,28 +96,51 @@ enum BodySpecPDFParser {
             let datePattern = #"^\d{1,2}/\d{1,2}/\d{4}$"#
             for token in tokens {
                 if token.range(of: datePattern, options: .regularExpression) != nil {
-                    if let d = convertDate(token), !d.contains("1991") { // skip birth date
+                    if let d = convertDate(token), !d.contains("1991") {
                         if !scanDates.contains(d) { scanDates.append(d) }
                     }
                 }
             }
 
-            // Extract total mass values (>50 lbs, not a date)
-            let massNums = tokens.filter { $0.range(of: datePattern, options: .regularExpression) == nil && !$0.hasSuffix("%") }
-                .compactMap { Double($0) }.filter { $0 > 50 && $0 < 500 }
-            totalMasses.append(contentsOf: massNums)
+            // All non-date, non-pct numbers from this line
+            let allNums = tokens.filter { $0.range(of: datePattern, options: .regularExpression) == nil && !$0.hasSuffix("%") }
+                .compactMap { Double($0) }.filter { $0 > 0 && $0 < 500 }
 
-            // Extract pct + accompanying values
             let pcts = tokens.filter { $0.hasSuffix("%") }.compactMap { Double($0.replacingOccurrences(of: "%", with: "")) }
-            let smallNums = tokens.filter { $0.range(of: datePattern, options: .regularExpression) == nil && !$0.hasSuffix("%") }
-                .compactMap { Double($0) }.filter { $0 > 0 && $0 <= 50 }
 
-            // Percentage line with small values = scan data
-            for pct in pcts {
-                if smallNums.count >= 3 {
-                    pctAndValues.append((pct, Array(smallNums.prefix(3))))
+            // Lines with dates also contain total mass values (>100 typically)
+            // e.g., "3/6/2026 1/25/2026 ... 120.2 122.3 129.2 130.3 21.0% 25.6 91.5 5.1"
+            let hasDates = tokens.contains { $0.range(of: datePattern, options: .regularExpression) != nil }
+
+            if hasDates && !allNums.isEmpty {
+                // On the dates line, first batch of numbers before any % are total masses
+                // e.g., "dates... 120.2 122.3 129.2 130.3 21.0% 25.6 91.5 5.1"
+                // Find position of first % token to split
+                let pctPosition = tokens.firstIndex { $0.hasSuffix("%") }
+                let numPositions = tokens.enumerated().compactMap { (idx, t) -> (Int, Double)? in
+                    guard t.range(of: datePattern, options: .regularExpression) == nil, !t.hasSuffix("%"),
+                          let v = Double(t), v > 0, v < 500 else { return nil }
+                    return (idx, v)
+                }
+
+                if let pctPos = pctPosition {
+                    // Numbers before the first % are total masses
+                    let masses = numPositions.filter { $0.0 < pctPos }.map(\.1)
+                    totalMasses.append(contentsOf: masses)
+                    // Numbers after the first % are scan data
+                    let scanNums = numPositions.filter { $0.0 > pctPos }.map(\.1)
+                    for pct in pcts {
+                        pctAndValues.append((pct, scanNums))
+                    }
                 } else {
-                    pctAndValues.append((pct, smallNums))
+                    // No %, all nums are total masses
+                    totalMasses.append(contentsOf: allNums)
+                }
+            } else if !pcts.isEmpty {
+                // Pure scan data line: "16.4% 19.8 95.5 4.9" or "25.0% 32.3 91.8 5.1"
+                // ALL numbers (regardless of size) are: fatMass, leanMass, bmc
+                for pct in pcts {
+                    pctAndValues.append((pct, allNums))
                 }
             }
         }
