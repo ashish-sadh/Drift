@@ -1,11 +1,10 @@
 import Foundation
 import PDFKit
 
-/// Parses BodySpec DEXA scan PDF reports.
+/// Parses BodySpec DEXA scan PDF reports using PDFKit text extraction.
 ///
-/// The pdftotext output has a known structure where the summary table
-/// lists dates, then body fat %, then total mass, fat, lean, BMC
-/// each as separate groups of lines (one value per scan per line).
+/// PDFKit extracts text differently from pdftotext - data often appears on
+/// single lines with values concatenated. This parser handles that format.
 enum BodySpecPDFParser {
 
     struct ParsedScan: Sendable {
@@ -36,266 +35,264 @@ enum BodySpecPDFParser {
         guard url.startAccessingSecurityScopedResource() else { throw ParseError.accessDenied }
         defer { url.stopAccessingSecurityScopedResource() }
 
-        guard let document = PDFDocument(url: url) else { throw ParseError.invalidPDF }
+        guard let doc = PDFDocument(url: url) else { throw ParseError.invalidPDF }
 
         var fullText = ""
-        for i in 0..<document.pageCount {
-            if let page = document.page(at: i), let text = page.string {
+        for i in 0..<doc.pageCount {
+            if let page = doc.page(at: i), let text = page.string {
                 fullText += text + "\n"
             }
         }
 
-        Log.bodyComp.info("PDF text: \(fullText.count) chars, \(document.pageCount) pages")
-        return parseFromText(fullText)
+        Log.bodyComp.info("PDF: \(fullText.count) chars, \(doc.pageCount) pages")
+
+        let scans = parseText(fullText)
+        if scans.isEmpty {
+            throw ParseError.noDataFound
+        }
+        return scans
     }
 
-    /// Main parse logic. Works on the raw text from pdftotext.
-    static func parseFromText(_ text: String) -> [ParsedScan] {
+    static func parseText(_ text: String) -> [ParsedScan] {
         let lines = text.components(separatedBy: .newlines).map { $0.trimmingCharacters(in: .whitespaces) }
 
-        // 1. Find all dates in the summary section (M/D/YYYY format)
-        var dates: [String] = [] // YYYY-MM-DD format
+        // Step 1: Find scan summary data.
+        // PDFKit gives us lines like:
+        //   "16.4% 19.8 95.5 4.9"                          (first scan: bf%, fat, lean, bmc)
+        //   "3/6/2026 1/25/2026 ... 120.2 122.3 ... 21.0% 25.6 91.5 5.1"  (dates + totals + 2nd scan)
+        //   "25.0% 32.3 91.8 5.1"                          (3rd scan)
+        //   "25.2% 32.8 92.4 5.1"                          (4th scan)
+
+        struct ScanData {
+            var date: String = ""
+            var bodyFatPct: Double?
+            var totalMassLbs: Double?
+            var fatMassLbs: Double?
+            var leanMassLbs: Double?
+            var bmcLbs: Double?
+        }
+
+        var scanDatas: [ScanData] = []
+        var scanDates: [String] = []
+        var totalMasses: [Double] = []
+        var pctAndValues: [(pct: Double, vals: [Double])] = []
+
+        // Find SUMMARY RESULTS section
         var inSummary = false
-
         for line in lines {
             if line.contains("SUMMARY RESULTS") { inSummary = true; continue }
-            if line.contains("Body Fat Percentile") || line.contains("REGIONAL") { inSummary = false }
-            if inSummary, let d = parseDate(line) {
-                dates.append(d)
-            }
-        }
-
-        guard !dates.isEmpty else {
-            Log.bodyComp.warning("No dates found in summary section")
-            return []
-        }
-
-        let scanCount = dates.count
-        Log.bodyComp.info("Found \(scanCount) scan dates: \(dates)")
-
-        // 2. Extract the numeric columns from summary.
-        // After dates, the PDF has groups of numbers:
-        //   body fat %: "16.4%", "21.0%", "25.0%", "25.2%"
-        //   total mass: 120.2, 122.3, 129.2, 130.3
-        //   fat tissue: 19.8, 25.6, 32.3, 32.8
-        //   lean tissue: 95.5, 91.5, 91.8, 92.4
-        //   BMC: 4.9, 5.1, 5.1, 5.1
-        //
-        // These appear as individual lines in the text.
-
-        var summaryNumbers: [Double] = []
-        var bodyFatPcts: [Double] = []
-        inSummary = false
-        var pastDates = false
-
-        for line in lines {
-            if line.contains("SUMMARY RESULTS") { inSummary = true; continue }
-            if line.contains("Body Fat Percentile") || line.contains("REGIONAL") { inSummary = false }
+            if line.contains("Percentile Chart") || line.contains("REGIONAL") { inSummary = false }
             guard inSummary else { continue }
 
-            // Skip header labels
-            if line.contains("Measured Date") || line.contains("Total Body Fat")
-                || line.contains("Total Mass") || line.contains("Fat Tissue")
-                || line.contains("Lean Tissue") || line.contains("Bone Mineral")
-                || line.contains("Content") || line.contains("Quantification")
-                || line.contains("This table") || line.contains("baseline") { continue }
+            // Skip headers/descriptions
+            if line.contains("Measured Date") || line.contains("Total Body Fat") || line.contains("Total Mass")
+                || line.contains("Fat Tissue") || line.contains("Lean Tissue") || line.contains("Bone Mineral")
+                || line.contains("Content") || line.contains("This table") || line.contains("baseline")
+                || line.contains("Quantification") || line.isEmpty { continue }
 
-            // Check for percentage values
-            if line.hasSuffix("%") {
-                let cleaned = line.replacingOccurrences(of: "%", with: "").trimmingCharacters(in: .whitespaces)
-                if let v = Double(cleaned) {
-                    bodyFatPcts.append(v)
-                    continue
+            let tokens = tokenize(line)
+
+            // Extract dates from this line
+            let datePattern = #"^\d{1,2}/\d{1,2}/\d{4}$"#
+            for token in tokens {
+                if token.range(of: datePattern, options: .regularExpression) != nil {
+                    if let d = convertDate(token), !d.contains("1991") { // skip birth date
+                        if !scanDates.contains(d) { scanDates.append(d) }
+                    }
                 }
             }
 
-            // Skip date lines (already captured)
-            if parseDate(line) != nil { pastDates = true; continue }
+            // Extract total mass values (>50 lbs, not a date)
+            let massNums = tokens.filter { $0.range(of: datePattern, options: .regularExpression) == nil && !$0.hasSuffix("%") }
+                .compactMap { Double($0) }.filter { $0 > 50 && $0 < 500 }
+            totalMasses.append(contentsOf: massNums)
 
-            // Numeric values
-            let cleaned = line.replacingOccurrences(of: ",", with: "").trimmingCharacters(in: .whitespaces)
-            if let v = Double(cleaned), v > 0, v < 500 {
-                summaryNumbers.append(v)
+            // Extract pct + accompanying values
+            let pcts = tokens.filter { $0.hasSuffix("%") }.compactMap { Double($0.replacingOccurrences(of: "%", with: "")) }
+            let smallNums = tokens.filter { $0.range(of: datePattern, options: .regularExpression) == nil && !$0.hasSuffix("%") }
+                .compactMap { Double($0) }.filter { $0 > 0 && $0 <= 50 }
+
+            // Percentage line with small values = scan data
+            for pct in pcts {
+                if smallNums.count >= 3 {
+                    pctAndValues.append((pct, Array(smallNums.prefix(3))))
+                } else {
+                    pctAndValues.append((pct, smallNums))
+                }
             }
         }
 
-        Log.bodyComp.info("Summary: \(bodyFatPcts.count) fat%, \(summaryNumbers.count) mass values")
+        let scanCount = scanDates.count
+        guard scanCount > 0 else {
+            Log.bodyComp.warning("No scan dates found")
+            return []
+        }
 
-        // Build scans from extracted data
-        // summaryNumbers should be: [totalMass x N, fatMass x N, leanMass x N, BMC x N]
-        var scans: [ParsedScan] = []
+        Log.bodyComp.info("Dates: \(scanDates), totalMasses: \(totalMasses), pctAndValues: \(pctAndValues.count)")
 
+        // Build scan data
         for i in 0..<scanCount {
-            let totalMass = (i < summaryNumbers.count) ? summaryNumbers[i] : nil
-            let fatMass = (scanCount + i < summaryNumbers.count) ? summaryNumbers[scanCount + i] : nil
-            let leanMass = (scanCount * 2 + i < summaryNumbers.count) ? summaryNumbers[scanCount * 2 + i] : nil
-            let bmc = (scanCount * 3 + i < summaryNumbers.count) ? summaryNumbers[scanCount * 3 + i] : nil
+            var sd = ScanData(date: scanDates[i])
+            sd.totalMassLbs = i < totalMasses.count ? totalMasses[i] : nil
+            if i < pctAndValues.count {
+                sd.bodyFatPct = pctAndValues[i].pct
+                let v = pctAndValues[i].vals
+                sd.fatMassLbs = v.count > 0 ? v[0] : nil
+                sd.leanMassLbs = v.count > 1 ? v[1] : nil
+                sd.bmcLbs = v.count > 2 ? v[2] : nil
+            }
+            scanDatas.append(sd)
+        }
 
+        // Step 2: Regional + muscle balance + supplemental
+        let regions = parseRegionalAssessment(lines: lines)
+        let muscleBalance = parseMuscleBalance(lines: lines)
+        let supplemental = parseSupplemental(lines: lines, scanCount: scanCount)
+
+        var scans: [ParsedScan] = []
+        for (i, sd) in scanDatas.enumerated() {
             scans.append(ParsedScan(
-                scanDate: dates[i],
-                bodyFatPct: i < bodyFatPcts.count ? bodyFatPcts[i] : nil,
-                totalMassLbs: totalMass,
-                fatMassLbs: fatMass,
-                leanMassLbs: leanMass,
-                bmcLbs: bmc,
-                rmrCalories: nil, vatMassLbs: nil, vatVolumeIn3: nil,
-                agRatio: nil, boneDensityTotal: nil,
-                regions: i == 0 ? parseRegions(lines: lines) : []
+                scanDate: sd.date,
+                bodyFatPct: sd.bodyFatPct,
+                totalMassLbs: sd.totalMassLbs,
+                fatMassLbs: sd.fatMassLbs,
+                leanMassLbs: sd.leanMassLbs,
+                bmcLbs: sd.bmcLbs,
+                rmrCalories: i < supplemental.rmr.count ? supplemental.rmr[i] : nil,
+                vatMassLbs: i < supplemental.vatMass.count ? supplemental.vatMass[i] : nil,
+                vatVolumeIn3: i < supplemental.vatVolume.count ? supplemental.vatVolume[i] : nil,
+                agRatio: i < supplemental.agRatio.count ? supplemental.agRatio[i] : nil,
+                boneDensityTotal: nil,
+                regions: i == 0 ? regions + muscleBalance : []
             ))
         }
 
-        // Parse supplemental data for all scans
-        let rmrs = parseValues(lines: lines, after: "Resting Metabolic Rate", suffix: "cal/day", count: scanCount)
-        let agRatios = parseColumnValues(lines: lines, section: "A/G Ratio", count: scanCount)
-        let vatMasses = parseColumnValues(lines: lines, section: "Mass (lbs)", count: scanCount)
-        let vatVolumes = parseColumnValues(lines: lines, section: "Volume (in3)", count: scanCount)
-
-        // Update scans with supplemental
-        for i in 0..<scans.count {
-            var s = scans[i]
-            s = ParsedScan(
-                scanDate: s.scanDate, bodyFatPct: s.bodyFatPct,
-                totalMassLbs: s.totalMassLbs, fatMassLbs: s.fatMassLbs,
-                leanMassLbs: s.leanMassLbs, bmcLbs: s.bmcLbs,
-                rmrCalories: i < rmrs.count ? rmrs[i] : nil,
-                vatMassLbs: i < vatMasses.count ? vatMasses[i] : nil,
-                vatVolumeIn3: i < vatVolumes.count ? vatVolumes[i] : nil,
-                agRatio: i < agRatios.count ? agRatios[i] : nil,
-                boneDensityTotal: nil, regions: scans[i].regions
-            )
-            scans[i] = s
-        }
-
+        Log.bodyComp.info("Parsed \(scans.count) scans: \(scans.map { "\($0.scanDate): bf=\($0.bodyFatPct ?? -1), fat=\($0.fatMassLbs ?? -1), lean=\($0.leanMassLbs ?? -1)" })")
         return scans
     }
 
     // MARK: - Regional Assessment
 
-    private static func parseRegions(lines: [String]) -> [ParsedRegion] {
+    private static func parseRegionalAssessment(lines: [String]) -> [ParsedRegion] {
         var regions: [ParsedRegion] = []
+        // PDFKit format: "Arms 13.4% 16.5 2.2 13.6 0.7"
+        let regionNames = ["Arms", "Legs", "Trunk", "Android", "Gynoid", "Total"]
 
-        // Regional Assessment table: region name followed by values
-        let mainRegions = ["Arms", "Legs", "Trunk", "Android", "Gynoid"]
-        var inRegional = false
-
-        for (i, line) in lines.enumerated() {
-            if line.contains("REGIONAL ASSESSMENT") { inRegional = true; continue }
-            if line.contains("SUPPLEMENTAL") || line.contains("REGIONAL FAT TISSUE") { inRegional = false }
-            guard inRegional else { continue }
-
-            for name in mainRegions {
-                if line == name {
-                    let values = grabNumbers(from: lines, startingAt: i + 1, count: 5)
-                    if values.count >= 5 {
+        for line in lines {
+            for name in regionNames {
+                if line.hasPrefix(name) && line.contains("%") {
+                    let tokens = tokenize(line.dropFirst(name.count).description)
+                    let pct = tokens.first { $0.hasSuffix("%") }.flatMap { Double($0.replacingOccurrences(of: "%", with: "")) }
+                    let nums = tokens.filter { !$0.hasSuffix("%") }.compactMap { Double($0) }
+                    if nums.count >= 4 {
                         regions.append(ParsedRegion(
-                            name: name.lowercased(), fatPct: values[0],
-                            totalMassLbs: values[1], fatMassLbs: values[2],
-                            leanMassLbs: values[3], bmcLbs: values[4]
-                        ))
-                    }
-                }
-            }
-            // Also capture "Total" in regional section
-            if line == "Total" && inRegional {
-                let values = grabNumbers(from: lines, startingAt: i + 1, count: 5)
-                if values.count >= 5 {
-                    regions.append(ParsedRegion(
-                        name: "total", fatPct: values[0],
-                        totalMassLbs: values[1], fatMassLbs: values[2],
-                        leanMassLbs: values[3], bmcLbs: values[4]
-                    ))
-                }
-            }
-        }
-
-        // Muscle Balance: R/L arms and legs
-        let limbPairs = [("Right Arm", "r_arm"), ("Left Arm", "l_arm"), ("Right Leg", "r_leg"), ("Left Leg", "l_leg")]
-        var inBalance = false
-
-        for (i, line) in lines.enumerated() {
-            if line.contains("MUSCLE BALANCE") { inBalance = true; continue }
-            if line.contains("REGIONAL FAT TISSUE") || line.contains("REGIONAL LEAN") { inBalance = false }
-            guard inBalance else { continue }
-
-            for (pdfName, dbName) in limbPairs {
-                if line == pdfName {
-                    let values = grabNumbers(from: lines, startingAt: i + 1, count: 5)
-                    if values.count >= 5 {
-                        regions.append(ParsedRegion(
-                            name: dbName, fatPct: values[0],
-                            totalMassLbs: values[1], fatMassLbs: values[2],
-                            leanMassLbs: values[3], bmcLbs: values[4]
+                            name: name.lowercased(), fatPct: pct,
+                            totalMassLbs: nums[0], fatMassLbs: nums[1],
+                            leanMassLbs: nums[2], bmcLbs: nums[3]
                         ))
                     }
                 }
             }
         }
-
-        Log.bodyComp.info("Parsed \(regions.count) regions")
         return regions
+    }
+
+    // MARK: - Muscle Balance
+
+    private static func parseMuscleBalance(lines: [String]) -> [ParsedRegion] {
+        var regions: [ParsedRegion] = []
+        // PDFKit format: "Right Arm 12.6 8.5 1.1 7.1 0.4"
+        // Values are: fatPct, totalMass, fatMass, leanMass, BMC (all bare numbers)
+        let limbPairs = [("Right Arm", "r_arm"), ("Left Arm", "l_arm"), ("Right Leg", "r_leg"), ("Left Leg", "l_leg")]
+
+        for line in lines {
+            for (pdfName, dbName) in limbPairs {
+                if line.hasPrefix(pdfName) {
+                    let rest = line.dropFirst(pdfName.count).description
+                    let nums = tokenize(rest).compactMap { Double($0.replacingOccurrences(of: "%", with: "")) }
+                    if nums.count >= 5 {
+                        regions.append(ParsedRegion(
+                            name: dbName, fatPct: nums[0],
+                            totalMassLbs: nums[1], fatMassLbs: nums[2],
+                            leanMassLbs: nums[3], bmcLbs: nums[4]
+                        ))
+                    }
+                }
+            }
+        }
+        return regions
+    }
+
+    // MARK: - Supplemental
+
+    private struct Supplemental {
+        var rmr: [Double] = []
+        var vatMass: [Double] = []
+        var vatVolume: [Double] = []
+        var agRatio: [Double] = []
+    }
+
+    private static func parseSupplemental(lines: [String], scanCount: Int) -> Supplemental {
+        var result = Supplemental()
+
+        for line in lines {
+            // RMR: "1,311 cal/day 16.2% 18.3% 0.88"
+            if line.contains("cal/day") {
+                let parts = line.components(separatedBy: "cal/day")
+                for part in parts {
+                    let cleaned = part.replacingOccurrences(of: ",", with: "").trimmingCharacters(in: .whitespaces)
+                    // Extract the number right before "cal/day"
+                    let tokens = tokenize(cleaned)
+                    if let last = tokens.last, let v = Double(last), v > 500, v < 5000 {
+                        result.rmr.append(v)
+                    }
+                }
+                // Also extract A/G ratios from the same line pattern
+                let allTokens = tokenize(line)
+                for token in allTokens {
+                    let cleaned = token.replacingOccurrences(of: "%", with: "")
+                    if let v = Double(cleaned), v > 0.3, v < 2.5, !token.hasSuffix("%"), !token.contains("cal") {
+                        result.agRatio.append(v)
+                    }
+                }
+            }
+
+            // VAT Mass: "Mass (lbs) 0.56"
+            if line.hasPrefix("Mass (lbs)") {
+                let nums = tokenize(line).compactMap { Double($0) }.filter { $0 < 10 }
+                result.vatMass.append(contentsOf: nums)
+            }
+
+            // VAT Volume: "Volume (in3) 16.33"
+            if line.hasPrefix("Volume (in3)") || line.contains("Volume (in3)") {
+                let nums = tokenize(line).compactMap { Double($0) }.filter { $0 > 5 }
+                result.vatVolume.append(contentsOf: nums)
+            }
+        }
+
+        return result
     }
 
     // MARK: - Helpers
 
-    private static func parseDate(_ line: String) -> String? {
-        let pattern = #"^(\d{1,2})/(\d{1,2})/(\d{4})$"#
-        guard let regex = try? NSRegularExpression(pattern: pattern),
-              let match = regex.firstMatch(in: line, range: NSRange(line.startIndex..., in: line)) else { return nil }
-        let m = String(line[Range(match.range(at: 1), in: line)!])
-        let d = String(line[Range(match.range(at: 2), in: line)!])
-        let y = String(line[Range(match.range(at: 3), in: line)!])
-        return String(format: "%@-%02d-%02d", y, Int(m) ?? 0, Int(d) ?? 0)
+    private static func tokenize(_ str: String) -> [String] {
+        str.components(separatedBy: .whitespaces).filter { !$0.isEmpty }
     }
 
-    private static func grabNumbers(from lines: [String], startingAt start: Int, count: Int) -> [Double] {
-        var nums: [Double] = []
-        var idx = start
-        while nums.count < count && idx < lines.count {
-            let cleaned = lines[idx].replacingOccurrences(of: "%", with: "")
-                .replacingOccurrences(of: ",", with: "").trimmingCharacters(in: .whitespaces)
-            if let v = Double(cleaned) { nums.append(v) }
-            idx += 1
-        }
-        return nums
-    }
-
-    private static func parseValues(lines: [String], after keyword: String, suffix: String, count: Int) -> [Double] {
-        var values: [Double] = []
-        for line in lines {
-            if line.contains(suffix) {
-                let cleaned = line.replacingOccurrences(of: ",", with: "")
-                    .replacingOccurrences(of: suffix, with: "").trimmingCharacters(in: .whitespaces)
-                if let v = Double(cleaned) { values.append(v) }
-            }
-        }
-        return values
-    }
-
-    private static func parseColumnValues(lines: [String], section: String, count: Int) -> [Double] {
-        var values: [Double] = []
-        var found = false
-        for line in lines {
-            if line.contains(section) { found = true; continue }
-            if found {
-                let cleaned = line.replacingOccurrences(of: ",", with: "").trimmingCharacters(in: .whitespaces)
-                if let v = Double(cleaned) {
-                    values.append(v)
-                    if values.count >= count { break }
-                } else if !cleaned.isEmpty {
-                    break // Hit non-numeric line
-                }
-            }
-        }
-        return values
+    private static func convertDate(_ dateStr: String) -> String? {
+        let parts = dateStr.split(separator: "/")
+        guard parts.count == 3,
+              let m = Int(parts[0]), let d = Int(parts[1]), let y = Int(parts[2]) else { return nil }
+        return String(format: "%04d-%02d-%02d", y, m, d)
     }
 
     enum ParseError: LocalizedError {
         case accessDenied, invalidPDF, noDataFound
         var errorDescription: String? {
             switch self {
-            case .accessDenied: "Could not access the PDF file"
+            case .accessDenied: "Could not access PDF"
             case .invalidPDF: "Not a valid PDF"
-            case .noDataFound: "No BodySpec data found"
+            case .noDataFound: "No BodySpec scan data found in PDF"
             }
         }
     }
