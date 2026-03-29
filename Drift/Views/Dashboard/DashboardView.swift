@@ -8,17 +8,14 @@ struct DashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
-                    // Calorie Balance
-                    calorieBalanceCard
-
-                    // Weight + Deficit
+                    // Weight + Deficit (always primary)
                     weightDeficitCard
 
                     // Goal progress
                     goalCard
 
-                    // Macros
-                    macroCard
+                    // Energy Balance (prominent if food logged, muted if not)
+                    calorieBalanceCard
 
                     // Health row
                     healthRow
@@ -45,40 +42,59 @@ struct DashboardView: View {
         }
     }
 
-    // MARK: - Calorie Balance
+    // MARK: - Calorie Balance + Macros (combined)
+
+    private var hasLoggedFood: Bool { viewModel.todayNutrition.calories > 0 }
 
     private var calorieBalanceCard: some View {
-        VStack(spacing: 14) {
-            HStack {
-                Text("Energy Balance")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                Spacer()
-                Text("Today")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-            }
+        VStack(spacing: 10) {
+            if hasLoggedFood {
+                // Active state: food logged
+                HStack {
+                    Text("Energy Balance")
+                        .font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+                    Spacer()
+                    Text("Today").font(.caption).foregroundStyle(.tertiary)
+                }
 
-            HStack(spacing: 0) {
-                calorieColumn(value: Int(viewModel.todayNutrition.calories), label: "Eaten", color: Theme.calorieBlue)
-                Spacer()
-                Text("\u{2212}")
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
-                Spacer()
-                calorieColumn(value: Int(viewModel.caloriesBurned), label: "Burned", color: Theme.stepsOrange)
-                Spacer()
-                Text("=")
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
-                Spacer()
-                let balance = Int(viewModel.calorieBalance)
-                calorieColumn(
-                    value: abs(balance),
-                    label: balance <= 0 ? "Deficit" : "Surplus",
-                    color: balance <= 0 ? Theme.deficit : Theme.surplus,
-                    prefix: balance < 0 ? "-" : "+"
-                )
+                HStack(spacing: 0) {
+                    calorieColumn(value: Int(viewModel.todayNutrition.calories), label: "Eaten", color: Theme.calorieBlue)
+                    Spacer()
+                    Text("\u{2212}").font(.title3).foregroundStyle(.secondary)
+                    Spacer()
+                    calorieColumn(value: Int(viewModel.caloriesBurned), label: "Burned", color: Theme.stepsOrange)
+                    Spacer()
+                    Text("=").font(.title3).foregroundStyle(.secondary)
+                    Spacer()
+                    let balance = Int(viewModel.calorieBalance)
+                    calorieColumn(
+                        value: abs(balance),
+                        label: balance <= 0 ? "Deficit" : "Surplus",
+                        color: balance <= 0 ? Theme.deficit : Theme.surplus,
+                        prefix: balance < 0 ? "-" : "+"
+                    )
+                }
+
+                // Inline macros
+                HStack(spacing: 6) {
+                    macroChip("P", value: viewModel.todayNutrition.proteinG, color: Theme.proteinRed)
+                    macroChip("C", value: viewModel.todayNutrition.carbsG, color: Theme.carbsGreen)
+                    macroChip("F", value: viewModel.todayNutrition.fatG, color: Theme.fatYellow)
+                    macroChip("Fiber", value: viewModel.todayNutrition.fiberG, color: Theme.fiberBrown)
+                }
+            } else {
+                // Muted state: no food logged
+                HStack(spacing: 10) {
+                    Image(systemName: "fork.knife")
+                        .foregroundStyle(.tertiary)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("No food logged today")
+                            .font(.subheadline).foregroundStyle(.tertiary)
+                        Text("Log meals to see energy balance and macros")
+                            .font(.caption2).foregroundStyle(.quaternary)
+                    }
+                    Spacer()
+                }
             }
         }
         .card()
@@ -91,11 +107,20 @@ struct DashboardView: View {
                 .foregroundStyle(color)
                 .minimumScaleFactor(0.7)
                 .lineLimit(1)
-            Text(label)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+            Text(label).font(.caption2).foregroundStyle(.secondary)
         }
         .frame(minWidth: 50)
+    }
+
+    private func macroChip(_ label: String, value: Double, color: Color) -> some View {
+        HStack(spacing: 2) {
+            RoundedRectangle(cornerRadius: 1).fill(color).frame(width: 2, height: 10)
+            Text("\(Int(value))g \(label)")
+                .font(.caption2.weight(.medium).monospacedDigit())
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 6).padding(.vertical, 3)
+        .background(color.opacity(0.08), in: RoundedRectangle(cornerRadius: 5))
     }
 
     // MARK: - Weight + Deficit
@@ -148,24 +173,7 @@ struct DashboardView: View {
 
     // MARK: - Macros
 
-    private var macroCard: some View {
-        VStack(spacing: 10) {
-            HStack {
-                Text("Macros")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.secondary)
-                Spacer()
-            }
-
-            HStack(spacing: 10) {
-                macroPill("P", value: viewModel.todayNutrition.proteinG, color: Theme.proteinRed)
-                macroPill("C", value: viewModel.todayNutrition.carbsG, color: Theme.carbsGreen)
-                macroPill("F", value: viewModel.todayNutrition.fatG, color: Theme.fatYellow)
-                macroPill("Fiber", value: viewModel.todayNutrition.fiberG, color: Theme.fiberBrown)
-            }
-        }
-        .card()
-    }
+    // macroCard removed - macros now inline in calorieBalanceCard
 
     private func macroPill(_ label: String, value: Double, color: Color) -> some View {
         VStack(spacing: 3) {
