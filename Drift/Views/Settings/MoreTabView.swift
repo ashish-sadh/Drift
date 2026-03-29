@@ -39,7 +39,7 @@ struct MoreTabView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 24)
             }
-            .background(Theme.background)
+            .scrollContentBackground(.hidden)
             .navigationTitle("More")
             .toolbarColorScheme(.dark, for: .navigationBar)
         }
@@ -132,7 +132,7 @@ struct SettingsView: View {
             .padding(.horizontal, 16)
             .padding(.top, 8)
         }
-        .background(Theme.background)
+        .scrollContentBackground(.hidden)
         .navigationTitle("Settings")
         .toolbarColorScheme(.dark, for: .navigationBar)
     }

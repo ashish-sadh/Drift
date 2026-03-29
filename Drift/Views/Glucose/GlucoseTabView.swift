@@ -93,7 +93,8 @@ struct GlucoseTabView: View {
             }
             .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 24)
         }
-        .background(Theme.background)
+        .scrollContentBackground(.hidden)
+        .background(Theme.background.ignoresSafeArea())
         .navigationTitle("Glucose")
         .toolbarColorScheme(.dark, for: .navigationBar)
         .fileImporter(isPresented: $showingImport, allowedContentTypes: [.commaSeparatedText, .plainText]) { handleImport($0) }

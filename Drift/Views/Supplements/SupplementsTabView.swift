@@ -79,7 +79,8 @@ struct SupplementsTabView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 24)
             }
-            .background(Theme.background)
+            .scrollContentBackground(.hidden)
+            .background(Theme.background.ignoresSafeArea())
             .navigationTitle("Supplements")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarColorScheme(.dark, for: .navigationBar)

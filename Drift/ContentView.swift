@@ -62,6 +62,7 @@ struct ContentView: View {
                 }
         }
         .tint(Theme.accent)
+        .background(Theme.background.ignoresSafeArea())
     }
 }
 

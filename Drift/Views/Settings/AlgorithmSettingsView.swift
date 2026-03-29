@@ -112,7 +112,8 @@ struct AlgorithmSettingsView: View {
             .padding(.top, 8)
             .padding(.bottom, 24)
         }
-        .background(Theme.background)
+        .scrollContentBackground(.hidden)
+        .background(Theme.background.ignoresSafeArea())
         .navigationTitle("Algorithm")
         .toolbarColorScheme(.dark, for: .navigationBar)
     }

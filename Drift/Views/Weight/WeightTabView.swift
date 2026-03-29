@@ -42,7 +42,8 @@ struct WeightTabView: View {
                 }
             }
         }
-        .background(Theme.background)
+        .scrollContentBackground(.hidden)
+        .background(Theme.background.ignoresSafeArea())
         .navigationTitle("Weight")
             .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)

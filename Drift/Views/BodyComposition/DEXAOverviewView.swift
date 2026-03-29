@@ -70,7 +70,8 @@ struct DEXAOverviewView: View {
             }
             .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 24)
         }
-        .background(Theme.background)
+        .scrollContentBackground(.hidden)
+        .background(Theme.background.ignoresSafeArea())
         .navigationTitle("Body Composition")
         .toolbarColorScheme(.dark, for: .navigationBar)
         .fileImporter(isPresented: $showingImportPDF, allowedContentTypes: [.pdf]) { handlePDFImport($0) }
