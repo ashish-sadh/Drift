@@ -295,8 +295,12 @@ struct SleepRecoveryView: View {
         let hk = HealthKitService.shared
         let today = Date()
 
+        // Re-request authorization (in case new types like HRV/RHR were added after initial grant)
+        try? await hk.requestAuthorization()
+
         do {
             let sleepDetail = try await hk.fetchSleepDetail(for: today)
+            Log.healthKit.info("Sleep detail: total=\(String(format: "%.1f", sleepDetail.totalHours))h rem=\(String(format: "%.1f", sleepDetail.remHours)) deep=\(String(format: "%.1f", sleepDetail.deepHours)) light=\(String(format: "%.1f", sleepDetail.lightHours)) awake=\(String(format: "%.1f", sleepDetail.awakeHours))")
             let hrv = try await hk.fetchHRV(for: today)
             let rhr = try await hk.fetchRestingHeartRate(for: today)
             let resp = try await hk.fetchRespiratoryRate(for: today)
@@ -320,9 +324,18 @@ struct SleepRecoveryView: View {
                 sleepDetail: sleepDetail
             )
 
-            sleepHistory = try await hk.fetchSleepHistory(days: 30)
+            // Load history (don't let this fail the whole page)
+            sleepHistory = (try? await hk.fetchSleepHistory(days: 30)) ?? []
         } catch {
             Log.healthKit.error("Sleep/Recovery load failed: \(error.localizedDescription)")
+            // Still try to show something - create a minimal recovery with zeros
+            recovery = RecoveryEstimator.DailyRecovery(
+                date: today, recoveryScore: 0, recoveryLevel: .red,
+                sleepScore: 0, strainScore: 0,
+                sleepHours: 0, sleepNeeded: 7.5,
+                hrvMs: 0, restingHR: 0, respiratoryRate: 0,
+                sleepDetail: nil
+            )
         }
 
         isLoading = false
