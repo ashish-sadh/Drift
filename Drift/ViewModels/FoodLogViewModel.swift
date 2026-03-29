@@ -127,4 +127,26 @@ final class FoodLogViewModel {
             Log.foodLog.error("Failed to delete entry: \(error.localizedDescription)")
         }
     }
+
+    func goToDate(_ date: Date) {
+        selectedDate = date
+        loadTodayMeals()
+    }
+
+    func goToPreviousDay() { goToDate(Calendar.current.date(byAdding: .day, value: -1, to: selectedDate)!) }
+    func goToNextDay() { goToDate(Calendar.current.date(byAdding: .day, value: 1, to: selectedDate)!) }
+    var isToday: Bool { Calendar.current.isDateInToday(selectedDate) }
+
+    /// Days with food logged in last N days (for consistency heatmap).
+    func loggedDays(last days: Int = 30) -> [Date: Double] {
+        let cal = Calendar.current
+        var result: [Date: Double] = [:]
+        for offset in 0..<days {
+            let date = cal.date(byAdding: .day, value: -offset, to: Date())!
+            let dateStr = DateFormatters.dateOnly.string(from: date)
+            let nutrition = try? database.fetchDailyNutrition(for: dateStr)
+            result[cal.startOfDay(for: date)] = nutrition?.calories ?? 0
+        }
+        return result
+    }
 }
