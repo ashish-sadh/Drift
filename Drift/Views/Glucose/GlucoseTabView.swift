@@ -70,7 +70,7 @@ struct GlucoseTabView: View {
                         Text("No Glucose Data").font(.headline)
                         Text(dataSource == .appleHealth
                              ? "No glucose data in Apple Health for this period."
-                             : "Import a Lingo CSV to see glucose data.")
+                             : "Import a CSV file to see glucose data.")
                             .font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
                     }
                     .padding(.top, 40)
@@ -83,7 +83,7 @@ struct GlucoseTabView: View {
                 }
 
                 Button { showingImport = true } label: {
-                    Label("Import Lingo CSV", systemImage: "doc.badge.plus")
+                    Label("Import CSV", systemImage: "doc.badge.plus")
                 }
                 .buttonStyle(.bordered)
 

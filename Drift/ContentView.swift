@@ -2,28 +2,22 @@ import SwiftUI
 
 struct ContentView: View {
     @Binding var syncComplete: Bool
+    @State private var selectedTab = 0
 
     init(syncComplete: Binding<Bool>) {
         self._syncComplete = syncComplete
 
-        // Solid dark tab bar - no blur/glass effect
         let tabAppearance = UITabBarAppearance()
         tabAppearance.configureWithOpaqueBackground()
         tabAppearance.backgroundColor = UIColor(Theme.background)
-
-        // Normal state
         tabAppearance.stackedLayoutAppearance.normal.iconColor = .secondaryLabel
         tabAppearance.stackedLayoutAppearance.normal.titleTextAttributes = [.foregroundColor: UIColor.secondaryLabel]
-
-        // Selected state - clean accent color, no blob
         let accentColor = UIColor(Theme.accent)
         tabAppearance.stackedLayoutAppearance.selected.iconColor = accentColor
         tabAppearance.stackedLayoutAppearance.selected.titleTextAttributes = [.foregroundColor: accentColor]
-
         UITabBar.appearance().standardAppearance = tabAppearance
         UITabBar.appearance().scrollEdgeAppearance = tabAppearance
 
-        // Dark nav bar
         let navAppearance = UINavigationBarAppearance()
         navAppearance.configureWithOpaqueBackground()
         navAppearance.backgroundColor = UIColor(Theme.background)
@@ -35,34 +29,41 @@ struct ContentView: View {
     }
 
     var body: some View {
-        TabView {
-            DashboardView(syncComplete: $syncComplete)
-                .tabItem {
-                    Label("Dashboard", systemImage: "chart.line.uptrend.xyaxis")
-                }
+        TabView(selection: $selectedTab) {
+            DashboardView(syncComplete: $syncComplete, selectedTab: $selectedTab)
+                .tabItem { Label("Drift", systemImage: "chart.line.uptrend.xyaxis") }
+                .tag(0)
 
             WeightTabView(syncComplete: $syncComplete)
-                .tabItem {
-                    Label("Weight", systemImage: "scalemass")
-                }
+                .tabItem { Label("Weight", systemImage: "scalemass") }
+                .tag(1)
+
+            WorkoutView()
+                .wrapInNav()
+                .tabItem { Label("Exercise", systemImage: "dumbbell.fill") }
+                .tag(2)
 
             FoodTabView()
-                .tabItem {
-                    Label("Food", systemImage: "fork.knife")
-                }
+                .tabItem { Label("Food", systemImage: "fork.knife") }
+                .tag(3)
 
-            SupplementsTabView()
-                .tabItem {
-                    Label("Supplements", systemImage: "pill")
-                }
+            SleepRecoveryView()
+                .wrapInNav()
+                .tabItem { Label("Recovery", systemImage: "bed.double.fill") }
+                .tag(4)
 
             MoreTabView()
-                .tabItem {
-                    Label("More", systemImage: "ellipsis")
-                }
+                .tabItem { Label("More", systemImage: "ellipsis") }
+                .tag(5)
         }
         .tint(Theme.accent)
         .background(Theme.background.ignoresSafeArea())
+    }
+}
+
+extension View {
+    func wrapInNav() -> some View {
+        NavigationStack { self }
     }
 }
 

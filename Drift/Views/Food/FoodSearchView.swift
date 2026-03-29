@@ -8,6 +8,8 @@ struct FoodSearchView: View {
     @State private var amount: String = "1"
     @State private var selectedUnit: ServingUnit = .grams
     @State private var selectedMealType: MealType = .lunch
+    @State private var query = ""
+    @State private var results: [Food] = []
 
     var body: some View {
         NavigationStack {
@@ -15,13 +17,14 @@ struct FoodSearchView: View {
                 // Search bar
                 HStack {
                     Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                    TextField("Search for a food", text: $viewModel.searchQuery)
+                    TextField("Search for a food", text: $query)
                         .textFieldStyle(.plain)
                         .autocorrectionDisabled()
-                        .onSubmit { viewModel.search() }
-                        .onChange(of: viewModel.searchQuery) { _, _ in viewModel.search() }
-                    if !viewModel.searchQuery.isEmpty {
-                        Button { viewModel.searchQuery = ""; viewModel.searchResults = [] } label: {
+                        .onChange(of: query) { _, q in
+                            results = q.isEmpty ? [] : ((try? AppDatabase.shared.searchFoods(query: q)) ?? [])
+                        }
+                    if !query.isEmpty {
+                        Button { query = ""; results = [] } label: {
                             Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary)
                         }
                     }
@@ -29,7 +32,7 @@ struct FoodSearchView: View {
                 .padding()
                 .background(.ultraThinMaterial)
 
-                if viewModel.searchResults.isEmpty && !viewModel.searchQuery.isEmpty {
+                if results.isEmpty && !query.isEmpty {
                     VStack(spacing: 8) {
                         Text("No results for \"\(viewModel.searchQuery)\"")
                             .font(.subheadline).foregroundStyle(.secondary)
@@ -38,7 +41,7 @@ struct FoodSearchView: View {
                     }
                     .padding(.top, 40)
                     Spacer()
-                } else if viewModel.searchResults.isEmpty {
+                } else if results.isEmpty {
                     VStack(spacing: 8) {
                         Text("Search the food database")
                             .font(.subheadline).foregroundStyle(.secondary)
@@ -49,7 +52,7 @@ struct FoodSearchView: View {
                     Spacer()
                 } else {
                     List {
-                        ForEach(viewModel.searchResults) { food in
+                        ForEach(results) { food in
                             Button {
                                 selectedFood = food
                                 // Set default amount based on food's serving
@@ -77,11 +80,6 @@ struct FoodSearchView: View {
                 if let food = selectedFood {
                     logFoodSheet(food)
                 }
-            }
-            .onAppear {
-                // Reset search on appear so it's not stale
-                viewModel.searchQuery = ""
-                viewModel.searchResults = []
             }
         }
     }

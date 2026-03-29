@@ -2,32 +2,33 @@ import SwiftUI
 
 struct DashboardView: View {
     @Binding var syncComplete: Bool
+    @Binding var selectedTab: Int
     @State private var viewModel = DashboardViewModel()
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
-                    // Weight + Deficit (always primary)
-                    weightDeficitCard
+                    // Weight + Deficit → Weight tab
+                    Button { selectedTab = 1 } label: { weightDeficitCard }.buttonStyle(.plain)
 
                     // Goal progress
                     goalCard
 
-                    // Energy Balance (prominent if food logged, muted if not)
-                    calorieBalanceCard
+                    // Energy Balance → Food tab
+                    Button { selectedTab = 3 } label: { calorieBalanceCard }.buttonStyle(.plain)
 
                     // Health row
                     healthRow
 
-                    // Sleep & Recovery mini
-                    if viewModel.sleepHours > 0 {
-                        sleepRecoveryCard
+                    // Sleep & Recovery → Recovery tab
+                    if viewModel.sleepHours > 0 || viewModel.recoveryScore > 0 {
+                        Button { selectedTab = 4 } label: { sleepRecoveryCard }.buttonStyle(.plain)
                     }
 
-                    // Supplements
+                    // Supplements → More > Supplements
                     if viewModel.supplementsTotal > 0 {
-                        supplementCard
+                        NavigationLink { SupplementsTabView() } label: { supplementCard }
                     }
                 }
                 .padding(.horizontal, 16)

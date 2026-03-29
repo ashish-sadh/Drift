@@ -5,33 +5,25 @@ struct MoreTabView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
-                    // Goal
+                    // Supplements + Goal
                     VStack(spacing: 0) {
+                        navRow(icon: "pill.fill", title: "Supplements", subtitle: "Daily checklist, consistency tracking", color: .mint) {
+                            SupplementsTabView()
+                        }
+                        Divider().overlay(Color.white.opacity(0.05))
                         navRow(icon: "target", title: "Weight Goal", subtitle: "Target weight, timeline, deficit plan", color: Theme.deficit) {
                             GoalView()
                         }
                     }
                     .card()
 
-                    // Workouts
-                    VStack(spacing: 0) {
-                        navRow(icon: "dumbbell.fill", title: "Workouts", subtitle: "Log exercises, track PRs, import from Strong", color: Theme.stepsOrange) {
-                            WorkoutView()
-                        }
-                    }
-                    .card()
-
                     // Data section
                     VStack(spacing: 0) {
-                        navRow(icon: "bed.double.fill", title: "Sleep & Recovery", subtitle: "Sleep stages, HRV, recovery score", color: Theme.sleepIndigo) {
-                            SleepRecoveryView()
-                        }
-                        Divider().overlay(Color.white.opacity(0.05))
                         navRow(icon: "figure.stand", title: "Body Composition", subtitle: "DEXA scan data", color: Theme.accent) {
                             DEXAOverviewView()
                         }
                         Divider().overlay(Color.white.opacity(0.05))
-                        navRow(icon: "waveform.path.ecg", title: "Glucose", subtitle: "Lingo CGM data", color: Theme.calorieBlue) {
+                        navRow(icon: "waveform.path.ecg", title: "Glucose", subtitle: "CGM glucose tracking", color: Theme.calorieBlue) {
                             GlucoseTabView()
                         }
                     }
