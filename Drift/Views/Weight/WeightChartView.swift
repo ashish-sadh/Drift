@@ -58,6 +58,31 @@ struct WeightChartView: View {
             }
 
             Chart {
+                // Starting weight reference line (gray)
+                if let startWeight = displayPoints.first?.ema {
+                    RuleMark(y: .value("", startWeight))
+                        .foregroundStyle(.secondary.opacity(0.4))
+                        .lineStyle(StrokeStyle(lineWidth: 1))
+                        .annotation(position: .leading, spacing: 4) {
+                            Text(String(format: "%.1f", startWeight))
+                                .font(.caption2.monospacedDigit())
+                                .foregroundStyle(.secondary)
+                        }
+                }
+
+                // Current weight reference line (accent)
+                if let currentWeight = displayPoints.last?.ema {
+                    RuleMark(y: .value("", currentWeight))
+                        .foregroundStyle(Theme.accent.opacity(0.6))
+                        .lineStyle(StrokeStyle(lineWidth: 1.5))
+                        .annotation(position: .trailing, spacing: 4) {
+                            Text(String(format: "%.1f", currentWeight))
+                                .font(.caption2.weight(.bold).monospacedDigit())
+                                .foregroundStyle(Theme.accent)
+                        }
+                }
+
+                // Scale weight points
                 ForEach(displayPoints.indices, id: \.self) { i in
                     if let actual = displayPoints[i].actual {
                         PointMark(x: .value("", displayPoints[i].date), y: .value("", actual))
@@ -65,6 +90,8 @@ struct WeightChartView: View {
                             .symbolSize(granularity == .weekly ? 30 : 16)
                     }
                 }
+
+                // Trend line
                 ForEach(displayPoints.indices, id: \.self) { i in
                     LineMark(x: .value("", displayPoints[i].date), y: .value("", displayPoints[i].ema))
                         .foregroundStyle(Theme.accent)
