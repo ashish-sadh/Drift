@@ -222,8 +222,10 @@ final class HealthKitService {
         // This catches sleep that starts late evening and ends in the morning
         let cal = Calendar.current
         let startOfDay = cal.startOfDay(for: date)
-        let evening = cal.date(byAdding: .hour, value: -6, to: startOfDay)! // 6pm previous day
-        let noon = cal.date(byAdding: .hour, value: 12, to: startOfDay)!    // noon today
+        guard let evening = cal.date(byAdding: .hour, value: -6, to: startOfDay),
+              let noon = cal.date(byAdding: .hour, value: 12, to: startOfDay) else {
+            return SleepDetail(totalHours: 0, remHours: 0, deepHours: 0, lightHours: 0, awakeHours: 0, bedStart: nil, bedEnd: nil)
+        }
         let predicate = HKQuery.predicateForSamples(withStart: evening, end: noon, options: [])
 
         return try await withCheckedThrowingContinuation { continuation in
