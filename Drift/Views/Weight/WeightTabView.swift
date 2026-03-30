@@ -57,7 +57,7 @@ struct WeightTabView: View {
             }
         }
         .sheet(isPresented: $showingAddWeight) {
-            WeightEntryView(unit: viewModel.weightUnit) { viewModel.addWeight(value: $0) }
+            WeightEntryView(unit: viewModel.weightUnit) { value, date in viewModel.addWeight(value: value, date: date) }
         }
         .onAppear { viewModel.loadEntries() }
         .onChange(of: syncComplete) { _, done in

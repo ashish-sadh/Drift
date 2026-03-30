@@ -2,7 +2,7 @@ import SwiftUI
 
 struct WeightEntryView: View {
     let unit: WeightUnit
-    let onSave: (Double) -> Void
+    let onSave: (Double, Date) -> Void
 
     @Environment(\.dismiss) private var dismiss
     @State private var weightText = ""
@@ -34,7 +34,7 @@ struct WeightEntryView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         if let value = Double(weightText) {
-                            onSave(value)
+                            onSave(value, selectedDate)
                             dismiss()
                         }
                     }
