@@ -20,9 +20,8 @@ Drift is a local-first iOS health & fitness tracking app. Everything runs on-dev
 - Daily upload limit: ~25 builds/day (hit on Mar 29, resets ~24hr)
 
 ## Current Build
-- Version 0.1.0, build 23 (pending upload - Apple limit hit)
-- Build 21 is latest on TestFlight
-- 207 tests, all passing
+- Version 0.1.0, build 24 (live on TestFlight)
+- 255 tests, all passing
 
 ## Tab Structure
 Drift | Weight | Food | Exercise | More
@@ -94,14 +93,27 @@ Drift | Weight | Food | Exercise | More
 - Settings: unit toggle (kg/lbs), HealthKit sync, full re-sync
 - Algorithm: configurable EMA alpha, regression window, energy density (kcal/kg),
   3 presets (Conservative/Default/Responsive)
+- Biomarkers: 65 blood biomarker tracking under More tab
+  - Upload lab reports (PDF or photo) with OCR extraction
+  - Handles Quest Diagnostics, Labcorp, WHOOP, and generic lab formats
+  - 65 biomarkers across 9 categories: Heart Health, Metabolic, Hormones, Thyroid,
+    Vitamins & Minerals, Inflammation, Blood Cells, Liver, Kidney
+  - Donut chart summary: Optimal/Sufficient/Out of Range counts
+  - Individual biomarker detail: trend chart with zone backgrounds, knowledge base
+    with accordions (what, why, relationships, how to improve), impact categories
+  - Range bar visualization on list view showing value position in reference range
+  - Unit normalization (mmol/L→mg/dL, nmol/L→ng/mL, etc.) for cross-lab consistency
+  - Encrypted local storage: AES-256-GCM via CryptoKit, key in Keychain (thisDeviceOnly)
+  - Privacy clause: data never leaves device
 - Factory Reset
 - Privacy note
 
 ## Database (GRDB SQLite)
-11 migrations (v1-v11):
+12 migrations (v1-v12):
 - weight_entry, meal_log, food_entry, food, supplement, supplement_log
 - glucose_reading, dexa_scan, dexa_region, hk_sync_anchor, barcode_cache
 - favorite_food, exercise, workout, workout_set, workout_template
+- lab_report, biomarker_result
 
 ## Key Services
 - WeightTrendCalculator: EMA + linear regression + configurable deficit
@@ -113,6 +125,9 @@ Drift | Weight | Food | Exercise | More
 - NutritionLabelOCR: Vision framework text extraction
 - CGMImportService: Lingo CSV parser (handles real format with TZ offsets)
 - BodySpecPDFParser: PDFKit text extraction for DEXA reports
+- LabReportOCR: PDF/image lab report extraction with pattern matching for 65 biomarkers
+- BiomarkerKnowledgeBase: 65 biomarker definitions, reference ranges, unit conversions
+- LabReportStorage: AES-256-GCM encrypted file storage with Keychain key management
 - CSVParser: generic CSV parsing
 
 ## Key Files
@@ -122,16 +137,18 @@ Drift | Weight | Food | Exercise | More
 - Drift/Utilities/Theme.swift → all colors, .card() modifier
 - Drift/Utilities/Log.swift → os.Logger categories
 - Drift/Resources/foods.json → 128 curated foods (snake_case keys)
+- Drift/Resources/biomarkers.json → 65 biomarker definitions with knowledge base
 - Drift/Resources/exercises.json → 873 exercises from free-exercise-db
 - Drift/Resources/default_supplements.json → just Whey Protein auto-seeded
 
-## Tests (207)
+## Tests (255)
 - DriftTests/WeightTrendCalculatorTests.swift (40)
 - DriftTests/UIFlowTests.swift (49)
 - DriftTests/WorkoutTests.swift (68)
 - DriftTests/EdgeCaseTests.swift (26)
 - DriftTests/NutritionOCRTests.swift (15)
 - DriftTests/CSVParserTests.swift (4)
+- DriftTests/LabReportOCRTests.swift (48) — Quest + LabCorp real PDF extraction tests
 - DriftTests/DriftTests.swift (placeholder)
 
 ## Build & Test Commands
@@ -154,14 +171,8 @@ xcodebuild -exportArchive -archivePath /tmp/Drift.xcarchive -exportPath /tmp/Dri
 ```
 
 ## Pending Work
-1. **Biomarker Tracking** - 65 blood biomarkers under More tab
-   - Upload lab reports (PDF/image), OCR extraction
-   - Knowledge base: what each marker means, reference ranges, how to improve
-   - Track values over time with trend charts
-   - Encrypted local storage
-   - Reference screenshots: ~/Downloads/Whoop-bio-marker/ (144 screenshots)
-2. **TestFlight v23** - upload when Apple limit resets
-3. **Known issues**: Dashboard top gap (reduced but may still be visible on some devices)
+1. **TestFlight** - build 24 live (biomarkers feature + OCR fixes + test fixes)
+2. **Known issues**: Dashboard top gap (reduced but may still be visible on some devices)
 
 ## User Preferences
 - Docs-first, iterative development

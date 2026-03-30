@@ -10,5 +10,6 @@ enum Log {
     static let supplements = Logger(subsystem: "com.drift.health", category: "supplements")
     static let glucose = Logger(subsystem: "com.drift.health", category: "glucose")
     static let bodyComp = Logger(subsystem: "com.drift.health", category: "body-composition")
+    static let biomarkers = Logger(subsystem: "com.drift.health", category: "biomarkers")
     static let app = Logger(subsystem: "com.drift.health", category: "app")
 }

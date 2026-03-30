@@ -239,5 +239,36 @@ enum Migrations {
                 t.add(column: "reminder_time", .text)                       // HH:mm format, nil = no reminder
             }
         }
+
+        // v12: Biomarker tracking
+        migrator.registerMigration("v12_biomarkers") { db in
+            try db.create(table: "lab_report") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("report_date", .text).notNull()
+                t.column("lab_name", .text)
+                t.column("file_name", .text).notNull()
+                t.column("file_data_hash", .text).notNull().defaults(to: "")
+                t.column("marker_count", .integer).notNull().defaults(to: 0)
+                t.column("notes", .text)
+                t.column("created_at", .text).notNull().defaults(sql: "(datetime('now'))")
+            }
+            try db.create(index: "idx_lab_report_date", on: "lab_report", columns: ["report_date"])
+
+            try db.create(table: "biomarker_result") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("report_id", .integer).notNull()
+                    .references("lab_report", onDelete: .cascade)
+                t.column("biomarker_id", .text).notNull()
+                t.column("value", .double).notNull()
+                t.column("unit", .text).notNull()
+                t.column("normalized_value", .double).notNull()
+                t.column("normalized_unit", .text).notNull()
+                t.column("reference_low", .double)
+                t.column("reference_high", .double)
+                t.column("created_at", .text).notNull().defaults(sql: "(datetime('now'))")
+            }
+            try db.create(index: "idx_biomarker_result_report", on: "biomarker_result", columns: ["report_id"])
+            try db.create(index: "idx_biomarker_result_marker", on: "biomarker_result", columns: ["biomarker_id"])
+        }
     }
 }

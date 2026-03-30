@@ -64,7 +64,7 @@ import GRDB
     try await db.writer.write { dbConn in
         var w = Workout(name: "Test", date: "2026-03-29", createdAt: "")
         try w.insert(dbConn)
-        let wid = w.id!
+        let wid = dbConn.lastInsertedRowID
         var s = WorkoutSet(workoutId: wid, exerciseName: "Bench", setOrder: 1, weightLbs: 100, reps: 10, isWarmup: false)
         try s.insert(dbConn)
     }
@@ -82,7 +82,7 @@ import GRDB
         var w = Workout(name: "Leg Day", date: "2026-03-29", createdAt: "")
         try w.insert(dbConn)
     }
-    let wid = try await db.reader.read { try Workout.fetchOne($0)!.id! }
+    let wid = try await db.reader.read { try Workout.fetchOne($0)! }.id!
     try await db.writer.write { dbConn in
         for i in 1...5 {
             var s = WorkoutSet(workoutId: wid, exerciseName: "Squat", setOrder: i, weightLbs: Double(i * 45), reps: 10 - i, isWarmup: i == 1)
@@ -418,7 +418,8 @@ import GRDB
     try await db.writer.write { dbConn in
         var m = MealLog(date: "2026-03-28", mealType: "lunch")
         try m.insert(dbConn)
-        var e = FoodEntry(mealLogId: m.id!, foodName: "Rice", servingSizeG: 200, servings: 1, calories: 260, proteinG: 5, carbsG: 57, fatG: 0.5, fiberG: 0.6)
+        let mid = dbConn.lastInsertedRowID
+        var e = FoodEntry(mealLogId: mid, foodName: "Rice", servingSizeG: 200, servings: 1, calories: 260, proteinG: 5, carbsG: 57, fatG: 0.5, fiberG: 0.6)
         try e.insert(dbConn)
     }
     let n = try db.fetchDailyNutrition(for: "2026-03-28")
@@ -433,7 +434,8 @@ import GRDB
         try await db.writer.write { dbConn in
             var m = MealLog(date: d, mealType: "lunch")
             try m.insert(dbConn)
-            var e = FoodEntry(mealLogId: m.id!, foodName: "Food", servingSizeG: 100, servings: 1, calories: 500)
+            let mid = dbConn.lastInsertedRowID
+            var e = FoodEntry(mealLogId: mid, foodName: "Food", servingSizeG: 100, servings: 1, calories: 500)
             try e.insert(dbConn)
         }
     }
@@ -448,7 +450,8 @@ import GRDB
     try await db.writer.write { dbConn in
         var m = MealLog(date: "2026-03-28", mealType: "lunch")
         try m.insert(dbConn)
-        var e = FoodEntry(mealLogId: m.id!, foodName: "X", servingSizeG: 100, servings: 1, calories: 300)
+        let mid = dbConn.lastInsertedRowID
+        var e = FoodEntry(mealLogId: mid, foodName: "X", servingSizeG: 100, servings: 1, calories: 300)
         try e.insert(dbConn)
     }
     let entries = try await db.reader.read { try FoodEntry.fetchAll($0) }

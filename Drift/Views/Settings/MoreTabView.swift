@@ -30,6 +30,10 @@ struct MoreTabView: View {
                         navRow(icon: "waveform.path.ecg", title: "Glucose", subtitle: "CGM glucose tracking", color: Theme.calorieBlue) {
                             GlucoseTabView()
                         }
+                        Divider().overlay(Color.white.opacity(0.05))
+                        navRow(icon: "cross.case.fill", title: "Biomarkers", subtitle: "Blood test results & trends", color: Theme.heartRed) {
+                            BiomarkersTabView()
+                        }
                     }
                     .card()
 
@@ -186,7 +190,7 @@ struct SettingsView: View {
                     Button("Reset Everything", role: .destructive) { performFactoryReset() }
                     Button("Cancel", role: .cancel) {}
                 } message: {
-                    Text("This deletes ALL local data: weight entries, food logs, supplements, DEXA scans, glucose data, barcode cache, goals, and algorithm settings. Apple Health data is NOT affected. This cannot be undone.")
+                    Text("This deletes ALL local data: weight entries, food logs, supplements, DEXA scans, glucose data, lab reports, biomarker results, barcode cache, goals, and algorithm settings. Apple Health data is NOT affected. This cannot be undone.")
                 }
             }
             .padding(.horizontal, 16)

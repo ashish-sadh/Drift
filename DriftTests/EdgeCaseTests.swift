@@ -128,7 +128,8 @@ import GRDB
     try await db.writer.write { dbConn in
         for mt in ["breakfast", "lunch", "dinner", "snack"] {
             var m = MealLog(date: "2026-03-28", mealType: mt); try m.insert(dbConn)
-            var e = FoodEntry(mealLogId: m.id!, foodName: mt, servingSizeG: 100, servings: 1, calories: 500, proteinG: 25, carbsG: 50, fatG: 15, fiberG: 5)
+            let mid = dbConn.lastInsertedRowID
+            var e = FoodEntry(mealLogId: mid, foodName: mt, servingSizeG: 100, servings: 1, calories: 500, proteinG: 25, carbsG: 50, fatG: 15, fiberG: 5)
             try e.insert(dbConn)
         }
     }

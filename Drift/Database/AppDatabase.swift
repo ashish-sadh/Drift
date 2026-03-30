@@ -46,6 +46,8 @@ extension AppDatabase {
             try db.execute(sql: "DELETE FROM hk_sync_anchor")
             try db.execute(sql: "DELETE FROM barcode_cache")
             try db.execute(sql: "DELETE FROM food")
+            try db.execute(sql: "DELETE FROM biomarker_result")
+            try db.execute(sql: "DELETE FROM lab_report")
         }
         // Re-seed default foods
         try seedFoodsFromJSON()
@@ -459,6 +461,85 @@ extension AppDatabase {
     func fetchRecentBarcodes(limit: Int = 20) throws -> [BarcodeCache] {
         try dbWriter.read { db in
             try BarcodeCache.order(Column("created_at").desc).limit(limit).fetchAll(db)
+        }
+    }
+}
+
+// MARK: - Lab Report Operations
+
+extension AppDatabase {
+    func saveLabReport(_ report: inout LabReport) throws {
+        try dbWriter.write { [report] db in
+            var mutable = report
+            try mutable.insert(db)
+        }
+        report = try dbWriter.read { db in
+            try LabReport.order(Column("id").desc).fetchOne(db)
+        } ?? report
+    }
+
+    func fetchLabReports() throws -> [LabReport] {
+        try dbWriter.read { db in
+            try LabReport.order(Column("report_date").desc).fetchAll(db)
+        }
+    }
+
+    func deleteLabReport(id: Int64) throws {
+        try dbWriter.write { db in
+            // biomarker_results cascade-delete via foreign key
+            _ = try LabReport.deleteOne(db, id: id)
+        }
+    }
+
+    func saveBiomarkerResults(_ results: [BiomarkerResult]) throws {
+        try dbWriter.write { db in
+            for var result in results {
+                try result.insert(db)
+            }
+        }
+    }
+
+    func fetchBiomarkerResults(forReportId reportId: Int64) throws -> [BiomarkerResult] {
+        try dbWriter.read { db in
+            try BiomarkerResult
+                .filter(Column("report_id") == reportId)
+                .order(Column("biomarker_id"))
+                .fetchAll(db)
+        }
+    }
+
+    func fetchBiomarkerResults(forBiomarkerId biomarkerId: String) throws -> [BiomarkerResult] {
+        try dbWriter.read { db in
+            try BiomarkerResult
+                .filter(Column("biomarker_id") == biomarkerId)
+                .order(sql: """
+                    (SELECT report_date FROM lab_report WHERE lab_report.id = biomarker_result.report_id) ASC
+                """)
+                .fetchAll(db)
+        }
+    }
+
+    /// Fetch the latest result for each biomarker across all reports.
+    func fetchLatestBiomarkerResults() throws -> [BiomarkerResult] {
+        try dbWriter.read { db in
+            try BiomarkerResult.fetchAll(db, sql: """
+                SELECT br.* FROM biomarker_result br
+                INNER JOIN (
+                    SELECT biomarker_id, MAX(lr.report_date) as max_date
+                    FROM biomarker_result br2
+                    INNER JOIN lab_report lr ON lr.id = br2.report_id
+                    GROUP BY biomarker_id
+                ) latest ON br.biomarker_id = latest.biomarker_id
+                INNER JOIN lab_report lr2 ON lr2.id = br.report_id AND lr2.report_date = latest.max_date
+                ORDER BY br.biomarker_id
+            """)
+        }
+    }
+
+    /// Fetch the report date for a given report ID.
+    func fetchReportDate(forId reportId: Int64) throws -> String? {
+        try dbWriter.read { db in
+            try String.fetchOne(db, sql: "SELECT report_date FROM lab_report WHERE id = ?", arguments: [reportId])
         }
     }
 }
