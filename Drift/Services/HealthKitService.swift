@@ -253,20 +253,25 @@ final class HealthKitService {
                     }
                 }
 
-                // If detailed stages exist (REM/Deep/Core), ignore inBed to avoid double-counting.
-                // If only inBed + asleepUnspecified exist (e.g., WHOOP), use those.
+                // If detailed stages (REM/Deep/Core) exist, use ONLY those.
+                // Ignore both inBed and asleepUnspecified — they overlap with stages
+                // from other HealthKit sources (WHOOP + iPhone = double counting).
                 let hasDetailedStages = rem > 0 || deep > 0 || light > 0
-                if !hasDetailedStages {
-                    // No detailed stages: use inBed as total sleep time
-                    asleep += inBed
+                let total: Double
+                if hasDetailedStages {
+                    total = rem + deep + light
+                } else if asleep > 0 {
+                    total = asleep
+                } else {
+                    total = inBed
                 }
-
-                let total = rem + deep + light + asleep
-                Log.healthKit.info("Sleep computed: total=\(String(format: "%.1f", total))h rem=\(String(format: "%.1f", rem)) deep=\(String(format: "%.1f", deep)) light=\(String(format: "%.1f", light)) asleep=\(String(format: "%.1f", asleep)) inBed=\(String(format: "%.1f", inBed)) hasStages=\(hasDetailedStages)")
+                // Sanity cap
+                let capped = min(total, 14.0)
+                Log.healthKit.info("Sleep computed: total=\(String(format: "%.1f", capped))h rem=\(String(format: "%.1f", rem)) deep=\(String(format: "%.1f", deep)) light=\(String(format: "%.1f", light)) asleep=\(String(format: "%.1f", asleep)) inBed=\(String(format: "%.1f", inBed)) hasStages=\(hasDetailedStages)")
 
                 continuation.resume(returning: SleepDetail(
-                    totalHours: total, remHours: rem, deepHours: deep,
-                    lightHours: light + (hasDetailedStages ? 0 : asleep), awakeHours: awake,
+                    totalHours: capped, remHours: rem, deepHours: deep,
+                    lightHours: hasDetailedStages ? light : asleep, awakeHours: awake,
                     bedStart: earliest, bedEnd: latest
                 ))
             }
