@@ -120,9 +120,9 @@ final class SupplementViewModel {
         }
     }
 
-    func addCustomSupplement(name: String, dosage: String, unit: String) {
+    func addCustomSupplement(name: String, dosage: String, unit: String, dailyDoses: Int = 1) {
         do {
-            var s = Supplement(name: name, dosage: dosage, unit: unit, sortOrder: supplements.count)
+            var s = Supplement(name: name, dosage: dosage, unit: unit, sortOrder: supplements.count, dailyDoses: dailyDoses)
             try database.saveSupplement(&s)
             loadSupplements()
         } catch {

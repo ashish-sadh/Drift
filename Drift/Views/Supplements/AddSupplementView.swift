@@ -76,7 +76,7 @@ struct AddSupplementView: View {
                         }
                         Section {
                             Button {
-                                viewModel.addCustomSupplement(name: name, dosage: dosage, unit: unit)
+                                viewModel.addCustomSupplement(name: name, dosage: dosage, unit: unit, dailyDoses: dailyDoses)
                                 dismiss()
                             } label: {
                                 Label("Add", systemImage: "plus.circle.fill").frame(maxWidth: .infinity)
