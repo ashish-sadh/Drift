@@ -107,20 +107,24 @@ struct BodyMapView: View {
     }
 
     private func exerciseSuggestions(for group: String) -> some View {
-        let exercises: [String] = {
-            switch group {
-            case "Chest": return ["Bench Press (Barbell)", "Bench Press (Dumbbell)", "Incline Bench Press", "Chest Fly", "Chest Dip"]
-            case "Back": return ["Lat Pulldown (Cable)", "Seated Row", "Deadlift (Barbell)", "Pull Up", "Bent Over Row"]
-            case "Shoulders": return ["Overhead Press", "Lateral Raise", "Face Pull (Cable)", "Shoulder Press"]
-            case "Arms": return ["Bicep Curl (Dumbbell)", "Hammer Curl", "Triceps Pushdown", "Triceps Extension"]
-            case "Core": return ["Crunch", "Plank", "Hanging Leg Raise", "Ab Wheel"]
-            case "Legs": return ["Squat (Barbell)", "Leg Press", "Leg Extension", "Leg Curl", "Standing Calf Raise"]
-            default: return []
-            }
-        }()
+        let exercises = ExerciseDatabase.byBodyPart(group).prefix(8).map(\.name)
+        let status = muscleStatus[group] ?? .untrained
 
-        return VStack(alignment: .leading, spacing: 4) {
-            Text("Exercises for \(group)").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+        return VStack(alignment: .leading, spacing: 6) {
+            HStack {
+                Text("Exercises for \(group)").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                Spacer()
+                // Recovery countdown
+                if status == .recovering {
+                    Text("~1-2 days to recover").font(.caption2).foregroundStyle(Theme.surplus)
+                } else if status == .moderate {
+                    Text("~1 day to recover").font(.caption2).foregroundStyle(Theme.stepsOrange)
+                } else if status == .recovered {
+                    Text("Ready to train").font(.caption2).foregroundStyle(Theme.deficit)
+                } else {
+                    Text("Not trained recently").font(.caption2).foregroundStyle(.tertiary)
+                }
+            }
             ForEach(exercises, id: \.self) { ex in
                 Text("• \(ex)").font(.caption2).foregroundStyle(.tertiary)
             }
@@ -167,13 +171,6 @@ struct BodyMapView: View {
     }
 
     private func guessMuscleGroup(_ name: String) -> String {
-        let e = name.lowercased()
-        if e.contains("bench") || e.contains("chest") || e.contains("fly") || e.contains("dip") { return "Chest" }
-        if e.contains("squat") || e.contains("leg") || e.contains("calf") || e.contains("hip") || e.contains("deadlift") || e.contains("lunge") || e.contains("press") && e.contains("leg") || e.contains("thrust") { return "Legs" }
-        if e.contains("lat") || e.contains("row") || e.contains("pull") || e.contains("back") { return "Back" }
-        if e.contains("shoulder") || e.contains("lateral raise") || e.contains("overhead") || e.contains("face pull") { return "Shoulders" }
-        if e.contains("bicep") || e.contains("curl") || e.contains("tricep") || e.contains("hammer") { return "Arms" }
-        if e.contains("crunch") || e.contains("plank") || e.contains("ab") || e.contains("leg raise") { return "Core" }
-        return "Legs" // default
+        ExerciseDatabase.bodyPart(for: name)
     }
 }

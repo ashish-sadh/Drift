@@ -11,6 +11,7 @@ struct WorkoutView: View {
     @State private var showingImport = false
     @State private var importResult: String?
     @State private var isLoading = true
+    @State private var selectedTemplate: WorkoutTemplate? = nil
 
     @State private var activeCalories: Double = 0
     @State private var steps: Double = 0
@@ -53,8 +54,8 @@ struct WorkoutView: View {
                             Text("Templates").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                             ForEach(templates) { t in
                                 Button {
+                                    selectedTemplate = t
                                     showingNewWorkout = true
-                                    // Template loading handled in ActiveWorkoutView
                                 } label: {
                                     HStack {
                                         VStack(alignment: .leading, spacing: 1) {
@@ -99,7 +100,12 @@ struct WorkoutView: View {
         .scrollContentBackground(.hidden).background(Theme.background.ignoresSafeArea())
         .navigationTitle("Exercise").navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
-        .sheet(isPresented: $showingNewWorkout) { ActiveWorkoutView { loadData() } }
+        .sheet(isPresented: $showingNewWorkout) {
+            ActiveWorkoutView(template: selectedTemplate) {
+                selectedTemplate = nil
+                loadData()
+            }
+        }
         .fileImporter(isPresented: $showingImport, allowedContentTypes: [.commaSeparatedText]) { handleImport($0) }
         .onAppear { loadData() }
         .task {
@@ -275,6 +281,7 @@ struct WorkoutDetailView: View {
 // MARK: - Active Workout (with live timer, rest timer, prefilled weights)
 
 struct ActiveWorkoutView: View {
+    var template: WorkoutTemplate? = nil
     let onComplete: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var workoutName = "Workout"
@@ -357,7 +364,16 @@ struct ActiveWorkoutView: View {
                     addExercise(name: name)
                 }
             }
-            .onAppear { startWorkoutTimer() }
+            .onAppear {
+                startWorkoutTimer()
+                // Load template if provided
+                if let t = template {
+                    workoutName = t.name
+                    for ex in t.exercises {
+                        addExercise(name: ex.name)
+                    }
+                }
+            }
             .onDisappear { stopTimers() }
         }
     }
@@ -578,24 +594,28 @@ struct ActiveWorkoutView: View {
     }
 }
 
-// MARK: - Exercise Picker (with muscle group labels + custom)
+// MARK: - Exercise Picker (873 exercises + history + custom)
 
 struct ExercisePickerView: View {
     let onSelect: (String) -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var query = ""
+    @State private var showingCustom = false
+    @State private var selectedBodyPartFilter: String? = nil
 
-    private var exerciseList: [(name: String, group: String)] {
-        let all = (try? WorkoutService.allExerciseNames()) ?? []
-        let defaults = ["Bench Press (Barbell)", "Squat (Barbell)", "Deadlift (Barbell)", "Overhead Press (Barbell)",
-                        "Bench Press (Dumbbell)", "Incline Bench Press (Dumbbell)", "Lat Pulldown (Cable)",
-                        "Seated Row (Cable)", "Leg Press", "Leg Extension (Machine)", "Leg Curl (Machine)",
-                        "Bicep Curl (Dumbbell)", "Triceps Pushdown (Cable)", "Lateral Raise (Dumbbell)",
-                        "Pull Up", "Push Up", "Plank", "Hip Thrust (Barbell)", "Romanian Deadlift (Barbell)",
-                        "Face Pull (Cable)", "Chest Fly (Cable)", "Hammer Curl (Dumbbell)"]
-        let combined = Array(Set(all + defaults)).sorted()
-        let filtered = query.isEmpty ? combined : combined.filter { $0.localizedCaseInsensitiveContains(query) }
-        return filtered.map { (name: $0, group: guessGroup($0)) }
+    private var results: [ExerciseDatabase.ExerciseInfo] {
+        var list = query.isEmpty ? ExerciseDatabase.all : ExerciseDatabase.search(query: query)
+        if let filter = selectedBodyPartFilter { list = list.filter { $0.bodyPart == filter } }
+        return Array(list.prefix(50)) // limit for performance
+    }
+
+    // Exercises from workout history that aren't in the database
+    private var historyExtras: [String] {
+        let dbNames = Set(ExerciseDatabase.all.map { $0.name.lowercased() })
+        let history = (try? WorkoutService.allExerciseNames()) ?? []
+        let filtered = history.filter { !dbNames.contains($0.lowercased()) }
+        if query.isEmpty { return filtered }
+        return filtered.filter { $0.localizedCaseInsensitiveContains(query) }
     }
 
     var body: some View {
@@ -603,40 +623,105 @@ struct ExercisePickerView: View {
             VStack(spacing: 0) {
                 HStack {
                     Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
-                    TextField("Search or add exercise", text: $query).textFieldStyle(.plain).autocorrectionDisabled()
+                    TextField("Search 873 exercises", text: $query).textFieldStyle(.plain).autocorrectionDisabled()
+                    if !query.isEmpty {
+                        Button { query = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary) }
+                    }
                 }.padding().background(.ultraThinMaterial)
 
+                // Body part filter chips
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        filterChip("All", selected: selectedBodyPartFilter == nil) { selectedBodyPartFilter = nil }
+                        ForEach(["Chest", "Back", "Legs", "Shoulders", "Arms", "Core"], id: \.self) { part in
+                            filterChip(part, selected: selectedBodyPartFilter == part) { selectedBodyPartFilter = part }
+                        }
+                    }.padding(.horizontal, 12).padding(.vertical, 6)
+                }
+
                 List {
-                    if !query.isEmpty && !exerciseList.contains(where: { $0.name.lowercased() == query.lowercased() }) {
-                        Button { onSelect(query); dismiss() } label: {
-                            Label("Add \"\(query)\"", systemImage: "plus.circle").foregroundStyle(Theme.accent)
+                    // Custom exercise option
+                    Button { showingCustom = true } label: {
+                        Label("Create Custom Exercise", systemImage: "plus.circle.fill").foregroundStyle(Theme.accent)
+                    }
+
+                    // History exercises (not in DB)
+                    if !historyExtras.isEmpty {
+                        Section("Your Exercises") {
+                            ForEach(historyExtras, id: \.self) { name in
+                                Button { onSelect(name); dismiss() } label: {
+                                    HStack {
+                                        Text(name).font(.subheadline)
+                                        Spacer()
+                                        Text(ExerciseDatabase.bodyPart(for: name)).font(.caption2).foregroundStyle(.tertiary)
+                                    }
+                                }.tint(.primary)
+                            }
                         }
                     }
-                    ForEach(exerciseList, id: \.name) { ex in
-                        Button { onSelect(ex.name); dismiss() } label: {
-                            HStack {
-                                Text(ex.name).font(.subheadline)
-                                Spacer()
-                                Text(ex.group).font(.caption2).foregroundStyle(.tertiary)
-                            }
-                        }.tint(.primary)
+
+                    // Database exercises
+                    Section(query.isEmpty ? "All Exercises (\(results.count))" : "\(results.count) results") {
+                        ForEach(results) { ex in
+                            Button { onSelect(ex.name); dismiss() } label: {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    HStack {
+                                        Text(ex.name).font(.subheadline)
+                                        Spacer()
+                                        Text(ex.bodyPart).font(.caption2).foregroundStyle(.tertiary)
+                                    }
+                                    HStack(spacing: 6) {
+                                        Text(ex.equipment).font(.system(size: 9)).foregroundStyle(.tertiary)
+                                        Text(ex.primaryMuscles.joined(separator: ", ")).font(.system(size: 9)).foregroundStyle(.quaternary)
+                                    }
+                                }
+                            }.tint(.primary)
+                        }
                     }
                 }.listStyle(.plain)
             }
             .navigationTitle("Add Exercise").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
+            .sheet(isPresented: $showingCustom) {
+                CustomExerciseSheet { name in onSelect(name); dismiss() }
+            }
         }
     }
 
-    private func guessGroup(_ name: String) -> String {
-        let e = name.lowercased()
-        if e.contains("bench") || e.contains("chest") || e.contains("fly") || e.contains("dip") { return "Chest" }
-        if e.contains("squat") || e.contains("leg") || e.contains("calf") || e.contains("hip") || e.contains("deadlift") || e.contains("lunge") || e.contains("thrust") { return "Legs" }
-        if e.contains("lat") || e.contains("row") || e.contains("pull") || e.contains("back") { return "Back" }
-        if e.contains("shoulder") || e.contains("lateral raise") || e.contains("overhead") || e.contains("face pull") { return "Shoulders" }
-        if e.contains("bicep") || e.contains("curl") || e.contains("tricep") || e.contains("hammer") { return "Arms" }
-        if e.contains("crunch") || e.contains("plank") || e.contains("ab") || e.contains("leg raise") { return "Core" }
-        return "Other"
+    private func filterChip(_ label: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label).font(.caption.weight(.medium))
+                .padding(.horizontal, 10).padding(.vertical, 5)
+                .background(selected ? Theme.accent.opacity(0.3) : Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 6))
+                .foregroundStyle(selected ? .white : .secondary)
+        }
+    }
+}
+
+// MARK: - Custom Exercise Sheet
+
+struct CustomExerciseSheet: View {
+    let onSave: (String) -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var name = ""
+    @State private var bodyPart = "Chest"
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                TextField("Exercise name", text: $name)
+                Picker("Targets", selection: $bodyPart) {
+                    ForEach(["Chest", "Back", "Legs", "Shoulders", "Arms", "Core", "Full Body"], id: \.self) { Text($0).tag($0) }
+                }
+            }
+            .navigationTitle("Custom Exercise").navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add") { onSave(name); dismiss() }.disabled(name.isEmpty)
+                }
+            }
+        }
     }
 }
 

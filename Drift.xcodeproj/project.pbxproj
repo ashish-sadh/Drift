@@ -15,6 +15,7 @@
 		24CF74D9CA0E8A4555F1EC68 /* SupplementViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D783FD1AF8952C1C8CECD29 /* SupplementViewModel.swift */; };
 		24D454E75E424F7ACA736A91 /* GlucoseTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0DAF3E5EFC6C85282C084A8 /* GlucoseTabView.swift */; };
 		27536FF4DD83AB95ADECF5AB /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFFBCB3D524DCFEA822DB53 /* Persistence.swift */; };
+		29FCA567A01752328CAEFFED /* ExerciseDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0653C13FD227ACE4F774C46 /* ExerciseDatabase.swift */; };
 		2CCF5E1D415E462AE9997DD4 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C555B3F9005A7C75FAAD51 /* DashboardViewModel.swift */; };
 		2D12F440CE4CBEB4B91023D2 /* default_supplements.json in Resources */ = {isa = PBXBuildFile; fileRef = 8810FAA67FDEA57FF05E2989 /* default_supplements.json */; };
 		30F7D3160F146CA92713AD13 /* MoreTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F6D2AA89F46A33EAE39DEAC /* MoreTabView.swift */; };
@@ -47,6 +48,7 @@
 		92B596C732C7784167EC8CDE /* WorkoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A884AC137C46CE932FEE1C9 /* WorkoutTests.swift */; };
 		98FF97CFE71A6BBCFF976259 /* UIFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A5DA3E3543A99260250279 /* UIFlowTests.swift */; };
 		9ACECC13D2365A3DF7F2C28C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78E3B6C1497F6A200DF8095 /* ContentView.swift */; };
+		9BDC062DA33278D9CE34EFC3 /* exercises.json in Resources */ = {isa = PBXBuildFile; fileRef = C10970FB3ED143760EC6C8C5 /* exercises.json */; };
 		9CBCD31AD1998B4E5237C1A6 /* Units.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88A19640FB19F5628DC8B824 /* Units.swift */; };
 		A2ACB0BE8811077162EBE463 /* FoodLogViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE2809389EE890A3F01ED675 /* FoodLogViewModel.swift */; };
 		AA43792497E2FC36FF55F58C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 08E33CA6BE80D735A37ED745 /* Assets.xcassets */; };
@@ -134,10 +136,12 @@
 		AE2809389EE890A3F01ED675 /* FoodLogViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodLogViewModel.swift; sourceTree = "<group>"; };
 		AE42BE067CE617760E08B051 /* DEXARegion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DEXARegion.swift; sourceTree = "<group>"; };
 		AFCD031A1C605FBFFDF1B7D0 /* ServingUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServingUnit.swift; sourceTree = "<group>"; };
+		B0653C13FD227ACE4F774C46 /* ExerciseDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseDatabase.swift; sourceTree = "<group>"; };
 		B0C555B3F9005A7C75FAAD51 /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
 		B0DAF3E5EFC6C85282C084A8 /* GlucoseTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseTabView.swift; sourceTree = "<group>"; };
 		B58C97F6B46397BDA539E78C /* SupplementsTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementsTabView.swift; sourceTree = "<group>"; };
 		BE56F885D3FD4E44B8999557 /* Workout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workout.swift; sourceTree = "<group>"; };
+		C10970FB3ED143760EC6C8C5 /* exercises.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = exercises.json; sourceTree = "<group>"; };
 		C182889F4730B18DE0244F02 /* MealLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealLog.swift; sourceTree = "<group>"; };
 		C2C63097444CD8E010008D65 /* FavoriteFood.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFood.swift; sourceTree = "<group>"; };
 		CB475E92982AD4F8897D5D8E /* RecoveryEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryEstimator.swift; sourceTree = "<group>"; };
@@ -315,6 +319,7 @@
 			children = (
 				08E33CA6BE80D735A37ED745 /* Assets.xcassets */,
 				8810FAA67FDEA57FF05E2989 /* default_supplements.json */,
+				C10970FB3ED143760EC6C8C5 /* exercises.json */,
 				FD7026C3D8745999EED9478E /* foods.json */,
 			);
 			path = Resources;
@@ -365,6 +370,7 @@
 			children = (
 				9F9F051926CE39DF3E0A47DA /* BodySpecPDFParser.swift */,
 				16A8D46F9E08C1960010A695 /* CGMImportService.swift */,
+				B0653C13FD227ACE4F774C46 /* ExerciseDatabase.swift */,
 				F57B8BA8C0B119CF10614F14 /* HealthKitService.swift */,
 				418816F51F38F19F65BC3D77 /* NutritionLabelOCR.swift */,
 				9887274AA907DE6C5349B2D1 /* OpenFoodFactsService.swift */,
@@ -499,6 +505,7 @@
 			files = (
 				AA43792497E2FC36FF55F58C /* Assets.xcassets in Resources */,
 				2D12F440CE4CBEB4B91023D2 /* default_supplements.json in Resources */,
+				9BDC062DA33278D9CE34EFC3 /* exercises.json in Resources */,
 				B3B780A670DA8D354A057699 /* foods.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -528,6 +535,7 @@
 				2CCF5E1D415E462AE9997DD4 /* DashboardViewModel.swift in Sources */,
 				DAD2FB33C19A3574C2643082 /* DateFormatters.swift in Sources */,
 				4C31E5F32057829ABAA0840A /* DriftApp.swift in Sources */,
+				29FCA567A01752328CAEFFED /* ExerciseDatabase.swift in Sources */,
 				87B4A86A2CDE6196B42015A4 /* FavoriteFood.swift in Sources */,
 				DB3B28E9FBF4531A10E67AA9 /* Food.swift in Sources */,
 				E083B1E037CD15A623ABFF2D /* FoodEntry.swift in Sources */,
