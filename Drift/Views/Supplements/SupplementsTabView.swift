@@ -59,6 +59,18 @@ struct SupplementsTabView: View {
 
                                     Spacer()
 
+                                    // Delete button
+                                    if let id = supplement.id {
+                                        Button {
+                                            try? AppDatabase.shared.writer.write { db in
+                                                try Supplement.deleteOne(db, id: id)
+                                            }
+                                            viewModel.loadSupplements()
+                                        } label: {
+                                            Image(systemName: "xmark.circle.fill").font(.caption2).foregroundStyle(.tertiary)
+                                        }.buttonStyle(.plain)
+                                    }
+
                                     if viewModel.isTaken(supplement.id ?? 0),
                                        let log = viewModel.todayLogs[supplement.id ?? 0],
                                        let takenAt = log.takenAt {

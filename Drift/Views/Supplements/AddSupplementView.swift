@@ -8,6 +8,7 @@ struct AddSupplementView: View {
     @State private var name = ""
     @State private var dosage = ""
     @State private var unit = "mg"
+    @State private var dailyDoses = 1
 
     enum AddMode: String, CaseIterable { case popular = "Popular"; case custom = "Custom" }
 
@@ -71,6 +72,7 @@ struct AddSupplementView: View {
                             Picker("Unit", selection: $unit) {
                                 ForEach(["mg", "g", "ml", "mcg", "IU", "capsule", "packet", "tablet", "scoop"], id: \.self) { Text($0).tag($0) }
                             }
+                            Stepper("Times per day: \(dailyDoses)", value: $dailyDoses, in: 1...5)
                         }
                         Section {
                             Button {

@@ -231,5 +231,13 @@ enum Migrations {
                 t.column("created_at", .text).notNull().defaults(sql: "(datetime('now'))")
             }
         }
+
+        // v11: Supplement frequency
+        migrator.registerMigration("v11_supplement_frequency") { db in
+            try db.alter(table: "supplement") { t in
+                t.add(column: "daily_doses", .integer).defaults(to: 1)     // how many times per day
+                t.add(column: "reminder_time", .text)                       // HH:mm format, nil = no reminder
+            }
+        }
     }
 }

@@ -163,12 +163,24 @@ final class HealthKitService {
             let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, error in
                 if let error { continuation.resume(throwing: error); return }
                 let sleepSamples = (samples ?? []).compactMap { $0 as? HKCategorySample }
-                // Count everything except explicit "awake" - includes inBed, asleep, asleepREM, asleepDeep, asleepCore, asleepUnspecified
-                let awakeRaw = HKCategoryValueSleepAnalysis.awake.rawValue
-                let totalSeconds = sleepSamples
-                    .filter { $0.value != awakeRaw }
-                    .reduce(0.0) { $0 + $1.endDate.timeIntervalSince($1.startDate) }
-                Log.healthKit.info("Sleep query: \(sleepSamples.count) samples, values: \(sleepSamples.map(\.value)), totalHours: \(totalSeconds/3600)")
+
+                var staged = 0.0, inBed = 0.0, unspecified = 0.0
+                for s in sleepSamples {
+                    let dur = s.endDate.timeIntervalSince(s.startDate)
+                    switch s.value {
+                    case HKCategoryValueSleepAnalysis.asleepREM.rawValue,
+                         HKCategoryValueSleepAnalysis.asleepDeep.rawValue,
+                         HKCategoryValueSleepAnalysis.asleepCore.rawValue:
+                        staged += dur
+                    case HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue:
+                        unspecified += dur
+                    case HKCategoryValueSleepAnalysis.inBed.rawValue:
+                        inBed += dur
+                    default: break // skip awake
+                    }
+                }
+                // Use stages if available, otherwise fallback to inBed + unspecified
+                let totalSeconds = staged > 0 ? (staged + unspecified) : (inBed + unspecified)
                 continuation.resume(returning: totalSeconds / 3600)
             }
             healthStore.execute(query)
@@ -207,11 +219,12 @@ final class HealthKitService {
                 if let error { continuation.resume(throwing: error); return }
                 let sleepSamples = (samples ?? []).compactMap { $0 as? HKCategorySample }
 
-                var rem = 0.0, deep = 0.0, light = 0.0, awake = 0.0, asleep = 0.0
+                var rem = 0.0, deep = 0.0, light = 0.0, awake = 0.0, asleep = 0.0, inBed = 0.0
                 var earliest: Date?, latest: Date?
 
                 Log.healthKit.info("Sleep detail: \(sleepSamples.count) samples, values: \(sleepSamples.map(\.value))")
 
+                // First pass: categorize all samples
                 for s in sleepSamples {
                     let dur = s.endDate.timeIntervalSince(s.startDate) / 3600
                     if earliest == nil || s.startDate < earliest! { earliest = s.startDate }
@@ -223,15 +236,25 @@ final class HealthKitService {
                     case HKCategoryValueSleepAnalysis.asleepCore.rawValue: light += dur
                     case HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue: asleep += dur
                     case HKCategoryValueSleepAnalysis.awake.rawValue: awake += dur
-                    case HKCategoryValueSleepAnalysis.inBed.rawValue: asleep += dur // count inBed as asleep
-                    default: asleep += dur // unknown types count as sleep
+                    case HKCategoryValueSleepAnalysis.inBed.rawValue: inBed += dur
+                    default: asleep += dur
                     }
                 }
 
+                // If detailed stages exist (REM/Deep/Core), ignore inBed to avoid double-counting.
+                // If only inBed + asleepUnspecified exist (e.g., WHOOP), use those.
+                let hasDetailedStages = rem > 0 || deep > 0 || light > 0
+                if !hasDetailedStages {
+                    // No detailed stages: use inBed as total sleep time
+                    asleep += inBed
+                }
+
                 let total = rem + deep + light + asleep
+                Log.healthKit.info("Sleep computed: total=\(String(format: "%.1f", total))h rem=\(String(format: "%.1f", rem)) deep=\(String(format: "%.1f", deep)) light=\(String(format: "%.1f", light)) asleep=\(String(format: "%.1f", asleep)) inBed=\(String(format: "%.1f", inBed)) hasStages=\(hasDetailedStages)")
+
                 continuation.resume(returning: SleepDetail(
                     totalHours: total, remHours: rem, deepHours: deep,
-                    lightHours: light + asleep, awakeHours: awake,
+                    lightHours: light + (hasDetailedStages ? 0 : asleep), awakeHours: awake,
                     bedStart: earliest, bedEnd: latest
                 ))
             }
