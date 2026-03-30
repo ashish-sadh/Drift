@@ -178,6 +178,54 @@ import GRDB
     #expect(score >= 0, "Should not crash or go negative")
 }
 
+// MARK: - WeightGoal Tests (5 tests)
+
+@Test func weightGoalProgressCalculation() async throws {
+    let goal = WeightGoal(targetWeightKg: 65, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 75)
+    // At 70kg: achieved 5 out of 10 kg loss = 50%
+    let progress = goal.progress(currentWeightKg: 70)
+    #expect(abs(progress - 0.5) < 0.01)
+}
+
+@Test func weightGoalRemainingKg() async throws {
+    let goal = WeightGoal(targetWeightKg: 65, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 75)
+    let remaining = goal.remainingKg(currentWeightKg: 70)
+    #expect(remaining == -5, "Need to lose 5 more kg")
+}
+
+@Test func weightGoalRequiredRate() async throws {
+    let goal = WeightGoal(targetWeightKg: 65, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 75)
+    // 10kg in 6 months = ~26 weeks = ~0.385 kg/week
+    let rate = goal.requiredWeeklyRateKg
+    #expect(rate < 0, "Should be negative for weight loss")
+    #expect(abs(rate) > 0.3 && abs(rate) < 0.5, "Rate: \(rate)")
+}
+
+@Test func weightGoalOnTrackStatus() async throws {
+    let goal = WeightGoal(targetWeightKg: 65, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 75)
+    let requiredRate = goal.requiredWeeklyRateKg // about -0.385
+
+    let ahead = goal.isOnTrack(actualWeeklyRateKg: requiredRate * 1.5) // losing faster
+    #expect(ahead == .ahead)
+
+    let onTrack = goal.isOnTrack(actualWeeklyRateKg: requiredRate)
+    #expect(onTrack == .onTrack)
+
+    let behind = goal.isOnTrack(actualWeeklyRateKg: requiredRate * 0.3) // barely losing
+    #expect(behind == .behind)
+}
+
+@Test func weightGoalProgressClamped() async throws {
+    let goal = WeightGoal(targetWeightKg: 65, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 75)
+    // Already past target
+    let progress = goal.progress(currentWeightKg: 60)
+    #expect(progress == 1.0, "Should be clamped to 1.0")
+
+    // Gained weight instead
+    let regress = goal.progress(currentWeightKg: 80)
+    #expect(regress == 0.0, "Should be clamped to 0.0")
+}
+
 // MARK: - Date Formatter Tests (2 tests)
 
 @Test func dateFormatterTodayString() async throws {
