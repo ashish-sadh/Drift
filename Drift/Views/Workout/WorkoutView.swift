@@ -915,6 +915,7 @@ struct ExercisePickerView: View {
     @State private var query = ""
     @State private var showingCustom = false
     @State private var selectedBodyPartFilter: String? = nil
+    @FocusState private var searchFocused: Bool
 
     private var results: [ExerciseDatabase.ExerciseInfo] {
         var list = query.isEmpty ? ExerciseDatabase.allWithCustom : ExerciseDatabase.search(query: query)
@@ -937,6 +938,7 @@ struct ExercisePickerView: View {
                 HStack {
                     Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
                     TextField("Search exercises", text: $query).textFieldStyle(.plain).autocorrectionDisabled()
+                        .focused($searchFocused)
                     if !query.isEmpty {
                         Button { query = "" } label: { Image(systemName: "xmark.circle.fill").foregroundStyle(.secondary) }
                     }
@@ -1001,6 +1003,9 @@ struct ExercisePickerView: View {
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
             .sheet(isPresented: $showingCustom) {
                 CustomExerciseSheet { name in onSelect(name); dismiss() }
+            }
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { searchFocused = true }
             }
         }
     }
