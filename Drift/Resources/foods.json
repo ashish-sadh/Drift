@@ -4501,12 +4501,12 @@
   {
     "name": "Mango Malai Kulfi",
     "category": "Indian Food",
-    "serving_size": 1,
+    "serving_size": 100,
     "serving_unit": "g",
-    "calories": 2,
-    "protein_g": 0,
-    "carbs_g": 0,
-    "fat_g": 0,
+    "calories": 160,
+    "protein_g": 3,
+    "carbs_g": 21,
+    "fat_g": 7,
     "fiber_g": 0
   },
   {
@@ -4655,11 +4655,11 @@
   {
     "name": "Organic Coconut Water",
     "category": "Nuts & Seeds",
-    "serving_size": 4,
+    "serving_size": 240,
     "serving_unit": "g",
-    "calories": 2,
+    "calories": 45,
     "protein_g": 0,
-    "carbs_g": 0,
+    "carbs_g": 11,
     "fat_g": 0,
     "fiber_g": 0
   },
