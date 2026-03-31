@@ -57,6 +57,21 @@ enum DefaultTemplates {
         ("Plate Pinches", "Arms"),
         // Legs
         ("Bulgarian Split Squats", "Legs"),
+        // Common gym exercises not in the 873 DB
+        ("Ab Wheel Rollout", "Core"),
+        ("Battle Ropes", "Full Body"),
+        ("Box Jump", "Legs"),
+        ("Mountain Climber", "Core"),
+        ("Hip Abductor Machine", "Legs"),
+        ("Hip Adductor Machine", "Legs"),
+        ("Chest Supported Row", "Back"),
+        ("Spider Curl", "Arms"),
+        ("Cable Lateral Raise", "Shoulders"),
+        ("Cable Tricep Kickback", "Arms"),
+        ("Seated Cable Row", "Back"),
+        ("Machine Chest Press", "Chest"),
+        ("Machine Shoulder Press", "Shoulders"),
+        ("Assisted Dips", "Chest"),
     ]
 
     // MARK: - Trainer Program (exact from plan)
