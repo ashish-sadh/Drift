@@ -27,13 +27,16 @@ enum ExerciseDatabase {
     }
 
     static func search(query: String) -> [ExerciseInfo] {
-        if query.isEmpty { return all }
-        let q = query.lowercased()
-        return all.filter {
-            $0.name.lowercased().contains(q) ||
-            $0.bodyPart.lowercased().contains(q) ||
-            $0.primaryMuscles.contains { $0.lowercased().contains(q) } ||
-            $0.equipment.lowercased().contains(q)
+        let source = allWithCustom
+        if query.isEmpty { return source }
+        let words = query.lowercased().split(separator: " ").map(String.init)
+        return source.filter { ex in
+            words.allSatisfy { word in
+                ex.name.lowercased().contains(word) ||
+                ex.bodyPart.lowercased().contains(word) ||
+                ex.primaryMuscles.contains { $0.lowercased().contains(word) } ||
+                ex.equipment.lowercased().contains(word)
+            }
         }
     }
 

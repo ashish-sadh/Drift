@@ -134,6 +134,56 @@ enum WorkoutService {
         }.reversed()
     }
 
+    // MARK: - Active Session Persistence
+
+    private static let sessionKey = "drift_active_workout_session"
+
+    struct SavedSession: Codable {
+        let workoutName: String
+        let startTime: Date
+        let exercises: [SessionExercise]
+
+        struct SessionExercise: Codable {
+            let name: String
+            let isWarmup: Bool
+            let notes: String?
+            let restTime: Int
+            let sets: [SessionSet]
+        }
+
+        struct SessionSet: Codable {
+            let weight: String
+            let reps: String
+            let done: Bool
+            let isWarmup: Bool
+        }
+    }
+
+    static func saveSession(_ session: SavedSession) {
+        if let data = try? JSONEncoder().encode(session) {
+            UserDefaults.standard.set(data, forKey: sessionKey)
+        }
+    }
+
+    static func loadSession() -> SavedSession? {
+        guard let data = UserDefaults.standard.data(forKey: sessionKey),
+              let session = try? JSONDecoder().decode(SavedSession.self, from: data) else { return nil }
+        // Expire after 5 hours
+        if Date().timeIntervalSince(session.startTime) > 5 * 3600 {
+            clearSession()
+            return nil
+        }
+        return session
+    }
+
+    static func clearSession() {
+        UserDefaults.standard.removeObject(forKey: sessionKey)
+    }
+
+    static var hasActiveSession: Bool {
+        loadSession() != nil
+    }
+
     // MARK: - Strong CSV Import
 
     struct ImportResult: Sendable {

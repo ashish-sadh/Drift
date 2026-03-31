@@ -22,6 +22,23 @@ struct WorkoutView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 14) {
+                // Active session banner
+                if WorkoutService.hasActiveSession {
+                    Button { showingNewWorkout = true } label: {
+                        HStack {
+                            Image(systemName: "figure.strengthtraining.traditional")
+                                .foregroundStyle(.white)
+                            Text("Workout in progress").font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.white)
+                            Spacer()
+                            Text("Resume").font(.caption.weight(.bold)).foregroundStyle(.white.opacity(0.8))
+                            Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.white.opacity(0.6))
+                        }
+                        .padding(12)
+                        .background(Theme.accent, in: RoundedRectangle(cornerRadius: 12))
+                    }.buttonStyle(.plain)
+                }
+
                 // Today's burn metrics
                 HStack(spacing: 10) {
                     HStack(spacing: 4) {
@@ -91,14 +108,16 @@ struct WorkoutView: View {
                                 Button { selectedTemplate = t; showingNewWorkout = true } label: {
                                     Image(systemName: "play.circle.fill").foregroundStyle(Theme.accent)
                                 }
-
+                            }
+                            .contextMenu {
+                                Button { selectedTemplate = t; showingNewWorkout = true } label: {
+                                    Label("Start Workout", systemImage: "play")
+                                }
                                 if let tid = t.id {
-                                    Button {
+                                    Button(role: .destructive) {
                                         try? AppDatabase.shared.writer.write { db in _ = try WorkoutTemplate.deleteOne(db, id: tid) }
                                         loadData()
-                                    } label: {
-                                        Image(systemName: "xmark.circle.fill").font(.caption2).foregroundStyle(.tertiary)
-                                    }.buttonStyle(.plain)
+                                    } label: { Label("Delete Template", systemImage: "trash") }
                                 }
                             }
                         }
@@ -519,15 +538,18 @@ struct ActiveWorkoutView: View {
                             Text("Finish").frame(maxWidth: .infinity)
                         }.buttonStyle(.borderedProminent).tint(Theme.deficit).padding(.horizontal, 12)
 
-                        Button("Cancel Workout", role: .destructive) { stopTimers(); dismiss() }
-                            .font(.caption).padding(.top, 4)
+                        Button("Cancel Workout", role: .destructive) {
+                            WorkoutService.clearSession(); stopTimers(); dismiss()
+                        }.font(.caption).padding(.top, 4)
                     }
                 }.padding(.top, 8).padding(.bottom, 24)
             }
             .background(Theme.background)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { stopTimers(); dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Minimize") { persistSession(); dismiss() }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     if !exercises.isEmpty {
                         Button("Finish") { saveWorkout() }.foregroundStyle(Theme.deficit)
@@ -541,6 +563,10 @@ struct ActiveWorkoutView: View {
             }
             .onAppear {
                 startWorkoutTimer()
+                // Restore a previous session if one exists
+                if restoreSession() {
+                    return
+                }
                 if let t = template {
                     workoutName = t.name
                     let warmups = t.exercises.filter(\.isWarmup)
@@ -555,7 +581,11 @@ struct ActiveWorkoutView: View {
                     }
                 }
             }
-            .onDisappear { stopTimers() }
+            .onDisappear {
+                stopTimers()
+                // Auto-persist if workout has exercises (user might have swiped down)
+                if !exercises.isEmpty { persistSession() }
+            }
         }
     }
 
@@ -604,10 +634,11 @@ struct ActiveWorkoutView: View {
             .font(.caption2).foregroundStyle(.secondary).italic()
 
             // Column headers
+            let assisted = isAssistedExercise(exercises[ei].name)
             HStack(spacing: 0) {
                 Text("Set").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 28, alignment: .leading)
                 Text("Previous").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 85, alignment: .leading)
-                Text("lbs").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 55)
+                Text(assisted ? "-lbs" : "lbs").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 55)
                 Text("Reps").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 50)
                 Spacer()
                 Text("✓").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 30)
@@ -718,6 +749,11 @@ struct ActiveWorkoutView: View {
         return parts.count > 1 ? parts[1].trimmingCharacters(in: .whitespaces) : "0"
     }
 
+    private func isAssistedExercise(_ name: String) -> Bool {
+        let e = name.lowercased()
+        return e.contains("assisted") || e.contains("dip") || (e.contains("pull") && e.contains("up") && e.contains("assist"))
+    }
+
     private func guessGroup(_ name: String) -> String {
         let e = name.lowercased()
         if e.contains("bench") || e.contains("chest") || e.contains("fly") || e.contains("dip") { return "· Chest" }
@@ -761,6 +797,35 @@ struct ActiveWorkoutView: View {
 
     private func stopTimers() { workoutTimer?.invalidate(); restTimer?.invalidate() }
 
+    // MARK: - Session Persistence
+
+    private func persistSession() {
+        let sessionExercises = exercises.map { ex in
+            WorkoutService.SavedSession.SessionExercise(
+                name: ex.name, isWarmup: ex.isWarmupExercise,
+                notes: ex.notes, restTime: ex.restTime,
+                sets: ex.sets.map { s in
+                    WorkoutService.SavedSession.SessionSet(
+                        weight: s.weight, reps: s.reps, done: s.done, isWarmup: s.isWarmup)
+                })
+        }
+        WorkoutService.saveSession(.init(workoutName: workoutName, startTime: startTime, exercises: sessionExercises))
+    }
+
+    private func restoreSession() -> Bool {
+        guard let session = WorkoutService.loadSession() else { return false }
+        workoutName = session.workoutName
+        startTime = session.startTime
+        exercises = session.exercises.map { ex in
+            ActiveExercise(
+                name: ex.name, restTime: ex.restTime, isWarmupExercise: ex.isWarmup,
+                notes: ex.notes,
+                sets: ex.sets.map { s in ActiveSet(weight: s.weight, reps: s.reps, done: s.done, isWarmup: s.isWarmup) },
+                previousSets: [])
+        }
+        return true
+    }
+
     // MARK: - Add Exercise (with prefill)
 
     private func addExercise(name: String, setCount: Int? = nil, restTime: Int = 90, isWarmup: Bool = false, notes: String? = nil) {
@@ -787,6 +852,7 @@ struct ActiveWorkoutView: View {
 
     private func saveWorkout() {
         stopTimers()
+        WorkoutService.clearSession()
         var workout = Workout(name: workoutName, date: DateFormatters.dateOnly.string(from: Date()),
                               durationSeconds: elapsedSeconds, notes: workoutNotes.isEmpty ? nil : workoutNotes,
                               createdAt: ISO8601DateFormatter().string(from: Date()))

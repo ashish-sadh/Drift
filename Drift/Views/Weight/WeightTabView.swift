@@ -60,6 +60,13 @@ struct WeightTabView: View {
             WeightEntryView(unit: viewModel.weightUnit) { value, date in viewModel.addWeight(value: value, date: date) }
         }
         .onAppear { viewModel.loadEntries() }
+        .task {
+            // Sync latest weight from Apple Health each time the tab appears
+            #if !targetEnvironment(simulator)
+            let _ = try? await HealthKitService.shared.syncWeight()
+            viewModel.loadEntries()
+            #endif
+        }
         .onChange(of: syncComplete) { _, done in
             if done { viewModel.loadEntries() }
         }
