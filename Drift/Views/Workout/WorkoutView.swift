@@ -80,6 +80,7 @@ struct WorkoutView: View {
                     HStack {
                         Text("Templates").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
                         Spacer()
+                        Text("\(templates.count)").font(.caption.monospacedDigit()).foregroundStyle(.tertiary)
                         Button { showingCreateTemplate = true } label: {
                             Label("New", systemImage: "plus").font(.caption)
                         }
@@ -89,6 +90,7 @@ struct WorkoutView: View {
                         Text("Save a workout as template or create one here")
                             .font(.caption).foregroundStyle(.tertiary)
                     } else {
+                        ScrollView {
                         ForEach(templates) { t in
                             HStack {
                                 Button {
@@ -126,6 +128,9 @@ struct WorkoutView: View {
                                 Button { WorkoutService.clearSession(); selectedTemplate = t; showingNewWorkout = true } label: {
                                     Label("Start Workout", systemImage: "play")
                                 }
+                                Button { previewTemplate = t } label: {
+                                    Label("Preview", systemImage: "eye")
+                                }
                                 if let tid = t.id {
                                     Button {
                                         try? WorkoutService.toggleFavorite(id: tid)
@@ -133,6 +138,7 @@ struct WorkoutView: View {
                                     } label: {
                                         Label(t.isFavorite ? "Unfavorite" : "Favorite", systemImage: t.isFavorite ? "star.slash" : "star")
                                     }
+                                    Divider()
                                     Button(role: .destructive) {
                                         try? AppDatabase.shared.writer.write { db in _ = try WorkoutTemplate.deleteOne(db, id: tid) }
                                         loadData()
@@ -140,6 +146,7 @@ struct WorkoutView: View {
                                 }
                             }
                         }
+                        }.frame(maxHeight: templates.count > 4 ? 280 : .infinity)
                     }
                 }
                 .card()
@@ -363,6 +370,7 @@ struct WorkoutDetailView: View {
     @State private var sets: [WorkoutSet] = []
     @State private var showingShare = false
     @State private var showingSaveTemplate = false
+    @State private var saveTemplateName = ""
 
     private var shareText: String {
         var t = "💪 \(summary.workout.name)\n📅 \(formatDate(summary.workout.date))\n"
@@ -431,7 +439,7 @@ struct WorkoutDetailView: View {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
                     Button { showingShare = true } label: { Label("Share", systemImage: "square.and.arrow.up") }
-                    Button { saveAsTemplate() } label: { Label("Save as Template", systemImage: "doc.on.doc") }
+                    Button { saveTemplateName = summary.workout.name; showingSaveTemplate = true } label: { Label("Save as Template", systemImage: "doc.on.doc") }
                     if let wid = summary.workout.id {
                         Divider()
                         Button(role: .destructive) {
@@ -444,6 +452,13 @@ struct WorkoutDetailView: View {
             }
         }
         .sheet(isPresented: $showingShare) { ShareSheet(text: shareText) }
+        .alert("Save as Template", isPresented: $showingSaveTemplate) {
+            TextField("Template name", text: $saveTemplateName)
+            Button("Save") { saveAsTemplate(name: saveTemplateName) }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Enter a name for this template")
+        }
         .onAppear { if let wid = summary.workout.id { sets = (try? WorkoutService.fetchSets(forWorkout: wid)) ?? [] } }
     }
 
@@ -459,7 +474,7 @@ struct WorkoutDetailView: View {
         return ""
     }
 
-    private func saveAsTemplate() {
+    private func saveAsTemplate(name: String? = nil) {
         // Determine warmup vs working from the saved sets
         let warmupNames = Set(sets.filter(\.isWarmup).map(\.exerciseName))
         let exercises = summary.exercises.map { name in
@@ -469,7 +484,8 @@ struct WorkoutDetailView: View {
                                                     restSeconds: isW ? 30 : 90)
         }
         if let json = try? JSONEncoder().encode(exercises), let jsonStr = String(data: json, encoding: .utf8) {
-            var t = WorkoutTemplate(name: summary.workout.name, exercisesJson: jsonStr, createdAt: ISO8601DateFormatter().string(from: Date()))
+            let templateName = (name?.isEmpty ?? true) ? summary.workout.name : name!
+            var t = WorkoutTemplate(name: templateName, exercisesJson: jsonStr, createdAt: ISO8601DateFormatter().string(from: Date()))
             try? WorkoutService.saveTemplate(&t)
         }
     }
@@ -486,7 +502,7 @@ struct ActiveWorkoutView: View {
     var template: WorkoutTemplate? = nil
     let onComplete: () -> Void
     @Environment(\.dismiss) private var dismiss
-    @State private var workoutName = "Workout"
+    @State private var workoutName = defaultWorkoutName()
     @State private var workoutNotes = ""
     @State private var exercises: [ActiveExercise] = []
     @State private var showingExercisePicker = false
@@ -666,7 +682,7 @@ struct ActiveWorkoutView: View {
                         Label("Remove Exercise", systemImage: "trash")
                     }
                 } label: {
-                    Image(systemName: "ellipsis").font(.caption).foregroundStyle(.secondary)
+                    Image(systemName: "xmark.circle.fill").font(.subheadline).foregroundStyle(.tertiary)
                 }
             }
 
@@ -935,6 +951,16 @@ struct ActiveWorkoutView: View {
             try WorkoutService.saveSets(allSets)
             onComplete(); dismiss()
         } catch { Log.app.error("Save workout: \(error.localizedDescription)") }
+    }
+
+    private static func defaultWorkoutName() -> String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case 5..<12: return "Morning Workout"
+        case 12..<17: return "Afternoon Workout"
+        case 17..<21: return "Evening Workout"
+        default: return "Night Workout"
+        }
     }
 
     private func formatDuration(_ s: Int) -> String {
