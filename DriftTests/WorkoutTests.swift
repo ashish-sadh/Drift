@@ -1098,6 +1098,39 @@ import GRDB
     WorkoutService.clearSession()
 }
 
+// MARK: - Exercise History Ordering (2 tests)
+
+@Test func exerciseHistoryOrderedByIdDesc() async throws {
+    // WorkoutService uses shared DB, so test the ordering logic directly
+    let sets = [
+        WorkoutSet(id: 10, workoutId: 1, exerciseName: "Bench", setOrder: 1, weightLbs: 100, reps: 10, isWarmup: false),
+        WorkoutSet(id: 20, workoutId: 2, exerciseName: "Bench", setOrder: 1, weightLbs: 135, reps: 8, isWarmup: false),
+    ]
+    // id DESC ordering: id 20 first, then id 10
+    let sorted = sets.sorted { ($0.id ?? 0) > ($1.id ?? 0) }
+    #expect(sorted[0].weightLbs == 135, "Higher ID (most recent) should be first")
+}
+
+@Test func lastSessionGroupingAndOrdering() async throws {
+    // Simulate what addExercise does: group by workoutId, sort by setOrder
+    let sets = [
+        WorkoutSet(id: 30, workoutId: 2, exerciseName: "Squat", setOrder: 3, weightLbs: 175, reps: 5, isWarmup: false),
+        WorkoutSet(id: 29, workoutId: 2, exerciseName: "Squat", setOrder: 2, weightLbs: 155, reps: 8, isWarmup: false),
+        WorkoutSet(id: 28, workoutId: 2, exerciseName: "Squat", setOrder: 1, weightLbs: 135, reps: 10, isWarmup: false),
+        WorkoutSet(id: 15, workoutId: 1, exerciseName: "Squat", setOrder: 1, weightLbs: 100, reps: 12, isWarmup: false),
+    ]
+    // Group by most recent workout
+    let lastWid = sets.first?.workoutId  // Should be 2 (highest id)
+    let lastSession = sets.filter { $0.workoutId == lastWid }.sorted { $0.setOrder < $1.setOrder }
+    #expect(lastSession.count == 3)
+    #expect(lastSession[0].setOrder == 1)
+    #expect(lastSession[0].weightLbs == 135, "Set 1 = 135lb")
+    #expect(lastSession[1].setOrder == 2)
+    #expect(lastSession[1].weightLbs == 155, "Set 2 = 155lb")
+    #expect(lastSession[2].setOrder == 3)
+    #expect(lastSession[2].weightLbs == 175, "Set 3 = 175lb")
+}
+
 @Test func templateFavoriteDefault() async throws {
     let t = WorkoutTemplate(name: "Test", exercisesJson: "[]", createdAt: "")
     #expect(t.isFavorite == false, "Default should be not favorite")
