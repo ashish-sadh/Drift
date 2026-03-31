@@ -211,7 +211,7 @@ struct WorkoutView: View {
 
                         if !warmups.isEmpty {
                             Text("WARMUP").font(.caption2.weight(.bold)).foregroundStyle(Theme.fatYellow)
-                            ForEach(warmups, id: \.name) { ex in
+                            ForEach(Array(warmups.enumerated()), id: \.offset) { _, ex in
                                 HStack {
                                     Text("W").font(.caption2.weight(.bold)).foregroundStyle(Theme.fatYellow)
                                         .padding(.horizontal, 3).padding(.vertical, 1)
@@ -229,7 +229,7 @@ struct WorkoutView: View {
 
                         if !working.isEmpty {
                             Text("EXERCISES").font(.caption2.weight(.bold)).foregroundStyle(Theme.calorieBlue)
-                            ForEach(Array(working.enumerated()), id: \.element.name) { i, ex in
+                            ForEach(Array(working.enumerated()), id: \.offset) { i, ex in
                                 NavigationLink {
                                     ExerciseDetailView(exerciseName: ex.name, info: ExerciseDatabase.info(for: ex.name))
                                 } label: {
