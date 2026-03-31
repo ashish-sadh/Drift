@@ -830,6 +830,53 @@ import GRDB
     #expect(w.durationDisplay == "1m")
 }
 
+// MARK: - Template Encoding Roundtrip (3 tests)
+
+@Test func templateFullRoundtripWithAllFields() async throws {
+    let original: [WorkoutTemplate.TemplateExercise] = [
+        .init(name: "Bench Press", sets: 3, isWarmup: false, restSeconds: 150, notes: "6-8 reps, controlled"),
+        .init(name: "Band Pull Aparts", sets: 2, isWarmup: true, restSeconds: 30, notes: "2x10"),
+        .init(name: "Dips", sets: 4, isWarmup: false, restSeconds: 120),
+    ]
+    let data = try JSONEncoder().encode(original)
+    let decoded = try JSONDecoder().decode([WorkoutTemplate.TemplateExercise].self, from: data)
+    #expect(decoded.count == 3)
+    for i in 0..<3 {
+        #expect(decoded[i].name == original[i].name)
+        #expect(decoded[i].sets == original[i].sets)
+        #expect(decoded[i].isWarmup == original[i].isWarmup)
+        #expect(decoded[i].restSeconds == original[i].restSeconds)
+        #expect(decoded[i].notes == original[i].notes)
+    }
+}
+
+@Test func templateWithUnicodeNotes() async throws {
+    let ex = WorkoutTemplate.TemplateExercise(name: "Squat", sets: 5, notes: "Heavy! 💪 Go deep")
+    let data = try JSONEncoder().encode([ex])
+    let decoded = try JSONDecoder().decode([WorkoutTemplate.TemplateExercise].self, from: data)
+    #expect(decoded[0].notes == "Heavy! 💪 Go deep")
+}
+
+@Test func templateExerciseDefaultValues() async throws {
+    let ex = WorkoutTemplate.TemplateExercise(name: "Test", sets: 3)
+    #expect(ex.isWarmup == false)
+    #expect(ex.restSeconds == 90)
+    #expect(ex.notes == nil)
+}
+
+// MARK: - Exercise History Tests (2 tests)
+
+@Test func exerciseHistoryEmptyForNewExercise() async throws {
+    // A brand new exercise should have no history
+    let history = try WorkoutService.fetchExerciseHistory(name: "CompletelyMadeUpExercise12345")
+    #expect(history.isEmpty)
+}
+
+@Test func exercisePRNilForNewExercise() async throws {
+    let pr = try WorkoutService.fetchPR(for: "CompletelyMadeUpExercise12345")
+    #expect(pr == nil)
+}
+
 @Test func templateMixedOldNewFormat() async throws {
     // Mix of old (no warmup field) and new (with warmup field) entries
     let json = #"[{"name":"Old Ex","sets":3},{"name":"New Ex","sets":2,"isWarmup":true,"restSeconds":30,"notes":"test"}]"#
