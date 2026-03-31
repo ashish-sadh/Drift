@@ -969,6 +969,34 @@ import GRDB
     #expect(all.count >= dbOnly.count, "allWithCustom should include DB + custom")
 }
 
+// MARK: - Search Edge Cases (5 tests)
+
+@Test func searchSingleChar() async throws {
+    let results = ExerciseDatabase.search(query: "a")
+    #expect(results.count > 100, "Single char should match many exercises")
+}
+
+@Test func searchSpecialChars() async throws {
+    let results = ExerciseDatabase.search(query: "(")
+    // Should not crash
+    #expect(results.count >= 0)
+}
+
+@Test func searchWhitespace() async throws {
+    let results = ExerciseDatabase.search(query: "  bench  press  ")
+    #expect(!results.isEmpty, "Extra whitespace should still match")
+}
+
+@Test func searchNoResultsGraceful() async throws {
+    let results = ExerciseDatabase.search(query: "xyznonexistent12345")
+    #expect(results.isEmpty)
+}
+
+@Test func searchEmptyString() async throws {
+    let results = ExerciseDatabase.search(query: "")
+    #expect(results.count > 800, "Empty query should return all exercises")
+}
+
 @Test func templateMixedOldNewFormat() async throws {
     // Mix of old (no warmup field) and new (with warmup field) entries
     let json = #"[{"name":"Old Ex","sets":3},{"name":"New Ex","sets":2,"isWarmup":true,"restSeconds":30,"notes":"test"}]"#
