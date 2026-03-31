@@ -1277,6 +1277,18 @@ import GRDB
     #expect(food.calories * multiplier == 152)
 }
 
+@Test func smartUnitsAlmondCount() async throws {
+    let food = Food(name: "Almonds, Raw", category: "Nuts", servingSize: 28, servingUnit: "g", calories: 164)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.contains(where: { $0.label == "almond" }), "Almonds should have per-piece unit")
+    let almondUnit = units.first(where: { $0.label == "almond" })!
+    #expect(abs(almondUnit.gramsEquivalent - 1.2) < 0.01, "1 almond ≈ 1.2g")
+    // 10 almonds = 12g, multiplier = 12/28 ≈ 0.43
+    let tenAlmonds = 10.0 * almondUnit.gramsEquivalent
+    let multiplier = tenAlmonds / food.servingSize
+    #expect(abs(multiplier - 0.4286) < 0.01)
+}
+
 @Test func smartUnitsOilTbsp() async throws {
     let food = Food(name: "Olive Oil (1 tbsp)", category: "Oils", servingSize: 14, servingUnit: "g", calories: 120)
     let units = FoodUnit.smartUnits(for: food)
