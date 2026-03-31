@@ -211,22 +211,26 @@ struct WorkoutView: View {
                         if !working.isEmpty {
                             Text("EXERCISES").font(.caption2.weight(.bold)).foregroundStyle(Theme.calorieBlue)
                             ForEach(Array(working.enumerated()), id: \.element.name) { i, ex in
-                                HStack {
-                                    Text("\(i + 1)").font(.caption.weight(.bold)).foregroundStyle(.secondary).frame(width: 20)
-                                    VStack(alignment: .leading, spacing: 1) {
-                                        Text(ex.name).font(.subheadline)
-                                        HStack(spacing: 4) {
-                                            Text("\(ex.sets) sets").font(.caption2).foregroundStyle(.tertiary)
-                                            if let notes = ex.notes {
-                                                Text("\u{00B7}").font(.caption2).foregroundStyle(.quaternary)
-                                                Text(notes).font(.caption2).foregroundStyle(.secondary).italic()
+                                NavigationLink {
+                                    ExerciseDetailView(exerciseName: ex.name, info: ExerciseDatabase.info(for: ex.name))
+                                } label: {
+                                    HStack {
+                                        Text("\(i + 1)").font(.caption.weight(.bold)).foregroundStyle(.secondary).frame(width: 20)
+                                        VStack(alignment: .leading, spacing: 1) {
+                                            Text(ex.name).font(.subheadline)
+                                            HStack(spacing: 4) {
+                                                Text("\(ex.sets) sets").font(.caption2).foregroundStyle(.tertiary)
+                                                if let notes = ex.notes {
+                                                    Text("\u{00B7}").font(.caption2).foregroundStyle(.quaternary)
+                                                    Text(notes).font(.caption2).foregroundStyle(.secondary).italic()
+                                                }
                                             }
                                         }
+                                        Spacer()
+                                        Text("\(ex.restSeconds/60):\(String(format: "%02d", ex.restSeconds%60))")
+                                            .font(.caption2.monospacedDigit()).foregroundStyle(.tertiary)
                                     }
-                                    Spacer()
-                                    Text("\(ex.restSeconds/60):\(String(format: "%02d", ex.restSeconds%60))")
-                                        .font(.caption2.monospacedDigit()).foregroundStyle(.tertiary)
-                                }
+                                }.tint(.primary)
                             }
                         }
 
