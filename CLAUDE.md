@@ -5,7 +5,7 @@ Read `Docs/project-state.md` first - it has the complete project state, tech sta
 
 ## Key Rules
 - Build and test locally after every change: `xcodebuild build` then `xcodebuild test`
-- All 559+ tests must pass before committing
+- All 566+ tests must pass before committing
 - Don't upload to TestFlight unless the user says "publish"
 - Internal group (Drift Myself) gets every build automatically
 - Only push to external group when explicitly asked
@@ -19,7 +19,7 @@ Read `Docs/project-state.md` first - it has the complete project state, tech sta
 - Default: assume losing weight
 
 ## Testing
-- 559 tests across 7 files
+- 566 tests across 12 files
 - Run: `xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro'`
 - Check failures: pipe to `grep "✘"` - empty = all pass
 - See `Docs/testing-process.md` for simulation testing
