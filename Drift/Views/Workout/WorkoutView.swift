@@ -953,7 +953,7 @@ struct ExercisePickerView: View {
                         Label("Create Custom Exercise", systemImage: "plus.circle.fill").foregroundStyle(Theme.accent)
                     }
 
-                    // History exercises (not in DB)
+                    // History exercises (logged before but not in DB)
                     if !historyExtras.isEmpty {
                         Section("Your Exercises") {
                             ForEach(historyExtras, id: \.self) { name in
@@ -961,6 +961,9 @@ struct ExercisePickerView: View {
                                     HStack {
                                         Text(name).font(.subheadline)
                                         Spacer()
+                                        if let lastW = try? WorkoutService.lastWeight(for: name) {
+                                            Text("\(Int(lastW)) lb").font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
+                                        }
                                         Text(ExerciseDatabase.bodyPart(for: name)).font(.caption2).foregroundStyle(.tertiary)
                                     }
                                 }.tint(.primary)
