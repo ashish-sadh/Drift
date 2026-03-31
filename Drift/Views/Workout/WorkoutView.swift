@@ -15,6 +15,9 @@ struct WorkoutView: View {
     @State private var isLoading = true
     @State private var selectedTemplate: WorkoutTemplate? = nil
     @State private var previewTemplate: WorkoutTemplate? = nil
+    @State private var renameTemplateId: Int64?
+    @State private var renameTemplateName = ""
+    @State private var showingRenameAlert = false
 
     @State private var activeCalories: Double = 0
     @State private var steps: Double = 0
@@ -137,6 +140,13 @@ struct WorkoutView: View {
                                         loadData()
                                     } label: {
                                         Label(t.isFavorite ? "Unfavorite" : "Favorite", systemImage: t.isFavorite ? "star.slash" : "star")
+                                    }
+                                    Button {
+                                        renameTemplateId = tid
+                                        renameTemplateName = t.name
+                                        showingRenameAlert = true
+                                    } label: {
+                                        Label("Rename", systemImage: "pencil")
                                     }
                                     Divider()
                                     Button(role: .destructive) {
@@ -285,6 +295,19 @@ struct WorkoutView: View {
             .presentationDetents([.medium, .large])
         }
         .fileImporter(isPresented: $showingImport, allowedContentTypes: [.commaSeparatedText]) { handleImport($0) }
+        .alert("Rename Template", isPresented: $showingRenameAlert) {
+            TextField("Name", text: $renameTemplateName)
+            Button("Save") {
+                if let tid = renameTemplateId {
+                    try? AppDatabase.shared.writer.write { db in
+                        try db.execute(sql: "UPDATE workout_template SET name = ? WHERE id = ?",
+                                       arguments: [renameTemplateName, tid])
+                    }
+                    loadData()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        }
         .onAppear { loadData() }
         .onChange(of: showingNewWorkout) { _, showing in if !showing { loadData() } }
         .onChange(of: showingCreateTemplate) { _, showing in if !showing { loadData() } }
