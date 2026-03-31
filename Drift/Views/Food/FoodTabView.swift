@@ -279,6 +279,13 @@ struct FoodTabView: View {
         }
         .contextMenu {
             Button {
+                try? AppDatabase.shared.toggleFoodFavorite(name: entry.foodName, foodId: entry.foodId)
+                viewModel.loadSuggestions()
+            } label: {
+                let isFav = (try? AppDatabase.shared.isFoodFavorite(name: entry.foodName)) ?? false
+                Label(isFav ? "Unfavorite" : "Favorite", systemImage: isFav ? "star.slash" : "star")
+            }
+            Button {
                 viewModel.quickAdd(name: entry.foodName, calories: entry.totalCalories,
                                    proteinG: entry.totalProtein, carbsG: entry.totalCarbs,
                                    fatG: entry.totalFat, fiberG: entry.totalFiber,
@@ -333,6 +340,15 @@ struct FoodTabView: View {
                             Button { viewModel.quickLogFood(food); reload() } label: {
                                 Image(systemName: "plus.circle.fill").foregroundStyle(Theme.accent)
                             }.buttonStyle(.plain)
+                        }
+                        .contextMenu {
+                            Button {
+                                try? AppDatabase.shared.toggleFoodFavorite(name: food.name, foodId: food.id)
+                                viewModel.loadSuggestions()
+                            } label: {
+                                let isFav = (try? AppDatabase.shared.isFoodFavorite(name: food.name)) ?? false
+                                Label(isFav ? "Unfavorite" : "Favorite", systemImage: isFav ? "star.slash" : "star")
+                            }
                         }
                         .padding(.vertical, 2)
                     }
