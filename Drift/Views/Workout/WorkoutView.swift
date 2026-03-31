@@ -808,12 +808,13 @@ struct ExercisePickerView: View {
                                     HStack {
                                         Text(ex.name).font(.subheadline)
                                         Spacer()
+                                        // Show last weight if user has history
+                                        if let lastW = try? WorkoutService.lastWeight(for: ex.name) {
+                                            Text("\(Int(lastW)) lb").font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
+                                        }
                                         Text(ex.bodyPart).font(.caption2).foregroundStyle(.tertiary)
                                     }
-                                    HStack(spacing: 6) {
-                                        Text(ex.equipment).font(.system(size: 9)).foregroundStyle(.tertiary)
-                                        Text(ex.primaryMuscles.joined(separator: ", ")).font(.system(size: 9)).foregroundStyle(.quaternary)
-                                    }
+                                    Text(ex.equipment).font(.system(size: 9)).foregroundStyle(.quaternary)
                                 }
                             }.tint(.primary)
                         }
