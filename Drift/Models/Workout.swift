@@ -91,12 +91,14 @@ struct WorkoutTemplate: Identifiable, Codable, Sendable, FetchableRecord, Persis
     var name: String
     var exercisesJson: String  // JSON: [{"name": "Bench Press", "sets": 3}]
     var createdAt: String
+    var isFavorite: Bool = false
 
     static let databaseTableName = "workout_template"
     enum CodingKeys: String, CodingKey {
         case id, name
         case exercisesJson = "exercises_json"
         case createdAt = "created_at"
+        case isFavorite = "is_favorite"
     }
     mutating func didInsert(_ inserted: InsertionSuccess) { id = inserted.rowID }
 

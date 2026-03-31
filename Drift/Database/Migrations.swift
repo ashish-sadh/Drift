@@ -284,5 +284,12 @@ enum Migrations {
             try db.create(index: "idx_food_usage_count", on: "food_usage", columns: ["use_count"])
             try db.create(index: "idx_food_usage_last", on: "food_usage", columns: ["last_used"])
         }
+
+        // v14: Template favorites
+        migrator.registerMigration("v14_template_favorites") { db in
+            try db.alter(table: "workout_template") { t in
+                t.add(column: "is_favorite", .boolean).notNull().defaults(to: false)
+            }
+        }
     }
 }

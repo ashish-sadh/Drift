@@ -44,7 +44,13 @@ enum WorkoutService {
 
     static func fetchTemplates() throws -> [WorkoutTemplate] {
         try db.reader.read { dbConn in
-            try WorkoutTemplate.fetchAll(dbConn)
+            try WorkoutTemplate.order(Column("is_favorite").desc, Column("created_at").desc).fetchAll(dbConn)
+        }
+    }
+
+    static func toggleFavorite(id: Int64) throws {
+        try db.writer.write { dbConn in
+            try dbConn.execute(sql: "UPDATE workout_template SET is_favorite = NOT is_favorite WHERE id = ?", arguments: [id])
         }
     }
 

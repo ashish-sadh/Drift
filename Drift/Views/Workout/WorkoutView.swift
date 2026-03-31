@@ -58,7 +58,11 @@ struct WorkoutView: View {
                 }
 
                 // Body recovery map
-                BodyMapView()
+                BodyMapView { template in
+                    WorkoutService.clearSession()
+                    selectedTemplate = template
+                    showingNewWorkout = true
+                }
 
                 if !weeklyCounts.isEmpty { consistencyChart }
 
@@ -91,7 +95,12 @@ struct WorkoutView: View {
                                     previewTemplate = t
                                 } label: {
                                     VStack(alignment: .leading, spacing: 2) {
-                                        Text(t.name).font(.subheadline.weight(.medium))
+                                        HStack(spacing: 4) {
+                                            if t.isFavorite {
+                                                Image(systemName: "star.fill").font(.caption2).foregroundStyle(Theme.fatYellow)
+                                            }
+                                            Text(t.name).font(.subheadline.weight(.medium))
+                                        }
                                         let working = t.exercises.filter { !$0.isWarmup }
                                         let warmupCount = t.exercises.filter(\.isWarmup).count
                                         Text(working.map(\.name).prefix(3).joined(separator: ", "))
@@ -118,6 +127,12 @@ struct WorkoutView: View {
                                     Label("Start Workout", systemImage: "play")
                                 }
                                 if let tid = t.id {
+                                    Button {
+                                        try? WorkoutService.toggleFavorite(id: tid)
+                                        loadData()
+                                    } label: {
+                                        Label(t.isFavorite ? "Unfavorite" : "Favorite", systemImage: t.isFavorite ? "star.slash" : "star")
+                                    }
                                     Button(role: .destructive) {
                                         try? AppDatabase.shared.writer.write { db in _ = try WorkoutTemplate.deleteOne(db, id: tid) }
                                         loadData()

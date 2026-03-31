@@ -2,7 +2,7 @@ import Foundation
 
 /// Seeds default workout templates on first launch. Respects user edits - only seeds if no templates exist.
 enum DefaultTemplates {
-    private static let seededKey = "drift_default_templates_v2"
+    private static let seededKey = "drift_default_templates_v3"
 
     static func seedIfNeeded() {
         guard !UserDefaults.standard.bool(forKey: seededKey) else { return }
@@ -11,12 +11,12 @@ enum DefaultTemplates {
             return
         }
 
-        for template in programTemplates {
+        for template in allTemplates {
             var t = template
             try? WorkoutService.saveTemplate(&t)
         }
 
-        // Add all custom exercises that aren't in the 873 DB
+        // Add all custom exercises not in the 873 DB
         let dbNames = Set(ExerciseDatabase.all.map { $0.name.lowercased() })
         for (name, bodyPart) in customExercises {
             if !dbNames.contains(name.lowercased()) {
@@ -25,10 +25,10 @@ enum DefaultTemplates {
         }
 
         UserDefaults.standard.set(true, forKey: seededKey)
-        Log.app.info("Seeded \(programTemplates.count) default workout templates")
+        Log.app.info("Seeded \(allTemplates.count) default workout templates")
     }
 
-    /// Exercises not in the free-exercise-db that need to be added as custom
+    /// All custom exercises needed across all programs
     private static let customExercises: [(String, String)] = [
         // Warmup
         ("Banded Shoulder Rotations", "Shoulders"),
@@ -38,118 +38,281 @@ enum DefaultTemplates {
         ("Rope Pulling Machine", "Full Body"),
         ("Ladder Drill", "Full Body"),
         ("90/90 Hip Stretch + Extensions", "Legs"),
+        ("90/90 Switches", "Legs"),
+        ("Banded Lateral Walks", "Legs"),
         // Chest
         ("Incline Chest Press", "Chest"),
         ("Standing Cable Chest Flies (High to Low)", "Chest"),
+        ("Assisted Dips", "Chest"),
         // Core
         ("Crunch Machine", "Core"),
         ("Yoga Ball Pike", "Core"),
         ("Woodchopper", "Core"),
         ("Paloff Press", "Core"),
+        ("Copenhagen Planks", "Core"),
+        ("Side Planks", "Core"),
+        ("Dragon Flags", "Core"),
         // Back
         ("High Rows", "Back"),
         ("TRX Rows", "Back"),
         ("Assisted Pull-Ups", "Back"),
+        ("Seated Supinating Rows", "Back"),
+        ("Chest Supported Row", "Back"),
         // Arms
         ("Wrist Extension", "Arms"),
         ("Wrist Flexion", "Arms"),
         ("Barbell Wrist Rolls", "Arms"),
         ("Plate Pinches", "Arms"),
+        ("Crossbody Hammer Curls", "Arms"),
+        ("Overhead Tricep Extensions", "Arms"),
+        ("Cable Tricep Extensions", "Arms"),
+        ("Reverse Curls", "Arms"),
         // Legs
         ("Bulgarian Split Squats", "Legs"),
-        // Common gym exercises not in the 873 DB
+        ("Heavy Suitcase Carries", "Full Body"),
+        ("Hip Abduction Machine", "Legs"),
+        ("Hip Adduction Machine", "Legs"),
+        ("Seated Hamstring Curl", "Legs"),
+        ("Single Leg Deadlift", "Legs"),
+        ("Cossack Squats", "Legs"),
+        // Shoulders
+        ("Cable Lateral Raise", "Shoulders"),
+        // Full Body
         ("Ab Wheel Rollout", "Core"),
         ("Battle Ropes", "Full Body"),
         ("Box Jump", "Legs"),
         ("Mountain Climber", "Core"),
-        ("Hip Abductor Machine", "Legs"),
-        ("Hip Adductor Machine", "Legs"),
-        ("Chest Supported Row", "Back"),
-        ("Spider Curl", "Arms"),
-        ("Cable Lateral Raise", "Shoulders"),
-        ("Cable Tricep Kickback", "Arms"),
-        ("Seated Cable Row", "Back"),
         ("Machine Chest Press", "Chest"),
         ("Machine Shoulder Press", "Shoulders"),
-        ("Assisted Dips", "Chest"),
+        ("Seated Cable Row", "Back"),
+        ("Spider Curl", "Arms"),
+        ("Cable Tricep Kickback", "Arms"),
     ]
 
-    // MARK: - Trainer Program (exact from plan)
+    // MARK: - Helper
 
-    private static var programTemplates: [WorkoutTemplate] {
-        let encoder = JSONEncoder()
-        func json(_ exercises: [WorkoutTemplate.TemplateExercise]) -> String {
-            (try? encoder.encode(exercises)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
-        }
-        let now = ISO8601DateFormatter().string(from: Date())
+    private static func json(_ exercises: [WorkoutTemplate.TemplateExercise]) -> String {
+        (try? JSONEncoder().encode(exercises)).flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
+    }
+    private static let now = ISO8601DateFormatter().string(from: Date())
+    private static func w(_ name: String, sets: Int = 2, rest: Int = 15, notes: String? = nil) -> WorkoutTemplate.TemplateExercise {
+        .init(name: name, sets: sets, isWarmup: true, restSeconds: rest, notes: notes)
+    }
+    private static func e(_ name: String, sets: Int = 3, rest: Int = 90, notes: String? = nil) -> WorkoutTemplate.TemplateExercise {
+        .init(name: name, sets: sets, restSeconds: rest, notes: notes)
+    }
 
-        return [
-            // ── Day 1 - Chest/Core (Monday) ──
+    // MARK: - All Templates
+
+    private static var allTemplates: [WorkoutTemplate] {
+        program4 + program3 + program2 + program1
+    }
+
+    // MARK: - Program 4 (Current - Start 3/12/26)
+
+    private static var program4: [WorkoutTemplate] {
+        [
             WorkoutTemplate(name: "Day 1 - Chest/Core", exercisesJson: json([
-                // Warmup circuit
-                .init(name: "Banded Shoulder Rotations", sets: 2, isWarmup: true, restSeconds: 15, notes: "2x10"),
-                .init(name: "Banded Pull Aparts (Palms Up)", sets: 2, isWarmup: true, restSeconds: 15, notes: "2x10"),
-                .init(name: "Banded Pull Aparts (Palms Down)", sets: 2, isWarmup: true, restSeconds: 15, notes: "2x10"),
-                .init(name: "Shoulder Depressions", sets: 2, isWarmup: true, restSeconds: 15, notes: "2x10"),
-                .init(name: "Dumbbell Shrug", sets: 2, isWarmup: true, restSeconds: 15, notes: "2x15"),
-                // Working sets
-                .init(name: "Incline Chest Press", sets: 3, restSeconds: 150, notes: "5-8 reps"),
-                .init(name: "Dumbbell Bench Press", sets: 3, restSeconds: 120, notes: "8-10 reps"),
-                .init(name: "Dips", sets: 3, restSeconds: 120, notes: "8-12 reps"),
-                .init(name: "Leg Raise", sets: 3, restSeconds: 90, notes: "8-10 reps, Captain's Chair"),
-                .init(name: "Crunch Machine", sets: 3, restSeconds: 90, notes: "8-12 reps"),
-                .init(name: "Back Extension", sets: 3, restSeconds: 90, notes: "8-12 reps"),
-            ]), createdAt: now),
+                w("Banded Shoulder Rotations", notes: "2x10"),
+                w("Banded Pull Aparts (Palms Up)", notes: "2x10"),
+                w("Banded Pull Aparts (Palms Down)", notes: "2x10"),
+                w("Shoulder Depressions", notes: "2x10"),
+                w("Dumbbell Shrug", sets: 2, notes: "2x15"),
+                e("Incline Chest Press", rest: 150, notes: "5-8 reps"),
+                e("Dumbbell Bench Press", rest: 120, notes: "8-10 reps"),
+                e("Dips", rest: 120, notes: "8-12 reps"),
+                e("Leg Raise", rest: 90, notes: "8-10 reps, Captain's Chair"),
+                e("Crunch Machine", rest: 90, notes: "8-12 reps"),
+                e("Back Extension", rest: 90, notes: "8-12 reps"),
+            ]), createdAt: now, isFavorite: true),
 
-            // ── Day 2 - Forearms/Accessories (Tuesday) ──
             WorkoutTemplate(name: "Day 2 - Forearms/Accessories", exercisesJson: json([
-                // Warmup
-                .init(name: "Rope Pulling Machine", sets: 1, isWarmup: true, restSeconds: 30, notes: "5 mins"),
-                .init(name: "Banded Shoulder Rotations", sets: 2, isWarmup: true, restSeconds: 15, notes: "2x10"),
-                // Working sets
-                .init(name: "Lat Pulldown", sets: 3, restSeconds: 105, notes: "8-10 reps, scap depression"),
-                .init(name: "High Rows", sets: 3, restSeconds: 105, notes: "8-12 reps, upper"),
-                .init(name: "Reverse Barbell Curl", sets: 3, restSeconds: 75, notes: "10-15 reps"),
-                .init(name: "Wrist Extension", sets: 3, restSeconds: 45, notes: "10-15 reps"),
-                .init(name: "Wrist Flexion", sets: 3, restSeconds: 45, notes: "10-15 reps"),
-                .init(name: "Farmer's Walk", sets: 3, restSeconds: 75, notes: "30-45 secs"),
-                .init(name: "Shoulder Press", sets: 3, restSeconds: 75, notes: "10-15 reps"),
-                .init(name: "Lateral Raise", sets: 3, restSeconds: 75, notes: "10-15 reps"),
-            ]), createdAt: now),
+                w("Rope Pulling Machine", sets: 1, rest: 30, notes: "5 mins"),
+                w("Banded Shoulder Rotations", notes: "2x10"),
+                e("Lat Pulldown", rest: 105, notes: "8-10 reps, scap depression"),
+                e("High Rows", rest: 105, notes: "8-12 reps"),
+                e("Reverse Barbell Curl", rest: 75, notes: "10-15 reps"),
+                e("Wrist Extension", rest: 45, notes: "10-15 reps"),
+                e("Wrist Flexion", rest: 45, notes: "10-15 reps"),
+                e("Farmer's Walk", rest: 75, notes: "30-45 secs"),
+                e("Shoulder Press", rest: 75, notes: "10-15 reps"),
+                e("Lateral Raise", rest: 75, notes: "10-15 reps"),
+            ]), createdAt: now, isFavorite: true),
 
-            // ── Day 3 - Chest/Core (Thursday) ──
             WorkoutTemplate(name: "Day 3 - Chest/Core", exercisesJson: json([
-                // Warmup circuit
-                .init(name: "Banded Shoulder Rotations", sets: 2, isWarmup: true, restSeconds: 15, notes: "2x10"),
-                .init(name: "Banded Pull Aparts (Palms Up)", sets: 2, isWarmup: true, restSeconds: 15, notes: "2x10"),
-                .init(name: "Banded Pull Aparts (Palms Down)", sets: 2, isWarmup: true, restSeconds: 15, notes: "2x10"),
-                .init(name: "Shoulder Depressions", sets: 2, isWarmup: true, restSeconds: 15, notes: "2x10"),
-                .init(name: "Dumbbell Shrug", sets: 2, isWarmup: true, restSeconds: 15, notes: "2x15"),
-                // Working sets
-                .init(name: "Incline Dumbbell Press", sets: 3, restSeconds: 120, notes: "10-12 reps, 30° bench"),
-                .init(name: "Push-Ups", sets: 3, restSeconds: 120, notes: "20 reps, strict then assisted"),
-                .init(name: "Standing Cable Chest Flies (High to Low)", sets: 3, restSeconds: 60, notes: "12-15 reps, shoulders down"),
-                .init(name: "Yoga Ball Pike", sets: 3, restSeconds: 75, notes: "8-12 reps, shins/knees tucked"),
-                .init(name: "Woodchopper", sets: 3, restSeconds: 75, notes: "8-15 reps, superset w/ Paloff Press"),
-                .init(name: "Decline Crunch", sets: 3, restSeconds: 75, notes: "8-15 reps, reach hands up, use weight"),
+                w("Banded Shoulder Rotations", notes: "2x10"),
+                w("Banded Pull Aparts (Palms Up)", notes: "2x10"),
+                w("Banded Pull Aparts (Palms Down)", notes: "2x10"),
+                w("Shoulder Depressions", notes: "2x10"),
+                w("Dumbbell Shrug", sets: 2, notes: "2x15"),
+                e("Incline Dumbbell Press", rest: 120, notes: "10-12 reps, 30° bench"),
+                e("Push-Ups", rest: 120, notes: "20 reps, strict then assisted"),
+                e("Standing Cable Chest Flies (High to Low)", rest: 60, notes: "12-15 reps"),
+                e("Yoga Ball Pike", rest: 75, notes: "8-12 reps"),
+                e("Woodchopper", rest: 75, notes: "8-15 reps, SS w/ Paloff Press"),
+                e("Decline Crunch", rest: 75, notes: "8-15 reps, use weight"),
+            ]), createdAt: now, isFavorite: true),
+
+            WorkoutTemplate(name: "Day 4 - Lower/Forearms", exercisesJson: json([
+                w("Ladder Drill", sets: 1, rest: 30, notes: "2-5 mins"),
+                w("90/90 Hip Stretch + Extensions", notes: "2x10"),
+                w("Banded Shoulder Rotations", notes: "2x10"),
+                w("Banded Pull Aparts (Palms Up)", notes: "2x10"),
+                w("Banded Pull Aparts (Palms Down)", notes: "2x10"),
+                e("Deadlift", rest: 150, notes: "2-3x5-8 reps"),
+                e("Assisted Pull-Ups", rest: 150, notes: "5-8 reps"),
+                e("Bulgarian Split Squats", rest: 120, notes: "8-10 reps"),
+                e("TRX Rows", rest: 105, notes: "8-12 reps"),
+                e("Hammer Curls", rest: 75, notes: "8-15 reps"),
+                e("Barbell Wrist Rolls", rest: 75, notes: "10-15 reps"),
+                e("Plate Pinches", rest: 75, notes: "20-30 secs"),
+            ]), createdAt: now, isFavorite: true),
+        ]
+    }
+
+    // MARK: - Program 3
+
+    private static var program3: [WorkoutTemplate] {
+        [
+            WorkoutTemplate(name: "P3 Day 1 - Lower", exercisesJson: json([
+                w("90/90 Switches", notes: "10 per side"),
+                w("Banded Lateral Walks", notes: "2x12"),
+                w("Seated Hamstring Curl", sets: 2, notes: "2x8-10"),
+                e("Deadlift", rest: 150, notes: "3x5-8"),
+                e("Leg Press", rest: 105, notes: "3x8-10"),
+                e("Cossack Squats", rest: 105, notes: "3x8-12"),
+                e("Leg Extensions", rest: 75, notes: "3x8-12"),
+                e("Seated Hamstring Curl", rest: 75, notes: "3x8-12"),
+                e("Hip Abduction Machine", sets: 2, rest: 60, notes: "2x8-12"),
+                e("Hip Adduction Machine", sets: 2, rest: 60, notes: "2x8-12"),
+                e("Calf Raises", rest: 60, notes: "3x8-12"),
             ]), createdAt: now),
 
-            // ── Day 4 - Lower Body/Forearms (flexible day) ──
-            WorkoutTemplate(name: "Day 4 - Lower/Forearms", exercisesJson: json([
-                // Warmup
-                .init(name: "Ladder Drill", sets: 1, isWarmup: true, restSeconds: 30, notes: "2-5 mins"),
-                .init(name: "90/90 Hip Stretch + Extensions", sets: 2, isWarmup: true, restSeconds: 15, notes: "2x10"),
-                .init(name: "Banded Shoulder Rotations", sets: 2, isWarmup: true, restSeconds: 15, notes: "2x10"),
-                .init(name: "Banded Pull Aparts (Palms Up)", sets: 2, isWarmup: true, restSeconds: 15, notes: "2x10"),
-                .init(name: "Banded Pull Aparts (Palms Down)", sets: 2, isWarmup: true, restSeconds: 15, notes: "2x10"),
-                // Working sets
-                .init(name: "Deadlift", sets: 3, restSeconds: 150, notes: "2-3x5-8 reps"),
-                .init(name: "Assisted Pull-Ups", sets: 3, restSeconds: 150, notes: "5-8 reps"),
-                .init(name: "Bulgarian Split Squats", sets: 3, restSeconds: 120, notes: "8-10 reps"),
-                .init(name: "TRX Rows", sets: 3, restSeconds: 105, notes: "8-12 reps"),
-                .init(name: "Hammer Curls", sets: 3, restSeconds: 75, notes: "8-15 reps"),
-                .init(name: "Barbell Wrist Rolls", sets: 3, restSeconds: 75, notes: "10-15 reps"),
-                .init(name: "Plate Pinches", sets: 3, restSeconds: 75, notes: "20-30 secs"),
+            WorkoutTemplate(name: "P3 Day 2 - Upper", exercisesJson: json([
+                w("Banded Shoulder Rotations", sets: 1, notes: "10 reps"),
+                w("Banded Pull Aparts (Palms Up)", notes: "2x10"),
+                w("Upright Row", sets: 2, notes: "2x12"),
+                w("Wrist Extension", sets: 2, notes: "2x12-15"),
+                w("Wrist Flexion", sets: 2, notes: "2x12-15"),
+                e("Assisted Pull-Ups", rest: 150, notes: "3x5-8"),
+                e("Incline Chest Press", sets: 4, rest: 105, notes: "4x8-12"),
+                e("Seated Supinating Rows", rest: 105, notes: "3x8-12"),
+                e("Upright Row", rest: 75, notes: "3x12-15"),
+                e("Crossbody Hammer Curls", rest: 75, notes: "3x8-12"),
+                e("Cable Tricep Extensions", rest: 75, notes: "3x8-15, SS w/ lateral raises"),
+                e("Lateral Raise", rest: 60, notes: "3x12-15"),
+            ]), createdAt: now),
+
+            WorkoutTemplate(name: "P3 Day 3 - Full Body", exercisesJson: json([
+                w("90/90 Switches", notes: "10 per side"),
+                w("Banded Lateral Walks", notes: "2x12"),
+                w("Seated Hamstring Curl", sets: 2, notes: "2x8-10"),
+                w("Banded Shoulder Rotations", sets: 1, notes: "10 reps"),
+                w("Banded Pull Aparts (Palms Up)", notes: "2x10"),
+                w("Upright Row", sets: 2, notes: "2x12"),
+                e("Deadlift", rest: 180, notes: "3x3-5"),
+                e("Bulgarian Split Squats", rest: 105, notes: "3x8-12"),
+                e("Dumbbell Bench Press", sets: 4, rest: 105, notes: "4x8-12"),
+                e("Shoulder Press", rest: 75, notes: "3x10-15"),
+                e("Lat Pulldown", rest: 75, notes: "3x8-12, palms facing you"),
+                e("Dumbbell Row", rest: 75, notes: "3x8-12"),
+                e("Heavy Suitcase Carries", rest: 60, notes: "3x40-60 secs"),
+            ]), createdAt: now),
+
+            WorkoutTemplate(name: "P3 Day 4 - Core/Arms/Shoulders", exercisesJson: json([
+                e("Crunch Machine", rest: 75, notes: "3x10-12, do obliques too"),
+                e("Leg Raise", rest: 75, notes: "3x8-15, or dragon flags"),
+                e("Face Pull", sets: 4, rest: 75, notes: "4x10-15"),
+                e("Overhead Tricep Extensions", sets: 4, rest: 75, notes: "4x8-12"),
+                e("Reverse Curls", sets: 4, rest: 75, notes: "4x8-12"),
+                e("Lateral Raise", sets: 4, rest: 75, notes: "4x12-15"),
+            ]), createdAt: now),
+        ]
+    }
+
+    // MARK: - Program 2
+
+    private static var program2: [WorkoutTemplate] {
+        [
+            WorkoutTemplate(name: "P2 Day 1 - Upper 1", exercisesJson: json([
+                w("TRX Rows", notes: "2x10, easy-medium"),
+                w("90/90 Switches", notes: "8 per side"),
+                w("Dumbbell Shrug", sets: 2, notes: "Shrugs warmup"),
+                e("Deadlift", rest: 150, notes: "3x5-8"),
+                e("Seated Supinating Rows", rest: 105, notes: "3x8-12"),
+                e("Dumbbell Bench Press", sets: 4, rest: 105, notes: "4x8-12"),
+                e("Shoulder Press", rest: 75, notes: "3x12-15"),
+                e("Upright Row", rest: 75, notes: "3x12-15"),
+                e("Crossbody Hammer Curls", rest: 75, notes: "3x8-12"),
+                e("Heavy Suitcase Carries", rest: 45, notes: "3x40-60 secs"),
+            ]), createdAt: now),
+
+            WorkoutTemplate(name: "P2 Day 2 - Upper 2", exercisesJson: json([
+                w("Banded Shoulder Rotations", sets: 1, notes: "10 reps"),
+                w("Banded Pull Aparts (Palms Up)", notes: "2x10"),
+                w("Upright Row", sets: 2, notes: "2x12"),
+                e("Assisted Pull-Ups", rest: 150, notes: "3x5-8"),
+                e("Incline Chest Press", sets: 4, rest: 105, notes: "4x8-12"),
+                e("Bent-Over Row", rest: 105, notes: "3x8-12"),
+                e("Lat Pulldown", rest: 105, notes: "3x8-12, palms facing you"),
+                e("Cossack Squats", rest: 105, notes: "3x8-12"),
+                e("Cable Tricep Extensions", rest: 75, notes: "3x8-15, SS w/ lateral raises"),
+                e("Lateral Raise", rest: 60, notes: "3x12-15"),
+            ]), createdAt: now),
+
+            WorkoutTemplate(name: "P2 Day 3 - Lower", exercisesJson: json([
+                w("Banded Lateral Walks", notes: "2x12"),
+                w("Seated Hamstring Curl", sets: 2, notes: "2x8-10"),
+                e("Leg Press", rest: 105, notes: "3x8-10"),
+                e("Romanian Deadlift", rest: 105, notes: "3x8-10"),
+                e("Bulgarian Split Squats", rest: 105, notes: "3x8-12"),
+                e("Leg Extensions", rest: 75, notes: "3x8-12"),
+                e("Seated Hamstring Curl", rest: 75, notes: "3x8-12"),
+                e("Hip Abduction Machine", rest: 60, notes: "3x10-12, SS w/ adduction"),
+                e("Hip Adduction Machine", rest: 60, notes: "3x10-12"),
+                e("Calf Raises", rest: 60, notes: "3x8-12"),
+            ]), createdAt: now),
+
+            WorkoutTemplate(name: "P2 Day 4 - Core/Arms/Shoulders", exercisesJson: json([
+                e("Crunch Machine", rest: 75, notes: "3x10-12, do obliques too"),
+                e("Leg Raise", rest: 75, notes: "3x8-15, or dragon flags"),
+                e("Face Pull", sets: 4, rest: 75, notes: "4x10-15"),
+                e("Overhead Tricep Extensions", sets: 4, rest: 75, notes: "4x8-12"),
+                e("Reverse Curls", sets: 4, rest: 75, notes: "4x8-12"),
+                e("Lateral Raise", sets: 4, rest: 75, notes: "4x12-15"),
+            ]), createdAt: now),
+        ]
+    }
+
+    // MARK: - Program 1
+
+    private static var program1: [WorkoutTemplate] {
+        [
+            WorkoutTemplate(name: "P1 Lower + Core", exercisesJson: json([
+                e("Deadlift", rest: 150, notes: "3x5-8"),
+                e("Bulgarian Split Squats", rest: 105, notes: "3x8-12"),
+                e("Seated Hamstring Curl", rest: 75, notes: "3x8-12"),
+                e("Hip Adduction Machine", rest: 75, notes: "3x8-15"),
+                e("Heavy Suitcase Carries", rest: 60, notes: "3x30-60 secs"),
+                e("Leg Raise", rest: 75, notes: "3x8-15, or dragon flags"),
+            ]), createdAt: now),
+
+            WorkoutTemplate(name: "P1 Upper", exercisesJson: json([
+                e("Assisted Pull-Ups", rest: 150, notes: "3x8-12"),
+                e("Dumbbell Bench Press", rest: 105, notes: "3x8-12"),
+                e("Seated Cable Row", rest: 75, notes: "3x8-15"),
+                e("Bicep Curl", sets: 3, rest: 75, notes: "2-3x8-12"),
+                e("Tricep Extension", sets: 3, rest: 75, notes: "2-3x8-12"),
+                e("Lateral Raise", sets: 3, rest: 75, notes: "2-3x8-15"),
+            ]), createdAt: now),
+
+            WorkoutTemplate(name: "P1 Full Body + Core", exercisesJson: json([
+                e("Leg Press", rest: 105, notes: "3x8-15"),
+                e("Incline Dumbbell Press", rest: 105, notes: "3x8-12"),
+                e("High Rows", rest: 75, notes: "3x8-15"),
+                e("Assisted Dips", rest: 75, notes: "3x8-12"),
+                e("Back Extension", rest: 75, notes: "3x8-12"),
+                e("Side Planks", rest: 60, notes: "3 sets"),
             ]), createdAt: now),
         ]
     }

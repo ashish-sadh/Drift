@@ -2,8 +2,10 @@ import SwiftUI
 
 /// Shows muscle groups with recovery status colors and contextual coaching.
 struct BodyMapView: View {
+    var onStartTemplate: ((WorkoutTemplate) -> Void)? = nil
     @State private var muscleStatus: [String: MuscleStatus] = [:]
     @State private var daysSince: [String: Int] = [:]
+    @State private var lastTrainedDate: [String: String] = [:] // group → "Mar 29"
     @State private var recentExercises: [String: [String]] = [:] // group → exercise names
     @State private var selectedGroup: String?
 
@@ -66,69 +68,54 @@ struct BodyMapView: View {
         let status = muscleStatus[group] ?? .untrained
         let recent = recentExercises[group] ?? []
         let templates = (try? WorkoutService.fetchTemplates()) ?? []
-        let matchingTemplate = templates.first { t in
+        let matchingTemplates = templates.filter { t in
             t.name.lowercased().contains(group.lowercased()) ||
             t.exercises.filter { !$0.isWarmup }.contains { ExerciseDatabase.bodyPart(for: $0.name) == group }
         }
 
-        return VStack(alignment: .leading, spacing: 8) {
-            // Status message
-            switch status {
-            case .recovering:
-                HStack(spacing: 6) {
-                    Image(systemName: "bed.double.fill").font(.caption).foregroundStyle(Theme.surplus)
-                    Text("You trained \(group.lowercased()) \(dayText(group)). Give it 1-2 days to recover.")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-                if !recent.isEmpty {
-                    Text("Last session: \(recent.prefix(3).joined(separator: ", "))")
-                        .font(.caption2).foregroundStyle(.tertiary)
-                }
-
-            case .moderate:
-                HStack(spacing: 6) {
-                    Image(systemName: "clock.fill").font(.caption).foregroundStyle(Theme.stepsOrange)
-                    Text("\(group) is almost recovered. Light work is okay, heavy lifting tomorrow.")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-
-            case .recovered:
-                HStack(spacing: 6) {
-                    Image(systemName: "checkmark.circle.fill").font(.caption).foregroundStyle(Theme.deficit)
-                    Text("\(group) is fully recovered and ready to train!")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
-                if let t = matchingTemplate {
-                    quickStartButton(template: t)
-                }
-
-            case .untrained:
+        return VStack(alignment: .leading, spacing: 6) {
+            if status == .untrained {
+                // Not trained recently — encourage with suggestions
                 HStack(spacing: 6) {
                     Image(systemName: "exclamationmark.triangle.fill").font(.caption).foregroundStyle(.secondary)
                     Text("You haven't trained \(group.lowercased()) in over a week.")
                         .font(.caption).foregroundStyle(.secondary)
                 }
-                if let t = matchingTemplate {
-                    quickStartButton(template: t)
+                if !matchingTemplates.isEmpty {
+                    ForEach(matchingTemplates) { t in quickStartButton(template: t) }
                 } else {
-                    // Show standard exercises for this group
                     let standards = standardExercises(for: group)
                     if !standards.isEmpty {
                         Text("Try: \(standards.joined(separator: ", "))")
                             .font(.caption2).foregroundStyle(.tertiary)
                     }
                 }
+            } else {
+                // Trained recently — show last session info
+                HStack(spacing: 6) {
+                    let dateStr = lastTrainedDate[group] ?? dayText(group)
+                    Text("Last trained: \(dateStr)").font(.caption.weight(.medium)).foregroundStyle(status.color)
+                }
+                if !recent.isEmpty {
+                    Text(recent.prefix(4).joined(separator: ", "))
+                        .font(.caption2).foregroundStyle(.tertiary).lineLimit(2)
+                }
+                ForEach(matchingTemplates) { t in quickStartButton(template: t) }
             }
         }
     }
 
     private func quickStartButton(template: WorkoutTemplate) -> some View {
-        // This is just informational - actual navigation handled by parent
-        HStack(spacing: 4) {
-            Image(systemName: "play.circle.fill").font(.caption).foregroundStyle(Theme.accent)
-            Text("Template: \(template.name)").font(.caption2.weight(.medium)).foregroundStyle(Theme.accent)
-        }
-        .padding(.top, 2)
+        Button {
+            onStartTemplate?(template)
+        } label: {
+            HStack(spacing: 4) {
+                Image(systemName: "play.circle.fill").font(.caption)
+                Text("Start \(template.name)").font(.caption2.weight(.medium))
+            }
+            .foregroundStyle(Theme.accent)
+            .padding(.top, 2)
+        }.buttonStyle(.plain)
     }
 
     private func dayText(_ group: String) -> String {
@@ -199,7 +186,11 @@ struct BodyMapView: View {
 
         recentExercises = exercisesByGroup
 
+        let dateFmt = DateFormatter()
+        dateFmt.dateFormat = "MMM d"
+
         for group in Self.muscleGroups {
+            if let d = lastWorked[group] { lastTrainedDate[group] = dateFmt.string(from: d) }
             if let lastDate = lastWorked[group] {
                 let days = cal.dateComponents([.day], from: lastDate, to: today).day ?? 999
                 daysSince[group] = days
