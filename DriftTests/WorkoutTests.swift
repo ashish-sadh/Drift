@@ -877,6 +877,56 @@ import GRDB
     #expect(pr == nil)
 }
 
+// MARK: - Session Persistence Tests (3 tests)
+
+@Test func sessionSaveAndLoad() async throws {
+    let session = WorkoutService.SavedSession(
+        workoutName: "Test Workout", startTime: Date(),
+        exercises: [.init(name: "Bench", isWarmup: false, notes: "heavy", restTime: 120,
+                          sets: [.init(weight: "135", reps: "10", done: true, isWarmup: false)])])
+    WorkoutService.saveSession(session)
+    let loaded = WorkoutService.loadSession()
+    #expect(loaded != nil)
+    #expect(loaded?.workoutName == "Test Workout")
+    #expect(loaded?.exercises.count == 1)
+    #expect(loaded?.exercises[0].sets[0].weight == "135")
+    WorkoutService.clearSession()
+}
+
+@Test func sessionClear() async throws {
+    WorkoutService.saveSession(.init(workoutName: "X", startTime: Date(), exercises: []))
+    #expect(WorkoutService.hasActiveSession == true)
+    WorkoutService.clearSession()
+    #expect(WorkoutService.hasActiveSession == false)
+}
+
+@Test func sessionExpiresAfter5Hours() async throws {
+    let oldTime = Date().addingTimeInterval(-6 * 3600) // 6 hours ago
+    WorkoutService.saveSession(.init(workoutName: "Old", startTime: oldTime, exercises: []))
+    let loaded = WorkoutService.loadSession()
+    #expect(loaded == nil, "Session older than 5 hours should be expired")
+}
+
+// MARK: - Exercise Search Fix Tests (3 tests)
+
+@Test func searchFindsCustomExercises() async throws {
+    let uniqueName = "ZZZ Test Custom Ex \(Int.random(in: 10000...99999))"
+    ExerciseDatabase.addCustomExercise(name: uniqueName, bodyPart: "Chest")
+    let results = ExerciseDatabase.search(query: uniqueName)
+    #expect(!results.isEmpty, "Custom exercise should be findable in search")
+}
+
+@Test func searchMultiWordExercise() async throws {
+    let results = ExerciseDatabase.search(query: "bench press")
+    #expect(!results.isEmpty, "Multi-word search should work")
+}
+
+@Test func searchIncludesAllWithCustom() async throws {
+    let all = ExerciseDatabase.allWithCustom
+    let dbOnly = ExerciseDatabase.all
+    #expect(all.count >= dbOnly.count, "allWithCustom should include DB + custom")
+}
+
 @Test func templateMixedOldNewFormat() async throws {
     // Mix of old (no warmup field) and new (with warmup field) entries
     let json = #"[{"name":"Old Ex","sets":3},{"name":"New Ex","sets":2,"isWarmup":true,"restSeconds":30,"notes":"test"}]"#
