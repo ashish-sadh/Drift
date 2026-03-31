@@ -498,6 +498,7 @@ struct FoodSearchView: View {
                 }
                 .padding(.horizontal, 16)
             }
+            .scrollDismissesKeyboard(.interactively)
             .background(Theme.background)
             .navigationTitle("Log Food").navigationBarTitleDisplayMode(.inline)
             .toolbar {
