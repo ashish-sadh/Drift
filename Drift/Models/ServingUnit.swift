@@ -189,6 +189,17 @@ struct FoodUnit: Hashable {
             units.append(FoodUnit(label: "tbsp", gramsEquivalent: 15))
         }
 
+        // Oils — add ml and tsp alongside tbsp
+        let oilFoods = ["oil", "ghee"]
+        if oilFoods.contains(where: { lower.contains($0) }) {
+            if !units.contains(where: { $0.label == "tsp" }) {
+                units.append(FoodUnit(label: "tsp", gramsEquivalent: 5))
+            }
+            if !units.contains(where: { $0.label == "ml" }) {
+                units.append(FoodUnit(label: "ml", gramsEquivalent: 1))
+            }
+        }
+
         let liquidFoods = ["milk", "juice", "lassi", "buttermilk", "coconut water",
                            "smoothie", "broth", "soup", "shake"]
         if liquidFoods.contains(where: { lower.contains($0) }) {
