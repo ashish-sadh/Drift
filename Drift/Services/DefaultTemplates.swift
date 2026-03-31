@@ -87,6 +87,14 @@ enum DefaultTemplates {
         ("Seated Cable Row", "Back"),
         ("Spider Curl", "Arms"),
         ("Cable Tricep Kickback", "Arms"),
+        // Additional common exercises
+        ("Chest Press Machine", "Chest"),
+        ("Pec Deck", "Chest"),
+        ("Preacher Curl Machine", "Arms"),
+        ("EZ Bar Curl", "Arms"),
+        ("Rope Pushdown", "Arms"),
+        ("Turkish Get-Up", "Full Body"),
+        ("Chin-Up", "Back"),
     ]
 
     // MARK: - Helper
