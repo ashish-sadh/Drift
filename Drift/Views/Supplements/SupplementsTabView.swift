@@ -4,6 +4,8 @@ import Charts
 struct SupplementsTabView: View {
     @State private var viewModel = SupplementViewModel()
     @State private var showingAdd = false
+    @State private var showingEditSupp = false
+    @State private var editSupp: Supplement?
 
     var body: some View {
         NavigationStack {
@@ -81,6 +83,18 @@ struct SupplementsTabView: View {
                                 .padding(.vertical, 12)
                             }
                             .buttonStyle(.plain)
+                            .contextMenu {
+                                if let id = supplement.id {
+                                    Button {
+                                        editSupp = supplement
+                                        showingEditSupp = true
+                                    } label: { Label("Edit", systemImage: "pencil") }
+                                    Button(role: .destructive) {
+                                        try? AppDatabase.shared.writer.write { db in try Supplement.deleteOne(db, id: id) }
+                                        viewModel.loadSupplements()
+                                    } label: { Label("Delete", systemImage: "trash") }
+                                }
+                            }
 
                             if index < viewModel.supplements.count - 1 {
                                 Divider().overlay(Color.white.opacity(0.05))
@@ -116,6 +130,13 @@ struct SupplementsTabView: View {
             }
             .sheet(isPresented: $showingAdd) {
                 AddSupplementView(viewModel: viewModel)
+            }
+            .sheet(isPresented: $showingEditSupp) {
+                if let supp = editSupp {
+                    EditSupplementSheet(supplement: supp) {
+                        viewModel.loadSupplements()
+                    }
+                }
             }
             .onAppear {
                 viewModel.seedDefaultsIfNeeded()
@@ -222,5 +243,56 @@ struct SupplementsTabView: View {
         let f = DateFormatter()
         f.dateFormat = "h:mm a"
         return f.string(from: d)
+    }
+}
+
+// MARK: - Edit Supplement Sheet
+
+private struct EditSupplementSheet: View {
+    let supplement: Supplement
+    let onSave: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var name: String
+    @State private var dosage: String
+    @State private var unit: String
+    @State private var dailyDoses: Int
+
+    init(supplement: Supplement, onSave: @escaping () -> Void) {
+        self.supplement = supplement; self.onSave = onSave
+        _name = State(initialValue: supplement.name)
+        _dosage = State(initialValue: supplement.dosage ?? "")
+        _unit = State(initialValue: supplement.unit ?? "")
+        _dailyDoses = State(initialValue: supplement.dailyDoses)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Supplement") { TextField("Name", text: $name) }
+                Section("Dosage") {
+                    HStack {
+                        TextField("Amount", text: $dosage).keyboardType(.decimalPad).frame(width: 80)
+                        TextField("Unit (g, mg, ml...)", text: $unit)
+                    }
+                    Stepper("Daily doses: \(dailyDoses)", value: $dailyDoses, in: 1...5)
+                }
+            }
+            .navigationTitle("Edit Supplement").navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        if let id = supplement.id {
+                            try? AppDatabase.shared.writer.write { db in
+                                try db.execute(sql: """
+                                    UPDATE supplement SET name = ?, dosage = ?, unit = ?, daily_doses = ? WHERE id = ?
+                                    """, arguments: [name, dosage.isEmpty ? nil : dosage, unit.isEmpty ? nil : unit, dailyDoses, id])
+                            }
+                        }
+                        onSave(); dismiss()
+                    }.disabled(name.isEmpty)
+                }
+            }
+        }
     }
 }
