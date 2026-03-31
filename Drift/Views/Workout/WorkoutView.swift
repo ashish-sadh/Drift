@@ -1270,7 +1270,7 @@ struct ExerciseBrowserView: View {
     @State private var showingCustom = false
 
     private var results: [ExerciseDatabase.ExerciseInfo] {
-        var list = query.isEmpty ? ExerciseDatabase.all : ExerciseDatabase.search(query: query)
+        var list = query.isEmpty ? ExerciseDatabase.allWithCustom : ExerciseDatabase.search(query: query)
         if let part = selectedPart { list = list.filter { $0.bodyPart == part } }
         return list
     }
