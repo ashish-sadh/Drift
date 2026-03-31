@@ -105,20 +105,20 @@ struct FoodSearchView: View {
                     }
                 }
 
-                // Saved recipes
-                if !viewModel.savedRecipes.isEmpty {
-                    suggestionSection("RECIPES") {
-                        ForEach(viewModel.savedRecipes) { recipe in
-                            recipeSuggestionRow(recipe)
-                        }
-                    }
-                }
-
-                // Recent (includes recipes, manual entries, and DB foods)
+                // Recent first — most likely what you're looking for
                 if !viewModel.recentEntries.isEmpty {
                     suggestionSection("RECENT") {
                         ForEach(viewModel.recentEntries) { entry in
                             recentEntryRow(entry)
+                        }
+                    }
+                }
+
+                // Recipes
+                if !viewModel.savedRecipes.isEmpty {
+                    suggestionSection("RECIPES") {
+                        ForEach(viewModel.savedRecipes) { recipe in
+                            recipeSuggestionRow(recipe)
                         }
                     }
                 }
