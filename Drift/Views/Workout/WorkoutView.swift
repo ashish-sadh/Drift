@@ -126,7 +126,7 @@ struct WorkoutView: View {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("History").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
                         ForEach(workouts, id: \.workout.id) { s in
-                            NavigationLink { WorkoutDetailView(summary: s) } label: { workoutCard(s) }.tint(.primary)
+                            NavigationLink { WorkoutDetailView(summary: s) { loadData() } } label: { workoutCard(s) }.tint(.primary)
                                 .contextMenu {
                                     if let wid = s.workout.id {
                                         Button(role: .destructive) {
@@ -233,6 +233,8 @@ struct WorkoutView: View {
 
 struct WorkoutDetailView: View {
     let summary: WorkoutSummary
+    var onDelete: (() -> Void)? = nil
+    @Environment(\.dismiss) private var dismiss
     @State private var sets: [WorkoutSet] = []
     @State private var showingShare = false
     @State private var showingSaveTemplate = false
@@ -295,6 +297,14 @@ struct WorkoutDetailView: View {
                 Menu {
                     Button { showingShare = true } label: { Label("Share", systemImage: "square.and.arrow.up") }
                     Button { saveAsTemplate() } label: { Label("Save as Template", systemImage: "doc.on.doc") }
+                    if let wid = summary.workout.id {
+                        Divider()
+                        Button(role: .destructive) {
+                            try? WorkoutService.deleteWorkout(id: wid)
+                            onDelete?()
+                            dismiss()
+                        } label: { Label("Delete Workout", systemImage: "trash") }
+                    }
                 } label: { Image(systemName: "ellipsis.circle").foregroundStyle(Theme.accent) }
             }
         }
