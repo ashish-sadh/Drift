@@ -103,7 +103,7 @@ struct FoodTabView: View {
                 Color.clear.frame(width: 30)
             } else {
                 HStack(spacing: 8) {
-                    Button { viewModel.goToNextDay() } label: {
+                    Button { viewModel.goToNextDay(); loggedDays = viewModel.loggedDays(last: 30) } label: {
                         Image(systemName: "chevron.right").font(.caption.weight(.bold))
                     }
                     Button { viewModel.goToDate(Date()); loggedDays = viewModel.loggedDays(last: 30) } label: {
