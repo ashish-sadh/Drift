@@ -191,7 +191,9 @@ struct FoodSearchView: View {
             if entry.isDBFood {
                 // DB food — tap opens log sheet with serving picker
                 Button {
-                    if let food = (try? AppDatabase.shared.searchFoods(query: entry.name, limit: 1))?.first {
+                    let foods = (try? AppDatabase.shared.searchFoods(query: entry.name, limit: 5)) ?? []
+                    // Prefer exact match, fall back to first result
+                    if let food = foods.first(where: { $0.name == entry.name }) ?? foods.first {
                         selectFood(food)
                     }
                 } label: {
