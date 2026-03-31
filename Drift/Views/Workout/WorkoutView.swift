@@ -23,7 +23,7 @@ struct WorkoutView: View {
         ScrollView {
             VStack(spacing: 14) {
                 // Active session banner
-                if WorkoutService.hasActiveSession {
+                if !showingNewWorkout && WorkoutService.hasActiveSession {
                     Button { showingNewWorkout = true } label: {
                         HStack {
                             Image(systemName: "figure.strengthtraining.traditional")
@@ -63,7 +63,11 @@ struct WorkoutView: View {
                 if !weeklyCounts.isEmpty { consistencyChart }
 
                 // Start buttons
-                Button { selectedTemplate = nil; showingNewWorkout = true } label: {
+                Button {
+                    WorkoutService.clearSession()
+                    selectedTemplate = nil
+                    showingNewWorkout = true
+                } label: {
                     Label("Start Empty Workout", systemImage: "plus.circle.fill").frame(maxWidth: .infinity)
                 }.buttonStyle(.borderedProminent).tint(Theme.accent)
 
@@ -105,12 +109,12 @@ struct WorkoutView: View {
 
                                 Spacer()
 
-                                Button { selectedTemplate = t; showingNewWorkout = true } label: {
+                                Button { WorkoutService.clearSession(); selectedTemplate = t; showingNewWorkout = true } label: {
                                     Image(systemName: "play.circle.fill").foregroundStyle(Theme.accent)
                                 }
                             }
                             .contextMenu {
-                                Button { selectedTemplate = t; showingNewWorkout = true } label: {
+                                Button { WorkoutService.clearSession(); selectedTemplate = t; showingNewWorkout = true } label: {
                                     Label("Start Workout", systemImage: "play")
                                 }
                                 if let tid = t.id {
@@ -557,7 +561,14 @@ struct ActiveWorkoutView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Minimize") { persistSession(); dismiss() }
+                    Menu {
+                        Button("Minimize (keep running)") { persistSession(); dismiss() }
+                        Button("Cancel Workout", role: .destructive) {
+                            WorkoutService.clearSession(); stopTimers(); dismiss()
+                        }
+                    } label: {
+                        Image(systemName: "xmark.circle").foregroundStyle(.secondary)
+                    }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if !exercises.isEmpty {
