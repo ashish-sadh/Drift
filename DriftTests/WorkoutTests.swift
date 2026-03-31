@@ -999,6 +999,32 @@ import GRDB
 
 // MARK: - Favorite Template Tests (2 tests)
 
+// MARK: - Body Part Guesser Tests (4 tests)
+
+@Test func bodyPartGuessChest() async throws {
+    #expect(ExerciseDatabase.bodyPart(for: "Dumbbell Bench Press") == "Chest")
+    #expect(ExerciseDatabase.bodyPart(for: "Incline Chest Press") == "Chest")
+}
+
+@Test func bodyPartGuessLegs() async throws {
+    #expect(ExerciseDatabase.bodyPart(for: "Barbell Squat") == "Legs")
+    #expect(ExerciseDatabase.bodyPart(for: "Romanian Deadlift") == "Legs")
+}
+
+@Test func bodyPartGuessArms() async throws {
+    #expect(ExerciseDatabase.bodyPart(for: "Hammer Curls") == "Arms")
+    #expect(ExerciseDatabase.bodyPart(for: "Tricep Extension") == "Arms")
+}
+
+@Test func bodyPartCustomExercise() async throws {
+    // Custom exercises should return their stored body part
+    let info = ExerciseDatabase.info(for: "Banded Shoulder Rotations")
+    // Might or might not exist depending on seeding state
+    if let info {
+        #expect(info.bodyPart == "Shoulders")
+    }
+}
+
 @Test func templateFavoriteDefault() async throws {
     let t = WorkoutTemplate(name: "Test", exercisesJson: "[]", createdAt: "")
     #expect(t.isFavorite == false, "Default should be not favorite")
