@@ -72,11 +72,15 @@ struct WorkoutView: View {
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(t.name).font(.subheadline.weight(.medium))
                                         let working = t.exercises.filter { !$0.isWarmup }
+                                        let warmupCount = t.exercises.filter(\.isWarmup).count
                                         Text(working.map(\.name).prefix(3).joined(separator: ", "))
                                             .font(.caption2).foregroundStyle(.tertiary).lineLimit(1)
-                                        let warmupCount = t.exercises.filter(\.isWarmup).count
-                                        if warmupCount > 0 {
-                                            Text("\(warmupCount) warmup + \(working.count) exercises")
+                                        let totalSets = working.reduce(0) { $0 + $1.sets }
+                                        HStack(spacing: 6) {
+                                            if warmupCount > 0 {
+                                                Text("\(warmupCount) warmup").font(.system(size: 9)).foregroundStyle(Theme.fatYellow)
+                                            }
+                                            Text("\(working.count) exercises \u{00B7} \(totalSets) sets")
                                                 .font(.system(size: 9)).foregroundStyle(.quaternary)
                                         }
                                     }
