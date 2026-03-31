@@ -14,6 +14,7 @@ struct WorkoutView: View {
     @State private var importResult: String?
     @State private var isLoading = true
     @State private var selectedTemplate: WorkoutTemplate? = nil
+    @State private var previewTemplate: WorkoutTemplate? = nil
 
     @State private var activeCalories: Double = 0
     @State private var steps: Double = 0
@@ -66,8 +67,7 @@ struct WorkoutView: View {
                         ForEach(templates) { t in
                             HStack {
                                 Button {
-                                    selectedTemplate = t
-                                    showingNewWorkout = true
+                                    previewTemplate = t
                                 } label: {
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(t.name).font(.subheadline.weight(.medium))
@@ -155,6 +155,73 @@ struct WorkoutView: View {
         }
         .sheet(isPresented: $showingExerciseBrowser) {
             ExerciseBrowserView()
+        }
+        .sheet(item: $previewTemplate) { t in
+            NavigationStack {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        let warmups = t.exercises.filter(\.isWarmup)
+                        let working = t.exercises.filter { !$0.isWarmup }
+
+                        if !warmups.isEmpty {
+                            Text("WARMUP").font(.caption2.weight(.bold)).foregroundStyle(Theme.fatYellow)
+                            ForEach(warmups, id: \.name) { ex in
+                                HStack {
+                                    Text("W").font(.caption2.weight(.bold)).foregroundStyle(Theme.fatYellow)
+                                        .padding(.horizontal, 3).padding(.vertical, 1)
+                                        .background(Theme.fatYellow.opacity(0.2), in: RoundedRectangle(cornerRadius: 3))
+                                    VStack(alignment: .leading, spacing: 1) {
+                                        Text(ex.name).font(.subheadline)
+                                        if let notes = ex.notes { Text(notes).font(.caption2).foregroundStyle(.secondary).italic() }
+                                    }
+                                    Spacer()
+                                    Text("\(ex.sets) sets").font(.caption2).foregroundStyle(.tertiary)
+                                }
+                            }
+                            Divider().padding(.vertical, 4)
+                        }
+
+                        if !working.isEmpty {
+                            Text("EXERCISES").font(.caption2.weight(.bold)).foregroundStyle(Theme.calorieBlue)
+                            ForEach(Array(working.enumerated()), id: \.element.name) { i, ex in
+                                HStack {
+                                    Text("\(i + 1)").font(.caption.weight(.bold)).foregroundStyle(.secondary).frame(width: 20)
+                                    VStack(alignment: .leading, spacing: 1) {
+                                        Text(ex.name).font(.subheadline)
+                                        HStack(spacing: 4) {
+                                            Text("\(ex.sets) sets").font(.caption2).foregroundStyle(.tertiary)
+                                            if let notes = ex.notes {
+                                                Text("\u{00B7}").font(.caption2).foregroundStyle(.quaternary)
+                                                Text(notes).font(.caption2).foregroundStyle(.secondary).italic()
+                                            }
+                                        }
+                                    }
+                                    Spacer()
+                                    Text("\(ex.restSeconds/60):\(String(format: "%02d", ex.restSeconds%60))")
+                                        .font(.caption2.monospacedDigit()).foregroundStyle(.tertiary)
+                                }
+                            }
+                        }
+
+                        Button {
+                            previewTemplate = nil
+                            selectedTemplate = t
+                            showingNewWorkout = true
+                        } label: {
+                            Label("Start Workout", systemImage: "play.fill").frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent).tint(Theme.accent)
+                        .padding(.top, 8)
+                    }
+                    .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 24)
+                }
+                .background(Theme.background)
+                .navigationTitle(t.name).navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) { Button("Close") { previewTemplate = nil } }
+                }
+            }
+            .presentationDetents([.medium, .large])
         }
         .fileImporter(isPresented: $showingImport, allowedContentTypes: [.commaSeparatedText]) { handleImport($0) }
         .onAppear { loadData() }
