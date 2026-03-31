@@ -97,9 +97,14 @@ extension FoodEntry {
         if lower.contains("banana") && servingSizeG < 160 { return fmt(servings, "banana", "bananas") }
         if lower.contains("apple") && servingSizeG < 250 { return fmt(servings, "apple", "apples") }
         if lower.contains("cookie") || lower.contains("biscuit") { return fmt(servings, "piece", "pieces") }
+        if lower.contains("nugget") { return fmt(servings, "nugget", "nuggets") }
+        if lower.contains("wing") && servingSizeG < 100 { return fmt(servings, "wing", "wings") }
+        if lower.contains("strip") && servingSizeG < 50 { return fmt(servings, "strip", "strips") }
+        if lower.contains("link") && servingSizeG < 100 { return fmt(servings, "link", "links") }
         if lower.contains("slice") { return fmt(servings, "slice", "slices") }
         if lower.contains("scoop") { return fmt(servings, "scoop", "scoops") }
         if lower.contains("patty") || lower.contains("pattie") { return fmt(servings, "patty", "patties") }
+        if lower.contains("bar") && !lower.contains("barley") && servingSizeG < 80 { return fmt(servings, "bar", "bars") }
 
         return "\(Int(totalG))g"
     }
