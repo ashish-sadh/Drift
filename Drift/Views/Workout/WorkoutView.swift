@@ -1304,18 +1304,34 @@ struct ExerciseDetailView: View {
         ScrollView {
             VStack(spacing: 14) {
                 // Exercise info
-                VStack(alignment: .leading, spacing: 6) {
+                VStack(alignment: .leading, spacing: 8) {
                     Text(exerciseName).font(.title3.weight(.bold))
+
                     if let info {
-                        HStack(spacing: 8) {
-                            Label(info.bodyPart, systemImage: "figure.strengthtraining.traditional").font(.caption)
-                            Label(info.equipment, systemImage: "wrench.and.screwdriver").font(.caption)
-                        }.foregroundStyle(.secondary)
+                        // Tags row
+                        HStack(spacing: 6) {
+                            detailTag(info.bodyPart, icon: "figure.strengthtraining.traditional", color: Theme.accent)
+                            detailTag(info.equipment, icon: "wrench.and.screwdriver", color: .secondary)
+                            detailTag(info.level.capitalized, icon: "chart.bar", color: .secondary)
+                        }
+
+                        // Muscles
                         if !info.primaryMuscles.isEmpty {
-                            Text("Muscles: \(info.primaryMuscles.joined(separator: ", "))")
-                                .font(.caption2).foregroundStyle(.tertiary)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Primary muscles").font(.caption2.weight(.semibold)).foregroundStyle(.secondary)
+                                Text(info.primaryMuscles.map(\.capitalized).joined(separator: ", "))
+                                    .font(.caption).foregroundStyle(.primary)
+                            }
+                        }
+                        if !info.secondaryMuscles.isEmpty {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Secondary muscles").font(.caption2.weight(.semibold)).foregroundStyle(.secondary)
+                                Text(info.secondaryMuscles.map(\.capitalized).joined(separator: ", "))
+                                    .font(.caption).foregroundStyle(.tertiary)
+                            }
                         }
                     }
+
                     if let pr {
                         HStack(spacing: 4) {
                             Image(systemName: "trophy.fill").font(.caption).foregroundStyle(Theme.fatYellow)
@@ -1359,6 +1375,13 @@ struct ExerciseDetailView: View {
             history = (try? WorkoutService.fetchExerciseHistory(name: exerciseName)) ?? []
             pr = try? WorkoutService.fetchPR(for: exerciseName)
         }
+    }
+
+    private func detailTag(_ text: String, icon: String, color: Color) -> some View {
+        Label(text, systemImage: icon).font(.caption2)
+            .padding(.horizontal, 6).padding(.vertical, 3)
+            .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 5))
+            .foregroundStyle(color)
     }
 }
 
