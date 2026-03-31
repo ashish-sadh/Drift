@@ -917,16 +917,16 @@ struct ExercisePickerView: View {
     @State private var selectedBodyPartFilter: String? = nil
 
     private var results: [ExerciseDatabase.ExerciseInfo] {
-        var list = query.isEmpty ? ExerciseDatabase.allWithCustom : ExerciseDatabase.search(query: query) + ExerciseDatabase.customExercises.filter { $0.name.localizedCaseInsensitiveContains(query) }
+        var list = query.isEmpty ? ExerciseDatabase.allWithCustom : ExerciseDatabase.search(query: query)
         if let filter = selectedBodyPartFilter { list = list.filter { $0.bodyPart == filter } }
         return Array(list.prefix(50))
     }
 
     // Exercises from workout history that aren't in the database
     private var historyExtras: [String] {
-        let dbNames = Set(ExerciseDatabase.all.map { $0.name.lowercased() })
+        let allKnown = Set(ExerciseDatabase.allWithCustom.map { $0.name.lowercased() })
         let history = (try? WorkoutService.allExerciseNames()) ?? []
-        let filtered = history.filter { !dbNames.contains($0.lowercased()) }
+        let filtered = history.filter { !allKnown.contains($0.lowercased()) }
         if query.isEmpty { return filtered }
         return filtered.filter { $0.localizedCaseInsensitiveContains(query) }
     }
