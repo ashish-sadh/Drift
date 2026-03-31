@@ -921,16 +921,24 @@ struct ActiveWorkoutView: View {
     // MARK: - Add Exercise (with prefill)
 
     private func addExercise(name: String, setCount: Int? = nil, restTime: Int = 90, isWarmup: Bool = false, notes: String? = nil) {
-        let history = (try? WorkoutService.fetchExerciseHistory(name: name).prefix(10)) ?? []
-        let previous = history.prefix(3).map { s in
+        let allHistory = (try? WorkoutService.fetchExerciseHistory(name: name)) ?? []
+
+        // Get the most recent workout's sets for this exercise (in set_order)
+        // History is ordered by id DESC, so first entry is from most recent workout
+        let lastWorkoutId = allHistory.first?.workoutId
+        let lastSession = lastWorkoutId.map { wid in
+            allHistory.filter { $0.workoutId == wid }.sorted { $0.setOrder < $1.setOrder }
+        } ?? []
+
+        let previous = lastSession.prefix(5).map { s in
             "\(Int(s.weightLbs ?? 0)) lb \u{00D7} \(s.reps ?? 0)"
         }
 
-        let count = setCount ?? (previous.isEmpty ? 3 : max(previous.count, 3))
+        let count = setCount ?? (lastSession.isEmpty ? 3 : max(lastSession.count, 3))
         var sets: [ActiveSet] = []
         for i in 0..<count {
-            if i < history.count {
-                let s = history[i]
+            if i < lastSession.count {
+                let s = lastSession[i]
                 sets.append(ActiveSet(weight: s.weightLbs.map { String(Int($0)) } ?? "",
                                       reps: s.reps.map { String($0) } ?? "", isWarmup: isWarmup))
             } else {

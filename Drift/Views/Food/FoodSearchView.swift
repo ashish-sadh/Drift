@@ -262,6 +262,13 @@ struct FoodSearchView: View {
         .padding(.horizontal, 16).padding(.vertical, 4)
     }
 
+    private func refreshSearch() {
+        if !query.isEmpty {
+            results = (try? AppDatabase.shared.searchFoodsRanked(query: query)) ?? []
+            matchingRecipes = (try? AppDatabase.shared.searchRecipes(query: query)) ?? []
+        }
+    }
+
     private func selectFood(_ food: Food) {
         let units = FoodUnit.smartUnits(for: food)
         amount = "1"
@@ -455,6 +462,7 @@ struct FoodSearchView: View {
                     Button("Log") {
                         viewModel.logFood(food, servings: multiplier, mealType: viewModel.autoMealType)
                         viewModel.loadSuggestions()
+                        refreshSearch()
                         loggedCount += 1
                         selectedFood = nil
                     }
