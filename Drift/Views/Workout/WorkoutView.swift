@@ -262,6 +262,10 @@ struct WorkoutView: View {
             HStack(spacing: 12) {
                 if !s.workout.durationDisplay.isEmpty { Label(s.workout.durationDisplay, systemImage: "clock").font(.caption).foregroundStyle(.secondary) }
                 Label("\(Int(s.totalVolume)) lb", systemImage: "scalemass").font(.caption).foregroundStyle(.secondary)
+                Label("\(s.exercises.count) exercises", systemImage: "dumbbell").font(.caption).foregroundStyle(.secondary)
+            }
+            if let notes = s.workout.notes, !notes.isEmpty {
+                Text(notes).font(.caption2).foregroundStyle(.tertiary).lineLimit(1)
             }
             ForEach(s.bestSets.prefix(3), id: \.exercise) { best in
                 HStack {
@@ -419,6 +423,7 @@ struct ActiveWorkoutView: View {
     let onComplete: () -> Void
     @Environment(\.dismiss) private var dismiss
     @State private var workoutName = "Workout"
+    @State private var workoutNotes = ""
     @State private var exercises: [ActiveExercise] = []
     @State private var showingExercisePicker = false
     @State private var startTime = Date()
@@ -465,6 +470,14 @@ struct ActiveWorkoutView: View {
                         }
                         .font(.caption).foregroundStyle(.secondary)
                     }.padding(.horizontal, 12)
+
+                    // Notes (collapsed by default)
+                    if !workoutNotes.isEmpty || exercises.count > 0 {
+                        TextField("Workout notes...", text: $workoutNotes, axis: .vertical)
+                            .font(.caption).foregroundStyle(.secondary)
+                            .lineLimit(1...3)
+                            .padding(.horizontal, 16)
+                    }
 
                     // Warmup exercises
                     let warmupIndices = exercises.indices.filter { exercises[$0].isWarmupExercise }
@@ -762,7 +775,8 @@ struct ActiveWorkoutView: View {
     private func saveWorkout() {
         stopTimers()
         var workout = Workout(name: workoutName, date: DateFormatters.dateOnly.string(from: Date()),
-                              durationSeconds: elapsedSeconds, createdAt: ISO8601DateFormatter().string(from: Date()))
+                              durationSeconds: elapsedSeconds, notes: workoutNotes.isEmpty ? nil : workoutNotes,
+                              createdAt: ISO8601DateFormatter().string(from: Date()))
         do {
             try WorkoutService.saveWorkout(&workout)
             guard let wid = workout.id else {
