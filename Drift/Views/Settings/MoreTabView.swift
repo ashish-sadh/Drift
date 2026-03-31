@@ -215,8 +215,12 @@ struct SettingsView: View {
             try AppDatabase.shared.factoryReset()
             WeightGoal.clear()
             WeightTrendCalculator.saveConfig(.default)
+            WorkoutService.clearSession()
             UserDefaults.standard.removeObject(forKey: "weight_unit")
             UserDefaults.standard.removeObject(forKey: "drift_custom_exercises")
+            UserDefaults.standard.removeObject(forKey: "drift_default_templates_v3")
+            UserDefaults.standard.removeObject(forKey: "drift_default_templates_v2")
+            UserDefaults.standard.removeObject(forKey: "drift_default_templates_seeded")
             Log.app.info("Factory reset performed")
             resetDone = true
         } catch {
