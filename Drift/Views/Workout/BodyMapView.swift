@@ -7,6 +7,7 @@ import SwiftUI
 /// Gray = not trained recently (>7 days)
 struct BodyMapView: View {
     @State private var muscleStatus: [String: MuscleStatus] = [:]
+    @State private var daysSince: [String: Int] = [:]
     @State private var selectedGroup: String?
 
     enum MuscleStatus: Sendable {
@@ -47,15 +48,21 @@ struct BodyMapView: View {
                     Button {
                         selectedGroup = group
                     } label: {
-                        VStack(spacing: 4) {
+                        VStack(spacing: 3) {
                             Image(systemName: iconFor(group))
                                 .font(.title3)
                                 .foregroundStyle(status.color)
                             Text(group)
                                 .font(.caption2.weight(.semibold))
-                            Text(status.label)
-                                .font(.system(size: 8))
-                                .foregroundStyle(.secondary)
+                            if let days = daysSince[group] {
+                                Text(days == 0 ? "Today" : "\(days)d ago")
+                                    .font(.system(size: 8).monospacedDigit())
+                                    .foregroundStyle(.secondary)
+                            } else {
+                                Text("—")
+                                    .font(.system(size: 8))
+                                    .foregroundStyle(.quaternary)
+                            }
                         }
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
@@ -160,6 +167,7 @@ struct BodyMapView: View {
         for group in Self.muscleGroups {
             if let lastDate = lastWorked[group] {
                 let days = cal.dateComponents([.day], from: lastDate, to: today).day ?? 999
+                daysSince[group] = days
                 if days <= 1 { muscleStatus[group] = .recovering }
                 else if days <= 2 { muscleStatus[group] = .moderate }
                 else if days <= 7 { muscleStatus[group] = .recovered }
