@@ -145,7 +145,16 @@ extension AppDatabase {
 
     func deleteFoodEntry(id: Int64) throws {
         try dbWriter.write { db in
+            // Get the meal_log_id before deleting
+            let mealLogId = try Int64.fetchOne(db, sql: "SELECT meal_log_id FROM food_entry WHERE id = ?", arguments: [id])
             _ = try FoodEntry.deleteOne(db, id: id)
+            // Clean up empty meal_logs (no remaining entries)
+            if let mlId = mealLogId {
+                let remaining = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM food_entry WHERE meal_log_id = ?", arguments: [mlId]) ?? 0
+                if remaining == 0 {
+                    try db.execute(sql: "DELETE FROM meal_log WHERE id = ?", arguments: [mlId])
+                }
+            }
         }
     }
 
