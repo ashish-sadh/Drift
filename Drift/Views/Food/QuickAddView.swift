@@ -119,6 +119,7 @@ struct QuickAddView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 24)
             }
+            .scrollDismissesKeyboard(.interactively)
             .background(Theme.background)
             .navigationTitle("Recipe").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
@@ -403,6 +404,7 @@ private struct IngredientPickerView: View {
             }
             .padding(16)
         }
+        .scrollDismissesKeyboard(.interactively)
         .background(Theme.background)
     }
 
