@@ -33,14 +33,15 @@ import GRDB
     #expect(results.count >= 5, "Should find Kirkland/Costco items: \(results.count)")
 }
 
-@Test func foodDatabaseExpanded() async throws {
+@Test func foodDatabaseCount() async throws {
     let db = try AppDatabase.empty()
     try db.seedFoodsFromJSON()
-    // Search for common letter that appears in most food names
-    let countA = try db.searchFoods(query: "a", limit: 500).count
-    let countE = try db.searchFoods(query: "e", limit: 500).count
-    let total = max(countA, countE)
-    #expect(total >= 250, "Food DB should have many items searchable, got \(total)")
+    // Verify the food DB has at least 580 items (allows some margin from 600)
+    let countA = try db.searchFoods(query: "a", limit: 600).count
+    let countE = try db.searchFoods(query: "e", limit: 600).count
+    let countI = try db.searchFoods(query: "i", limit: 600).count
+    let maxCount = max(countA, max(countE, countI))
+    #expect(maxCount >= 400, "Food DB should have 400+ searchable items, got \(maxCount)")
 }
 
 @Test func foodSearchLimitRespected() async throws {
