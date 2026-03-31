@@ -888,17 +888,17 @@ struct CreateTemplateView: View {
                     TextField("e.g., Push Day", text: $name)
                 }
 
-                let warmups = exercises.filter(\.isWarmup)
-                let working = exercises.filter { !$0.isWarmup }
+                let warmupIndices = exercises.indices.filter { exercises[$0].isWarmup }
+                let workingIndices = exercises.indices.filter { !exercises[$0].isWarmup }
 
-                if !warmups.isEmpty {
-                    Section("Warmup (\(warmups.count))") {
-                        ForEach(exercises.indices.filter { exercises[$0].isWarmup }, id: \.self) { i in
+                if !warmupIndices.isEmpty {
+                    Section("Warmup (\(warmupIndices.count))") {
+                        ForEach(warmupIndices, id: \.self) { i in
                             templateExerciseRow(i)
                         }
                         .onDelete { offsets in
-                            let warmupIndices = exercises.indices.filter { exercises[$0].isWarmup }
-                            for offset in offsets.sorted().reversed() { exercises.remove(at: warmupIndices[offset]) }
+                            let toRemove = offsets.map { warmupIndices[$0] }
+                            exercises.remove(atOffsets: IndexSet(toRemove))
                         }
                         Button { addingWarmup = true; showingPicker = true } label: {
                             Label("Add Warmup", systemImage: "plus.circle").foregroundStyle(Theme.fatYellow)
@@ -906,18 +906,18 @@ struct CreateTemplateView: View {
                     }
                 }
 
-                Section(warmups.isEmpty ? "Exercises" : "Working Sets (\(working.count))") {
-                    ForEach(exercises.indices.filter { !exercises[$0].isWarmup }, id: \.self) { i in
+                Section(warmupIndices.isEmpty ? "Exercises" : "Working Sets (\(workingIndices.count))") {
+                    ForEach(workingIndices, id: \.self) { i in
                         templateExerciseRow(i)
                     }
                     .onDelete { offsets in
-                        let workingIndices = exercises.indices.filter { !exercises[$0].isWarmup }
-                        for offset in offsets.sorted().reversed() { exercises.remove(at: workingIndices[offset]) }
+                        let toRemove = offsets.map { workingIndices[$0] }
+                        exercises.remove(atOffsets: IndexSet(toRemove))
                     }
                     Button { addingWarmup = false; showingPicker = true } label: {
                         Label("Add Exercise", systemImage: "plus.circle").foregroundStyle(Theme.accent)
                     }
-                    if warmups.isEmpty {
+                    if warmupIndices.isEmpty {
                         Button { addingWarmup = true; showingPicker = true } label: {
                             Label("Add Warmup Exercise", systemImage: "plus.circle").foregroundStyle(Theme.fatYellow)
                         }
