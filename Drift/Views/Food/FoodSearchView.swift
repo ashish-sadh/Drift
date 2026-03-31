@@ -19,6 +19,7 @@ struct FoodSearchView: View {
     @State private var loggedCount = 0
     @State private var showingRecipeBuilder = false
     @State private var showingScanner = false
+    @State private var editingRecipe: FavoriteFood?
     @FocusState private var searchFocused: Bool
 
     var body: some View {
@@ -63,6 +64,9 @@ struct FoodSearchView: View {
             .fullScreenCover(isPresented: $showingScanner) { BarcodeLookupView(viewModel: viewModel) }
             .onChange(of: showingRecipeBuilder) { _, showing in if !showing { viewModel.loadSuggestions() } }
             .onChange(of: showingScanner) { _, showing in if !showing { viewModel.loadSuggestions() } }
+            .sheet(item: $editingRecipe) { recipe in
+                EditRecipeSheet(recipe: recipe) { viewModel.loadSuggestions(); refreshSearch() }
+            }
             .onAppear {
                 viewModel.loadSuggestions()
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { searchFocused = true }
@@ -216,6 +220,9 @@ struct FoodSearchView: View {
                 loggedCount += 1
             } label: { Label("Log", systemImage: "plus.circle") }
 
+            Button { editingRecipe = recipe } label: {
+                Label("Edit Recipe", systemImage: "pencil")
+            }
             if let id = recipe.id {
                 Divider()
                 Button(role: .destructive) {
@@ -580,7 +587,75 @@ struct FoodSearchView: View {
         return result
     }
 
-    private func macroField(_ label: String, value: Binding<String>, unit: String) -> some View {
+}
+
+// MARK: - Edit Recipe Sheet
+
+private struct EditRecipeSheet: View {
+    let recipe: FavoriteFood
+    let onSave: () -> Void
+    @Environment(\.dismiss) private var dismiss
+    @State private var name: String
+    @State private var calories: String
+    @State private var protein: String
+    @State private var carbs: String
+    @State private var fat: String
+    @State private var fiber: String
+
+    init(recipe: FavoriteFood, onSave: @escaping () -> Void) {
+        self.recipe = recipe; self.onSave = onSave
+        _name = State(initialValue: recipe.name)
+        _calories = State(initialValue: "\(Int(recipe.calories))")
+        _protein = State(initialValue: "\(Int(recipe.proteinG))")
+        _carbs = State(initialValue: "\(Int(recipe.carbsG))")
+        _fat = State(initialValue: "\(Int(recipe.fatG))")
+        _fiber = State(initialValue: "\(Int(recipe.fiberG))")
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Name") { TextField("Recipe name", text: $name) }
+                Section("Nutrition (per serving)") {
+                    field("Calories", $calories, "kcal")
+                    field("Protein", $protein, "g")
+                    field("Carbs", $carbs, "g")
+                    field("Fat", $fat, "g")
+                    field("Fiber", $fiber, "g")
+                }
+            }
+            .navigationTitle("Edit Recipe").navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        if let id = recipe.id {
+                            try? AppDatabase.shared.writer.write { db in
+                                try db.execute(sql: """
+                                    UPDATE favorite_food SET name = ?, calories = ?, protein_g = ?,
+                                    carbs_g = ?, fat_g = ?, fiber_g = ? WHERE id = ?
+                                    """, arguments: [name, Double(calories) ?? 0, Double(protein) ?? 0,
+                                                     Double(carbs) ?? 0, Double(fat) ?? 0, Double(fiber) ?? 0, id])
+                            }
+                        }
+                        onSave(); dismiss()
+                    }.disabled(name.isEmpty)
+                }
+            }
+        }
+    }
+
+    private func field(_ label: String, _ value: Binding<String>, _ unit: String) -> some View {
+        HStack {
+            Text(label); Spacer()
+            TextField("0", text: value).keyboardType(.decimalPad).multilineTextAlignment(.trailing).frame(width: 80)
+            Text(unit).font(.caption).foregroundStyle(.secondary).frame(width: 35)
+        }
+    }
+}
+
+extension FoodSearchView {
+    func macroField(_ label: String, value: Binding<String>, unit: String) -> some View {
         HStack {
             Text(label); Spacer()
             TextField("0", text: value).keyboardType(.decimalPad).multilineTextAlignment(.trailing).frame(width: 80)
