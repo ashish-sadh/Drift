@@ -105,20 +105,11 @@ struct FoodSearchView: View {
                     }
                 }
 
-                // Recent first — most likely what you're looking for
+                // Recent — everything you've logged (foods + recipes)
                 if !viewModel.recentEntries.isEmpty {
                     suggestionSection("RECENT") {
                         ForEach(viewModel.recentEntries) { entry in
                             recentEntryRow(entry)
-                        }
-                    }
-                }
-
-                // Recipes
-                if !viewModel.savedRecipes.isEmpty {
-                    suggestionSection("RECIPES") {
-                        ForEach(viewModel.savedRecipes) { recipe in
-                            recipeSuggestionRow(recipe)
                         }
                     }
                 }
@@ -133,7 +124,7 @@ struct FoodSearchView: View {
                 }
 
                 // First-time empty state
-                if viewModel.recentFoods.isEmpty && viewModel.frequentFoods.isEmpty && viewModel.savedRecipes.isEmpty && viewModel.favoriteFoods.isEmpty {
+                if viewModel.recentEntries.isEmpty && viewModel.frequentFoods.isEmpty && viewModel.favoriteFoods.isEmpty {
                     suggestionSection("POPULAR FOODS") {
                         let starters = popularFoods()
                         ForEach(starters) { food in
