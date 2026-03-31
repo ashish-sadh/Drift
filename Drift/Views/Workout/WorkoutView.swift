@@ -375,10 +375,15 @@ struct WorkoutDetailView: View {
                 let grouped = Dictionary(grouping: sets) { $0.exerciseName }
                 ForEach(summary.exercises, id: \.self) { ex in
                     if let exSets = grouped[ex] {
+                        let workingSets = exSets.filter { !$0.isWarmup }
+                        let exVolume = workingSets.reduce(0.0) { $0 + ($1.weightLbs ?? 0) * Double($1.reps ?? 0) }
                         VStack(alignment: .leading, spacing: 6) {
                             HStack {
                                 Text(ex).font(.subheadline.weight(.semibold))
                                 Spacer()
+                                if exVolume > 0 {
+                                    Text("\(Int(exVolume)) lb").font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
+                                }
                                 Text(muscleGroup(for: ex)).font(.caption2).foregroundStyle(.tertiary)
                             }
                             ForEach(exSets, id: \.id) { s in
