@@ -47,7 +47,7 @@ struct ContentView: View {
                 .tabItem { Label("Exercise", systemImage: "dumbbell.fill") }
                 .tag(3)
 
-            MoreTabView()
+            MoreTabView(selectedTab: $selectedTab)
                 .tabItem { Label("More", systemImage: "ellipsis") }
                 .tag(4)
         }

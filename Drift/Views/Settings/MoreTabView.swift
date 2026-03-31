@@ -1,6 +1,9 @@
 import SwiftUI
 
 struct MoreTabView: View {
+    @Binding var selectedTab: Int
+    @State private var navId = UUID()
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -79,6 +82,11 @@ struct MoreTabView: View {
             .scrollContentBackground(.hidden)
             .navigationTitle("More")
             .toolbarColorScheme(.dark, for: .navigationBar)
+        }
+        .id(navId)
+        .onChange(of: selectedTab) { oldTab, newTab in
+            // When leaving More tab, reset navigation so it shows root when coming back
+            if oldTab == 4 && newTab != 4 { navId = UUID() }
         }
     }
 
