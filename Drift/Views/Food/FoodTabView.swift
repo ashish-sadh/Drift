@@ -308,12 +308,12 @@ struct FoodTabView: View {
             }
 
             // Copy from yesterday
-            if viewModel.isToday, let yesterdayCal = yesterdayCalories(), yesterdayCal > 0 {
+            if let yesterdayCal = yesterdayCalories(), yesterdayCal > 0 {
                 Button {
                     copyFromYesterday()
                     reload()
                 } label: {
-                    Label("Copy yesterday's food", systemImage: "doc.on.doc")
+                    Label("Copy previous day's food", systemImage: "doc.on.doc")
                         .font(.caption).foregroundStyle(Theme.accent)
                 }
                 .padding(.top, 2)
@@ -354,13 +354,13 @@ struct FoodTabView: View {
     }
 
     private func yesterdayCalories() -> Double? {
-        guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) else { return nil }
+        guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: viewModel.selectedDate) else { return nil }
         let dateStr = DateFormatters.dateOnly.string(from: yesterday)
         return (try? AppDatabase.shared.fetchDailyNutrition(for: dateStr))?.calories
     }
 
     private func copyFromYesterday() {
-        guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) else { return }
+        guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: viewModel.selectedDate) else { return }
         let dateStr = DateFormatters.dateOnly.string(from: yesterday)
         guard let logs = try? AppDatabase.shared.fetchMealLogs(for: dateStr) else { return }
         for log in logs {
