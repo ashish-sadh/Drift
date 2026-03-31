@@ -286,6 +286,8 @@ struct WorkoutView: View {
         }
         .fileImporter(isPresented: $showingImport, allowedContentTypes: [.commaSeparatedText]) { handleImport($0) }
         .onAppear { loadData() }
+        .onChange(of: showingNewWorkout) { _, showing in if !showing { loadData() } }
+        .onChange(of: showingCreateTemplate) { _, showing in if !showing { loadData() } }
         .task {
             let hk = HealthKitService.shared
             activeCalories = (try? await hk.fetchCaloriesBurned(for: Date()).active) ?? 0
