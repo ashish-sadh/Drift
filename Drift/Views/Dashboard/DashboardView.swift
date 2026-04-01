@@ -267,7 +267,7 @@ struct DashboardView: View {
                 .foregroundStyle(.secondary)
         }
         .padding(.horizontal, 6).padding(.vertical, 3)
-        .background(color.opacity(0.08), in: RoundedRectangle(cornerRadius: 5))
+        .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 6))
     }
 
     private func macroChipWithTarget(_ label: String, value: Double, target: Double, color: Color) -> some View {
@@ -278,7 +278,7 @@ struct DashboardView: View {
                 .foregroundStyle(value >= target ? color : .secondary)
         }
         .padding(.horizontal, 6).padding(.vertical, 3)
-        .background(color.opacity(0.08), in: RoundedRectangle(cornerRadius: 5))
+        .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 6))
     }
 
     // MARK: - Weight + Deficit

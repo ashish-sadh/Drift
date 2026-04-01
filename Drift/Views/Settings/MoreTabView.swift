@@ -123,6 +123,7 @@ struct SettingsView: View {
     @State private var weightUnit: WeightUnit = Preferences.weightUnit
     @State private var showingFactoryReset = false
     @State private var resetDone = false
+    @State private var syncStatus: String?
 
     var body: some View {
         ScrollView {
@@ -146,33 +147,74 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
 
                     Button {
-                        Task { try? await HealthKitService.shared.requestAuthorization() }
+                        Task {
+                            do {
+                                try await HealthKitService.shared.requestAuthorization()
+                                syncStatus = "Health access granted"
+                            } catch {
+                                syncStatus = "Access denied: \(error.localizedDescription)"
+                            }
+                            clearStatus()
+                        }
                     } label: {
-                        HStack {
-                            Image(systemName: "heart.fill").foregroundStyle(Theme.heartRed)
-                            Text("Request Health Access")
-                            Spacer()
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack {
+                                Image(systemName: "heart.fill").foregroundStyle(Theme.heartRed)
+                                Text("Request Health Access")
+                                Spacer()
+                            }
+                            Text("Grant permission to read weight, sleep, vitals, and activity")
+                                .font(.caption2).foregroundStyle(.tertiary)
                         }
                     }
 
                     Button {
-                        Task { _ = try? await HealthKitService.shared.syncWeight() }
+                        Task {
+                            do {
+                                let count = try await HealthKitService.shared.syncWeight()
+                                syncStatus = "Synced \(count) weight entries"
+                            } catch {
+                                syncStatus = "Sync failed"
+                            }
+                            clearStatus()
+                        }
                     } label: {
-                        HStack {
-                            Image(systemName: "arrow.triangle.2.circlepath").foregroundStyle(Theme.accent)
-                            Text("Sync Weight")
-                            Spacer()
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack {
+                                Image(systemName: "arrow.triangle.2.circlepath").foregroundStyle(Theme.accent)
+                                Text("Sync Weight")
+                                Spacer()
+                            }
+                            Text("Import new weight data from Apple Health")
+                                .font(.caption2).foregroundStyle(.tertiary)
                         }
                     }
 
                     Button {
-                        Task { _ = try? await HealthKitService.shared.fullResyncWeight() }
-                    } label: {
-                        HStack {
-                            Image(systemName: "arrow.clockwise").foregroundStyle(.orange)
-                            Text("Full Re-sync (all history)")
-                            Spacer()
+                        Task {
+                            do {
+                                let count = try await HealthKitService.shared.fullResyncWeight()
+                                syncStatus = "Re-synced \(count) entries from all history"
+                            } catch {
+                                syncStatus = "Re-sync failed"
+                            }
+                            clearStatus()
                         }
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack {
+                                Image(systemName: "arrow.clockwise").foregroundStyle(.orange)
+                                Text("Full Re-sync")
+                                Spacer()
+                            }
+                            Text("Clear sync history and re-import all weight data")
+                                .font(.caption2).foregroundStyle(.tertiary)
+                        }
+                    }
+
+                    if let status = syncStatus {
+                        Text(status).font(.caption).foregroundStyle(Theme.accent)
+                            .transition(.opacity)
                     }
                 }
                 .card()
@@ -200,6 +242,11 @@ struct SettingsView: View {
                 } message: {
                     Text("This deletes ALL local data: weight entries, food logs, workouts, favorites, supplements, DEXA scans, glucose data, lab reports, biomarker results, barcode cache, goals, and algorithm settings. Apple Health data is NOT affected. This cannot be undone.")
                 }
+                .alert("Reset Complete", isPresented: $resetDone) {
+                    Button("OK") {}
+                } message: {
+                    Text("All data has been cleared. Restart the app for a fresh start.")
+                }
             }
             .padding(.horizontal, 16)
             .padding(.top, 8)
@@ -208,6 +255,12 @@ struct SettingsView: View {
         .background(Theme.background.ignoresSafeArea())
         .navigationTitle("Settings")
         .toolbarColorScheme(.dark, for: .navigationBar)
+    }
+
+    private func clearStatus() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            withAnimation { syncStatus = nil }
+        }
     }
 
     private func performFactoryReset() {

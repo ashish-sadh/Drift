@@ -97,9 +97,9 @@ The Manager reads these directions and adjusts the plan accordingly.
 
 - **Incremental only.** No major new features. No architectural rewrites. Small, safe improvements.
 - **If a drastic change is identified**, write it to `Docs/future-ideas.md` for the human to review later. Do not implement it.
-- **Git discipline:** One commit per logical change. Clear commit messages. Human must be able to revert any single change.
-- **Check `.claude-stop` before every cycle.** Follow the status and direction fields.
-- **Publish to TestFlight every 3 hours** with a build number bump.
+- **Git discipline:** Commit after every logical change. Push to remote frequently (every 2-3 commits). Clear commit messages. Human must be able to revert any single change.
+- **Check `.claude-stop` before every cycle.** Follow the status and direction fields. The human controls session duration — there is no built-in timer. The session runs until `.claude-stop` says STOP.
+- **Publish to TestFlight every 3 hours** (or at the end of a shorter session) with a build number bump.
 - **Track everything** in `Docs/session-log.md`: what was found, what was fixed, what was deferred, test results.
 
 ## Starting the Loop
