@@ -225,8 +225,13 @@ enum WorkoutService {
         let exercises: Int
     }
 
+    enum ImportError: LocalizedError {
+        case fileAccessDenied
+        var errorDescription: String? { "Could not access the selected file. Try re-selecting it." }
+    }
+
     static func importStrongCSV(url: URL) throws -> ImportResult {
-        guard url.startAccessingSecurityScopedResource() else { throw NSError(domain: "", code: -1) }
+        guard url.startAccessingSecurityScopedResource() else { throw ImportError.fileAccessDenied }
         defer { url.stopAccessingSecurityScopedResource() }
 
         let content = try String(contentsOf: url, encoding: .utf8)
