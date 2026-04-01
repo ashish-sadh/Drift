@@ -280,7 +280,7 @@ struct GlucoseTabView: View {
         // Deduplicate close indices (within 3 readings)
         var filtered: [Int] = []
         for idx in indices {
-            if filtered.isEmpty || idx - filtered.last! > 3 {
+            if filtered.isEmpty || idx - (filtered.last ?? 0) > 3 {
                 filtered.append(idx)
             }
         }
