@@ -55,6 +55,14 @@ struct GoalView: View {
                         .foregroundStyle(Theme.accent)
                 }
             }
+            if goal != nil {
+                ToolbarItem(placement: .primaryAction) {
+                    Button { showingSetup = true } label: {
+                        Image(systemName: "pencil.circle")
+                            .foregroundStyle(Theme.accent)
+                    }
+                }
+            }
         }
         .sheet(isPresented: $showingSetup) {
             GoalSetupView(existingGoal: goal) { newGoal in
