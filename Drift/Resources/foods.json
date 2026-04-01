@@ -3797,13 +3797,13 @@
   {
     "name": "Biryani (Indian Seasoned Rice), Without Meat",
     "category": "Indian Food",
-    "serving_size": 11,
-    "serving_unit": "tbsp",
-    "calories": 7,
-    "protein_g": 0,
-    "carbs_g": 1,
-    "fat_g": 0,
-    "fiber_g": 0
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 250,
+    "protein_g": 5,
+    "carbs_g": 45,
+    "fat_g": 6,
+    "fiber_g": 1
   },
   {
     "name": "Blueberries, Fresh",
@@ -4798,13 +4798,13 @@
   {
     "name": "Pistachio Nuts, Raw",
     "category": "Nuts & Seeds",
-    "serving_size": 1,
+    "serving_size": 28,
     "serving_unit": "g",
-    "calories": 7,
-    "protein_g": 0,
-    "carbs_g": 0,
-    "fat_g": 0,
-    "fiber_g": 0
+    "calories": 159,
+    "protein_g": 6,
+    "carbs_g": 8,
+    "fat_g": 13,
+    "fiber_g": 3
   },
   {
     "name": "Pistachio Nuts, Roasted, Salted",
@@ -5128,13 +5128,13 @@
   {
     "name": "Strawberries, Fresh",
     "category": "Grocery",
-    "serving_size": 18,
+    "serving_size": 150,
     "serving_unit": "g",
-    "calories": 6,
-    "protein_g": 0,
-    "carbs_g": 1,
-    "fat_g": 0,
-    "fiber_g": 0
+    "calories": 48,
+    "protein_g": 1,
+    "carbs_g": 12,
+    "fat_g": 0.5,
+    "fiber_g": 3
   },
   {
     "name": "Sugar",
