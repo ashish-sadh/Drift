@@ -275,6 +275,10 @@ struct WorkoutView: View {
                                             Text(ex.name).font(.subheadline)
                                             HStack(spacing: 4) {
                                                 Text("\(ex.sets) sets").font(.caption2).foregroundStyle(.tertiary)
+                                                if let lastW = try? WorkoutService.lastWeight(for: ex.name) {
+                                                    Text("\u{00B7}").font(.caption2).foregroundStyle(.quaternary)
+                                                    Text("\(Int(lastW)) lb").font(.caption2.monospacedDigit()).foregroundStyle(.tertiary)
+                                                }
                                                 if let notes = ex.notes {
                                                     Text("\u{00B7}").font(.caption2).foregroundStyle(.quaternary)
                                                     Text(notes).font(.caption2).foregroundStyle(.secondary).italic()
