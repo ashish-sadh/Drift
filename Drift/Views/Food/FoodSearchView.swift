@@ -566,7 +566,7 @@ struct FoodSearchView: View {
                         showingManual = false
                         manualName = ""; manualCal = ""; manualP = ""; manualC = ""; manualF = ""; manualFb = ""
                     }
-                    .disabled(manualCal.isEmpty && macroCalories == 0)
+                    .disabled((Double(manualCal) ?? 0) == 0 && macroCalories == 0)
                 }
             }
         }
