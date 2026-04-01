@@ -439,6 +439,7 @@ struct WorkoutDetailView: View {
     @State private var sets: [WorkoutSet] = []
     @State private var showingShare = false
     @State private var showingSaveTemplate = false
+    @State private var showingDeleteConfirm = false
     @State private var saveTemplateName = ""
 
     private var shareText: String {
@@ -509,17 +510,25 @@ struct WorkoutDetailView: View {
                 Menu {
                     Button { showingShare = true } label: { Label("Share", systemImage: "square.and.arrow.up") }
                     Button { saveTemplateName = summary.workout.name; showingSaveTemplate = true } label: { Label("Save as Template", systemImage: "doc.on.doc") }
-                    if let wid = summary.workout.id {
+                    if summary.workout.id != nil {
                         Divider()
                         Button(role: .destructive) {
-                            try? WorkoutService.deleteWorkout(id: wid)
-                            onDelete?()
-                            dismiss()
+                            showingDeleteConfirm = true
                         } label: { Label("Delete Workout", systemImage: "trash") }
                     }
                 } label: { Image(systemName: "ellipsis.circle").foregroundStyle(Theme.accent) }
             }
         }
+        .alert("Delete Workout?", isPresented: $showingDeleteConfirm) {
+            Button("Delete", role: .destructive) {
+                if let wid = summary.workout.id {
+                    try? WorkoutService.deleteWorkout(id: wid)
+                    onDelete?()
+                    dismiss()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { Text("This workout and all its sets will be permanently deleted.") }
         .sheet(isPresented: $showingShare) { ShareSheet(text: shareText) }
         .alert("Save as Template", isPresented: $showingSaveTemplate) {
             TextField("Template name", text: $saveTemplateName)

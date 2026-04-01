@@ -44,15 +44,8 @@ struct LabReport: Identifiable, Codable, Sendable {
 
     /// Display-friendly date.
     var displayDate: String {
-        let parts = reportDate.split(separator: "-")
-        guard parts.count == 3 else { return reportDate }
-        let months = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
-        let m = Int(parts[1]) ?? 0
-        let d = Int(parts[2]) ?? 0
-        let y = String(parts[0])
-        guard m > 0, m <= 12 else { return reportDate }
-        return "\(months[m]) \(d), \(y)"
+        guard let date = DateFormatters.dateOnly.date(from: reportDate) else { return reportDate }
+        return DateFormatters.dayDisplay.string(from: date)
     }
 }
 
