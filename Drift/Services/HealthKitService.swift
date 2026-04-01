@@ -144,54 +144,10 @@ final class HealthKitService {
         return steps
     }
 
+    /// Simplified sleep hours — delegates to fetchSleepDetail to avoid duplicate logic.
     func fetchSleepHours(for date: Date) async throws -> Double {
-        guard isAvailable, let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else { return 0 }
-        let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: date)
-        guard let evening = calendar.date(byAdding: .hour, value: -6, to: startOfDay),
-              let noon = calendar.date(byAdding: .hour, value: 12, to: startOfDay) else { return 0 }
-        let predicate = HKQuery.predicateForSamples(withStart: evening, end: noon, options: [])
-
-        let hours: Double = try await withCheckedThrowingContinuation { continuation in
-            let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, error in
-                if let error { continuation.resume(throwing: error); return }
-                let sleepSamples = (samples ?? []).compactMap { $0 as? HKCategorySample }
-
-                var staged = 0.0, inBed = 0.0, unspecified = 0.0
-                for s in sleepSamples {
-                    let dur = s.endDate.timeIntervalSince(s.startDate)
-                    switch s.value {
-                    case HKCategoryValueSleepAnalysis.asleepREM.rawValue,
-                         HKCategoryValueSleepAnalysis.asleepDeep.rawValue,
-                         HKCategoryValueSleepAnalysis.asleepCore.rawValue:
-                        staged += dur
-                    case HKCategoryValueSleepAnalysis.asleepUnspecified.rawValue:
-                        unspecified += dur
-                    case HKCategoryValueSleepAnalysis.inBed.rawValue:
-                        inBed += dur
-                    default: break // skip awake
-                    }
-                }
-                // If detailed stages (REM/Deep/Core) exist, use ONLY those.
-                // Don't add inBed or unspecified on top — they often overlap and cause double-counting
-                // (e.g., WHOOP writes stages + iPhone writes inBed for the same night = 13h).
-                // Only fall back to unspecified or inBed when no detailed stages are available.
-                let totalSeconds: Double
-                if staged > 0 {
-                    totalSeconds = staged
-                } else if unspecified > 0 {
-                    totalSeconds = unspecified
-                } else {
-                    totalSeconds = inBed
-                }
-                // Sanity cap: sleep cannot exceed 14 hours in one night
-                let capped = min(totalSeconds, 14 * 3600)
-                continuation.resume(returning: capped / 3600)
-            }
-            healthStore.execute(query)
-        }
-        Log.healthKit.debug("Sleep: \(String(format: "%.1f", hours))h")
-        return hours
+        let detail = try await fetchSleepDetail(for: date)
+        return detail.totalHours
     }
 
     // MARK: - Sleep & Recovery Data
