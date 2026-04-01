@@ -329,8 +329,12 @@ struct FoodTabView: View {
                     copyFromYesterday()
                     reload()
                 } label: {
-                    Label("Copy previous day's food", systemImage: "doc.on.doc")
-                        .font(.caption).foregroundStyle(Theme.accent)
+                    HStack(spacing: 4) {
+                        Label("Copy previous day", systemImage: "doc.on.doc")
+                        Text("(\(Int(yesterdayCal)) cal)")
+                            .foregroundStyle(.tertiary)
+                    }
+                    .font(.caption).foregroundStyle(Theme.accent)
                 }
                 .padding(.top, 2)
             }
