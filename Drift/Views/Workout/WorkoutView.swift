@@ -20,6 +20,10 @@ struct WorkoutView: View {
     @State private var renameTemplateId: Int64?
     @State private var renameTemplateName = ""
     @State private var showingRenameAlert = false
+    @State private var deleteTemplateId: Int64?
+    @State private var showingDeleteTemplate = false
+    @State private var deleteWorkoutId: Int64?
+    @State private var showingDeleteWorkout = false
 
     @State private var activeCalories: Double = 0
     @State private var steps: Double = 0
@@ -97,37 +101,28 @@ struct WorkoutView: View {
                             .font(.caption).foregroundStyle(.tertiary)
                     } else {
                         ForEach(templates) { t in
-                            HStack {
-                                VStack(alignment: .leading, spacing: 3) {
-                                    HStack(spacing: 4) {
-                                        if t.isFavorite {
-                                            Image(systemName: "star.fill").font(.caption2).foregroundStyle(Theme.fatYellow)
-                                        }
-                                        Text(t.name).font(.subheadline.weight(.medium))
-                                    }
-                                    let working = t.exercises.filter { !$0.isWarmup }
-                                    Text(working.map(\.name).prefix(3).joined(separator: ", "))
-                                        .font(.caption2).foregroundStyle(.tertiary).lineLimit(1)
+                            HStack(spacing: 8) {
+                                if t.isFavorite {
+                                    Image(systemName: "star.fill").font(.system(size: 9)).foregroundStyle(Theme.fatYellow)
                                 }
-
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(t.name).font(.subheadline.weight(.medium))
+                                    let working = t.exercises.filter { !$0.isWarmup }
+                                    Text("\(working.count) exercises")
+                                        .font(.caption2).foregroundStyle(.tertiary)
+                                }
                                 Spacer()
-
-                                // Start button
-                                Button {
-                                    WorkoutService.clearSession(); selectedTemplate = t; showingNewWorkout = true
-                                } label: {
-                                    Text("Start").font(.caption.weight(.semibold))
-                                        .padding(.horizontal, 12).padding(.vertical, 6)
-                                        .background(Theme.accent, in: RoundedRectangle(cornerRadius: 8))
-                                        .foregroundStyle(.white)
-                                }.buttonStyle(.plain)
+                                Image(systemName: "play.circle.fill")
+                                    .font(.title3).foregroundStyle(Theme.accent.opacity(0.6))
                             }
-                            .padding(.vertical, 4)
+                            .padding(.vertical, 3)
                             .contentShape(Rectangle())
-                            .onTapGesture { previewTemplate = t }
+                            .onTapGesture {
+                                WorkoutService.clearSession(); selectedTemplate = t; showingNewWorkout = true
+                            }
                             .contextMenu {
-                                Button { WorkoutService.clearSession(); selectedTemplate = t; showingNewWorkout = true } label: {
-                                    Label("Start Workout", systemImage: "play")
+                                Button { previewTemplate = t } label: {
+                                    Label("Preview", systemImage: "eye")
                                 }
                                 Button { editingTemplateForEdit = t } label: {
                                     Label("Edit", systemImage: "pencil")
@@ -148,8 +143,8 @@ struct WorkoutView: View {
                                     }
                                     Divider()
                                     Button(role: .destructive) {
-                                        try? AppDatabase.shared.writer.write { db in _ = try WorkoutTemplate.deleteOne(db, id: tid) }
-                                        loadData()
+                                        deleteTemplateId = tid
+                                        showingDeleteTemplate = true
                                     } label: { Label("Delete Template", systemImage: "trash") }
                                 }
                             }
@@ -199,8 +194,8 @@ struct WorkoutView: View {
                                     .contextMenu {
                                         if let wid = s.workout.id {
                                             Button(role: .destructive) {
-                                                try? WorkoutService.deleteWorkout(id: wid)
-                                                loadData()
+                                                deleteWorkoutId = wid
+                                                showingDeleteWorkout = true
                                             } label: { Label("Delete Workout", systemImage: "trash") }
                                         }
                                     }
@@ -332,6 +327,24 @@ struct WorkoutView: View {
             }
             Button("Cancel", role: .cancel) {}
         }
+        .alert("Delete Template?", isPresented: $showingDeleteTemplate) {
+            Button("Delete", role: .destructive) {
+                if let tid = deleteTemplateId {
+                    try? AppDatabase.shared.writer.write { db in _ = try WorkoutTemplate.deleteOne(db, id: tid) }
+                    loadData()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { Text("This template will be permanently deleted.") }
+        .alert("Delete Workout?", isPresented: $showingDeleteWorkout) {
+            Button("Delete", role: .destructive) {
+                if let wid = deleteWorkoutId {
+                    try? WorkoutService.deleteWorkout(id: wid)
+                    loadData()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { Text("This workout and all its sets will be permanently deleted.") }
         .onAppear { loadData() }
         .onChange(of: showingNewWorkout) { _, showing in if !showing { loadData() } }
         .onChange(of: showingCreateTemplate) { _, showing in if !showing { loadData() } }
