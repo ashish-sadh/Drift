@@ -276,56 +276,38 @@ final class HealthKitService {
 
     /// HRV (SDNN) for a date - latest reading.
     func fetchHRV(for date: Date) async throws -> Double {
-        guard isAvailable, let hrvType = HKQuantityType.quantityType(forIdentifier: .heartRateVariabilitySDNN) else { return 0 }
-        let cal = Calendar.current
-        guard let start = cal.date(byAdding: .day, value: -1, to: cal.startOfDay(for: date)),
-              let end = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: date)) else { return 0 }
-        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
-
-        return try await withCheckedThrowingContinuation { continuation in
-            let query = HKSampleQuery(sampleType: hrvType, predicate: predicate, limit: 1,
-                                      sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)]) { _, samples, error in
-                if let error { continuation.resume(throwing: error); return }
-                let ms = (samples?.first as? HKQuantitySample)?.quantity.doubleValue(for: .secondUnit(with: .milli)) ?? 0
-                continuation.resume(returning: ms)
-            }
-            healthStore.execute(query)
-        }
+        try await fetchLatestQuantity(identifier: .heartRateVariabilitySDNN, for: date,
+                                       unit: .secondUnit(with: .milli), windowDays: 1)
     }
 
     /// Resting heart rate for a date.
     func fetchRestingHeartRate(for date: Date) async throws -> Double {
-        guard isAvailable, let rhrType = HKQuantityType.quantityType(forIdentifier: .restingHeartRate) else { return 0 }
-        let cal = Calendar.current
-        let start = cal.startOfDay(for: date)
-        guard let end = cal.date(byAdding: .day, value: 1, to: start) else { return 0 }
-        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
-
-        return try await withCheckedThrowingContinuation { continuation in
-            let query = HKSampleQuery(sampleType: rhrType, predicate: predicate, limit: 1,
-                                      sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)]) { _, samples, error in
-                if let error { continuation.resume(throwing: error); return }
-                let bpm = (samples?.first as? HKQuantitySample)?.quantity.doubleValue(for: .count().unitDivided(by: .minute())) ?? 0
-                continuation.resume(returning: bpm)
-            }
-            healthStore.execute(query)
-        }
+        try await fetchLatestQuantity(identifier: .restingHeartRate, for: date,
+                                       unit: .count().unitDivided(by: .minute()))
     }
 
     /// Respiratory rate for a date.
     func fetchRespiratoryRate(for date: Date) async throws -> Double {
-        guard isAvailable, let rrType = HKQuantityType.quantityType(forIdentifier: .respiratoryRate) else { return 0 }
+        try await fetchLatestQuantity(identifier: .respiratoryRate, for: date,
+                                       unit: .count().unitDivided(by: .minute()))
+    }
+
+    /// Generic helper: fetch the latest sample of a quantity type for a date.
+    private func fetchLatestQuantity(identifier: HKQuantityTypeIdentifier, for date: Date,
+                                      unit: HKUnit, windowDays: Int = 0) async throws -> Double {
+        guard isAvailable, let qType = HKQuantityType.quantityType(forIdentifier: identifier) else { return 0 }
         let cal = Calendar.current
-        let start = cal.startOfDay(for: date)
-        guard let end = cal.date(byAdding: .day, value: 1, to: start) else { return 0 }
+        let startOfDay = cal.startOfDay(for: date)
+        guard let start = cal.date(byAdding: .day, value: -windowDays, to: startOfDay),
+              let end = cal.date(byAdding: .day, value: 1, to: startOfDay) else { return 0 }
         let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
 
         return try await withCheckedThrowingContinuation { continuation in
-            let query = HKSampleQuery(sampleType: rrType, predicate: predicate, limit: 1,
+            let query = HKSampleQuery(sampleType: qType, predicate: predicate, limit: 1,
                                       sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)]) { _, samples, error in
                 if let error { continuation.resume(throwing: error); return }
-                let rpm = (samples?.first as? HKQuantitySample)?.quantity.doubleValue(for: .count().unitDivided(by: .minute())) ?? 0
-                continuation.resume(returning: rpm)
+                let value = (samples?.first as? HKQuantitySample)?.quantity.doubleValue(for: unit) ?? 0
+                continuation.resume(returning: value)
             }
             healthStore.execute(query)
         }
