@@ -118,33 +118,50 @@ struct AlgorithmSettingsView: View {
                 .font(.system(size: 48, weight: .bold).monospacedDigit())
             Text("kcal/day").font(.caption).foregroundStyle(.tertiary)
 
-            // Target or goal link
-            if let target = liveCalorieTarget {
-                let adj = WeightGoal.load()?.requiredDailyDeficit ?? 0
+            // Target + goal context
+            if let target = liveCalorieTarget, let goal = WeightGoal.load() {
+                let unit = Preferences.weightUnit
+                let remaining = abs(unit.convert(fromKg: goal.totalChangeKg))
+                let isLosing = goal.totalChangeKg < 0
+                let requiredDeficit = goal.requiredDailyDeficit
+
                 HStack(spacing: 4) {
                     Text("Target \(target)")
                         .font(.caption2.weight(.bold).monospacedDigit())
                         .foregroundStyle(Theme.accent)
-                    Text(adj < 0 ? "for weight loss" : adj > 0 ? "to gain" : "")
+                    Text("to \(isLosing ? "lose" : "gain") \(String(format: "%.1f", remaining)) \(unit.displayName)")
                         .font(.caption2).foregroundStyle(.quaternary)
+                }
+
+                // Required vs actual deficit/surplus
+                Divider().frame(width: 40).overlay(Color.white.opacity(0.1))
+                HStack(spacing: 12) {
+                    VStack(spacing: 1) {
+                        Text("Required").font(.system(size: 9)).foregroundStyle(.tertiary)
+                        Text("\(requiredDeficit < 0 ? "" : "+")\(Int(requiredDeficit))")
+                            .font(.caption2.weight(.bold).monospacedDigit())
+                            .foregroundStyle(isLosing ? (requiredDeficit < 0 ? Theme.deficit : Theme.surplus) : (requiredDeficit > 0 ? Theme.deficit : Theme.surplus))
+                    }
+                    if let deficit = liveDeficit {
+                        VStack(spacing: 1) {
+                            Text("Current").font(.system(size: 9)).foregroundStyle(.tertiary)
+                            Text("\(deficit < 0 ? "" : "+")\(Int(deficit))")
+                                .font(.caption2.weight(.bold).monospacedDigit())
+                                .foregroundStyle(isLosing ? (deficit < 0 ? Theme.deficit : Theme.surplus) : (deficit > 0 ? Theme.deficit : Theme.surplus))
+                        }
+                    }
+                    Text("kcal/day").font(.system(size: 9)).foregroundStyle(.quaternary)
+                }
+            } else if liveCalorieTarget != nil {
+                // Has TDEE target but no goal
+                HStack(spacing: 4) {
+                    Text("Target \(liveCalorieTarget!)")
+                        .font(.caption2.weight(.bold).monospacedDigit())
+                        .foregroundStyle(Theme.accent)
                 }
             } else {
                 NavigationLink { GoalView() } label: {
                     Text("Set goal for calorie target").font(.caption2).foregroundStyle(Theme.accent)
-                }
-            }
-
-            // Est. Deficit/Surplus — visually separated
-            if let deficit = liveDeficit {
-                Divider().frame(width: 40).overlay(Color.white.opacity(0.1))
-                HStack(spacing: 4) {
-                    Text("Current:")
-                        .font(.caption2).foregroundStyle(.tertiary)
-                    Text(deficit < 0 ? "Est. Deficit \(deficit)" : "Est. Surplus +\(deficit)")
-                        .font(.caption2.weight(.semibold).monospacedDigit())
-                        .foregroundStyle(deficit < 0 ? Theme.deficit : Theme.surplus)
-                    Text("kcal/day")
-                        .font(.caption2).foregroundStyle(.quaternary)
                 }
             }
         }
@@ -317,14 +334,14 @@ struct AlgorithmSettingsView: View {
 
             if showAdvanced {
                 VStack(spacing: 10) {
-                    // Data sources
+                    // Data sources — from the shared TDEE estimator (same as Dashboard)
                     VStack(alignment: .leading, spacing: 6) {
                         Text("Active Data Sources").font(.caption.weight(.semibold)).foregroundStyle(.tertiary)
                         HStack(spacing: 10) {
-                            sourceChip("Weight", active: (try? AppDatabase.shared.fetchWeightEntries(from: nil))?.first != nil)
-                            sourceChip("Profile", active: tdeeConfig.age != nil || tdeeConfig.heightCm != nil || tdeeConfig.sex != nil)
-                            sourceChip("Apple Health", active: ahResting > 0)
-                            sourceChip("Food Log", active: liveDeficit != nil)
+                            let est = TDEEEstimator.shared.cachedOrSync()
+                            ForEach(est.activeSources, id: \.self) { source in
+                                sourceChip(source, active: true)
+                            }
                         }
 
                         if ahResting > 0 || ahActive > 0 {
