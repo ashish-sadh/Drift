@@ -19,6 +19,8 @@ final class HealthKitService {
         if let rhr = HKObjectType.quantityType(forIdentifier: .restingHeartRate) { types.insert(rhr) }
         if let hr = HKObjectType.quantityType(forIdentifier: .heartRate) { types.insert(hr) }
         if let resp = HKObjectType.quantityType(forIdentifier: .respiratoryRate) { types.insert(resp) }
+        if let height = HKObjectType.quantityType(forIdentifier: .height) { types.insert(height) }
+        // biologicalSex and dateOfBirth are characteristics — no auth needed
         return types
     }
 
@@ -35,6 +37,56 @@ final class HealthKitService {
         Log.healthKit.info("Requesting HealthKit authorization")
         try await healthStore.requestAuthorization(toShare: writeTypes, read: readTypes)
         Log.healthKit.info("HealthKit authorization completed")
+    }
+
+    // MARK: - User Profile (age, height, sex)
+
+    struct UserProfile: Sendable {
+        let age: Int?
+        let heightCm: Double?
+        let sex: TDEEEstimator.Sex?
+    }
+
+    func fetchUserProfile() -> UserProfile {
+        guard isAvailable else { return UserProfile(age: nil, heightCm: nil, sex: nil) }
+
+        // Biological sex
+        let sex: TDEEEstimator.Sex?
+        if let bioSex = try? healthStore.biologicalSex().biologicalSex {
+            switch bioSex {
+            case .male: sex = .male
+            case .female: sex = .female
+            default: sex = nil
+            }
+        } else {
+            sex = nil
+        }
+
+        // Date of birth → age
+        let age: Int?
+        if let dob = try? healthStore.dateOfBirthComponents().date {
+            age = Calendar.current.dateComponents([.year], from: dob, to: Date()).year
+        } else {
+            age = nil
+        }
+
+        // Height (latest sample)
+        var heightCm: Double?
+        if let heightType = HKQuantityType.quantityType(forIdentifier: .height) {
+            let semaphore = DispatchSemaphore(value: 0)
+            let query = HKSampleQuery(sampleType: heightType, predicate: nil, limit: 1,
+                                      sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)]) { _, samples, _ in
+                if let sample = samples?.first as? HKQuantitySample {
+                    heightCm = sample.quantity.doubleValue(for: .meterUnit(with: .centi))
+                }
+                semaphore.signal()
+            }
+            healthStore.execute(query)
+            semaphore.wait()
+        }
+
+        Log.healthKit.info("Profile: age=\(age ?? -1), height=\(heightCm ?? -1)cm, sex=\(sex?.rawValue ?? "nil")")
+        return UserProfile(age: age, heightCm: heightCm, sex: sex)
     }
 
     func syncWeight() async throws -> Int {
