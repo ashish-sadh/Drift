@@ -183,14 +183,20 @@ final class FoodLogViewModel {
     var isToday: Bool { Calendar.current.isDateInToday(selectedDate) }
 
     /// Days with food logged in last N days (for consistency heatmap).
+    /// Uses single batch query instead of N individual queries.
     func loggedDays(last days: Int = 30) -> [Date: Double] {
         let cal = Calendar.current
+        guard let startDate = cal.date(byAdding: .day, value: -(days - 1), to: Date()) else { return [:] }
+        let startStr = DateFormatters.dateOnly.string(from: startDate)
+        let endStr = DateFormatters.dateOnly.string(from: Date())
+
+        let dailyCals = (try? database.fetchDailyCalories(from: startStr, to: endStr)) ?? [:]
+
         var result: [Date: Double] = [:]
         for offset in 0..<days {
             guard let date = cal.date(byAdding: .day, value: -offset, to: Date()) else { continue }
             let dateStr = DateFormatters.dateOnly.string(from: date)
-            let nutrition = try? database.fetchDailyNutrition(for: dateStr)
-            result[cal.startOfDay(for: date)] = nutrition?.calories ?? 0
+            result[cal.startOfDay(for: date)] = dailyCals[dateStr] ?? 0
         }
         return result
     }

@@ -207,6 +207,26 @@ extension AppDatabase {
         }
     }
 
+    /// Daily calorie totals for a date range (batch query for consistency heatmap).
+    func fetchDailyCalories(from startDate: String, to endDate: String) throws -> [String: Double] {
+        try dbWriter.read { db in
+            let rows = try Row.fetchAll(db, sql: """
+                SELECT ml.date, SUM(fe.calories * fe.servings) as total_cal
+                FROM food_entry fe
+                JOIN meal_log ml ON fe.meal_log_id = ml.id
+                WHERE ml.date BETWEEN ? AND ?
+                GROUP BY ml.date
+                """, arguments: [startDate, endDate])
+            var result: [String: Double] = [:]
+            for row in rows {
+                if let date: String = row["date"], let cal: Double = row["total_cal"] {
+                    result[date] = cal
+                }
+            }
+            return result
+        }
+    }
+
     /// Average daily calories over a date range (for TDEE estimation).
     func averageDailyCalories(from startDate: String, to endDate: String) throws -> Double {
         try dbWriter.read { db in
