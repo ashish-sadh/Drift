@@ -1089,17 +1089,6 @@
     "fiber_g": 2
   },
   {
-    "name": "Chia Seeds",
-    "category": "Nuts & Seeds",
-    "serving_size": 15,
-    "serving_unit": "g",
-    "calories": 73,
-    "protein_g": 2.5,
-    "carbs_g": 6,
-    "fat_g": 4.5,
-    "fiber_g": 5
-  },
-  {
     "name": "Flax Seeds",
     "category": "Nuts & Seeds",
     "serving_size": 10,
@@ -1285,28 +1274,6 @@
     "carbs_g": 5,
     "fat_g": 3.5,
     "fiber_g": 1
-  },
-  {
-    "name": "Samosa (1 piece)",
-    "category": "Snacks",
-    "serving_size": 80,
-    "serving_unit": "g",
-    "calories": 250,
-    "protein_g": 4,
-    "carbs_g": 28,
-    "fat_g": 14,
-    "fiber_g": 2
-  },
-  {
-    "name": "Pakora / Bhajia (5 pieces)",
-    "category": "Snacks",
-    "serving_size": 100,
-    "serving_unit": "g",
-    "calories": 280,
-    "protein_g": 5,
-    "carbs_g": 22,
-    "fat_g": 20,
-    "fiber_g": 3
   },
   {
     "name": "Namkeen / Trail Mix",
@@ -2024,17 +1991,6 @@
     "fiber_g": 3
   },
   {
-    "name": "Hemp Seeds",
-    "category": "Nuts & Seeds",
-    "serving_size": 30,
-    "serving_unit": "g",
-    "calories": 166,
-    "protein_g": 10,
-    "carbs_g": 2.6,
-    "fat_g": 14.6,
-    "fiber_g": 1.2
-  },
-  {
     "name": "Sunflower Seeds",
     "category": "Nuts & Seeds",
     "serving_size": 30,
@@ -2396,17 +2352,6 @@
     "carbs_g": 18,
     "fat_g": 13,
     "fiber_g": 2
-  },
-  {
-    "name": "Popcorn (air-popped)",
-    "category": "Snacks",
-    "serving_size": 28,
-    "serving_unit": "g",
-    "calories": 110,
-    "protein_g": 3,
-    "carbs_g": 22,
-    "fat_g": 1.3,
-    "fiber_g": 4
   },
   {
     "name": "Potato Chips",
@@ -5434,17 +5379,6 @@
     "fiber_g": 1
   },
   {
-    "name": "Brussels Sprouts (roasted)",
-    "category": "Vegetables",
-    "serving_size": 156,
-    "serving_unit": "g",
-    "calories": 56,
-    "protein_g": 4,
-    "carbs_g": 11,
-    "fat_g": 1,
-    "fiber_g": 4
-  },
-  {
     "name": "Mixed Greens (salad base)",
     "category": "Vegetables",
     "serving_size": 85,
@@ -6598,28 +6532,6 @@
     "carbs_g": 33,
     "fat_g": 0,
     "fiber_g": 2
-  },
-  {
-    "name": "Chipotle Chicken Burrito Bowl",
-    "category": "Ready Meals",
-    "serving_size": 510,
-    "serving_unit": "g",
-    "calories": 665,
-    "protein_g": 42,
-    "carbs_g": 73,
-    "fat_g": 22,
-    "fiber_g": 12
-  },
-  {
-    "name": "Chipotle Steak Bowl",
-    "category": "Ready Meals",
-    "serving_size": 510,
-    "serving_unit": "g",
-    "calories": 720,
-    "protein_g": 46,
-    "carbs_g": 73,
-    "fat_g": 27,
-    "fiber_g": 12
   },
   {
     "name": "Chick-fil-A Grilled Nuggets (8ct)",
@@ -8248,17 +8160,6 @@
     "carbs_g": 28,
     "fat_g": 18,
     "fiber_g": 1
-  },
-  {
-    "name": "Edamame (shelled)",
-    "category": "Vegetables",
-    "serving_size": 1,
-    "serving_unit": "cup",
-    "calories": 188,
-    "protein_g": 18,
-    "carbs_g": 14,
-    "fat_g": 8,
-    "fiber_g": 8
   },
   {
     "name": "Chia Seeds",
