@@ -7764,5 +7764,93 @@
     "carbs_g": 40,
     "fat_g": 4,
     "fiber_g": 0
+  },
+  {
+    "name": "Celsius Energy Drink (12 fl oz)",
+    "category": "Beverages",
+    "serving_size": 355,
+    "serving_unit": "ml",
+    "calories": 10,
+    "protein_g": 0,
+    "carbs_g": 2,
+    "fat_g": 0,
+    "fiber_g": 0
+  },
+  {
+    "name": "Monster Energy (16 fl oz)",
+    "category": "Beverages",
+    "serving_size": 473,
+    "serving_unit": "ml",
+    "calories": 210,
+    "protein_g": 0,
+    "carbs_g": 54,
+    "fat_g": 0,
+    "fiber_g": 0
+  },
+  {
+    "name": "Boba / Bubble Tea (medium)",
+    "category": "Beverages",
+    "serving_size": 473,
+    "serving_unit": "ml",
+    "calories": 350,
+    "protein_g": 3,
+    "carbs_g": 68,
+    "fat_g": 6,
+    "fiber_g": 0
+  },
+  {
+    "name": "Goldfish Crackers (55 pieces)",
+    "category": "Snacks",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 140,
+    "protein_g": 3,
+    "carbs_g": 20,
+    "fat_g": 5,
+    "fiber_g": 1
+  },
+  {
+    "name": "Cheez-It Crackers (27 crackers)",
+    "category": "Snacks",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 150,
+    "protein_g": 3,
+    "carbs_g": 17,
+    "fat_g": 8,
+    "fiber_g": 0
+  },
+  {
+    "name": "Lays Classic Potato Chips (1 oz)",
+    "category": "Snacks",
+    "serving_size": 28,
+    "serving_unit": "g",
+    "calories": 160,
+    "protein_g": 2,
+    "carbs_g": 15,
+    "fat_g": 10,
+    "fiber_g": 1
+  },
+  {
+    "name": "Skinny Pop Popcorn (3.5 cups)",
+    "category": "Snacks",
+    "serving_size": 28,
+    "serving_unit": "g",
+    "calories": 150,
+    "protein_g": 2,
+    "carbs_g": 15,
+    "fat_g": 10,
+    "fiber_g": 3
+  },
+  {
+    "name": "Built Bar (Peanut Butter)",
+    "category": "Snacks",
+    "serving_size": 56,
+    "serving_unit": "g",
+    "calories": 130,
+    "protein_g": 17,
+    "carbs_g": 18,
+    "fat_g": 3,
+    "fiber_g": 6
   }
 ]
