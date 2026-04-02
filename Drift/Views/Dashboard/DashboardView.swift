@@ -312,11 +312,7 @@ struct DashboardView: View {
         return isLosing ? deficit < 0 : deficit > 0
     }
 
-    // weightDeficitRow removed - inlined into the card above
-
     // MARK: - Macros
-
-    // macroCard removed - macros now inline in calorieBalanceCard
 
     private func macroPill(_ label: String, value: Double, color: Color) -> some View {
         VStack(spacing: 3) {
