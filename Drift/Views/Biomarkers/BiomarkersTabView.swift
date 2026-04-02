@@ -67,7 +67,8 @@ struct BiomarkersTabView: View {
                     .foregroundStyle(.white)
             }
         }
-        .padding(.top, 60)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(.horizontal, 32)
     }
 
     // MARK: - Donut Summary
