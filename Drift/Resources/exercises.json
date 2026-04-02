@@ -12086,5 +12086,309 @@
       "chest",
       "triceps"
     ]
+  },
+  {
+    "name": "Dumbbell Chest Fly",
+    "bodyPart": "Chest",
+    "category": "strength",
+    "equipment": "dumbbell",
+    "level": "intermediate",
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "shoulders"
+    ]
+  },
+  {
+    "name": "Cable Chest Fly",
+    "bodyPart": "Chest",
+    "category": "strength",
+    "equipment": "cable",
+    "level": "intermediate",
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "shoulders"
+    ]
+  },
+  {
+    "name": "Bulgarian Split Squat",
+    "bodyPart": "Legs",
+    "category": "strength",
+    "equipment": "dumbbell",
+    "level": "intermediate",
+    "primaryMuscles": [
+      "quadriceps"
+    ],
+    "secondaryMuscles": [
+      "glutes",
+      "hamstrings",
+      "calves"
+    ]
+  },
+  {
+    "name": "Bodyweight Bulgarian Split Squat",
+    "bodyPart": "Legs",
+    "category": "strength",
+    "equipment": "body only",
+    "level": "beginner",
+    "primaryMuscles": [
+      "quadriceps"
+    ],
+    "secondaryMuscles": [
+      "glutes",
+      "hamstrings"
+    ]
+  },
+  {
+    "name": "Cable Seated Row",
+    "bodyPart": "Back",
+    "category": "strength",
+    "equipment": "cable",
+    "level": "beginner",
+    "primaryMuscles": [
+      "middle back"
+    ],
+    "secondaryMuscles": [
+      "biceps",
+      "lats"
+    ]
+  },
+  {
+    "name": "Machine Seated Row",
+    "bodyPart": "Back",
+    "category": "strength",
+    "equipment": "machine",
+    "level": "beginner",
+    "primaryMuscles": [
+      "middle back"
+    ],
+    "secondaryMuscles": [
+      "biceps",
+      "lats"
+    ]
+  },
+  {
+    "name": "Pendlay Row",
+    "bodyPart": "Back",
+    "category": "strength",
+    "equipment": "barbell",
+    "level": "intermediate",
+    "primaryMuscles": [
+      "middle back"
+    ],
+    "secondaryMuscles": [
+      "biceps",
+      "lats",
+      "lower back"
+    ]
+  },
+  {
+    "name": "Ab Wheel Rollout",
+    "bodyPart": "Core",
+    "category": "strength",
+    "equipment": "other",
+    "level": "intermediate",
+    "primaryMuscles": [
+      "abdominals"
+    ],
+    "secondaryMuscles": [
+      "shoulders",
+      "lats"
+    ]
+  },
+  {
+    "name": "Hip Abduction Machine",
+    "bodyPart": "Legs",
+    "category": "strength",
+    "equipment": "machine",
+    "level": "beginner",
+    "primaryMuscles": [
+      "abductors"
+    ],
+    "secondaryMuscles": [
+      "glutes"
+    ]
+  },
+  {
+    "name": "Hip Adduction Machine",
+    "bodyPart": "Legs",
+    "category": "strength",
+    "equipment": "machine",
+    "level": "beginner",
+    "primaryMuscles": [
+      "adductors"
+    ],
+    "secondaryMuscles": []
+  },
+  {
+    "name": "Dragon Flag",
+    "bodyPart": "Core",
+    "category": "strength",
+    "equipment": "body only",
+    "level": "expert",
+    "primaryMuscles": [
+      "abdominals"
+    ],
+    "secondaryMuscles": [
+      "lower back",
+      "glutes"
+    ]
+  },
+  {
+    "name": "L-Sit",
+    "bodyPart": "Core",
+    "category": "strength",
+    "equipment": "body only",
+    "level": "advanced",
+    "primaryMuscles": [
+      "abdominals"
+    ],
+    "secondaryMuscles": [
+      "quadriceps",
+      "triceps"
+    ]
+  },
+  {
+    "name": "Pike Push-Up",
+    "bodyPart": "Shoulders",
+    "category": "strength",
+    "equipment": "body only",
+    "level": "intermediate",
+    "primaryMuscles": [
+      "shoulders"
+    ],
+    "secondaryMuscles": [
+      "triceps",
+      "chest"
+    ]
+  },
+  {
+    "name": "Single Leg Hip Thrust",
+    "bodyPart": "Legs",
+    "category": "strength",
+    "equipment": "body only",
+    "level": "intermediate",
+    "primaryMuscles": [
+      "glutes"
+    ],
+    "secondaryMuscles": [
+      "hamstrings"
+    ]
+  },
+  {
+    "name": "Machine Chest Press",
+    "bodyPart": "Chest",
+    "category": "strength",
+    "equipment": "machine",
+    "level": "beginner",
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "triceps",
+      "shoulders"
+    ]
+  },
+  {
+    "name": "Machine Shoulder Press",
+    "bodyPart": "Shoulders",
+    "category": "strength",
+    "equipment": "machine",
+    "level": "beginner",
+    "primaryMuscles": [
+      "shoulders"
+    ],
+    "secondaryMuscles": [
+      "triceps"
+    ]
+  },
+  {
+    "name": "Machine Leg Curl",
+    "bodyPart": "Legs",
+    "category": "strength",
+    "equipment": "machine",
+    "level": "beginner",
+    "primaryMuscles": [
+      "hamstrings"
+    ],
+    "secondaryMuscles": [
+      "calves"
+    ]
+  },
+  {
+    "name": "Machine Leg Extension",
+    "bodyPart": "Legs",
+    "category": "strength",
+    "equipment": "machine",
+    "level": "beginner",
+    "primaryMuscles": [
+      "quadriceps"
+    ],
+    "secondaryMuscles": []
+  },
+  {
+    "name": "Dumbbell Pullover",
+    "bodyPart": "Chest",
+    "category": "strength",
+    "equipment": "dumbbell",
+    "level": "intermediate",
+    "primaryMuscles": [
+      "chest"
+    ],
+    "secondaryMuscles": [
+      "lats",
+      "triceps"
+    ]
+  },
+  {
+    "name": "Cable Lateral Raise",
+    "bodyPart": "Shoulders",
+    "category": "strength",
+    "equipment": "cable",
+    "level": "intermediate",
+    "primaryMuscles": [
+      "shoulders"
+    ],
+    "secondaryMuscles": []
+  },
+  {
+    "name": "Cable Reverse Fly",
+    "bodyPart": "Shoulders",
+    "category": "strength",
+    "equipment": "cable",
+    "level": "intermediate",
+    "primaryMuscles": [
+      "shoulders"
+    ],
+    "secondaryMuscles": [
+      "middle back"
+    ]
+  },
+  {
+    "name": "Cable Curl",
+    "bodyPart": "Arms",
+    "category": "strength",
+    "equipment": "cable",
+    "level": "beginner",
+    "primaryMuscles": [
+      "biceps"
+    ],
+    "secondaryMuscles": [
+      "forearms"
+    ]
+  },
+  {
+    "name": "Dumbbell Kickback",
+    "bodyPart": "Arms",
+    "category": "strength",
+    "equipment": "dumbbell",
+    "level": "beginner",
+    "primaryMuscles": [
+      "triceps"
+    ],
+    "secondaryMuscles": []
   }
 ]
