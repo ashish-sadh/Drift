@@ -93,24 +93,6 @@ final class SupplementViewModel {
         }
     }
 
-    func seedDefaultsIfNeeded() {
-        do {
-            let existing = try database.fetchActiveSupplements()
-            guard existing.isEmpty else { return }
-            guard let url = Bundle.main.url(forResource: "default_supplements", withExtension: "json"),
-                  let data = try? Data(contentsOf: url) else { return }
-            struct DS: Codable { let name: String; let dosage: String; let unit: String; let sortOrder: Int }
-            let defaults = try JSONDecoder().decode([DS].self, from: data)
-            for d in defaults {
-                var s = Supplement(name: d.name, dosage: d.dosage, unit: d.unit, sortOrder: d.sortOrder)
-                try database.saveSupplement(&s)
-            }
-            loadSupplements()
-        } catch {
-            Log.supplements.error("Failed to seed: \(error.localizedDescription)")
-        }
-    }
-
     func toggleTaken(supplementId: Int64) {
         do {
             try database.toggleSupplementTaken(supplementId: supplementId, date: dateString)
