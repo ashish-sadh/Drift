@@ -21,6 +21,13 @@ These are larger changes identified during autonomous sessions that require huma
 - **Schofield equation as alternative base**: Research shows the sex-averaged Schofield BMR (10.1*W + 851) × activity factor is more accurate than our sqrt scaling (16-20% higher). Could swap in as base formula when no Mifflin profile exists. Trade-off: higher estimates might feel alarming to users in deficit. Current conservative approach is safer but could be configurable.
 - **Hard ceiling at 4000 kcal**: Research suggests capping no-profile TDEE at 4000 kcal (covers 140kg very-active). Only elite athletes exceed this. Current soft cap at 2700 is aggressive but matches user preference.
 
+## Lab Report OCR
+- **Epic MyChart format**: ~35% of US hospitals use Epic. Format: `Component | Value | Flag | Standard Range | Units` with H/L/HH/LL flags. Adding this parser would cover the biggest gap.
+- **Cerner/Oracle Health format**: ~25% of hospitals. Format: `Test Name | Result Value | Units | Reference Range | Interpretation` with Normal/High/Low words.
+- **Inline flag parsing (VA/older systems)**: Some formats put flag inline with value: `GLUCOSE 102 H mg/dL 74-100`. Need to strip trailing H/L from numeric value.
+- **Colon-separated format (DTC brands)**: `Glucose: 89 mg/dL (65-99)`. Used by LetsGetChecked, some wellness brands.
+- **Additional providers to detect**: BioReference Laboratories, ARUP Laboratories, Life Extension, Ulta Lab Tests, Mayo Clinic Labs.
+
 ## UI
 - **Dark theme variant**: Some users may prefer a slightly lighter dark (OLED black vs dark gray).
 - **Haptic feedback**: Add subtle haptics to key interactions (logging food, completing a set, finishing a workout).
