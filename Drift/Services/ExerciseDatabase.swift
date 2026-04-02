@@ -29,7 +29,8 @@ enum ExerciseDatabase {
     static func search(query: String) -> [ExerciseInfo] {
         let source = allWithCustom
         if query.isEmpty { return source }
-        let words = query.lowercased().split(separator: " ").map(String.init)
+        let queryLower = query.lowercased()
+        let words = queryLower.split(separator: " ").map(String.init)
         return source.filter { ex in
             words.allSatisfy { word in
                 ex.name.lowercased().contains(word) ||
@@ -37,6 +38,25 @@ enum ExerciseDatabase {
                 ex.primaryMuscles.contains { $0.lowercased().contains(word) } ||
                 ex.equipment.lowercased().contains(word)
             }
+        }.sorted { a, b in
+            let aLower = a.name.lowercased()
+            let bLower = b.name.lowercased()
+            // 1. Exact match first
+            let aExact = aLower == queryLower
+            let bExact = bLower == queryLower
+            if aExact != bExact { return aExact }
+            // 2. Starts with query (e.g., "Chest Press" for "chest press")
+            let aPrefix = aLower.hasPrefix(queryLower)
+            let bPrefix = bLower.hasPrefix(queryLower)
+            if aPrefix != bPrefix { return aPrefix }
+            // 3. Name contains query as contiguous substring vs scattered words
+            let aContiguous = aLower.contains(queryLower)
+            let bContiguous = bLower.contains(queryLower)
+            if aContiguous != bContiguous { return aContiguous }
+            // 4. Shorter names = more specific (Chest Press before Wide-Grip Decline Barbell Bench Press)
+            if a.name.count != b.name.count { return a.name.count < b.name.count }
+            // 5. Alphabetical
+            return aLower < bLower
         }
     }
 
@@ -61,8 +81,13 @@ enum ExerciseDatabase {
         _exercises = nil // clear cache so `all` reloads
     }
 
-    // Include custom exercises in all searches
-    static var allWithCustom: [ExerciseInfo] { all + customExercises }
+    // Include custom exercises in all searches, deduplicating by name
+    static var allWithCustom: [ExerciseInfo] {
+        let base = all
+        let baseNames = Set(base.map { $0.name.lowercased() })
+        let unique = customExercises.filter { !baseNames.contains($0.name.lowercased()) }
+        return base + unique
+    }
 
     static func byBodyPart(_ part: String) -> [ExerciseInfo] {
         allWithCustom.filter { $0.bodyPart == part }
