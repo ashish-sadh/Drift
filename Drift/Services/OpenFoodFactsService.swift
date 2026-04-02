@@ -101,8 +101,15 @@ enum OpenFoodFactsService {
         guard let str else { return nil }
         let cleaned = str.lowercased()
         // Look for number followed by 'g'
-        let pattern = #"(\d+\.?\d*)\s*g"#
-        if let regex = try? NSRegularExpression(pattern: pattern),
+        let gPattern = #"(\d+\.?\d*)\s*g\b"#
+        if let regex = try? NSRegularExpression(pattern: gPattern),
+           let match = regex.firstMatch(in: cleaned, range: NSRange(cleaned.startIndex..., in: cleaned)),
+           let range = Range(match.range(at: 1), in: cleaned) {
+            return Double(String(cleaned[range]))
+        }
+        // Fallback: number followed by 'ml' (treat 1 ml ≈ 1 g for liquids)
+        let mlPattern = #"(\d+\.?\d*)\s*ml"#
+        if let regex = try? NSRegularExpression(pattern: mlPattern),
            let match = regex.firstMatch(in: cleaned, range: NSRange(cleaned.startIndex..., in: cleaned)),
            let range = Range(match.range(at: 1), in: cleaned) {
             return Double(String(cleaned[range]))
