@@ -50,6 +50,7 @@ struct BodyMapView: View {
                             }
                         }
                     }.buttonStyle(.plain)
+                    .accessibilityLabel("\(group): \(status == .untrained ? "not trained recently" : status == .recovered ? "recovered" : status == .moderate ? "moderately recovered" : "still recovering")\(daysSince[group].map { $0 == 0 ? ", trained today" : ", \($0) days ago" } ?? "")")
                 }
             }
 
