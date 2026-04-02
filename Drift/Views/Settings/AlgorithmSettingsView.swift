@@ -14,18 +14,17 @@ struct AlgorithmSettingsView: View {
         return WeightTrendCalculator.calculateTrend(entries: input, config: config)
     }
 
-    /// Live TDEE — reads from the shared estimator (same source as all other views).
-    /// Falls back to live formula when cache is stale from slider changes.
+    /// Live TDEE — recomputes from current slider values for instant feedback.
     private var liveTDEE: Int {
         let _ = refreshKey
-        let cached = TDEEEstimator.shared.cachedOrSync()
-        // If source is bodyWeight, recompute with current slider values for instant feedback
-        if cached.source == .bodyWeight {
-            let db = AppDatabase.shared
-            let weight = (try? db.fetchWeightEntries(from: nil))?.first?.weightKg ?? 75
-            return Int(max(800, 200 + weight * tdeeConfig.activityMultiplier + tdeeConfig.manualAdjustment))
+        let db = AppDatabase.shared
+        let weight = (try? db.fetchWeightEntries(from: nil))?.first?.weightKg
+        var tdee = TDEEEstimator.computeBase(weightKg: weight, activityMultiplier: tdeeConfig.activityMultiplier)
+        // Apply Mifflin correction if profile available
+        if let w = weight, let mifflin = TDEEEstimator.computeMifflin(weightKg: w, config: tdeeConfig) {
+            tdee += (mifflin - tdee) * 0.4
         }
-        return Int(cached.tdee)
+        return Int(max(1200, tdee + tdeeConfig.manualAdjustment))
     }
 
     /// Live calorie target based on goal + live TDEE.
@@ -131,8 +130,59 @@ struct AlgorithmSettingsView: View {
                         Spacer()
                         Text("Athlete").font(.caption2).foregroundStyle(.tertiary)
                     }
-                    Text("Blended into your TDEE (15% when Apple Health data exists, 100% without). As Apple Health collects more resting energy and step data, this matters less.")
+                    Text("Sets your baseline TDEE. Refined by profile, Apple Health, and weight trend data as they become available.")
                         .font(.caption2).foregroundStyle(.secondary)
+                }
+                .card()
+
+                // Optional Profile (Mifflin-St Jeor)
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack {
+                        Text("Profile").font(.subheadline.weight(.semibold))
+                        Spacer()
+                        if tdeeConfig.hasMifflinProfile {
+                            Image(systemName: "checkmark.circle.fill").font(.caption).foregroundStyle(Theme.deficit)
+                        }
+                    }
+                    Text("Optional — more data means a more accurate estimate.")
+                        .font(.caption2).foregroundStyle(.tertiary)
+
+                    HStack(spacing: 12) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Age").font(.caption2).foregroundStyle(.secondary)
+                            TextField("—", value: $tdeeConfig.age, format: .number)
+                                .keyboardType(.numberPad)
+                                .font(.subheadline.monospacedDigit())
+                                .padding(8)
+                                .background(Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 8))
+                        }
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Height (cm)").font(.caption2).foregroundStyle(.secondary)
+                            TextField("—", value: $tdeeConfig.heightCm, format: .number)
+                                .keyboardType(.decimalPad)
+                                .font(.subheadline.monospacedDigit())
+                                .padding(8)
+                                .background(Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 8))
+                        }
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Sex").font(.caption2).foregroundStyle(.secondary)
+                            Picker("", selection: Binding(
+                                get: { tdeeConfig.sex ?? .male },
+                                set: { tdeeConfig.sex = $0 }
+                            )) {
+                                Text("M").tag(TDEEEstimator.Sex.male)
+                                Text("F").tag(TDEEEstimator.Sex.female)
+                            }
+                            .pickerStyle(.segmented)
+                        }
+                    }
+
+                    if tdeeConfig.hasMifflinProfile, let w = (try? AppDatabase.shared.fetchWeightEntries(from: nil))?.first?.weightKg {
+                        if let mifflin = TDEEEstimator.computeMifflin(weightKg: w, config: tdeeConfig) {
+                            Text("Mifflin BMR: \(Int(mifflin / tdeeConfig.mifflinActivityFactor)) × \(String(format: "%.2f", tdeeConfig.mifflinActivityFactor)) = \(Int(mifflin)) kcal")
+                                .font(.caption2).foregroundStyle(.tertiary)
+                        }
+                    }
                 }
                 .card()
 
@@ -238,6 +288,9 @@ struct AlgorithmSettingsView: View {
         .onChange(of: tdeeConfig.activityMultiplier) { _, _ in save() }
         .onChange(of: tdeeConfig.manualAdjustment) { _, _ in save() }
         .onChange(of: tdeeConfig.appleHealthTrust) { _, _ in save() }
+        .onChange(of: tdeeConfig.age) { _, _ in save() }
+        .onChange(of: tdeeConfig.heightCm) { _, _ in save() }
+        .onChange(of: tdeeConfig.sex) { _, _ in save() }
         .onChange(of: config.emaAlpha) { _, _ in save() }
     }
 

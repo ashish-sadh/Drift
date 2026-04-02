@@ -103,7 +103,7 @@ struct WeightGoal: Codable, Sendable {
             return est.tdee + requiredDailyDeficit
         }
         // Off main thread fallback
-        return 200 + startWeightKg * 29 + requiredDailyDeficit
+        return 2000 * sqrt(startWeightKg / 70) + requiredDailyDeficit
     }
 
     /// Describes how the calorie target was determined.

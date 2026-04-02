@@ -1,7 +1,7 @@
 Control file for Drift self-improvement loop.
 Check this file before every cycle.
 
-Current status: RUNNING
+Current status: STOP
 Direction: do work on fitness, nutrition data too. as a manager fine new directions. Also I think there is some opporutnity to improve TDEE calcuatation, but don't make major changes, research well on intenet too to see what can be done to improve. But I dont' want drastic changes that shows like 3000 ish calaories for people. Current one is not too bad but sometimes shows extereme calculation for people, just need some adjustments. I want to have theme that more sensors and data apple halth has better it gets but realizity is questionable too. I think do write tests to make sure it's breaking current cases - write tests for all age groups etc. Dont' necessarily need to default 2000 if there is some data - even if weight trend etc. Make sure some is used. for eg. for the weight group of 53 kg, I expected 1800ish when trend is 0.5 kg per week treding down. so that should come around same even if you update it. once you are dont with TDEE dont' need to keep doing it. move on. Also never stop. Refer to all agents in self-irpvlement loop ang ask them to work and keep working. When you feel stuck go on intenet resarch a bit ask individual agent to be more innovative or comprehensive in their work. Also don't discard major idea keep a log so human can come back and take a look. Publish every 3 horus to testFlight not more often since there is daily limit.
 
 Status options:

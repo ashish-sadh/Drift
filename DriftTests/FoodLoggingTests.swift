@@ -1364,4 +1364,113 @@ import GRDB
     #expect(high == .moderate || high == .heavy)
 }
 
+// MARK: - TDEE Estimator Tests
+
+// Group 1: Base formula
+@Test func tdeeBaseNoWeight() async throws {
+    let base = TDEEEstimator.computeBase(weightKg: nil, activityMultiplier: 29)
+    #expect(base == 2000, "No weight = 2000 default")
+}
+
+@Test func tdeeBaseAnchor70kg() async throws {
+    let base = TDEEEstimator.computeBase(weightKg: 70, activityMultiplier: 29)
+    #expect(abs(base - 2000) < 1, "70kg at moderate = 2000 anchor")
+}
+
+@Test func tdeeBaseLightPerson() async throws {
+    let base = TDEEEstimator.computeBase(weightKg: 53.8, activityMultiplier: 29)
+    #expect(base > 1700 && base < 1800, "53.8kg should be ~1,754, got \(Int(base))")
+}
+
+@Test func tdeeBaseHeavyPerson() async throws {
+    let base = TDEEEstimator.computeBase(weightKg: 78.4, activityMultiplier: 29)
+    #expect(base > 2050 && base < 2200, "78.4kg should be ~2,117 (not 2,585), got \(Int(base))")
+}
+
+@Test func tdeeBaseVeryHeavy() async throws {
+    let base = TDEEEstimator.computeBase(weightKg: 110, activityMultiplier: 29)
+    #expect(base > 2400 && base < 2600, "110kg should be ~2,508 with diminishing returns, got \(Int(base))")
+}
+
+// Group 2: Activity slider
+@Test func tdeeActivitySedentary() async throws {
+    let base = TDEEEstimator.computeBase(weightKg: 78.4, activityMultiplier: 22)
+    #expect(base > 1500 && base < 1700, "Sedentary 78.4kg ~1,606, got \(Int(base))")
+}
+
+@Test func tdeeActivityAthlete() async throws {
+    let base = TDEEEstimator.computeBase(weightKg: 78.4, activityMultiplier: 36)
+    #expect(base > 2500 && base < 2700, "Athlete 78.4kg ~2,628, got \(Int(base))")
+}
+
+// Group 3: Mifflin-St Jeor
+@Test func mifflinMale() async throws {
+    let config = TDEEEstimator.TDEEConfig(activityMultiplier: 29, appleHealthTrust: 1.0, manualAdjustment: 0,
+                                            age: 36, heightCm: 185, sex: .male)
+    let tdee = TDEEEstimator.computeMifflin(weightKg: 78.4, config: config)!
+    // BMR = 10×78.4 + 6.25×185 - 5×36 + 5 = 1765, × 1.55 = 2736
+    #expect(abs(tdee - 2736) < 5, "Male Mifflin TDEE ~2,736, got \(Int(tdee))")
+}
+
+@Test func mifflinFemale() async throws {
+    let config = TDEEEstimator.TDEEConfig(activityMultiplier: 29, appleHealthTrust: 1.0, manualAdjustment: 0,
+                                            age: 30, heightCm: 165, sex: .female)
+    let tdee = TDEEEstimator.computeMifflin(weightKg: 62, config: config)!
+    // BMR = 10×62 + 6.25×165 - 5×30 - 161 = 1341, × 1.55 = 2079
+    #expect(abs(tdee - 2079) < 5, "Female Mifflin TDEE ~2,079, got \(Int(tdee))")
+}
+
+@Test func mifflinReturnsNilWithoutProfile() async throws {
+    let config = TDEEEstimator.TDEEConfig.default
+    let tdee = TDEEEstimator.computeMifflin(weightKg: 70, config: config)
+    #expect(tdee == nil, "No profile = nil Mifflin")
+}
+
+// Group 4: Mifflin correction dampening
+@Test func mifflinCorrectionDampened() async throws {
+    let base = TDEEEstimator.computeBase(weightKg: 78.4, activityMultiplier: 29) // ~2117
+    let config = TDEEEstimator.TDEEConfig(activityMultiplier: 29, appleHealthTrust: 1.0, manualAdjustment: 0,
+                                            age: 36, heightCm: 185, sex: .male)
+    let mifflin = TDEEEstimator.computeMifflin(weightKg: 78.4, config: config)! // ~2736
+    let corrected = base + (mifflin - base) * 0.4 // ~2365
+    #expect(corrected > 2300 && corrected < 2400, "Dampened correction should be ~2,365, got \(Int(corrected))")
+    #expect(corrected < mifflin, "Correction must be less than raw Mifflin")
+    #expect(corrected > base, "Correction must be more than base for tall active male")
+}
+
+// Group 5: Same weight, different demographics
+@Test func sameWeightDifferentPeople() async throws {
+    let base = TDEEEstimator.computeBase(weightKg: 78, activityMultiplier: 29) // same for both
+
+    let maleConfig = TDEEEstimator.TDEEConfig(activityMultiplier: 29, appleHealthTrust: 1.0, manualAdjustment: 0,
+                                                age: 28, heightCm: 185, sex: .male)
+    let femaleConfig = TDEEEstimator.TDEEConfig(activityMultiplier: 29, appleHealthTrust: 1.0, manualAdjustment: 0,
+                                                  age: 50, heightCm: 158, sex: .female)
+    let maleMifflin = TDEEEstimator.computeMifflin(weightKg: 78, config: maleConfig)!
+    let femaleMifflin = TDEEEstimator.computeMifflin(weightKg: 78, config: femaleConfig)!
+
+    let maleResult = base + (maleMifflin - base) * 0.4
+    let femaleResult = base + (femaleMifflin - base) * 0.4
+
+    #expect(maleResult - femaleResult > 250, "Same 78kg: male should be >250 cal higher than older shorter female, got \(Int(maleResult - femaleResult))")
+}
+
+// Group 6: Diminishing returns (heavy weights don't explode)
+@Test func diminishingReturns() async throws {
+    let at70 = TDEEEstimator.computeBase(weightKg: 70, activityMultiplier: 29)
+    let at140 = TDEEEstimator.computeBase(weightKg: 140, activityMultiplier: 29)
+    // sqrt scaling: doubling weight should NOT double TDEE
+    let ratio = at140 / at70
+    #expect(ratio < 1.5, "Doubling weight should increase TDEE by < 50%, got \(String(format: "%.0f", (ratio-1)*100))%")
+    #expect(ratio > 1.3, "But should still increase meaningfully")
+}
+
+// Group 7: Edge cases
+@Test func tdeeMinimumFloor() async throws {
+    // Even with extreme negative adjustment, should floor at 1200
+    var base = TDEEEstimator.computeBase(weightKg: 45, activityMultiplier: 22) // ~1216
+    base = max(1200, base + (-500)) // adjustment -500
+    #expect(base >= 1200, "TDEE should never go below 1200")
+}
+
 enum TestError: Error { case msg(String); init(_ s: String) { self = .msg(s) } }

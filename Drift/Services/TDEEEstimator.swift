@@ -1,34 +1,40 @@
 import Foundation
 
-/// Unified TDEE estimation. All views should use `TDEEEstimator.shared` for consistent calorie targets.
+/// Unified TDEE estimation using Base + Dampened Corrections.
 ///
-/// Sources (blended by confidence):
-/// 1. Apple Health: 7-day avg of resting + active energy (passive, most reliable)
-/// 2. Weight trend + food logs: intake - deficit (only when logging is consistent)
-/// 3. Body weight × activity multiplier (Mifflin-St Jeor approximation)
+/// Base = 2000 × √(weight/70) × activityFactor (always computed)
+/// Then each available data source pulls the base toward observed reality:
+///   + Mifflin correction (0.4 dampening) — when age/height/sex provided
+///   + Apple Health correction (0.5 dampening) — when resting + active available
+///   + Weight Trend correction (0.3 dampening) — when food logging consistent
 ///
-/// All parameters are user-tunable via Algorithm Settings.
+/// Result: conservative default that improves incrementally with data.
 @MainActor
 final class TDEEEstimator {
     static let shared = TDEEEstimator()
 
     // MARK: - Configuration
 
+    enum Sex: String, Codable, Sendable, CaseIterable {
+        case male, female
+        var label: String { rawValue.capitalized }
+    }
+
     struct TDEEConfig: Codable, Sendable {
-        /// Activity multiplier for weight-based TDEE (kcal per kg bodyweight per day).
         var activityMultiplier: Double
-
-        /// How much to trust Apple Health data (0.0–1.0).
         var appleHealthTrust: Double
-
-        /// Manual TDEE adjustment in kcal (positive = add, negative = subtract).
-        /// Applied on top of the computed estimate. Use when your wearable under/overestimates.
         var manualAdjustment: Double
+
+        // Optional profile for Mifflin-St Jeor
+        var age: Int?
+        var heightCm: Double?
+        var sex: Sex?
 
         static let `default` = TDEEConfig(
             activityMultiplier: 29,
             appleHealthTrust: 1.0,
-            manualAdjustment: 0
+            manualAdjustment: 0,
+            age: nil, heightCm: nil, sex: nil
         )
 
         var loggingConsistencyThreshold: Double { 0.5 }
@@ -41,6 +47,15 @@ final class TDEEEstimator {
             case ..<33: "Very Active"
             default: "Athlete"
             }
+        }
+
+        var hasMifflinProfile: Bool {
+            age != nil && heightCm != nil && sex != nil
+        }
+
+        /// Map activity slider (22-36) to Mifflin activity factor (1.2-1.9)
+        var mifflinActivityFactor: Double {
+            1.2 + (activityMultiplier - 22) * 0.05
         }
     }
 
@@ -58,7 +73,6 @@ final class TDEEEstimator {
         if let data = try? JSONEncoder().encode(config) {
             UserDefaults.standard.set(data, forKey: configKey)
         }
-        // Invalidate cache so next read uses new config
         shared.current = nil
         UserDefaults.standard.removeObject(forKey: shared.cacheKey)
     }
@@ -70,116 +84,150 @@ final class TDEEEstimator {
         let source: Source
         let confidence: Confidence
         let timestamp: Date
+        let activeSources: [String] // which sources contributed
 
         enum Source: String, Codable, Sendable {
             case appleHealth = "Apple Health"
             case weightTrend = "Weight Trend"
             case blended = "Blended"
+            case mifflin = "Mifflin-St Jeor"
             case bodyWeight = "Body Weight"
         }
 
         enum Confidence: String, Codable, Sendable {
-            case high   // 7+ days of Apple Health or consistent logging
-            case medium // some Apple Health or partial logging
-            case low    // weight-based estimate only
+            case high, medium, low
         }
 
         var explanation: String {
             switch source {
             case .appleHealth:
-                return "7-day average from Apple Health (resting + active energy)."
+                return "Resting + active energy from Apple Health (7-day avg)."
             case .weightTrend:
-                return "Derived from your food logs and weight trend."
+                return "Derived from food logs and weight trend."
             case .blended:
-                return "Blended from Apple Health energy and weight trend data."
+                return "Blended from multiple data sources."
+            case .mifflin:
+                return "Calculated from your profile (age, height, sex)."
             case .bodyWeight:
-                return "Estimated from body weight and activity level. Log weight & food for better accuracy."
+                return "Estimated from body weight. Add profile or log data for better accuracy."
             }
         }
     }
 
     private let cacheKey = "drift_tdee_cache"
-
-    /// Current best TDEE estimate. Cached for consistency within a session.
     private(set) var current: Estimate?
 
-    /// Compute TDEE from all available sources. Call on app launch and periodically.
-    /// Activity level always blends in at 30% when better data exists, 100% when alone.
-    func refresh() async {
-        let config = Self.loadConfig()
-        let appleHealthTDEE = await fetchAppleHealth7DayAvg(config: config)
-        let trendTDEE = fetchWeightTrendTDEE()
-        let activityTDEE = fetchWeightFallback(config: config) ?? 2000
-        let consistency = foodLoggingConsistency()
+    // MARK: - Core Formula
 
-        let estimate: Estimate
-
-        if let ah = appleHealthTDEE, let trend = trendTDEE, consistency >= config.loggingConsistencyThreshold {
-            // All three: 50% AH + 35% trend + 15% activity
-            let blended = ah * 0.50 + trend * 0.35 + activityTDEE * 0.15
-            estimate = Estimate(tdee: blended, source: .blended,
-                                confidence: .high, timestamp: Date())
-        } else if let ah = appleHealthTDEE {
-            // AH dominant + light activity: 85% AH + 15% activity
-            let blended = ah * 0.85 + activityTDEE * 0.15
-            estimate = Estimate(tdee: blended, source: .appleHealth,
-                                confidence: .high, timestamp: Date())
-        } else if let trend = trendTDEE, consistency >= config.loggingConsistencyThreshold {
-            // Trend + activity: 70% trend + 30% activity
-            let blended = trend * 0.7 + activityTDEE * 0.3
-            estimate = Estimate(tdee: blended, source: .weightTrend,
-                                confidence: .medium, timestamp: Date())
-        } else {
-            // Activity only: 100%
-            estimate = Estimate(tdee: activityTDEE, source: .bodyWeight,
-                                confidence: .low, timestamp: Date())
-        }
-
-        // Apply manual adjustment
-        let adjusted = Estimate(tdee: max(800, estimate.tdee + config.manualAdjustment),
-                                source: estimate.source, confidence: estimate.confidence, timestamp: estimate.timestamp)
-        current = adjusted
-        cache(adjusted)
-        Log.app.info("TDEE: \(Int(adjusted.tdee)) kcal (\(adjusted.source.rawValue), adj \(Int(config.manualAdjustment)))")
+    /// Compute base TDEE from weight + activity slider.
+    /// Anchored at 2000 kcal for 70kg, sqrt scaling for diminishing returns.
+    nonisolated static func computeBase(weightKg: Double?, activityMultiplier: Double) -> Double {
+        guard let w = weightKg, w > 0 else { return 2000 }
+        return 2000 * sqrt(w / 70) * (activityMultiplier / 29)
     }
 
-    /// Get cached or compute synchronously using all available non-async sources.
-    /// Activity level always blends in (30% with trend data, 100% alone).
+    /// Compute Mifflin-St Jeor TDEE when profile is available.
+    nonisolated static func computeMifflin(weightKg: Double, config: TDEEConfig) -> Double? {
+        guard let age = config.age, let height = config.heightCm, let sex = config.sex else { return nil }
+        let bmr: Double
+        switch sex {
+        case .male:   bmr = 10 * weightKg + 6.25 * height - 5 * Double(age) + 5
+        case .female: bmr = 10 * weightKg + 6.25 * height - 5 * Double(age) - 161
+        }
+        return bmr * config.mifflinActivityFactor
+    }
+
+    // MARK: - Refresh (async — uses Apple Health)
+
+    func refresh() async {
+        let config = Self.loadConfig()
+        let db = AppDatabase.shared
+        let weightKg = (try? db.fetchWeightEntries(from: nil))?.first?.weightKg
+
+        // Step 1: Base
+        var tdee = Self.computeBase(weightKg: weightKg, activityMultiplier: config.activityMultiplier)
+        var sources: [String] = weightKg != nil ? ["Weight"] : ["Default"]
+        var bestSource: Estimate.Source = weightKg != nil ? .bodyWeight : .bodyWeight
+
+        // Step 2: Corrections
+
+        // Mifflin correction (0.4 dampening)
+        if let w = weightKg, let mifflin = Self.computeMifflin(weightKg: w, config: config) {
+            tdee += (mifflin - tdee) * 0.4
+            sources.append("Profile")
+            bestSource = .mifflin
+        }
+
+        // Apple Health correction (0.5 dampening)
+        let ahTDEE = await fetchAppleHealth7DayAvg(config: config)
+        if let ah = ahTDEE {
+            tdee += (ah - tdee) * 0.5
+            sources.append("Apple Health")
+            bestSource = sources.count >= 3 ? .blended : .appleHealth
+        }
+
+        // Weight trend correction (0.3 dampening)
+        let trendTDEE = fetchWeightTrendTDEE()
+        let consistency = foodLoggingConsistency()
+        if let trend = trendTDEE, consistency >= config.loggingConsistencyThreshold {
+            tdee += (trend - tdee) * 0.3
+            sources.append("Weight Trend")
+            bestSource = .blended
+        }
+
+        // Step 3: Final
+        tdee = max(1200, tdee + config.manualAdjustment)
+
+        let confidence: Estimate.Confidence = sources.count >= 3 ? .high : sources.count >= 2 ? .medium : .low
+        let estimate = Estimate(tdee: tdee, source: bestSource, confidence: confidence,
+                                timestamp: Date(), activeSources: sources)
+        current = estimate
+        cache(estimate)
+        Log.app.info("TDEE: \(Int(tdee)) kcal (\(sources.joined(separator: "+")))")
+    }
+
+    // MARK: - Sync path (no Apple Health)
+
     func cachedOrSync() -> Estimate {
         if let current { return current }
         if let cached = loadCache() { self.current = cached; return cached }
 
         let config = Self.loadConfig()
-        let trendTDEE = fetchWeightTrendTDEE()
-        let activityTDEE = fetchWeightFallback(config: config) ?? 2000
-        let consistency = foodLoggingConsistency()
+        let db = AppDatabase.shared
+        let weightKg = (try? db.fetchWeightEntries(from: nil))?.first?.weightKg
 
-        let baseTDEE: Double
-        let source: Estimate.Source
-        let confidence: Estimate.Confidence
+        // Step 1: Base
+        var tdee = Self.computeBase(weightKg: weightKg, activityMultiplier: config.activityMultiplier)
+        var sources: [String] = weightKg != nil ? ["Weight"] : ["Default"]
+        var bestSource: Estimate.Source = .bodyWeight
 
-        if let trend = trendTDEE, consistency >= config.loggingConsistencyThreshold {
-            // Trend dominant: 70% trend + 30% activity
-            baseTDEE = trend * 0.70 + activityTDEE * 0.30
-            source = .weightTrend
-            confidence = .medium
-        } else {
-            // Activity only: 100%
-            baseTDEE = activityTDEE
-            source = .bodyWeight
-            confidence = .low
+        // Step 2: Mifflin correction
+        if let w = weightKg, let mifflin = Self.computeMifflin(weightKg: w, config: config) {
+            tdee += (mifflin - tdee) * 0.4
+            sources.append("Profile")
+            bestSource = .mifflin
         }
 
-        let est = Estimate(tdee: max(800, baseTDEE + config.manualAdjustment),
-                           source: source, confidence: confidence, timestamp: Date())
+        // Step 2b: Weight trend correction
+        let trendTDEE = fetchWeightTrendTDEE()
+        let consistency = foodLoggingConsistency()
+        if let trend = trendTDEE, consistency >= config.loggingConsistencyThreshold {
+            tdee += (trend - tdee) * 0.3
+            sources.append("Weight Trend")
+            bestSource = .blended
+        }
+
+        // Step 3: Final
+        tdee = max(1200, tdee + config.manualAdjustment)
+
+        let confidence: Estimate.Confidence = sources.count >= 2 ? .medium : .low
+        let est = Estimate(tdee: tdee, source: bestSource, confidence: confidence,
+                           timestamp: Date(), activeSources: sources)
         current = est; return est
     }
 
     // MARK: - Apple Health (smart multi-signal, 7-day average)
 
-    /// Uses resting energy + the HIGHER of (active energy, step-derived estimate).
-    /// iPhone often underreports active energy without a Watch. Steps are more reliable.
-    /// Also adds ~5% for Thermic Effect of Food (TEF) which AH doesn't capture.
     private func fetchAppleHealth7DayAvg(config: TDEEConfig) async -> Double? {
         #if targetEnvironment(simulator)
         return nil
@@ -187,30 +235,25 @@ final class TDEEEstimator {
         let hk = HealthKitService.shared
         guard hk.isAvailable else { return nil }
 
+        // Step correction: 0.04 kcal/step baseline, don't scale DOWN for lighter people
         let db = AppDatabase.shared
         let weightKg = (try? db.fetchWeightEntries(from: nil))?.first?.weightKg ?? 70
-        // Step calorie factor: ~0.04 kcal/step for 70kg person, scales with weight
-        let kcalPerStep = 0.04 * weightKg / 70
+        let kcalPerStep = 0.04 * max(1.0, weightKg / 70)
 
         var dailyTotals: [Double] = []
         let calendar = Calendar.current
 
         for dayOffset in 1...7 {
             guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: Date()) else { continue }
-
             guard let burn = try? await hk.fetchCaloriesBurned(for: date) else { continue }
             let steps = (try? await hk.fetchSteps(for: date)) ?? 0
 
             let resting = burn.basal
-            guard resting > 500 else { continue } // need valid resting data
+            guard resting > 500 else { continue }
 
-            // Active: use the higher of AH active energy or step-derived estimate
-            // iPhone without Watch severely underestimates active energy
             let stepDerivedActive = steps * kcalPerStep
             let active = max(burn.active, stepDerivedActive)
-
-            let dayTotal = resting + active
-            dailyTotals.append(dayTotal)
+            dailyTotals.append(resting + active)
         }
 
         guard dailyTotals.count >= 3 else { return nil }
@@ -221,15 +264,13 @@ final class TDEEEstimator {
 
     // MARK: - Weight Trend + Food Logs (Adaptive TDEE)
 
-    /// TDEE = avg intake - estimated deficit from weight trend.
-    /// This is the adaptive TDEE approach: Expenditure = Intake - (WeightChange × EnergyDensity)
     private func fetchWeightTrendTDEE() -> Double? {
         let db = AppDatabase.shared
         guard let entries = try? db.fetchWeightEntries(from: nil), entries.count >= 7 else { return nil }
         let input = entries.map { (date: $0.date, weightKg: $0.weightKg) }
         guard let trend = WeightTrendCalculator.calculateTrend(entries: input) else { return nil }
 
-        let deficit = trend.estimatedDailyDeficit // negative when losing
+        let deficit = trend.estimatedDailyDeficit
         let today = Date()
         let twoWeeksAgo = Calendar.current.date(byAdding: .day, value: -14, to: today) ?? today
 
@@ -238,13 +279,12 @@ final class TDEEEstimator {
             to: DateFormatters.dateOnly.string(from: today)),
               avgIntake > 500 else { return nil }
 
-        let tdee = avgIntake - deficit // deficit negative → TDEE = intake + |deficit|
+        let tdee = avgIntake - deficit
         return tdee > 800 ? tdee : nil
     }
 
     // MARK: - Food Logging Consistency
 
-    /// Returns 0.0–1.0: fraction of days with food logged in last 14 days.
     func foodLoggingConsistency() -> Double {
         let db = AppDatabase.shared
         let today = Date()
@@ -253,17 +293,6 @@ final class TDEEEstimator {
             from: DateFormatters.dateOnly.string(from: twoWeeksAgo),
             to: DateFormatters.dateOnly.string(from: today)) else { return 0 }
         return Double(count) / 14.0
-    }
-
-    // MARK: - Body Weight Fallback
-
-    private func fetchWeightFallback(config: TDEEConfig) -> Double? {
-        let db = AppDatabase.shared
-        guard let entries = try? db.fetchWeightEntries(from: nil), let latest = entries.first else { return nil }
-        // Base 200 kcal accounts for fixed organ metabolism (brain, liver, kidneys)
-        // that doesn't scale with weight. Prevents underestimation for lighter people.
-        // At 53kg × 28 + 200 = 1,684. At 75kg × 28 + 200 = 2,300. Both reasonable.
-        return 200 + latest.weightKg * config.activityMultiplier
     }
 
     // MARK: - Cache
