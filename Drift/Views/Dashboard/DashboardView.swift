@@ -4,7 +4,6 @@ struct DashboardView: View {
     @Binding var syncComplete: Bool
     @Binding var selectedTab: Int
     @State private var viewModel = DashboardViewModel()
-    @State private var showDeficitInfo = false
 
     var body: some View {
         NavigationStack {
@@ -32,55 +31,20 @@ struct DashboardView: View {
                                 "Weight: \(String(format: "%.1f", Preferences.weightUnit.convert(fromKg: $0))) \(Preferences.weightUnit.displayName)"
                             } ?? "Weight: no data")
 
-                            // Right column: Trend + Estimated Deficit stacked
-                            VStack(alignment: .leading, spacing: 8) {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Label("Trend", systemImage: "chart.line.downtrend.xyaxis").font(.caption).foregroundStyle(.secondary)
-                                    if let rate = viewModel.weeklyRate {
-                                        let display = Preferences.weightUnit.convert(fromKg: rate)
-                                        let good = isGoalAligned(rate < 0 ? -1 : 1)
-                                        HStack(alignment: .firstTextBaseline, spacing: 3) {
-                                            Text(String(format: "%+.2f", display))
-                                                .font(.title2.weight(.bold).monospacedDigit())
-                                                .foregroundStyle(good ? Theme.deficit : Theme.surplus)
-                                            Text("\(Preferences.weightUnit.displayName)/wk").font(.caption2).foregroundStyle(.tertiary)
-                                        }
-                                    } else {
-                                        Text("--").font(.title2.weight(.bold)).foregroundStyle(.tertiary)
+                            // Right column: Trend only (deficit moved to TDEE card)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Label("Trend", systemImage: "chart.line.downtrend.xyaxis").font(.caption).foregroundStyle(.secondary)
+                                if let rate = viewModel.weeklyRate {
+                                    let display = Preferences.weightUnit.convert(fromKg: rate)
+                                    let good = isGoalAligned(rate < 0 ? -1 : 1)
+                                    HStack(alignment: .firstTextBaseline, spacing: 3) {
+                                        Text(String(format: "%+.2f", display))
+                                            .font(.title2.weight(.bold).monospacedDigit())
+                                            .foregroundStyle(good ? Theme.deficit : Theme.surplus)
+                                        Text("\(Preferences.weightUnit.displayName)/wk").font(.caption2).foregroundStyle(.tertiary)
                                     }
-                                }
-
-                                if let deficit = viewModel.dailyDeficit {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        HStack(spacing: 3) {
-                                            Text(deficit < 0 ? "Est. Deficit" : "Est. Surplus")
-                                                .font(.caption).foregroundStyle(.secondary)
-                                            Button {
-                                                withAnimation(.easeInOut(duration: 0.2)) { showDeficitInfo.toggle() }
-                                            } label: {
-                                                Image(systemName: "info.circle")
-                                                    .font(.system(size: 10))
-                                                    .foregroundStyle(.tertiary)
-                                            }
-                                        }
-                                        let isGood = isGoalAligned(deficit)
-                                        HStack(alignment: .firstTextBaseline, spacing: 3) {
-                                            Image(systemName: deficit < 0 ? "arrow.down.right" : "arrow.up.right")
-                                                .font(.caption2.weight(.bold))
-                                                .foregroundStyle(isGood ? Theme.deficit : Theme.surplus)
-                                            Text("\(deficit < 0 ? "-" : "+")\(Int(abs(deficit)))")
-                                                .font(.subheadline.weight(.bold).monospacedDigit())
-                                                .foregroundStyle(isGood ? Theme.deficit : Theme.surplus)
-                                            Text("kcal/day").font(.caption2).foregroundStyle(.tertiary)
-                                        }
-                                        if showDeficitInfo {
-                                            Text("Estimated from your weight trend over the past \(WeightTrendCalculator.loadConfig().regressionWindowDays) days. Not based on watch/activity data.")
-                                                .font(.caption2)
-                                                .foregroundStyle(.secondary)
-                                                .fixedSize(horizontal: false, vertical: true)
-                                                .transition(.opacity)
-                                        }
-                                    }
+                                } else {
+                                    Text("--").font(.title2.weight(.bold)).foregroundStyle(.tertiary)
                                 }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -141,8 +105,10 @@ struct DashboardView: View {
         let est = TDEEEstimator.shared.cachedOrSync()
         let goal = WeightGoal.load()
         let target = goal?.macroTargets(currentWeightKg: viewModel.currentWeight)
+        let unit = Preferences.weightUnit
 
-        return VStack(spacing: 6) {
+        return VStack(spacing: 8) {
+            // Row 1: TDEE + Target
             HStack {
                 VStack(alignment: .leading, spacing: 2) {
                     Label("Est. Expenditure", systemImage: "flame").font(.caption).foregroundStyle(.secondary)
@@ -152,12 +118,13 @@ struct DashboardView: View {
                         Text("kcal/day").font(.caption2).foregroundStyle(.tertiary)
                     }
                 }
-
                 Spacer()
-
-                if let t = target {
+                if let t = target, let goal {
+                    let remaining = abs(unit.convert(fromKg: goal.totalChangeKg))
+                    let isLosing = goal.totalChangeKg < 0
                     VStack(alignment: .trailing, spacing: 2) {
-                        Text("Target").font(.caption).foregroundStyle(.secondary)
+                        Text("eat to \(isLosing ? "lose" : "gain") \(String(format: "%.1f", remaining)) \(unit.displayName)")
+                            .font(.caption).foregroundStyle(.secondary)
                         HStack(alignment: .firstTextBaseline, spacing: 3) {
                             Text("\(Int(t.calorieTarget))")
                                 .font(.title3.weight(.bold).monospacedDigit())
@@ -168,10 +135,42 @@ struct DashboardView: View {
                 }
             }
 
-            // Required vs Current deficit/surplus (same as Algorithm page)
+            // Row 2: Energy balance bar (only when avg intake data exists)
+            if viewModel.avgDailyIntake > 500 {
+                let tdee = est.tdee
+                let intake = viewModel.avgDailyIntake
+                let deficit = intake - tdee
+                let barFraction = min(1.0, max(0, intake / tdee))
+
+                VStack(spacing: 4) {
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            // TDEE (full bar, muted)
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(Theme.cardBackgroundElevated)
+                                .frame(height: 8)
+                            // Avg intake (partial fill)
+                            RoundedRectangle(cornerRadius: 3)
+                                .fill(deficit < 0 ? Theme.calorieBlue : Theme.stepsOrange)
+                                .frame(width: max(0, geo.size.width * barFraction), height: 8)
+                        }
+                    }
+                    .frame(height: 8)
+
+                    HStack {
+                        Text("\(Int(intake)) avg intake")
+                            .font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
+                        Spacer()
+                        Text("\(deficit < 0 ? "" : "+")\(Int(deficit)) /day")
+                            .font(.caption2.weight(.semibold).monospacedDigit())
+                            .foregroundStyle(isGoalAligned(deficit) ? Theme.deficit : Theme.surplus)
+                    }
+                }
+            }
+
+            // Row 3: Required vs Current
             if let goal {
                 let required = goal.requiredDailyDeficit
-                let isLosing = goal.totalChangeKg < 0
                 HStack(spacing: 12) {
                     HStack(spacing: 4) {
                         Text("Required").font(.system(size: 9)).foregroundStyle(.tertiary)
@@ -192,7 +191,7 @@ struct DashboardView: View {
                 }
             }
 
-            // Data sources
+            // Row 4: Data sources
             HStack(spacing: 4) {
                 ForEach(est.activeSources, id: \.self) { source in
                     Text(source)

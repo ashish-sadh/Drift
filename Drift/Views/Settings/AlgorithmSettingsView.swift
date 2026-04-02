@@ -34,7 +34,7 @@ struct AlgorithmSettingsView: View {
     private var liveCalorieTarget: Int? {
         guard let goal = WeightGoal.load() else { return nil }
         if goal.calorieTargetOverride != nil { return Int(goal.calorieTargetOverride!) }
-        return Int(max(800, Double(liveTDEE) + goal.requiredDailyDeficit))
+        return Int(max(800, TDEEEstimator.shared.cachedOrSync().tdee + goal.requiredDailyDeficit))
     }
 
     private var liveDeficit: Int? {

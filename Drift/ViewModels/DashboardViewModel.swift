@@ -15,6 +15,7 @@ final class DashboardViewModel {
     var currentWeight: Double? // kg (EMA)
     var weeklyRate: Double? // kg/week
     var dailyDeficit: Double? // kcal (from weight trend)
+    var avgDailyIntake: Double = 0 // 14-day avg calories eaten
     var supplementsTaken: Int = 0
     var supplementsTotal: Int = 0
     var isHealthKitAvailable: Bool = false
@@ -82,6 +83,17 @@ final class DashboardViewModel {
             }
         } catch {
             Log.weightTrend.error("Failed to load weight trend: \(error.localizedDescription)")
+        }
+
+        // Load 14-day avg daily intake (for energy balance bar)
+        do {
+            let today = Date()
+            let twoWeeksAgo = Calendar.current.date(byAdding: .day, value: -14, to: today) ?? today
+            avgDailyIntake = try database.averageDailyCalories(
+                from: DateFormatters.dateOnly.string(from: twoWeeksAgo),
+                to: DateFormatters.dateOnly.string(from: today))
+        } catch {
+            Log.app.error("Failed to load avg intake: \(error.localizedDescription)")
         }
 
         // Load HealthKit data
