@@ -7566,5 +7566,126 @@
     "carbs_g": 7,
     "fat_g": 9,
     "fiber_g": 0
+  },
+  {
+    "name": "McDonald's Big Mac",
+    "category": "Fast Food",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 550,
+    "protein_g": 25,
+    "carbs_g": 45,
+    "fat_g": 30,
+    "fiber_g": 3
+  },
+  {
+    "name": "McDonald's McChicken",
+    "category": "Fast Food",
+    "serving_size": 143,
+    "serving_unit": "g",
+    "calories": 400,
+    "protein_g": 14,
+    "carbs_g": 39,
+    "fat_g": 21,
+    "fiber_g": 2
+  },
+  {
+    "name": "McDonald's Medium Fries",
+    "category": "Fast Food",
+    "serving_size": 111,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 5,
+    "carbs_g": 43,
+    "fat_g": 15,
+    "fiber_g": 4
+  },
+  {
+    "name": "McDonald's Egg McMuffin",
+    "category": "Fast Food",
+    "serving_size": 137,
+    "serving_unit": "g",
+    "calories": 300,
+    "protein_g": 17,
+    "carbs_g": 30,
+    "fat_g": 12,
+    "fiber_g": 2
+  },
+  {
+    "name": "Starbucks Caff\u00e8 Latte (Grande, 2% milk)",
+    "category": "Beverages",
+    "serving_size": 473,
+    "serving_unit": "ml",
+    "calories": 190,
+    "protein_g": 13,
+    "carbs_g": 18,
+    "fat_g": 7,
+    "fiber_g": 0
+  },
+  {
+    "name": "Starbucks Caramel Macchiato (Grande)",
+    "category": "Beverages",
+    "serving_size": 473,
+    "serving_unit": "ml",
+    "calories": 250,
+    "protein_g": 10,
+    "carbs_g": 35,
+    "fat_g": 7,
+    "fiber_g": 0
+  },
+  {
+    "name": "Starbucks Cold Brew (Grande, black)",
+    "category": "Beverages",
+    "serving_size": 473,
+    "serving_unit": "ml",
+    "calories": 5,
+    "protein_g": 0,
+    "carbs_g": 0,
+    "fat_g": 0,
+    "fiber_g": 0
+  },
+  {
+    "name": "Taco Bell Crunchy Taco",
+    "category": "Fast Food",
+    "serving_size": 78,
+    "serving_unit": "g",
+    "calories": 170,
+    "protein_g": 8,
+    "carbs_g": 13,
+    "fat_g": 10,
+    "fiber_g": 2
+  },
+  {
+    "name": "Taco Bell Burrito Supreme (Beef)",
+    "category": "Fast Food",
+    "serving_size": 248,
+    "serving_unit": "g",
+    "calories": 390,
+    "protein_g": 16,
+    "carbs_g": 51,
+    "fat_g": 14,
+    "fiber_g": 7
+  },
+  {
+    "name": "Wendy's Dave's Single",
+    "category": "Fast Food",
+    "serving_size": 201,
+    "serving_unit": "g",
+    "calories": 590,
+    "protein_g": 30,
+    "carbs_g": 39,
+    "fat_g": 34,
+    "fiber_g": 3
+  },
+  {
+    "name": "Wendy's Medium Frosty (Chocolate)",
+    "category": "Fast Food",
+    "serving_size": 298,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 9,
+    "carbs_g": 56,
+    "fat_g": 9,
+    "fiber_g": 0
   }
 ]
