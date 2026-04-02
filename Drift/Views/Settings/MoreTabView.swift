@@ -80,6 +80,7 @@ struct MoreTabView: View {
                 .padding(.bottom, 24)
             }
             .scrollContentBackground(.hidden)
+            .background(Theme.background.ignoresSafeArea())
             .navigationTitle("More")
             .toolbarColorScheme(.dark, for: .navigationBar)
         }
