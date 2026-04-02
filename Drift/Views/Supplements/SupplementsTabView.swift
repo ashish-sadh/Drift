@@ -48,6 +48,7 @@ struct SupplementsTabView: View {
                                     Image(systemName: viewModel.isTaken(supplement.id ?? 0) ? "checkmark.circle.fill" : "circle")
                                         .font(.title3)
                                         .foregroundStyle(viewModel.isTaken(supplement.id ?? 0) ? Theme.deficit : .secondary)
+                                        .accessibilityHidden(true)
 
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text(supplement.name)
@@ -83,6 +84,8 @@ struct SupplementsTabView: View {
                                 .padding(.vertical, 12)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel("\(supplement.name)\(supplement.dosageDisplay.isEmpty ? "" : ", \(supplement.dosageDisplay)"), \(viewModel.isTaken(supplement.id ?? 0) ? "taken" : "not taken")")
+                            .accessibilityHint("Double tap to toggle")
                             .contextMenu {
                                 if let id = supplement.id {
                                     Button {
