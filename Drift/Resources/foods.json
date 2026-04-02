@@ -8314,5 +8314,137 @@
     "carbs_g": 32,
     "fat_g": 15,
     "fiber_g": 3
+  },
+  {
+    "name": "KIND Energy Bar",
+    "category": "Snacks",
+    "serving_size": 1,
+    "serving_unit": "bar",
+    "calories": 210,
+    "protein_g": 4,
+    "carbs_g": 28,
+    "fat_g": 10,
+    "fiber_g": 3
+  },
+  {
+    "name": "Veggie Burger Patty",
+    "category": "Proteins",
+    "serving_size": 1,
+    "serving_unit": "patty",
+    "calories": 220,
+    "protein_g": 20,
+    "carbs_g": 13,
+    "fat_g": 11,
+    "fiber_g": 4
+  },
+  {
+    "name": "Impossible Burger Patty",
+    "category": "Proteins",
+    "serving_size": 1,
+    "serving_unit": "patty",
+    "calories": 240,
+    "protein_g": 19,
+    "carbs_g": 9,
+    "fat_g": 14,
+    "fiber_g": 3
+  },
+  {
+    "name": "Cauliflower Rice (cooked)",
+    "category": "Vegetables",
+    "serving_size": 1,
+    "serving_unit": "cup",
+    "calories": 25,
+    "protein_g": 2,
+    "carbs_g": 5,
+    "fat_g": 0,
+    "fiber_g": 2
+  },
+  {
+    "name": "Zucchini Noodles (raw)",
+    "category": "Vegetables",
+    "serving_size": 1,
+    "serving_unit": "cup",
+    "calories": 20,
+    "protein_g": 1,
+    "carbs_g": 4,
+    "fat_g": 0,
+    "fiber_g": 1
+  },
+  {
+    "name": "Sauerkraut",
+    "category": "Vegetables",
+    "serving_size": 0.5,
+    "serving_unit": "cup",
+    "calories": 14,
+    "protein_g": 1,
+    "carbs_g": 3,
+    "fat_g": 0,
+    "fiber_g": 2
+  },
+  {
+    "name": "Kimchi",
+    "category": "Vegetables",
+    "serving_size": 0.5,
+    "serving_unit": "cup",
+    "calories": 23,
+    "protein_g": 2,
+    "carbs_g": 4,
+    "fat_g": 0,
+    "fiber_g": 2
+  },
+  {
+    "name": "Falafel (3 pieces)",
+    "category": "Fast Food",
+    "serving_size": 3,
+    "serving_unit": "pieces",
+    "calories": 170,
+    "protein_g": 7,
+    "carbs_g": 18,
+    "fat_g": 8,
+    "fiber_g": 3
+  },
+  {
+    "name": "Brie Cheese",
+    "category": "Dairy",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 100,
+    "protein_g": 6,
+    "carbs_g": 0,
+    "fat_g": 8,
+    "fiber_g": 0
+  },
+  {
+    "name": "Pepperoni (10 slices)",
+    "category": "Proteins",
+    "serving_size": 10,
+    "serving_unit": "slices",
+    "calories": 140,
+    "protein_g": 6,
+    "carbs_g": 1,
+    "fat_g": 13,
+    "fiber_g": 0
+  },
+  {
+    "name": "Prosciutto (2 slices)",
+    "category": "Proteins",
+    "serving_size": 2,
+    "serving_unit": "slices",
+    "calories": 60,
+    "protein_g": 9,
+    "carbs_g": 0,
+    "fat_g": 2,
+    "fiber_g": 0
+  },
+  {
+    "name": "Smoothie Bowl (mixed berry)",
+    "category": "US Staples",
+    "serving_size": 1,
+    "serving_unit": "bowl",
+    "calories": 350,
+    "protein_g": 10,
+    "carbs_g": 60,
+    "fat_g": 8,
+    "fiber_g": 6
   }
 ]
