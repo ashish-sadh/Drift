@@ -11975,5 +11975,116 @@
       "calves",
       "hamstrings"
     ]
+  },
+  {
+    "name": "Turkish Get-Up",
+    "bodyPart": "Core",
+    "category": "Strength",
+    "equipment": "Kettlebells",
+    "level": "advanced",
+    "primaryMuscles": [
+      "shoulders",
+      "abdominals"
+    ],
+    "secondaryMuscles": [
+      "glutes",
+      "quadriceps",
+      "triceps"
+    ]
+  },
+  {
+    "name": "Battle Ropes",
+    "bodyPart": "Core",
+    "category": "Strength",
+    "equipment": "Other",
+    "level": "intermediate",
+    "primaryMuscles": [
+      "shoulders",
+      "abdominals"
+    ],
+    "secondaryMuscles": [
+      "forearms",
+      "chest",
+      "quadriceps"
+    ]
+  },
+  {
+    "name": "Wall Ball",
+    "bodyPart": "Legs",
+    "category": "Strength",
+    "equipment": "Medicine Ball",
+    "level": "intermediate",
+    "primaryMuscles": [
+      "quadriceps",
+      "shoulders"
+    ],
+    "secondaryMuscles": [
+      "glutes",
+      "triceps",
+      "abdominals"
+    ]
+  },
+  {
+    "name": "Rowing Machine",
+    "bodyPart": "Back",
+    "category": "Cardio",
+    "equipment": "Machine",
+    "level": "beginner",
+    "primaryMuscles": [
+      "middle back",
+      "quadriceps"
+    ],
+    "secondaryMuscles": [
+      "biceps",
+      "hamstrings",
+      "calves"
+    ]
+  },
+  {
+    "name": "Kettlebell Goblet Squat",
+    "bodyPart": "Legs",
+    "category": "Strength",
+    "equipment": "Kettlebells",
+    "level": "beginner",
+    "primaryMuscles": [
+      "quadriceps",
+      "glutes"
+    ],
+    "secondaryMuscles": [
+      "hamstrings",
+      "calves",
+      "abdominals"
+    ]
+  },
+  {
+    "name": "Kettlebell Clean and Press",
+    "bodyPart": "Shoulders",
+    "category": "Strength",
+    "equipment": "Kettlebells",
+    "level": "intermediate",
+    "primaryMuscles": [
+      "shoulders"
+    ],
+    "secondaryMuscles": [
+      "triceps",
+      "forearms",
+      "abdominals"
+    ]
+  },
+  {
+    "name": "Bear Crawl",
+    "bodyPart": "Core",
+    "category": "Strength",
+    "equipment": "body only",
+    "level": "intermediate",
+    "primaryMuscles": [
+      "shoulders",
+      "abdominals"
+    ],
+    "secondaryMuscles": [
+      "quadriceps",
+      "chest",
+      "triceps"
+    ]
   }
 ]
