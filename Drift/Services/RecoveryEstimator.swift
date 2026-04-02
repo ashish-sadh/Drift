@@ -193,11 +193,11 @@ enum RecoveryEstimator {
     ) -> [String] {
         var insights: [String] = []
 
-        // HRV trend
+        // HRV trend: check all sequential pairs are rising
         if hrvHistory.count >= 3 {
             let last3 = hrvHistory.suffix(3).map(\.ms)
-            let allRising = last3.count >= 3 && last3[last3.startIndex] < last3[last3.index(before: last3.endIndex)]
-            if allRising {
+            let trendingUp = last3[0] < last3[1] && last3[1] < last3[2]
+            if trendingUp {
                 insights.append("HRV has been trending up — consistent with good recovery.")
             }
         }

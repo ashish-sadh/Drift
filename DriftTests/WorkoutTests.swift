@@ -924,6 +924,7 @@ import GRDB
 }
 
 @Test func sessionClearAfterFinish() async throws {
+    WorkoutService.clearSession() // ensure clean state from other tests
     WorkoutService.saveSession(.init(workoutName: "X", startTime: Date(), exercises: [
         .init(name: "Bench", isWarmup: false, notes: nil, restTime: 90,
               sets: [.init(weight: "135", reps: "10", done: true, isWarmup: false)])
