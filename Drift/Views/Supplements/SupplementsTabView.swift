@@ -142,7 +142,6 @@ struct SupplementsTabView: View {
                 }
             }
             .onAppear {
-                viewModel.seedDefaultsIfNeeded()
                 viewModel.loadSupplements()
             }
         }
