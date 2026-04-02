@@ -188,22 +188,22 @@ struct WeightGoal: Codable, Sendable {
         let required = requiredWeeklyRateKg
         let ratio = required != 0 ? actualWeeklyRateKg / required : 1.0
 
-        // ratio > 1 means exceeding the required rate (ahead)
-        // ratio 0.8-1.2 means on track
-        // ratio < 0.8 means behind
+        // Negative ratio = moving opposite direction (losing when should gain, or vice versa)
+        if ratio < 0 { return .wrongDirection }
         if ratio > 1.2 { return .ahead }
         if ratio >= 0.8 { return .onTrack }
         return .behind
     }
 
     enum OnTrackStatus {
-        case ahead, onTrack, behind
+        case ahead, onTrack, behind, wrongDirection
 
         var label: String {
             switch self {
             case .ahead: "Ahead of schedule"
             case .onTrack: "On track"
             case .behind: "Behind schedule"
+            case .wrongDirection: "Wrong direction"
             }
         }
     }

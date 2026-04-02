@@ -211,6 +211,20 @@ import GRDB
 
     let behind = goal.isOnTrack(actualWeeklyRateKg: requiredRate * 0.3) // barely losing
     #expect(behind == .behind)
+
+    // Gaining when should be losing = wrong direction
+    let wrong = goal.isOnTrack(actualWeeklyRateKg: 0.5)
+    #expect(wrong == .wrongDirection, "Gaining when goal is to lose = wrong direction")
+}
+
+@Test func weightGoalWrongDirectionGaining() async throws {
+    // Goal: gain 2.2 kg (56 - 53.8)
+    let goal = WeightGoal(targetWeightKg: 56, monthsToAchieve: 3, startDate: "2026-04-01", startWeightKg: 53.8)
+    #expect(goal.requiredWeeklyRateKg > 0, "Gaining goal should have positive rate")
+
+    // Actually losing weight = wrong direction
+    let wrong = goal.isOnTrack(actualWeeklyRateKg: -0.42)
+    #expect(wrong == .wrongDirection, "Losing when goal is to gain = wrong direction, got \(wrong.label)")
 }
 
 @Test func weightGoalProgressClamped() async throws {

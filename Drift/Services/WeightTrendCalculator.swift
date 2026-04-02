@@ -176,10 +176,11 @@ enum WeightTrendCalculator {
         if recentPoints.count >= 3 {
             weeklyRateKg = linearRegressionSlope(points: recentPoints) * 7
         } else if dataPoints.count >= 2 {
-            let first = dataPoints.first ?? lastPoint
-            let last = lastPoint
-            let days = Calendar.current.dateComponents([.day], from: first.date, to: last.date).day ?? 1
-            weeklyRateKg = days > 0 ? (last.emaWeight - first.emaWeight) / Double(days) * 7 : 0
+            // Use the two most recent entries (not oldest-to-newest which distorts with sparse data)
+            let last = dataPoints[dataPoints.count - 1]
+            let prev = dataPoints[dataPoints.count - 2]
+            let days = Calendar.current.dateComponents([.day], from: prev.date, to: last.date).day ?? 1
+            weeklyRateKg = days > 0 ? (last.emaWeight - prev.emaWeight) / Double(days) * 7 : 0
         } else {
             weeklyRateKg = 0
         }

@@ -104,9 +104,10 @@ final class DashboardViewModel {
             let hrvHist = (try? await hkService.fetchHRVHistory(days: 14)) ?? []
             let rhrHist = (try? await hkService.fetchRestingHeartRateHistory(days: 14)) ?? []
             let sleepHist = (try? await hkService.fetchSleepHistory(days: 14)) ?? []
+            let respHist = (try? await hkService.fetchRespiratoryRateHistory(days: 14)) ?? []
             let baselines = RecoveryEstimator.calculateBaselines(
                 hrvHistory: hrvHist, rhrHistory: rhrHist,
-                respHistory: [], sleepHistory: sleepHist)
+                respHistory: respHist, sleepHistory: sleepHist)
 
             recoveryScore = RecoveryEstimator.calculateRecovery(
                 hrvMs: hrvMs, restingHR: restingHR, sleepHours: sleepHours,
