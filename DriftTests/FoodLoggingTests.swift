@@ -1333,6 +1333,28 @@ import GRDB
     #expect(!foods.isEmpty, "Foods should be re-seeded after reset")
 }
 
+// MARK: - Batch Query Tests
+
+@Test func fetchDailyCaloriesBatch() async throws {
+    let db = try AppDatabase.empty()
+    let today = DateFormatters.todayString
+    let vm = await FoodLogViewModel(database: db)
+
+    // Log food
+    await vm.quickAdd(name: "Breakfast", calories: 400, proteinG: 20, carbsG: 40, fatG: 15, fiberG: 3, mealType: .breakfast)
+    await vm.quickAdd(name: "Lunch", calories: 600, proteinG: 30, carbsG: 50, fatG: 20, fiberG: 5, mealType: .lunch)
+
+    let result = try db.fetchDailyCalories(from: today, to: today)
+    #expect(result[today] != nil, "Should have calories for today")
+    #expect(abs((result[today] ?? 0) - 1000) < 1, "Total should be ~1000, got \(result[today] ?? 0)")
+}
+
+@Test func fetchDailyCaloriesEmptyRange() async throws {
+    let db = try AppDatabase.empty()
+    let result = try db.fetchDailyCalories(from: "2020-01-01", to: "2020-01-31")
+    #expect(result.isEmpty, "No data should return empty dict")
+}
+
 // MARK: - Recovery Estimator Tests
 
 @Test func recoveryDeviationCalculation() async throws {
