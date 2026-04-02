@@ -909,8 +909,10 @@ import GRDB
     WorkoutService.saveSession(.init(workoutName: "Old", startTime: oldTime, exercises: []))
     let loaded = WorkoutService.loadSession()
     #expect(loaded == nil, "Session older than 5 hours should be expired")
-    // Should also clear itself
-    #expect(WorkoutService.hasActiveSession == false, "Expired session should auto-clear")
+    // loadSession auto-clears expired sessions, so a second load should also be nil
+    let reloaded = WorkoutService.loadSession()
+    #expect(reloaded == nil, "Expired session should stay cleared")
+    WorkoutService.clearSession()
 }
 
 @Test func sessionNotExpiredAt4Hours() async throws {

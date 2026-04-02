@@ -889,6 +889,18 @@ import GRDB
     #expect(withTDEE != nil, "With TDEE, targets should compute")
 }
 
+@Test func goalResolvedCalorieTargetUsesSoftCap() async throws {
+    // Heavy person: off-main-thread fallback should use computeBase (with soft cap)
+    let goal = WeightGoal(targetWeightKg: 100, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 120)
+    // With explicit TDEE, soft cap doesn't apply (it's a known value)
+    let withExplicit = goal.macroTargets(actualTDEE: 2800)
+    #expect(withExplicit != nil)
+
+    // The base for 120kg at moderate activity: raw = 2619, under 2700 soft cap, so = 2619
+    let base = TDEEEstimator.computeBase(weightKg: 120, activityMultiplier: 29)
+    #expect(base < 2700, "120kg moderate should be under soft cap, got \(Int(base))")
+}
+
 // MARK: - Diet Preference Tests (4 tests)
 
 @Test func dietPrefHighProtein() async throws {

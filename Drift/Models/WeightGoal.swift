@@ -102,8 +102,8 @@ struct WeightGoal: Codable, Sendable {
             let est = MainActor.assumeIsolated { TDEEEstimator.shared.cachedOrSync() }
             return est.tdee + requiredDailyDeficit
         }
-        // Off main thread fallback
-        return 2000 * sqrt(startWeightKg / 70) + requiredDailyDeficit
+        // Off main thread fallback — use the proper base formula (with soft cap)
+        return TDEEEstimator.computeBase(weightKg: startWeightKg, activityMultiplier: 29) + requiredDailyDeficit
     }
 
     /// Describes how the calorie target was determined.
