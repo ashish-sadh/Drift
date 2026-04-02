@@ -189,15 +189,28 @@ struct FoodUnit: Hashable {
             units.append(FoodUnit(label: "tbsp", gramsEquivalent: 15))
         }
 
-        // Oils — add ml and tsp alongside tbsp
+        // Oils — add spray, ml, tsp alongside tbsp
         let oilFoods = ["oil", "ghee"]
         if oilFoods.contains(where: { lower.contains($0) }) {
+            if !units.contains(where: { $0.label == "spray" }) {
+                units.append(FoodUnit(label: "spray", gramsEquivalent: 0.25)) // ~1 cal per spray
+            }
             if !units.contains(where: { $0.label == "tsp" }) {
                 units.append(FoodUnit(label: "tsp", gramsEquivalent: 5))
             }
             if !units.contains(where: { $0.label == "ml" }) {
                 units.append(FoodUnit(label: "ml", gramsEquivalent: 1))
             }
+        }
+
+        // Vegetables & fruits — add "piece" for whole items
+        let pieceFoods = ["capsicum", "pepper", "bell pepper", "onion", "tomato", "potato",
+                          "carrot", "cucumber", "zucchini", "eggplant", "brinjal", "avocado",
+                          "lemon", "lime", "mango", "peach", "pear", "plum", "guava",
+                          "kiwi", "fig", "apricot", "corn", "beet", "turnip", "radish"]
+        if pieceFoods.contains(where: { lower.contains($0) }) && primary.label != "piece" && !units.contains(where: { $0.label == "piece" }) {
+            let pieceWeight = pieceGrams(for: lower)
+            units.append(FoodUnit(label: "piece", gramsEquivalent: pieceWeight))
         }
 
         let liquidFoods = ["milk", "juice", "lassi", "buttermilk", "coconut water",
@@ -268,6 +281,30 @@ struct FoodUnit: Hashable {
         }
 
         return FoodUnit(label: "serving", gramsEquivalent: ss)
+    }
+
+    private static func pieceGrams(for name: String) -> Double {
+        if name.contains("capsicum") || name.contains("bell pepper") { return 150 }
+        if name.contains("onion") { return 110 }
+        if name.contains("tomato") { return 120 }
+        if name.contains("potato") { return 150 }
+        if name.contains("carrot") { return 70 }
+        if name.contains("cucumber") { return 200 }
+        if name.contains("zucchini") { return 200 }
+        if name.contains("eggplant") || name.contains("brinjal") { return 300 }
+        if name.contains("avocado") { return 150 }
+        if name.contains("lemon") || name.contains("lime") { return 60 }
+        if name.contains("mango") { return 200 }
+        if name.contains("peach") || name.contains("pear") { return 170 }
+        if name.contains("plum") || name.contains("apricot") { return 65 }
+        if name.contains("guava") { return 100 }
+        if name.contains("kiwi") { return 75 }
+        if name.contains("fig") { return 50 }
+        if name.contains("corn") { return 90 } // one ear
+        if name.contains("beet") { return 80 }
+        if name.contains("radish") { return 15 }
+        if name.contains("turnip") { return 120 }
+        return 100 // default piece weight
     }
 
     private static func cupGrams(for name: String) -> Double {

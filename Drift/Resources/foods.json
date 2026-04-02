@@ -7852,5 +7852,27 @@
     "carbs_g": 18,
     "fat_g": 3,
     "fiber_g": 6
+  },
+  {
+    "name": "Cooking Spray Oil (per spray)",
+    "category": "Oils & Fats",
+    "serving_size": 0.25,
+    "serving_unit": "g",
+    "calories": 2,
+    "protein_g": 0,
+    "carbs_g": 0,
+    "fat_g": 0.2,
+    "fiber_g": 0
+  },
+  {
+    "name": "Avocado Oil Spray (per spray)",
+    "category": "Oils & Fats",
+    "serving_size": 0.25,
+    "serving_unit": "g",
+    "calories": 2,
+    "protein_g": 0,
+    "carbs_g": 0,
+    "fat_g": 0.2,
+    "fiber_g": 0
   }
 ]
