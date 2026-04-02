@@ -68,23 +68,19 @@ final class WeightViewModel {
 
     func loadEntries() {
         do {
-            // Always load ALL entries for insights
+            // Single DB query — filter in memory for the chart
             allEntries = try database.fetchWeightEntries(from: nil)
             let allInput = allEntries.map { (date: $0.date, weightKg: $0.weightKg) }
             fullTrend = WeightTrendCalculator.calculateTrend(entries: allInput)
 
-            // Load filtered entries for chart
-            let startDate: String?
-            if let days = selectedTimeRange.days {
-                if let date = Calendar.current.date(byAdding: .day, value: -days, to: Date()) {
-                    startDate = DateFormatters.dateOnly.string(from: date)
-                } else {
-                    startDate = nil
-                }
+            // Filter for chart time range (in memory, not a second DB call)
+            if let days = selectedTimeRange.days,
+               let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) {
+                let cutoffStr = DateFormatters.dateOnly.string(from: cutoff)
+                entries = allEntries.filter { $0.date >= cutoffStr }
             } else {
-                startDate = nil
+                entries = allEntries
             }
-            entries = try database.fetchWeightEntries(from: startDate)
             let input = entries.map { (date: $0.date, weightKg: $0.weightKg) }
             trend = WeightTrendCalculator.calculateTrend(entries: input)
 
