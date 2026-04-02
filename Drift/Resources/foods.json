@@ -77,17 +77,6 @@
     "fiber_g": 11
   },
   {
-    "name": "Chole / Chickpea Curry",
-    "category": "Indian Staples",
-    "serving_size": 250,
-    "serving_unit": "g",
-    "calories": 310,
-    "protein_g": 14,
-    "carbs_g": 45,
-    "fat_g": 8,
-    "fiber_g": 10
-  },
-  {
     "name": "White Rice (cooked)",
     "category": "Indian Staples",
     "serving_size": 200,
@@ -5214,7 +5203,7 @@
     "fiber_g": 0
   },
   {
-    "name": "capsicum",
+    "name": "Capsicum",
     "category": "Grocery",
     "serving_size": 45,
     "serving_unit": "g",
@@ -5225,7 +5214,7 @@
     "fiber_g": 0
   },
   {
-    "name": "cherry tomato",
+    "name": "Cherry Tomato",
     "category": "Grocery",
     "serving_size": 17,
     "serving_unit": "g",
@@ -5236,19 +5225,8 @@
     "fiber_g": 0
   },
   {
-    "name": "chole",
-    "category": "Indian Staples",
-    "serving_size": 195,
-    "serving_unit": "cup",
-    "calories": 281,
-    "protein_g": 8,
-    "carbs_g": 29,
-    "fat_g": 16,
-    "fiber_g": 8
-  },
-  {
-    "name": "egg plant",
-    "category": "Proteins",
+    "name": "Eggplant (cooked)",
+    "category": "Vegetables",
     "serving_size": 566,
     "serving_unit": "g",
     "calories": 99,
@@ -5258,7 +5236,7 @@
     "fiber_g": 7
   },
   {
-    "name": "feta cheese",
+    "name": "Feta Cheese",
     "category": "Grocery",
     "serving_size": 28,
     "serving_unit": "g",
@@ -5269,7 +5247,7 @@
     "fiber_g": 0
   },
   {
-    "name": "kale",
+    "name": "Kale",
     "category": "Grocery",
     "serving_size": 130,
     "serving_unit": "g",
@@ -5280,7 +5258,7 @@
     "fiber_g": 3
   },
   {
-    "name": "mushroom",
+    "name": "Mushroom",
     "category": "Grocery",
     "serving_size": 157,
     "serving_unit": "cup",
@@ -5291,7 +5269,7 @@
     "fiber_g": 2
   },
   {
-    "name": "parmesan",
+    "name": "Parmesan",
     "category": "Grocery",
     "serving_size": 5,
     "serving_unit": "tbsp",
@@ -5302,7 +5280,7 @@
     "fiber_g": 0
   },
   {
-    "name": "rice",
+    "name": "Rice",
     "category": "Grocery",
     "serving_size": 158,
     "serving_unit": "cup",
@@ -5313,7 +5291,7 @@
     "fiber_g": 1
   },
   {
-    "name": "saag",
+    "name": "Saag (Spinach Curry)",
     "category": "Indian Staples",
     "serving_size": 185,
     "serving_unit": "cup",
@@ -5324,7 +5302,7 @@
     "fiber_g": 5
   },
   {
-    "name": "spinach",
+    "name": "Spinach",
     "category": "Grocery",
     "serving_size": 180,
     "serving_unit": "cup",
