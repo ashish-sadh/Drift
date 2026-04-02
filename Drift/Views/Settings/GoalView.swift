@@ -356,8 +356,8 @@ struct GoalView: View {
                             .frame(maxWidth: .infinity).card()
                         }
 
-                        Text("You're \(isLosing ? "gaining" : "losing") weight but your goal is to \(isLosing ? "lose" : "gain"). Review your calorie target or update your goal.")
-                            .font(.caption).foregroundStyle(Theme.surplus)
+                        Text("Your weight trend is currently moving the other way. Follow your calorie target and this will adjust as your trend catches up.")
+                            .font(.caption).foregroundStyle(.secondary)
                     }
                 }
             } else {
