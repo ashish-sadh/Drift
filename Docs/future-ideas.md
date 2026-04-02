@@ -17,6 +17,10 @@ These are larger changes identified during autonomous sessions that require huma
 - **Cache recovery baselines**: Dashboard fetches 14-day HRV/RHR/sleep history (42 HealthKit queries) on every load. Should cache baselines for 6 hours.
 - **Accessibility labels**: Zero VoiceOver labels in the entire app. Needs systematic pass.
 
+## TDEE
+- **Schofield equation as alternative base**: Research shows the sex-averaged Schofield BMR (10.1*W + 851) × activity factor is more accurate than our sqrt scaling (16-20% higher). Could swap in as base formula when no Mifflin profile exists. Trade-off: higher estimates might feel alarming to users in deficit. Current conservative approach is safer but could be configurable.
+- **Hard ceiling at 4000 kcal**: Research suggests capping no-profile TDEE at 4000 kcal (covers 140kg very-active). Only elite athletes exceed this. Current soft cap at 2700 is aggressive but matches user preference.
+
 ## UI
 - **Dark theme variant**: Some users may prefer a slightly lighter dark (OLED black vs dark gray).
 - **Haptic feedback**: Add subtle haptics to key interactions (logging food, completing a set, finishing a workout).

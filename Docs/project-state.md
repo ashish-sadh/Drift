@@ -20,9 +20,9 @@ Drift is a local-first iOS health & fitness tracking app. Everything runs on-dev
 - Daily upload limit: ~25 builds/day (hit on Mar 29, resets ~24hr)
 
 ## Current Build
-- Version 0.1.0, build 37 (live on TestFlight)
-- 566 tests, all passing
-- 632 foods, 873+ exercises
+- Version 0.1.0, build 50 (live on TestFlight)
+- 609 tests, all passing
+- 767 foods, 907 exercises
 
 ## Tab Structure
 Drift | Weight | Food | Exercise | More
@@ -149,11 +149,15 @@ Drift | Weight | Food | Exercise | More
 - Drift/Resources/exercises.json → 873 exercises from free-exercise-db
 - Drift/Resources/default_supplements.json → just Whey Protein auto-seeded
 
-## Tests (255)
+## Tests (609)
 - DriftTests/WeightTrendCalculatorTests.swift (40)
 - DriftTests/UIFlowTests.swift (49)
-- DriftTests/WorkoutTests.swift (68)
+- DriftTests/WorkoutTests.swift (68+)
+- DriftTests/WorkoutPersistenceTests.swift
 - DriftTests/EdgeCaseTests.swift (26)
+- DriftTests/DatabaseEdgeCaseTests.swift
+- DriftTests/RobustnessTests.swift
+- DriftTests/FoodLoggingTests.swift (180+) — food search, logging, recipes, macros, TDEE
 - DriftTests/NutritionOCRTests.swift (15)
 - DriftTests/CSVParserTests.swift (4)
 - DriftTests/LabReportOCRTests.swift (48) — Quest + LabCorp real PDF extraction tests
