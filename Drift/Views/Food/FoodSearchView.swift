@@ -253,11 +253,22 @@ struct FoodSearchView: View {
 
     private func selectFood(_ food: Food) {
         let units = FoodUnit.smartUnits(for: food)
-        amount = "1"
         selectedUnitIndex = 0
-        if units.first?.label == "g" && food.servingSize > 0 {
+
+        // Smart default: use last-used serving size if available
+        let lastUsed = viewModel.recentEntries.first(where: { $0.name == food.name })?.lastServings
+        if let last = lastUsed, last > 0 {
+            // Convert last servings (which is a multiplier) to the primary unit amount
+            let primaryUnit = units.first ?? FoodUnit(label: "g", gramsEquivalent: 1)
+            let totalG = food.servingSize * last
+            let inPrimary = primaryUnit.gramsEquivalent > 0 ? totalG / primaryUnit.gramsEquivalent : last
+            amount = inPrimary == Double(Int(inPrimary)) ? "\(Int(inPrimary))" : String(format: "%.1f", inPrimary)
+        } else if units.first?.label == "g" && food.servingSize > 0 {
             amount = String(format: "%.0f", food.servingSize)
+        } else {
+            amount = "1"
         }
+
         isFoodFavorite = (try? AppDatabase.shared.isFoodFavorite(name: food.name)) ?? false
         selectedFood = food
     }
