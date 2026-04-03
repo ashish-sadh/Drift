@@ -58,13 +58,17 @@ struct FoodTabView: View {
 
     // MARK: - Date Navigator
 
+    @State private var weekOffset: Int = 0
+
     private var dateNav: some View {
         let cal = Calendar.current
         let today = cal.startOfDay(for: Date())
         let selected = cal.startOfDay(for: viewModel.selectedDate)
 
-        // Build 7 days centered on selected date (3 before, selected, 3 after)
-        let days: [Date] = (-3...3).compactMap { cal.date(byAdding: .day, value: $0, to: selected) }
+        // Fixed week based on weekOffset from current week's Monday
+        let currentWeekStart = cal.dateInterval(of: .weekOfYear, for: today)?.start ?? today
+        let weekStart = cal.date(byAdding: .weekOfYear, value: weekOffset, to: currentWeekStart) ?? currentWeekStart
+        let days: [Date] = (0..<7).compactMap { cal.date(byAdding: .day, value: $0, to: weekStart) }
         let dayFormatter: DateFormatter = {
             let f = DateFormatter(); f.dateFormat = "EEE"; return f
         }()
@@ -72,14 +76,23 @@ struct FoodTabView: View {
         return VStack(spacing: 8) {
             // Month label — tap to open calendar
             Button { showingDatePicker = true } label: {
-                Text(DateFormatters.monthYear.string(from: viewModel.selectedDate))
-                    .font(.caption.weight(.medium)).foregroundStyle(.secondary)
+                HStack(spacing: 4) {
+                    Text(DateFormatters.monthYear.string(from: viewModel.selectedDate))
+                        .font(.caption.weight(.medium)).foregroundStyle(.secondary)
+                    Image(systemName: "chevron.down").font(.system(size: 8)).foregroundStyle(.tertiary)
+                }
             }
             .sheet(isPresented: $showingDatePicker) {
                 NavigationStack {
                     DatePicker("Go to date", selection: Binding(
                         get: { viewModel.selectedDate },
-                        set: { viewModel.goToDate($0); loggedDays = viewModel.loggedDays(last: 30) }
+                        set: { date in
+                            viewModel.goToDate(date)
+                            loggedDays = viewModel.loggedDays(last: 30)
+                            // Update weekOffset to show the week containing the picked date
+                            let pickedWeek = cal.dateInterval(of: .weekOfYear, for: date)?.start ?? date
+                            weekOffset = cal.dateComponents([.weekOfYear], from: currentWeekStart, to: pickedWeek).weekOfYear ?? 0
+                        }
                     ), displayedComponents: .date)
                     .datePickerStyle(.graphical)
                     .padding()
@@ -87,7 +100,7 @@ struct FoodTabView: View {
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) { Button("Done") { showingDatePicker = false } }
                         ToolbarItem(placement: .confirmationAction) {
-                            Button("Today") { viewModel.goToDate(Date()); loggedDays = viewModel.loggedDays(last: 30); showingDatePicker = false }
+                            Button("Today") { viewModel.goToDate(Date()); loggedDays = viewModel.loggedDays(last: 30); weekOffset = 0; showingDatePicker = false }
                                 .foregroundStyle(Theme.accent)
                         }
                     }
@@ -95,33 +108,57 @@ struct FoodTabView: View {
                 .presentationDetents([.medium])
             }
 
-            // Day strip — 7 pills
-            HStack(spacing: 6) {
-                ForEach(days, id: \.self) { day in
-                    let isSelected = cal.isDate(day, inSameDayAs: selected)
-                    let isToday = cal.isDate(day, inSameDayAs: today)
-
+            // Scrollable day strip — fixed week, swipe to change weeks
+            ScrollViewReader { proxy in
+                HStack(spacing: 4) {
+                    // Previous week arrow
                     Button {
-                        viewModel.goToDate(day)
+                        weekOffset -= 1
+                        if let first = days.first { viewModel.goToDate(cal.date(byAdding: .day, value: -7, to: first) ?? first) }
                         loggedDays = viewModel.loggedDays(last: 30)
                     } label: {
-                        VStack(spacing: 3) {
-                            Text(dayFormatter.string(from: day))
-                                .font(.caption2)
-                                .foregroundStyle(isSelected ? Color.white : Color.gray)
-                            Text("\(cal.component(.day, from: day))")
-                                .font(.subheadline.weight(isSelected ? .bold : .regular).monospacedDigit())
-                                .foregroundStyle(isSelected ? .white : .primary)
-                            // Today dot indicator
-                            Circle()
-                                .fill(isToday ? Theme.accent : Color.clear)
-                                .frame(width: 4, height: 4)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                        .background(isSelected ? Theme.accent.opacity(0.3) : Color.clear, in: RoundedRectangle(cornerRadius: 10))
+                        Image(systemName: "chevron.left")
+                            .font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
+                            .frame(width: 24, height: 44)
                     }
-                    .buttonStyle(.plain)
+
+                    // Day pills — fixed positions, only highlight moves
+                    ForEach(days, id: \.self) { day in
+                        let isSelected = cal.isDate(day, inSameDayAs: selected)
+                        let isToday = cal.isDate(day, inSameDayAs: today)
+
+                        Button {
+                            viewModel.goToDate(day)
+                            loggedDays = viewModel.loggedDays(last: 30)
+                        } label: {
+                            VStack(spacing: 2) {
+                                Text(dayFormatter.string(from: day))
+                                    .font(.caption2)
+                                    .foregroundStyle(isSelected ? Color.white : Color.gray)
+                                Text("\(cal.component(.day, from: day))")
+                                    .font(.callout.weight(isSelected ? .bold : .regular).monospacedDigit())
+                                    .foregroundStyle(isSelected ? .white : .primary)
+                                Circle()
+                                    .fill(isToday ? Theme.accent : Color.clear)
+                                    .frame(width: 4, height: 4)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 6)
+                            .background(isSelected ? Theme.accent.opacity(0.3) : Color.clear, in: RoundedRectangle(cornerRadius: 10))
+                        }
+                        .buttonStyle(.plain)
+                    }
+
+                    // Next week arrow
+                    Button {
+                        weekOffset += 1
+                        if let last = days.last { viewModel.goToDate(cal.date(byAdding: .day, value: 1, to: last) ?? last) }
+                        loggedDays = viewModel.loggedDays(last: 30)
+                    } label: {
+                        Image(systemName: "chevron.right")
+                            .font(.caption2.weight(.bold)).foregroundStyle(.tertiary)
+                            .frame(width: 24, height: 44)
+                    }
                 }
             }
 
