@@ -250,7 +250,7 @@ struct BarcodeLookupView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(p.name).font(.headline)
                     if let brand = p.brand { Text(brand).font(.subheadline).foregroundStyle(.secondary) }
-                    Text("Per 100g").font(.caption).foregroundStyle(.tertiary)
+                    Text("Nutrition per 100g").font(.caption).foregroundStyle(.tertiary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading).card()
 
@@ -264,13 +264,20 @@ struct BarcodeLookupView: View {
 
                 VStack(spacing: 10) {
                     HStack {
-                        let servingLabel = p.servingSizeG.map { "\(Int($0))g each" } ?? "100g each"
-                        Text("Servings (\(servingLabel))"); Spacer()
+                        Text("Servings (100g each)"); Spacer()
                         TextField("1", value: $servings, format: .number).keyboardType(.decimalPad).multilineTextAlignment(.trailing).frame(width: 60)
                         Stepper("", value: $servings, in: 0.25...10, step: 0.25).frame(width: 100)
                     }
-                    if p.servingSizeG != nil {
-                        Button("Reset to 100g servings") { servings = 1.0 }
+                    // Show actual grams and quick-set buttons for common portions
+                    HStack(spacing: 8) {
+                        Text("\(Int(servings * 100))g total")
+                            .font(.caption).foregroundStyle(.secondary)
+                        Spacer()
+                        if let g = p.servingSizeG, g != 100 {
+                            Button("\(Int(g))g serving") { servings = g / 100.0 }
+                                .font(.caption.weight(.medium)).foregroundStyle(Theme.accent)
+                        }
+                        Button("100g") { servings = 1.0 }
                             .font(.caption).foregroundStyle(.tertiary)
                     }
                 }.card()
