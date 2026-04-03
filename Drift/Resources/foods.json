@@ -8743,5 +8743,93 @@
     "carbs_g": 26,
     "fat_g": 5,
     "fiber_g": 6
+  },
+  {
+    "name": "Deli Turkey",
+    "category": "Proteins",
+    "serving_size": 56,
+    "serving_unit": "g",
+    "calories": 60,
+    "protein_g": 12,
+    "carbs_g": 1,
+    "fat_g": 1,
+    "fiber_g": 0
+  },
+  {
+    "name": "Navy Beans (cooked)",
+    "category": "Proteins",
+    "serving_size": 1,
+    "serving_unit": "cup",
+    "calories": 255,
+    "protein_g": 15,
+    "carbs_g": 47,
+    "fat_g": 1,
+    "fiber_g": 19
+  },
+  {
+    "name": "Butternut Squash (cooked)",
+    "category": "Vegetables",
+    "serving_size": 1,
+    "serving_unit": "cup",
+    "calories": 82,
+    "protein_g": 2,
+    "carbs_g": 22,
+    "fat_g": 0,
+    "fiber_g": 7
+  },
+  {
+    "name": "Tuna Salad",
+    "category": "US Staples",
+    "serving_size": 0.5,
+    "serving_unit": "cup",
+    "calories": 190,
+    "protein_g": 16,
+    "carbs_g": 10,
+    "fat_g": 10,
+    "fiber_g": 0
+  },
+  {
+    "name": "Egg Salad",
+    "category": "US Staples",
+    "serving_size": 0.5,
+    "serving_unit": "cup",
+    "calories": 210,
+    "protein_g": 11,
+    "carbs_g": 3,
+    "fat_g": 17,
+    "fiber_g": 0
+  },
+  {
+    "name": "Alfredo Sauce",
+    "category": "Condiments",
+    "serving_size": 0.25,
+    "serving_unit": "cup",
+    "calories": 110,
+    "protein_g": 3,
+    "carbs_g": 3,
+    "fat_g": 10,
+    "fiber_g": 0
+  },
+  {
+    "name": "Pita Chips",
+    "category": "Snacks",
+    "serving_size": 28,
+    "serving_unit": "g",
+    "calories": 130,
+    "protein_g": 3,
+    "carbs_g": 19,
+    "fat_g": 5,
+    "fiber_g": 1
+  },
+  {
+    "name": "RXBAR (Chocolate Sea Salt)",
+    "category": "Snacks",
+    "serving_size": 1,
+    "serving_unit": "bar",
+    "calories": 210,
+    "protein_g": 12,
+    "carbs_g": 24,
+    "fat_g": 9,
+    "fiber_g": 5
   }
 ]
