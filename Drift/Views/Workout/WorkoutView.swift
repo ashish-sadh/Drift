@@ -30,6 +30,7 @@ struct WorkoutView: View {
     @State private var activeCalories: Double = 0
     @State private var steps: Double = 0
     @State private var showHistory = false
+    @State private var healthWorkouts: [HealthKitService.HealthWorkout] = []
 
     var body: some View {
         ScrollView {
@@ -67,6 +68,38 @@ struct WorkoutView: View {
                         Text("steps").font(.caption2).foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity).card()
+                }
+
+                // Apple Health Workouts (last 7 days)
+                if !healthWorkouts.isEmpty {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Image(systemName: "heart.fill").font(.caption).foregroundStyle(Theme.heartRed)
+                            Text("Apple Health").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+                            Spacer()
+                            Text("\(healthWorkouts.count) this week").font(.caption.monospacedDigit()).foregroundStyle(.tertiary)
+                        }
+
+                        ForEach(healthWorkouts.prefix(5)) { w in
+                            HStack(spacing: 10) {
+                                Image(systemName: "figure.strengthtraining.traditional")
+                                    .font(.caption).foregroundStyle(Theme.stepsOrange)
+                                    .frame(width: 28, height: 28)
+                                    .background(Theme.stepsOrange.opacity(0.12), in: RoundedRectangle(cornerRadius: 6))
+                                VStack(alignment: .leading, spacing: 1) {
+                                    Text(w.type).font(.caption.weight(.semibold))
+                                    Text(DateFormatters.dayDisplay.string(from: w.date))
+                                        .font(.caption2).foregroundStyle(.quaternary)
+                                }
+                                Spacer()
+                                VStack(alignment: .trailing, spacing: 1) {
+                                    Text(w.durationDisplay).font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
+                                    Text("\(Int(w.calories)) cal").font(.caption2.monospacedDigit()).foregroundStyle(.tertiary)
+                                }
+                            }
+                        }
+                    }
+                    .card()
                 }
 
                 // Body recovery map
@@ -424,6 +457,7 @@ struct WorkoutView: View {
             let hk = HealthKitService.shared
             activeCalories = (try? await hk.fetchCaloriesBurned(for: Date()).active) ?? 0
             steps = (try? await hk.fetchSteps(for: Date())) ?? 0
+            healthWorkouts = (try? await hk.fetchRecentWorkouts(days: 7)) ?? []
         }
     }
 
