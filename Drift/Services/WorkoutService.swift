@@ -252,11 +252,16 @@ enum WorkoutService {
             exerciseNames.insert(exerciseName)
 
             let setOrder = Int(row["Set Order"] ?? "1") ?? 1
-            let weight = Double(row["Weight"] ?? "0") ?? 0
+            var weight = Double(row["Weight"] ?? "0") ?? 0
             let reps = Int(Double(row["Reps"] ?? "0") ?? 0)
+            let rpe = Double(row["RPE"] ?? "")
+            let weightUnit = row["Weight Unit"] ?? "lbs"
+
+            // Convert kg to lbs if needed (our DB stores lbs)
+            if weightUnit.lowercased() == "kg" { weight *= 2.20462 }
 
             let set = WorkoutSet(workoutId: 0, exerciseName: exerciseName, setOrder: setOrder,
-                                 weightLbs: weight, reps: reps, isWarmup: false, rpe: nil)
+                                 weightLbs: weight, reps: reps, isWarmup: false, rpe: rpe)
             setsByDate[date, default: []].append(set)
         }
 
