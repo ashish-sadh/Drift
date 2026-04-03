@@ -38,6 +38,18 @@ struct SupplementsTabView: View {
                         consistencyGraph
                     }
 
+                    // "Same as yesterday" — when nothing taken today but yesterday had logs
+                    if viewModel.takenCount == 0 && viewModel.yesterdayHadSupplements {
+                        Button {
+                            viewModel.copyYesterday()
+                        } label: {
+                            Label("Same as yesterday", systemImage: "doc.on.doc")
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(Theme.accent)
+                        }
+                        .buttonStyle(.bordered).tint(Theme.accent)
+                    }
+
                     // Checklist
                     VStack(spacing: 0) {
                         ForEach(Array(viewModel.supplements.enumerated()), id: \.element.id) { index, supplement in

@@ -102,6 +102,31 @@ final class SupplementViewModel {
         }
     }
 
+    /// Check if yesterday had supplements taken (for "Same as yesterday" button)
+    var yesterdayHadSupplements: Bool {
+        guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) else { return false }
+        let yesterdayStr = DateFormatters.dateOnly.string(from: yesterday)
+        let logs = (try? database.fetchSupplementLogs(for: yesterdayStr)) ?? []
+        return logs.contains(where: \.taken)
+    }
+
+    /// Copy yesterday's taken supplements to today
+    func copyYesterday() {
+        guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) else { return }
+        let yesterdayStr = DateFormatters.dateOnly.string(from: yesterday)
+        guard let logs = try? database.fetchSupplementLogs(for: yesterdayStr) else { return }
+        for log in logs where log.taken {
+            if !isTaken(log.supplementId) {
+                do {
+                    try database.toggleSupplementTaken(supplementId: log.supplementId, date: dateString)
+                } catch {
+                    Log.supplements.error("Copy yesterday failed: \(error.localizedDescription)")
+                }
+            }
+        }
+        loadSupplements()
+    }
+
     func addCustomSupplement(name: String, dosage: String, unit: String, dailyDoses: Int = 1) {
         do {
             var s = Supplement(name: name, dosage: dosage, unit: unit, sortOrder: supplements.count, dailyDoses: dailyDoses)
