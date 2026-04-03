@@ -85,7 +85,45 @@ struct WeightInsightsView: View {
 
             // Compact weight-change chips
             weightChangesRow
+
+            // Weekday pattern insight
+            if trend.dataPoints.count >= 14 {
+                weekdayInsight
+            }
         }
+    }
+
+    // MARK: - Weekday Pattern
+
+    private var weekdayInsight: some View {
+        let cal = Calendar.current
+        var byDay: [Int: [Double]] = [:] // 1=Sun ... 7=Sat
+        for p in trend.dataPoints {
+            guard let w = p.actualWeight else { continue }
+            let weekday = cal.component(.weekday, from: p.date)
+            byDay[weekday, default: []].append(w)
+        }
+        let averages = byDay.compactMapValues { vals -> Double? in
+            guard !vals.isEmpty else { return nil }
+            return vals.reduce(0, +) / Double(vals.count)
+        }
+        guard averages.count >= 5 else { return AnyView(EmptyView()) } // need most days
+
+        let dayNames = ["", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+        let lightest = averages.min(by: { $0.value < $1.value })
+        let heaviest = averages.max(by: { $0.value < $1.value })
+
+        guard let light = lightest, let heavy = heaviest, light.key != heavy.key else {
+            return AnyView(EmptyView())
+        }
+
+        return AnyView(
+            Text("You tend to weigh least on \(dayNames[light.key])s and most on \(dayNames[heavy.key])s")
+                .font(.caption2).foregroundStyle(.tertiary)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 4)
+        )
     }
 
     // MARK: - Metric Cell
