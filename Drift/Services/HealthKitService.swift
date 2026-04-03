@@ -298,13 +298,15 @@ final class HealthKitService {
         let date: Date
         let flow: Int // 1=light, 2=medium, 3=heavy, 4=none/spotting ended
 
+        /// HK: 1=unspecified, 2=light, 3=medium, 4=heavy, 5=none
         var flowDisplay: String {
             switch flow {
-            case 1: "Light"
-            case 2: "Medium"
-            case 3: "Heavy"
-            case 4: "None"
-            default: "Unspecified"
+            case 1: "Unspecified"
+            case 2: "Light"
+            case 3: "Medium"
+            case 4: "Heavy"
+            case 5: "None"
+            default: "Unknown"
             }
         }
     }
@@ -461,7 +463,7 @@ final class HealthKitService {
             let cycleStart = cal.date(byAdding: .day, value: -offset, to: Date())!
             for day in 0..<5 {
                 let date = cal.date(byAdding: .day, value: day, to: cycleStart)!
-                let flow = day == 0 || day == 4 ? 1 : (day == 2 ? 3 : 2)
+                let flow = day == 0 || day == 4 ? 2 : (day == 2 ? 4 : 3) // HK: 2=light, 3=medium, 4=heavy
                 entries.append(CycleEntry(date: date, flow: flow))
             }
             if i < 2 { offset += cycleLengths[2 - i] }

@@ -523,11 +523,13 @@ struct CycleView: View {
 
     // MARK: - Helpers
 
+    /// HK: 1=unspecified, 2=light, 3=medium, 4=heavy
     private func flowColor(_ flow: Int) -> Color {
         switch flow {
-        case 1: .pink.opacity(0.5)
-        case 2: .pink.opacity(0.7)
-        case 3: .pink
+        case 1: .pink.opacity(0.4)   // unspecified
+        case 2: .pink.opacity(0.5)   // light
+        case 3: .pink.opacity(0.7)   // medium
+        case 4: .pink               // heavy
         default: .pink.opacity(0.3)
         }
     }

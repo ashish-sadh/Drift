@@ -9,16 +9,18 @@ struct CyclePeriod {
     var endDate: Date { days.last?.date ?? startDate }
 
     var dominantFlow: Int {
-        let flows = days.map(\.flow).filter { $0 >= 1 && $0 <= 3 }
+        let flows = days.map(\.flow).filter { $0 >= 1 && $0 <= 4 }
         guard !flows.isEmpty else { return 1 }
         return flows.max() ?? 2
     }
 
+    /// HK values: 1=unspecified, 2=light, 3=medium, 4=heavy
     var dominantFlowDisplay: String {
         switch dominantFlow {
-        case 1: "Light"
-        case 2: "Medium"
-        case 3: "Heavy"
+        case 1: "Unspecified"
+        case 2: "Light"
+        case 3: "Medium"
+        case 4: "Heavy"
         default: "Light"
         }
     }
@@ -26,9 +28,9 @@ struct CyclePeriod {
 
 enum CycleCalculations {
     /// Groups cycle entries into periods. Entries more than 3 days apart start a new period.
-    /// Only includes flow values 1-3 (light/medium/heavy), filters out 0 and 4+.
+    /// HK values: 1=unspecified, 2=light, 3=medium, 4=heavy, 5=none. Include 1-4, exclude 0 and 5.
     static func groupIntoPeriods(_ entries: [HealthKitService.CycleEntry]) -> [CyclePeriod] {
-        let flowEntries = entries.filter { $0.flow >= 1 && $0.flow <= 3 }
+        let flowEntries = entries.filter { $0.flow >= 1 && $0.flow <= 4 }
         guard !flowEntries.isEmpty else { return [] }
 
         let sorted = flowEntries.sorted { $0.date < $1.date }

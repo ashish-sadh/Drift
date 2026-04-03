@@ -42,14 +42,28 @@ import Testing
 
 @Test func cycleGroupPeriodsFiltersInvalidFlow() async throws {
     let cal = Calendar.current
+    // HK: 0=notApplicable, 5=none — both should be excluded. 1-4 included.
     let entries = [
         HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: -3, to: Date())!, flow: 0),
         HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: -2, to: Date())!, flow: 2),
-        HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: -1, to: Date())!, flow: 4),
+        HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: -1, to: Date())!, flow: 5),
     ]
     let result = CycleCalculations.groupIntoPeriods(entries)
     #expect(result.count == 1)
-    #expect(result[0].days.count == 1, "Only flow=2 should be included")
+    #expect(result[0].days.count == 1, "Only flow=2 (light) should be included, 0 and 5 excluded")
+}
+
+@Test func cycleGroupPeriodsIncludesHeavyFlow() async throws {
+    let cal = Calendar.current
+    let entries = [
+        HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: -3, to: Date())!, flow: 2), // light
+        HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: -2, to: Date())!, flow: 4), // heavy
+        HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: -1, to: Date())!, flow: 3), // medium
+    ]
+    let result = CycleCalculations.groupIntoPeriods(entries)
+    #expect(result.count == 1)
+    #expect(result[0].days.count == 3, "Should include heavy flow (4)")
+    #expect(result[0].dominantFlow == 4, "Dominant should be heavy (4)")
 }
 
 @Test func cycleGroupPeriodsUnsortedInput() async throws {
