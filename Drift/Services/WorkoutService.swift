@@ -280,8 +280,9 @@ enum WorkoutService {
             // Convert kg to lbs if needed (our DB stores lbs)
             if weightUnit.lowercased() == "kg" { weight *= 2.20462 }
 
+            let isWarmup = isHevy && (row["set_type"] ?? "").lowercased() == "warmup"
             let set = WorkoutSet(workoutId: 0, exerciseName: en, setOrder: setOrder,
-                                 weightLbs: weight, reps: reps, isWarmup: false, rpe: rpe)
+                                 weightLbs: weight, reps: reps, isWarmup: isWarmup, rpe: rpe)
             setsByDate[date, default: []].append(set)
         }
 
