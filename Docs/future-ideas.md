@@ -33,6 +33,12 @@ These are larger changes identified during autonomous sessions that require huma
 - **VO2 Max**: Fitness level indicator from Apple Watch. Could factor into recovery scoring or activity recommendations.
 - **Walking heart rate average**: More stable than resting HR for recovery estimation on days without formal workouts.
 
+## Food Logging UX (researched)
+- **Multi-add / batch select**: Check multiple foods from search results and add all at once. MFP's top feature.
+- **Meal templates / saved meals**: Save "My usual breakfast" as a single-tap entry. Beyond individual food favorites.
+- **Copy from any previous day**: Not just yesterday — let user pick any past day to copy from.
+- **Inline editing**: Tap any number in the diary to edit directly without opening a sheet.
+
 ## Small Delights (researched, 1-2 hours each)
 - **Weekday weight pattern**: "You tend to weigh least on Wednesdays" — group historical weights by day-of-week, show insight. Users never think to check this.
 - **Macro rings on Food tab**: Concentric rings (like Apple Fitness) showing P/C/F progress toward targets. "Close the ring" motivation.
