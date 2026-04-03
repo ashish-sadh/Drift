@@ -4,19 +4,27 @@ import Foundation
 enum DefaultTemplates {
     private static let seededKey = "drift_default_templates_v3"
 
+    /// Legacy auto-seed (no longer called from app launch).
     static func seedIfNeeded() {
         guard !UserDefaults.standard.bool(forKey: seededKey) else { return }
-        guard (try? WorkoutService.fetchTemplates())?.isEmpty ?? true else {
-            UserDefaults.standard.set(true, forKey: seededKey)
-            return
-        }
+        loadCurated()
+        UserDefaults.standard.set(true, forKey: seededKey)
+    }
+
+    /// Load Drift Curated templates on demand. Skips any that already exist by name.
+    @discardableResult
+    static func loadCurated() -> Int {
+        let existing = Set((try? WorkoutService.fetchTemplates())?.map(\.name) ?? [])
+        var added = 0
 
         for template in allTemplates {
+            guard !existing.contains(template.name) else { continue }
             var t = template
             try? WorkoutService.saveTemplate(&t)
+            added += 1
         }
 
-        // Add all custom exercises not in the 873 DB
+        // Add custom exercises needed by curated templates
         let dbNames = Set(ExerciseDatabase.all.map { $0.name.lowercased() })
         for (name, bodyPart) in customExercises {
             if !dbNames.contains(name.lowercased()) {
@@ -24,8 +32,8 @@ enum DefaultTemplates {
             }
         }
 
-        UserDefaults.standard.set(true, forKey: seededKey)
-        Log.app.info("Seeded \(allTemplates.count) default workout templates")
+        Log.app.info("Loaded \(added) Drift Curated templates (skipped \(allTemplates.count - added) existing)")
+        return added
     }
 
     /// All custom exercises needed across all programs

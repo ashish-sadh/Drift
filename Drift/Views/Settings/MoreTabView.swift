@@ -125,6 +125,8 @@ struct SettingsView: View {
     @State private var showingFactoryReset = false
     @State private var resetDone = false
     @State private var syncStatus: String?
+    @State private var showingExport = false
+    @State private var exportURL: URL?
 
     var body: some View {
         ScrollView {
@@ -220,6 +222,41 @@ struct SettingsView: View {
                 }
                 .card()
 
+                // Export
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Export Data")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(.secondary)
+
+                    Button {
+                        exportURL = exportWorkoutsCSV()
+                        if exportURL != nil { showingExport = true }
+                    } label: {
+                        HStack {
+                            Image(systemName: "dumbbell.fill").foregroundStyle(Theme.accent)
+                            Text("Export Workouts (CSV)")
+                            Spacer()
+                        }
+                    }
+
+                    Button {
+                        exportURL = exportFoodLogsCSV()
+                        if exportURL != nil { showingExport = true }
+                    } label: {
+                        HStack {
+                            Image(systemName: "fork.knife").foregroundStyle(Theme.accent)
+                            Text("Export Food Logs (CSV)")
+                            Spacer()
+                        }
+                    }
+                }
+                .card()
+                .sheet(isPresented: $showingExport) {
+                    if let url = exportURL {
+                        ShareSheet(items: [url])
+                    }
+                }
+
                 // Factory Reset
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Danger Zone")
@@ -285,4 +322,47 @@ struct SettingsView: View {
             Log.app.error("Factory reset failed: \(error.localizedDescription)")
         }
     }
+
+    // MARK: - Export
+
+    private func exportWorkoutsCSV() -> URL? {
+        guard let workouts = try? WorkoutService.fetchWorkouts(limit: 10000) else { return nil }
+        var csv = "Date,Workout Name,Exercise Name,Set Order,Weight,Reps,RPE\n"
+        for w in workouts {
+            guard let wid = w.id else { continue }
+            let sets = (try? WorkoutService.fetchSets(forWorkout: wid)) ?? []
+            for s in sets {
+                let weight = s.weightLbs.map { String(format: "%.1f", $0) } ?? ""
+                let reps = s.reps.map { "\($0)" } ?? ""
+                let rpe = s.rpe.map { String(format: "%.1f", $0) } ?? ""
+                csv += "\"\(w.date)\",\"\(w.name)\",\"\(s.exerciseName)\",\(s.setOrder),\(weight),\(reps),\(rpe)\n"
+            }
+        }
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("drift_workouts.csv")
+        try? csv.write(to: url, atomically: true, encoding: .utf8)
+        return url
+    }
+
+    private func exportFoodLogsCSV() -> URL? {
+        let db = AppDatabase.shared
+        var csv = "Date,Food,Calories,Protein,Carbs,Fat,Fiber,Servings\n"
+        // Export last 90 days
+        let today = Date()
+        for dayOffset in 0..<90 {
+            guard let date = Calendar.current.date(byAdding: .day, value: -dayOffset, to: today) else { continue }
+            let dateStr = DateFormatters.dateOnly.string(from: date)
+            guard let logs = try? db.fetchMealLogs(for: dateStr) else { continue }
+            for log in logs {
+                guard let logId = log.id, let entries = try? db.fetchFoodEntries(forMealLog: logId) else { continue }
+                for e in entries {
+                    csv += "\"\(dateStr)\",\"\(e.foodName)\",\(Int(e.totalCalories)),\(Int(e.totalProtein)),\(Int(e.totalCarbs)),\(Int(e.totalFat)),\(Int(e.totalFiber)),\(String(format: "%.1f", e.servings))\n"
+                }
+            }
+        }
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("drift_food_logs.csv")
+        try? csv.write(to: url, atomically: true, encoding: .utf8)
+        return url
+    }
 }
+
+// ShareSheet is defined in WorkoutView.swift — reused here for file export

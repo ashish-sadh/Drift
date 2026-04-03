@@ -106,7 +106,7 @@ enum ExerciseDatabase {
         info(for: name)?.bodyPart ?? guessBodyPart(name)
     }
 
-    private static func guessBodyPart(_ name: String) -> String {
+    static func guessBodyPart(_ name: String) -> String {
         let e = name.lowercased()
         if e.contains("bench") || e.contains("chest") || e.contains("fly") || e.contains("dip") { return "Chest" }
         if e.contains("squat") || e.contains("leg") || e.contains("calf") || e.contains("deadlift") || e.contains("lunge") || e.contains("hip") || e.contains("thrust") { return "Legs" }

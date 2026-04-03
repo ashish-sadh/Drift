@@ -12,7 +12,6 @@ struct DriftApp: App {
                 .task {
                     if !hasRequestedHealthKit {
                         hasRequestedHealthKit = true
-                        DefaultTemplates.seedIfNeeded()
                         DefaultFoods.seedIfNeeded()
                         #if !targetEnvironment(simulator)
                         do {

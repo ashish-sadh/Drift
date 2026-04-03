@@ -13,6 +13,7 @@ struct WorkoutView: View {
     @State private var showingCreateTemplate = false
     @State private var showingExerciseBrowser = false
     @State private var importResult: String?
+    @State private var showingImportAlert = false
     @State private var isLoading = true
     @State private var selectedTemplate: WorkoutTemplate? = nil
     @State private var previewTemplate: WorkoutTemplate? = nil
@@ -90,15 +91,46 @@ struct WorkoutView: View {
                     HStack {
                         Text("Templates").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
                         Spacer()
-                        Text("\(templates.count)").font(.caption.monospacedDigit()).foregroundStyle(.tertiary)
-                        Button { showingCreateTemplate = true } label: {
-                            Label("New", systemImage: "plus").font(.caption)
+                        if !templates.isEmpty {
+                            Text("\(templates.count)").font(.caption.monospacedDigit()).foregroundStyle(.tertiary)
+                        }
+                        Menu {
+                            Button { showingCreateTemplate = true } label: {
+                                Label("New Template", systemImage: "plus")
+                            }
+                            Button { showingImport = true } label: {
+                                Label("Import from Strong / Hevy", systemImage: "square.and.arrow.down")
+                            }
+                            Button {
+                                let added = DefaultTemplates.loadCurated()
+                                importResult = "Added \(added) Drift Curated templates"
+                                showingImportAlert = true
+                                loadData()
+                            } label: {
+                                Label("Load Drift Curated", systemImage: "star")
+                            }
+                        } label: {
+                            Image(systemName: "plus.circle").font(.body).foregroundStyle(Theme.accent)
                         }
                     }
 
                     if templates.isEmpty {
-                        Text("Save a workout as template or create one here")
-                            .font(.caption).foregroundStyle(.tertiary)
+                        VStack(spacing: 12) {
+                            Text("No templates yet").font(.caption).foregroundStyle(.tertiary)
+                            HStack(spacing: 12) {
+                                Button { showingImport = true } label: {
+                                    Label("Import", systemImage: "square.and.arrow.down").font(.caption)
+                                }.buttonStyle(.bordered)
+                                Button {
+                                    let added = DefaultTemplates.loadCurated()
+                                    importResult = "Added \(added) Drift Curated templates"
+                                    showingImportAlert = true
+                                    loadData()
+                                } label: {
+                                    Label("Drift Curated", systemImage: "star").font(.caption)
+                                }.buttonStyle(.bordered).tint(Theme.accent)
+                            }
+                        }
                     } else {
                         ForEach(templates) { t in
                             HStack(spacing: 8) {
@@ -349,6 +381,11 @@ struct WorkoutView: View {
             }
             Button("Cancel", role: .cancel) {}
         } message: { Text("This workout and all its sets will be permanently deleted.") }
+        .alert("Import", isPresented: $showingImportAlert) {
+            Button("OK") {}
+        } message: {
+            Text(importResult ?? "Done")
+        }
         .onAppear { loadData() }
         .onChange(of: showingNewWorkout) { _, showing in if !showing { loadData() } }
         .onChange(of: showingCreateTemplate) { _, showing in if !showing { loadData() } }
@@ -413,8 +450,19 @@ struct WorkoutView: View {
     }
     private func handleImport(_ result: Result<URL, Error>) {
         switch result {
-        case .success(let url): do { let r = try WorkoutService.importStrongCSV(url: url); importResult = "Imported \(r.workouts) workouts, \(r.sets) sets"; loadData() } catch { importResult = "Failed: \(error.localizedDescription)" }
-        case .failure(let error): importResult = "Error: \(error.localizedDescription)"
+        case .success(let url):
+            do {
+                let r = try WorkoutService.importStrongCSV(url: url)
+                importResult = "Imported \(r.workouts) workouts, \(r.sets) sets"
+                showingImportAlert = true
+                loadData()
+            } catch {
+                importResult = "Failed: \(error.localizedDescription)"
+                showingImportAlert = true
+            }
+        case .failure(let error):
+            importResult = "Error: \(error.localizedDescription)"
+            showingImportAlert = true
         }
     }
     private func loadData() {
@@ -1767,7 +1815,10 @@ struct ExerciseDetailView: View {
 // MARK: - Share Sheet
 
 struct ShareSheet: UIViewControllerRepresentable {
-    let text: String
-    func makeUIViewController(context: Context) -> UIActivityViewController { UIActivityViewController(activityItems: [text], applicationActivities: nil) }
+    var text: String = ""
+    var items: [Any]?
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(activityItems: items ?? [text], applicationActivities: nil)
+    }
     func updateUIViewController(_ vc: UIActivityViewController, context: Context) {}
 }

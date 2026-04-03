@@ -315,10 +315,20 @@ enum WorkoutService {
             workoutCount += 1
         }
 
-        // Auto-extract templates from recurring workout names
+        // Auto-add missing exercises to custom DB with smart body part guessing
+        let dbNames = Set(ExerciseDatabase.allWithCustom.map { $0.name.lowercased() })
+        for name in exerciseNames {
+            if !dbNames.contains(name.lowercased()) {
+                let bodyPart = ExerciseDatabase.guessBodyPart(name)
+                ExerciseDatabase.addCustomExercise(name: name, bodyPart: bodyPart)
+            }
+        }
+
+        // Auto-extract templates from recurring workout names (max 5)
         let nameKey = isHevy ? "title" : "Workout Name"
         let exerciseKey = isHevy ? "exercise_title" : "Exercise Name"
         var templatesByName: [String: [String]] = [:]
+        var templateFrequency: [String: Int] = [:] // count of unique dates per workout name
         for row in result.rows {
             guard let name = row[nameKey], let exercise = row[exerciseKey] else { continue }
             if templatesByName[name] == nil { templatesByName[name] = [] }
@@ -327,17 +337,24 @@ enum WorkoutService {
             }
         }
 
-        // Create templates for workout names that appeared 2+ times
-        var templatesCreated = 0
-        let existingTemplates = Set((try? fetchTemplates())?.map(\.name) ?? [])
-        for (name, exercises) in templatesByName where exercises.count >= 2 {
-            // Only create if this workout name appears in multiple dates AND isn't already a template
-            let dateKey = isHevy ? "start_time" : "Date"
-            let datesWithName = Set(result.rows.compactMap { row -> String? in
+        // Count frequency (dates per workout name)
+        let dateKey = isHevy ? "start_time" : "Date"
+        for (name, _) in templatesByName {
+            let dates = Set(result.rows.compactMap { row -> String? in
                 guard row[nameKey] == name else { return nil }
                 return row[dateKey].map { String($0.prefix(10)) }
             })
-            guard datesWithName.count >= 2, !existingTemplates.contains(name) else { continue }
+            templateFrequency[name] = dates.count
+        }
+
+        // Sort by frequency, take top 5, require 2+ dates
+        var templatesCreated = 0
+        let existingTemplates = Set((try? fetchTemplates())?.map(\.name) ?? [])
+        let sortedNames = templateFrequency.sorted { $0.value > $1.value }.map(\.key)
+
+        for name in sortedNames where templatesCreated < 5 {
+            guard let exercises = templatesByName[name], exercises.count >= 2 else { continue }
+            guard (templateFrequency[name] ?? 0) >= 2, !existingTemplates.contains(name) else { continue }
 
             let templateExercises = exercises.map {
                 WorkoutTemplate.TemplateExercise(name: $0, sets: 3, restSeconds: 90)
@@ -351,7 +368,7 @@ enum WorkoutService {
             }
         }
 
-        Log.app.info("Imported \(workoutCount) workouts, \(result.rows.count) sets, \(exerciseNames.count) exercises, \(templatesCreated) templates from Strong CSV")
+        Log.app.info("Imported \(workoutCount) workouts, \(result.rows.count) sets, \(exerciseNames.count) exercises, \(templatesCreated) templates")
 
         return ImportResult(workouts: workoutCount, sets: result.rows.count, exercises: exerciseNames.count)
     }

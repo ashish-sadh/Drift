@@ -57,7 +57,9 @@ struct FoodSearchView: View {
             .navigationTitle(loggedCount > 0 ? "Add Food (\(loggedCount) logged)" : "Add Food")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(loggedCount > 0 ? "Done" : "Cancel") { dismiss() }
+                }
             }
             .sheet(item: $selectedFood) { food in logFoodSheet(food) }
             .sheet(isPresented: $showingManual) { manualEntrySheet }
