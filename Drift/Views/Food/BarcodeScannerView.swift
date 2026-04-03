@@ -264,13 +264,14 @@ struct BarcodeLookupView: View {
 
                 VStack(spacing: 10) {
                     HStack {
-                        Text("Servings (100g each)"); Spacer()
+                        let servingLabel = p.servingSizeG.map { "\(Int($0))g each" } ?? "100g each"
+                        Text("Servings (\(servingLabel))"); Spacer()
                         TextField("1", value: $servings, format: .number).keyboardType(.decimalPad).multilineTextAlignment(.trailing).frame(width: 60)
                         Stepper("", value: $servings, in: 0.25...10, step: 0.25).frame(width: 100)
                     }
-                    if let g = p.servingSizeG {
-                        Button("Use serving size (\(Int(g))g)") { servings = g / 100.0 }
-                            .font(.caption).foregroundStyle(Theme.accent)
+                    if p.servingSizeG != nil {
+                        Button("Reset to 100g servings") { servings = 1.0 }
+                            .font(.caption).foregroundStyle(.tertiary)
                     }
                 }.card()
 
@@ -310,13 +311,15 @@ struct BarcodeLookupView: View {
             // Check local cache first
             if let cached = try? AppDatabase.shared.fetchCachedBarcode(barcode) {
                 Log.foodLog.info("Barcode cache hit: \(cached.name)")
-                product = OpenFoodFactsService.Product(
+                let p = OpenFoodFactsService.Product(
                     barcode: cached.barcode, name: cached.name, brand: cached.brand,
                     servingSize: cached.servingDescription, calories: cached.caloriesPer100g,
                     proteinG: cached.proteinGPer100g, carbsG: cached.carbsGPer100g,
                     fatG: cached.fatGPer100g, fiberG: cached.fiberGPer100g,
                     servingSizeG: cached.servingSizeG
                 )
+                product = p
+                if let g = p.servingSizeG { servings = g / 100.0 }
                 isLooking = false
                 return
             }
@@ -325,6 +328,7 @@ struct BarcodeLookupView: View {
             do {
                 let p = try await OpenFoodFactsService.lookup(barcode: barcode)
                 product = p
+                if let g = p.servingSizeG { servings = g / 100.0 }
                 // Cache locally for next time
                 try? AppDatabase.shared.cacheBarcodeProduct(BarcodeCache(from: p))
                 Log.foodLog.info("Barcode cached: \(p.name)")
@@ -336,8 +340,12 @@ struct BarcodeLookupView: View {
     }
 
     private func logProduct(_ p: OpenFoodFactsService.Product) {
+        // servingSize is the API's serving in grams (or 100g fallback).
+        // servings count is how many of those servings the user wants.
+        // Macros in Food are per servingSize grams (from API: per 100g).
+        // So total = macros * servings where servings already accounts for serving size.
         var food = Food(name: [p.name, p.brand].compactMap { $0 }.joined(separator: " - "), category: "Scanned",
-                        servingSize: p.servingSizeG ?? 100, servingUnit: "g",
+                        servingSize: 100, servingUnit: "g",
                         calories: p.calories, proteinG: p.proteinG, carbsG: p.carbsG, fatG: p.fatG, fiberG: p.fiberG)
         // Save to food DB so it shows up in future searches
         try? AppDatabase.shared.saveScannedFood(&food)
