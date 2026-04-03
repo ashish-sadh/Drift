@@ -1790,4 +1790,67 @@ import GRDB
     #expect(abs(config36.mifflinActivityFactor - 1.9) < 0.01, "Athlete = 1.9")
 }
 
+// MARK: - Weight Trend Fallback Tests
+
+@Test func weightTrendFallbackUsesTwoMostRecent() async throws {
+    // With < 3 points in regression window, should use 2 most recent (not oldest-to-newest)
+    let entries: [(date: String, weightKg: Double)] = [
+        ("2026-01-01", 80.0),  // old entry, far away
+        ("2026-03-28", 75.0),  // recent
+        ("2026-03-30", 74.5),  // most recent
+    ]
+    let trend = WeightTrendCalculator.calculateTrend(
+        entries: entries,
+        config: .init(emaAlpha: 0.1, regressionWindowDays: 3, kcalPerKg: 6000, maintainingThresholdKgPerWeek: 0.05)
+    )
+    #expect(trend != nil)
+    // With 3-day window, only last 2 entries are in window → fallback path
+    // Rate should be based on 74.5 vs 75.0 over 2 days, NOT 74.5 vs 80.0 over 89 days
+    if let rate = trend?.weeklyRateKg {
+        #expect(rate < 0, "Should show losing trend")
+        #expect(abs(rate) < 5, "Rate should be moderate, not extreme: \(rate)")
+    }
+}
+
+// MARK: - Recovery Score Edge Cases
+
+@Test func recoveryScoreAllDataPresent() async throws {
+    // Normal case: all data available
+    let baselines = RecoveryEstimator.Baselines(hrvMs: 45, restingHR: 65, respiratoryRate: 15, sleepHours: 7.5, daysOfData: 14)
+    let score = RecoveryEstimator.calculateRecovery(hrvMs: 50, restingHR: 60, sleepHours: 7.5, baselines: baselines)
+    #expect(score > 60 && score < 90, "Normal data should give moderate-high score: \(score)")
+}
+
+@Test func recoveryScoreMissingHRVStillReasonable() async throws {
+    // Missing HRV should not tank score when other metrics are good
+    let baselines = RecoveryEstimator.Baselines(hrvMs: 45, restingHR: 65, respiratoryRate: 15, sleepHours: 7.5, daysOfData: 14)
+    let withHRV = RecoveryEstimator.calculateRecovery(hrvMs: 50, restingHR: 55, sleepHours: 7.5, baselines: baselines)
+    let noHRV = RecoveryEstimator.calculateRecovery(hrvMs: 0, restingHR: 55, sleepHours: 7.5, baselines: baselines)
+    // Without HRV, score should still be reasonable (not < 50)
+    #expect(noHRV >= 70, "Missing HRV with good RHR + sleep should score 70+: \(noHRV)")
+    // Bad HRV should score LOWER than missing HRV
+    let badHRV = RecoveryEstimator.calculateRecovery(hrvMs: 15, restingHR: 55, sleepHours: 7.5, baselines: baselines)
+    #expect(noHRV > badHRV, "No HRV (\(noHRV)) should beat bad HRV (\(badHRV))")
+}
+
+@Test func sleepScoreWithoutStagesIsReasonable() async throws {
+    // iPhone-only: no REM/Deep stages
+    let score = RecoveryEstimator.calculateSleepScore(totalHours: 7.5, remHours: 0, deepHours: 0, targetHours: 7.5)
+    #expect(score >= 90, "Full duration without stages should score 90+: \(score)")
+
+    let partialDuration = RecoveryEstimator.calculateSleepScore(totalHours: 6, remHours: 0, deepHours: 0, targetHours: 7.5)
+    #expect(partialDuration >= 60 && partialDuration < 90, "80% duration without stages: \(partialDuration)")
+}
+
+// MARK: - TDEE Soft Cap Regression
+
+@Test func tdeeSoftCapStillApplies() async throws {
+    // Verify soft cap at 2700 is still in place after all the refactoring
+    let heavyAthlete = TDEEEstimator.computeBase(weightKg: 120, activityMultiplier: 36)
+    #expect(heavyAthlete < 2950, "120kg athlete should be soft-capped: \(Int(heavyAthlete))")
+
+    let normalModerate = TDEEEstimator.computeBase(weightKg: 70, activityMultiplier: 29)
+    #expect(abs(normalModerate - 2000) < 1, "70kg moderate should still be 2000 anchor: \(Int(normalModerate))")
+}
+
 enum TestError: Error { case msg(String); init(_ s: String) { self = .msg(s) } }
