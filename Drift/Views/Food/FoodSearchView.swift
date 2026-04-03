@@ -484,6 +484,7 @@ struct FoodSearchView: View {
                 }
             }
         }
+        .presentationDetents([.medium, .large])
     }
 
     private func macroChip(_ label: String, value: Double, color: Color) -> some View {
