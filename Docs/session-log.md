@@ -1,5 +1,37 @@
 # Self-Improvement Session Log
 
+## Session 4 (April 3, 2026) — IN PROGRESS
+- **Tests**: 646 → 662 (+16, 0 regressions)
+- **Food DB**: 7 USDA corrections (dal fiber, cottage cheese, egg, bread, roti)
+
+### New Features
+- Cycle tracking from Apple Health (6-section view: hero, timeline, biometric correlation chart, cycle length trend, fertile window, history)
+- Food diary time-ordered entries with `loggedAt` field + copy-from-yesterday preserves eating times
+- Copied entry indicator (purple doc.on.doc icon)
+- Full simulator mock data for all HealthKit metrics (calories, steps, sleep, HRV, RHR, workouts, cycle)
+- Advanced Insights opt-in toggle for fertile window (privacy-first)
+- Privacy note on cycle page
+
+### Bug Fixes
+- Ovulation estimate: `avg/2` → standard `avg-14` formula
+- `fertileWindowDayRange` was ignoring its parameter
+- Duplicate cycleLengths computation → single source of truth
+- DateFormatter per-call allocations → shared static instances (60+ allocations/render → 0)
+- copyFromYesterday double-tap guard
+- copyFromYesterday handles SQLite datetime format for old entries
+- Mixed ISO8601/SQLite timestamp sort fix
+- Duplicate shortDate formatter removed
+- Neutralized "Apple Watch" → "fitness-tracking watch" in SleepRecoveryView
+
+### Code Quality
+- Extracted CycleCalculations.swift (testable computation layer)
+- 16 cycle calculation tests + 6 loggedAt/formatter tests
+
+### Research
+- UX research curated to Docs/future-ideas.md (food/exercise logging, AI photo, exercise GIFs)
+
+---
+
 ## Session 3 (April 2-3, 2026) — COMPLETED
 - **Commits**: 64
 - **TestFlight**: Builds 51-57 published
