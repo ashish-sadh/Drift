@@ -28,6 +28,11 @@ These are larger changes identified during autonomous sessions that require huma
 - **Colon-separated format (DTC brands)**: `Glucose: 89 mg/dL (65-99)`. Used by LetsGetChecked, some wellness brands.
 - **Additional providers to detect**: BioReference Laboratories, ARUP Laboratories, Life Extension, Ulta Lab Tests, Mayo Clinic Labs.
 
+## Apple Health Integration
+- **Body fat percentage**: Could enable Katch-McArdle BMR formula for more accurate TDEE when body fat is known from smart scales.
+- **VO2 Max**: Fitness level indicator from Apple Watch. Could factor into recovery scoring or activity recommendations.
+- **Walking heart rate average**: More stable than resting HR for recovery estimation on days without formal workouts.
+
 ## UI
 - **Dark theme variant**: Some users may prefer a slightly lighter dark (OLED black vs dark gray).
 - **Haptic feedback**: Add subtle haptics to key interactions (logging food, completing a set, finishing a workout).
