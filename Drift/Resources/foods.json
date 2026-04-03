@@ -4174,9 +4174,9 @@
     "serving_size": 100,
     "serving_unit": "g",
     "calories": 40,
-    "protein_g": 0,
-    "carbs_g": 0,
-    "fat_g": 0,
+    "protein_g": 2,
+    "carbs_g": 10,
+    "fat_g": 1,
     "fiber_g": 0
   },
   {
@@ -8566,17 +8566,6 @@
     "protein_g": 0,
     "carbs_g": 10,
     "fat_g": 8,
-    "fiber_g": 0
-  },
-  {
-    "name": "Ranch Dressing",
-    "category": "Condiments",
-    "serving_size": 2,
-    "serving_unit": "tbsp",
-    "calories": 130,
-    "protein_g": 0,
-    "carbs_g": 2,
-    "fat_g": 14,
     "fiber_g": 0
   },
   {
