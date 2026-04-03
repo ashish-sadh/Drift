@@ -32,7 +32,7 @@ struct SleepRecoveryView: View {
                     if r.sleepHours == 0 && r.hrvMs == 0 {
                         emptyState
                     } else if r.hrvMs == 0 {
-                        Text("Wear Apple Watch for HRV and resting heart rate data.")
+                        Text("A fitness-tracking watch that syncs with Apple Health provides HRV and resting heart rate data.")
                             .font(.caption).foregroundStyle(.tertiary).multilineTextAlignment(.center)
                     } else if r.sleepHours == 0 {
                         Text("No sleep data detected. Use a sleep tracker that writes to Apple Health.")
@@ -401,7 +401,7 @@ struct SleepRecoveryView: View {
             Image(systemName: "bed.double.fill")
                 .font(.system(size: 48)).foregroundStyle(Theme.sleepIndigo.opacity(0.5))
             Text("No Sleep Data").font(.headline)
-            Text("Wear Apple Watch to bed or use a sleep tracker that writes to Apple Health.")
+            Text("Wear a fitness-tracking watch to bed or use a sleep tracker that syncs with Apple Health.")
                 .font(.caption).foregroundStyle(.secondary).multilineTextAlignment(.center)
         }
         .padding(.top, 40)

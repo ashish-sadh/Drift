@@ -28,6 +28,7 @@ enum WeightUnit: String, CaseIterable, Codable, Sendable {
 
 enum Preferences {
     private static let weightUnitKey = "weight_unit"
+    private static let cycleFertileWindowKey = "drift_cycle_fertile_window"
 
     static var weightUnit: WeightUnit {
         get {
@@ -40,5 +41,10 @@ enum Preferences {
         set {
             UserDefaults.standard.set(newValue.rawValue, forKey: weightUnitKey)
         }
+    }
+
+    static var cycleFertileWindow: Bool {
+        get { UserDefaults.standard.bool(forKey: cycleFertileWindowKey) }
+        set { UserDefaults.standard.set(newValue, forKey: cycleFertileWindowKey) }
     }
 }

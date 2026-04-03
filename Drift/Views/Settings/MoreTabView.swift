@@ -3,6 +3,7 @@ import SwiftUI
 struct MoreTabView: View {
     @Binding var selectedTab: Int
     @State private var navId = UUID()
+    @State private var hasCycleData = false
 
     var body: some View {
         NavigationStack {
@@ -20,6 +21,12 @@ struct MoreTabView: View {
                     VStack(spacing: 0) {
                         navRow(icon: "waveform.path", title: "Body Rhythm", subtitle: "Sleep, vitals, and recovery", color: Theme.rhythmTeal) {
                             SleepRecoveryView()
+                        }
+                        if hasCycleData {
+                            Divider().overlay(Color.white.opacity(0.05))
+                            navRow(icon: "circle.circle", title: "Cycle", subtitle: "Period tracking from Apple Health", color: .pink) {
+                                CycleView()
+                            }
                         }
                         Divider().overlay(Color.white.opacity(0.05))
                         navRow(icon: "pill.fill", title: "Supplements", subtitle: "Daily checklist, consistency", color: .mint) {
@@ -83,6 +90,7 @@ struct MoreTabView: View {
             .background(Theme.background.ignoresSafeArea())
             .navigationTitle("More")
             .toolbarColorScheme(.dark, for: .navigationBar)
+            .task { hasCycleData = await HealthKitService.shared.hasCycleData() }
         }
         .id(navId)
         .onChange(of: selectedTab) { oldTab, newTab in
@@ -318,6 +326,7 @@ struct SettingsView: View {
             UserDefaults.standard.removeObject(forKey: "drift_default_templates_v2")
             UserDefaults.standard.removeObject(forKey: "drift_default_templates_seeded")
             UserDefaults.standard.removeObject(forKey: "drift_default_foods_seeded_v1")
+            UserDefaults.standard.removeObject(forKey: "drift_cycle_fertile_window")
             Log.app.info("Factory reset performed")
             resetDone = true
         } catch {

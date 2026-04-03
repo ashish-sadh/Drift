@@ -78,6 +78,7 @@
 		CF5BB4A5266F949DA9DEE006 /* LabReportUploadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D747073BCD9310AB76B496 /* LabReportUploadView.swift */; };
 		D681045AF7657C38E75D4D86 /* FoodSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42A6CAF4720F61DC0C9BD2E7 /* FoodSearchView.swift */; };
 		D7C81264B1FEDD6E3701FD13 /* Migrations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FDCCAED76696ACF2A89F445 /* Migrations.swift */; };
+		D8DCF736FEE3123E530756CA /* CycleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 163C4017D9AEE2E0927DC907 /* CycleView.swift */; };
 		DAD2FB33C19A3574C2643082 /* DateFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35CA37F54FABF8B93BB278BB /* DateFormatters.swift */; };
 		DB3B28E9FBF4531A10E67AA9 /* Food.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A797FB70463B0909C9C34E3 /* Food.swift */; };
 		DD0B299251C0A89AE490CC73 /* BiomarkersTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 664CF8C9378B65A23548F155 /* BiomarkersTabView.swift */; };
@@ -116,6 +117,7 @@
 		1053BB3F19E5D50A27C74DDE /* DailyNutrition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyNutrition.swift; sourceTree = "<group>"; };
 		155E590DFD0A95014B993B9D /* BiomarkerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomarkerDetailView.swift; sourceTree = "<group>"; };
 		1575030FD9A7BEF5BC9E0612 /* NutritionOCRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionOCRTests.swift; sourceTree = "<group>"; };
+		163C4017D9AEE2E0927DC907 /* CycleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleView.swift; sourceTree = "<group>"; };
 		16A8D46F9E08C1960010A695 /* CGMImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGMImportService.swift; sourceTree = "<group>"; };
 		1A884AC137C46CE932FEE1C9 /* WorkoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutTests.swift; sourceTree = "<group>"; };
 		1ABDC86BA4516AA3699FE080 /* WeightChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightChartView.swift; sourceTree = "<group>"; };
@@ -227,6 +229,14 @@
 			path = Weight;
 			sourceTree = "<group>";
 		};
+		03AFA9FB723F7EC015C3A4B2 /* Cycle */ = {
+			isa = PBXGroup;
+			children = (
+				163C4017D9AEE2E0927DC907 /* CycleView.swift */,
+			);
+			path = Cycle;
+			sourceTree = "<group>";
+		};
 		0722BA8BD8D3FCE6E6A0257D /* Supplements */ = {
 			isa = PBXGroup;
 			children = (
@@ -322,6 +332,7 @@
 			children = (
 				0CF035F730E3D07AD50E71EE /* Biomarkers */,
 				8935B2C63DFF003BB6300F49 /* BodyComposition */,
+				03AFA9FB723F7EC015C3A4B2 /* Cycle */,
 				79C427A9E8C6F8EEFCEEA012 /* Dashboard */,
 				1E13B73313706E9254470E88 /* Food */,
 				FA9DF84BE5D84C9597FCFFA3 /* Glucose */,
@@ -594,6 +605,7 @@
 				33EC5B66DF492493925C24CA /* CGMImportService.swift in Sources */,
 				B8666DFAC44BA801AF626FE7 /* CSVParser.swift in Sources */,
 				9ACECC13D2365A3DF7F2C28C /* ContentView.swift in Sources */,
+				D8DCF736FEE3123E530756CA /* CycleView.swift in Sources */,
 				8224D8220B6D9328EDDDB648 /* DEXAOverviewView.swift in Sources */,
 				4C8D307CC64DADDCE400F45B /* DEXARegion.swift in Sources */,
 				3BBB59B401ACCCDB35D323F3 /* DEXAScan.swift in Sources */,
