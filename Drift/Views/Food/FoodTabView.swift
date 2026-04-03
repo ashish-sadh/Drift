@@ -43,7 +43,7 @@ struct FoodTabView: View {
             .sheet(isPresented: $showingSearch) { FoodSearchView(viewModel: viewModel) }
             .sheet(isPresented: $showingRecipeBuilder) { QuickAddView(viewModel: viewModel) }
             .sheet(item: $editingEntry) { entry in editEntrySheet(entry) }
-            .onAppear { reload() }
+            .onAppear { weekOffset = 0; reload() }
             .onChange(of: showingSearch) { _, showing in if !showing { reload() } }
             .onChange(of: showingRecipeBuilder) { _, showing in if !showing { reload() } }
             .onChange(of: showingScanner) { _, showing in if !showing { reload() } }
