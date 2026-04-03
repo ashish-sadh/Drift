@@ -94,6 +94,8 @@ struct WeightChartView: View {
             }
         }
         .card()
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Weight chart. Average \(String(format: "%.1f", averageWeight)) \(unit.displayName)\(totalDifference.map { ", change \(String(format: "%+.1f", $0))" } ?? "")")
     }
 
     private var averageWeight: Double {
