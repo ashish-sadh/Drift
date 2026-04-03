@@ -239,8 +239,8 @@ enum WorkoutService {
         let isHevy = content.lowercased().contains("exercise_title") || content.lowercased().contains("set_type")
         let result = CSVParser.parse(content: content)
 
-        // Key by date+name to support multiple workouts per day
-        struct WorkoutKey: Hashable { let date: String; let name: String }
+        // Key by full timestamp — rows from the same workout share exact timestamp
+        struct WorkoutKey: Hashable { let timestamp: String; let name: String }
         var workoutsByKey: [WorkoutKey: (name: String, duration: String, notes: String)] = [:]
         var setsByKey: [WorkoutKey: [WorkoutSet]] = [:]
         var exerciseNames = Set<String>()
@@ -269,7 +269,7 @@ enum WorkoutService {
 
             guard let ds = dateStr, let en = exerciseName else { continue }
             let date = String(ds.prefix(10))
-            let wKey = WorkoutKey(date: date, name: workoutName)
+            let wKey = WorkoutKey(timestamp: ds, name: workoutName)
 
             workoutsByKey[wKey] = (workoutName, duration, notes)
             exerciseNames.insert(en)
@@ -291,8 +291,8 @@ enum WorkoutService {
 
         // Save workouts and sets
         var workoutCount = 0
-        for (wKey, info) in workoutsByKey.sorted(by: { $0.key.date < $1.key.date }) {
-            let date = wKey.date
+        for (wKey, info) in workoutsByKey.sorted(by: { $0.key.timestamp < $1.key.timestamp }) {
+            let date = String(wKey.timestamp.prefix(10))
             // Parse duration
             var durationSec: Int? = nil
             let durStr = info.duration.lowercased()
