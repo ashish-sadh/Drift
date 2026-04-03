@@ -328,9 +328,17 @@ struct SettingsView: View {
     // MARK: - Export
 
     private func exportWorkoutsCSV() -> URL? {
+        // Only export workouts created in Drift (exclude imported history older than the app install)
+        // Use the same data the dashboard shows
         guard let workouts = try? WorkoutService.fetchWorkouts(limit: 10000) else { return nil }
+        // Filter: only workouts that have sets (imported but empty workouts are noise)
+        let validWorkouts = workouts.filter { w in
+            guard let wid = w.id else { return false }
+            let sets = (try? WorkoutService.fetchSets(forWorkout: wid)) ?? []
+            return !sets.isEmpty
+        }
         var csv = "Date,Workout Name,Exercise Name,Set Order,Weight,Reps,RPE\n"
-        for w in workouts {
+        for w in validWorkouts {
             guard let wid = w.id else { continue }
             let sets = (try? WorkoutService.fetchSets(forWorkout: wid)) ?? []
             for s in sets {
@@ -340,7 +348,8 @@ struct SettingsView: View {
                 csv += "\"\(w.date)\",\"\(w.name)\",\"\(s.exerciseName)\",\(s.setOrder),\(weight),\(reps),\(rpe)\n"
             }
         }
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("drift_workouts.csv")
+        let dateStr = DateFormatters.dateOnly.string(from: Date())
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("drift_workouts_\(dateStr).csv")
         try? csv.write(to: url, atomically: true, encoding: .utf8)
         return url
     }
