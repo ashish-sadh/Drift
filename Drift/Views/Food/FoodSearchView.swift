@@ -584,8 +584,8 @@ struct FoodSearchView: View {
         }
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity)
-        .background(color.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(0.2), lineWidth: 1))
+        .background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(0.25), lineWidth: 1))
     }
 
     private func popularFoods() -> [Food] {
