@@ -239,8 +239,10 @@ enum WorkoutService {
         let isHevy = content.lowercased().contains("exercise_title") || content.lowercased().contains("set_type")
         let result = CSVParser.parse(content: content)
 
-        var workoutsByDate: [String: (name: String, duration: String, notes: String)] = [:]
-        var setsByDate: [String: [WorkoutSet]] = [:]
+        // Key by date+name to support multiple workouts per day
+        struct WorkoutKey: Hashable { let date: String; let name: String }
+        var workoutsByKey: [WorkoutKey: (name: String, duration: String, notes: String)] = [:]
+        var setsByKey: [WorkoutKey: [WorkoutSet]] = [:]
         var exerciseNames = Set<String>()
 
         for row in result.rows {
@@ -267,8 +269,9 @@ enum WorkoutService {
 
             guard let ds = dateStr, let en = exerciseName else { continue }
             let date = String(ds.prefix(10))
+            let wKey = WorkoutKey(date: date, name: workoutName)
 
-            workoutsByDate[date] = (workoutName, duration, notes)
+            workoutsByKey[wKey] = (workoutName, duration, notes)
             exerciseNames.insert(en)
 
             let setOrder = Int(row[isHevy ? "set_index" : "Set Order"] ?? "1") ?? 1
@@ -283,12 +286,13 @@ enum WorkoutService {
             let isWarmup = isHevy && (row["set_type"] ?? "").lowercased() == "warmup"
             let set = WorkoutSet(workoutId: 0, exerciseName: en, setOrder: setOrder,
                                  weightLbs: weight, reps: reps, isWarmup: isWarmup, rpe: rpe)
-            setsByDate[date, default: []].append(set)
+            setsByKey[wKey, default: []].append(set)
         }
 
         // Save workouts and sets
         var workoutCount = 0
-        for (date, info) in workoutsByDate.sorted(by: { $0.key < $1.key }) {
+        for (wKey, info) in workoutsByKey.sorted(by: { $0.key.date < $1.key.date }) {
+            let date = wKey.date
             // Parse duration
             var durationSec: Int? = nil
             let durStr = info.duration.lowercased()
@@ -308,7 +312,7 @@ enum WorkoutService {
                                   createdAt: ISO8601DateFormatter().string(from: Date()))
             try saveWorkout(&workout)
 
-            if let wid = workout.id, let sets = setsByDate[date] {
+            if let wid = workout.id, let sets = setsByKey[wKey] {
                 let updatedSets = sets.map { var s = $0; s.workoutId = wid; return s }
                 try saveSets(updatedSets)
             }
