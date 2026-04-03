@@ -25,6 +25,7 @@ struct WorkoutView: View {
     @State private var showingDeleteTemplate = false
     @State private var deleteWorkoutId: Int64?
     @State private var showingDeleteWorkout = false
+    @State private var showingDeleteAllTemplates = false
 
     @State private var activeCalories: Double = 0
     @State private var steps: Double = 0
@@ -109,6 +110,14 @@ struct WorkoutView: View {
                             } label: {
                                 Label("Load Drift Curated", systemImage: "star")
                             }
+                            if !templates.isEmpty {
+                                Divider()
+                                Button(role: .destructive) {
+                                    showingDeleteAllTemplates = true
+                                } label: {
+                                    Label("Remove All Templates", systemImage: "trash")
+                                }
+                            }
                         } label: {
                             Image(systemName: "plus.circle").font(.body).foregroundStyle(Theme.accent)
                         }
@@ -140,7 +149,9 @@ struct WorkoutView: View {
                                 VStack(alignment: .leading, spacing: 2) {
                                     Text(t.name).font(.subheadline.weight(.medium))
                                     let working = t.exercises.filter { !$0.isWarmup }
-                                    Text(working.prefix(3).map(\.name).joined(separator: ", ") + (working.count > 3 ? " +\(working.count - 3)" : ""))
+                                    let preview = working.prefix(3).map(\.name).joined(separator: ", ")
+                                    let suffix = working.count > 3 ? " +\(working.count - 3)" : ""
+                                    Text(preview + suffix)
                                         .font(.caption2).foregroundStyle(.tertiary).lineLimit(1)
                                 }
                                 Spacer()
@@ -363,6 +374,17 @@ struct WorkoutView: View {
             }
             Button("Cancel", role: .cancel) {}
         }
+        .alert("Remove All Templates?", isPresented: $showingDeleteAllTemplates) {
+            Button("Remove All", role: .destructive) {
+                for t in templates {
+                    if let tid = t.id {
+                        try? AppDatabase.shared.writer.write { db in _ = try WorkoutTemplate.deleteOne(db, id: tid) }
+                    }
+                }
+                loadData()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { Text("All \(templates.count) templates will be permanently deleted.") }
         .alert("Delete Template?", isPresented: $showingDeleteTemplate) {
             Button("Delete", role: .destructive) {
                 if let tid = deleteTemplateId {
