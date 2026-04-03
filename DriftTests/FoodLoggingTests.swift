@@ -1880,4 +1880,71 @@ import GRDB
     #expect(OpenFoodFactsService.parseServingSize("") == nil)
 }
 
+// MARK: - Food Entry loggedAt Tests
+
+@Test func foodEntryLoggedAtDefault() async throws {
+    let entry = FoodEntry(mealLogId: 1, foodName: "Test", servingSizeG: 100, calories: 100)
+    #expect(!entry.loggedAt.isEmpty, "loggedAt should default to current timestamp")
+    let iso = ISO8601DateFormatter()
+    #expect(iso.date(from: entry.loggedAt) != nil, "loggedAt should be valid ISO8601")
+}
+
+@Test func foodEntryLoggedAtPersists() async throws {
+    let db = try AppDatabase.empty()
+    var log = MealLog(date: "2026-04-03", mealType: "breakfast")
+    try db.saveMealLog(&log)
+    let customTime = "2026-04-03T07:30:00Z"
+    var entry = FoodEntry(mealLogId: log.id!, foodName: "Oatmeal", servingSizeG: 100, calories: 350, loggedAt: customTime)
+    try db.saveFoodEntry(&entry)
+    let fetched = try db.fetchFoodEntries(forMealLog: log.id!)
+    #expect(fetched.count == 1)
+    #expect(fetched[0].loggedAt == customTime)
+}
+
+@Test func foodEntriesSortedByLoggedAt() async throws {
+    let db = try AppDatabase.empty()
+    var log = MealLog(date: "2026-04-03", mealType: "breakfast")
+    try db.saveMealLog(&log)
+    // Insert in reverse time order
+    var e1 = FoodEntry(mealLogId: log.id!, foodName: "Dinner", servingSizeG: 100, calories: 500, loggedAt: "2026-04-03T19:00:00Z")
+    var e2 = FoodEntry(mealLogId: log.id!, foodName: "Breakfast", servingSizeG: 100, calories: 300, loggedAt: "2026-04-03T07:30:00Z")
+    var e3 = FoodEntry(mealLogId: log.id!, foodName: "Lunch", servingSizeG: 100, calories: 400, loggedAt: "2026-04-03T12:00:00Z")
+    try db.saveFoodEntry(&e1)
+    try db.saveFoodEntry(&e2)
+    try db.saveFoodEntry(&e3)
+    let fetched = try db.fetchFoodEntries(forMealLog: log.id!)
+    #expect(fetched.count == 3)
+    #expect(fetched[0].foodName == "Breakfast", "Should be sorted by loggedAt ascending")
+    #expect(fetched[1].foodName == "Lunch")
+    #expect(fetched[2].foodName == "Dinner")
+}
+
+@Test func foodEntryLoggedAtMigrationBackfill() async throws {
+    // Entries created without explicit loggedAt get it from createdAt
+    let db = try AppDatabase.empty()
+    var log = MealLog(date: "2026-04-03", mealType: "lunch")
+    try db.saveMealLog(&log)
+    let now = ISO8601DateFormatter().string(from: Date())
+    var entry = FoodEntry(mealLogId: log.id!, foodName: "Test", servingSizeG: 100, calories: 200, createdAt: now, loggedAt: now)
+    try db.saveFoodEntry(&entry)
+    let fetched = try db.fetchFoodEntries(forMealLog: log.id!)
+    #expect(fetched[0].loggedAt == now, "loggedAt should match createdAt for new entries")
+}
+
+@Test func dateFormattersSqliteDatetime() async throws {
+    let f = DateFormatters.sqliteDatetime
+    let date = f.date(from: "2026-04-03 15:30:00")
+    #expect(date != nil, "Should parse SQLite datetime format")
+    let str = f.string(from: date!)
+    #expect(str == "2026-04-03 15:30:00")
+}
+
+@Test func dateFormattersShortTime() async throws {
+    let f = DateFormatters.shortTime
+    let cal = Calendar.current
+    let date = cal.date(bySettingHour: 14, minute: 30, second: 0, of: Date())!
+    let str = f.string(from: date)
+    #expect(str == "2:30 PM")
+}
+
 enum TestError: Error { case msg(String); init(_ s: String) { self = .msg(s) } }
