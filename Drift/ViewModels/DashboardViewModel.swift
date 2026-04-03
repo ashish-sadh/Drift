@@ -20,6 +20,8 @@ final class DashboardViewModel {
     var supplementsTaken: Int = 0
     var supplementsTotal: Int = 0
     var isHealthKitAvailable: Bool = false
+    // Apple Health Workouts
+    var todayWorkouts: [HealthKitService.HealthWorkout] = []
     // Recovery
     var recoveryScore: Int = 0
     var hrvMs: Double = 0
@@ -111,6 +113,7 @@ final class DashboardViewModel {
                 caloriesBurned = cal.active + cal.basal
             }
             steps = (try? await hkService.fetchSteps(for: Date())) ?? 0
+            todayWorkouts = (try? await hkService.fetchWorkouts(for: Date())) ?? []
             sleepHours = (try? await hkService.fetchSleepHours(for: Date())) ?? 0
             hrvMs = (try? await hkService.fetchHRV(for: Date())) ?? 0
             restingHR = (try? await hkService.fetchRestingHeartRate(for: Date())) ?? 0

@@ -65,6 +65,11 @@ struct DashboardView: View {
                     // Active/Steps → Exercise tab
                     Button { selectedTab = 3 } label: { healthRow }.buttonStyle(.plain)
 
+                    // Apple Health Workouts — show if any today
+                    if !viewModel.todayWorkouts.isEmpty {
+                        Button { selectedTab = 3 } label: { workoutCard }.buttonStyle(.plain)
+                    }
+
                     // Body Rhythm → SleepRecoveryView (always visible)
                     NavigationLink { SleepRecoveryView() } label: { sleepRecoveryCard }
 
@@ -379,6 +384,46 @@ struct DashboardView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
         .background(color.opacity(0.15), in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    // MARK: - Apple Health Workouts
+
+    private var workoutCard: some View {
+        let workouts = viewModel.todayWorkouts
+        let totalCal = Int(workouts.reduce(0) { $0 + $1.calories })
+        let latest = workouts.first
+
+        return VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "flame.circle.fill").foregroundStyle(Theme.stepsOrange)
+                Text("Workouts").font(.subheadline.weight(.semibold)).foregroundStyle(Theme.stepsOrange)
+                Spacer()
+                Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary)
+            }
+
+            if let w = latest {
+                Text("You burned \(totalCal) calories during \(workouts.count == 1 ? "your last workout" : "\(workouts.count) workouts").")
+                    .font(.caption).foregroundStyle(.secondary)
+
+                ForEach(workouts.prefix(3)) { w in
+                    HStack(spacing: 10) {
+                        Image(systemName: "figure.strengthtraining.traditional")
+                            .font(.title3).foregroundStyle(Theme.stepsOrange)
+                            .frame(width: 36, height: 36)
+                            .background(Theme.stepsOrange.opacity(0.15), in: RoundedRectangle(cornerRadius: 8))
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(w.type).font(.caption.weight(.semibold))
+                            HStack(spacing: 8) {
+                                Text(w.durationDisplay).font(.caption2.monospacedDigit())
+                                Text("\(Int(w.calories)) cal").font(.caption2.monospacedDigit())
+                            }
+                            .foregroundStyle(.tertiary)
+                        }
+                    }
+                }
+            }
+        }
+        .card()
     }
 
     // MARK: - Health

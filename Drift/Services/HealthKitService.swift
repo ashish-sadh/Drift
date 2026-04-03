@@ -20,6 +20,7 @@ final class HealthKitService {
         if let hr = HKObjectType.quantityType(forIdentifier: .heartRate) { types.insert(hr) }
         if let resp = HKObjectType.quantityType(forIdentifier: .respiratoryRate) { types.insert(resp) }
         if let height = HKObjectType.quantityType(forIdentifier: .height) { types.insert(height) }
+        types.insert(HKObjectType.workoutType())
         // biologicalSex and dateOfBirth are characteristics — no auth needed
         return types
     }
@@ -158,6 +159,77 @@ final class HealthKitService {
         Log.healthKit.debug("Calories: active=\(Int(result.0)) basal=\(Int(result.1))")
         return result
     }
+
+    // MARK: - Apple Health Workouts
+
+    struct HealthWorkout: Sendable, Identifiable {
+        let id: UUID
+        let type: String
+        let duration: TimeInterval
+        let calories: Double
+        let date: Date
+
+        var durationDisplay: String {
+            let m = Int(duration) / 60
+            let h = m / 60
+            return h > 0 ? "\(h)h \(m % 60)m" : "\(m)m"
+        }
+    }
+
+    /// Fetch today's workouts from Apple Health.
+    func fetchWorkouts(for date: Date) async throws -> [HealthWorkout] {
+        guard isAvailable else { return [] }
+        let cal = Calendar.current
+        let start = cal.startOfDay(for: date)
+        guard let end = cal.date(byAdding: .day, value: 1, to: start) else { return [] }
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: end, options: .strictStartDate)
+
+        return try await withCheckedThrowingContinuation { continuation in
+            let query = HKSampleQuery(sampleType: .workoutType(), predicate: predicate, limit: 50,
+                                      sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)]) { _, samples, error in
+                if let error { continuation.resume(throwing: error); return }
+                let workouts = (samples as? [HKWorkout] ?? []).map { w in
+                    HealthWorkout(
+                        id: w.uuid,
+                        type: w.workoutActivityType.displayName,
+                        duration: w.duration,
+                        calories: w.totalEnergyBurned?.doubleValue(for: .kilocalorie()) ?? 0,
+                        date: w.startDate
+                    )
+                }
+                continuation.resume(returning: workouts)
+            }
+            healthStore.execute(query)
+        }
+    }
+
+    /// Fetch recent workouts (last N days).
+    func fetchRecentWorkouts(days: Int = 7) async throws -> [HealthWorkout] {
+        guard isAvailable else { return [] }
+        let cal = Calendar.current
+        guard let start = cal.date(byAdding: .day, value: -days, to: Date()) else { return [] }
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: Date(), options: .strictStartDate)
+
+        return try await withCheckedThrowingContinuation { continuation in
+            let query = HKSampleQuery(sampleType: .workoutType(), predicate: predicate, limit: 100,
+                                      sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)]) { _, samples, error in
+                if let error { continuation.resume(throwing: error); return }
+                let workouts = (samples as? [HKWorkout] ?? []).map { w in
+                    HealthWorkout(
+                        id: w.uuid,
+                        type: w.workoutActivityType.displayName,
+                        duration: w.duration,
+                        calories: w.totalEnergyBurned?.doubleValue(for: .kilocalorie()) ?? 0,
+                        date: w.startDate
+                    )
+                }
+                continuation.resume(returning: workouts)
+            }
+            healthStore.execute(query)
+        }
+    }
+
+    // MARK: - Glucose
 
     /// Fetch glucose readings from Apple Health for a date range.
     func fetchGlucoseReadings(from startDate: Date, to endDate: Date) async throws -> [GlucoseReading] {
@@ -409,5 +481,64 @@ final class HealthKitService {
     private nonisolated func saveAnchor(_ anchor: HKQueryAnchor, for dataType: String, database: AppDatabase) throws {
         let data = try NSKeyedArchiver.archivedData(withRootObject: anchor, requiringSecureCoding: true)
         try database.saveAnchor(dataType: dataType, anchor: data)
+    }
+}
+
+// MARK: - Workout Activity Type Names
+
+extension HKWorkoutActivityType {
+    var displayName: String {
+        switch self {
+        case .running: "Running"
+        case .cycling: "Cycling"
+        case .walking: "Walking"
+        case .swimming: "Swimming"
+        case .hiking: "Hiking"
+        case .yoga: "Yoga"
+        case .functionalStrengthTraining: "Strength Training"
+        case .traditionalStrengthTraining: "Strength Training"
+        case .coreTraining: "Core Training"
+        case .highIntensityIntervalTraining: "HIIT"
+        case .elliptical: "Elliptical"
+        case .rowing: "Rowing"
+        case .stairClimbing: "Stair Climbing"
+        case .dance: "Dance"
+        case .pilates: "Pilates"
+        case .boxing: "Boxing"
+        case .kickboxing: "Kickboxing"
+        case .martialArts: "Martial Arts"
+        case .crossTraining: "Cross Training"
+        case .flexibility: "Flexibility"
+        case .cooldown: "Cooldown"
+        case .mixedCardio: "Mixed Cardio"
+        case .jumpRope: "Jump Rope"
+        case .tennis: "Tennis"
+        case .badminton: "Badminton"
+        case .basketball: "Basketball"
+        case .soccer: "Soccer"
+        case .baseball: "Baseball"
+        case .golf: "Golf"
+        case .tableTennis: "Table Tennis"
+        case .cricket: "Cricket"
+        default: "Workout"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .running: "figure.run"
+        case .cycling: "bicycle"
+        case .walking: "figure.walk"
+        case .swimming: "figure.pool.swim"
+        case .hiking: "figure.hiking"
+        case .yoga: "figure.yoga"
+        case .functionalStrengthTraining, .traditionalStrengthTraining: "dumbbell.fill"
+        case .highIntensityIntervalTraining: "flame.fill"
+        case .elliptical: "figure.elliptical"
+        case .rowing: "figure.rowing"
+        case .dance: "figure.dance"
+        case .coreTraining: "figure.core.training"
+        default: "figure.mixed.cardio"
+        }
     }
 }
