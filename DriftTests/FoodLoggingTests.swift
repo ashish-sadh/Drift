@@ -1853,4 +1853,31 @@ import GRDB
     #expect(abs(normalModerate - 2000) < 1, "70kg moderate should still be 2000 anchor: \(Int(normalModerate))")
 }
 
+// MARK: - Serving Size Parsing Tests
+
+@Test func parseServingSizeGrams() async throws {
+    #expect(OpenFoodFactsService.parseServingSize("30g") == 30)
+    #expect(OpenFoodFactsService.parseServingSize("170g") == 170)
+    #expect(OpenFoodFactsService.parseServingSize("100 g") == 100)
+    #expect(OpenFoodFactsService.parseServingSize("2.5g") == 2.5)
+}
+
+@Test func parseServingSizeWithParens() async throws {
+    // "1 cup (240g)" should extract 240
+    #expect(OpenFoodFactsService.parseServingSize("1 cup (240g)") == 240)
+    #expect(OpenFoodFactsService.parseServingSize("1 serving (85g)") == 85)
+}
+
+@Test func parseServingSizeML() async throws {
+    // ml treated as grams (1:1 for liquids)
+    #expect(OpenFoodFactsService.parseServingSize("250ml") == 250)
+    #expect(OpenFoodFactsService.parseServingSize("330 ml") == 330)
+}
+
+@Test func parseServingSizeNil() async throws {
+    #expect(OpenFoodFactsService.parseServingSize(nil) == nil)
+    #expect(OpenFoodFactsService.parseServingSize("1 cup") == nil) // no grams or ml
+    #expect(OpenFoodFactsService.parseServingSize("") == nil)
+}
+
 enum TestError: Error { case msg(String); init(_ s: String) { self = .msg(s) } }
