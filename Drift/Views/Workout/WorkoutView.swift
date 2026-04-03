@@ -119,7 +119,7 @@ struct WorkoutView: View {
                                 }
                             }
                         } label: {
-                            Image(systemName: "plus.circle").font(.body).foregroundStyle(Theme.accent)
+                            Image(systemName: "ellipsis.circle").font(.body).foregroundStyle(Theme.accent)
                         }
                     }
 
@@ -142,54 +142,26 @@ struct WorkoutView: View {
                         }
                     } else {
                         ForEach(templates) { t in
-                            HStack(spacing: 8) {
-                                if t.isFavorite {
-                                    Image(systemName: "star.fill").font(.caption).foregroundStyle(Theme.fatYellow)
-                                }
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text(t.name).font(.subheadline.weight(.medium))
-                                    let working = t.exercises.filter { !$0.isWarmup }
-                                    let warmups = t.exercises.filter { $0.isWarmup }
-                                    Text("\(working.count) exercises\(warmups.isEmpty ? "" : " · \(warmups.count) warmup")")
-                                        .font(.caption2).foregroundStyle(.tertiary)
-                                }
-                                Spacer()
-                                Image(systemName: "play.circle.fill")
-                                    .font(.title3).foregroundStyle(Theme.accent.opacity(0.6))
-                            }
-                            .padding(.vertical, 3)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                WorkoutService.clearSession(); selectedTemplate = t; showingNewWorkout = true
-                            }
-                            .contextMenu {
-                                Button { previewTemplate = t } label: {
-                                    Label("Preview", systemImage: "eye")
-                                }
-                                Button { editingTemplateForEdit = t } label: {
-                                    Label("Edit", systemImage: "pencil")
-                                }
-                                if let tid = t.id {
-                                    Button {
-                                        try? WorkoutService.toggleFavorite(id: tid)
-                                        loadData()
-                                    } label: {
-                                        Label(t.isFavorite ? "Unfavorite" : "Favorite", systemImage: t.isFavorite ? "star.slash" : "star")
+                            Button {
+                                previewTemplate = t
+                            } label: {
+                                HStack(spacing: 8) {
+                                    if t.isFavorite {
+                                        Image(systemName: "star.fill").font(.caption).foregroundStyle(Theme.fatYellow)
                                     }
-                                    Button {
-                                        renameTemplateId = tid
-                                        renameTemplateName = t.name
-                                        showingRenameAlert = true
-                                    } label: {
-                                        Label("Rename", systemImage: "textformat")
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(t.name).font(.subheadline.weight(.medium)).foregroundStyle(.primary)
+                                        let working = t.exercises.filter { !$0.isWarmup }
+                                        let warmups = t.exercises.filter { $0.isWarmup }
+                                        Text("\(working.count) exercises\(warmups.isEmpty ? "" : " · \(warmups.count) warmup")")
+                                            .font(.caption2).foregroundStyle(.tertiary)
                                     }
-                                    Divider()
-                                    Button(role: .destructive) {
-                                        deleteTemplateId = tid
-                                        showingDeleteTemplate = true
-                                    } label: { Label("Delete Template", systemImage: "trash") }
+                                    Spacer()
+                                    Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary)
                                 }
+                                .padding(.vertical, 6)
                             }
+                            .buttonStyle(.plain)
                         }
                     }
                 }
@@ -335,18 +307,56 @@ struct WorkoutView: View {
                             }
                         }
 
-                        Button {
-                            let template = t
-                            previewTemplate = nil
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                                WorkoutService.clearSession()
-                                selectedTemplate = template
-                                showingNewWorkout = true
+                        // Actions
+                        VStack(spacing: 10) {
+                            Button {
+                                let template = t
+                                previewTemplate = nil
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                    WorkoutService.clearSession()
+                                    selectedTemplate = template
+                                    showingNewWorkout = true
+                                }
+                            } label: {
+                                Label("Start Workout", systemImage: "play.fill").frame(maxWidth: .infinity)
                             }
-                        } label: {
-                            Label("Start Workout", systemImage: "play.fill").frame(maxWidth: .infinity)
+                            .buttonStyle(.borderedProminent).tint(Theme.accent)
+
+                            HStack(spacing: 12) {
+                                Button {
+                                    let template = t
+                                    previewTemplate = nil
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                        editingTemplateForEdit = template
+                                    }
+                                } label: {
+                                    Label("Edit", systemImage: "pencil").frame(maxWidth: .infinity)
+                                }.buttonStyle(.bordered)
+
+                                Button {
+                                    if let tid = t.id {
+                                        try? WorkoutService.toggleFavorite(id: tid)
+                                        previewTemplate = nil
+                                        loadData()
+                                    }
+                                } label: {
+                                    Label(t.isFavorite ? "Unfavorite" : "Favorite",
+                                          systemImage: t.isFavorite ? "star.slash" : "star")
+                                        .frame(maxWidth: .infinity)
+                                }.buttonStyle(.bordered).tint(Theme.fatYellow)
+                            }
+
+                            Button(role: .destructive) {
+                                if let tid = t.id {
+                                    try? AppDatabase.shared.writer.write { db in _ = try WorkoutTemplate.deleteOne(db, id: tid) }
+                                    previewTemplate = nil
+                                    loadData()
+                                }
+                            } label: {
+                                Label("Delete Template", systemImage: "trash").font(.caption)
+                            }
+                            .padding(.top, 4)
                         }
-                        .buttonStyle(.borderedProminent).tint(Theme.accent)
                         .padding(.top, 8)
                     }
                     .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 24)
