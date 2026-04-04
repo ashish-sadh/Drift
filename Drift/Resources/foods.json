@@ -10712,5 +10712,60 @@
     "carbs_g": 28,
     "fat_g": 7,
     "fiber_g": 2
+  },
+  {
+    "name": "Vodka (1 shot)",
+    "category": "Beverages",
+    "serving_size": 44,
+    "serving_unit": "ml",
+    "calories": 97,
+    "protein_g": 0,
+    "carbs_g": 0,
+    "fat_g": 0,
+    "fiber_g": 0
+  },
+  {
+    "name": "Whiskey (1 shot)",
+    "category": "Beverages",
+    "serving_size": 44,
+    "serving_unit": "ml",
+    "calories": 105,
+    "protein_g": 0,
+    "carbs_g": 0,
+    "fat_g": 0,
+    "fiber_g": 0
+  },
+  {
+    "name": "Rum (1 shot)",
+    "category": "Beverages",
+    "serving_size": 44,
+    "serving_unit": "ml",
+    "calories": 97,
+    "protein_g": 0,
+    "carbs_g": 0,
+    "fat_g": 0,
+    "fiber_g": 0
+  },
+  {
+    "name": "Gin (1 shot)",
+    "category": "Beverages",
+    "serving_size": 44,
+    "serving_unit": "ml",
+    "calories": 97,
+    "protein_g": 0,
+    "carbs_g": 0,
+    "fat_g": 0,
+    "fiber_g": 0
+  },
+  {
+    "name": "Tequila (1 shot)",
+    "category": "Beverages",
+    "serving_size": 44,
+    "serving_unit": "ml",
+    "calories": 97,
+    "protein_g": 0,
+    "carbs_g": 0,
+    "fat_g": 0,
+    "fiber_g": 0
   }
 ]
