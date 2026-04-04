@@ -191,12 +191,13 @@ xcodebuild archive -project Drift.xcodeproj -scheme Drift -destination 'generic/
 xcodebuild -exportArchive -archivePath /tmp/Drift.xcarchive -exportPath /tmp/DriftExport -exportOptionsPlist /tmp/ExportOptions.plist -allowProvisioningUpdates \
   -authenticationKeyPath "/Users/ashishsadh/important-ashisadh/key for apple app/AuthKey_623N7AD6BJ.p8" \
   -authenticationKeyID 623N7AD6BJ -authenticationKeyIssuerID ad762446-bede-4bcd-9776-a3613c669447
-# Then set encryption via API and optionally add to external group
+# Upload IPA (export only creates local IPA, doesn't upload):
+xcrun altool --upload-app -f /tmp/DriftExport/Drift.ipa -t ios --apiKey 623N7AD6BJ --apiIssuer ad762446-bede-4bcd-9776-a3613c669447
+# Encryption compliance is auto-inherited from previous builds
 ```
 
 ## Pending Work
-1. **TestFlight** - build 24 live (biomarkers feature + OCR fixes + test fixes)
-2. **Known issues**: Dashboard top gap (reduced but may still be visible on some devices)
+- Build 60 live on TestFlight (cycle tracking, food ordering, scanner fix)
 
 ## User Preferences
 - Docs-first, iterative development
