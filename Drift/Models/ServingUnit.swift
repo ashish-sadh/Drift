@@ -216,7 +216,8 @@ struct FoodUnit: Hashable {
 
         let liquidSubstrings = ["milk", "juice", "buttermilk", "coconut water",
                                 "smoothie", "broth", "soup", "shake"]
-        let isLiquid = liquidSubstrings.contains(where: { lower.contains($0) }) || words.contains("lassi")
+        let isLiquid = liquidSubstrings.contains(where: { lower.contains($0) })
+            || words.contains("lassi") || words.contains("tea") || words.contains("chai")
         if isLiquid {
             if primary.label != "ml" {
                 units.append(FoodUnit(label: "ml", gramsEquivalent: 1))
@@ -247,7 +248,7 @@ struct FoodUnit: Hashable {
         let ss = servingSize > 0 ? servingSize : 100
 
         // Countable items
-        if name.contains("egg") && ss < 80 { return FoodUnit(label: "egg", gramsEquivalent: ss) }
+        if words.contains("egg") && ss < 80 { return FoodUnit(label: "egg", gramsEquivalent: ss) }
         if name.contains("meatball") && ss < 50 { return FoodUnit(label: "meatball", gramsEquivalent: ss) }
         if name.contains("roti") || name.contains("chapati") || name.contains("naan") || name.contains("paratha") {
             return FoodUnit(label: "piece", gramsEquivalent: ss)
@@ -275,8 +276,8 @@ struct FoodUnit: Hashable {
             return FoodUnit(label: "tbsp", gramsEquivalent: 14)
         }
 
-        // Liquid items (use word boundaries to avoid false matches like "classic" → "lassi")
-        if words.contains("milk") || name.contains("juice") || words.contains("lassi") ||
+        // Liquid items (word boundaries to avoid "steak"→"tea", "classic"→"lassi")
+        if words.contains("milk") || words.contains("juice") || words.contains("lassi") ||
            words.contains("chai") || words.contains("tea") || words.contains("coffee") ||
            name.contains("buttermilk") {
             return FoodUnit(label: "ml", gramsEquivalent: 1)

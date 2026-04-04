@@ -1980,6 +1980,29 @@ import GRDB
     #expect(units.contains(where: { $0.label == "cup" }), "Yogurt should have cup option")
 }
 
+@Test func smartUnitSteakNotLiquid() async throws {
+    // "steak" contains "tea" — must NOT get ml units
+    let food = Food(name: "Steak (8oz ribeye)", category: "Protein", servingSize: 227, servingUnit: "g", calories: 544)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label != "ml", "Steak must not get ml, got: \(units.first?.label ?? "nil")")
+    #expect(!units.contains(where: { $0.label == "ml" }), "Steak should have no ml option")
+}
+
+@Test func smartUnitVeggieBurgerNotEgg() async throws {
+    // "veggies" contains "egg" — must NOT get egg units
+    let food = Food(name: "Veggie Burger Patty", category: "Protein", servingSize: 113, servingUnit: "g", calories: 190)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label != "egg", "Veggie burger must not get egg, got: \(units.first?.label ?? "nil")")
+}
+
+@Test func smartUnitSteamedRiceNotLiquid() async throws {
+    // "steamed" contains "tea" — must NOT get ml
+    let food = Food(name: "Steamed Rice (white)", category: "Grains", servingSize: 200, servingUnit: "g", calories: 260)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label != "ml", "Steamed rice must not get ml")
+    #expect(units.contains(where: { $0.label == "cup" }), "Rice should have cup option")
+}
+
 @Test func scannedFoodServingSizePreserved() async throws {
     // Verify that when saving a scanned food with non-100g serving, it persists
     let db = try AppDatabase.empty()
