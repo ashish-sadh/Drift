@@ -318,18 +318,18 @@ struct BarcodeLookupView: View {
                     }
                 }
 
-                // Total nutrition
+                // Total nutrition (use food.* which is per-serving, not p.* which is per-100g)
                 VStack(spacing: 8) {
                     HStack(alignment: .firstTextBaseline, spacing: 4) {
-                        Text("\(Int(p.calories * multiplier))")
+                        Text("\(Int(food.calories * multiplier))")
                             .font(.system(size: 36, weight: .bold).monospacedDigit())
                         Text("cal").font(.subheadline).foregroundStyle(.secondary)
                     }
                     HStack(spacing: 12) {
-                        mpill("\(Int(p.proteinG * multiplier))g", label: "P", color: Theme.proteinRed)
-                        mpill("\(Int(p.carbsG * multiplier))g", label: "C", color: Theme.carbsGreen)
-                        mpill("\(Int(p.fatG * multiplier))g", label: "F", color: Theme.fatYellow)
-                        mpill("\(Int(p.fiberG * multiplier))g", label: "Fiber", color: Theme.fiberBrown)
+                        mpill("\(Int(food.proteinG * multiplier))g", label: "P", color: Theme.proteinRed)
+                        mpill("\(Int(food.carbsG * multiplier))g", label: "C", color: Theme.carbsGreen)
+                        mpill("\(Int(food.fatG * multiplier))g", label: "F", color: Theme.fatYellow)
+                        mpill("\(Int(food.fiberG * multiplier))g", label: "Fiber", color: Theme.fiberBrown)
                     }
                 }.card()
 
@@ -337,7 +337,7 @@ struct BarcodeLookupView: View {
                     Label("Log Food", systemImage: "plus.circle.fill").frame(maxWidth: .infinity)
                 }.buttonStyle(.borderedProminent).tint(Theme.accent)
 
-                Button("Scan Another") { product = nil; scannedBarcode = nil; error = nil; selectedUnitIndex = 0; amount = "1" }
+                Button("Scan Another") { product = nil; scannedBarcode = nil; error = nil; ocrResult = nil; selectedUnitIndex = 0; amount = "1" }
                     .buttonStyle(.bordered)
             }
             .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 24)
