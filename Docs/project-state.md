@@ -20,9 +20,9 @@ Drift is a local-first iOS health & fitness tracking app. Everything runs on-dev
 - Daily upload limit: ~25 builds/day (hit on Mar 29, resets ~24hr)
 
 ## Current Build
-- Version 0.1.0, build 57 (live on TestFlight)
-- 630 tests, all passing
-- 817 foods, 960 exercises
+- Version 0.1.0, build 60 (live on TestFlight)
+- 663 tests, all passing
+- 974 foods, 960 exercises
 
 ## Tab Structure
 Drift | Weight | Food | Exercise | More
@@ -37,7 +37,19 @@ Drift | Weight | Food | Exercise | More
 - Energy Balance + inline macros (clickable → Food tab, muted when no food logged)
 - Active cal + Steps (clickable → Exercise tab)
 - Sleep + Recovery % + HRV + RHR (clickable → Sleep & Recovery)
+- Apple Health workouts card (today's workouts)
 - Supplements taken count (clickable → Supplements)
+
+### Cycle Tracking (More → Cycle)
+- Read-only from Apple Health (menstrualFlow, ovulationTestResult, cervicalMucusQuality, BBT)
+- Hero: cycle day + current phase
+- Phase timeline bar with day ranges
+- Biometric correlation chart (HRV + RHR across cycle phases)
+- Cycle length trend chart (Flo-style)
+- Fertile window (behind Advanced Insights opt-in toggle)
+- Recent periods history with flow intensity + cycle lengths
+- Privacy note: data stays on device
+- Only visible if user has cycle data in Apple Health
 
 ### Weight Tab
 - Time range: 1W/1M/3M/6M/1Y/All with D/W granularity
