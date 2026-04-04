@@ -74,7 +74,8 @@ struct BarcodeLookupView: View {
     @State private var product: OpenFoodFactsService.Product?
     @State private var isLooking = false
     @State private var error: String?
-    @State private var servings: Double = 1.0
+    @State private var amount: String = "1"
+    @State private var selectedUnitIndex: Int = 0
     // OCR states
     @State private var showingCamera = false
     @State private var ocrResult: NutritionLabelOCR.ExtractedNutrition?
@@ -238,62 +239,105 @@ struct BarcodeLookupView: View {
         )
         // Save to food DB so it shows up in future searches
         try? AppDatabase.shared.saveScannedFood(&food)
-        viewModel.logFood(food, servings: servings, mealType: viewModel.autoMealType)
+        viewModel.logFood(food, servings: 1, mealType: viewModel.autoMealType)
         dismiss()
     }
 
     // MARK: - Product View (from barcode lookup)
 
     private func productView(_ p: OpenFoodFactsService.Product) -> some View {
-        ScrollView {
+        let servingG = p.servingSizeG ?? 100
+        let food = Food(name: [p.name, p.brand].compactMap { $0 }.joined(separator: " - "),
+                        category: "Scanned", servingSize: servingG, servingUnit: "g",
+                        calories: p.calories * servingG / 100,
+                        proteinG: p.proteinG * servingG / 100,
+                        carbsG: p.carbsG * servingG / 100,
+                        fatG: p.fatG * servingG / 100,
+                        fiberG: p.fiberG * servingG / 100)
+        let units = FoodUnit.smartUnits(for: food)
+        let safeIndex = min(selectedUnitIndex, max(units.count - 1, 0))
+        let unit = units.isEmpty ? FoodUnit(label: "g", gramsEquivalent: 1) : units[safeIndex]
+        let amountNum = Double(amount) ?? 0
+        let totalGrams = amountNum * unit.gramsEquivalent
+        let multiplier = servingG > 0 ? totalGrams / servingG : amountNum
+
+        return ScrollView {
             VStack(spacing: 14) {
+                // Product info
                 VStack(alignment: .leading, spacing: 4) {
                     Text(p.name).font(.headline)
                     if let brand = p.brand { Text(brand).font(.subheadline).foregroundStyle(.secondary) }
-                    Text("Nutrition per 100g").font(.caption).foregroundStyle(.tertiary)
+                    let perText = "\(Int(p.calories))cal · \(Int(p.proteinG))P \(Int(p.carbsG))C \(Int(p.fatG))F per 100g"
+                    Text(perText).font(.caption).foregroundStyle(.tertiary)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading).card()
 
-                HStack(spacing: 8) {
-                    mpill("\(Int(p.calories))", label: "cal", color: Theme.calorieBlue)
-                    mpill("\(Int(p.proteinG))g", label: "P", color: Theme.proteinRed)
-                    mpill("\(Int(p.carbsG))g", label: "C", color: Theme.carbsGreen)
-                    mpill("\(Int(p.fatG))g", label: "F", color: Theme.fatYellow)
-                    mpill("\(Int(p.fiberG))g", label: "Fiber", color: Theme.fiberBrown)
+                // Amount + unit picker (same pattern as FoodSearchView)
+                HStack(spacing: 12) {
+                    TextField("1", text: $amount)
+                        .keyboardType(.decimalPad)
+                        .font(.title2.weight(.medium).monospacedDigit())
+                        .multilineTextAlignment(.center)
+                        .frame(width: 80)
+                        .padding(.vertical, 10)
+                        .background(Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 10))
+
+                    Picker("", selection: $selectedUnitIndex) {
+                        ForEach(0..<units.count, id: \.self) { i in
+                            Text(units[i].label).tag(i)
+                        }
+                    }
+                    .pickerStyle(.menu)
+                    .labelsHidden()
+                    .padding(.vertical, 10).padding(.horizontal, 16)
+                    .background(Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 10))
+                    .onChange(of: selectedUnitIndex) { oldIdx, newIdx in
+                        guard oldIdx < units.count, newIdx < units.count else { return }
+                        let oldUnit = units[oldIdx]
+                        let newUnit = units[newIdx]
+                        let cur = Double(amount) ?? 0
+                        let grams = cur * oldUnit.gramsEquivalent
+                        let converted = newUnit.gramsEquivalent > 0 ? grams / newUnit.gramsEquivalent : cur
+                        amount = converted == Double(Int(converted)) ? "\(Int(converted))" : String(format: "%.1f", converted)
+                    }
                 }
 
-                VStack(spacing: 10) {
-                    HStack {
-                        Text("Servings (100g each)"); Spacer()
-                        TextField("1", value: $servings, format: .number).keyboardType(.decimalPad).multilineTextAlignment(.trailing).frame(width: 60)
-                        Stepper("", value: $servings, in: 0.25...10, step: 0.25).frame(width: 100)
+                // Quick amount buttons
+                HStack(spacing: 6) {
+                    ForEach([0.5, 1.0, 1.5, 2.0], id: \.self) { mult in
+                        Button {
+                            if unit.label == "g" || unit.label == "ml" {
+                                amount = String(format: "%.0f", servingG * mult)
+                            } else {
+                                amount = mult == Double(Int(mult)) ? "\(Int(mult))" : String(format: "%.1f", mult)
+                            }
+                        } label: {
+                            Text(mult == 0.5 ? "\u{00BD}" : (mult == 1.5 ? "1\u{00BD}" : "\(Int(mult))x"))
+                                .font(.caption.weight(.medium))
+                        }.buttonStyle(.bordered)
                     }
-                    // Show actual grams and quick-set buttons for common portions
-                    HStack(spacing: 8) {
-                        Text("\(Int(servings * 100))g total")
-                            .font(.caption).foregroundStyle(.secondary)
-                        Spacer()
-                        if let g = p.servingSizeG, g != 100 {
-                            Button("\(Int(g))g serving") { servings = g / 100.0 }
-                                .font(.caption.weight(.medium)).foregroundStyle(Theme.accent)
-                        }
-                        Button("100g") { servings = 1.0 }
-                            .font(.caption).foregroundStyle(.tertiary)
+                }
+
+                // Total nutrition
+                VStack(spacing: 8) {
+                    HStack(alignment: .firstTextBaseline, spacing: 4) {
+                        Text("\(Int(p.calories * multiplier))")
+                            .font(.system(size: 36, weight: .bold).monospacedDigit())
+                        Text("cal").font(.subheadline).foregroundStyle(.secondary)
+                    }
+                    HStack(spacing: 12) {
+                        mpill("\(Int(p.proteinG * multiplier))g", label: "P", color: Theme.proteinRed)
+                        mpill("\(Int(p.carbsG * multiplier))g", label: "C", color: Theme.carbsGreen)
+                        mpill("\(Int(p.fatG * multiplier))g", label: "F", color: Theme.fatYellow)
+                        mpill("\(Int(p.fiberG * multiplier))g", label: "Fiber", color: Theme.fiberBrown)
                     }
                 }.card()
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Total").font(.caption).foregroundStyle(.secondary)
-                    Text("\(Int(p.calories * servings))cal · \(Int(p.proteinG * servings))P \(Int(p.carbsG * servings))C \(Int(p.fatG * servings))F")
-                        .font(.subheadline.weight(.bold).monospacedDigit())
-                }
-                .frame(maxWidth: .infinity, alignment: .leading).card()
 
                 Button { logProduct(p) } label: {
                     Label("Log Food", systemImage: "plus.circle.fill").frame(maxWidth: .infinity)
                 }.buttonStyle(.borderedProminent).tint(Theme.accent)
 
-                Button("Scan Another") { product = nil; scannedBarcode = nil; error = nil }
+                Button("Scan Another") { product = nil; scannedBarcode = nil; error = nil; selectedUnitIndex = 0; amount = "1" }
                     .buttonStyle(.bordered)
             }
             .padding(.horizontal, 16).padding(.top, 8).padding(.bottom, 24)
@@ -326,7 +370,7 @@ struct BarcodeLookupView: View {
                     servingSizeG: cached.servingSizeG
                 )
                 product = p
-                if let g = p.servingSizeG { servings = g / 100.0 }
+                amount = "1"; selectedUnitIndex = 0
                 isLooking = false
                 return
             }
@@ -335,7 +379,7 @@ struct BarcodeLookupView: View {
             do {
                 let p = try await OpenFoodFactsService.lookup(barcode: barcode)
                 product = p
-                if let g = p.servingSizeG { servings = g / 100.0 }
+                amount = "1"; selectedUnitIndex = 0
                 // Cache locally for next time
                 try? AppDatabase.shared.cacheBarcodeProduct(BarcodeCache(from: p))
                 Log.foodLog.info("Barcode cached: \(p.name)")
@@ -347,16 +391,25 @@ struct BarcodeLookupView: View {
     }
 
     private func logProduct(_ p: OpenFoodFactsService.Product) {
-        // servingSize is the API's serving in grams (or 100g fallback).
-        // servings count is how many of those servings the user wants.
-        // Macros in Food are per servingSize grams (from API: per 100g).
-        // So total = macros * servings where servings already accounts for serving size.
+        let servingG = p.servingSizeG ?? 100
+        // Create food with actual serving size (not hardcoded 100g)
+        // Macros stored per-serving (scaled from per-100g)
         var food = Food(name: [p.name, p.brand].compactMap { $0 }.joined(separator: " - "), category: "Scanned",
-                        servingSize: 100, servingUnit: "g",
-                        calories: p.calories, proteinG: p.proteinG, carbsG: p.carbsG, fatG: p.fatG, fiberG: p.fiberG)
-        // Save to food DB so it shows up in future searches
+                        servingSize: servingG, servingUnit: "g",
+                        calories: p.calories * servingG / 100,
+                        proteinG: p.proteinG * servingG / 100,
+                        carbsG: p.carbsG * servingG / 100,
+                        fatG: p.fatG * servingG / 100,
+                        fiberG: p.fiberG * servingG / 100)
         try? AppDatabase.shared.saveScannedFood(&food)
-        viewModel.logFood(food, servings: servings, mealType: viewModel.autoMealType)
+        // Calculate servings multiplier from amount + unit
+        let units = FoodUnit.smartUnits(for: food)
+        let safeIndex = min(selectedUnitIndex, max(units.count - 1, 0))
+        let unit = units.isEmpty ? FoodUnit(label: "g", gramsEquivalent: 1) : units[safeIndex]
+        let amountNum = Double(amount) ?? 1
+        let totalGrams = amountNum * unit.gramsEquivalent
+        let multiplier = servingG > 0 ? totalGrams / servingG : amountNum
+        viewModel.logFood(food, servings: multiplier, mealType: viewModel.autoMealType)
         dismiss()
     }
 
