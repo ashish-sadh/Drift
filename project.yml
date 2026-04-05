@@ -10,6 +10,9 @@ packages:
   GRDB:
     url: https://github.com/groue/GRDB.swift.git
     from: "7.0.0"
+  LLM:
+    url: https://github.com/eastriverlee/LLM.swift
+    branch: main
 
 targets:
   Drift:
@@ -32,11 +35,13 @@ targets:
         DEVELOPMENT_TEAM: ZJ5H5XH82A
     dependencies:
       - package: GRDB
+      - package: LLM
     entitlements:
       path: Drift/Drift.entitlements
       properties:
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.background-delivery: true
+        com.apple.developer.kernel.increased-memory-limit: true
 
   DriftTests:
     type: bundle.unit-test

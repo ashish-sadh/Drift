@@ -9,6 +9,14 @@ struct MoreTabView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
+                    // AI Assistant
+                    VStack(spacing: 0) {
+                        navRow(icon: "sparkles", title: "Drift AI", subtitle: "Health assistant powered by on-device AI", color: Theme.accent) {
+                            AIView()
+                        }
+                    }
+                    .card()
+
                     // Goal
                     VStack(spacing: 0) {
                         navRow(icon: "target", title: "Weight Goal", subtitle: "Target weight, timeline, deficit plan", color: Theme.deficit) {
