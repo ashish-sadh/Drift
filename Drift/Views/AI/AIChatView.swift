@@ -9,6 +9,7 @@ struct AIChatView: View {
     @State private var showingFoodSearch = false
     @State private var showingWorkoutStart = false
     @State private var actionFoodName = ""
+    @State private var actionFoodServings: Double? = nil
     @State private var actionWorkoutType: String?
     @State private var selectedPhoto: PhotosPickerItem?
     @State private var selectedImageData: Data?
@@ -156,7 +157,7 @@ struct AIChatView: View {
         }
         .sheet(isPresented: $showingFoodSearch) {
             NavigationStack {
-                FoodSearchView(viewModel: FoodLogViewModel(), initialQuery: actionFoodName)
+                FoodSearchView(viewModel: FoodLogViewModel(), initialQuery: actionFoodName, initialServings: actionFoodServings)
             }
         }
         .onAppear {
@@ -241,7 +242,12 @@ struct AIChatView: View {
         // Food intent: "log 1/3 avocado", "ate 2 eggs", "had chicken breast"
         if let foodIntent = AIActionExecutor.parseFoodIntent(lower) {
             actionFoodName = foodIntent.query
-            messages.append(ChatMessage(role: .assistant, text: "Opening \"\(foodIntent.query)\" for you..."))
+            actionFoodServings = foodIntent.servings
+            let servingsText = foodIntent.servings.map { s in
+                s == Double(Int(s)) ? "\(Int(s))" : String(format: "%.1f", s)
+            }
+            let desc = servingsText.map { "\($0)x " } ?? ""
+            messages.append(ChatMessage(role: .assistant, text: "Logging \(desc)\(foodIntent.query)..."))
             showingFoodSearch = true
             return
         }

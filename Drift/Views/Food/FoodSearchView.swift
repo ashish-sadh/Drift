@@ -3,6 +3,7 @@ import SwiftUI
 struct FoodSearchView: View {
     @Bindable var viewModel: FoodLogViewModel
     var initialQuery: String = ""
+    var initialServings: Double? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var selectedFood: Food?
     @State private var amount = "1"
@@ -98,6 +99,23 @@ struct FoodSearchView: View {
                 if !initialQuery.isEmpty {
                     query = initialQuery
                     results = (try? AppDatabase.shared.searchFoodsRanked(query: initialQuery)) ?? []
+                    // Auto-select best match and pre-fill servings
+                    if let bestMatch = results.first {
+                        if let servings = initialServings {
+                            // Pre-fill with specified servings
+                            let units = FoodUnit.smartUnits(for: bestMatch)
+                            selectedUnitIndex = 0
+                            let primaryUnit = units.first ?? FoodUnit(label: "g", gramsEquivalent: 1)
+                            let totalG = bestMatch.servingSize * servings
+                            let inPrimary = primaryUnit.gramsEquivalent > 0 ? totalG / primaryUnit.gramsEquivalent : servings
+                            amount = inPrimary == Double(Int(inPrimary)) ? "\(Int(inPrimary))" : String(format: "%.1f", inPrimary)
+                            isFoodFavorite = (try? AppDatabase.shared.isFoodFavorite(name: bestMatch.name)) ?? false
+                            selectedFood = bestMatch
+                        } else {
+                            selectFood(bestMatch)
+                        }
+                        return // Don't focus search — sheet is already open
+                    }
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { searchFocused = true }
             }
