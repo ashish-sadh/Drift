@@ -124,34 +124,29 @@ struct AIChatView: View {
         return lines.joined(separator: "\n")
     }
 
-    /// Resolve pronouns like "it", "that", "this" by scanning recent messages for food/topic mentions.
+    /// Resolve pronouns like "it", "that", "this" by scanning recent messages for food mentions.
     /// "log it" after discussing banana → "log banana"
     private func resolvePronouns(_ text: String) -> String {
-        let pronouns = ["log it", "log that", "log this", "add it", "add that", "add this", "track it", "track that"]
-        guard pronouns.contains(where: { text.contains($0) }) else { return text }
+        let pronounPatterns = ["log it", "log that", "log this", "add it", "add that", "add this", "track it", "track that"]
+        guard pronounPatterns.contains(where: { text.contains($0) }) else { return text }
 
-        // Scan recent messages for food-like nouns (from both user and assistant)
-        let recentTexts = messages.suffix(6).map(\.text)
-        for recent in recentTexts.reversed() {
-            let lower = recent.lowercased()
-            // Look for food names mentioned by assistant ("banana", "chicken breast", etc.)
-            // Try to find a word that could be a food
-            if let foods = try? AppDatabase.shared.searchFoodsRanked(query: ""),
-               !foods.isEmpty {
-                // This won't work — need a different approach
-            }
+        // Scan recent messages (newest first) for food names in our DB
+        let skipWords: Set<String> = ["the", "and", "for", "you", "your", "have", "has", "had", "are", "was",
+                                       "with", "about", "from", "that", "this", "been", "will", "can", "how",
+                                       "what", "today", "calories", "protein", "carbs", "fat", "logged", "eaten"]
 
-            // Simple heuristic: find the last noun the user or assistant mentioned
-            // that looks like a food (exists in our food DB)
-            let words = lower.components(separatedBy: .whitespaces)
-            for word in words.reversed() where word.count > 2 {
+        for msg in messages.suffix(8).reversed() {
+            let words = msg.text.lowercased()
+                .components(separatedBy: CharacterSet.alphanumerics.inverted)
+                .filter { $0.count > 2 && !skipWords.contains($0) }
+
+            for word in words {
                 if let results = try? AppDatabase.shared.searchFoodsRanked(query: word),
                    let match = results.first,
                    match.name.lowercased().contains(word) {
-                    // Replace pronoun with the food name
                     var resolved = text
-                    for pronoun in ["it", "that", "this"] {
-                        resolved = resolved.replacingOccurrences(of: " \(pronoun)", with: " \(match.name.lowercased())")
+                    for pronoun in [" it", " that", " this"] {
+                        resolved = resolved.replacingOccurrences(of: pronoun, with: " \(match.name.lowercased())")
                     }
                     return resolved
                 }
