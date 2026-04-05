@@ -58,29 +58,26 @@ import Testing
 
 // MARK: - AIContextBuilder Tests
 
-@Test func aiContextBuilderReturnsString() async throws {
+@Test @MainActor func aiContextBuilderReturnsString() async throws {
     let context = AIContextBuilder.buildContext()
     #expect(!context.isEmpty, "Context should not be empty")
-    // On test DB, should at least say "No food logged today"
-    #expect(context.contains("food") || context.contains("No"))
+    #expect(context.contains("food") || context.contains("No") || context.contains("Target"))
 }
 
 // MARK: - AIRuleEngine Tests
 
-@Test func aiRuleEngineDailySummary() async throws {
+@Test @MainActor func aiRuleEngineDailySummary() async throws {
     let summary = AIRuleEngine.dailySummary()
     #expect(summary.contains("Here's your day"), "Should start with day summary header")
 }
 
-@Test func aiRuleEngineYesterdaySummary() async throws {
+@Test @MainActor func aiRuleEngineYesterdaySummary() async throws {
     let summary = AIRuleEngine.yesterdaySummary()
     #expect(!summary.isEmpty, "Yesterday summary should not be empty")
 }
 
-@Test func aiRuleEngineQuickInsight() async throws {
-    // On empty DB, should return something about no food logged
+@Test @MainActor func aiRuleEngineQuickInsight() async throws {
     let insight = AIRuleEngine.quickInsight()
-    // Could be nil or a string — both are valid
     if let insight {
         #expect(!insight.isEmpty)
     }

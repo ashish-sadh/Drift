@@ -80,12 +80,17 @@ enum AIContextBuilder {
         var lines: [String] = []
         let today = DateFormatters.todayString
 
-        // Today's nutrition
+        // Today's nutrition with target
         let nutrition = (try? AppDatabase.shared.fetchDailyNutrition(for: today)) ?? .zero
+        let tdee = TDEEEstimator.shared.current?.tdee ?? 2000
+        let deficit = WeightGoal.load()?.requiredDailyDeficit ?? 0
+        let calorieTarget = Int(tdee - deficit)
+
         if nutrition.calories > 0 {
-            lines.append("Today's intake: \(Int(nutrition.calories))cal, \(Int(nutrition.proteinG))P \(Int(nutrition.carbsG))C \(Int(nutrition.fatG))F \(Int(nutrition.fiberG))fiber")
+            let remaining = calorieTarget - Int(nutrition.calories)
+            lines.append("Today: \(Int(nutrition.calories))/\(calorieTarget)cal (\(remaining > 0 ? "\(remaining) left" : "\(abs(remaining)) over")), \(Int(nutrition.proteinG))P \(Int(nutrition.carbsG))C \(Int(nutrition.fatG))F")
         } else {
-            lines.append("No food logged today.")
+            lines.append("No food logged today. Target: \(calorieTarget)cal.")
         }
 
         // Weight + trend

@@ -263,27 +263,21 @@ struct AIChatView: View {
 
         let lower = text.lowercased()
 
-        // Rule engine: instant data queries (no LLM needed)
-        if lower.contains("summary") || lower.contains("how am i") || lower.contains("my day") {
+        // Rule engine: instant answers for exact-match patterns only
+        // Broader questions go to LLM for nuanced, personalized responses
+        if lower == "daily summary" || lower == "summary" || lower == "my day" {
             messages.append(ChatMessage(role: .assistant, text: AIRuleEngine.dailySummary()))
             return
         }
-        if lower.contains("yesterday") || lower.contains("what did i eat") {
+        if lower == "yesterday" || lower == "what did i eat yesterday" {
             messages.append(ChatMessage(role: .assistant, text: AIRuleEngine.yesterdaySummary()))
             return
         }
-        if (lower.contains("calorie") || lower.contains("protein") || lower.contains("macro")) && !lower.contains("how many") {
-            let n = (try? AppDatabase.shared.fetchDailyNutrition(for: DateFormatters.todayString)) ?? .zero
-            messages.append(ChatMessage(role: .assistant, text: n.calories > 0
-                ? "Today: \(Int(n.calories)) cal, \(Int(n.proteinG))g protein, \(Int(n.carbsG))g carbs, \(Int(n.fatG))g fat."
-                : "No food logged today yet."))
-            return
-        }
-        if lower.contains("calories left") || lower.contains("how much can i eat") || lower.contains("remaining") {
+        if lower == "calories left" || lower == "calories left today" || lower == "how many calories left" {
             messages.append(ChatMessage(role: .assistant, text: AIRuleEngine.caloriesLeft()))
             return
         }
-        if lower.contains("supplement") && (lower.contains("take") || lower.contains("status") || lower.contains("did i")) {
+        if lower == "supplements" || lower == "did i take my supplements" || lower == "supplement status" {
             messages.append(ChatMessage(role: .assistant, text: AIRuleEngine.supplementStatus()))
             return
         }

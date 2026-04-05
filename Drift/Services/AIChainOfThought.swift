@@ -57,11 +57,10 @@ enum AIChainOfThought {
         let needsOverview = q.contains("how am i") || q.contains("overview") || q.contains("doing")
             || q.contains("my day") || q.contains("summary")
 
-        // Broad queries get everything relevant
+        // Broad queries get a comprehensive overview (fullDayContext includes food+workouts+supplements)
         if needsOverview {
-            steps.append(Step(label: "Checking your meals...") { AIContextBuilder.foodContext() })
-            steps.append(Step(label: "Analyzing weight trend...") { AIContextBuilder.weightContext() })
             steps.append(Step(label: "Reviewing your day...") { AIContextBuilder.fullDayContext() })
+            steps.append(Step(label: "Analyzing weight trend...") { AIContextBuilder.weightContext() })
             return steps
         }
 
@@ -126,11 +125,16 @@ enum AIChainOfThought {
             if !data.isEmpty { contextParts.append(data) }
         }
 
-        // Always include feature context
-        contextParts.append(AIContextBuilder.featureContext())
+        // Include feature context only if query seems about the app
+        let q = query.lowercased()
+        if q.contains("drift") || q.contains("app") || q.contains("feature") || q.contains("how do i")
+            || q.contains("how to") || q.contains("can you") || q.contains("what can") || q.contains("help") {
+            contextParts.append(AIContextBuilder.featureContext())
+        }
 
         onStep("Writing response...")
-        let enrichedContext = contextParts.joined(separator: "\n")
+        let rawContext = contextParts.joined(separator: "\n")
+        let enrichedContext = AIContextBuilder.truncateToFit(rawContext, maxTokens: 800)
         return await LocalAIService.shared.respondStreaming(to: query, context: enrichedContext, history: history, onToken: onToken)
     }
 }
