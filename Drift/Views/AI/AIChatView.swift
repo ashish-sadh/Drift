@@ -241,14 +241,41 @@ struct AIChatView: View {
         }
         // Food intent: "log 1/3 avocado", "ate 2 eggs", "had chicken breast"
         if let foodIntent = AIActionExecutor.parseFoodIntent(lower) {
-            actionFoodName = foodIntent.query
-            actionFoodServings = foodIntent.servings
-            let servingsText = foodIntent.servings.map { s in
-                s == Double(Int(s)) ? "\(Int(s))" : String(format: "%.1f", s)
+            // Try DB first
+            if let match = AIActionExecutor.findFood(query: foodIntent.query, servings: foodIntent.servings) {
+                actionFoodName = foodIntent.query
+                actionFoodServings = foodIntent.servings
+                messages.append(ChatMessage(role: .assistant, text: "Found \(match.food.name) — tap Log to confirm."))
+                showingFoodSearch = true
+            } else {
+                // Not in DB — ask LLM to estimate nutrition, then pre-fill manual entry
+                messages.append(ChatMessage(role: .assistant, text: "Not in database. Estimating nutrition..."))
+                isGenerating = true
+                Task {
+                    let prompt = AIActionExecutor.nutritionEstimationPrompt(food: foodIntent.query, servings: foodIntent.servings)
+                    let response = await aiService.respond(to: prompt)
+                    if let est = AIActionExecutor.parseNutritionEstimate(response) {
+                        // Log directly with estimated values
+                        let vm = FoodLogViewModel()
+                        vm.quickAdd(
+                            name: est.name.capitalized,
+                            calories: est.cal,
+                            proteinG: est.p, carbsG: est.c, fatG: est.f,
+                            fiberG: est.fiber,
+                            mealType: vm.autoMealType,
+                            servingSizeG: est.servingG
+                        )
+                        messages.append(ChatMessage(role: .assistant, text: "Logged \(est.name.capitalized): \(Int(est.cal))cal, \(Int(est.p))P \(Int(est.c))C \(Int(est.f))F ✓"))
+                    } else {
+                        // LLM couldn't estimate — fall back to search
+                        actionFoodName = foodIntent.query
+                        actionFoodServings = foodIntent.servings
+                        messages.append(ChatMessage(role: .assistant, text: "Couldn't estimate. Opening search for \"\(foodIntent.query)\"."))
+                        showingFoodSearch = true
+                    }
+                    isGenerating = false
+                }
             }
-            let desc = servingsText.map { "\($0)x " } ?? ""
-            messages.append(ChatMessage(role: .assistant, text: "Logging \(desc)\(foodIntent.query)..."))
-            showingFoodSearch = true
             return
         }
         // Generic food logging

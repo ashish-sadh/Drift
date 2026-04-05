@@ -69,6 +69,52 @@ enum AIActionExecutor {
         return WeightIntent(weightValue: value, unit: unit)
     }
 
+    // MARK: - Food Search + AI Fallback
+
+    struct FoodMatch {
+        let food: Food
+        let servings: Double
+    }
+
+    /// Search local DB for food. Returns best match or nil.
+    static func findFood(query: String, servings: Double?) -> FoodMatch? {
+        guard let results = try? AppDatabase.shared.searchFoodsRanked(query: query),
+              let best = results.first else { return nil }
+        // Check if name is a reasonable match (contains the query words)
+        let queryWords = query.lowercased().split(separator: " ")
+        let nameWords = best.name.lowercased()
+        let matchCount = queryWords.filter { nameWords.contains($0) }.count
+        guard matchCount > 0 else { return nil }
+        return FoodMatch(food: best, servings: servings ?? 1)
+    }
+
+    /// Ask the LLM to estimate nutrition for an unknown food.
+    /// Returns a prompt that will get structured nutrition data back.
+    static func nutritionEstimationPrompt(food: String, servings: Double?) -> String {
+        let servingsText = servings.map { String(format: "%.1f servings of", $0) } ?? "1 serving of"
+        return """
+        Estimate nutrition for \(servingsText) \(food). \
+        Reply ONLY in this exact format, nothing else: \
+        NUTRITION|\(food)|calories|protein_g|carbs_g|fat_g|fiber_g|serving_size_g
+        Example: NUTRITION|avocado|80|1|4|7|3|50
+        """
+    }
+
+    /// Parse "NUTRITION|name|cal|p|c|f|fiber|serving_g" from LLM response.
+    static func parseNutritionEstimate(_ response: String) -> (name: String, cal: Double, p: Double, c: Double, f: Double, fiber: Double, servingG: Double)? {
+        let lines = response.components(separatedBy: .newlines)
+        guard let line = lines.first(where: { $0.hasPrefix("NUTRITION|") }) else { return nil }
+        let parts = line.split(separator: "|")
+        guard parts.count >= 8 else { return nil }
+        guard let cal = Double(parts[2]),
+              let p = Double(parts[3]),
+              let c = Double(parts[4]),
+              let f = Double(parts[5]),
+              let fiber = Double(parts[6]),
+              let servingG = Double(parts[7]) else { return nil }
+        return (name: String(parts[1]), cal: cal, p: p, c: c, f: f, fiber: fiber, servingG: servingG)
+    }
+
     // MARK: - Amount Parsing
 
     /// Extract amount from beginning of string: "1/3 avocado" → (0.33, "avocado")
