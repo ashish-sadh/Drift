@@ -66,6 +66,10 @@ enum AIActionExecutor {
               let numRange = Range(match.range(at: 1), in: lower),
               let value = Double(String(lower[numRange])) else { return nil }
 
+        // Sanity check: body weight should be in reasonable range
+        // Prevents "chicken weighs 200g" from logging 200 as body weight
+        if value < 20 || value > 500 { return nil }
+
         // Detect unit
         let unit: WeightUnit
         if let unitRange = Range(match.range(at: 2), in: lower) {
