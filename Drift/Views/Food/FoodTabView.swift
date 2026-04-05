@@ -402,11 +402,6 @@ struct FoodTabView: View {
         VStack(spacing: 14) {
             Text("No food logged").font(.subheadline).foregroundStyle(.tertiary)
 
-            Button { showingSearch = true } label: {
-                Label("Add food", systemImage: "plus.circle")
-                    .font(.subheadline).foregroundStyle(Theme.accent)
-            }
-
             // Copy from yesterday
             if let yesterdayCal = yesterdayCalories(), yesterdayCal > 0 {
                 Button {
