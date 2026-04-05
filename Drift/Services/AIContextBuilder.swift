@@ -425,21 +425,28 @@ enum AIContextBuilder {
         guard let results = try? AppDatabase.shared.fetchLatestBiomarkerResults(),
               !results.isEmpty else { return "No lab results on file." }
 
-        var lines = ["Latest biomarkers (\(results.count) markers):"]
+        var lines = ["Biomarkers (\(results.count)):"]
         var optimalCount = 0
+        var outOfRange: [String] = []
 
-        // Show out-of-range and sufficient first (most actionable)
         for r in results {
             guard let def = BiomarkerKnowledgeBase.byId[r.biomarkerId] else { continue }
             let status = def.status(for: r.normalizedValue)
             if status == .optimal {
                 optimalCount += 1
             } else {
-                lines.append("  \(def.name): \(String(format: "%.1f", r.value)) \(r.unit) [\(status.label)]")
+                // Include optimal range so model can explain the gap
+                let direction = r.normalizedValue < def.optimalLow ? "low" : "high"
+                outOfRange.append("\(def.name): \(String(format: "%.1f", r.value))\(r.unit) [\(direction), optimal \(String(format: "%.0f", def.optimalLow))-\(String(format: "%.0f", def.optimalHigh))]")
             }
         }
-        lines.append("  \(optimalCount)/\(results.count) in optimal range")
-        return lines.prefix(12).joined(separator: "\n") // Cap to fit context window
+
+        // Show out-of-range first (most actionable), then summary
+        for marker in outOfRange.prefix(8) {
+            lines.append("  \(marker)")
+        }
+        lines.append("  \(optimalCount)/\(results.count) optimal")
+        return lines.joined(separator: "\n")
     }
 
     // MARK: - DEXA / Body Composition Context
