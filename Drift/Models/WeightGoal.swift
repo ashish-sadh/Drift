@@ -222,7 +222,8 @@ struct WeightGoal: Codable, Sendable {
     func save() {
         if let data = try? JSONEncoder().encode(self) {
             UserDefaults.standard.set(data, forKey: Self.storageKey)
-            UserDefaults.standard.synchronize()
+
+
             Log.app.info("Weight goal saved: target=\(targetWeightKg)kg in \(monthsToAchieve) months")
         } else {
             Log.app.error("Failed to encode weight goal")
