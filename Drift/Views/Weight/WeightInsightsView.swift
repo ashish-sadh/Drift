@@ -41,7 +41,7 @@ struct WeightInsightsView: View {
                     direction: directionIcon(rate),
                     directionColor: changeColor(rate),
                     tooltip: "Your typical weekly rate of change over the past \(WeightTrendCalculator.loadConfig().regressionWindowDays) days.",
-                    nudge: weeklyNudge(rate: rate)
+                    nudge: "Based on last \(trend.config.regressionWindowDays) days"
                 )
             }
 
@@ -59,7 +59,7 @@ struct WeightInsightsView: View {
                     direction: directionIcon(deficit),
                     directionColor: deficitColor,
                     tooltip: "Estimated daily caloric \(deficit < 0 ? "deficit" : "surplus") based on your weight trend over the past \(WeightTrendCalculator.loadConfig().regressionWindowDays) days.",
-                    nudge: deficitNudge(deficit: deficit)
+                    nudge: "Based on last \(trend.config.regressionWindowDays) days"
                 )
 
                 if let proj = trend.projection30Day {
@@ -129,39 +129,6 @@ struct WeightInsightsView: View {
     }
 
     // MARK: - Metric Cell
-
-    // MARK: - Nudge Helpers
-
-    private func weeklyNudge(rate: Double) -> String? {
-        let absRate = abs(unit.convert(fromKg: rate))
-        if isLosing {
-            if rate < -0.01 && absRate > 1.0 { return "Aggressive pace — stay safe" }
-            if rate < -0.01 && absRate >= 0.5 { return "Healthy pace" }
-            if rate < -0.01 { return "Slow & steady" }
-            if rate > 0.01 { return "Trending up — check intake" }
-        } else {
-            if rate > 0.01 && absRate > 0.5 { return "Strong gain pace" }
-            if rate > 0.01 { return "Gaining steadily" }
-            if rate < -0.01 { return "Trending down — check surplus" }
-        }
-        return "Maintaining"
-    }
-
-    private func deficitNudge(deficit: Double) -> String? {
-        let abs = abs(deficit)
-        if isLosing {
-            if deficit < -750 { return "~1.5 lb/wk pace" }
-            if deficit < -500 { return "~1 lb/wk pace" }
-            if deficit < -250 { return "~0.5 lb/wk pace" }
-            if deficit < 0 { return "Mild deficit" }
-            return nil
-        } else {
-            if deficit > 500 { return "Strong surplus" }
-            if deficit > 250 { return "Moderate surplus" }
-            if deficit > 0 { return "Mild surplus" }
-            return nil
-        }
-    }
 
     private func metricCell(
         id: String,
