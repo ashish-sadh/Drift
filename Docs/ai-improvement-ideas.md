@@ -12,7 +12,35 @@
 - Few-shot examples in system prompt
 - Pre-computed insights ("losing at healthy pace", "low protein by afternoon")
 - Response cleaner (artifacts, disclaimers, deduplication)
-- Quality gate (filters generic/repetitive responses)
+- Quality gate (filters generic/repetitive/garbage responses)
+- Instant food logging for known foods (no search sheet needed)
+- Multi-food natural phrasing ("I just had chicken and rice" → both logged)
+- Weekly summary, yesterday comparison with calorie target
+- Compound food handling (mac and cheese not split)
+- Pronoun resolution ("log it" after discussing banana)
+- Screen-aware fallback responses with actionable suggestions
+- Data-aware greetings (guides new users to add data)
+- Help command with structured capability list
+- Undo handling with clear guidance
+- Weight logging via chat ("I weigh 165")
+- LOG_WEIGHT action from LLM responses
+- Conversation memory (last 2 exchanges)
+- Auto-scroll during streaming
+- Time-aware calorie warnings
+- Restaurant/eating out meal estimation guidance
+- Emoji-only message handling
+- Weekly suggestion pill on weekends/evenings
+- Biomarker improvement tips for out-of-range markers
+- Recovery assessment for training readiness
+- Glucose health assessment (well controlled/elevated)
+- DEXA body fat classification (athletic/fit/average)
+- Workout template suggestions based on recent training
+- Food context grouped by meal type (breakfast/lunch/dinner)
+- Automatic dependency injection (weight plateau → food data)
+- Context regurgitation detection
+- Format echo stripping ("A:", "Assistant:")
+- Mechanical preamble removal
+- Experimental warning only shown once
 - Nutrition lookup from DB ("how many calories in banana?")
 - Comparison context (this week vs last week)
 - Pronoun resolution ("log it" after discussing banana)
