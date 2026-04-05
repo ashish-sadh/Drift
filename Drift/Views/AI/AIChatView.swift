@@ -124,6 +124,13 @@ struct AIChatView: View {
         .onAppear {
             if messages.isEmpty {
                 messages.append(ChatMessage(role: .system, text: "I'm your health assistant. Ask me about your nutrition, weight, workouts, or say \"log food\" / \"start workout\" and I'll help."))
+                // Show a quick insight on launch
+                if let insight = AIRuleEngine.quickInsight() {
+                    messages.append(ChatMessage(role: .assistant, text: insight))
+                }
+                if let next = AIRuleEngine.nextAction() {
+                    messages.append(ChatMessage(role: .assistant, text: next))
+                }
             }
             if aiService.state == .ready && !aiService.isModelDownloaded {
                 // Model was deleted
