@@ -402,6 +402,13 @@ struct AIChatView: View {
                 let f = match.food
                 let servings = match.servings
                 let cal = f.calories * servings
+
+                // Safety: if >2000 cal in one entry, it's likely a mistake
+                if cal > 2000 {
+                    messages.append(ChatMessage(role: .assistant, text: "That would be \(Int(cal)) cal — are you sure? Try specifying a smaller amount (e.g., \"log 2 \(intent.query)\")."))
+                    return
+                }
+
                 let p = f.proteinG * servings
                 let vm = FoodLogViewModel()
                 vm.quickAdd(name: f.name, calories: cal, proteinG: p,
