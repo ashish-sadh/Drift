@@ -2,6 +2,7 @@ import SwiftUI
 
 /// Floating AI assistant bubble — sits above tab bar on all screens.
 struct FloatingAIAssistant: View {
+    let currentTab: Int
     @State private var isExpanded = false
     @State private var aiService = LocalAIService.shared
     @State private var modelManager = AIModelManager.shared
@@ -135,7 +136,7 @@ struct FloatingAIAssistant: View {
             if !modelManager.isModelDownloaded {
                 downloadPrompt
             } else {
-                AIChatView()
+                AIChatView(currentTab: currentTab)
             }
         }
         .frame(height: UIScreen.main.bounds.height * 0.55)

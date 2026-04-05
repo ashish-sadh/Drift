@@ -57,7 +57,7 @@ struct ContentView: View {
         .background(Theme.background.ignoresSafeArea())
         .overlay {
             if aiEnabled {
-                FloatingAIAssistant()
+                FloatingAIAssistant(currentTab: selectedTab)
             }
         }
 

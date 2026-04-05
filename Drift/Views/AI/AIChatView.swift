@@ -4,6 +4,7 @@ import PhotosUI
 /// Action-oriented AI assistant — buttons first, text secondary.
 /// No free-form LLM chat. Structured actions powered by rule engine.
 struct AIChatView: View {
+    var currentTab: Int = 0
     @State private var aiService = LocalAIService.shared
     @State private var resultText = ""
     @State private var inputText = ""
@@ -23,14 +24,13 @@ struct AIChatView: View {
         VStack(spacing: 0) {
             ScrollView {
                 VStack(spacing: 12) {
-                    // Context insight
-                    if let insight = AIRuleEngine.quickInsight() {
-                        HStack(alignment: .top, spacing: 8) {
-                            Image(systemName: "sparkles").font(.caption).foregroundStyle(Theme.accent)
-                            Text(insight).font(.caption).foregroundStyle(.secondary)
-                        }
-                        .padding(.horizontal, 4)
+                    // Page-aware context insight
+                    let insight = pageInsight
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: "sparkles").font(.caption).foregroundStyle(Theme.accent)
+                        Text(insight).font(.caption).foregroundStyle(.secondary)
                     }
+                    .padding(.horizontal, 4)
 
                     // Result display
                     if !resultText.isEmpty {
@@ -69,6 +69,37 @@ struct AIChatView: View {
             NavigationStack {
                 FoodSearchView(viewModel: FoodLogViewModel(), initialQuery: foodSearchQuery, initialServings: foodSearchServings)
             }
+        }
+    }
+
+    // MARK: - Page-Aware Insight
+
+    private var pageInsight: String {
+        switch currentTab {
+        case 0: // Dashboard
+            return AIRuleEngine.quickInsight() ?? "Welcome to Drift."
+        case 1: // Weight
+            if let entries = try? AppDatabase.shared.fetchWeightEntries(),
+               let trend = WeightTrendCalculator.calculateTrend(entries: entries.map { ($0.date, $0.weightKg) }) {
+                let u = Preferences.weightUnit
+                return "Weight: \(String(format: "%.1f", u.convert(fromKg: trend.currentEMA))) \(u.displayName), \(String(format: "%+.2f", u.convert(fromKg: trend.weeklyRateKg)))/wk"
+            }
+            return "Log your weight to start tracking."
+        case 2: // Food
+            let today = DateFormatters.todayString
+            let n = (try? AppDatabase.shared.fetchDailyNutrition(for: today)) ?? .zero
+            return n.calories > 0
+                ? "Today: \(Int(n.calories))cal, \(Int(n.proteinG))P \(Int(n.carbsG))C \(Int(n.fatG))F"
+                : "No food logged today. Tap Log Food below."
+        case 3: // Exercise
+            if let workouts = try? WorkoutService.fetchWorkouts(limit: 1), let last = workouts.first {
+                return "Last workout: \(last.name) (\(last.date))"
+            }
+            return "Start a workout from your templates."
+        case 4: // More
+            return "Settings, supplements, cycle tracking, and more."
+        default:
+            return AIRuleEngine.quickInsight() ?? "How can I help?"
         }
     }
 
