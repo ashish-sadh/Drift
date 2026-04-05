@@ -98,13 +98,11 @@ struct DashboardView: View {
                     }
                 }
                 ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        aiEnabled.toggle()
-                    } label: {
-                        Image(systemName: aiEnabled ? "sparkles" : "sparkles")
-                            .font(.body)
-                            .foregroundStyle(aiEnabled ? Theme.accent : .secondary)
-                            .symbolEffect(.bounce, value: aiEnabled)
+                    HStack(spacing: 6) {
+                        Image(systemName: "sparkles").font(.system(size: 10))
+                            .foregroundStyle(aiEnabled ? Theme.accent : Color.gray)
+                        Toggle("", isOn: $aiEnabled).labelsHidden()
+                            .scaleEffect(0.65).tint(Theme.accent)
                     }
                 }
             }

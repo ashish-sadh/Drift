@@ -1,409 +1,243 @@
 import SwiftUI
 import PhotosUI
 
+/// Action-oriented AI assistant — buttons first, text secondary.
+/// No free-form LLM chat. Structured actions powered by rule engine.
 struct AIChatView: View {
     @State private var aiService = LocalAIService.shared
-    @State private var messages: [ChatMessage] = []
+    @State private var resultText = ""
     @State private var inputText = ""
-    @State private var isGenerating = false
+    @State private var mode: AssistantMode = .actions
     @State private var showingFoodSearch = false
-    @State private var showingWorkoutStart = false
-    @State private var actionFoodName = ""
-    @State private var actionFoodServings: Double? = nil
-    @State private var actionWorkoutType: String?
-    @State private var selectedPhoto: PhotosPickerItem?
-    @State private var selectedImageData: Data?
+    @State private var foodSearchQuery = ""
+    @State private var foodSearchServings: Double? = nil
     @FocusState private var inputFocused: Bool
 
-    struct ChatMessage: Identifiable {
-        let id = UUID()
-        let role: Role
-        var text: String
-        let timestamp = Date()
-
-        enum Role { case user, assistant, system }
+    enum AssistantMode {
+        case actions      // Show action buttons
+        case foodInput    // "What did you eat?" text input
+        case result       // Showing a result
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            // Messages
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(spacing: 12) {
-                        ForEach(messages) { message in
-                            messageBubble(message)
-                                .id(message.id)
-                        }
-
-                        if isGenerating {
-                            HStack(spacing: 8) {
-                                ProgressView().scaleEffect(0.7)
-                                Text("Thinking...").font(.caption).foregroundStyle(.tertiary)
-                            }
-                            .id("loading")
-                        }
-                    }
-                    .padding(.vertical, 12)
-                }
-                .onChange(of: messages.count) { _, _ in
-                    if let last = messages.last {
-                        withAnimation { proxy.scrollTo(last.id, anchor: .bottom) }
-                    }
-                }
-
-
-            }
-
-            // Quick suggestion chips
-            if !isGenerating && messages.count <= 3 {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        suggestionChip("Daily summary")
-                        let hour = Calendar.current.component(.hour, from: Date())
-                        if hour < 11 {
-                            suggestionChip("Log breakfast")
-                        } else if hour < 15 {
-                            suggestionChip("Log lunch")
-                        } else {
-                            suggestionChip("Log dinner")
-                        }
-                        suggestionChip("Weight")
-                        suggestionChip("Calories")
-                        suggestionChip("Help")
-                    }
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                }
-            }
-
-            Divider()
-
-            // Input bar
-            HStack(spacing: 8) {
-                // Vision: camera/photo button (only when backend supports it)
-                if aiService.supportsVision {
-                    PhotosPicker(selection: $selectedPhoto, matching: .images) {
-                        Image(systemName: "camera.fill")
-                            .font(.body)
-                            .foregroundStyle(Theme.accent.opacity(0.7))
-                    }
-                    .onChange(of: selectedPhoto) { _, item in
-                        guard let item else { return }
-                        Task {
-                            if let data = try? await item.loadTransferable(type: Data.self) {
-                                selectedImageData = data
-                                inputText = inputText.isEmpty ? "What food is this?" : inputText
-                            }
-                        }
-                    }
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    if let imageData = selectedImageData, let uiImage = UIImage(data: imageData) {
-                        HStack {
-                            Image(uiImage: uiImage)
-                                .resizable().scaledToFill()
-                                .frame(width: 40, height: 40)
-                                .clipShape(RoundedRectangle(cornerRadius: 6))
-                            Button { selectedImageData = nil } label: {
-                                Image(systemName: "xmark.circle.fill").font(.caption).foregroundStyle(.secondary)
-                            }
-                        }
-                    }
-                    TextField("Ask about your health...", text: $inputText, axis: .vertical)
-                        .textFieldStyle(.plain)
-                        .font(.subheadline)
-                        .lineLimit(1...4)
-                        .focused($inputFocused)
-                        .onSubmit { sendMessage() }
-                }
-
-                if isGenerating {
-                    Button { aiService.stop() } label: {
-                        Image(systemName: "stop.circle.fill")
-                            .font(.title3)
-                            .foregroundStyle(Theme.surplus)
-                    }
-                } else {
-                    Button { sendMessage() } label: {
-                        Image(systemName: "arrow.up.circle.fill")
-                            .font(.title3)
-                            .foregroundStyle(inputText.isEmpty ? Color.gray : Theme.accent)
-                    }
-                    .disabled(inputText.isEmpty)
-                }
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(Theme.cardBackground)
-        }
-        .background(Theme.background)
-        .navigationTitle("Drift AI")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarColorScheme(.dark, for: .navigationBar)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    aiService.resetChat()
-                    messages.removeAll()
-                    messages.append(ChatMessage(role: .system, text: "I'm your health assistant. Ask me about your nutrition, weight, workouts, or say \"log food\" / \"start workout\" and I'll help."))
+            ScrollView {
+                VStack(spacing: 14) {
+                    // Context insight
                     if let insight = AIRuleEngine.quickInsight() {
-                        messages.append(ChatMessage(role: .assistant, text: insight))
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "sparkles").font(.caption).foregroundStyle(Theme.accent)
+                            Text(insight).font(.subheadline).foregroundStyle(.secondary)
+                        }
+                        .padding(.horizontal, 4)
                     }
-                } label: {
-                    Image(systemName: "plus.message").foregroundStyle(.secondary)
+
+                    // Result display
+                    if !resultText.isEmpty {
+                        HStack(alignment: .top, spacing: 8) {
+                            Image(systemName: "sparkles").font(.caption).foregroundStyle(Theme.accent)
+                            Text(resultText).font(.subheadline).foregroundStyle(.primary)
+                        }
+                        .padding(12)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .background(Theme.accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+                    }
+
+                    // Action grid
+                    if mode == .actions {
+                        actionGrid
+                    }
+
+                    // Food input mode
+                    if mode == .foodInput {
+                        foodInputSection
+                    }
                 }
+                .padding(.horizontal, 12)
+                .padding(.top, 8)
             }
+
+            Divider().overlay(Color.white.opacity(0.06))
+
+            // Bottom input
+            bottomInput
         }
         .sheet(isPresented: $showingFoodSearch) {
             NavigationStack {
-                FoodSearchView(viewModel: FoodLogViewModel(), initialQuery: actionFoodName, initialServings: actionFoodServings)
-            }
-        }
-        .onAppear {
-            if messages.isEmpty {
-                messages.append(ChatMessage(role: .system, text: "I'm your health assistant. Ask me about your nutrition, weight, workouts, or say \"log food\" / \"start workout\" and I'll help."))
-                // Show a quick insight on launch
-                if let insight = AIRuleEngine.quickInsight() {
-                    messages.append(ChatMessage(role: .assistant, text: insight))
-                }
-                if let next = AIRuleEngine.nextAction() {
-                    messages.append(ChatMessage(role: .assistant, text: next))
-                }
-            }
-            if aiService.state == .ready && !aiService.isModelLoaded {
-                Task {
-                    aiService.loadModel()
-                }
+                FoodSearchView(viewModel: FoodLogViewModel(), initialQuery: foodSearchQuery, initialServings: foodSearchServings)
             }
         }
     }
 
-    // MARK: - Send Message
+    // MARK: - Action Grid
 
-    private func sendMessage() {
-        let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty, !isGenerating else { return }
-
-        messages.append(ChatMessage(role: .user, text: text))
-        inputText = ""
-
-        // Handle rule-based queries locally (instant, no LLM needed)
-        let lower = text.lowercased()
-        if lower.contains("daily summary") || lower.contains("how am i doing") || lower.contains("my day") || lower.contains("today") {
-            let summary = AIRuleEngine.dailySummary()
-            messages.append(ChatMessage(role: .assistant, text: summary))
-            return
-        }
-        if lower.contains("help") || lower.contains("what can you do") || lower.contains("commands") {
-            messages.append(ChatMessage(role: .assistant, text: "I can help with:\n- \"Daily summary\" — your day at a glance\n- \"Yesterday\" — what you ate\n- \"Calories\" / \"Protein\" — today's nutrition\n- \"Weight\" — your current weight & trend\n- \"Log food\" — open food search\n- Or just ask me anything about your health!"))
-            return
-        }
-        if lower.contains("supplement") {
-            let today = DateFormatters.todayString
-            if let supplements = try? AppDatabase.shared.fetchActiveSupplements(),
-               let logs = try? AppDatabase.shared.fetchSupplementLogs(for: today) {
-                let taken = logs.filter(\.taken).count
-                let names = supplements.map(\.name).joined(separator: ", ")
-                messages.append(ChatMessage(role: .assistant, text: "Supplements: \(taken)/\(supplements.count) taken today.\n\(names)"))
-            } else {
-                messages.append(ChatMessage(role: .assistant, text: "No supplements set up. Add them in More → Supplements."))
+    private var actionGrid: some View {
+        LazyVGrid(columns: [
+            GridItem(.flexible()),
+            GridItem(.flexible()),
+            GridItem(.flexible()),
+        ], spacing: 10) {
+            actionButton(icon: "fork.knife", label: "Log Food", color: Theme.carbsGreen) {
+                mode = .foodInput
+                resultText = ""
+                inputFocused = true
             }
-            return
-        }
-        if lower.contains("calorie") || lower.contains("how many cal") || lower.contains("macro") || lower.contains("protein") {
-            let today = DateFormatters.todayString
-            let nutrition = (try? AppDatabase.shared.fetchDailyNutrition(for: today)) ?? .zero
-            if nutrition.calories > 0 {
-                messages.append(ChatMessage(role: .assistant, text: "Today so far: \(Int(nutrition.calories)) cal, \(Int(nutrition.proteinG))g protein, \(Int(nutrition.carbsG))g carbs, \(Int(nutrition.fatG))g fat, \(Int(nutrition.fiberG))g fiber."))
-            } else {
-                messages.append(ChatMessage(role: .assistant, text: "No food logged today yet. Tap \"Log food\" to start."))
+            actionButton(icon: "scalemass", label: "Weigh In", color: Theme.accent) {
+                // TODO: Open weight entry sheet
+                resultText = "Navigate to Weight tab to log your weight."
             }
-            return
-        }
-        if lower.contains("weight") || lower.contains("how much do i weigh") {
-            if let entries = try? AppDatabase.shared.fetchWeightEntries(),
-               let trend = WeightTrendCalculator.calculateTrend(entries: entries.map { (date: $0.date, weightKg: $0.weightKg) }) {
-                let unit = Preferences.weightUnit
-                let current = String(format: "%.1f", unit.convert(fromKg: trend.currentEMA))
-                let rate = String(format: "%+.2f", unit.convert(fromKg: trend.weeklyRateKg))
-                let direction = trend.weeklyRateKg < -0.01 ? "losing" : trend.weeklyRateKg > 0.01 ? "gaining" : "maintaining"
-                messages.append(ChatMessage(role: .assistant, text: "Your current weight is \(current) \(unit.displayName). You're \(direction) at \(rate) \(unit.displayName)/week."))
-            } else {
-                messages.append(ChatMessage(role: .assistant, text: "No weight data yet. Log your weight in the Weight tab to start tracking."))
+            actionButton(icon: "chart.bar", label: "Summary", color: Theme.calorieBlue) {
+                resultText = AIRuleEngine.dailySummary()
+                mode = .result
             }
-            return
-        }
-        if lower.contains("yesterday") || lower.contains("what did i eat") {
-            let summary = AIRuleEngine.yesterdaySummary()
-            messages.append(ChatMessage(role: .assistant, text: summary))
-            return
-        }
-        // Food intent: "log 1/3 avocado", "ate 2 eggs", "had chicken breast"
-        if let foodIntent = AIActionExecutor.parseFoodIntent(lower) {
-            // Try DB first
-            if let match = AIActionExecutor.findFood(query: foodIntent.query, servings: foodIntent.servings) {
-                actionFoodName = foodIntent.query
-                actionFoodServings = foodIntent.servings
-                messages.append(ChatMessage(role: .assistant, text: "Found \(match.food.name) — tap Log to confirm."))
-                showingFoodSearch = true
-            } else {
-                // Not in DB — ask LLM to estimate nutrition, then pre-fill manual entry
-                messages.append(ChatMessage(role: .assistant, text: "Not in database. Estimating nutrition..."))
-                isGenerating = true
-                Task {
-                    let prompt = AIActionExecutor.nutritionEstimationPrompt(food: foodIntent.query, servings: foodIntent.servings)
-                    let response = await aiService.respond(to: prompt)
-                    if let est = AIActionExecutor.parseNutritionEstimate(response) {
-                        // Log directly with estimated values
-                        let vm = FoodLogViewModel()
-                        vm.quickAdd(
-                            name: est.name.capitalized,
-                            calories: est.cal,
-                            proteinG: est.p, carbsG: est.c, fatG: est.f,
-                            fiberG: est.fiber,
-                            mealType: vm.autoMealType,
-                            servingSizeG: est.servingG
-                        )
-                        messages.append(ChatMessage(role: .assistant, text: "Logged \(est.name.capitalized): \(Int(est.cal))cal, \(Int(est.p))P \(Int(est.c))C \(Int(est.f))F ✓"))
-                    } else {
-                        // LLM couldn't estimate — fall back to search
-                        actionFoodName = foodIntent.query
-                        actionFoodServings = foodIntent.servings
-                        messages.append(ChatMessage(role: .assistant, text: "Couldn't estimate. Opening search for \"\(foodIntent.query)\"."))
-                        showingFoodSearch = true
-                    }
-                    isGenerating = false
+            actionButton(icon: "dumbbell", label: "Workout", color: Theme.stepsOrange) {
+                resultText = "Head to the Exercise tab to start a workout."
+            }
+            actionButton(icon: "pill", label: "Supps", color: .mint) {
+                let today = DateFormatters.todayString
+                if let supplements = try? AppDatabase.shared.fetchActiveSupplements(),
+                   let logs = try? AppDatabase.shared.fetchSupplementLogs(for: today) {
+                    let taken = logs.filter(\.taken).count
+                    resultText = "Supplements: \(taken)/\(supplements.count) taken today."
+                } else {
+                    resultText = "No supplements set up."
                 }
+                mode = .result
             }
-            return
-        }
-        // Generic food logging
-        if lower.contains("log food") || lower.contains("log breakfast") || lower.contains("log lunch") || lower.contains("log dinner") || lower.contains("add food") {
-            actionFoodName = ""
-            messages.append(ChatMessage(role: .assistant, text: "Opening food search."))
-            showingFoodSearch = true
-            return
-        }
-        if lower.contains("start workout") || lower.contains("start a workout") || lower.contains("begin workout") {
-            messages.append(ChatMessage(role: .assistant, text: "Head to the Exercise tab to pick a template or start fresh."))
-            return
-        }
-
-        // LLM inference
-        isGenerating = true
-        Task {
-            let context = AIContextBuilder.buildContext()
-
-            if aiService.state != .ready {
-                // No model — use rule engine
-                var response = "AI model is loading. Try asking for a \"daily summary\" in the meantime."
-                if let insight = AIRuleEngine.quickInsight() {
-                    response = insight
-                }
-                messages.append(ChatMessage(role: .assistant, text: response))
-            } else {
-                var response = await aiService.respond(to: text, context: context)
-                if response.isEmpty { response = "I couldn't generate a response. Try again." }
-                messages.append(ChatMessage(role: .assistant, text: response))
-
-                // Auto-execute actions from LLM response
-                let parsed = AIActionParser.parse(response)
-                switch parsed.action {
-                case .logFood(let name, _):
-                    actionFoodName = name
-                    showingFoodSearch = true
-                case .startWorkout:
-                    break // Could navigate to exercise tab
-                default:
-                    break
-                }
+            actionButton(icon: "clock", label: "Yesterday", color: .secondary) {
+                resultText = AIRuleEngine.yesterdaySummary()
+                mode = .result
             }
-            isGenerating = false
         }
     }
 
-    // MARK: - Message Bubble
-
-    private func suggestionChip(_ text: String) -> some View {
-        Button {
-            inputText = text
-            sendMessage()
-        } label: {
-            Text(text)
-                .font(.caption)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Theme.cardBackgroundElevated, in: Capsule())
+    private func actionButton(icon: String, label: String, color: Color, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.title3)
+                    .foregroundStyle(color)
+                Text(label)
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(.secondary)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
     }
 
-    private func messageBubble(_ message: ChatMessage) -> some View {
-        HStack(alignment: .top, spacing: 8) {
-            switch message.role {
-            case .user:
-                Spacer()
-                Text(message.text)
-                    .font(.subheadline)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 8)
-                    .background(Theme.accent.opacity(0.2), in: RoundedRectangle(cornerRadius: 16))
-                    .foregroundStyle(.primary)
+    // MARK: - Food Input
 
-            case .assistant:
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack(alignment: .top, spacing: 8) {
-                        Image(systemName: "sparkles")
-                            .font(.caption)
-                            .foregroundStyle(Theme.accent)
-                            .padding(.top, 4)
-                        let parsed = AIActionParser.parse(message.text)
-                        Text(parsed.cleanText.isEmpty ? message.text : parsed.cleanText)
-                            .font(.subheadline)
-                            .foregroundStyle(.primary)
-                    }
-                    // Action buttons
-                    let action = AIActionParser.parse(message.text).action
-                    switch action {
-                    case .logFood(let name, _):
-                        Button {
-                            // Pre-fill food search with the name
-                            actionFoodName = name
-                            showingFoodSearch = true
-                        } label: {
-                            Label("Log \(name)", systemImage: "plus.circle")
-                                .font(.caption.weight(.medium))
-                        }
-                        .buttonStyle(.bordered).tint(Theme.accent)
-                    case .startWorkout(let type):
-                        Button {
-                            actionWorkoutType = type
-                            showingWorkoutStart = true
-                        } label: {
-                            Label("Start \(type ?? "Workout")", systemImage: "figure.run")
-                                .font(.caption.weight(.medium))
-                        }
-                        .buttonStyle(.bordered).tint(Theme.deficit)
-                    default:
-                        EmptyView()
-                    }
-                }
-                Spacer()
+    private var foodInputSection: some View {
+        VStack(spacing: 10) {
+            Text("What did you eat?")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.secondary)
 
-            case .system:
-                HStack(spacing: 6) {
-                    Image(systemName: "sparkles")
-                        .font(.caption)
-                        .foregroundStyle(Theme.accent.opacity(0.6))
-                    Text(message.text)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 16)
+            Button {
+                mode = .actions
+                inputText = ""
+            } label: {
+                Text("Cancel").font(.caption).foregroundStyle(.tertiary)
             }
         }
-        .padding(.horizontal, 16)
+    }
+
+    // MARK: - Bottom Input
+
+    private var bottomInput: some View {
+        HStack(spacing: 8) {
+            TextField(mode == .foodInput ? "e.g. 2 eggs, 1/3 avocado..." : "Type a command...", text: $inputText)
+                .textFieldStyle(.plain)
+                .font(.subheadline)
+                .focused($inputFocused)
+                .onSubmit { handleInput() }
+
+            Button { handleInput() } label: {
+                Image(systemName: "arrow.up.circle.fill")
+                    .font(.title3)
+                    .foregroundStyle(inputText.isEmpty ? Color.gray : Theme.accent)
+            }
+            .disabled(inputText.isEmpty)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+    }
+
+    // MARK: - Handle Input
+
+    private func handleInput() {
+        let text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else { return }
+        inputText = ""
+
+        if mode == .foodInput {
+            // User typed a food name — search and open
+            if let intent = AIActionExecutor.parseFoodIntent("log \(text)") {
+                foodSearchQuery = intent.query
+                foodSearchServings = intent.servings
+            } else {
+                foodSearchQuery = text
+                foodSearchServings = nil
+            }
+            showingFoodSearch = true
+            mode = .actions
+            return
+        }
+
+        // Parse as command
+        let lower = text.lowercased()
+
+        // Food intent
+        if let intent = AIActionExecutor.parseFoodIntent(lower) {
+            if let match = AIActionExecutor.findFood(query: intent.query, servings: intent.servings) {
+                foodSearchQuery = intent.query
+                foodSearchServings = intent.servings
+                showingFoodSearch = true
+            } else {
+                foodSearchQuery = intent.query
+                foodSearchServings = intent.servings
+                showingFoodSearch = true
+            }
+            return
+        }
+
+        // Data queries
+        if lower.contains("summary") || lower.contains("today") || lower.contains("how am i") {
+            resultText = AIRuleEngine.dailySummary()
+            mode = .result
+            return
+        }
+        if lower.contains("yesterday") {
+            resultText = AIRuleEngine.yesterdaySummary()
+            mode = .result
+            return
+        }
+        if lower.contains("calorie") || lower.contains("protein") || lower.contains("macro") {
+            let today = DateFormatters.todayString
+            let n = (try? AppDatabase.shared.fetchDailyNutrition(for: today)) ?? .zero
+            resultText = n.calories > 0
+                ? "Today: \(Int(n.calories))cal, \(Int(n.proteinG))P \(Int(n.carbsG))C \(Int(n.fatG))F"
+                : "No food logged today."
+            mode = .result
+            return
+        }
+        if lower.contains("weight") {
+            if let entries = try? AppDatabase.shared.fetchWeightEntries(),
+               let trend = WeightTrendCalculator.calculateTrend(entries: entries.map { ($0.date, $0.weightKg) }) {
+                let u = Preferences.weightUnit
+                resultText = "Weight: \(String(format: "%.1f", u.convert(fromKg: trend.currentEMA))) \(u.displayName), \(String(format: "%+.2f", u.convert(fromKg: trend.weeklyRateKg)))/wk"
+            } else {
+                resultText = "No weight data yet."
+            }
+            mode = .result
+            return
+        }
+
+        // Unknown — show help
+        resultText = "Try: \"log 2 eggs\", \"summary\", \"yesterday\", \"calories\", or use the buttons above."
+        mode = .result
     }
 }

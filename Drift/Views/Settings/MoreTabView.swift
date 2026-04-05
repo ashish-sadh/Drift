@@ -66,7 +66,7 @@ struct MoreTabView: View {
                                 .foregroundStyle(Theme.accent).frame(width: 24)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("AI Assistant").font(.subheadline.weight(.medium))
-                                Text("Beta").font(.caption2).foregroundStyle(.tertiary)
+                                Text("Powered by Qwen 0.5B · Beta").font(.caption2).foregroundStyle(.tertiary)
                             }
                             Spacer()
                             Toggle("", isOn: Binding(
