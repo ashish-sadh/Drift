@@ -286,11 +286,17 @@ enum AIContextBuilder {
             }
         }
 
-        // Templates
-        if let templates = try? WorkoutService.fetchTemplates() {
+        // Templates with suggestion
+        if let templates = try? WorkoutService.fetchTemplates(), !templates.isEmpty {
             let names = templates.prefix(5).map(\.name)
-            if !names.isEmpty {
-                lines.append("Templates: \(names.joined(separator: ", "))")
+            lines.append("Templates: \(names.joined(separator: ", "))")
+
+            // Suggest a template not done recently
+            if let workouts = try? WorkoutService.fetchWorkouts(limit: 5) {
+                let recentSet = Set(workouts.map(\.name))
+                if let suggestion = templates.first(where: { !recentSet.contains($0.name) }) {
+                    lines.append("Suggestion: try \(suggestion.name) (not done recently)")
+                }
             }
         }
 
