@@ -350,9 +350,9 @@ enum AIContextBuilder {
     // MARK: - Screen-Aware Context
 
     static func buildContext(screen: AIScreen) -> String {
-        var parts: [String] = [baseContext(), featureContext()]
+        var parts: [String] = [baseContext()]
         parts.append(screenContext(screen: screen))
-        return parts.joined(separator: "\n")
+        return truncateToFit(parts.joined(separator: "\n"), maxTokens: 800)
     }
 
     static func screenContext(screen: AIScreen) -> String {
