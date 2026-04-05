@@ -99,15 +99,21 @@ struct DashboardView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if DeviceCapability.canRunAI {
-                        Toggle(isOn: $aiEnabled) {
-                            HStack(spacing: 3) {
+                        Button { aiEnabled.toggle() } label: {
+                            HStack(spacing: 4) {
                                 Image(systemName: "sparkles").font(.system(size: 10))
-                                Text("beta").font(.system(size: 10, weight: .medium))
+                                Text("beta").font(.system(size: 8, weight: .semibold))
+                                RoundedRectangle(cornerRadius: 7)
+                                    .fill(aiEnabled ? Theme.accent : Color.gray.opacity(0.3))
+                                    .frame(width: 28, height: 16)
+                                    .overlay(alignment: aiEnabled ? .trailing : .leading) {
+                                        Circle().fill(.white).frame(width: 12, height: 12)
+                                            .padding(.horizontal, 2)
+                                    }
+                                    .animation(.easeInOut(duration: 0.15), value: aiEnabled)
                             }
                             .foregroundStyle(aiEnabled ? Theme.accent : .secondary)
                         }
-                        .toggleStyle(.switch)
-                        .tint(Theme.accent)
                     }
                 }
             }
