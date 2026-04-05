@@ -146,9 +146,18 @@ struct AIChatView: View {
 
         // Handle rule-based queries locally (instant, no LLM needed)
         let lower = text.lowercased()
-        if lower.contains("daily summary") || lower.contains("how am i doing") || lower.contains("my day") {
+        if lower.contains("daily summary") || lower.contains("how am i doing") || lower.contains("my day") || lower.contains("today") {
             let summary = AIRuleEngine.dailySummary()
             messages.append(ChatMessage(role: .assistant, text: summary))
+            return
+        }
+        if lower.contains("log food") || lower.contains("log breakfast") || lower.contains("log lunch") || lower.contains("log dinner") || lower.contains("add food") {
+            messages.append(ChatMessage(role: .assistant, text: "Opening food search for you. [LOG_FOOD: food]"))
+            showingFoodSearch = true
+            return
+        }
+        if lower.contains("start workout") || lower.contains("start a workout") || lower.contains("begin workout") {
+            messages.append(ChatMessage(role: .assistant, text: "Let's get moving! Head to the Exercise tab to pick a template or start fresh."))
             return
         }
 
