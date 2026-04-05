@@ -12,10 +12,12 @@ enum AIResponseCleaner {
             text = text.replacingOccurrences(of: artifact, with: "")
         }
 
-        // Remove mechanical preambles
+        // Remove mechanical preambles and question echoes
         let preambles = ["based on your data, ", "based on the context, ", "according to the data, ",
                          "according to your information, ", "based on the information provided, ",
-                         "looking at your data, ", "from what i can see, "]
+                         "looking at your data, ", "from what i can see, ",
+                         "great question! ", "good question! ", "that's a great question! ",
+                         "sure! ", "of course! ", "absolutely! "]
         for p in preambles {
             if text.lowercased().hasPrefix(p) {
                 text = String(text.dropFirst(p.count))
