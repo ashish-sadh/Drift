@@ -371,7 +371,7 @@ struct AIChatView: View {
             }
 
             if !logged.isEmpty {
-                messages.append(ChatMessage(role: .assistant, text: "Logged: \(logged.joined(separator: ", "))."))
+                messages.append(ChatMessage(role: .assistant, text: "Logged for \(meal.displayName.lowercased()): \(logged.joined(separator: ", "))."))
             }
             if let first = notFound.first {
                 messages.append(ChatMessage(role: .assistant, text: "Couldn't find \(notFound.map(\.query).joined(separator: ", ")) — opening search..."))
