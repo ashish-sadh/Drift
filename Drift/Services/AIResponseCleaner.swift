@@ -104,6 +104,10 @@ enum AIResponseCleaner {
         let alphaCount = trimmed.filter(\.isLetter).count
         if trimmed.count > 20 && Double(alphaCount) / Double(trimmed.count) < 0.5 { return true }
 
+        // Context regurgitation: response is just the raw data format
+        if trimmed.contains("|") && trimmed.filter({ $0 == "|" }).count > 3 { return true }
+        if trimmed.hasPrefix("eaten:") || trimmed.hasPrefix("weight:") || trimmed.hasPrefix("goal:") { return true }
+
         return false
     }
 }
