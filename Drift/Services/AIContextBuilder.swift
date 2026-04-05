@@ -247,9 +247,16 @@ enum AIContextBuilder {
 
         // Supplements
         if let supplements = try? AppDatabase.shared.fetchActiveSupplements(),
+           !supplements.isEmpty,
            let logs = try? AppDatabase.shared.fetchSupplementLogs(for: today) {
             let taken = logs.filter(\.taken).count
-            lines.append("Supplements: \(taken)/\(supplements.count) taken")
+            lines.append("Supplements: \(taken)/\(supplements.count)")
+        }
+
+        // Sleep/recovery (from cache)
+        let sleep = sleepRecoveryContext()
+        if !sleep.isEmpty && !sleep.contains("No sleep") {
+            lines.append(sleep)
         }
 
         return lines.joined(separator: "\n")
