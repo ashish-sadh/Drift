@@ -82,7 +82,7 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
 
         // Create sampler chain
         let s = llama_sampler_chain_init(llama_sampler_chain_default_params())!
-        llama_sampler_chain_add(s, llama_sampler_init_temp(0.7))
+        llama_sampler_chain_add(s, llama_sampler_init_temp(0.4))
         llama_sampler_chain_add(s, llama_sampler_init_top_p(0.9, 1))
         llama_sampler_chain_add(s, llama_sampler_init_dist(UInt32.random(in: .min ... .max)))
         smpl = s

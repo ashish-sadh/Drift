@@ -80,36 +80,34 @@ enum AIContextBuilder {
         var lines: [String] = []
         let today = DateFormatters.todayString
 
-        // Today's nutrition with target
+        // Nutrition — pre-computed with target
         let nutrition = (try? AppDatabase.shared.fetchDailyNutrition(for: today)) ?? .zero
         let tdee = TDEEEstimator.shared.current?.tdee ?? 2000
         let deficit = WeightGoal.load()?.requiredDailyDeficit ?? 0
-        let calorieTarget = Int(tdee - deficit)
+        let target = Int(tdee - deficit)
 
         if nutrition.calories > 0 {
-            let remaining = calorieTarget - Int(nutrition.calories)
-            lines.append("Today: \(Int(nutrition.calories))/\(calorieTarget)cal (\(remaining > 0 ? "\(remaining) left" : "\(abs(remaining)) over")), \(Int(nutrition.proteinG))P \(Int(nutrition.carbsG))C \(Int(nutrition.fatG))F")
+            let left = target - Int(nutrition.calories)
+            lines.append("Eaten: \(Int(nutrition.calories))/\(target)cal | \(left > 0 ? "\(left) left" : "\(abs(left)) over") | \(Int(nutrition.proteinG))P \(Int(nutrition.carbsG))C \(Int(nutrition.fatG))F")
         } else {
-            lines.append("No food logged today. Target: \(calorieTarget)cal.")
+            lines.append("No food logged | Target: \(target)cal")
         }
 
-        // Weight + trend
+        // Weight — pre-computed trend
         if let entries = try? AppDatabase.shared.fetchWeightEntries() {
             let input = entries.map { (date: $0.date, weightKg: $0.weightKg) }
             if let trend = WeightTrendCalculator.calculateTrend(entries: input) {
-                let unit = Preferences.weightUnit
-                lines.append("Weight: \(String(format: "%.1f", unit.convert(fromKg: trend.currentEMA))) \(unit.displayName)")
-                lines.append("Weekly rate: \(String(format: "%+.2f", unit.convert(fromKg: trend.weeklyRateKg))) \(unit.displayName)/wk")
-                if trend.estimatedDailyDeficit != 0 {
-                    lines.append("Daily \(trend.estimatedDailyDeficit < 0 ? "deficit" : "surplus"): \(Int(abs(trend.estimatedDailyDeficit)))kcal")
-                }
+                let u = Preferences.weightUnit
+                let w = String(format: "%.1f", u.convert(fromKg: trend.currentEMA))
+                let rate = String(format: "%+.1f", u.convert(fromKg: trend.weeklyRateKg))
+                lines.append("Weight: \(w)\(u.displayName) | \(rate)/wk | TDEE: \(Int(tdee))kcal")
             }
         }
 
-        // Goal
+        // Goal — pre-computed
         if let goal = WeightGoal.load() {
-            let unit = Preferences.weightUnit
-            lines.append("Goal: \(String(format: "%.1f", unit.convert(fromKg: goal.targetWeightKg))) \(unit.displayName) in \(goal.monthsToAchieve)mo")
+            let u = Preferences.weightUnit
+            lines.append("Goal: \(String(format: "%.1f", u.convert(fromKg: goal.targetWeightKg)))\(u.displayName) in \(goal.monthsToAchieve)mo")
         }
 
         return lines.joined(separator: "\n")
