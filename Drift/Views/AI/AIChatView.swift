@@ -390,12 +390,17 @@ struct AIChatView: View {
                 }
             )
 
-            // Finalize: clean the response and replace streaming message
+            // Finalize: clean the response, check quality, replace streaming message
             let finalResponse: String
             if response.isEmpty {
                 finalResponse = "I took too long to respond. Try a simpler question, or check the relevant tab directly."
             } else {
-                finalResponse = AIResponseCleaner.clean(response)
+                let cleaned = AIResponseCleaner.clean(response)
+                if AIResponseCleaner.isLowQuality(cleaned) {
+                    finalResponse = "I couldn't generate a helpful answer. Try asking about your food, weight, workouts, or health data."
+                } else {
+                    finalResponse = cleaned
+                }
             }
 
             if let idx = messages.firstIndex(where: { $0.id == streamingMessageId }) {

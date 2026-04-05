@@ -53,4 +53,34 @@ enum AIResponseCleaner {
 
         return trimmed
     }
+
+    /// Check if a response is too generic/unhelpful and should be replaced.
+    static func isLowQuality(_ response: String) -> Bool {
+        let lower = response.lowercased()
+        let trimmed = lower.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Too short
+        if trimmed.count < 10 { return true }
+
+        // Generic fillers
+        let genericPhrases = [
+            "i'm here to help",
+            "how can i assist you",
+            "what would you like to know",
+            "feel free to ask",
+            "let me know if you",
+            "i'd be happy to help",
+        ]
+        if genericPhrases.contains(where: { trimmed.contains($0) }) && trimmed.count < 80 { return true }
+
+        // Pure repetition of the question
+        // (detected by very low unique word ratio)
+        let words = trimmed.components(separatedBy: .whitespaces).filter { $0.count > 2 }
+        if words.count > 5 {
+            let unique = Set(words).count
+            if Double(unique) / Double(words.count) < 0.3 { return true } // Very repetitive
+        }
+
+        return false
+    }
 }
