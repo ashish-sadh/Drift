@@ -106,22 +106,25 @@ final class AIModelManager {
             // Track progress via bytes received
             let (asyncBytes, response) = try await URLSession.shared.bytes(from: url)
             let totalBytes = response.expectedContentLength
-            var data = Data()
-            data.reserveCapacity(fileSizeMB * 1024 * 1024)
+            let fileHandle = FileManager.default.createFile(atPath: destination.path, contents: nil) ? try FileHandle(forWritingTo: destination) : nil
+            guard let fileHandle else { throw URLError(.cannotCreateFile) }
             var received: Int64 = 0
+            var buffer = Data()
+            let chunkSize = 256 * 1024 // 256KB chunks
 
             for try await byte in asyncBytes {
-                data.append(byte)
+                buffer.append(byte)
                 received += 1
-                if received % (512 * 1024) == 0 { // Update every 512KB
+                if buffer.count >= chunkSize {
+                    fileHandle.write(buffer)
+                    buffer.removeAll(keepingCapacity: true)
                     let fileProgress = totalBytes > 0 ? Double(received) / Double(totalBytes) : 0
                     let overallProgress = (Double(offsetMB) + fileProgress * Double(fileSizeMB)) / Double(totalMB)
                     downloadState = .downloading(progress: min(overallProgress, 0.99))
                 }
             }
-
-            try? FileManager.default.removeItem(at: destination)
-            try data.write(to: destination)
+            if !buffer.isEmpty { fileHandle.write(buffer) }
+            fileHandle.closeFile()
             return true
         } catch {
             downloadState = .error("Download failed: \(error.localizedDescription)")

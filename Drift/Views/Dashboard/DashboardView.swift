@@ -98,12 +98,17 @@ struct DashboardView: View {
                     }
                 }
                 ToolbarItem(placement: .primaryAction) {
-                    HStack(spacing: 6) {
-                        Image(systemName: "sparkles").font(.system(size: 10))
-                            .foregroundStyle(aiEnabled ? Theme.accent : Color.gray)
-                        Toggle("", isOn: $aiEnabled).labelsHidden()
-                            .scaleEffect(0.65).tint(Theme.accent)
+                    Toggle(isOn: $aiEnabled) {
+                        HStack(spacing: 3) {
+                            Image(systemName: "sparkles").font(.system(size: 9))
+                            Text(aiEnabled ? "AI on" : "AI off").font(.system(size: 10, weight: .medium))
+                            Text("beta").font(.system(size: 8)).foregroundStyle(.tertiary)
+                        }
+                        .foregroundStyle(aiEnabled ? Theme.accent : .secondary)
                     }
+                    .toggleStyle(.switch)
+                    .scaleEffect(0.7)
+                    .tint(Theme.accent)
                 }
             }
             .task { await viewModel.loadToday() }

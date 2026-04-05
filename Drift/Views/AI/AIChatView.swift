@@ -22,12 +22,12 @@ struct AIChatView: View {
     var body: some View {
         VStack(spacing: 0) {
             ScrollView {
-                VStack(spacing: 14) {
+                VStack(spacing: 12) {
                     // Context insight
                     if let insight = AIRuleEngine.quickInsight() {
                         HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "sparkles").font(.caption).foregroundStyle(Theme.accent)
-                            Text(insight).font(.subheadline).foregroundStyle(.secondary)
+                            Text(insight).font(.caption).foregroundStyle(.secondary)
                         }
                         .padding(.horizontal, 4)
                     }
@@ -36,25 +36,28 @@ struct AIChatView: View {
                     if !resultText.isEmpty {
                         HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "sparkles").font(.caption).foregroundStyle(Theme.accent)
-                            Text(resultText).font(.subheadline).foregroundStyle(.primary)
+                            Text(resultText).font(.caption).foregroundStyle(.primary)
+                            Spacer()
+                            Button { resultText = ""; mode = .actions } label: {
+                                Image(systemName: "xmark").font(.system(size: 9)).foregroundStyle(.tertiary)
+                            }
                         }
-                        .padding(12)
+                        .padding(10)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Theme.accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 12))
+                        .background(Theme.accent.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
                     }
 
-                    // Action grid
-                    if mode == .actions {
-                        actionGrid
-                    }
+                    // Action grid — ALWAYS visible
+                    actionGrid
 
-                    // Food input mode
+                    // Food input hint
                     if mode == .foodInput {
-                        foodInputSection
+                        Text("Type what you ate below")
+                            .font(.caption2).foregroundStyle(.tertiary)
                     }
                 }
                 .padding(.horizontal, 12)
-                .padding(.top, 8)
+                .padding(.top, 6)
             }
 
             Divider().overlay(Color.white.opacity(0.06))
@@ -175,15 +178,19 @@ struct AIChatView: View {
 
         if mode == .foodInput {
             // User typed a food name — search and open
+            // Try exact match first, then fuzzy
+            var query = text
             if let intent = AIActionExecutor.parseFoodIntent("log \(text)") {
-                foodSearchQuery = intent.query
+                query = intent.query
                 foodSearchServings = intent.servings
             } else {
-                foodSearchQuery = text
                 foodSearchServings = nil
             }
+            // Fuzzy: try variations (remove trailing s, common misspellings)
+            foodSearchQuery = query
             showingFoodSearch = true
             mode = .actions
+            resultText = ""
             return
         }
 

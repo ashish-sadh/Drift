@@ -76,16 +76,33 @@ enum AIActionExecutor {
         let servings: Double
     }
 
-    /// Search local DB for food. Returns best match or nil.
+    /// Search local DB for food with fuzzy matching. Returns best match or nil.
     static func findFood(query: String, servings: Double?) -> FoodMatch? {
-        guard let results = try? AppDatabase.shared.searchFoodsRanked(query: query),
-              let best = results.first else { return nil }
-        // Check if name is a reasonable match (contains the query words)
-        let queryWords = query.lowercased().split(separator: " ")
-        let nameWords = best.name.lowercased()
-        let matchCount = queryWords.filter { nameWords.contains($0) }.count
-        guard matchCount > 0 else { return nil }
-        return FoodMatch(food: best, servings: servings ?? 1)
+        // Try exact search first
+        if let results = try? AppDatabase.shared.searchFoodsRanked(query: query),
+           let best = results.first {
+            let queryWords = query.lowercased().split(separator: " ")
+            let nameWords = best.name.lowercased()
+            let matchCount = queryWords.filter { nameWords.contains($0) }.count
+            if matchCount > 0 {
+                return FoodMatch(food: best, servings: servings ?? 1)
+            }
+        }
+        // Try without trailing 's' (eggs → egg, bananas → banana)
+        let singular = query.hasSuffix("s") ? String(query.dropLast()) : query
+        if singular != query,
+           let results = try? AppDatabase.shared.searchFoodsRanked(query: singular),
+           let best = results.first {
+            return FoodMatch(food: best, servings: servings ?? 1)
+        }
+        // Try first word only (chicken breast → chicken)
+        let firstWord = String(query.split(separator: " ").first ?? Substring(query))
+        if firstWord != query && firstWord.count >= 3,
+           let results = try? AppDatabase.shared.searchFoodsRanked(query: firstWord),
+           let best = results.first {
+            return FoodMatch(food: best, servings: servings ?? 1)
+        }
+        return nil
     }
 
     /// Ask the LLM to estimate nutrition for an unknown food.
