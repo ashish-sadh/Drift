@@ -64,6 +64,32 @@ enum AIRuleEngine {
         return nil
     }
 
+    /// Yesterday's food log.
+    static func yesterdaySummary() -> String {
+        let cal = Calendar.current
+        guard let yesterday = cal.date(byAdding: .day, value: -1, to: Date()) else { return "Can't load yesterday." }
+        let dateStr = DateFormatters.dateOnly.string(from: yesterday)
+        let nutrition = (try? AppDatabase.shared.fetchDailyNutrition(for: dateStr)) ?? .zero
+
+        if nutrition.calories == 0 {
+            return "No food was logged yesterday."
+        }
+
+        var lines = ["Yesterday's food (\(DateFormatters.shortDisplay.string(from: yesterday))):"]
+        lines.append("  \(Int(nutrition.calories)) cal (\(Int(nutrition.proteinG))P / \(Int(nutrition.carbsG))C / \(Int(nutrition.fatG))F)")
+
+        // List foods
+        if let logs = try? AppDatabase.shared.fetchMealLogs(for: dateStr) {
+            for log in logs {
+                guard let logId = log.id, let entries = try? AppDatabase.shared.fetchFoodEntries(forMealLog: logId) else { continue }
+                for entry in entries {
+                    lines.append("  - \(entry.foodName) (\(Int(entry.totalCalories)) cal)")
+                }
+            }
+        }
+        return lines.joined(separator: "\n")
+    }
+
     /// Generate a structured daily summary.
     static func dailySummary() -> String {
         var lines: [String] = ["Here's your day so far:"]

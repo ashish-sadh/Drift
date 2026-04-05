@@ -153,6 +153,11 @@ struct AIChatView: View {
             messages.append(ChatMessage(role: .assistant, text: summary))
             return
         }
+        if lower.contains("yesterday") || lower.contains("what did i eat") {
+            let summary = AIRuleEngine.yesterdaySummary()
+            messages.append(ChatMessage(role: .assistant, text: summary))
+            return
+        }
         if lower.contains("log food") || lower.contains("log breakfast") || lower.contains("log lunch") || lower.contains("log dinner") || lower.contains("add food") {
             messages.append(ChatMessage(role: .assistant, text: "Opening food search for you. [LOG_FOOD: food]"))
             showingFoodSearch = true
