@@ -106,60 +106,33 @@ struct AIChatView: View {
     // MARK: - Action Grid
 
     private var actionGrid: some View {
-        LazyVGrid(columns: [
-            GridItem(.flexible()),
-            GridItem(.flexible()),
-            GridItem(.flexible()),
-        ], spacing: 10) {
+        HStack(spacing: 10) {
             actionButton(icon: "fork.knife", label: "Log Food", color: Theme.carbsGreen) {
                 mode = .foodInput
                 resultText = ""
                 inputFocused = true
             }
-            actionButton(icon: "scalemass", label: "Weight", color: Theme.accent) {
-                mode = .result
-                resultText = "Loading..."
-                Task {
-                    let context = AIContextBuilder.buildContext(tab: currentTab, action: "weight")
-                    let prompt = AIContextBuilder.actionPrompt(for: "weight")
-                    let response = await aiService.respond(to: prompt, context: context)
-                    resultText = response.isEmpty ? AIContextBuilder.weightContext() : response
-                }
-            }
             actionButton(icon: "chart.bar", label: "Summary", color: Theme.calorieBlue) {
+                resultText = AIRuleEngine.dailySummary()
                 mode = .result
-                resultText = "Loading..."
-                Task {
-                    let context = AIContextBuilder.buildContext(tab: currentTab, action: "summary")
-                    let prompt = AIContextBuilder.actionPrompt(for: "summary")
-                    let response = await aiService.respond(to: prompt, context: context)
-                    resultText = response.isEmpty ? AIRuleEngine.dailySummary() : response
+                if aiService.isModelLoaded {
+                    Task {
+                        let ctx = AIContextBuilder.buildContext(tab: currentTab, action: "summary")
+                        let r = await aiService.respond(to: AIContextBuilder.actionPrompt(for: "summary"), context: ctx)
+                        if !r.isEmpty { resultText = r }
+                    }
                 }
             }
             actionButton(icon: "dumbbell", label: "Workout", color: Theme.stepsOrange) {
+                resultText = AIContextBuilder.workoutContext()
                 mode = .result
-                resultText = "Loading..."
-                Task {
-                    let context = AIContextBuilder.buildContext(tab: currentTab, action: "workout")
-                    let prompt = AIContextBuilder.actionPrompt(for: "workout")
-                    let response = await aiService.respond(to: prompt, context: context)
-                    resultText = response.isEmpty ? AIContextBuilder.workoutContext() : response
+                if aiService.isModelLoaded {
+                    Task {
+                        let ctx = AIContextBuilder.buildContext(tab: currentTab, action: "workout")
+                        let r = await aiService.respond(to: AIContextBuilder.actionPrompt(for: "workout"), context: ctx)
+                        if !r.isEmpty { resultText = r }
+                    }
                 }
-            }
-            actionButton(icon: "pill", label: "Supps", color: .mint) {
-                let today = DateFormatters.todayString
-                if let supplements = try? AppDatabase.shared.fetchActiveSupplements(),
-                   let logs = try? AppDatabase.shared.fetchSupplementLogs(for: today) {
-                    let taken = logs.filter(\.taken).count
-                    resultText = "Supplements: \(taken)/\(supplements.count) taken today."
-                } else {
-                    resultText = "No supplements set up."
-                }
-                mode = .result
-            }
-            actionButton(icon: "clock", label: "Yesterday", color: .secondary) {
-                resultText = AIRuleEngine.yesterdaySummary()
-                mode = .result
             }
         }
     }
@@ -293,7 +266,12 @@ struct AIChatView: View {
             return
         }
 
-        // Unknown — send to LLM with page-specific context
+        // Unknown — send to LLM if loaded, otherwise show help
+        if !aiService.isModelLoaded {
+            resultText = "Try: \"log 2 eggs\", \"summary\", \"calories\", or use the buttons above."
+            mode = .result
+            return
+        }
         mode = .result
         resultText = "Thinking..."
         Task {
