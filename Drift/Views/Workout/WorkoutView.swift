@@ -1065,11 +1065,12 @@ struct ActiveWorkoutView: View {
 
             // Column headers
             let assisted = isAssistedExercise(exercises[ei].name)
+            let isDuration = WorkoutSet.isDurationExercise(exercises[ei].name)
             HStack(spacing: 0) {
                 Text("Set").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 28, alignment: .leading)
                 Text("Previous").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 85, alignment: .leading)
                 Text(assisted ? "-lbs" : "lbs").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 55)
-                Text("Reps").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 50)
+                Text(isDuration ? "Time (s)" : "Reps").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 50)
                 Spacer()
                 Text("✓").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 30)
             }
@@ -1098,8 +1099,8 @@ struct ActiveWorkoutView: View {
                             .padding(.vertical, 4)
                             .background(exercises[ei].sets[si].done ? Theme.deficit.opacity(0.1) : Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 4))
 
-                        // Reps
-                        TextField(si < exercises[ei].previousSets.count ? prevReps(exercises[ei].previousSets[si]) : "0",
+                        // Reps or Time
+                        TextField(isDuration ? "sec" : (si < exercises[ei].previousSets.count ? prevReps(exercises[ei].previousSets[si]) : "0"),
                                   text: $exercises[ei].sets[si].reps)
                             .keyboardType(.numberPad).font(.subheadline.monospacedDigit())
                             .multilineTextAlignment(.center).frame(width: 50)

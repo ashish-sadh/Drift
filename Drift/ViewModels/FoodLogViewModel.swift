@@ -229,7 +229,10 @@ final class FoodLogViewModel {
                 loggedAt: loggedAt ?? now
             )
             try database.saveFoodEntry(&entry)
-            try? database.trackFoodUsage(name: name, foodId: nil, servings: 1)
+            // Only track usage for named foods (not generic "Quick Add")
+            if name != "Quick Add" && !name.isEmpty {
+                try? database.trackFoodUsage(name: name, foodId: nil, servings: 1)
+            }
             loadTodayMeals()
         } catch {
             Log.foodLog.error("Failed to quick add: \(error.localizedDescription)")

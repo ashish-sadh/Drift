@@ -606,10 +606,10 @@ struct FoodSearchView: View {
             ScrollView {
                 VStack(spacing: 20) {
                     // Name
-                    TextField("Food name (optional)", text: $manualName)
+                    TextField("Food name", text: $manualName)
                         .font(.body)
                         .padding(12)
-                        .background(Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 10))
+                        .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
 
                     // Calories — hero
                     VStack(spacing: 4) {
@@ -715,8 +715,8 @@ struct FoodSearchView: View {
         }
         .padding(.vertical, 10)
         .frame(maxWidth: .infinity)
-        .background(color.opacity(0.12), in: RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(0.25), lineWidth: 1))
+        .background(color.opacity(0.18), in: RoundedRectangle(cornerRadius: 12))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(0.35), lineWidth: 1))
     }
 
     private func popularFoods() -> [Food] {
