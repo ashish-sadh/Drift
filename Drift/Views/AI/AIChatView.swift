@@ -99,6 +99,23 @@ struct AIChatView: View {
         .navigationTitle("Drift AI")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Menu {
+                    Button { aiService.reset() } label: {
+                        Label("New Chat", systemImage: "plus.message")
+                    }
+                    Button(role: .destructive) {
+                        aiService.deleteModel()
+                        messages.removeAll()
+                    } label: {
+                        Label("Delete Model (~470 MB)", systemImage: "trash")
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle").foregroundStyle(.secondary)
+                }
+            }
+        }
         .sheet(isPresented: $showingFoodSearch) {
             NavigationStack {
                 FoodSearchView(viewModel: FoodLogViewModel())
