@@ -835,8 +835,9 @@ final class HealthKitService {
     }
 
     private nonisolated func loadAnchor(for dataType: String, database: AppDatabase) throws -> HKQueryAnchor? {
-        guard let data = try database.fetchAnchor(dataType: dataType) else { return nil }
-        return try NSKeyedUnarchiver.unarchivedObject(ofClass: HKQueryAnchor.self, from: data)
+        guard let data = try database.fetchAnchor(dataType: dataType), !data.isEmpty else { return nil }
+        // Gracefully handle corrupted anchor data
+        return try? NSKeyedUnarchiver.unarchivedObject(ofClass: HKQueryAnchor.self, from: data)
     }
 
     private nonisolated func saveAnchor(_ anchor: HKQueryAnchor, for dataType: String, database: AppDatabase) throws {
