@@ -229,26 +229,35 @@ struct AIChatView: View {
 
         switch screen {
         case .weight, .goal:
-            return "\(greeting) I can help with your weight progress — just ask."
+            if let entries = try? AppDatabase.shared.fetchWeightEntries(), !entries.isEmpty {
+                return "\(greeting) I can help with your weight progress — ask about your trend, goal, or pace."
+            }
+            return "\(greeting) Log your weight using the + button to start tracking your progress."
         case .food:
             let n = (try? AppDatabase.shared.fetchDailyNutrition(for: DateFormatters.todayString)) ?? .zero
             return n.calories > 0
                 ? "\(greeting) You've logged \(Int(n.calories)) cal so far. Need to add anything?"
-                : "\(greeting) What did you have to eat?"
+                : "\(greeting) What did you have to eat? Say something like \"log 2 eggs and toast\"."
         case .exercise:
-            return "\(greeting) Ready for a workout? Tell me what you'd like to train."
+            return "\(greeting) Ask what to train, or say \"start push day\" to begin a workout."
         case .bodyRhythm:
-            return "\(greeting) Ask me about your sleep, HRV, or recovery."
+            return "\(greeting) Ask about your sleep, HRV, recovery, or energy levels."
         case .glucose:
-            return "\(greeting) I can analyze your glucose patterns."
+            let hasGlucose = (try? AppDatabase.shared.fetchGlucoseReadings(from: DateFormatters.todayString, to: DateFormatters.todayString))?.isEmpty == false
+            return hasGlucose
+                ? "\(greeting) Ask about your glucose patterns, spikes, or fasting windows."
+                : "\(greeting) Import glucose data from a CGM CSV to start analyzing your patterns."
         case .biomarkers:
-            return "\(greeting) Ask about your lab results or biomarker trends."
+            let hasLabs = (try? AppDatabase.shared.fetchLatestBiomarkerResults())?.isEmpty == false
+            return hasLabs
+                ? "\(greeting) Ask about your lab results — which markers are out of range?"
+                : "\(greeting) Upload a lab report PDF to see your biomarker trends."
         case .cycle:
-            return "\(greeting) I can help with cycle tracking insights."
+            return "\(greeting) Ask about your cycle phase, period timing, or cycle length trends."
         case .supplements:
-            return "\(greeting) Need help with your supplement routine?"
+            return "\(greeting) Ask about your supplement status or what you still need to take."
         case .bodyComposition:
-            return "\(greeting) I can compare your DEXA scans and body composition."
+            return "\(greeting) Ask about your body fat, lean mass, or compare DEXA scans."
         default:
             return "\(greeting) How can I help you today?"
         }
