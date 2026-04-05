@@ -373,7 +373,12 @@ struct AIChatView: View {
             }
 
             if !logged.isEmpty {
-                messages.append(ChatMessage(role: .assistant, text: "Logged for \(meal.displayName.lowercased()): \(logged.joined(separator: ", "))."))
+                let todayN = (try? AppDatabase.shared.fetchDailyNutrition(for: DateFormatters.todayString)) ?? .zero
+                let tdee = TDEEEstimator.shared.current?.tdee ?? 2000
+                let deficit = WeightGoal.load()?.requiredDailyDeficit ?? 0
+                let target = max(500, Int(tdee - deficit))
+                let left = target - Int(todayN.calories)
+                messages.append(ChatMessage(role: .assistant, text: "Logged for \(meal.displayName.lowercased()): \(logged.joined(separator: ", ")). \(left > 0 ? "\(left) cal left." : "Over by \(abs(left)) cal.")"))
             }
             if let first = notFound.first {
                 messages.append(ChatMessage(role: .assistant, text: "Couldn't find \(notFound.map(\.query).joined(separator: ", ")) — opening search..."))
