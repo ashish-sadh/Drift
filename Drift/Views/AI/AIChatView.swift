@@ -323,6 +323,10 @@ struct AIChatView: View {
             messages.append(ChatMessage(role: .assistant, text: AIRuleEngine.yesterdaySummary()))
             return
         }
+        if lower == "this week" || lower == "weekly summary" || lower == "how was my week" {
+            messages.append(ChatMessage(role: .assistant, text: AIRuleEngine.weeklySummary()))
+            return
+        }
         if lower == "calories left" || lower == "calories left today" || lower == "how many calories left" {
             messages.append(ChatMessage(role: .assistant, text: AIRuleEngine.caloriesLeft()))
             return

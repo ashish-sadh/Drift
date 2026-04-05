@@ -166,6 +166,40 @@ enum AIRuleEngine {
         }
     }
 
+    /// Weekly overview.
+    static func weeklySummary() -> String {
+        let cal = Calendar.current
+        guard let weekStart = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) else { return "" }
+        let from = DateFormatters.dateOnly.string(from: weekStart)
+        let to = DateFormatters.todayString
+        let avg = (try? AppDatabase.shared.averageDailyCalories(from: from, to: to)) ?? 0
+
+        // Count workouts this week
+        let workoutCount: Int
+        if let workouts = try? WorkoutService.fetchWorkouts(limit: 20) {
+            workoutCount = workouts.filter {
+                guard let d = DateFormatters.dateOnly.date(from: $0.date) else { return false }
+                return d >= weekStart
+            }.count
+        } else { workoutCount = 0 }
+
+        var lines = ["This week:"]
+        if avg > 0 { lines.append("Avg intake: \(Int(avg)) cal/day") }
+        lines.append("Workouts: \(workoutCount)")
+
+        // Weight change this week
+        if let entries = try? AppDatabase.shared.fetchWeightEntries() {
+            let u = Preferences.weightUnit
+            let weekEntries = entries.filter { $0.date >= from }
+            if let first = weekEntries.first, let last = weekEntries.last, first.date != last.date {
+                let change = u.convert(fromKg: last.weightKg - first.weightKg)
+                lines.append("Weight: \(String(format: "%+.1f", change))\(u.displayName)")
+            }
+        }
+
+        return lines.joined(separator: "\n")
+    }
+
     /// Supplement check.
     static func supplementStatus() -> String {
         let today = DateFormatters.todayString
