@@ -403,26 +403,31 @@ struct AIChatView: View {
                 let servings = match.servings
                 let cal = f.calories * servings
 
-                // Safety: if >2000 cal in one entry, it's likely a mistake
                 if cal > 2000 {
                     messages.append(ChatMessage(role: .assistant, text: "That would be \(Int(cal)) cal — are you sure? Try specifying a smaller amount (e.g., \"log 2 \(intent.query)\")."))
                     return
+                }
+
+                // Use meal hint if user specified, otherwise auto-detect from time
+                let meal: MealType = if let hint = intent.mealHint {
+                    MealType(rawValue: hint) ?? currentMealType
+                } else {
+                    currentMealType
                 }
 
                 let p = f.proteinG * servings
                 let vm = FoodLogViewModel()
                 vm.quickAdd(name: f.name, calories: cal, proteinG: p,
                             carbsG: f.carbsG * servings, fatG: f.fatG * servings,
-                            fiberG: f.fiberG * servings, mealType: currentMealType,
+                            fiberG: f.fiberG * servings, mealType: meal,
                             servingSizeG: f.servingSize * servings)
-                let meal = currentMealType.displayName.lowercased()
                 // Show updated calories remaining after logging
                 let todayN = (try? AppDatabase.shared.fetchDailyNutrition(for: DateFormatters.todayString)) ?? .zero
                 let tdee = TDEEEstimator.shared.current?.tdee ?? 2000
                 let deficit = WeightGoal.load()?.requiredDailyDeficit ?? 0
                 let target = max(500, Int(tdee - deficit))
                 let left = target - Int(todayN.calories)
-                messages.append(ChatMessage(role: .assistant, text: "Logged \(f.name)\(servings != 1 ? " x\(Int(servings))" : "") for \(meal) (\(Int(cal)) cal). \(left > 0 ? "\(left) cal left today." : "Over target by \(abs(left)) cal.")"))
+                messages.append(ChatMessage(role: .assistant, text: "Logged \(f.name)\(servings != 1 ? " x\(Int(servings))" : "") for \(meal.displayName.lowercased()) (\(Int(cal)) cal). \(left > 0 ? "\(left) cal left today." : "Over target by \(abs(left)) cal.")"))
                 return
             }
             // No exact match — open search

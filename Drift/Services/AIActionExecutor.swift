@@ -7,6 +7,7 @@ enum AIActionExecutor {
     struct FoodIntent {
         let query: String
         let servings: Double?
+        var mealHint: String? = nil // "breakfast", "lunch", "dinner", "snack" if user specified
     }
 
     struct WeightIntent {
@@ -34,20 +35,28 @@ enum AIActionExecutor {
             remainder = String(lower.dropFirst(prefix.count)).trimmingCharacters(in: .whitespaces)
         }
 
-        // Remove trailing qualifiers
-        for suffix in [" for me", " please", " today", " for breakfast", " for lunch", " for dinner", " for snack"] {
+        // Remove trailing qualifiers and detect meal hint
+        var mealHint: String? = nil
+        let mealSuffixes: [(String, String)] = [
+            (" for breakfast", "breakfast"), (" for lunch", "lunch"),
+            (" for dinner", "dinner"), (" for snack", "snack")
+        ]
+        for (suffix, meal) in mealSuffixes {
             if remainder.hasSuffix(suffix) {
                 remainder = String(remainder.dropLast(suffix.count))
+                mealHint = meal
+                break
             }
+        }
+        for suffix in [" for me", " please", " today"] {
+            if remainder.hasSuffix(suffix) { remainder = String(remainder.dropLast(suffix.count)) }
         }
 
         guard !remainder.isEmpty else { return nil }
 
-        // Try to extract amount from the beginning
         let (amount, food) = extractAmount(from: remainder)
-
         guard !food.isEmpty else { return nil }
-        return FoodIntent(query: food, servings: amount)
+        return FoodIntent(query: food, servings: amount, mealHint: mealHint)
     }
 
     /// Try to parse a weight logging intent.
