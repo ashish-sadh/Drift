@@ -138,18 +138,15 @@ enum AIContextBuilder {
         var lines: [String] = []
         let today = DateFormatters.todayString
 
-        // Today's food entries — compact format
-        var todayFoods: [String] = []
+        // Today's food entries grouped by meal
         if let logs = try? AppDatabase.shared.fetchMealLogs(for: today) {
             for log in logs {
-                guard let logId = log.id, let entries = try? AppDatabase.shared.fetchFoodEntries(forMealLog: logId) else { continue }
-                for entry in entries {
-                    todayFoods.append("\(entry.foodName) \(Int(entry.totalCalories))cal")
-                }
+                guard let logId = log.id, let entries = try? AppDatabase.shared.fetchFoodEntries(forMealLog: logId),
+                      !entries.isEmpty else { continue }
+                let mealName = log.mealType.capitalized
+                let foods = entries.map { "\($0.foodName) \(Int($0.totalCalories))cal" }.joined(separator: ", ")
+                lines.append("\(mealName): \(foods)")
             }
-        }
-        if !todayFoods.isEmpty {
-            lines.append("Today's food: \(todayFoods.joined(separator: ", "))")
         }
 
         // Recent foods with protein — helps meal suggestions
