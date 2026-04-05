@@ -99,16 +99,15 @@ struct DashboardView: View {
                 }
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if DeviceCapability.canRunAI {
-                        HStack(spacing: 4) {
-                            Image(systemName: "sparkles").font(.system(size: 11))
-                                .foregroundStyle(aiEnabled ? Theme.accent : .secondary)
-                            Text("AI").font(.system(size: 10, weight: .bold))
-                                .foregroundStyle(aiEnabled ? Theme.accent : .secondary)
-                            Toggle("", isOn: $aiEnabled)
-                                .labelsHidden()
-                                .scaleEffect(0.65)
-                                .tint(Theme.accent)
+                        Toggle(isOn: $aiEnabled) {
+                            HStack(spacing: 3) {
+                                Image(systemName: "sparkles").font(.system(size: 10))
+                                Text("beta").font(.system(size: 10, weight: .medium))
+                            }
+                            .foregroundStyle(aiEnabled ? Theme.accent : .secondary)
                         }
+                        .toggleStyle(.switch)
+                        .tint(Theme.accent)
                     }
                 }
             }
