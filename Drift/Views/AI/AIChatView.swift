@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct AIChatView: View {
     @State private var aiService = LocalAIService.shared
@@ -9,6 +10,8 @@ struct AIChatView: View {
     @State private var showingWorkoutStart = false
     @State private var actionFoodName = ""
     @State private var actionWorkoutType: String?
+    @State private var selectedPhoto: PhotosPickerItem?
+    @State private var selectedImageData: Data?
     @FocusState private var inputFocused: Bool
 
     struct ChatMessage: Identifiable {
@@ -76,12 +79,43 @@ struct AIChatView: View {
 
             // Input bar
             HStack(spacing: 8) {
-                TextField("Ask about your health...", text: $inputText, axis: .vertical)
-                    .textFieldStyle(.plain)
-                    .font(.subheadline)
-                    .lineLimit(1...4)
-                    .focused($inputFocused)
-                    .onSubmit { sendMessage() }
+                // Vision: camera/photo button (only when backend supports it)
+                if aiService.supportsVision {
+                    PhotosPicker(selection: $selectedPhoto, matching: .images) {
+                        Image(systemName: "camera.fill")
+                            .font(.body)
+                            .foregroundStyle(Theme.accent.opacity(0.7))
+                    }
+                    .onChange(of: selectedPhoto) { _, item in
+                        guard let item else { return }
+                        Task {
+                            if let data = try? await item.loadTransferable(type: Data.self) {
+                                selectedImageData = data
+                                inputText = inputText.isEmpty ? "What food is this?" : inputText
+                            }
+                        }
+                    }
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    if let imageData = selectedImageData, let uiImage = UIImage(data: imageData) {
+                        HStack {
+                            Image(uiImage: uiImage)
+                                .resizable().scaledToFill()
+                                .frame(width: 40, height: 40)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                            Button { selectedImageData = nil } label: {
+                                Image(systemName: "xmark.circle.fill").font(.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                    TextField("Ask about your health...", text: $inputText, axis: .vertical)
+                        .textFieldStyle(.plain)
+                        .font(.subheadline)
+                        .lineLimit(1...4)
+                        .focused($inputFocused)
+                        .onSubmit { sendMessage() }
+                }
 
                 if isGenerating {
                     Button { aiService.stop() } label: {
