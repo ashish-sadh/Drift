@@ -333,10 +333,24 @@ struct AIChatView: View {
         }
 
         // Single food intent: "log 2 eggs", "ate avocado"
+        // Try direct logging if exact DB match found
         if let intent = AIActionExecutor.parseFoodIntent(resolved) {
+            if let match = AIActionExecutor.findFood(query: intent.query, servings: intent.servings) {
+                let f = match.food
+                let servings = match.servings
+                let cal = f.calories * servings
+                let p = f.proteinG * servings
+                let vm = FoodLogViewModel()
+                vm.quickAdd(name: f.name, calories: cal, proteinG: p,
+                            carbsG: f.carbsG * servings, fatG: f.fatG * servings,
+                            fiberG: f.fiberG * servings, mealType: currentMealType)
+                messages.append(ChatMessage(role: .assistant, text: "Logged \(f.name)\(servings != 1 ? " x\(Int(servings))" : "") (\(Int(cal)) cal, \(Int(p))g protein)."))
+                return
+            }
+            // No exact match — open search
             foodSearchQuery = intent.query
             foodSearchServings = intent.servings
-            messages.append(ChatMessage(role: .assistant, text: "Opening \(intent.query)..."))
+            messages.append(ChatMessage(role: .assistant, text: "Searching for \(intent.query)..."))
             showingFoodSearch = true
             return
         }
@@ -437,6 +451,17 @@ struct AIChatView: View {
     }
 
     // MARK: - Message Bubble
+
+    /// Determine meal type based on time of day.
+    private var currentMealType: MealType {
+        let hour = Calendar.current.component(.hour, from: Date())
+        switch hour {
+        case ..<11: return .breakfast
+        case ..<15: return .lunch
+        case ..<21: return .dinner
+        default: return .snack
+        }
+    }
 
     /// Screen-aware fallback when LLM fails or produces low-quality output.
     private func fallbackResponse(for screen: AIScreen) -> String {
