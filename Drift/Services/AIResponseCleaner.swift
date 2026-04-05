@@ -12,6 +12,20 @@ enum AIResponseCleaner {
             text = text.replacingOccurrences(of: artifact, with: "")
         }
 
+        // Remove mechanical preambles
+        let preambles = ["based on your data, ", "based on the context, ", "according to the data, ",
+                         "according to your information, ", "based on the information provided, ",
+                         "looking at your data, ", "from what i can see, "]
+        for p in preambles {
+            if text.lowercased().hasPrefix(p) {
+                text = String(text.dropFirst(p.count))
+                // Capitalize first letter
+                if let first = text.first {
+                    text = first.uppercased() + text.dropFirst()
+                }
+            }
+        }
+
         // Remove "As an AI..." disclaimers
         let disclaimers = ["as an ai", "as a language model", "i'm just an ai", "i cannot provide medical", "i'm not a doctor"]
         let sentences = text.components(separatedBy: ". ")
