@@ -47,4 +47,11 @@ enum Preferences {
         get { UserDefaults.standard.bool(forKey: cycleFertileWindowKey) }
         set { UserDefaults.standard.set(newValue, forKey: cycleFertileWindowKey) }
     }
+
+    private static let aiEnabledKey = "drift_ai_enabled"
+
+    static var aiEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: aiEnabledKey) }
+        set { UserDefaults.standard.set(newValue, forKey: aiEnabledKey) }
+    }
 }

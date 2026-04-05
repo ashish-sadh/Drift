@@ -5,6 +5,7 @@ struct DashboardView: View {
     @Binding var selectedTab: Int
     @State private var viewModel = DashboardViewModel()
     @State private var showDeficitExplainer = false
+    @State private var aiEnabled = Preferences.aiEnabled
 
     var body: some View {
         NavigationStack {
@@ -96,9 +97,25 @@ struct DashboardView: View {
                             .font(.headline.weight(.bold))
                     }
                 }
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        aiEnabled.toggle()
+                        Preferences.aiEnabled = aiEnabled
+                    } label: {
+                        HStack(spacing: 3) {
+                            Image(systemName: "sparkles")
+                                .font(.caption)
+                            Text("AI")
+                                .font(.caption.weight(.semibold))
+                        }
+                        .foregroundStyle(aiEnabled ? Theme.accent : Color.gray)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(aiEnabled ? Theme.accent.opacity(0.15) : Color.clear, in: Capsule())
+                    }
+                }
             }
             .task { await viewModel.loadToday() }
-            .refreshable { await viewModel.loadToday() }
             .refreshable { await viewModel.loadToday() }
             .onChange(of: syncComplete) { _, done in
                 if done { Task { await viewModel.loadToday() } }

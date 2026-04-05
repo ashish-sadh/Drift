@@ -17,11 +17,11 @@ final class AIModelManager {
     private(set) var currentTier: AIModelTier
     private(set) var backendType: AIBackendType
 
-    // Base URL for model downloads — HuggingFace (fallback until GitHub Releases is set up)
+    // Base URL for model downloads — GitHub Releases (primary), HuggingFace (fallback for vision)
     private var baseURL: String {
         switch currentTier {
         case .small:
-            return "https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main"
+            return "https://github.com/ashish-sadh/Drift/releases/download/models-v1"
         case .vision:
             return "https://huggingface.co/unsloth/Qwen3-VL-2B-Instruct-GGUF/resolve/main"
         }

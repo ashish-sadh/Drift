@@ -12,6 +12,7 @@
 		12608375BDCD57D211C64849 /* WeightLogListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E78D132A90B0FDC35353646 /* WeightLogListView.swift */; };
 		12D17153112FD530712D6FC6 /* AIContextBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB907D183F2E9999A4BC3915 /* AIContextBuilder.swift */; };
 		1706838F0C81E8CA30C39676 /* SleepRecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0EA24C208A1C32DB52709A4 /* SleepRecoveryView.swift */; };
+		1BF24E5EFE0ECE537D36EA2E /* FloatingAIAssistant.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFF155F20FB2EF069D634C95 /* FloatingAIAssistant.swift */; };
 		1E0CA8E39AF5CE13AC703456 /* BiomarkerKnowledgeBase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42CC554F9454FF0FC8A31F56 /* BiomarkerKnowledgeBase.swift */; };
 		1E11E5682458FC83023281D7 /* WeightInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A039993077E4BE9F83149249 /* WeightInsightsView.swift */; };
 		1E41F060499A92A9EFB59BE1 /* BiomarkerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155E590DFD0A95014B993B9D /* BiomarkerDetailView.swift */; };
@@ -212,6 +213,7 @@
 		DD2565511DFA43570D0CE9EA /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
 		DDFFBCB3D524DCFEA822DB53 /* Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistence.swift; sourceTree = "<group>"; };
 		DF03B01EDE878137C97C5012 /* FoodEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodEntry.swift; sourceTree = "<group>"; };
+		DFF155F20FB2EF069D634C95 /* FloatingAIAssistant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingAIAssistant.swift; sourceTree = "<group>"; };
 		E0EA24C208A1C32DB52709A4 /* SleepRecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepRecoveryView.swift; sourceTree = "<group>"; };
 		E1A5DA3E3543A99260250279 /* UIFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIFlowTests.swift; sourceTree = "<group>"; };
 		E342C8090873CF9612C8A63E /* LabReportOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabReportOCR.swift; sourceTree = "<group>"; };
@@ -395,6 +397,7 @@
 			children = (
 				9FA2C56E731BE5610FDC5B12 /* AIChatView.swift */,
 				7F4C6870115BE53081FA0CDE /* AISetupView.swift */,
+				DFF155F20FB2EF069D634C95 /* FloatingAIAssistant.swift */,
 			);
 			path = AI;
 			sourceTree = "<group>";
@@ -674,6 +677,7 @@
 				4C31E5F32057829ABAA0840A /* DriftApp.swift in Sources */,
 				29FCA567A01752328CAEFFED /* ExerciseDatabase.swift in Sources */,
 				87B4A86A2CDE6196B42015A4 /* FavoriteFood.swift in Sources */,
+				1BF24E5EFE0ECE537D36EA2E /* FloatingAIAssistant.swift in Sources */,
 				DB3B28E9FBF4531A10E67AA9 /* Food.swift in Sources */,
 				E083B1E037CD15A623ABFF2D /* FoodEntry.swift in Sources */,
 				A2ACB0BE8811077162EBE463 /* FoodLogViewModel.swift in Sources */,

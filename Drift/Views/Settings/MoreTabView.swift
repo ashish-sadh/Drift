@@ -9,14 +9,6 @@ struct MoreTabView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
-                    // AI Assistant
-                    VStack(spacing: 0) {
-                        navRow(icon: "sparkles", title: "Drift AI", subtitle: "Health assistant powered by on-device AI", color: Theme.accent) {
-                            AIView()
-                        }
-                    }
-                    .card()
-
                     // Goal
                     VStack(spacing: 0) {
                         navRow(icon: "target", title: "Weight Goal", subtitle: "Target weight, timeline, deficit plan", color: Theme.deficit) {
@@ -63,6 +55,45 @@ struct MoreTabView: View {
                         Divider().overlay(Color.white.opacity(0.05))
                         navRow(icon: "slider.horizontal.3", title: "Algorithm", subtitle: "TDEE & calorie target settings", color: Theme.accent) {
                             AlgorithmSettingsView()
+                        }
+                    }
+                    .card()
+
+                    // AI
+                    VStack(spacing: 0) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "sparkles")
+                                .foregroundStyle(Theme.accent).frame(width: 24)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("AI Assistant").font(.subheadline.weight(.medium))
+                                Text("Beta").font(.caption2).foregroundStyle(.tertiary)
+                            }
+                            Spacer()
+                            Toggle("", isOn: Binding(
+                                get: { Preferences.aiEnabled },
+                                set: { Preferences.aiEnabled = $0 }
+                            ))
+                            .labelsHidden().tint(Theme.accent)
+                        }
+                        .padding(.vertical, 10)
+
+                        if AIModelManager.shared.isModelDownloaded {
+                            Divider().overlay(Color.white.opacity(0.05))
+                            Button(role: .destructive) {
+                                LocalAIService.shared.deleteModel()
+                                Preferences.aiEnabled = false
+                            } label: {
+                                HStack(spacing: 12) {
+                                    Image(systemName: "trash").foregroundStyle(Theme.surplus).frame(width: 24)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("Remove AI Data").font(.subheadline.weight(.medium)).foregroundStyle(Theme.surplus)
+                                        Text("Free ~\(AIModelManager.shared.modelSizeOnDiskMB) MB")
+                                            .font(.caption2).foregroundStyle(.tertiary)
+                                    }
+                                    Spacer()
+                                }
+                                .padding(.vertical, 10)
+                            }.buttonStyle(.plain)
                         }
                     }
                     .card()

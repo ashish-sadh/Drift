@@ -28,7 +28,10 @@ struct ContentView: View {
         UINavigationBar.appearance().compactAppearance = navAppearance
     }
 
+    @State private var aiEnabled = Preferences.aiEnabled
+
     var body: some View {
+        ZStack {
         TabView(selection: $selectedTab) {
             DashboardView(syncComplete: $syncComplete, selectedTab: $selectedTab)
                 .tabItem { Label("Drift", systemImage: "chart.line.uptrend.xyaxis") }
@@ -53,6 +56,13 @@ struct ContentView: View {
         }
         .tint(Theme.accent)
         .background(Theme.background.ignoresSafeArea())
+
+            // Floating AI assistant
+            if aiEnabled {
+                FloatingAIAssistant()
+            }
+        } // end ZStack
+        .onChange(of: aiEnabled) { _, val in Preferences.aiEnabled = val }
     }
 }
 
