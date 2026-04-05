@@ -5,6 +5,10 @@ struct AIChatView: View {
     @State private var messages: [ChatMessage] = []
     @State private var inputText = ""
     @State private var isGenerating = false
+    @State private var showingFoodSearch = false
+    @State private var showingWorkoutStart = false
+    @State private var actionFoodName = ""
+    @State private var actionWorkoutType: String?
     @FocusState private var inputFocused: Bool
 
     struct ChatMessage: Identifiable {
@@ -128,13 +132,43 @@ struct AIChatView: View {
                     .foregroundStyle(.primary)
 
             case .assistant:
-                Image(systemName: "sparkles")
-                    .font(.caption)
-                    .foregroundStyle(Theme.accent)
-                    .padding(.top, 4)
-                Text(message.text)
-                    .font(.subheadline)
-                    .foregroundStyle(.primary)
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(alignment: .top, spacing: 8) {
+                        Image(systemName: "sparkles")
+                            .font(.caption)
+                            .foregroundStyle(Theme.accent)
+                            .padding(.top, 4)
+                        let parsed = AIActionParser.parse(message.text)
+                        Text(parsed.cleanText.isEmpty ? message.text : parsed.cleanText)
+                            .font(.subheadline)
+                            .foregroundStyle(.primary)
+                    }
+                    // Action buttons
+                    let action = AIActionParser.parse(message.text).action
+                    switch action {
+                    case .logFood(let name, _):
+                        Button {
+                            // Pre-fill food search with the name
+                            actionFoodName = name
+                            showingFoodSearch = true
+                        } label: {
+                            Label("Log \(name)", systemImage: "plus.circle")
+                                .font(.caption.weight(.medium))
+                        }
+                        .buttonStyle(.bordered).tint(Theme.accent)
+                    case .startWorkout(let type):
+                        Button {
+                            actionWorkoutType = type
+                            showingWorkoutStart = true
+                        } label: {
+                            Label("Start \(type ?? "Workout")", systemImage: "figure.run")
+                                .font(.caption.weight(.medium))
+                        }
+                        .buttonStyle(.bordered).tint(Theme.deficit)
+                    default:
+                        EmptyView()
+                    }
+                }
                 Spacer()
 
             case .system:
