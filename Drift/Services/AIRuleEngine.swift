@@ -152,15 +152,26 @@ enum AIRuleEngine {
         }
 
         let remaining = target - nutrition.calories
+        let hour = Calendar.current.component(.hour, from: Date())
+
         if remaining > 0 {
-            // Add protein context if relevant
+            var response = "\(Int(remaining)) cal left (\(Int(nutrition.calories))/\(Int(target)))"
+
+            // Protein context
             if let goal = WeightGoal.load(), let targets = goal.macroTargets() {
                 let pLeft = max(0, Int(targets.proteinG - nutrition.proteinG))
-                if pLeft > 20 {
-                    return "\(Int(remaining)) cal left (\(Int(nutrition.calories))/\(Int(target))). Still need \(pLeft)g protein."
-                }
+                if pLeft > 20 { response += ". Still need \(pLeft)g protein" }
             }
-            return "\(Int(remaining)) cal left (\(Int(nutrition.calories))/\(Int(target)))."
+
+            // Time-aware note
+            let pctEaten = nutrition.calories / target
+            if hour < 13 && pctEaten > 0.6 {
+                response += ". Heads up: you've eaten most of your budget before lunch."
+            } else if hour > 19 && remaining > target * 0.5 {
+                response += ". You've got plenty left — don't skip dinner."
+            }
+
+            return response + "."
         } else {
             return "You've eaten \(Int(nutrition.calories)) of \(Int(target)) cal — \(Int(abs(remaining))) over target."
         }
