@@ -436,7 +436,15 @@ enum AIContextBuilder {
         let inNormal = readings.filter { $0.zone == .normal }.count
         let spikes = readings.filter { $0.glucoseMgdl > 140 }.count
 
-        return "Glucose today (\(readings.count) readings): avg \(Int(avg)) mg/dL, range \(Int(values.min() ?? 0))-\(Int(values.max() ?? 0)), \(Int(Double(inNormal) / Double(readings.count) * 100))% in normal zone, \(spikes) spike\(spikes == 1 ? "" : "s") >140"
+        var lines = ["Glucose (\(readings.count) readings): avg \(Int(avg))mg/dL | range \(Int(values.min() ?? 0))-\(Int(values.max() ?? 0)) | \(Int(Double(inNormal) / Double(readings.count) * 100))% normal"]
+        if spikes > 0 { lines.append("Spikes: \(spikes) readings >140mg/dL") }
+
+        // Pre-computed assessment
+        if avg < 100 { lines.append("Assessment: glucose well controlled") }
+        else if avg < 126 { lines.append("Assessment: slightly elevated average — monitor diet") }
+        else { lines.append("Assessment: elevated glucose — consider consulting doctor") }
+
+        return lines.joined(separator: "\n")
     }
 
     // MARK: - Biomarker Context
