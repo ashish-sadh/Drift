@@ -21,11 +21,18 @@ enum AIActionExecutor {
     static func parseFoodIntent(_ text: String) -> FoodIntent? {
         let lower = text.lowercased().trimmingCharacters(in: .whitespaces)
 
-        // Must start with a logging verb
+        // Direct verb prefix: "log eggs", "ate chicken"
         let verbs = ["log ", "ate ", "had ", "add ", "track ", "logged ", "eating "]
-        guard let verb = verbs.first(where: { lower.hasPrefix($0) }) else { return nil }
+        var remainder: String
 
-        var remainder = String(lower.dropFirst(verb.count)).trimmingCharacters(in: .whitespaces)
+        if let verb = verbs.first(where: { lower.hasPrefix($0) }) {
+            remainder = String(lower.dropFirst(verb.count)).trimmingCharacters(in: .whitespaces)
+        } else {
+            // Natural phrasing: "I just had", "I ate", "just ate", "just had"
+            let naturalPrefixes = ["i just had ", "i just ate ", "i had ", "i ate ", "just had ", "just ate ", "just logged "]
+            guard let prefix = naturalPrefixes.first(where: { lower.hasPrefix($0) }) else { return nil }
+            remainder = String(lower.dropFirst(prefix.count)).trimmingCharacters(in: .whitespaces)
+        }
 
         // Remove trailing qualifiers
         for suffix in [" for me", " please", " today", " for breakfast", " for lunch", " for dinner", " for snack"] {

@@ -124,6 +124,19 @@ import Testing
     #expect(intent?.servings == 0.5)
 }
 
+@Test func aiExecutorNaturalPhrasing() async throws {
+    let intent1 = AIActionExecutor.parseFoodIntent("i just had a samosa for lunch")
+    #expect(intent1 != nil, "'I just had' should be recognized")
+    #expect(intent1?.query == "samosa")
+
+    let intent2 = AIActionExecutor.parseFoodIntent("i ate chicken breast")
+    #expect(intent2 != nil, "'I ate' should be recognized")
+    #expect(intent2?.query == "chicken breast")
+
+    let intent3 = AIActionExecutor.parseFoodIntent("just had some rice")
+    #expect(intent3 != nil, "'just had' should be recognized")
+}
+
 @Test func aiExecutorNoFoodIntent() async throws {
     let intent = AIActionExecutor.parseFoodIntent("how many calories today")
     #expect(intent == nil)
