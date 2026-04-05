@@ -83,6 +83,11 @@ struct WeightInsightsView: View {
                 }
             }
 
+            // 21-day mini trend
+            if trend.dataPoints.count >= 7 {
+                last21DaysTrend
+            }
+
             // Compact weight-change chips
             weightChangesRow
 
@@ -91,6 +96,70 @@ struct WeightInsightsView: View {
                 weekdayInsight
             }
         }
+    }
+
+    // MARK: - 21-Day Mini Trend
+
+    private var last21DaysTrend: some View {
+        let cal = Calendar.current
+        let cutoff = cal.date(byAdding: .day, value: -21, to: Date())!
+        let recent = trend.dataPoints.filter { $0.date >= cutoff }
+        guard !recent.isEmpty else { return AnyView(EmptyView()) }
+
+        let weights = recent.compactMap(\.actualWeight)
+        let minW = weights.min() ?? 0
+        let maxW = weights.max() ?? 0
+        let range = max(maxW - minW, 0.1)
+        let netChange = (weights.last ?? 0) - (weights.first ?? 0)
+
+        return AnyView(
+            VStack(spacing: 6) {
+                HStack {
+                    Text("Last 21 Days").font(.caption2.weight(.medium)).foregroundStyle(.secondary)
+                    Spacer()
+                    let d = unit.convert(fromKg: netChange)
+                    HStack(spacing: 2) {
+                        Image(systemName: directionIcon(netChange)).font(.system(size: 9, weight: .bold))
+                        Text(String(format: "%+.1f %@", d, unit.displayName))
+                            .font(.caption2.weight(.semibold).monospacedDigit())
+                    }
+                    .foregroundStyle(changeColor(netChange))
+                }
+
+                // Mini sparkline
+                GeometryReader { geo in
+                    let w = geo.size.width
+                    let h: CGFloat = 40
+                    let dayWidth = w / 20 // 21 days = 20 gaps
+
+                    // EMA trend line
+                    Path { path in
+                        for (i, point) in recent.enumerated() {
+                            let x = CGFloat(i) * dayWidth * (20.0 / max(CGFloat(recent.count - 1), 1))
+                            let y = h - CGFloat((point.emaWeight - minW) / range) * h
+                            if i == 0 { path.move(to: CGPoint(x: x, y: y)) }
+                            else { path.addLine(to: CGPoint(x: x, y: y)) }
+                        }
+                    }
+                    .stroke(Theme.accent.opacity(0.6), style: StrokeStyle(lineWidth: 1.5))
+
+                    // Actual weight dots
+                    ForEach(Array(recent.enumerated()), id: \.offset) { i, point in
+                        if let actual = point.actualWeight {
+                            let x = CGFloat(i) * dayWidth * (20.0 / max(CGFloat(recent.count - 1), 1))
+                            let y = h - CGFloat((actual - minW) / range) * h
+                            Circle()
+                                .fill(changeColor(actual - point.emaWeight))
+                                .frame(width: 4, height: 4)
+                                .position(x: x, y: y)
+                        }
+                    }
+                }
+                .frame(height: 40)
+            }
+            .padding(.vertical, 10).padding(.horizontal, 12)
+            .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 14))
+        )
     }
 
     // MARK: - Weekday Pattern
