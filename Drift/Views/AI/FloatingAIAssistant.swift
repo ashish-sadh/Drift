@@ -72,26 +72,32 @@ struct FloatingAIAssistant: View {
 
     // MARK: - Minimized Bubble
 
+    @State private var pulseAnimation = false
+
     private var minimizedBubble: some View {
-        Button { withAnimation { isExpanded = true } } label: {
+        let isDownloading = modelManager.downloadState != .idle && modelManager.downloadState != .completed && modelManager.downloadState != .error("")
+
+        return Button { withAnimation { isExpanded = true } } label: {
             ZStack {
                 Circle()
                     .fill(Theme.accent)
                     .frame(width: 52, height: 52)
                     .shadow(color: Theme.accent.opacity(0.4), radius: 10, y: 4)
 
-                if case .downloading(let progress) = modelManager.downloadState {
+                if case .downloading = modelManager.downloadState {
+                    // Pulsing ring animation during download
                     Circle()
-                        .stroke(Color.white.opacity(0.2), lineWidth: 3)
-                        .frame(width: 52, height: 52)
-                    Circle()
-                        .trim(from: 0, to: progress)
-                        .stroke(Color.white, style: StrokeStyle(lineWidth: 3, lineCap: .round))
-                        .frame(width: 52, height: 52)
-                        .rotationEffect(.degrees(-90))
-                    Text("\(Int(progress * 100))%")
-                        .font(.system(size: 10, weight: .bold).monospacedDigit())
-                        .foregroundStyle(.white)
+                        .stroke(Color.white.opacity(0.4), lineWidth: 2)
+                        .frame(width: 58, height: 58)
+                        .scaleEffect(pulseAnimation ? 1.3 : 1.0)
+                        .opacity(pulseAnimation ? 0 : 0.6)
+                        .animation(.easeOut(duration: 1.2).repeatForever(autoreverses: false), value: pulseAnimation)
+                        .onAppear { pulseAnimation = true }
+
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .tint(.white)
+                        .scaleEffect(0.8)
                 } else {
                     Image(systemName: "sparkles")
                         .font(.title3)
@@ -154,10 +160,12 @@ struct FloatingAIAssistant: View {
         VStack(spacing: 16) {
             Spacer()
 
-            if case .downloading(let progress) = modelManager.downloadState {
-                ProgressView(value: progress).tint(Theme.accent).padding(.horizontal, 40)
-                Text("\(Int(progress * 100))% · Setting up AI")
-                    .font(.caption).foregroundStyle(.secondary)
+            if case .downloading = modelManager.downloadState {
+                ProgressView().tint(Theme.accent)
+                Text("Setting up AI...")
+                    .font(.caption.weight(.medium)).foregroundStyle(.secondary)
+                Text("This may take a few minutes")
+                    .font(.caption2).foregroundStyle(.tertiary)
             } else if case .error(let msg) = modelManager.downloadState {
                 Text(msg).font(.caption).foregroundStyle(Theme.surplus)
                     .multilineTextAlignment(.center).padding(.horizontal, 20)
