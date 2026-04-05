@@ -81,7 +81,11 @@ struct AIChatView: View {
         .onAppear {
             if messages.isEmpty {
                 messages.append(ChatMessage(role: .assistant, text: pageInsight))
-                messages.append(ChatMessage(role: .assistant, text: "This is an experimental feature. If something doesn't work, you can turn it off from the toggle on Dashboard or in More \u{2192} Settings."))
+                // Show experimental warning only once
+                if !UserDefaults.standard.bool(forKey: "drift_ai_warned") {
+                    messages.append(ChatMessage(role: .assistant, text: "This is an experimental feature. Turn it off from the toggle on Dashboard or More \u{2192} Settings."))
+                    UserDefaults.standard.set(true, forKey: "drift_ai_warned")
+                }
             }
             if !aiService.isModelLoaded && aiService.state == .ready {
                 aiService.loadModel()
