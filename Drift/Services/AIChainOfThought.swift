@@ -36,6 +36,7 @@ enum AIChainOfThought {
         // Always start with base context
         let needsWeight = q.contains("track") || q.contains("progress") || q.contains("on track")
             || q.contains("weight") || q.contains("goal") || q.contains("losing") || q.contains("gaining")
+            || q.contains("lost") || q.contains("gained") || q.contains("lighter") || q.contains("heavier")
         let needsFood = q.contains("eat") || q.contains("meal") || q.contains("dinner") || q.contains("lunch")
             || q.contains("breakfast") || q.contains("food") || q.contains("calorie") || q.contains("protein")
             || q.contains("macro") || q.contains("nutrition") || q.contains("diet") || q.contains("snack")
