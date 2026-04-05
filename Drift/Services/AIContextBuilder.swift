@@ -106,11 +106,12 @@ enum AIContextBuilder {
         // Goal — pre-computed with progress
         if let goal = WeightGoal.load() {
             let u = Preferences.weightUnit
+            let direction = goal.totalChangeKg < 0 ? "losing" : "gaining"
             if let entries = try? AppDatabase.shared.fetchWeightEntries(),
                let latest = entries.last {
                 let progress = goal.progress(currentWeightKg: latest.weightKg)
                 let goalW = String(format: "%.1f", u.convert(fromKg: goal.targetWeightKg))
-                lines.append("Goal: \(goalW)\(u.displayName) | \(Int(progress * 100))% done | \(goal.monthsToAchieve)mo timeline")
+                lines.append("Goal: \(direction) to \(goalW)\(u.displayName) | \(Int(progress * 100))% done | \(goal.monthsToAchieve)mo")
             }
         }
 
