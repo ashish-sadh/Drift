@@ -304,8 +304,15 @@ enum Migrations {
             try db.alter(table: "food_entry") { t in
                 t.add(column: "logged_at", .text).notNull().defaults(to: "")
             }
-            // Backfill: copy created_at into logged_at for existing rows
             try db.execute(sql: "UPDATE food_entry SET logged_at = created_at WHERE logged_at = ''")
+        }
+
+        // v17: Workout set duration + exercise order
+        migrator.registerMigration("v17_workout_duration_order") { db in
+            try db.alter(table: "workout_set") { t in
+                t.add(column: "duration_sec", .integer)
+                t.add(column: "exercise_order", .integer).notNull().defaults(to: 0)
+            }
         }
     }
 }

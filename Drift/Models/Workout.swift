@@ -58,6 +58,8 @@ struct WorkoutSet: Identifiable, Codable, Sendable, FetchableRecord, Persistable
     var reps: Int?
     var isWarmup: Bool
     var rpe: Double?
+    var durationSec: Int?
+    var exerciseOrder: Int = 0
 
     static let databaseTableName = "workout_set"
     enum CodingKeys: String, CodingKey {
@@ -67,6 +69,8 @@ struct WorkoutSet: Identifiable, Codable, Sendable, FetchableRecord, Persistable
         case setOrder = "set_order"
         case weightLbs = "weight_lbs"
         case isWarmup = "is_warmup"
+        case durationSec = "duration_sec"
+        case exerciseOrder = "exercise_order"
     }
     mutating func didInsert(_ inserted: InsertionSuccess) { id = inserted.rowID }
 
@@ -78,9 +82,24 @@ struct WorkoutSet: Identifiable, Codable, Sendable, FetchableRecord, Persistable
     }
 
     var display: String {
+        if let d = durationSec, d > 0 {
+            let m = d / 60; let s = d % 60
+            let timeStr = m > 0 ? "\(m):\(String(format: "%02d", s))" : "\(s)s"
+            let w = weightLbs.map { "\(Int($0)) lb · " } ?? ""
+            return "\(w)\(timeStr)"
+        }
         let w = weightLbs.map { "\(Int($0)) lb" } ?? "BW"
         let r = reps.map { "× \($0)" } ?? ""
         return "\(w) \(r)"
+    }
+
+    /// Whether this exercise type uses duration instead of reps.
+    static func isDurationExercise(_ name: String) -> Bool {
+        let lower = name.lowercased()
+        let keywords = ["plank", "hold", "hang", "wall sit", "l-sit", "dead hang",
+                        "farmer", "carry", "walk", "battle rope", "rope climb",
+                        "sled", "prowler", "isometric"]
+        return keywords.contains(where: { lower.contains($0) })
     }
 }
 

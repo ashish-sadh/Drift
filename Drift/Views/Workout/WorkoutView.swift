@@ -694,6 +694,7 @@ struct WorkoutDetailView: View {
 // MARK: - Active Workout (with live timer, rest timer, prefilled weights)
 
 struct ActiveWorkoutView: View {
+    @Environment(\.scenePhase) private var scenePhase
     var template: WorkoutTemplate? = nil
     let onComplete: () -> Void
     @Environment(\.dismiss) private var dismiss
@@ -709,6 +710,7 @@ struct ActiveWorkoutView: View {
     @State private var restTotalSeconds = 90
     @State private var restTimerActive = false
     @State private var restTimer: Timer?
+    @State private var restEndTime: Date?
     @State private var activeRestExerciseIndex: Int? = nil
     @State private var activeRestSetIndex: Int? = nil
     @State private var workoutEnded = false  // prevents re-persisting after finish/cancel
@@ -717,6 +719,9 @@ struct ActiveWorkoutView: View {
     @State private var showingTemplateName = false
     @State private var saveAsTemplateToggle = false
     @State private var favoriteAllToggle = false
+    @State private var showingCompletionSheet = false
+    @State private var completionShareText = ""
+    @State private var completionMilestone: String? = nil
 
     struct ActiveExercise: Identifiable {
         let id = UUID()
@@ -917,6 +922,41 @@ struct ActiveWorkoutView: View {
                 }
                 .presentationDetents([.medium])
             }
+            .sheet(isPresented: $showingCompletionSheet) {
+                // Dismiss everything when completion sheet closes
+                onComplete(); dismiss()
+            } content: {
+                VStack(spacing: 20) {
+                    if let milestone = completionMilestone {
+                        Text("🎉").font(.system(size: 48))
+                        Text(milestone).font(.title2.weight(.bold))
+                    } else {
+                        Text("💪").font(.system(size: 48))
+                        Text("Workout Complete").font(.title2.weight(.bold))
+                    }
+
+                    Text(completionShareText)
+                        .font(.subheadline).foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+
+                    Button {
+                        guard let scene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                              let root = scene.windows.first?.rootViewController else { return }
+                        let vc = UIActivityViewController(activityItems: [completionShareText], applicationActivities: nil)
+                        root.present(vc, animated: true)
+                    } label: {
+                        Label("Share", systemImage: "square.and.arrow.up").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+
+                    Button("Done") { showingCompletionSheet = false }
+                        .buttonStyle(.borderedProminent).tint(Theme.deficit)
+                        .frame(maxWidth: .infinity)
+                }
+                .padding(24)
+                .presentationDetents([.medium])
+                .background(Theme.background)
+            }
             .onAppear {
                 // Restore session BEFORE starting timer so startTime is correct
                 let restored = restoreSession()
@@ -940,6 +980,29 @@ struct ActiveWorkoutView: View {
                 stopTimers()
                 // Only persist if workout wasn't finished or cancelled
                 if !workoutEnded && !exercises.isEmpty { persistSession() }
+            }
+            .onChange(of: scenePhase) { _, newPhase in
+                if newPhase == .active && !workoutEnded {
+                    // Restart workout timer — elapsed recalculates from startTime
+                    workoutTimer?.invalidate()
+                    elapsedSeconds = Int(Date().timeIntervalSince(startTime))
+                    startWorkoutTimer()
+                    // Update rest timer from wall-clock end time
+                    if restTimerActive, let endTime = restEndTime {
+                        let remaining = Int(endTime.timeIntervalSince(Date()))
+                        if remaining > 0 {
+                            restSeconds = remaining
+                            restTimer?.invalidate()
+                            startRestTimerTick()
+                        } else {
+                            // Rest finished while in background
+                            restSeconds = 0
+                            restTimer?.invalidate()
+                            restTimerActive = false
+                            AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
+                        }
+                    }
+                }
             }
         }
     }
@@ -1050,12 +1113,28 @@ struct ActiveWorkoutView: View {
                             exercises[ei].sets[si].done.toggle()
                             if exercises[ei].sets[si].done {
                                 startRest(exerciseIndex: ei, setIndex: si, duration: exercises[ei].restTime)
+                                // Auto-add next set prefilled with same weight/reps (copy to next)
+                                if si == exercises[ei].sets.count - 1 {
+                                    let s = exercises[ei].sets[si]
+                                    if !s.weight.isEmpty || !s.reps.isEmpty {
+                                        exercises[ei].sets.append(ActiveSet(weight: s.weight, reps: s.reps))
+                                    }
+                                }
                             }
                         } label: {
                             Image(systemName: exercises[ei].sets[si].done ? "checkmark.circle.fill" : "circle")
                                 .font(.title3)
                                 .foregroundStyle(exercises[ei].sets[si].done ? Theme.deficit : .secondary)
                         }.frame(width: 30)
+
+                        // Delete set button (only if more than 1 set)
+                        if exercises[ei].sets.count > 1 {
+                            Button {
+                                exercises[ei].sets.remove(at: si)
+                            } label: {
+                                Image(systemName: "minus.circle").font(.caption2).foregroundStyle(.quaternary)
+                            }.frame(width: 20)
+                        }
                     }
                     .padding(.vertical, 2)
 
@@ -1149,17 +1228,26 @@ struct ActiveWorkoutView: View {
     private func startRest(exerciseIndex: Int, setIndex: Int, duration: Int) {
         restTotalSeconds = duration
         restSeconds = duration
+        restEndTime = Date().addingTimeInterval(Double(duration))
         activeRestExerciseIndex = exerciseIndex
         activeRestSetIndex = setIndex
         restTimerActive = true
         restTimer?.invalidate()
+        startRestTimerTick()
+    }
+
+    private func startRestTimerTick() {
         restTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { _ in
             Task { @MainActor in
-                if restSeconds > 0 {
-                    restSeconds -= 1
+                guard let endTime = restEndTime else { return }
+                let remaining = Int(ceil(endTime.timeIntervalSince(Date())))
+                if remaining > 0 {
+                    restSeconds = remaining
                 } else {
+                    restSeconds = 0
                     restTimer?.invalidate()
                     restTimerActive = false
+                    restEndTime = nil
                     AudioServicesPlaySystemSound(kSystemSoundID_Vibrate)
                 }
             }
@@ -1243,28 +1331,55 @@ struct ActiveWorkoutView: View {
                 return
             }
             var allSets: [WorkoutSet] = []
-            for ex in exercises {
+            for (ei, ex) in exercises.enumerated() {
+                let isDuration = WorkoutSet.isDurationExercise(ex.name)
                 for (si, s) in ex.sets.enumerated() where s.done {
                     let w = Double(s.weight) ?? 0
                     let r = Int(s.reps) ?? 0
-                    guard r > 0 else { continue }
+                    let dur = isDuration ? (Int(s.reps) ?? 0) : nil // duration exercises store seconds in reps field
+                    guard r > 0 || (isDuration && (dur ?? 0) > 0) else { continue }
                     allSets.append(WorkoutSet(workoutId: wid, exerciseName: ex.name, setOrder: si + 1,
-                                             weightLbs: w, reps: r, isWarmup: s.isWarmup || ex.isWarmupExercise))
+                                             weightLbs: w > 0 ? w : nil, reps: isDuration ? nil : r,
+                                             isWarmup: s.isWarmup || ex.isWarmupExercise,
+                                             durationSec: dur, exerciseOrder: ei))
                 }
             }
             if allSets.isEmpty {
-                for ex in exercises {
+                for (ei, ex) in exercises.enumerated() {
+                    let isDuration = WorkoutSet.isDurationExercise(ex.name)
                     for (si, s) in ex.sets.enumerated() {
                         let w = Double(s.weight) ?? 0
                         let r = Int(s.reps) ?? 0
-                        guard r > 0 else { continue }
+                        let dur = isDuration ? (Int(s.reps) ?? 0) : nil
+                        guard r > 0 || (isDuration && (dur ?? 0) > 0) else { continue }
                         allSets.append(WorkoutSet(workoutId: wid, exerciseName: ex.name, setOrder: si + 1,
-                                                 weightLbs: w, reps: r, isWarmup: s.isWarmup || ex.isWarmupExercise))
+                                                 weightLbs: w > 0 ? w : nil, reps: isDuration ? nil : r,
+                                                 isWarmup: s.isWarmup || ex.isWarmupExercise,
+                                                 durationSec: dur, exerciseOrder: ei))
                     }
                 }
             }
             try WorkoutService.saveSets(allSets)
-            if andDismiss { onComplete(); dismiss() }
+            if andDismiss {
+                // Build completion share text + check milestones
+                let totalVol = allSets.reduce(0.0) { $0 + (($1.weightLbs ?? 0) * Double($1.reps ?? 0)) }
+                let exerciseNames = exercises.map(\.name).filter { !$0.isEmpty }
+                let duration = workout.durationDisplay
+                var shareLines = ["💪 \(workout.name)"]
+                if !duration.isEmpty { shareLines.append("⏱ \(duration)") }
+                shareLines.append("🏋️ \(Int(totalVol)) lb total volume")
+                shareLines.append("\(exerciseNames.count) exercises · \(allSets.count) sets")
+                completionShareText = shareLines.joined(separator: "\n")
+
+                // Check milestone
+                if let count = try? WorkoutService.totalWorkoutCount() {
+                    let milestones = [1, 5, 10, 25, 50, 100, 150, 200, 250, 300, 500]
+                    if milestones.contains(count) {
+                        completionMilestone = count == 1 ? "First workout!" : "Workout #\(count)!"
+                    }
+                }
+                showingCompletionSheet = true
+            }
         } catch { Log.app.error("Save workout: \(error.localizedDescription)") }
     }
 

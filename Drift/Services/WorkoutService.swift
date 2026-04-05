@@ -32,13 +32,21 @@ enum WorkoutService {
 
     static func fetchSets(forWorkout workoutId: Int64) throws -> [WorkoutSet] {
         try db.reader.read { dbConn in
-            try WorkoutSet.filter(Column("workout_id") == workoutId).order(Column("set_order")).fetchAll(dbConn)
+            try WorkoutSet.filter(Column("workout_id") == workoutId)
+                .order(Column("exercise_order"), Column("set_order"))
+                .fetchAll(dbConn)
         }
     }
 
     static func deleteWorkout(id: Int64) throws {
         try db.writer.write { dbConn in
             _ = try Workout.deleteOne(dbConn, id: id)
+        }
+    }
+
+    static func totalWorkoutCount() throws -> Int {
+        try db.reader.read { dbConn in
+            try Workout.fetchCount(dbConn)
         }
     }
 
@@ -285,7 +293,8 @@ enum WorkoutService {
 
             let isWarmup = isHevy && (row["set_type"] ?? "").lowercased() == "warmup"
             let set = WorkoutSet(workoutId: 0, exerciseName: en, setOrder: setOrder,
-                                 weightLbs: weight, reps: reps, isWarmup: isWarmup, rpe: rpe)
+                                 weightLbs: weight, reps: reps, isWarmup: isWarmup, rpe: rpe,
+                                 exerciseOrder: 0)
             setsByKey[wKey, default: []].append(set)
         }
 
