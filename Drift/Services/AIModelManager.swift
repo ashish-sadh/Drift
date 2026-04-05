@@ -31,6 +31,20 @@ final class AIModelManager {
         let detected = DeviceCapability.detectTier()
         self.currentTier = detected.tier
         self.backendType = detected.backend
+        // Clean up incompatible model files from previous tier
+        cleanupIncompatibleModels()
+    }
+
+    /// Remove model files that don't belong to the current tier (e.g., old Qwen3 vision files).
+    private func cleanupIncompatibleModels() {
+        let validNames = Set(currentTier.modelFiles.map(\.name))
+        guard let contents = try? FileManager.default.contentsOfDirectory(at: modelsDirectory, includingPropertiesForKeys: nil) else { return }
+        for file in contents where file.pathExtension == "gguf" {
+            if !validNames.contains(file.lastPathComponent) {
+                try? FileManager.default.removeItem(at: file)
+                Log.app.info("Removed incompatible model: \(file.lastPathComponent)")
+            }
+        }
     }
 
     // MARK: - Model Status
@@ -51,7 +65,7 @@ final class AIModelManager {
     }
 
     var visionProjectorPath: URL? {
-        guard currentTier == .vision, currentTier.modelFiles.count > 1, isModelDownloaded else { return nil }
+        guard currentTier.modelFiles.count > 1, isModelDownloaded else { return nil }
         return modelPath(for: currentTier.modelFiles[1].name)
     }
 
