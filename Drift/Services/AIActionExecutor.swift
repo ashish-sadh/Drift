@@ -223,6 +223,14 @@ enum AIActionExecutor {
 
     /// Extract amount from beginning of string: "1/3 avocado" → (0.33, "avocado")
     private static func extractAmount(from text: String) -> (Double?, String) {
+        // Multi-word amounts first
+        let multiWord: [(String, Double)] = [("a couple of ", 2), ("couple of ", 2), ("a few ", 3)]
+        for (prefix, amount) in multiWord {
+            if text.lowercased().hasPrefix(prefix) {
+                return (amount, String(text.dropFirst(prefix.count)).trimmingCharacters(in: .whitespaces))
+            }
+        }
+
         let parts = text.split(separator: " ", maxSplits: 1)
         guard let first = parts.first else { return (nil, text) }
         let firstStr = String(first)
@@ -237,7 +245,10 @@ enum AIActionExecutor {
         }
 
         // Word amounts
-        let wordAmounts: [String: Double] = ["half": 0.5, "quarter": 0.25, "one": 1, "two": 2, "three": 3, "a": 1, "an": 1]
+        let wordAmounts: [String: Double] = [
+            "half": 0.5, "quarter": 0.25, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+            "a": 1, "an": 1, "couple": 2, "few": 3, "several": 4, "some": 1
+        ]
         if let amount = wordAmounts[firstStr] {
             let food = parts.count > 1 ? String(parts[1]) : ""
             return (amount, food.trimmingCharacters(in: .whitespaces))
