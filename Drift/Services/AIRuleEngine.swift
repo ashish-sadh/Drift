@@ -93,40 +93,43 @@ enum AIRuleEngine {
 
     /// Generate a structured daily summary.
     static func dailySummary() -> String {
-        var lines: [String] = ["Here's your day so far:"]
+        var lines: [String] = ["Here's your day:"]
         let today = DateFormatters.todayString
 
-        // Nutrition
+        // Nutrition with target
         let nutrition = (try? AppDatabase.shared.fetchDailyNutrition(for: today)) ?? .zero
+        let tdee = TDEEEstimator.shared.current?.tdee ?? 2000
+        let deficit = WeightGoal.load()?.requiredDailyDeficit ?? 0
+        let target = max(500, Int(tdee - deficit))
+
         if nutrition.calories > 0 {
-            lines.append("  Eaten: \(Int(nutrition.calories)) cal (\(Int(nutrition.proteinG))P / \(Int(nutrition.carbsG))C / \(Int(nutrition.fatG))F)")
+            let left = target - Int(nutrition.calories)
+            lines.append("Food: \(Int(nutrition.calories))/\(target) cal (\(left > 0 ? "\(left) left" : "\(abs(left)) over")) — \(Int(nutrition.proteinG))P \(Int(nutrition.carbsG))C \(Int(nutrition.fatG))F")
         } else {
-            lines.append("  No food logged yet")
+            lines.append("Food: nothing logged yet (target: \(target) cal)")
         }
 
         // Weight
         if let entries = try? AppDatabase.shared.fetchWeightEntries(),
            let latest = entries.last {
             let unit = Preferences.weightUnit
-            lines.append("  Weight: \(String(format: "%.1f", unit.convert(fromKg: latest.weightKg))) \(unit.displayName) (\(latest.date))")
+            lines.append("Weight: \(String(format: "%.1f", unit.convert(fromKg: latest.weightKg)))\(unit.displayName)")
         }
 
         // Workouts today
         if let workouts = try? WorkoutService.fetchWorkouts(limit: 10) {
             let todayWorkouts = workouts.filter { $0.date == today }
             if !todayWorkouts.isEmpty {
-                let names = todayWorkouts.map(\.name)
-                lines.append("  Workout: \(names.joined(separator: ", "))")
-            } else {
-                lines.append("  No workout today")
+                lines.append("Workout: \(todayWorkouts.map(\.name).joined(separator: ", "))")
             }
         }
 
         // Supplements
         if let supplements = try? AppDatabase.shared.fetchActiveSupplements(),
+           !supplements.isEmpty,
            let logs = try? AppDatabase.shared.fetchSupplementLogs(for: today) {
             let taken = logs.filter(\.taken).count
-            lines.append("  Supplements: \(taken)/\(supplements.count) taken")
+            lines.append("Supplements: \(taken)/\(supplements.count)")
         }
 
         return lines.joined(separator: "\n")
