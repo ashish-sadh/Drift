@@ -185,15 +185,22 @@ struct AIChatView: View {
         let hour = Calendar.current.component(.hour, from: Date())
         let screen = screenTracker.currentScreen
 
-        // Food-based suggestions
+        // Food-based suggestions — time and context aware
         if nutrition.calories == 0 {
             pills.append(hour < 11 ? "Log breakfast" : hour < 15 ? "Log lunch" : "Log dinner")
         } else {
-            pills.append("How's my protein?")
-            if hour > 17 { pills.append("What should I eat for dinner?") }
+            pills.append("Calories left")
+            if nutrition.proteinG < 80 && hour > 14 {
+                pills.append("How's my protein?")
+            }
+            if hour >= 17 && hour <= 21 {
+                pills.append("What should I eat for dinner?")
+            }
         }
 
-        pills.append("Daily summary")
+        if hour >= 20 || (hour >= 18 && nutrition.calories > 0) {
+            pills.append("Daily summary")
+        }
 
         // Screen-specific pills
         switch screen {
