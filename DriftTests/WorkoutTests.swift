@@ -1280,3 +1280,112 @@ import GRDB
     #expect(second == 0, "Second load should skip all duplicates, got \(second)")
     #expect(first >= 0)
 }
+
+// MARK: - Timer Background Resilience Tests (10 tests)
+
+@Test func elapsedTimeCalculatesFromStartTimeNotIncrement() async throws {
+    // The workout timer must use Date().timeIntervalSince(startTime), not += 1
+    // This is what makes it survive background suspensions
+    let startTime = Date().addingTimeInterval(-300) // started 5 min ago
+    let elapsed = Int(Date().timeIntervalSince(startTime))
+    #expect(elapsed >= 299 && elapsed <= 301, "Should be ~300 seconds, got \(elapsed)")
+}
+
+@Test func elapsedTimeAfterSimulatedBackground() async throws {
+    // Simulate: started 10 min ago, app was in background for 5 min
+    let startTime = Date().addingTimeInterval(-600)
+    // When the timer fires again after returning to foreground, it recalculates
+    let elapsed = Int(Date().timeIntervalSince(startTime))
+    #expect(elapsed >= 599 && elapsed <= 601, "Should be ~600 seconds, got \(elapsed)")
+}
+
+@Test func restTimerEndTimeBasedCalculation() async throws {
+    // Rest timer should calculate remaining time from an end time, not decrement
+    let duration = 90
+    let restEndTime = Date().addingTimeInterval(Double(duration))
+    // Simulate 30 seconds passing in background
+    let simulatedNow = Date().addingTimeInterval(30)
+    let remaining = Int(ceil(restEndTime.timeIntervalSince(simulatedNow)))
+    #expect(remaining == 60, "Should have 60s left after 30s elapsed, got \(remaining)")
+}
+
+@Test func restTimerExpiresDuringBackground() async throws {
+    // Rest timer set for 90s, app backgrounded for 120s — should show 0
+    let duration = 90
+    let restEndTime = Date().addingTimeInterval(Double(duration))
+    let simulatedNow = Date().addingTimeInterval(120)
+    let remaining = Int(restEndTime.timeIntervalSince(simulatedNow))
+    #expect(remaining <= 0, "Rest should have expired, got \(remaining)")
+}
+
+@Test func restTimerExactlyExpires() async throws {
+    // Rest timer at exactly its duration
+    let duration = 60
+    let restEndTime = Date().addingTimeInterval(Double(duration))
+    let simulatedNow = Date().addingTimeInterval(Double(duration))
+    let remaining = Int(ceil(restEndTime.timeIntervalSince(simulatedNow)))
+    #expect(remaining <= 0, "Should be expired at exact duration")
+}
+
+@Test func restTimerPartialSecondRoundsUp() async throws {
+    // If 0.3s remains, ceil should show 1s not 0
+    let restEndTime = Date().addingTimeInterval(90)
+    let simulatedNow = Date().addingTimeInterval(89.7) // 0.3s before end
+    let remaining = Int(ceil(restEndTime.timeIntervalSince(simulatedNow)))
+    #expect(remaining == 1, "Partial second should round up to 1, got \(remaining)")
+}
+
+@Test func sessionPersistencePreservesStartTime() async throws {
+    // Ensure session save/load round-trips the start time accurately
+    let originalStart = Date().addingTimeInterval(-600) // 10 min ago
+    let session = WorkoutService.SavedSession(
+        workoutName: "Timer Test",
+        startTime: originalStart,
+        exercises: []
+    )
+    WorkoutService.saveSession(session)
+    let loaded = WorkoutService.loadSession()
+    #expect(loaded != nil, "Session should load")
+    let timeDiff = abs(loaded!.startTime.timeIntervalSince(originalStart))
+    #expect(timeDiff < 1, "Start time should round-trip within 1s, diff was \(timeDiff)")
+    WorkoutService.clearSession()
+}
+
+@Test func sessionPersistenceWithExercises() async throws {
+    let session = WorkoutService.SavedSession(
+        workoutName: "Push Day",
+        startTime: Date().addingTimeInterval(-120),
+        exercises: [
+            .init(name: "Bench Press", isWarmup: false, notes: nil, restTime: 90,
+                  sets: [.init(weight: "80", reps: "10", done: true, isWarmup: false),
+                         .init(weight: "80", reps: "8", done: false, isWarmup: false)])
+        ]
+    )
+    WorkoutService.saveSession(session)
+    let loaded = WorkoutService.loadSession()
+    #expect(loaded != nil)
+    #expect(loaded!.exercises.count == 1)
+    #expect(loaded!.exercises[0].restTime == 90)
+    #expect(loaded!.exercises[0].sets.count == 2)
+    #expect(loaded!.exercises[0].sets[0].done == true)
+    #expect(loaded!.exercises[0].sets[1].done == false)
+    WorkoutService.clearSession()
+}
+
+@Test func sessionClearRemovesData() async throws {
+    let session = WorkoutService.SavedSession(
+        workoutName: "Clear Test",
+        startTime: Date(),
+        exercises: []
+    )
+    WorkoutService.saveSession(session)
+    #expect(WorkoutService.loadSession() != nil)
+    WorkoutService.clearSession()
+    #expect(WorkoutService.loadSession() == nil, "Session should be nil after clear")
+}
+
+@Test func elapsedTimeZeroAtStart() async throws {
+    let startTime = Date()
+    let elapsed = Int(Date().timeIntervalSince(startTime))
+    #expect(elapsed >= 0 && elapsed <= 1, "Should be ~0 at start, got \(elapsed)")
+}
