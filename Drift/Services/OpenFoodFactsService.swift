@@ -99,13 +99,15 @@ enum OpenFoodFactsService {
     /// Text search for foods by name. Returns up to `limit` products with nutrition data.
     static func search(query: String, limit: Int = 10) async throws -> [Product] {
         let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
-        let urlString = "https://world.openfoodfacts.org/cgi/search.pl?search_terms=\(encoded)&json=1&page_size=\(limit)&fields=product_name,brands,serving_size,nutriments,code"
+        let urlString = "https://search.openfoodfacts.org/search?q=\(encoded)&page_size=\(limit)&fields=product_name,brands,serving_size,nutriments,code"
         guard let url = URL(string: urlString) else { return [] }
 
-        let (data, response) = try await URLSession.shared.data(from: url)
+        var request = URLRequest(url: url)
+        request.setValue("Drift/1.0 (iOS)", forHTTPHeaderField: "User-Agent")
+        let (data, response) = try await URLSession.shared.data(for: request)
         guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else { return [] }
         guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let products = json["products"] as? [[String: Any]] else { return [] }
+              let products = json["hits"] as? [[String: Any]] else { return [] }
 
         return products.compactMap { product in
             let nutriments = product["nutriments"] as? [String: Any] ?? [:]
@@ -118,7 +120,11 @@ enum OpenFoodFactsService {
             guard calories > 0 else { return nil }
             let name = product["product_name"] as? String ?? ""
             guard !name.isEmpty else { return nil }
-            let brand = product["brands"] as? String
+            // brands can be String or [String] depending on endpoint
+            let brand: String?
+            if let b = product["brands"] as? String { brand = b }
+            else if let arr = product["brands"] as? [String] { brand = arr.first }
+            else { brand = nil }
             let barcode = product["code"] as? String ?? ""
             let servingStr = product["serving_size"] as? String
 
