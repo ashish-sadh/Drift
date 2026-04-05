@@ -1,6 +1,13 @@
 import XCTest
 @testable import Drift
 
+/// Thread-safe counter for streaming tests.
+private final class Counter: @unchecked Sendable {
+    private var _value = 0
+    var value: Int { _value }
+    func increment() { _value += 1 }
+}
+
 /// Integration test: verifies LLM.swift can load a GGUF model and produce output.
 final class LLMIntegrationTest: XCTestCase {
 
@@ -62,6 +69,26 @@ final class LLMIntegrationTest: XCTestCase {
         let response = await backend.respond(to: "What is 2+2?", systemPrompt: "Answer briefly.")
         print("Qwen2.5-0.5B response: '\(response)'")
         XCTAssertFalse(response.isEmpty)
+    }
+
+    /// Test streaming generates tokens incrementally.
+    func testStreamingGeneratesTokens() async throws {
+        let modelPath = URL(fileURLWithPath: "/tmp/smollm2-360m-instruct-q8_0.gguf")
+        guard FileManager.default.fileExists(atPath: modelPath.path) else {
+            throw XCTSkip("SmolLM2 not found at /tmp/")
+        }
+
+        let backend = LlamaCppBackend(modelPath: modelPath)
+        try backend.loadSync()
+
+        let counter = Counter()
+        let response = await backend.respondStreaming(to: "Say hello.", systemPrompt: "Reply briefly.") { _ in
+            counter.increment()
+        }
+
+        XCTAssertFalse(response.isEmpty, "Should produce output")
+        XCTAssertGreaterThan(counter.value, 0, "Should stream at least 1 token")
+        print("Streaming test: \(counter.value) tokens, response: '\(response)'")
     }
 
     /// Test Qwen2.5-1.5B with raw C API.
