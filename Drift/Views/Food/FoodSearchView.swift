@@ -21,6 +21,9 @@ struct FoodSearchView: View {
     @State private var showingScanner = false
     @State private var editingRecipe: FavoriteFood?
     @State private var isFoodFavorite = false
+    @State private var onlineResults: [Food] = []
+    @State private var isSearchingOnline = false
+    @State private var onlineSearchTask: Task<Void, Never>?
     @FocusState private var searchFocused: Bool
 
     var body: some View {
@@ -36,6 +39,16 @@ struct FoodSearchView: View {
                         .onChange(of: query) { _, q in
                             results = q.isEmpty ? [] : ((try? AppDatabase.shared.searchFoodsRanked(query: q)) ?? [])
                             matchingRecipes = q.isEmpty ? [] : ((try? AppDatabase.shared.searchRecipes(query: q)) ?? [])
+                            onlineResults = []
+                            // Smart trigger: search online when local results are insufficient
+                            onlineSearchTask?.cancel()
+                            if q.count >= 3 && results.count < 3 {
+                                onlineSearchTask = Task {
+                                    try? await Task.sleep(for: .milliseconds(500))
+                                    guard !Task.isCancelled else { return }
+                                    await searchOnline(query: q)
+                                }
+                            }
                         }
                     if !query.isEmpty {
                         Button { query = ""; results = []; matchingRecipes = [] } label: {
@@ -48,8 +61,15 @@ struct FoodSearchView: View {
 
                 if query.isEmpty {
                     suggestionsView
-                } else if results.isEmpty && matchingRecipes.isEmpty {
-                    noResultsView
+                } else if results.isEmpty && matchingRecipes.isEmpty && onlineResults.isEmpty {
+                    if isSearchingOnline {
+                        VStack(spacing: 12) {
+                            ProgressView().tint(.secondary)
+                            Text("Searching online...").font(.caption).foregroundStyle(.tertiary)
+                        }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        noResultsView
+                    }
                 } else {
                     searchResultsList
                 }
@@ -369,8 +389,72 @@ struct FoodSearchView: View {
                     }
                 }
             }
+
+            // Online results (from OpenFoodFacts)
+            if !onlineResults.isEmpty {
+                Section {
+                    ForEach(onlineResults) { food in
+                        Button { selectFood(food) } label: {
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(food.name).font(.subheadline).lineLimit(1)
+                                    Text(food.macroSummary).font(.caption).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "plus.circle.fill").foregroundStyle(Theme.accent)
+                            }
+                        }.tint(.primary)
+                    }
+                } header: {
+                    HStack(spacing: 4) {
+                        Text("Online Results")
+                        Image(systemName: "globe").font(.caption2)
+                    }
+                }
+            }
+
+            if isSearchingOnline && onlineResults.isEmpty && !results.isEmpty {
+                Section {
+                    HStack(spacing: 8) {
+                        ProgressView().scaleEffect(0.7)
+                        Text("Searching online...").font(.caption).foregroundStyle(.tertiary)
+                    }
+                }
+            }
         }
         .listStyle(.plain)
+    }
+
+    // MARK: - Online Search
+
+    @MainActor
+    private func searchOnline(query: String) async {
+        isSearchingOnline = true
+        defer { isSearchingOnline = false }
+        guard let products = try? await OpenFoodFactsService.search(query: query, limit: 8) else { return }
+        guard !Task.isCancelled else { return }
+
+        var newFoods: [Food] = []
+        for p in products {
+            let servingG = p.servingSizeG ?? 100
+            var food = Food(
+                name: [p.name, p.brand].compactMap { $0 }.joined(separator: " - "),
+                category: "Online",
+                servingSize: servingG,
+                servingUnit: "g",
+                calories: p.calories * servingG / 100,
+                proteinG: p.proteinG * servingG / 100,
+                carbsG: p.carbsG * servingG / 100,
+                fatG: p.fatG * servingG / 100,
+                fiberG: p.fiberG * servingG / 100
+            )
+            try? AppDatabase.shared.saveScannedFood(&food)
+            if let saved = try? AppDatabase.shared.searchFoods(query: food.name).first {
+                newFoods.append(saved)
+            }
+        }
+        guard !Task.isCancelled else { return }
+        onlineResults = newFoods
     }
 
     // MARK: - Log Food Sheet

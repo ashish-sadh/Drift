@@ -96,6 +96,38 @@ enum OpenFoodFactsService {
         )
     }
 
+    /// Text search for foods by name. Returns up to `limit` products with nutrition data.
+    static func search(query: String, limit: Int = 10) async throws -> [Product] {
+        let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
+        let urlString = "https://world.openfoodfacts.org/cgi/search.pl?search_terms=\(encoded)&json=1&page_size=\(limit)&fields=product_name,brands,serving_size,nutriments,code"
+        guard let url = URL(string: urlString) else { return [] }
+
+        let (data, response) = try await URLSession.shared.data(from: url)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else { return [] }
+        guard let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let products = json["products"] as? [[String: Any]] else { return [] }
+
+        return products.compactMap { product in
+            let nutriments = product["nutriments"] as? [String: Any] ?? [:]
+            let calories = nutriments["energy-kcal_100g"] as? Double ?? nutriments["energy-kcal"] as? Double ?? 0
+            let protein = nutriments["proteins_100g"] as? Double ?? 0
+            let carbs = nutriments["carbohydrates_100g"] as? Double ?? 0
+            let fat = nutriments["fat_100g"] as? Double ?? 0
+            let fiber = nutriments["fiber_100g"] as? Double ?? 0
+
+            guard calories > 0 else { return nil }
+            let name = product["product_name"] as? String ?? ""
+            guard !name.isEmpty else { return nil }
+            let brand = product["brands"] as? String
+            let barcode = product["code"] as? String ?? ""
+            let servingStr = product["serving_size"] as? String
+
+            return Product(barcode: barcode, name: name, brand: brand, servingSize: servingStr,
+                           calories: calories, proteinG: protein, carbsG: carbs, fatG: fat,
+                           fiberG: fiber, servingSizeG: parseServingSize(servingStr))
+        }
+    }
+
     /// Try to parse serving size like "30g", "100 ml", "1 cup (240g)" into grams.
     static func parseServingSize(_ str: String?) -> Double? {
         guard let str else { return nil }
