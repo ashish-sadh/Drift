@@ -31,7 +31,6 @@ struct ContentView: View {
     @AppStorage("drift_ai_enabled") private var aiEnabled = false
 
     var body: some View {
-        ZStack {
         TabView(selection: $selectedTab) {
             DashboardView(syncComplete: $syncComplete, selectedTab: $selectedTab)
                 .tabItem { Label("Drift", systemImage: "chart.line.uptrend.xyaxis") }
@@ -56,12 +55,11 @@ struct ContentView: View {
         }
         .tint(Theme.accent)
         .background(Theme.background.ignoresSafeArea())
-
-            // Floating AI assistant
+        .overlay(alignment: .bottomTrailing) {
             if aiEnabled {
                 FloatingAIAssistant()
             }
-        } // end ZStack
+        }
 
 
     }

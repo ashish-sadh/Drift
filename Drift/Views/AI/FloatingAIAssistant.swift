@@ -7,19 +7,14 @@ struct FloatingAIAssistant: View {
     @State private var modelManager = AIModelManager.shared
 
     var body: some View {
-        VStack {
-            Spacer()
-            HStack {
-                Spacer()
-
-                if isExpanded {
-                    expandedChat
-                } else {
-                    minimizedBubble
-                }
+        Group {
+            if isExpanded {
+                expandedChat
+            } else {
+                minimizedBubble
             }
         }
-        .padding(.bottom, 60) // above tab bar
+        .padding(.bottom, 70) // above tab bar
         .padding(.trailing, 16)
         .animation(.spring(response: 0.3), value: isExpanded)
     }
