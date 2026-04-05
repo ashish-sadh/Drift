@@ -64,3 +64,45 @@ import Testing
     // On test DB, should at least say "No food logged today"
     #expect(context.contains("food") || context.contains("No"))
 }
+
+// MARK: - AIRuleEngine Tests
+
+@Test func aiRuleEngineDailySummary() async throws {
+    let summary = AIRuleEngine.dailySummary()
+    #expect(summary.contains("Here's your day"), "Should start with day summary header")
+}
+
+@Test func aiRuleEngineYesterdaySummary() async throws {
+    let summary = AIRuleEngine.yesterdaySummary()
+    #expect(!summary.isEmpty, "Yesterday summary should not be empty")
+}
+
+@Test func aiRuleEngineQuickInsight() async throws {
+    // On empty DB, should return something about no food logged
+    let insight = AIRuleEngine.quickInsight()
+    // Could be nil or a string — both are valid
+    if let insight {
+        #expect(!insight.isEmpty)
+    }
+}
+
+// MARK: - More AIActionParser Tests
+
+@Test func aiParseShowWeight() async throws {
+    let (action, _) = AIActionParser.parse("Here's your weight. [SHOW_WEIGHT]")
+    if case .showWeight = action {
+        // Expected
+    } else {
+        #expect(Bool(false), "Expected showWeight action")
+    }
+}
+
+@Test func aiParseMultipleActionsFirstWins() async throws {
+    // If response has multiple actions, first one should be extracted
+    let (action, _) = AIActionParser.parse("[LOG_FOOD: rice] and [START_WORKOUT: push]")
+    if case .logFood(let name, _) = action {
+        #expect(name == "rice")
+    } else {
+        #expect(Bool(false), "Expected logFood (first action)")
+    }
+}
