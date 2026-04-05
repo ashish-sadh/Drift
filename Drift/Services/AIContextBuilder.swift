@@ -151,11 +151,11 @@ enum AIContextBuilder {
             lines.append("Today's food: \(todayFoods.joined(separator: ", "))")
         }
 
-        // Recent foods for "log it again" type queries
+        // Recent foods with protein — helps meal suggestions
         if let recents = try? AppDatabase.shared.fetchRecentEntryNames() {
-            let names = recents.prefix(5).map(\.name)
-            if !names.isEmpty {
-                lines.append("Recent: \(names.joined(separator: ", "))")
+            let items = recents.prefix(5).map { "\($0.name)(\(Int($0.proteinG))P)" }
+            if !items.isEmpty {
+                lines.append("Recent: \(items.joined(separator: ", "))")
             }
         }
 
