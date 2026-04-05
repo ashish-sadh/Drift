@@ -37,7 +37,8 @@
 ## Ideas for Next Session
 
 ### High Impact
-- [ ] **Direct food logging without search sheet** — when exact DB match found, log immediately and confirm ("Logged 2 eggs (156cal)")
+- [x] **Direct food logging without search sheet** — DONE: when exact DB match found, logs immediately
+- [ ] **"Ask AI" in food search no-results** — when search finds nothing, show "Ask AI to estimate" button that uses LLM to estimate nutrition
 - [ ] **Meal plan builder** — "plan my meals for today" generates a full day plan based on remaining macros and user's food history
 - [ ] **Smart time-of-day suggestions** — at 7am, suggest breakfast items; at 6pm, dinner items with remaining macro targets
 - [ ] **Exercise recommendation** — based on last 7 days of workouts, suggest which body part hasn't been trained
