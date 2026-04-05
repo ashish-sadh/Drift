@@ -66,12 +66,20 @@ enum AIBackendType: Sendable {
 // MARK: - Device Capability Detection
 
 enum DeviceCapability {
+    /// Whether this device can run AI at all (6GB+ RAM).
+    static var canRunAI: Bool {
+        ramGB >= 5.5
+    }
+
     /// Detect the best model tier + backend for this device.
     static func detectTier() -> (tier: AIModelTier, backend: AIBackendType) {
-        // Force small model until MLX vision backend is implemented
-        // TODO: Enable vision tier when MLX backend is ready
-        return (.small, .llamaCpp)
-
+        if ramGB >= 7.5 {
+            // 8GB+ device — 2B model
+            return (.vision, .llamaCpp)
+        } else {
+            // 6GB device — 0.5B model
+            return (.small, .llamaCpp)
+        }
     }
 
     /// Check if there's enough free disk space for the model.

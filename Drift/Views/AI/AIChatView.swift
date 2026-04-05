@@ -116,16 +116,35 @@ struct AIChatView: View {
                 resultText = ""
                 inputFocused = true
             }
-            actionButton(icon: "scalemass", label: "Weigh In", color: Theme.accent) {
-                // TODO: Open weight entry sheet
-                resultText = "Navigate to Weight tab to log your weight."
+            actionButton(icon: "scalemass", label: "Weight", color: Theme.accent) {
+                mode = .result
+                resultText = "Loading..."
+                Task {
+                    let context = AIContextBuilder.buildContext(tab: currentTab, action: "weight")
+                    let prompt = AIContextBuilder.actionPrompt(for: "weight")
+                    let response = await aiService.respond(to: prompt, context: context)
+                    resultText = response.isEmpty ? AIContextBuilder.weightContext() : response
+                }
             }
             actionButton(icon: "chart.bar", label: "Summary", color: Theme.calorieBlue) {
-                resultText = AIRuleEngine.dailySummary()
                 mode = .result
+                resultText = "Loading..."
+                Task {
+                    let context = AIContextBuilder.buildContext(tab: currentTab, action: "summary")
+                    let prompt = AIContextBuilder.actionPrompt(for: "summary")
+                    let response = await aiService.respond(to: prompt, context: context)
+                    resultText = response.isEmpty ? AIRuleEngine.dailySummary() : response
+                }
             }
             actionButton(icon: "dumbbell", label: "Workout", color: Theme.stepsOrange) {
-                resultText = "Head to the Exercise tab to start a workout."
+                mode = .result
+                resultText = "Loading..."
+                Task {
+                    let context = AIContextBuilder.buildContext(tab: currentTab, action: "workout")
+                    let prompt = AIContextBuilder.actionPrompt(for: "workout")
+                    let response = await aiService.respond(to: prompt, context: context)
+                    resultText = response.isEmpty ? AIContextBuilder.workoutContext() : response
+                }
             }
             actionButton(icon: "pill", label: "Supps", color: .mint) {
                 let today = DateFormatters.todayString
@@ -274,8 +293,28 @@ struct AIChatView: View {
             return
         }
 
-        // Unknown — show help
-        resultText = "Try: \"log 2 eggs\", \"summary\", \"yesterday\", \"calories\", or use the buttons above."
+        // Unknown — send to LLM with page-specific context
         mode = .result
+        resultText = "Thinking..."
+        Task {
+            let context = AIContextBuilder.buildContext(tab: currentTab)
+            let response = await aiService.respond(to: text, context: context)
+            if response.isEmpty {
+                resultText = "I couldn't process that. Try the buttons above or a specific question."
+            } else {
+                resultText = response
+                // Auto-execute any actions in the response
+                let parsed = AIActionParser.parse(response)
+                switch parsed.action {
+                case .logFood(let name, _):
+                    foodSearchQuery = name
+                    showingFoodSearch = true
+                case .startWorkout:
+                    break
+                default:
+                    break
+                }
+            }
+        }
     }
 }
