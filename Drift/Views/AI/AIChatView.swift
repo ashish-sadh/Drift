@@ -50,6 +50,21 @@ struct AIChatView: View {
 
             }
 
+            // Quick suggestion chips
+            if !isGenerating && messages.count <= 3 {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        suggestionChip("How am I doing today?")
+                        suggestionChip("Log breakfast")
+                        suggestionChip("Start a workout")
+                        suggestionChip("What should I eat?")
+                        suggestionChip("Weekly summary")
+                    }
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                }
+            }
+
             Divider()
 
             // Input bar
@@ -118,6 +133,20 @@ struct AIChatView: View {
     }
 
     // MARK: - Message Bubble
+
+    private func suggestionChip(_ text: String) -> some View {
+        Button {
+            inputText = text
+            sendMessage()
+        } label: {
+            Text(text)
+                .font(.caption)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Theme.cardBackgroundElevated, in: Capsule())
+        }
+        .buttonStyle(.plain)
+    }
 
     private func messageBubble(_ message: ChatMessage) -> some View {
         HStack(alignment: .top, spacing: 8) {
