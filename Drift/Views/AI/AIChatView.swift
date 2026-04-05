@@ -156,7 +156,7 @@ struct AIChatView: View {
         }
         .sheet(isPresented: $showingFoodSearch) {
             NavigationStack {
-                FoodSearchView(viewModel: FoodLogViewModel())
+                FoodSearchView(viewModel: FoodLogViewModel(), initialQuery: actionFoodName)
             }
         }
         .onAppear {
@@ -238,13 +238,22 @@ struct AIChatView: View {
             messages.append(ChatMessage(role: .assistant, text: summary))
             return
         }
+        // Food intent: "log 1/3 avocado", "ate 2 eggs", "had chicken breast"
+        if let foodIntent = AIActionExecutor.parseFoodIntent(lower) {
+            actionFoodName = foodIntent.query
+            messages.append(ChatMessage(role: .assistant, text: "Opening \"\(foodIntent.query)\" for you..."))
+            showingFoodSearch = true
+            return
+        }
+        // Generic food logging
         if lower.contains("log food") || lower.contains("log breakfast") || lower.contains("log lunch") || lower.contains("log dinner") || lower.contains("add food") {
-            messages.append(ChatMessage(role: .assistant, text: "Opening food search for you. [LOG_FOOD: food]"))
+            actionFoodName = ""
+            messages.append(ChatMessage(role: .assistant, text: "Opening food search."))
             showingFoodSearch = true
             return
         }
         if lower.contains("start workout") || lower.contains("start a workout") || lower.contains("begin workout") {
-            messages.append(ChatMessage(role: .assistant, text: "Let's get moving! Head to the Exercise tab to pick a template or start fresh."))
+            messages.append(ChatMessage(role: .assistant, text: "Head to the Exercise tab to pick a template or start fresh."))
             return
         }
 
@@ -264,6 +273,18 @@ struct AIChatView: View {
                 var response = await aiService.respond(to: text, context: context)
                 if response.isEmpty { response = "I couldn't generate a response. Try again." }
                 messages.append(ChatMessage(role: .assistant, text: response))
+
+                // Auto-execute actions from LLM response
+                let parsed = AIActionParser.parse(response)
+                switch parsed.action {
+                case .logFood(let name, _):
+                    actionFoodName = name
+                    showingFoodSearch = true
+                case .startWorkout:
+                    break // Could navigate to exercise tab
+                default:
+                    break
+                }
             }
             isGenerating = false
         }

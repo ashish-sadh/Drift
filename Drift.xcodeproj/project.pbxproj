@@ -50,6 +50,7 @@
 		5F4476C2F1B7DC3E662A1DBC /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24385DF0FF7F89584AE40020 /* Theme.swift */; };
 		685C24962B2912E5B124EB60 /* BodyMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5286E0309471AF898D70E3C /* BodyMapView.swift */; };
 		6A4AC25199199579681FCAD4 /* WeightViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E8B598BCB7486A2C75848E /* WeightViewModel.swift */; };
+		6A5E607A5053083EB25372F7 /* AIActionExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C1323C593FD4D57F250E362 /* AIActionExecutor.swift */; };
 		6B0CE72048898157F8BA881F /* BarcodeCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4EFC6AC02BBE73CDE74B5E2 /* BarcodeCache.swift */; };
 		70F621B0C5089E738C2DEA5E /* FoodTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A981E37D718D28A6679F9C8 /* FoodTabView.swift */; };
 		71248B6DE58F57FE294B28A3 /* LLM in Frameworks */ = {isa = PBXBuildFile; productRef = 9D027B373F40785E72CCD81F /* LLM */; };
@@ -177,6 +178,7 @@
 		82577AEF6B12486590A24B47 /* BiomarkerResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomarkerResult.swift; sourceTree = "<group>"; };
 		88A19640FB19F5628DC8B824 /* Units.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Units.swift; sourceTree = "<group>"; };
 		89FB0C77EA74796A1BF01D1F /* WeightGoal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightGoal.swift; sourceTree = "<group>"; };
+		8C1323C593FD4D57F250E362 /* AIActionExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIActionExecutor.swift; sourceTree = "<group>"; };
 		8E78D132A90B0FDC35353646 /* WeightLogListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightLogListView.swift; sourceTree = "<group>"; };
 		8F4D8D947C82941F66C3E892 /* LabReportStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabReportStorage.swift; sourceTree = "<group>"; };
 		9317E4AADEC72D6DC385E722 /* LabReportDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabReportDetailView.swift; sourceTree = "<group>"; };
@@ -476,6 +478,7 @@
 		E9AB1B657564FD836D16BAB5 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				8C1323C593FD4D57F250E362 /* AIActionExecutor.swift */,
 				D6B64C16D8106D8EB594C117 /* AIActionParser.swift */,
 				64BFDDB952907C50869B4078 /* AIBackend.swift */,
 				AB907D183F2E9999A4BC3915 /* AIContextBuilder.swift */,
@@ -641,6 +644,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6A5E607A5053083EB25372F7 /* AIActionExecutor.swift in Sources */,
 				86899F322EA3AB5164995C09 /* AIActionParser.swift in Sources */,
 				98FBDD66D792C10086005407 /* AIBackend.swift in Sources */,
 				E16388BC43C225F2C6B7368A /* AIChatView.swift in Sources */,

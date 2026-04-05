@@ -2,6 +2,7 @@ import SwiftUI
 
 struct FoodSearchView: View {
     @Bindable var viewModel: FoodLogViewModel
+    var initialQuery: String = ""
     @Environment(\.dismiss) private var dismiss
     @State private var selectedFood: Food?
     @State private var amount = "1"
@@ -94,6 +95,10 @@ struct FoodSearchView: View {
             }
             .onAppear {
                 viewModel.loadSuggestions()
+                if !initialQuery.isEmpty {
+                    query = initialQuery
+                    results = (try? AppDatabase.shared.searchFoodsRanked(query: initialQuery)) ?? []
+                }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { searchFocused = true }
             }
         }
