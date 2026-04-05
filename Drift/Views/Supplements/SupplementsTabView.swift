@@ -156,6 +156,7 @@ struct SupplementsTabView: View {
                 }
             }
             .onAppear {
+                AIScreenTracker.shared.currentScreen = .supplements
                 viewModel.loadSupplements()
             }
         }

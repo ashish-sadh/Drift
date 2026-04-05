@@ -455,7 +455,7 @@ struct WorkoutView: View {
         } message: {
             Text(importResult ?? "Done")
         }
-        .onAppear { loadData() }
+        .onAppear { AIScreenTracker.shared.currentScreen = .exercise; loadData() }
         .onChange(of: showingNewWorkout) { _, showing in if !showing { loadData() } }
         .onChange(of: showingCreateTemplate) { _, showing in if !showing { loadData() } }
         .task {

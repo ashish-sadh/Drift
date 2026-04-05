@@ -40,7 +40,7 @@ struct BiomarkersTabView: View {
         .sheet(isPresented: $showingUpload) {
             LabReportUploadView { reload() }
         }
-        .onAppear { reload() }
+        .onAppear { AIScreenTracker.shared.currentScreen = .biomarkers; reload() }
     }
 
     // MARK: - Empty State

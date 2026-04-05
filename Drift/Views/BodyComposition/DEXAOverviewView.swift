@@ -78,7 +78,7 @@ struct DEXAOverviewView: View {
         .sheet(isPresented: $showingManualEntry) {
             DEXAEntryView(database: database) { loadScans() }
         }
-        .onAppear { loadScans() }
+        .onAppear { AIScreenTracker.shared.currentScreen = .bodyComposition; loadScans() }
     }
 
     // MARK: - Overview Cards

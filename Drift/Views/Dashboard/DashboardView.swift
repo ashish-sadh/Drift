@@ -117,6 +117,7 @@ struct DashboardView: View {
                     }
                 }
             }
+            .onAppear { AIScreenTracker.shared.currentScreen = .dashboard }
             .task { await viewModel.loadToday() }
             .refreshable { await viewModel.loadToday() }
             .onChange(of: syncComplete) { _, done in

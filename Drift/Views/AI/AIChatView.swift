@@ -1,17 +1,23 @@
 import SwiftUI
 import PhotosUI
 
-/// Chat-style AI assistant with smart suggestion pills.
+/// Chat-style AI assistant with chain-of-thought reasoning and smart suggestion pills.
 struct AIChatView: View {
-    var currentTab: Int = 0
     @State private var aiService = LocalAIService.shared
+    @State private var screenTracker = AIScreenTracker.shared
     @State private var messages: [ChatMessage] = []
     @State private var inputText = ""
-    @State private var isGenerating = false
+    @State private var generatingState: GeneratingState = .idle
     @State private var showingFoodSearch = false
     @State private var foodSearchQuery = ""
     @State private var foodSearchServings: Double? = nil
     @FocusState private var inputFocused: Bool
+
+    enum GeneratingState: Equatable {
+        case idle
+        case thinking(step: String)
+        case generating
+    }
 
     struct ChatMessage: Identifiable {
         let id = UUID()
@@ -19,6 +25,8 @@ struct AIChatView: View {
         let text: String
         enum Role { case user, assistant }
     }
+
+    private var isGenerating: Bool { generatingState != .idle }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -30,11 +38,7 @@ struct AIChatView: View {
                             messageBubble(msg).id(msg.id)
                         }
                         if isGenerating {
-                            HStack(spacing: 6) {
-                                ProgressView().scaleEffect(0.6)
-                                Text("Thinking...").font(.caption2).foregroundStyle(.tertiary)
-                                Spacer()
-                            }.padding(.horizontal, 14)
+                            thinkingIndicator
                         }
                     }
                     .padding(.top, 6)
@@ -75,16 +79,50 @@ struct AIChatView: View {
         }
         .onAppear {
             if messages.isEmpty {
-                let insight = pageInsight
-                messages.append(ChatMessage(role: .assistant, text: insight))
+                messages.append(ChatMessage(role: .assistant, text: pageInsight))
             }
-            if aiService.isModelLoaded == false && aiService.state == .ready {
+            if !aiService.isModelLoaded && aiService.state == .ready {
                 aiService.loadModel()
             }
         }
     }
 
-    // MARK: - Smart Suggestions (contextual pills)
+    // MARK: - Thinking Indicator
+
+    private var thinkingIndicator: some View {
+        HStack(spacing: 6) {
+            ProgressView().scaleEffect(0.6)
+            switch generatingState {
+            case .thinking(let step):
+                Text(step).font(.caption2).foregroundStyle(.tertiary)
+            case .generating:
+                Text("Writing response...").font(.caption2).foregroundStyle(.tertiary)
+            case .idle:
+                EmptyView()
+            }
+            Spacer()
+        }
+        .padding(.horizontal, 14)
+        .transition(.opacity)
+    }
+
+    // MARK: - Conversation History
+
+    private func buildConversationHistory() -> String {
+        let recent = messages.suffix(6) // Last 3 exchanges
+        var lines: [String] = []
+        var charCount = 0
+        for msg in recent {
+            let prefix = msg.role == .user ? "User" : "Assistant"
+            let line = "\(prefix): \(msg.text)"
+            if charCount + line.count > 400 { break }
+            lines.append(line)
+            charCount += line.count
+        }
+        return lines.joined(separator: "\n")
+    }
+
+    // MARK: - Smart Suggestions
 
     private var suggestionsRow: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -110,6 +148,7 @@ struct AIChatView: View {
         let today = DateFormatters.todayString
         let nutrition = (try? AppDatabase.shared.fetchDailyNutrition(for: today)) ?? .zero
         let hour = Calendar.current.component(.hour, from: Date())
+        let screen = screenTracker.currentScreen
 
         // Food-based suggestions
         if nutrition.calories == 0 {
@@ -119,22 +158,28 @@ struct AIChatView: View {
             if hour > 17 { pills.append("What should I eat for dinner?") }
         }
 
-        // Always useful
         pills.append("Daily summary")
 
-        // Weight context
-        if currentTab == 1 {
+        // Screen-specific pills
+        switch screen {
+        case .weight, .goal:
             pills.append("Am I on track?")
-        }
-
-        // Workout context
-        if currentTab == 3 {
+        case .exercise:
             pills.append("What should I train?")
-        }
-
-        // General
-        if nutrition.calories > 0 {
-            pills.append("Calories left today?")
+        case .bodyRhythm:
+            pills.append("How'd I sleep?")
+        case .glucose:
+            pills.append("Any spikes today?")
+        case .biomarkers:
+            pills.append("Which markers are out of range?")
+        case .cycle:
+            pills.append("What phase am I in?")
+        case .supplements:
+            pills.append("Did I take everything?")
+        case .bodyComposition:
+            pills.append("Compare my DEXA scans")
+        default:
+            if nutrition.calories > 0 { pills.append("Calories left today?") }
         }
 
         return pills
@@ -145,19 +190,32 @@ struct AIChatView: View {
     private var pageInsight: String {
         let hour = Calendar.current.component(.hour, from: Date())
         let greeting = hour < 12 ? "Good morning!" : hour < 17 ? "Good afternoon!" : "Good evening!"
+        let screen = screenTracker.currentScreen
 
-        switch currentTab {
-        case 0:
-            return "\(greeting) How can I help you today?"
-        case 1:
+        switch screen {
+        case .weight, .goal:
             return "\(greeting) I can help with your weight progress — just ask."
-        case 2:
+        case .food:
             let n = (try? AppDatabase.shared.fetchDailyNutrition(for: DateFormatters.todayString)) ?? .zero
-            return n.calories > 0 ? "\(greeting) You've logged \(Int(n.calories)) cal so far. Need to add anything?" : "\(greeting) What did you have to eat?"
-        case 3:
+            return n.calories > 0
+                ? "\(greeting) You've logged \(Int(n.calories)) cal so far. Need to add anything?"
+                : "\(greeting) What did you have to eat?"
+        case .exercise:
             return "\(greeting) Ready for a workout? Tell me what you'd like to train."
+        case .bodyRhythm:
+            return "\(greeting) Ask me about your sleep, HRV, or recovery."
+        case .glucose:
+            return "\(greeting) I can analyze your glucose patterns."
+        case .biomarkers:
+            return "\(greeting) Ask about your lab results or biomarker trends."
+        case .cycle:
+            return "\(greeting) I can help with cycle tracking insights."
+        case .supplements:
+            return "\(greeting) Need help with your supplement routine?"
+        case .bodyComposition:
+            return "\(greeting) I can compare your DEXA scans and body composition."
         default:
-            return "\(greeting) How can I help?"
+            return "\(greeting) How can I help you today?"
         }
     }
 
@@ -172,7 +230,7 @@ struct AIChatView: View {
 
         let lower = text.lowercased()
 
-        // Rule engine: instant data queries
+        // Rule engine: instant data queries (no LLM needed)
         if lower.contains("summary") || lower.contains("how am i") || lower.contains("my day") {
             messages.append(ChatMessage(role: .assistant, text: AIRuleEngine.dailySummary()))
             return
@@ -204,13 +262,9 @@ struct AIChatView: View {
             return
         }
 
-        // LLM for everything else (feature questions answered via context injection)
+        // LLM for everything else
         if !aiService.isModelLoaded {
-            // Try loading if model is downloaded but not loaded yet
-            if aiService.state == .ready {
-                aiService.loadModel()
-            }
-            // If that worked, fall through to LLM
+            if aiService.state == .ready { aiService.loadModel() }
             if !aiService.isModelLoaded {
                 let hint = "Try \"daily summary\", \"log 2 eggs\", or \"calories\"."
                 switch aiService.state {
@@ -231,24 +285,35 @@ struct AIChatView: View {
             }
         }
 
-        isGenerating = true
+        // Chain-of-thought: fetch relevant data, then call LLM once
+        let screen = screenTracker.currentScreen
+        let history = buildConversationHistory()
+
+        generatingState = .thinking(step: "Understanding your question...")
         Task {
-            let context = AIContextBuilder.buildContext(tab: currentTab)
-            var response = await aiService.respond(to: text, context: context)
-            if response.isEmpty { response = "I'm not sure about that. Try asking about your food, weight, or workouts." }
+            let response = await AIChainOfThought.execute(
+                query: text, screen: screen, history: history
+            ) { step in
+                Task { @MainActor in
+                    generatingState = .thinking(step: step)
+                }
+            }
 
-            messages.append(ChatMessage(role: .assistant, text: response))
-            isGenerating = false
+            let finalResponse = response.isEmpty
+                ? "I'm not sure about that. Try asking about your food, weight, or workouts."
+                : response
 
-            // Auto-execute actions
-            let parsed = AIActionParser.parse(response)
+            messages.append(ChatMessage(role: .assistant, text: finalResponse))
+            generatingState = .idle
+
+            // Auto-execute actions from LLM response
+            let parsed = AIActionParser.parse(finalResponse)
             if case .logFood(let name, _) = parsed.action {
                 foodSearchQuery = name
                 showingFoodSearch = true
             }
         }
     }
-
 
     // MARK: - Message Bubble
 

@@ -71,6 +71,7 @@ struct GoalView: View {
             }
         }
         .onAppear {
+            AIScreenTracker.shared.currentScreen = .goal
             goal = WeightGoal.load()
             loadCurrentData()
         }

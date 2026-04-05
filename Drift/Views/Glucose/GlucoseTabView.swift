@@ -101,7 +101,7 @@ struct GlucoseTabView: View {
             }
         }
         .fileImporter(isPresented: $showingImport, allowedContentTypes: [.commaSeparatedText, .plainText]) { handleImport($0) }
-        .onAppear { loadReadings() }
+        .onAppear { AIScreenTracker.shared.currentScreen = .glucose; loadReadings() }
     }
 
     // MARK: - Chart with zone coloring

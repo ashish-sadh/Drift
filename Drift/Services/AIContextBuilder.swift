@@ -278,11 +278,35 @@ enum AIContextBuilder {
         return lines.joined(separator: "\n")
     }
 
-    // MARK: - Page Context (free text on specific tab)
+    // MARK: - Screen-Aware Context
+
+    static func buildContext(screen: AIScreen) -> String {
+        var parts: [String] = [baseContext(), featureContext()]
+        parts.append(screenContext(screen: screen))
+        return parts.joined(separator: "\n")
+    }
+
+    static func screenContext(screen: AIScreen) -> String {
+        switch screen {
+        case .dashboard: return fullDayContext()
+        case .weight, .goal: return weightContext()
+        case .food: return foodContext()
+        case .exercise: return workoutContext()
+        case .supplements: return supplementContext()
+        case .bodyRhythm: return sleepRecoveryContext()
+        case .cycle: return cycleContext()
+        case .bodyComposition: return dexaContext()
+        case .glucose: return glucoseContext()
+        case .biomarkers: return biomarkerContext()
+        case .settings, .algorithm: return ""
+        }
+    }
+
+    // MARK: - Page Context (legacy — uses tab index)
 
     static func pageContext(tab: Int) -> String {
         switch tab {
-        case 0: return fullDayContext() // Dashboard — everything
+        case 0: return fullDayContext()
         case 1: return weightContext()
         case 2: return foodContext()
         case 3: return workoutContext()
@@ -290,6 +314,14 @@ enum AIContextBuilder {
         default: return ""
         }
     }
+
+    // MARK: - New Context Builders (stub — Phase 2 fills these in)
+
+    static func sleepRecoveryContext() -> String { "" }
+    static func glucoseContext() -> String { "" }
+    static func biomarkerContext() -> String { "" }
+    static func dexaContext() -> String { "" }
+    static func cycleContext() -> String { "" }
 
     // MARK: - App Feature Context (always included so LLM can answer about Drift)
 

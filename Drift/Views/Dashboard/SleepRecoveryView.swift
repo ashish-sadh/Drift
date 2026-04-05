@@ -50,6 +50,7 @@ struct SleepRecoveryView: View {
         .background(Theme.background.ignoresSafeArea())
         .navigationTitle("Body Rhythm").navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .onAppear { AIScreenTracker.shared.currentScreen = .bodyRhythm }
         .task { await loadData() }
     }
 

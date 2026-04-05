@@ -125,16 +125,15 @@ final class LocalAIService {
 
     // MARK: - Inference
 
-    func respond(to message: String, context: String = "") async -> String {
+    func respond(to message: String, context: String = "", history: String = "") async -> String {
         guard let backend else { return "Model not loaded." }
 
-        let prompt: String
-        if context.isEmpty {
-            prompt = message
-        } else {
-            prompt = "Context about the user:\n\(context)\n\nUser: \(message)"
-        }
+        var parts: [String] = []
+        if !context.isEmpty { parts.append("Context about the user:\n\(context)") }
+        if !history.isEmpty { parts.append("Recent conversation:\n\(history)") }
+        parts.append("User: \(message)")
 
+        let prompt = parts.joined(separator: "\n\n")
         let b = backend
         return await b.respond(to: prompt, systemPrompt: systemPrompt)
     }

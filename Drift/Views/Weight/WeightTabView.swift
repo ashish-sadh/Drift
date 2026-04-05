@@ -86,7 +86,7 @@ struct WeightTabView: View {
                 .transition(.scale.combined(with: .opacity))
             }
         }
-        .onAppear { viewModel.loadEntries() }
+        .onAppear { AIScreenTracker.shared.currentScreen = .weight; viewModel.loadEntries() }
         .task {
             #if !targetEnvironment(simulator)
             let _ = try? await HealthKitService.shared.syncWeight()

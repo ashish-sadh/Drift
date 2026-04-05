@@ -142,7 +142,7 @@ struct FloatingAIAssistant: View {
             if !modelManager.isModelDownloaded {
                 downloadPrompt
             } else {
-                AIChatView(currentTab: currentTab)
+                AIChatView()
             }
         }
         .frame(height: UIScreen.main.bounds.height * 0.55)

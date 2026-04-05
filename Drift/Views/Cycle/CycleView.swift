@@ -76,6 +76,7 @@ struct CycleView: View {
         .navigationTitle("Cycle")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarColorScheme(.dark, for: .navigationBar)
+        .onAppear { AIScreenTracker.shared.currentScreen = .cycle }
         .task { await loadData() }
     }
 
