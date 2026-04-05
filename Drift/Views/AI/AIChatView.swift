@@ -54,11 +54,18 @@ struct AIChatView: View {
             if !isGenerating && messages.count <= 3 {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
-                        suggestionChip("How am I doing today?")
-                        suggestionChip("Log breakfast")
-                        suggestionChip("Start a workout")
-                        suggestionChip("What should I eat?")
                         suggestionChip("Daily summary")
+                        let hour = Calendar.current.component(.hour, from: Date())
+                        if hour < 11 {
+                            suggestionChip("Log breakfast")
+                        } else if hour < 15 {
+                            suggestionChip("Log lunch")
+                        } else {
+                            suggestionChip("Log dinner")
+                        }
+                        suggestionChip("Weight")
+                        suggestionChip("Calories")
+                        suggestionChip("Help")
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
@@ -151,6 +158,22 @@ struct AIChatView: View {
         if lower.contains("daily summary") || lower.contains("how am i doing") || lower.contains("my day") || lower.contains("today") {
             let summary = AIRuleEngine.dailySummary()
             messages.append(ChatMessage(role: .assistant, text: summary))
+            return
+        }
+        if lower.contains("help") || lower.contains("what can you do") || lower.contains("commands") {
+            messages.append(ChatMessage(role: .assistant, text: "I can help with:\n- \"Daily summary\" — your day at a glance\n- \"Yesterday\" — what you ate\n- \"Calories\" / \"Protein\" — today's nutrition\n- \"Weight\" — your current weight & trend\n- \"Log food\" — open food search\n- Or just ask me anything about your health!"))
+            return
+        }
+        if lower.contains("supplement") {
+            let today = DateFormatters.todayString
+            if let supplements = try? AppDatabase.shared.fetchActiveSupplements(),
+               let logs = try? AppDatabase.shared.fetchSupplementLogs(for: today) {
+                let taken = logs.filter(\.taken).count
+                let names = supplements.map(\.name).joined(separator: ", ")
+                messages.append(ChatMessage(role: .assistant, text: "Supplements: \(taken)/\(supplements.count) taken today.\n\(names)"))
+            } else {
+                messages.append(ChatMessage(role: .assistant, text: "No supplements set up. Add them in More → Supplements."))
+            }
             return
         }
         if lower.contains("calorie") || lower.contains("how many cal") || lower.contains("macro") || lower.contains("protein") {
