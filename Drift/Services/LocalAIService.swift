@@ -55,32 +55,25 @@ final class LocalAIService {
         state = .downloading(progress: 0)
 
         do {
-            let (asyncBytes, response) = try await URLSession.shared.bytes(from: url)
-            let totalBytes = response.expectedContentLength
-            let fileHandle = try FileHandle(forWritingTo: createEmptyFile())
-            var downloadedBytes: Int64 = 0
-
-            for try await byte in asyncBytes {
-                fileHandle.write(Data([byte]))
-                downloadedBytes += 1
-                if downloadedBytes % (1024 * 1024) == 0 { // Update every 1MB
-                    let progress = totalBytes > 0 ? Double(downloadedBytes) / Double(totalBytes) : 0
-                    state = .downloading(progress: progress)
+            // Use delegate-based download for progress tracking
+            let delegate = DownloadDelegate { [weak self] progress in
+                Task { @MainActor in
+                    self?.state = .downloading(progress: progress)
                 }
             }
-            fileHandle.closeFile()
+            let session = URLSession(configuration: .default, delegate: delegate, delegateQueue: nil)
+            let (tempURL, _) = try await session.download(from: url)
+
+            // Move to final location
+            let dest = modelPath
+            try? FileManager.default.removeItem(at: dest)
+            try FileManager.default.moveItem(at: tempURL, to: dest)
             state = .ready
             Log.app.info("AI model downloaded: \(self.modelFileName)")
         } catch {
             state = .error("Download failed: \(error.localizedDescription)")
             try? FileManager.default.removeItem(at: modelPath)
         }
-    }
-
-    private func createEmptyFile() throws -> URL {
-        let path = modelPath
-        FileManager.default.createFile(atPath: path.path, contents: nil)
-        return path
     }
 
     // MARK: - Load Model
@@ -129,5 +122,25 @@ final class LocalAIService {
         bot = nil
         try? FileManager.default.removeItem(at: modelPath)
         state = .notDownloaded
+    }
+}
+
+// MARK: - Download Progress Delegate
+
+private final class DownloadDelegate: NSObject, URLSessionDownloadDelegate, @unchecked Sendable {
+    let onProgress: (Double) -> Void
+
+    init(onProgress: @escaping (Double) -> Void) {
+        self.onProgress = onProgress
+    }
+
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
+        guard totalBytesExpectedToWrite > 0 else { return }
+        let progress = Double(totalBytesWritten) / Double(totalBytesExpectedToWrite)
+        onProgress(progress)
+    }
+
+    func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
+        // Handled by the async download(from:) caller
     }
 }
