@@ -245,6 +245,54 @@ import Testing
     #expect(truncated.count <= 200)
 }
 
+// MARK: - Natural Food Phrasing
+
+@Test func aiNaturalPhrasing_IJustHad() async throws {
+    let intent = AIActionExecutor.parseFoodIntent("i just had a samosa for lunch")
+    #expect(intent != nil, "'I just had' should be recognized")
+    #expect(intent?.query == "samosa")
+}
+
+@Test func aiNaturalPhrasing_IAte() async throws {
+    let intent = AIActionExecutor.parseFoodIntent("i ate chicken breast")
+    #expect(intent != nil, "'I ate' should be recognized")
+    #expect(intent?.query == "chicken breast")
+}
+
+@Test func aiNaturalPhrasing_JustHad() async throws {
+    let intent = AIActionExecutor.parseFoodIntent("just had some rice")
+    #expect(intent != nil, "'just had' should be recognized")
+}
+
+// MARK: - Chain-of-Thought Nutrition Lookup
+
+@Test @MainActor func aiChainOfThoughtNutritionLookup() async throws {
+    let steps = AIChainOfThought.plan(query: "how many calories in a banana", screen: .food)
+    #expect(steps != nil, "Nutrition lookup should trigger chain-of-thought")
+    #expect(steps?.first?.label.contains("nutrition") == true)
+}
+
+@Test @MainActor func aiChainOfThoughtComparison() async throws {
+    let steps = AIChainOfThought.plan(query: "compare this week to last week", screen: .dashboard)
+    #expect(steps != nil, "Comparison should trigger chain-of-thought")
+}
+
+@Test @MainActor func aiChainOfThoughtMultiDomain() async throws {
+    // "Should I exercise given my sleep?" needs both workout AND sleep
+    let steps = AIChainOfThought.plan(query: "should I work out today given my sleep", screen: .dashboard)
+    #expect(steps != nil)
+    #expect(steps?.count ?? 0 >= 2, "Multi-domain query should fetch 2+ data sources")
+}
+
+// MARK: - Response Quality
+
+@Test func aiResponseQualityCheck() async throws {
+    #expect(AIResponseCleaner.isLowQuality("") == true)
+    #expect(AIResponseCleaner.isLowQuality("Hi") == true)
+    #expect(AIResponseCleaner.isLowQuality("I'm here to help you with anything you need.") == true)
+    #expect(AIResponseCleaner.isLowQuality("You've eaten 1200 of 1800 cal. Consider a protein-rich dinner.") == false)
+}
+
 @Test func aiParseMultipleActionsFirstWins() async throws {
     // If response has multiple actions, first one should be extracted
     let (action, _) = AIActionParser.parse("[LOG_FOOD: rice] and [START_WORKOUT: push]")
