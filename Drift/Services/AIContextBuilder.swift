@@ -327,10 +327,7 @@ enum AIContextBuilder {
             let untaken = supplements.filter { !takenIds.contains($0.id ?? 0) }.map(\.name)
             lines.append("Still need: \(untaken.joined(separator: ", "))")
         }
-        for s in supplements {
-            let status = takenIds.contains(s.id ?? 0) ? "✓" : "✗"
-            lines.append("  \(status) \(s.name)")
-        }
+        // Skip per-item list to save tokens — "Still need:" already shows what's missing
         return lines.joined(separator: "\n")
     }
 
