@@ -397,7 +397,13 @@ struct AIChatView: View {
                             carbsG: f.carbsG * servings, fatG: f.fatG * servings,
                             fiberG: f.fiberG * servings, mealType: currentMealType)
                 let meal = currentMealType.displayName.lowercased()
-                messages.append(ChatMessage(role: .assistant, text: "Logged \(f.name)\(servings != 1 ? " x\(Int(servings))" : "") for \(meal) (\(Int(cal)) cal, \(Int(p))g protein)."))
+                // Show updated calories remaining after logging
+                let todayN = (try? AppDatabase.shared.fetchDailyNutrition(for: DateFormatters.todayString)) ?? .zero
+                let tdee = TDEEEstimator.shared.current?.tdee ?? 2000
+                let deficit = WeightGoal.load()?.requiredDailyDeficit ?? 0
+                let target = max(500, Int(tdee - deficit))
+                let left = target - Int(todayN.calories)
+                messages.append(ChatMessage(role: .assistant, text: "Logged \(f.name)\(servings != 1 ? " x\(Int(servings))" : "") for \(meal) (\(Int(cal)) cal). \(left > 0 ? "\(left) cal left today." : "Over target by \(abs(left)) cal.")"))
                 return
             }
             // No exact match — open search
