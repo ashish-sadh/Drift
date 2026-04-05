@@ -8,7 +8,6 @@ struct WorkoutView: View {
     @State private var workouts: [WorkoutSummary] = []
     @State private var weeklyCounts: [(weekStart: Date, count: Int)] = []
     @State private var templates: [WorkoutTemplate] = []
-    @State private var showAllTemplates = false
     @State private var showingNewWorkout = false
     @State private var showingImport = false
     @State private var showingCreateTemplate = false
@@ -175,36 +174,33 @@ struct WorkoutView: View {
                             }
                         }
                     } else {
-                        let displayedTemplates = showAllTemplates ? templates : Array(templates.prefix(5))
-                        ForEach(displayedTemplates) { t in
-                            Button {
-                                previewTemplate = t
-                            } label: {
-                                HStack(spacing: 8) {
-                                    if t.isFavorite {
-                                        Image(systemName: "star.fill").font(.caption).foregroundStyle(Theme.fatYellow)
+                        ScrollView {
+                            VStack(spacing: 0) {
+                                ForEach(templates) { t in
+                                    Button {
+                                        previewTemplate = t
+                                    } label: {
+                                        HStack(spacing: 8) {
+                                            if t.isFavorite {
+                                                Image(systemName: "star.fill").font(.caption).foregroundStyle(Theme.fatYellow)
+                                            }
+                                            VStack(alignment: .leading, spacing: 2) {
+                                                Text(t.name).font(.subheadline.weight(.medium)).foregroundStyle(.primary)
+                                                let working = t.exercises.filter { !$0.isWarmup }
+                                                let warmups = t.exercises.filter { $0.isWarmup }
+                                                Text("\(working.count) exercises\(warmups.isEmpty ? "" : " · \(warmups.count) warmup")")
+                                                    .font(.caption2).foregroundStyle(.tertiary)
+                                            }
+                                            Spacer()
+                                            Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary)
+                                        }
+                                        .padding(.vertical, 6)
                                     }
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(t.name).font(.subheadline.weight(.medium)).foregroundStyle(.primary)
-                                        let working = t.exercises.filter { !$0.isWarmup }
-                                        let warmups = t.exercises.filter { $0.isWarmup }
-                                        Text("\(working.count) exercises\(warmups.isEmpty ? "" : " · \(warmups.count) warmup")")
-                                            .font(.caption2).foregroundStyle(.tertiary)
-                                    }
-                                    Spacer()
-                                    Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary)
+                                    .buttonStyle(.plain)
                                 }
-                                .padding(.vertical, 6)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                        if !showAllTemplates && templates.count > 5 {
-                            Button { showAllTemplates = true } label: {
-                                Text("Show all \(templates.count) templates")
-                                    .font(.caption).foregroundStyle(Theme.accent)
-                                    .frame(maxWidth: .infinity)
                             }
                         }
+                        .frame(maxHeight: min(CGFloat(templates.count) * 50, 250))
                     }
                 }
                 .card()
