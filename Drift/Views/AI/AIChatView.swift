@@ -284,7 +284,12 @@ struct AIChatView: View {
         case .bodyComposition:
             return "\(greeting) Ask about your body fat, lean mass, or compare DEXA scans."
         default:
-            return "\(greeting) How can I help you today?"
+            // Dashboard — show a quick stat if available
+            let n = (try? AppDatabase.shared.fetchDailyNutrition(for: DateFormatters.todayString)) ?? .zero
+            if n.calories > 0 {
+                return "\(greeting) You've logged \(Int(n.calories)) cal so far. Ask anything about your health data."
+            }
+            return "\(greeting) Say \"log 2 eggs\" to track food, or ask about your weight, sleep, or workouts."
         }
     }
 
