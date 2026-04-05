@@ -63,4 +63,45 @@ enum AIRuleEngine {
 
         return nil
     }
+
+    /// Generate a structured daily summary.
+    static func dailySummary() -> String {
+        var lines: [String] = ["Here's your day so far:"]
+        let today = DateFormatters.todayString
+
+        // Nutrition
+        let nutrition = (try? AppDatabase.shared.fetchDailyNutrition(for: today)) ?? .zero
+        if nutrition.calories > 0 {
+            lines.append("  Eaten: \(Int(nutrition.calories)) cal (\(Int(nutrition.proteinG))P / \(Int(nutrition.carbsG))C / \(Int(nutrition.fatG))F)")
+        } else {
+            lines.append("  No food logged yet")
+        }
+
+        // Weight
+        if let entries = try? AppDatabase.shared.fetchWeightEntries(),
+           let latest = entries.last {
+            let unit = Preferences.weightUnit
+            lines.append("  Weight: \(String(format: "%.1f", unit.convert(fromKg: latest.weightKg))) \(unit.displayName) (\(latest.date))")
+        }
+
+        // Workouts today
+        if let workouts = try? WorkoutService.fetchWorkouts(limit: 10) {
+            let todayWorkouts = workouts.filter { $0.date == today }
+            if !todayWorkouts.isEmpty {
+                let names = todayWorkouts.map(\.name)
+                lines.append("  Workout: \(names.joined(separator: ", "))")
+            } else {
+                lines.append("  No workout today")
+            }
+        }
+
+        // Supplements
+        if let supplements = try? AppDatabase.shared.fetchActiveSupplements(),
+           let logs = try? AppDatabase.shared.fetchSupplementLogs(for: today) {
+            let taken = logs.filter(\.taken).count
+            lines.append("  Supplements: \(taken)/\(supplements.count) taken")
+        }
+
+        return lines.joined(separator: "\n")
+    }
 }

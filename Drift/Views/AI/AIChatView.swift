@@ -58,7 +58,7 @@ struct AIChatView: View {
                         suggestionChip("Log breakfast")
                         suggestionChip("Start a workout")
                         suggestionChip("What should I eat?")
-                        suggestionChip("Weekly summary")
+                        suggestionChip("Daily summary")
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
@@ -148,15 +148,32 @@ struct AIChatView: View {
 
         messages.append(ChatMessage(role: .user, text: text))
         inputText = ""
-        isGenerating = true
 
+        // Handle rule-based queries locally (instant, no LLM needed)
+        let lower = text.lowercased()
+        if lower.contains("daily summary") || lower.contains("how am i doing") || lower.contains("my day") {
+            let summary = AIRuleEngine.dailySummary()
+            messages.append(ChatMessage(role: .assistant, text: summary))
+            return
+        }
+
+        // LLM inference
+        isGenerating = true
         Task {
             let context = AIContextBuilder.buildContext()
 
-            var response = await aiService.respond(to: text, context: context)
-            if response.isEmpty { response = "I couldn't generate a response. Try again." }
-
-            messages.append(ChatMessage(role: .assistant, text: response))
+            if aiService.state != .ready || !aiService.isModelDownloaded {
+                // No model — use rule engine
+                var response = "I need the AI model to answer that. Download it from the setup screen, or try asking for a \"daily summary.\""
+                if let insight = AIRuleEngine.quickInsight() {
+                    response = insight
+                }
+                messages.append(ChatMessage(role: .assistant, text: response))
+            } else {
+                var response = await aiService.respond(to: text, context: context)
+                if response.isEmpty { response = "I couldn't generate a response. Try again." }
+                messages.append(ChatMessage(role: .assistant, text: response))
+            }
             isGenerating = false
         }
     }
