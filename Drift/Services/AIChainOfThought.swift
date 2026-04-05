@@ -77,14 +77,17 @@ enum AIChainOfThought {
         // Nutrition lookup — search DB for specific food
         if needsNutritionLookup {
             steps.append(Step(label: "Looking up nutrition...") {
-                // Extract food name from query
-                let foodName = q.replacingOccurrences(of: "how many calories in ", with: "")
-                    .replacingOccurrences(of: "calories in ", with: "")
-                    .replacingOccurrences(of: "nutrition in ", with: "")
-                    .replacingOccurrences(of: "protein in ", with: "")
-                    .replacingOccurrences(of: "macros in ", with: "")
+                // Extract food name: take everything after the last " in " or " of "
+                var foodName = ""
+                if let inRange = q.range(of: " in ", options: .backwards) {
+                    foodName = String(q[inRange.upperBound...])
+                } else if let ofRange = q.range(of: " of ", options: .backwards) {
+                    foodName = String(q[ofRange.upperBound...])
+                }
+                foodName = foodName
                     .replacingOccurrences(of: "a ", with: "")
                     .replacingOccurrences(of: "an ", with: "")
+                    .replacingOccurrences(of: "?", with: "")
                     .trimmingCharacters(in: .whitespacesAndNewlines)
 
                 guard !foodName.isEmpty else { return "" }
