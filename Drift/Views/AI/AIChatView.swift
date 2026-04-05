@@ -394,7 +394,8 @@ struct AIChatView: View {
                 vm.quickAdd(name: f.name, calories: cal, proteinG: p,
                             carbsG: f.carbsG * servings, fatG: f.fatG * servings,
                             fiberG: f.fiberG * servings, mealType: currentMealType)
-                messages.append(ChatMessage(role: .assistant, text: "Logged \(f.name)\(servings != 1 ? " x\(Int(servings))" : "") (\(Int(cal)) cal, \(Int(p))g protein)."))
+                let meal = currentMealType.displayName.lowercased()
+                messages.append(ChatMessage(role: .assistant, text: "Logged \(f.name)\(servings != 1 ? " x\(Int(servings))" : "") for \(meal) (\(Int(cal)) cal, \(Int(p))g protein)."))
                 return
             }
             // No exact match — open search
