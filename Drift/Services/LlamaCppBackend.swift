@@ -102,9 +102,15 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
         // Build ChatML prompt
         let fullPrompt = "<|im_start|>system\n\(systemPrompt)<|im_end|>\n<|im_start|>user\n\(prompt)<|im_end|>\n<|im_start|>assistant\n"
 
-        // Tokenize
+        // Tokenize and enforce context limit (leave room for generation)
         var tokens = tokenize(text: fullPrompt, addBos: true)
         guard !tokens.isEmpty else { return "" }
+
+        let maxPromptTokens = 2048 - 256 - 16 // context - generation - safety margin
+        if tokens.count > maxPromptTokens {
+            Log.app.info("AI: prompt truncated \(tokens.count) → \(maxPromptTokens) tokens")
+            tokens = Array(tokens.prefix(maxPromptTokens))
+        }
 
         // Clear memory (KV cache)
         let mem = llama_get_memory(context)
