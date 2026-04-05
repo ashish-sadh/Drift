@@ -102,18 +102,19 @@ enum AIChainOfThought {
         return steps
     }
 
-    /// Execute chain: run steps to gather data, build enriched context, call LLM once.
+    /// Execute chain: run steps to gather data, build enriched context, call LLM with streaming.
     static func execute(
         query: String,
         screen: AIScreen,
         history: String,
-        onStep: (String) -> Void
+        onStep: (String) -> Void,
+        onToken: @escaping @Sendable (String) -> Void = { _ in }
     ) async -> String {
         guard let steps = plan(query: query, screen: screen) else {
             // No chain needed — use screen context
             onStep("Thinking...")
             let context = AIContextBuilder.buildContext(screen: screen)
-            return await LocalAIService.shared.respond(to: query, context: context, history: history)
+            return await LocalAIService.shared.respondStreaming(to: query, context: context, history: history, onToken: onToken)
         }
 
         // Gather data from each step
@@ -130,6 +131,6 @@ enum AIChainOfThought {
 
         onStep("Writing response...")
         let enrichedContext = contextParts.joined(separator: "\n")
-        return await LocalAIService.shared.respond(to: query, context: enrichedContext, history: history)
+        return await LocalAIService.shared.respondStreaming(to: query, context: enrichedContext, history: history, onToken: onToken)
     }
 }

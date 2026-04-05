@@ -8,6 +8,7 @@ struct AIChatView: View {
     @State private var messages: [ChatMessage] = []
     @State private var inputText = ""
     @State private var generatingState: GeneratingState = .idle
+    @State private var streamingMessageId: UUID? = nil
     @State private var showingFoodSearch = false
     @State private var foodSearchQuery = ""
     @State private var foodSearchServings: Double? = nil
@@ -22,7 +23,7 @@ struct AIChatView: View {
     struct ChatMessage: Identifiable {
         let id = UUID()
         let role: Role
-        let text: String
+        var text: String
         enum Role { case user, assistant }
     }
 
@@ -37,7 +38,7 @@ struct AIChatView: View {
                         ForEach(messages) { msg in
                             messageBubble(msg).id(msg.id)
                         }
-                        if isGenerating {
+                        if case .thinking = generatingState {
                             thinkingIndicator
                         }
                     }
@@ -314,42 +315,50 @@ struct AIChatView: View {
             }
         }
 
-        // Chain-of-thought with timeout: fetch data, call LLM, clean response
+        // Chain-of-thought with streaming: fetch data, stream LLM tokens into live message
         let screen = screenTracker.currentScreen
         let history = buildConversationHistory()
 
+        // Create a placeholder message for streaming
+        let placeholder = ChatMessage(role: .assistant, text: "")
+        messages.append(placeholder)
+        streamingMessageId = placeholder.id
+
         generatingState = .thinking(step: "Understanding your question...")
         Task {
-            // Race LLM against 30s timeout
-            let response: String? = await withTaskGroup(of: String?.self) { group in
-                group.addTask {
-                    await AIChainOfThought.execute(
-                        query: text, screen: screen, history: history
-                    ) { step in
-                        Task { @MainActor in
-                            generatingState = .thinking(step: step)
+            let response = await AIChainOfThought.execute(
+                query: text, screen: screen, history: history,
+                onStep: { step in
+                    Task { @MainActor in
+                        generatingState = .thinking(step: step)
+                    }
+                },
+                onToken: { token in
+                    Task { @MainActor in
+                        // Switch from thinking to generating on first token
+                        if case .thinking = generatingState {
+                            generatingState = .generating
+                        }
+                        // Append token to the streaming message
+                        if let idx = messages.firstIndex(where: { $0.id == streamingMessageId }) {
+                            messages[idx].text += token
                         }
                     }
                 }
-                group.addTask {
-                    try? await Task.sleep(for: .seconds(30))
-                    return nil // timeout sentinel
-                }
-                for await result in group {
-                    group.cancelAll()
-                    return result
-                }
-                return nil
-            }
+            )
 
+            // Finalize: clean the response and replace streaming message
             let finalResponse: String
-            if let response, !response.isEmpty {
-                finalResponse = AIResponseCleaner.clean(response)
-            } else {
+            if response.isEmpty {
                 finalResponse = "I took too long to respond. Try a simpler question, or check the relevant tab directly."
+            } else {
+                finalResponse = AIResponseCleaner.clean(response)
             }
 
-            messages.append(ChatMessage(role: .assistant, text: finalResponse))
+            if let idx = messages.firstIndex(where: { $0.id == streamingMessageId }) {
+                messages[idx].text = finalResponse
+            }
+            streamingMessageId = nil
             generatingState = .idle
 
             // Auto-execute actions from LLM response

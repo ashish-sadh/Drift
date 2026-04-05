@@ -13,6 +13,9 @@ protocol AIBackend: AnyObject, Sendable {
     /// Generate a text response.
     func respond(to prompt: String, systemPrompt: String) async -> String
 
+    /// Generate a text response with streaming — calls onToken for each piece of text.
+    func respondStreaming(to prompt: String, systemPrompt: String, onToken: @escaping @Sendable (String) -> Void) async -> String
+
     /// Unload model from memory.
     func unload()
 }

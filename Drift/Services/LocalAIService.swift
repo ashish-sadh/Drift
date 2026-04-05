@@ -127,6 +127,10 @@ final class LocalAIService {
     // MARK: - Inference
 
     func respond(to message: String, context: String = "", history: String = "") async -> String {
+        await respondStreaming(to: message, context: context, history: history, onToken: { _ in })
+    }
+
+    func respondStreaming(to message: String, context: String = "", history: String = "", onToken: @escaping @Sendable (String) -> Void) async -> String {
         guard let backend else { return "Model not loaded." }
 
         var parts: [String] = []
@@ -136,7 +140,7 @@ final class LocalAIService {
 
         let prompt = parts.joined(separator: "\n\n")
         let b = backend
-        return await b.respond(to: prompt, systemPrompt: systemPrompt)
+        return await b.respondStreaming(to: prompt, systemPrompt: systemPrompt, onToken: onToken)
     }
 
     // MARK: - Management

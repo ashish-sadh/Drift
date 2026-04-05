@@ -93,6 +93,10 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
     // MARK: - Inference
 
     func respond(to prompt: String, systemPrompt: String) async -> String {
+        await respondStreaming(to: prompt, systemPrompt: systemPrompt, onToken: { _ in })
+    }
+
+    func respondStreaming(to prompt: String, systemPrompt: String, onToken: @escaping @Sendable (String) -> Void) async -> String {
         guard let model, let context, let smpl else { return "" }
 
         // Build ChatML prompt
@@ -110,7 +114,7 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
         let promptBatch = llama_batch_get_one(&tokens, Int32(tokens.count))
         if llama_decode(context, promptBatch) != 0 { return "" }
 
-        // Generate
+        // Generate token by token
         var outputBuf: [CChar] = []
         let maxNewTokens = 256
         let vocab = llama_model_get_vocab(model)
@@ -125,7 +129,14 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
             var buf = [CChar](repeating: 0, count: 256)
             let len = llama_token_to_piece(vocab, newToken, &buf, 256, 0, false)
             if len > 0 {
-                outputBuf.append(contentsOf: buf.prefix(Int(len)))
+                let piece = buf.prefix(Int(len))
+                outputBuf.append(contentsOf: piece)
+
+                // Stream the token piece to caller
+                let tokenStr = String(cString: Array(piece) + [0])
+                if !tokenStr.contains("<|im_end|>") && !tokenStr.contains("<|im_start|>") {
+                    onToken(tokenStr)
+                }
             }
 
             // Check stop sequence
