@@ -237,6 +237,16 @@ struct AIChatView: View {
             pills.append("Any spikes today?")
         case .biomarkers:
             pills.append("Which markers are out of range?")
+            // Show first out-of-range biomarker as a specific pill
+            if let results = try? AppDatabase.shared.fetchLatestBiomarkerResults() {
+                for r in results.prefix(10) {
+                    if let def = BiomarkerKnowledgeBase.byId[r.biomarkerId],
+                       def.status(for: r.normalizedValue) != .optimal {
+                        pills.append("How's my \(def.name.lowercased())?")
+                        break
+                    }
+                }
+            }
         case .cycle:
             pills.append("What phase am I in?")
         case .supplements:
