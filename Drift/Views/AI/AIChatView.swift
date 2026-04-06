@@ -425,6 +425,28 @@ struct AIChatView: View {
             return
         }
 
+        // Instant nutrition lookup: "calories in banana", "how much protein in chicken"
+        if lower.contains("calories in ") || lower.contains("protein in ") || lower.contains("carbs in ")
+            || lower.contains("nutrition in ") || lower.contains("nutrition for ")
+            || lower.contains("calories for ") || lower.contains("how much protein in ") {
+            // Extract food name after " in " or " for "
+            var foodName = ""
+            for sep in [" in ", " for "] {
+                if let range = lower.range(of: sep, options: .backwards) {
+                    foodName = String(lower[range.upperBound...])
+                    break
+                }
+            }
+            foodName = foodName.replacingOccurrences(of: "a ", with: "").replacingOccurrences(of: "an ", with: "")
+                .replacingOccurrences(of: "?", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+            if !foodName.isEmpty, let match = AIActionExecutor.findFood(query: foodName, servings: 1) {
+                let f = match.food
+                messages.append(ChatMessage(role: .assistant, text: "\(f.name) (per \(Int(f.servingSize))\(f.servingUnit)): \(Int(f.calories)) cal, \(Int(f.proteinG))g protein, \(Int(f.carbsG))g carbs, \(Int(f.fatG))g fat. Say \"log \(f.name.lowercased())\" to add it."))
+                return
+            }
+            // Not found in DB — fall through to LLM for estimation
+        }
+
         // Resolve pronouns from conversation context: "log it", "log that", "add this"
         let resolved = resolvePronouns(lower)
 
