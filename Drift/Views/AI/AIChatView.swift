@@ -359,10 +359,19 @@ struct AIChatView: View {
         // Resolve pronouns from conversation context: "log it", "log that", "add this"
         let resolved = resolvePronouns(lower)
 
-        // Multi-food intent: "log chicken and rice" — open search for first item
+        // Multi-food intent: "log chicken and rice" — show matches, open for first
         if let intents = AIActionExecutor.parseMultiFoodIntent(resolved) {
-            let names = intents.map(\.query).joined(separator: ", ")
-            messages.append(ChatMessage(role: .assistant, text: "Opening search for \(names)..."))
+            var found: [String] = []
+            for intent in intents {
+                if let match = AIActionExecutor.findFood(query: intent.query, servings: intent.servings) {
+                    found.append("\(match.food.name) (\(Int(match.food.calories * match.servings))cal)")
+                }
+            }
+            if !found.isEmpty {
+                messages.append(ChatMessage(role: .assistant, text: "Found: \(found.joined(separator: ", ")). Opening to log..."))
+            } else {
+                messages.append(ChatMessage(role: .assistant, text: "Searching for \(intents.map(\.query).joined(separator: ", "))..."))
+            }
             foodSearchQuery = intents[0].query
             foodSearchServings = intents[0].servings
             showingFoodSearch = true
@@ -370,11 +379,18 @@ struct AIChatView: View {
         }
 
         // Single food intent: "log 2 eggs", "ate avocado"
-        // Always open search/confirmation sheet — never log without user seeing the food first
+        // Always open search/confirmation sheet — show what we found
         if let intent = AIActionExecutor.parseFoodIntent(resolved) {
             foodSearchQuery = intent.query
             foodSearchServings = intent.servings
-            messages.append(ChatMessage(role: .assistant, text: "Opening \(intent.query)..."))
+            // Show what we found before opening the sheet
+            if let match = AIActionExecutor.findFood(query: intent.query, servings: intent.servings) {
+                let f = match.food
+                let cal = Int(f.calories * match.servings)
+                messages.append(ChatMessage(role: .assistant, text: "Found \(f.name) (\(cal) cal). Opening to confirm..."))
+            } else {
+                messages.append(ChatMessage(role: .assistant, text: "Searching for \(intent.query)..."))
+            }
             showingFoodSearch = true
             return
         }
