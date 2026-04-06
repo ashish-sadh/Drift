@@ -67,14 +67,18 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
         // KV cache at full precision for best quality
         // (Q8_0 was faster but degraded response quality)
 
-        #if targetEnvironment(simulator)
-        ctxParams.offload_kqv = false
-        ctxParams.op_offload = false
-        #else
         ctxParams.offload_kqv = true
         ctxParams.op_offload = true
-        #endif
-        guard let c = llama_init_from_model(m, ctxParams) else {
+
+        // Try GPU context first, fall back to CPU-only if Metal fails
+        var c = llama_init_from_model(m, ctxParams)
+        if c == nil {
+            Log.app.info("AI: GPU context failed, falling back to CPU-only")
+            ctxParams.offload_kqv = false
+            ctxParams.op_offload = false
+            c = llama_init_from_model(m, ctxParams)
+        }
+        guard let c else {
             llama_model_free(m)
             model = nil
             throw LoadError.contextCreateFailed
