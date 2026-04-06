@@ -46,6 +46,7 @@
 		4C31E5F32057829ABAA0840A /* DriftApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6712FB46945A6FE1AAB0E0 /* DriftApp.swift */; };
 		4C8D307CC64DADDCE400F45B /* DEXARegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE42BE067CE617760E08B051 /* DEXARegion.swift */; };
 		510B0EC55CDC176805887710 /* DefaultFoods.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B410A7B058246A1F98F46E9 /* DefaultFoods.swift */; };
+		5284981F1135EBAFC55F5BFE /* llama.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4101CD9171B652C6B8D1BB4E /* llama.xcframework */; };
 		5A5C3B121A517C9F07A31C5A /* CycleCalculations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D1FB1A43791483D88EC4BC /* CycleCalculations.swift */; };
 		5D88D4133DC583D407E81955 /* FoodLoggingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D6A44D7C25BC4956132FE8 /* FoodLoggingTests.swift */; };
 		5F4476C2F1B7DC3E662A1DBC /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24385DF0FF7F89584AE40020 /* Theme.swift */; };
@@ -54,7 +55,6 @@
 		6A5E607A5053083EB25372F7 /* AIActionExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C1323C593FD4D57F250E362 /* AIActionExecutor.swift */; };
 		6B0CE72048898157F8BA881F /* BarcodeCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4EFC6AC02BBE73CDE74B5E2 /* BarcodeCache.swift */; };
 		70F621B0C5089E738C2DEA5E /* FoodTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A981E37D718D28A6679F9C8 /* FoodTabView.swift */; };
-		71248B6DE58F57FE294B28A3 /* llama in Frameworks */ = {isa = PBXBuildFile; productRef = 50C3973AB95D033FCF4312E5 /* llama */; };
 		7BDC02B8C99F8B719546A8A1 /* WeightEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = F237A2E1C7747DBE102B665C /* WeightEntry.swift */; };
 		8224D8220B6D9328EDDDB648 /* DEXAOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5893DE4C163CA3CF50E74C1A /* DEXAOverviewView.swift */; };
 		86211210D2E5528F57C90AEF /* WorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2998A31AEC29094C6F4062 /* WorkoutView.swift */; };
@@ -73,6 +73,7 @@
 		9ACECC13D2365A3DF7F2C28C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78E3B6C1497F6A200DF8095 /* ContentView.swift */; };
 		9BDC062DA33278D9CE34EFC3 /* exercises.json in Resources */ = {isa = PBXBuildFile; fileRef = C10970FB3ED143760EC6C8C5 /* exercises.json */; };
 		9CBCD31AD1998B4E5237C1A6 /* Units.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88A19640FB19F5628DC8B824 /* Units.swift */; };
+		9F09FCD3472B6C02FEC11B48 /* llama.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4101CD9171B652C6B8D1BB4E /* llama.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A2ACB0BE8811077162EBE463 /* FoodLogViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE2809389EE890A3F01ED675 /* FoodLogViewModel.swift */; };
 		A8ACF4689ACE5AE7AB3FE4DE /* LabReportStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4D8D947C82941F66C3E892 /* LabReportStorage.swift */; };
 		AA43792497E2FC36FF55F58C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 08E33CA6BE80D735A37ED745 /* Assets.xcassets */; };
@@ -130,6 +131,20 @@
 		};
 /* End PBXContainerItemProxy section */
 
+/* Begin PBXCopyFilesBuildPhase section */
+		6D0E33BD7AB89B601B6F2462 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				9F09FCD3472B6C02FEC11B48 /* llama.xcframework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		0207D73F0C177B95B548B321 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		059465804E239D09C0E9C1D4 /* biomarkers.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = biomarkers.json; sourceTree = "<group>"; };
@@ -156,6 +171,7 @@
 		377CCA5F9E895164E95EC65E /* AIModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIModelManager.swift; sourceTree = "<group>"; };
 		37D1FB1A43791483D88EC4BC /* CycleCalculations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleCalculations.swift; sourceTree = "<group>"; };
 		3F51E9EC49412B4F96068D35 /* WeightTrendCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightTrendCalculatorTests.swift; sourceTree = "<group>"; };
+		4101CD9171B652C6B8D1BB4E /* llama.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = llama.xcframework; path = Frameworks/llama.xcframework; sourceTree = "<group>"; };
 		418816F51F38F19F65BC3D77 /* NutritionLabelOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionLabelOCR.swift; sourceTree = "<group>"; };
 		42A6CAF4720F61DC0C9BD2E7 /* FoodSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSearchView.swift; sourceTree = "<group>"; };
 		42CC554F9454FF0FC8A31F56 /* BiomarkerKnowledgeBase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomarkerKnowledgeBase.swift; sourceTree = "<group>"; };
@@ -174,7 +190,6 @@
 		659C59EE72A777C6DEA046D9 /* AIResponseCleaner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIResponseCleaner.swift; sourceTree = "<group>"; };
 		664CF8C9378B65A23548F155 /* BiomarkersTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomarkersTabView.swift; sourceTree = "<group>"; };
 		668D8D5951EB119A1624DDB2 /* DriftTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DriftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		6968F5B22F85C1C92E4CCAA8 /* LlamaLocal */ = {isa = PBXFileReference; lastKnownFileType = folder; name = LlamaLocal; path = Packages/LlamaLocal; sourceTree = SOURCE_ROOT; };
 		6A797FB70463B0909C9C34E3 /* Food.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Food.swift; sourceTree = "<group>"; };
 		6B6C02FCD909BDE67D229EC1 /* CycleCalculationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleCalculationTests.swift; sourceTree = "<group>"; };
 		6D6B07DD56345F8A5F5448BC /* CSVParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVParserTests.swift; sourceTree = "<group>"; };
@@ -253,7 +268,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				EA461A149CE8C537C738BF00 /* GRDB in Frameworks */,
-				71248B6DE58F57FE294B28A3 /* llama in Frameworks */,
+				5284981F1135EBAFC55F5BFE /* llama.xcframework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -314,7 +329,7 @@
 			children = (
 				DF13210FEF8ED80B93DD4A50 /* Drift */,
 				230C4300561292D969C89B4E /* DriftTests */,
-				E43DD523F801D0D6B44061E1 /* Packages */,
+				D7CBC30631A98D4A41A6373C /* Frameworks */,
 				0EA67573775347F2DA7F1A99 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -474,6 +489,14 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		D7CBC30631A98D4A41A6373C /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				4101CD9171B652C6B8D1BB4E /* llama.xcframework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		DF13210FEF8ED80B93DD4A50 /* Drift */ = {
 			isa = PBXGroup;
 			children = (
@@ -490,14 +513,6 @@
 				4A7204948841850DFF3D940D /* Views */,
 			);
 			path = Drift;
-			sourceTree = "<group>";
-		};
-		E43DD523F801D0D6B44061E1 /* Packages */ = {
-			isa = PBXGroup;
-			children = (
-				6968F5B22F85C1C92E4CCAA8 /* LlamaLocal */,
-			);
-			path = Packages;
 			sourceTree = "<group>";
 		};
 		E9AB1B657564FD836D16BAB5 /* Services */ = {
@@ -593,6 +608,7 @@
 				271ED68B29D0DA60F5E3CB98 /* Sources */,
 				F72ECFB3C1B5BC2EFDA4A82C /* Resources */,
 				188A35C15589F9B39A3AD2F7 /* Frameworks */,
+				6D0E33BD7AB89B601B6F2462 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -601,7 +617,6 @@
 			name = Drift;
 			packageProductDependencies = (
 				8D44ABA58001AC21A70DEA3A /* GRDB */,
-				50C3973AB95D033FCF4312E5 /* llama */,
 			);
 			productName = Drift;
 			productReference = 552F5AE6789DA294DDB91E8B /* Drift.app */;
@@ -632,7 +647,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				A0800830A85682E9EA5E8575 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
-				AEEC61F42D58AA2E4EEB4586 /* XCLocalSwiftPackageReference "Packages/LlamaLocal" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0EA67573775347F2DA7F1A99 /* Products */;
@@ -897,6 +911,10 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 81;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"Frameworks\"",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Drift/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Drift;
@@ -983,6 +1001,10 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CURRENT_PROJECT_VERSION = 81;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"\"Frameworks\"",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Drift/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Drift;
@@ -1030,13 +1052,6 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCLocalSwiftPackageReference section */
-		AEEC61F42D58AA2E4EEB4586 /* XCLocalSwiftPackageReference "Packages/LlamaLocal" */ = {
-			isa = XCLocalSwiftPackageReference;
-			relativePath = Packages/LlamaLocal;
-		};
-/* End XCLocalSwiftPackageReference section */
-
 /* Begin XCRemoteSwiftPackageReference section */
 		A0800830A85682E9EA5E8575 /* XCRemoteSwiftPackageReference "GRDB.swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
@@ -1049,10 +1064,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		50C3973AB95D033FCF4312E5 /* llama */ = {
-			isa = XCSwiftPackageProductDependency;
-			productName = llama;
-		};
 		8D44ABA58001AC21A70DEA3A /* GRDB */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = A0800830A85682E9EA5E8575 /* XCRemoteSwiftPackageReference "GRDB.swift" */;

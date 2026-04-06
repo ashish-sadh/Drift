@@ -10,10 +10,6 @@ packages:
   GRDB:
     url: https://github.com/groue/GRDB.swift.git
     from: "7.0.0"
-  LlamaLocal:
-    path: Packages/LlamaLocal
-
-
 
 targets:
   Drift:
@@ -36,9 +32,8 @@ targets:
         DEVELOPMENT_TEAM: ZJ5H5XH82A
     dependencies:
       - package: GRDB
-      - package: LlamaLocal
-        product: llama
-
+      - framework: Frameworks/llama.xcframework
+        embed: true
 
     entitlements:
       path: Drift/Drift.entitlements
