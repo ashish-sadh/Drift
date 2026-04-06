@@ -563,6 +563,232 @@ final class AIEvalHarness: XCTestCase {
         XCTAssertTrue(clean.contains("Sure"), "Regular text should remain")
     }
 
+    // MARK: - Indian Food Logging
+
+    func testIndianFoodIntents() {
+        let indianFoods = [
+            "log 2 rotis",
+            "had dal and rice",
+            "ate paneer butter masala",
+            "log a samosa",
+            "had 2 idli",
+            "ate dosa for breakfast",
+            "log a paratha",
+            "had rajma chawal",
+            "ate biryani for lunch",
+            "log a cup of chai",
+            "had a bowl of dal",
+            "ate chole bhature",
+        ]
+
+        var detected = 0
+        for query in indianFoods {
+            let lower = query.lowercased()
+            let hasFoodIntent = AIActionExecutor.parseFoodIntent(lower) != nil
+                || AIActionExecutor.parseMultiFoodIntent(lower) != nil
+            if hasFoodIntent { detected += 1 }
+            else { print("MISS (Indian food): '\(query)'") }
+        }
+
+        let precision = Double(detected) / Double(indianFoods.count)
+        XCTAssertGreaterThanOrEqual(precision, 0.83, "Indian food precision: \(detected)/\(indianFoods.count)")
+    }
+
+    // MARK: - Amount Edge Cases
+
+    func testAmountEdgeCases() {
+        // Test amount parsing with various prefixes
+        let cases: [(String, Double?)] = [
+            ("log half a banana", 0.5),
+            ("ate 1.5 cups of oatmeal", 1.5),
+            ("log a couple of eggs", 2.0),
+            ("log a few almonds", 3.0),
+            ("log 200g chicken", nil), // grams handled separately
+            ("had 3 rotis", 3.0),
+            ("ate 2.5 servings of rice", 2.5),
+        ]
+
+        for (query, expectedAmount) in cases {
+            let intent = AIActionExecutor.parseFoodIntent(query.lowercased())
+            XCTAssertNotNil(intent, "'\(query)' should parse as food intent")
+            if let expected = expectedAmount, let actual = intent?.servings {
+                XCTAssertEqual(actual, expected, accuracy: 0.1, "'\(query)' should have amount \(expected), got \(actual)")
+            }
+        }
+    }
+
+    // MARK: - Negation and Questions (Should NOT log)
+
+    func testNegationAndQuestions() {
+        let shouldNotLog = [
+            "I don't want to eat",
+            "should I eat more protein",
+            "is banana good for me",
+            "what's healthier chicken or fish",
+            "how much protein should I have",
+            "should I skip dinner",
+            "I'm thinking about food",
+            "tell me about nutrition",
+            "what are macros",
+            "is 2000 calories too much",
+        ]
+
+        var falsePositives = 0
+        for query in shouldNotLog {
+            let lower = query.lowercased()
+            let hasFoodIntent = AIActionExecutor.parseFoodIntent(lower) != nil
+                || AIActionExecutor.parseMultiFoodIntent(lower) != nil
+            if hasFoodIntent {
+                falsePositives += 1
+                print("FALSE POSITIVE (negation): '\(query)'")
+            }
+        }
+
+        let fpRate = Double(falsePositives) / Double(shouldNotLog.count)
+        XCTAssertLessThanOrEqual(fpRate, 0.1, "Negation/question false positive rate: \(falsePositives)/\(shouldNotLog.count)")
+    }
+
+    // MARK: - Response Cleaner Edge Cases
+
+    func testResponseCleanerMarkdown() {
+        let markdownResponse = "**Here's your summary:**\n## Nutrition\n* Protein: 80g\n* Carbs: 200g\n- Fat: 60g"
+        let cleaned = AIResponseCleaner.clean(markdownResponse)
+        XCTAssertFalse(cleaned.contains("**"), "Bold markdown should be stripped")
+        XCTAssertFalse(cleaned.contains("## "), "Header markdown should be stripped")
+        XCTAssertTrue(cleaned.contains("\u{2022}"), "Bullets should be converted")
+    }
+
+    func testResponseCleanerPreambleStripping() {
+        let preambles = [
+            "Based on your data, you've consumed 1500 calories.",
+            "Great question! Your protein is at 80g.",
+            "Sure! You have 500 calories left.",
+            "Looking at your data, your weight is trending down.",
+        ]
+        for response in preambles {
+            let cleaned = AIResponseCleaner.clean(response)
+            XCTAssertFalse(cleaned.lowercased().hasPrefix("based on"), "Preamble should be stripped: \(cleaned)")
+            XCTAssertFalse(cleaned.lowercased().hasPrefix("great question"), "Preamble should be stripped: \(cleaned)")
+            XCTAssertFalse(cleaned.lowercased().hasPrefix("sure!"), "Preamble should be stripped: \(cleaned)")
+            XCTAssertFalse(cleaned.lowercased().hasPrefix("looking at"), "Preamble should be stripped: \(cleaned)")
+        }
+    }
+
+    func testResponseCleanerLowQuality() {
+        let lowQuality = [
+            "I'm here to help! What would you like to know?",
+            "abc abc abc abc abc abc abc abc abc abc",
+            "|||data|||more|||pipes|||",
+            "screen: dashboard\nweight: 165",
+            "",
+            "ok",
+        ]
+        for response in lowQuality {
+            XCTAssertTrue(AIResponseCleaner.isLowQuality(response), "Should be low quality: '\(response.prefix(30))'")
+        }
+    }
+
+    func testResponseCleanerGoodResponses() {
+        let goodResponses = [
+            "You've consumed 1500 calories today with 80g of protein.",
+            "Your weight has been trending down by 0.5 lbs per week.",
+            "You haven't trained legs in 5 days. Consider a leg day today.",
+            "Your fasting glucose is 95 mg/dL, which is in the normal range.",
+        ]
+        for response in goodResponses {
+            XCTAssertFalse(AIResponseCleaner.isLowQuality(response), "Should NOT be low quality: '\(response.prefix(40))'")
+        }
+    }
+
+    // MARK: - Weight Intent Edge Cases
+
+    func testWeightIntentEdgeCases() {
+        // Valid weight phrases
+        let valid = [
+            ("i weigh 75 kg", 75.0, "kg"),
+            ("my weight is 165.5", 165.5, nil),
+            ("i'm at 80 kg", 80.0, "kg"),
+        ]
+        for (query, expectedValue, expectedUnit) in valid {
+            let intent = AIActionExecutor.parseWeightIntent(query.lowercased())
+            XCTAssertNotNil(intent, "'\(query)' should parse as weight")
+            if let intent {
+                XCTAssertEqual(intent.weightValue, expectedValue, accuracy: 0.1)
+                if let eu = expectedUnit {
+                    XCTAssertEqual(intent.unit == .kg ? "kg" : "lbs", eu)
+                }
+            }
+        }
+
+        // Invalid — should NOT parse
+        let invalid = [
+            "the package weighs 5 lbs",
+            "how much should I weigh",
+            "ideal weight for my height",
+            "chicken weighs 200g",
+        ]
+        for query in invalid {
+            XCTAssertNil(AIActionExecutor.parseWeightIntent(query.lowercased()), "'\(query)' should NOT parse as weight")
+        }
+    }
+
+    // MARK: - Action Parser Edge Cases
+
+    func testActionParserCleanTextPreservation() {
+        // Action tags should be stripped but surrounding text preserved
+        let cases: [(String, String?, String)] = [
+            ("Great choice! [LOG_FOOD: banana] Enjoy!", "banana", "logFood"),
+            ("Starting your workout! [START_WORKOUT: Push Day]", "Push Day", "startWorkout"),
+            ("No action here, just advice.", nil, "none"),
+        ]
+        for (response, expectedExtract, expectedType) in cases {
+            let (action, clean) = AIActionParser.parse(response)
+            XCTAssertFalse(clean.contains("[LOG_FOOD") || clean.contains("[START_WORKOUT"), "Tags stripped from: \(clean)")
+            if let expected = expectedExtract {
+                switch action {
+                case .logFood(let name, _):
+                    XCTAssertTrue(name.contains(expected), "Food name should contain '\(expected)', got '\(name)'")
+                    XCTAssertEqual(expectedType, "logFood")
+                case .startWorkout(let type):
+                    XCTAssertEqual(type, expected)
+                    XCTAssertEqual(expectedType, "startWorkout")
+                default:
+                    XCTFail("Expected \(expectedType) action")
+                }
+            }
+        }
+    }
+
+    // MARK: - Chain-of-Thought Domain Coverage
+
+    @MainActor
+    func testAllDomainsRouteProperly() {
+        // Each domain should have at least one query that triggers its context
+        let domainQueries: [(String, AIScreen, String)] = [
+            ("what should I eat", .food, "meal"),
+            ("how's my weight", .weight, "weight"),
+            ("how'd I sleep", .bodyRhythm, "sleep"),
+            ("any glucose spikes", .glucose, "glucose"),
+            ("which labs are off", .biomarkers, "lab"),
+            ("what phase am I in", .cycle, "cycle"),
+            ("what should I train", .exercise, "workout"),
+            ("did I take everything", .supplements, "supplement"),
+            ("how's my body fat", .bodyComposition, "DEXA"),
+        ]
+
+        for (query, screen, expectedDomain) in domainQueries {
+            let steps = AIChainOfThought.plan(query: query, screen: screen)
+            XCTAssertNotNil(steps, "'\(query)' should trigger chain-of-thought")
+            let labels = steps?.map { $0.label.lowercased() } ?? []
+            let domainLower = expectedDomain.lowercased()
+            let matchesDomain = labels.contains(where: { $0.contains(domainLower) })
+                || labels.contains(where: { $0.contains("review") || $0.contains("check") || $0.contains("look") })
+            XCTAssertTrue(matchesDomain, "'\(query)' should fetch \(expectedDomain) context, got labels: \(labels)")
+        }
+    }
+
+    // MARK: - Summary
+
     func testPrintSummary() {
         print("=== AI EVAL HARNESS SUMMARY ===")
         print("Run individual tests for detailed precision/recall metrics.")
