@@ -87,7 +87,8 @@ enum AIContextBuilder {
 
         if nutrition.calories > 0 {
             let left = target - Int(nutrition.calories)
-            lines.append("Eaten: \(Int(nutrition.calories))/\(target)cal | \(left > 0 ? "\(left) left" : "\(abs(left)) over") | \(Int(nutrition.proteinG))P \(Int(nutrition.carbsG))C \(Int(nutrition.fatG))F")
+            lines.append("Calories: \(Int(nutrition.calories)) eaten, \(target) target, \(left > 0 ? "\(left) remaining" : "\(abs(left)) over target")")
+            lines.append("Macros: \(Int(nutrition.proteinG))P \(Int(nutrition.carbsG))C \(Int(nutrition.fatG))F")
         } else {
             lines.append("No food logged | Target: \(target)cal")
         }
@@ -99,7 +100,7 @@ enum AIContextBuilder {
                 let u = Preferences.weightUnit
                 let w = String(format: "%.1f", u.convert(fromKg: trend.currentEMA))
                 let rate = String(format: "%+.1f", u.convert(fromKg: trend.weeklyRateKg))
-                lines.append("Weight: \(w)\(u.displayName) | \(rate)/wk | TDEE: \(Int(tdee))kcal")
+                lines.append("Weight: \(w)\(u.displayName) | \(rate)/wk")
             }
         }
 
