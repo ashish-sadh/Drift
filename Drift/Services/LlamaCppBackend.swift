@@ -42,8 +42,9 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
         let cPath = modelPath.path.cString(using: .utf8)!
 
         // Force CPU-only: find the CPU device and pass it explicitly.
-        // This prevents llama.cpp from initializing Metal (which crashes on A19 Pro
-        // due to incompatible Metal shader compilation with the prebuilt xcframework).
+        // The prebuilt xcframework in LLM.swift has Metal shaders incompatible with A19 Pro.
+        // NOTE: Tried llama.cpp b8672 xcframework — API changes cause garbage output.
+        // GPU acceleration requires matching the xcframework version to our C API usage.
         var cpuDev: ggml_backend_dev_t?
         for i in 0..<ggml_backend_reg_count() {
             let reg = ggml_backend_reg_get(i)
@@ -58,7 +59,7 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
         modelParams.n_gpu_layers = 0
         var deviceList: [ggml_backend_dev_t?] = []
         if let cpuDev {
-            deviceList = [cpuDev, nil] // NULL-terminated
+            deviceList = [cpuDev, nil]
             modelParams.devices = UnsafeMutablePointer(mutating: deviceList.withUnsafeBufferPointer { $0.baseAddress })
         }
         guard let m = withExtendedLifetime(deviceList, { llama_model_load_from_file(cPath, modelParams) }) else {
