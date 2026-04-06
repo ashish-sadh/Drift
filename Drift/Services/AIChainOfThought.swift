@@ -75,7 +75,8 @@ enum AIChainOfThought {
             || q.contains("calories in") || q.contains("protein in") || q.contains("macros in")
             || q.contains("carbs in") || q.contains("fat in"))
         let needsComparison = q.contains("compare") || q.contains("versus") || q.contains("vs")
-            || q.contains("last week") || q.contains("this week") || q.contains("better") || q.contains("worse")
+            || q.contains("last week") || q.contains("this week")
+            || q.contains("better than") || q.contains("worse than") || q.contains("compared to")
 
         // Broad queries get a comprehensive overview (fullDayContext includes food+workouts+supplements)
         if needsOverview {
