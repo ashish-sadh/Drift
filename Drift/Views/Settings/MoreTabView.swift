@@ -46,17 +46,9 @@ struct MoreTabView: View {
                         navRow(icon: "cross.case.fill", title: "Biomarkers", subtitle: "Blood test results & trends", color: Theme.heartRed) {
                             BiomarkersTabView()
                         }
-                    }
-                    .card()
-
-                    // Settings
-                    VStack(spacing: 0) {
-                        navRow(icon: "gear", title: "Settings", subtitle: "Units, Health access", color: .secondary) {
-                            SettingsView()
-                        }
                         Divider().overlay(Color.white.opacity(0.05))
-                        navRow(icon: "slider.horizontal.3", title: "Algorithm", subtitle: "TDEE & calorie target settings", color: Theme.accent) {
-                            AlgorithmSettingsView()
+                        navRow(icon: "gear", title: "Settings", subtitle: "Units, Health access, algorithm", color: .secondary) {
+                            SettingsView()
                         }
                     }
                     .card()
@@ -319,6 +311,24 @@ struct SettingsView: View {
                             Spacer()
                         }
                     }
+                }
+                .card()
+
+                // Algorithm
+                NavigationLink {
+                    AlgorithmSettingsView()
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "slider.horizontal.3")
+                            .foregroundStyle(Theme.accent).frame(width: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Algorithm").font(.subheadline.weight(.medium))
+                            Text("TDEE & calorie target settings").font(.caption2).foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
+                    }
+                    .padding(.vertical, 10)
                 }
                 .card()
 
