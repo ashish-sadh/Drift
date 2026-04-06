@@ -405,6 +405,26 @@ struct AIChatView: View {
             return
         }
 
+        // Multi-turn: if AI just asked "What did you eat?" and user replies with a food name
+        if let lastAssistant = messages.last(where: { $0.role == .assistant }),
+           (lastAssistant.text.contains("What did you eat") || lastAssistant.text.contains("what did you eat")
+            || lastAssistant.text.contains("What did you order") || lastAssistant.text.contains("Describe it")),
+           !lower.contains("summary") && !lower.contains("calorie") && lower.count > 2 {
+            // Treat the reply as a food to log
+            if let match = AIActionExecutor.findFood(query: lower, servings: nil) {
+                messages.append(ChatMessage(role: .assistant, text: "Found \(match.food.name) (\(Int(match.food.calories)) cal). Opening to confirm..."))
+                foodSearchQuery = lower
+                showingFoodSearch = true
+                return
+            } else {
+                // Try as food search anyway
+                foodSearchQuery = lower
+                messages.append(ChatMessage(role: .assistant, text: "Searching for \(lower)..."))
+                showingFoodSearch = true
+                return
+            }
+        }
+
         // Generic "log food/breakfast/lunch"
         if lower.contains("log food") || lower.contains("log breakfast") || lower.contains("log lunch") || lower.contains("log dinner") {
             messages.append(ChatMessage(role: .assistant, text: "What did you eat? Say something like \"2 eggs and toast\" and I'll log it for you."))
