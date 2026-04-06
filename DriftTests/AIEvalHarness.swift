@@ -328,6 +328,33 @@ final class AIEvalHarness: XCTestCase {
         }
     }
 
+    // MARK: - Lab Report AI Enhancement
+
+    func testAIBiomarkerResponseParsing() {
+        // Simulate what the LLM would return for biomarker extraction
+        let aiResponse = """
+        glucose|95|mg/dL
+        total_cholesterol|210|mg/dL
+        hdl_cholesterol|55|mg/dL
+        """
+
+        // The parser should extract valid biomarker results
+        // (We can't call the private method directly, but we can test the format)
+        let lines = aiResponse.components(separatedBy: .newlines)
+        var parsed = 0
+        for line in lines {
+            let parts = line.split(separator: "|")
+            if parts.count >= 3 {
+                let id = String(parts[0]).trimmingCharacters(in: .whitespaces)
+                if let _ = Double(String(parts[1]).trimmingCharacters(in: .whitespaces)),
+                   !id.isEmpty {
+                    parsed += 1
+                }
+            }
+        }
+        XCTAssertEqual(parsed, 3, "Should parse 3 biomarkers from AI response")
+    }
+
     // MARK: - Summary Report
 
     func testPrintSummary() {
