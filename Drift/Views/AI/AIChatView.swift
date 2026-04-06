@@ -254,7 +254,7 @@ struct AIChatView: View {
             pills.append("Am I on track?")
         case .exercise:
             pills.append("What should I train?")
-            // Add first template name as quick-start pill
+            pills.append("Log a workout")
             if let templates = try? WorkoutService.fetchTemplates(), let first = templates.first {
                 pills.append("Start \(first.name)")
             }
@@ -461,6 +461,12 @@ struct AIChatView: View {
                 messages.append(ChatMessage(role: .assistant, text: "Searching for \(intent.query)..."))
             }
             showingFoodSearch = true
+            return
+        }
+
+        // Workout logging prompt
+        if lower == "log a workout" || lower == "log workout" {
+            messages.append(ChatMessage(role: .assistant, text: "What did you do? Describe your exercises \u{2014} e.g., \"bench press 3x10 at 135, squats 4x8 at 185\""))
             return
         }
 
