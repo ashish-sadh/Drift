@@ -464,6 +464,23 @@ struct AIChatView: View {
             return
         }
 
+        // Direct template start: "start push day", "start legs", "let's do chest day"
+        if (lower.hasPrefix("start ") || lower.hasPrefix("let's do ") || lower.hasPrefix("lets do ") || lower.hasPrefix("begin ")) {
+            let templateQuery = lower
+                .replacingOccurrences(of: "start ", with: "")
+                .replacingOccurrences(of: "let's do ", with: "")
+                .replacingOccurrences(of: "lets do ", with: "")
+                .replacingOccurrences(of: "begin ", with: "")
+                .trimmingCharacters(in: .whitespaces)
+            if let templates = try? WorkoutService.fetchTemplates(),
+               let matched = templates.first(where: { $0.name.lowercased().contains(templateQuery) }) {
+                messages.append(ChatMessage(role: .assistant, text: "Starting \(matched.name)!"))
+                workoutTemplate = matched
+                showingWorkout = true
+                return
+            }
+        }
+
         // Weight intent: "I weigh 165", "weight is 75.2 kg"
         if let weightIntent = AIActionExecutor.parseWeightIntent(lower) {
             let kg = weightIntent.unit == .kg ? weightIntent.weightValue : weightIntent.weightValue / 2.20462
