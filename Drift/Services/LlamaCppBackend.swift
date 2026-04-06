@@ -77,9 +77,8 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
         ctxParams.n_threads = Int32(max(2, min(coreCount - 2, 6)))       // leave 2 for UI
         ctxParams.n_threads_batch = Int32(max(2, min(coreCount, 8)))     // use all for prompt eval
 
-        // Quantized KV cache — reduces memory bandwidth (main CPU bottleneck)
-        ctxParams.type_k = GGML_TYPE_Q8_0
-        ctxParams.type_v = GGML_TYPE_Q8_0
+        // KV cache at full precision for best quality
+        // (Q8_0 was faster but degraded response quality)
 
         ctxParams.offload_kqv = false
         ctxParams.op_offload = false
