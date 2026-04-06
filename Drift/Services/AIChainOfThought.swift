@@ -168,7 +168,14 @@ enum AIChainOfThought {
             case .cycle: steps.append(Step(label: "Checking cycle...") { AIContextBuilder.cycleContext() })
             case .bodyComposition: steps.append(Step(label: "Checking DEXA...") { AIContextBuilder.dexaContext() })
             case .supplements: steps.append(Step(label: "Checking supplements...") { AIContextBuilder.supplementContext() })
-            default: return nil // Dashboard/settings — single-shot
+            case .dashboard:
+                // Unmatched dashboard query — give LLM a broad overview if query has substance
+                if q.count > 10 {
+                    steps.append(Step(label: "Checking your day...") { AIContextBuilder.fullDayContext() })
+                } else {
+                    return nil
+                }
+            default: return nil // Settings/algorithm — single-shot
             }
         }
 
