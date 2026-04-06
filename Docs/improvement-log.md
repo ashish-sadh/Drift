@@ -43,3 +43,73 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 **Commit:** 0a4ee95
 **Status:** keep
 **Notes:** LLM now sees "Last exercises: Bench Press 3x135lb, Squats 4x185lb" and "Needs training: Legs (5d), Back (4d)". This enables Flow C (AI suggests workout based on history).
+
+---
+
+## Cycle 4 · 2026-04-06 08:46
+**Priority:** P3 (Eval harness)
+**Change:** Eval 22→25: workout routing, false positives, multi-exercise parsing
+**Commit:** 6dc40c0 | **Status:** keep
+
+---
+
+## Cycle 5 · 2026-04-06 08:47
+**Priority:** P1 (Routing fix)
+**Change:** Comparison routing includes domain context (workout/food) when mentioned
+**Commit:** ace6652 | **Status:** keep
+
+---
+
+## Cycle 6 · 2026-04-06 08:48
+**Priority:** P2 (Workout keywords)
+**Change:** Expanded workout keywords: push/pull/leg day, body part, muscle, split, PPL
+**Commit:** c415918 | **Status:** keep
+
+---
+
+## Cycle 7 · 2026-04-06 08:49
+**Priority:** P3 (Response quality)
+**Change:** Response cleaner: markdown bullets, numbered lists, regurgitation detection
+**Commit:** 52f9d32 | **Status:** keep
+
+---
+
+## Cycle 8 · 2026-04-06 08:50
+**Priority:** P3 (Eval harness)
+**Change:** Eval 25→35: Indian foods, amounts, negation, response cleaner, domains
+**Commit:** e47af9b | **Status:** keep
+
+---
+
+## Cycle 9 · 2026-04-06 08:51
+**Priority:** P1 (Dashboard fallback)
+**Change:** Dashboard fallback provides fullDayContext for substantive queries (>10 chars)
+**Commit:** a619910 | **Status:** keep
+
+---
+
+## Cycle 10 · 2026-04-06 08:52
+**Priority:** P3 (Eval harness)
+**Change:** Eval 35→39: routing expansion, food coverage, action parser batch, rule engine
+**Commit:** a1f72ab | **Status:** keep
+
+---
+
+## Cycle 11 · 2026-04-06 08:53
+**Priority:** P2 (Workout builder)
+**Change:** CREATE_WORKOUT template includes reps + weight in notes field
+**Commit:** 3ec4fc1 | **Status:** keep
+
+---
+
+## Cycle 12 · 2026-04-06 08:55
+**Priority:** P4 (Food polish)
+**Change:** Food parser handles beverages/snacks/cooking: drank, snacked, made, i'm having
+**Commit:** cc6dfef | **Status:** keep
+
+---
+
+## Cycle 13 · 2026-04-06 08:57
+**Priority:** P3 (Eval harness)
+**Change:** Eval 40→48: edge cases, robustness, truncation, disclaimers, dedup, weight units
+**Commit:** a6e717d | **Status:** keep

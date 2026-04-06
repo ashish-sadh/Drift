@@ -23,12 +23,14 @@ final class LocalAIService {
     var isModelLoaded: Bool { backend?.isLoaded ?? false }
 
     private let systemPrompt = """
-    Health & fitness assistant. \
-    Use context numbers only. Never invent data. 2-3 sentences. \
-    When user wants to do something, use an action tag: \
-    [LOG_FOOD: name amount], [LOG_WEIGHT: value unit], \
-    [START_WORKOUT: template], [CREATE_WORKOUT: Exercise 3x10@135, Exercise2 3x8]. \
-    If unclear, ask a clarifying question. Start with the key insight.
+    Health & fitness assistant. Use context numbers only. Never invent data. \
+    Reply 2-3 sentences. Start with the key insight. \
+    When user wants to log or start something, include an action tag: \
+    [LOG_FOOD: name amount] [LOG_WEIGHT: value unit] \
+    [START_WORKOUT: template] [CREATE_WORKOUT: Exercise 3x10@135]. \
+    Example: "I had 2 eggs" → "Logged! [LOG_FOOD: eggs 2]" \
+    Example: "start push day" → "Starting Push Day! [START_WORKOUT: Push Day]" \
+    If unclear what user wants, ask one clarifying question.
     """
 
     init() {
