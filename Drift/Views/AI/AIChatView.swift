@@ -362,6 +362,20 @@ struct AIChatView: View {
             messages.append(ChatMessage(role: .assistant, text: AIRuleEngine.dailySummary()))
             return
         }
+        if lower == "how's my protein" || lower == "how's my protein?" || lower == "protein status" {
+            let n = (try? AppDatabase.shared.fetchDailyNutrition(for: DateFormatters.todayString)) ?? .zero
+            if n.proteinG > 0 {
+                if let goal = WeightGoal.load(), let targets = goal.macroTargets() {
+                    let pLeft = max(0, Int(targets.proteinG - n.proteinG))
+                    messages.append(ChatMessage(role: .assistant, text: "\(Int(n.proteinG))g protein today (\(Int(targets.proteinG))g target). \(pLeft > 0 ? "Still need \(pLeft)g." : "Target reached!")"))
+                } else {
+                    messages.append(ChatMessage(role: .assistant, text: "\(Int(n.proteinG))g protein today."))
+                }
+            } else {
+                messages.append(ChatMessage(role: .assistant, text: "No food logged yet. Log your meals to track protein."))
+            }
+            return
+        }
         if lower == "what did i eat today" || lower == "what did i eat" || lower == "today's food" {
             let context = AIContextBuilder.foodContext()
             messages.append(ChatMessage(role: .assistant, text: context.isEmpty ? "No food logged today yet." : context))
