@@ -20,8 +20,11 @@ enum AIResponseCleaner {
         text = text.replacingOccurrences(of: "**", with: "")
         text = text.replacingOccurrences(of: "## ", with: "")
         text = text.replacingOccurrences(of: "# ", with: "")
-        text = text.replacingOccurrences(of: "* ", with: "\u{2022} ") // bullet points → proper bullet
-        text = text.replacingOccurrences(of: "- ", with: "\u{2022} ") // dash lists → proper bullet
+        // Replace markdown bullets only at line start (avoid mid-sentence "-300kcal")
+        let bulletPattern = #"(?m)^[*\-]\s"#
+        if let bulletRegex = try? NSRegularExpression(pattern: bulletPattern) {
+            text = bulletRegex.stringByReplacingMatches(in: text, range: NSRange(text.startIndex..., in: text), withTemplate: "\u{2022} ")
+        }
 
         // Clean up numbered lists: "1. " → "1) " (more conversational)
         let numberedPattern = #"(\d+)\.\s"#
