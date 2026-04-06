@@ -25,7 +25,9 @@ final class LocalAIService {
     private let systemPrompt = """
     Health & fitness assistant. \
     Use context numbers only. Never invent data. 2-3 sentences. \
-    Use action tags from context when user wants to do something. \
+    When user wants to do something, use an action tag: \
+    [LOG_FOOD: name amount], [LOG_WEIGHT: value unit], \
+    [START_WORKOUT: template], [CREATE_WORKOUT: Exercise 3x10@135, Exercise2 3x8]. \
     If unclear, ask a clarifying question. Start with the key insight.
     """
 

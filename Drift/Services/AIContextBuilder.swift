@@ -391,16 +391,17 @@ enum AIContextBuilder {
         case .settings, .algorithm: context = ""
         }
 
-        // Screen-specific action hints — narrow the "tool surface" per turn
+        // Action hints — always available so LLM can classify any intent
+        var actions: [String] = ["[LOG_FOOD: name amount]", "[LOG_WEIGHT: value unit]",
+                                  "[START_WORKOUT: name]", "[CREATE_WORKOUT: Exercise 3x10@135]"]
+        // Emphasize the most relevant action for the current screen
         switch screen {
-        case .food:
-            context += "\nActions: [LOG_FOOD: name amount]"
-        case .exercise:
-            context += "\nActions: [START_WORKOUT: name], [CREATE_WORKOUT: Exercise 3x10@135]"
-        case .weight, .goal:
-            context += "\nActions: [LOG_WEIGHT: value unit]"
+        case .food: actions = ["[LOG_FOOD: name amount]"] + actions.filter { !$0.contains("LOG_FOOD") }
+        case .exercise: actions = ["[START_WORKOUT: name]", "[CREATE_WORKOUT: Exercise 3x10@135]"] + actions.filter { !$0.contains("WORKOUT") }
+        case .weight, .goal: actions = ["[LOG_WEIGHT: value unit]"] + actions.filter { !$0.contains("LOG_WEIGHT") }
         default: break
         }
+        context += "\nActions: \(actions.joined(separator: ", "))"
 
         return context
     }
