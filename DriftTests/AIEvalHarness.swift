@@ -343,6 +343,29 @@ final class AIEvalHarness: XCTestCase {
         }
     }
 
+    func testCreateWorkoutSingleExercise() {
+        let (action, _) = AIActionParser.parse("[CREATE_WORKOUT: Squats 4x8@185]")
+        if case .createWorkout(let exercises) = action {
+            XCTAssertEqual(exercises.count, 1)
+            XCTAssertEqual(exercises[0].name, "Squats")
+            XCTAssertEqual(exercises[0].sets, 4)
+            XCTAssertEqual(exercises[0].reps, 8)
+            XCTAssertEqual(exercises[0].weight, 185)
+        } else {
+            XCTFail("Expected createWorkout")
+        }
+    }
+
+    func testCreateWorkoutNoWeight() {
+        let (action, _) = AIActionParser.parse("[CREATE_WORKOUT: Plank 3x60]")
+        if case .createWorkout(let exercises) = action {
+            XCTAssertEqual(exercises[0].name, "Plank")
+            XCTAssertNil(exercises[0].weight)
+        } else {
+            XCTFail("Expected createWorkout")
+        }
+    }
+
     func testStartWorkoutParsing() {
         let (action, _) = AIActionParser.parse("[START_WORKOUT: Push Day]")
         if case .startWorkout(let type) = action {
