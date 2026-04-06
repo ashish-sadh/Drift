@@ -943,6 +943,27 @@ final class AIEvalHarness: XCTestCase {
         XCTAssertEqual(ruleEngineQueries.count, 19, "Should have 19 rule engine patterns")
     }
 
+    // MARK: - Keyword Precision Tests
+
+    @MainActor
+    func testKeywordFalsePositivePrevention() {
+        // These should NOT trigger the noted domain
+        let falsePositives: [(String, AIScreen, String)] = [
+            ("I feel better today", .dashboard, "compar"),         // "better" alone shouldn't trigger comparison
+            ("run the numbers for me", .dashboard, "workout"),     // "run" alone shouldn't trigger workout
+            ("I need to rest my case", .dashboard, "sleep"),       // "rest" alone shouldn't trigger sleep
+            ("that was fast", .dashboard, "meal"),                 // "fast" shouldn't trigger food
+            ("I'm doing great", .dashboard, "overview"),           // "doing" alone shouldn't trigger overview
+        ]
+
+        for (query, screen, forbiddenDomain) in falsePositives {
+            let steps = AIChainOfThought.plan(query: query, screen: screen)
+            let labels = steps?.map { $0.label.lowercased() } ?? []
+            let hasForbidden = labels.contains(where: { $0.contains(forbiddenDomain) })
+            XCTAssertFalse(hasForbidden, "'\(query)' should NOT fetch \(forbiddenDomain) context, got labels: \(labels)")
+        }
+    }
+
     // MARK: - Comprehensive Routing Matrix
 
     @MainActor
