@@ -616,7 +616,7 @@ struct AIChatView: View {
                         if let w = e.weight { s += " @ \(Int(w)) lbs" }
                         return s
                     }.joined(separator: ", ")
-                    messages.append(ChatMessage(role: .assistant, text: "Workout ready: \(summary). Opening..."))
+                    messages.append(ChatMessage(role: .assistant, text: "Workout ready: \(summary). Say \"also did X\" to add more, or opening now..."))
 
                     let template = WorkoutTemplate(
                         name: "AI Workout",
