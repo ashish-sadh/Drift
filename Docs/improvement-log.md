@@ -29,3 +29,17 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 **Commit:** 1bbd1a3
 **Status:** keep
 **Notes:** sendMessage() is 18 lines shorter. "log a workout", "log food", "ate out" now handled by LLM with action tags. Kept: weight intent (deterministic), multi-turn follow-up (complex), food/multi-food intent parsers (deterministic).
+
+---
+
+## Cycle 3 · 2026-04-06 08:44
+
+**Priority:** P2 (Conversational workout builder)
+**Change:** Enhanced workoutContext() with exercise details from last workout and body part coverage analysis
+**Files:** AIContextBuilder.swift
+**Build:** OK
+**Tests:** 729 passed, 0 failed
+**Eval harness:** All passed
+**Commit:** 0a4ee95
+**Status:** keep
+**Notes:** LLM now sees "Last exercises: Bench Press 3x135lb, Squats 4x185lb" and "Needs training: Legs (5d), Back (4d)". This enables Flow C (AI suggests workout based on history).

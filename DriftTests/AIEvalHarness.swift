@@ -383,6 +383,66 @@ final class AIEvalHarness: XCTestCase {
         }
     }
 
+    // MARK: - Workout Intent Routing
+
+    @MainActor
+    func testWorkoutQueriesRouteCorrectly() {
+        // These should all trigger workout context in chain-of-thought
+        let workoutQueries: [(String, AIScreen)] = [
+            ("what should I train today?", .dashboard),
+            ("I want to work out", .dashboard),
+            ("log a workout", .exercise),
+            ("start push day", .exercise),
+            ("I did bench press 3x10 at 135", .dashboard),
+            ("how many workouts this week?", .dashboard),
+            ("what did I train last?", .exercise),
+        ]
+        var correct = 0
+        for (query, screen) in workoutQueries {
+            let steps = AIChainOfThought.plan(query: query, screen: screen)
+            let hasWorkout = steps?.contains(where: { $0.label.lowercased().contains("workout") }) ?? false
+            if hasWorkout { correct += 1 }
+            else { print("MISS: '\(query)' on \(screen) did not trigger workout context") }
+        }
+        let precision = Double(correct) / Double(workoutQueries.count)
+        XCTAssertGreaterThanOrEqual(precision, 0.71, "Workout routing: \(correct)/\(workoutQueries.count) (\(Int(precision * 100))%)")
+    }
+
+    func testWorkoutFalsePositives() {
+        // These should NOT parse as CREATE_WORKOUT
+        let notWorkout = [
+            "how many calories in chicken?",
+            "log 2 eggs for breakfast",
+            "daily summary",
+            "I weigh 165",
+        ]
+        for query in notWorkout {
+            let (action, _) = AIActionParser.parse(query)
+            if case .createWorkout = action {
+                XCTFail("'\(query)' should NOT parse as createWorkout")
+            }
+            if case .startWorkout = action {
+                XCTFail("'\(query)' should NOT parse as startWorkout")
+            }
+        }
+    }
+
+    func testCreateWorkoutMultiExercise() {
+        // Three exercises with mixed weights
+        let (action, _) = AIActionParser.parse("[CREATE_WORKOUT: Bench Press 4x8@155, OHP 3x10@95, Lateral Raise 3x15]")
+        if case .createWorkout(let exercises) = action {
+            XCTAssertEqual(exercises.count, 3)
+            XCTAssertEqual(exercises[0].name, "Bench Press")
+            XCTAssertEqual(exercises[0].weight, 155)
+            XCTAssertEqual(exercises[1].name, "OHP")
+            XCTAssertEqual(exercises[1].weight, 95)
+            XCTAssertEqual(exercises[2].name, "Lateral Raise")
+            XCTAssertNil(exercises[2].weight)
+        } else {
+            XCTFail("Expected createWorkout with 3 exercises")
+        }
+    }
+
     // MARK: - Conversational Pattern Detection
 
     func testConversationalPatterns() {
