@@ -88,10 +88,7 @@ struct AIChatView: View {
             if messages.isEmpty {
                 messages.append(ChatMessage(role: .assistant, text: pageInsight))
                 // Show disclaimers only once
-                if !UserDefaults.standard.bool(forKey: "drift_ai_warned_v2") {
-                    messages.append(ChatMessage(role: .assistant, text: "This is a small on-device model \u{2014} responses may not always be perfect. Everything runs locally and your data never leaves your phone. Faster and smarter models coming in the next release. Thanks for testing!"))
-                    UserDefaults.standard.set(true, forKey: "drift_ai_warned_v2")
-                }
+                messages.append(ChatMessage(role: .assistant, text: "This is a small on-device model \u{2014} responses may not always be perfect. Everything runs locally and your data never leaves your phone. Faster and smarter models coming in the next release. Thanks for testing!"))
             }
             if !aiService.isModelLoaded && aiService.state == .ready {
                 aiService.loadModel()
