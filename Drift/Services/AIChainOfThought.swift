@@ -61,7 +61,7 @@ enum AIChainOfThought {
             || q.contains("train") || q.contains("gym") || q.contains("lift") || q.contains("run")
             || q.contains("cardio") || q.contains("sets") || q.contains("reps")
             || q.contains("push up") || q.contains("pull up") || q.contains("squat")
-            || q.contains("bench") || q.contains("deadlift") || q.contains("press")
+            || q.contains("bench") || q.contains("deadlift") || q.contains(" press")
             || q.contains("curl") || q.contains("plank") || q.contains("lunge")
             || q.contains("i did") || q.contains("just finished")
             || q.contains("push day") || q.contains("pull day") || q.contains("leg day")
