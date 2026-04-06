@@ -586,9 +586,11 @@ struct AIChatView: View {
                     messages.append(ChatMessage(role: .assistant, text: "Head to the Exercise tab to start your workout."))
                 }
             case .createWorkout(let exercises):
-                // Build a temporary template and show confirmation
-                let templateExercises = exercises.map {
-                    WorkoutTemplate.TemplateExercise(name: $0.name, sets: $0.sets)
+                // Build a temporary template with reps and weight info
+                let templateExercises = exercises.map { e in
+                    var notes = "\(e.reps) reps"
+                    if let w = e.weight { notes += " @ \(Int(w)) lbs" }
+                    return WorkoutTemplate.TemplateExercise(name: e.name, sets: e.sets, notes: notes)
                 }
                 if let json = try? JSONEncoder().encode(templateExercises),
                    let jsonStr = String(data: json, encoding: .utf8) {
