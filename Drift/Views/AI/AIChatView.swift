@@ -464,12 +464,6 @@ struct AIChatView: View {
             return
         }
 
-        // Workout logging prompt
-        if lower == "log a workout" || lower == "log workout" {
-            messages.append(ChatMessage(role: .assistant, text: "What did you do? Describe your exercises \u{2014} e.g., \"bench press 3x10 at 135, squats 4x8 at 185\""))
-            return
-        }
-
         // Weight intent: "I weigh 165", "weight is 75.2 kg"
         if let weightIntent = AIActionExecutor.parseWeightIntent(lower) {
             let kg = weightIntent.unit == .kg ? weightIntent.weightValue : weightIntent.weightValue / 2.20462
@@ -499,18 +493,6 @@ struct AIChatView: View {
                 showingFoodSearch = true
                 return
             }
-        }
-
-        // Generic "log food/breakfast/lunch"
-        if lower.contains("log food") || lower.contains("log breakfast") || lower.contains("log lunch") || lower.contains("log dinner") {
-            messages.append(ChatMessage(role: .assistant, text: "What did you eat? Say something like \"2 eggs and toast\" and I'll log it for you."))
-            return
-        }
-
-        // Restaurant/eating out — guide to estimate
-        if lower.contains("ate out") || lower.contains("restaurant") || lower.contains("fast food") || lower.contains("ordered") {
-            messages.append(ChatMessage(role: .assistant, text: "What did you order? Describe it and I'll help you estimate the calories — e.g., \"burger and fries\" or \"pasta with cream sauce\"."))
-            return
         }
 
         // LLM for everything else
