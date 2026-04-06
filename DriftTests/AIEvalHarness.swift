@@ -266,6 +266,34 @@ final class AIEvalHarness: XCTestCase {
         XCTAssertGreaterThanOrEqual(precision, 0.78, "Amount parsing should be >= 78%")
     }
 
+    // MARK: - Instant Response Coverage
+
+    @MainActor
+    func testInstantResponses() {
+        // These should be handled instantly (no LLM) and return non-empty
+        let instantQueries: [(String, String)] = [
+            ("daily summary", "dailySummary"),
+            ("summary", "dailySummary"),
+            ("calories left", "caloriesLeft"),
+            ("weekly summary", "weeklySummary"),
+            ("supplements", "supplements"),
+            ("yesterday", "yesterday"),
+        ]
+
+        for (_, label) in instantQueries {
+            let response: String
+            switch label {
+            case "dailySummary": response = AIRuleEngine.dailySummary()
+            case "caloriesLeft": response = AIRuleEngine.caloriesLeft()
+            case "weeklySummary": response = AIRuleEngine.weeklySummary()
+            case "supplements": response = AIRuleEngine.supplementStatus()
+            case "yesterday": response = AIRuleEngine.yesterdaySummary()
+            default: response = ""
+            }
+            XCTAssertFalse(response.isEmpty, "'\(label)' should produce non-empty response")
+        }
+    }
+
     // MARK: - Conversational Pattern Detection
 
     func testConversationalPatterns() {
