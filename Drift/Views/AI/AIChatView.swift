@@ -329,8 +329,18 @@ struct AIChatView: View {
             return
         }
         if lower == "undo" || lower == "remove that" || lower == "delete that" || lower == "nevermind" {
-            messages.append(ChatMessage(role: .assistant, text: "I can't undo actions yet. To remove a food entry, tap it in the Food tab. To delete a weight entry, swipe it in the Weight tab."))
+            messages.append(ChatMessage(role: .assistant, text: "I can't undo actions yet. To remove a food entry, tap it in the Food tab. To delete a weight entry, long-press it."))
             return
+        }
+
+        // Correction: "actually 3" or "make it 3" after a food log
+        if (lower.hasPrefix("actually") || lower.hasPrefix("make it") || lower.hasPrefix("no,")) {
+            // Check if previous message was a food log confirmation
+            if let lastAssistant = messages.last(where: { $0.role == .assistant }),
+               (lastAssistant.text.contains("Found") || lastAssistant.text.contains("Opening")) {
+                messages.append(ChatMessage(role: .assistant, text: "Got it! You can adjust the amount in the food log sheet. Tap the entry in your Food tab to edit."))
+                return
+            }
         }
 
         // Rule engine: instant answers for exact-match patterns only
