@@ -474,6 +474,35 @@ final class AIEvalHarness: XCTestCase {
         XCTAssertFalse(weightScreen.isEmpty)
     }
 
+    // MARK: - Token Budget
+
+    @MainActor
+    func testTokenBudgetTruncation() {
+        let longContext = String(repeating: "This is test data. ", count: 200) // ~4000 chars
+        let truncated = AIContextBuilder.truncateToFit(longContext, maxTokens: 100)
+        XCTAssertLessThan(truncated.count, longContext.count, "Should truncate long context")
+        XCTAssertLessThanOrEqual(truncated.count, 400, "Should be under 400 chars for 100 tokens")
+    }
+
+    // MARK: - Meal Type Detection
+
+    func testMealHintFromSuffix() {
+        let intent = AIActionExecutor.parseFoodIntent("log eggs for dinner")
+        XCTAssertNotNil(intent)
+        XCTAssertEqual(intent?.mealHint, "dinner", "Should detect 'for dinner' meal hint")
+
+        let noHint = AIActionExecutor.parseFoodIntent("log eggs")
+        XCTAssertNil(noHint?.mealHint, "No meal hint when not specified")
+    }
+
+    // MARK: - Action Cleanliness
+
+    func testActionTagsStrippedFromDisplay() {
+        let (_, clean) = AIActionParser.parse("Sure! [LOG_FOOD: eggs 2] Enjoy your breakfast!")
+        XCTAssertFalse(clean.contains("[LOG_FOOD"), "Action tags should be stripped from display text")
+        XCTAssertTrue(clean.contains("Sure"), "Regular text should remain")
+    }
+
     func testPrintSummary() {
         print("=== AI EVAL HARNESS SUMMARY ===")
         print("Run individual tests for detailed precision/recall metrics.")
