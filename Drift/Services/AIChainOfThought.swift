@@ -53,7 +53,7 @@ enum AIChainOfThought {
             || q.contains("cholesterol") || q.contains("testosterone") || q.contains("vitamin")
             || q.contains("thyroid") || q.contains("iron") || q.contains("marker")
             || q.contains("out of range") || q.contains("blood work") || q.contains("hemoglobin")
-            || q.contains("glucose") || q.contains("a1c")
+            || q.contains("a1c")
         let needsDEXA = q.contains("dexa") || q.contains("body fat") || q.contains("body comp")
             || q.contains("lean mass") || q.contains("muscle mass")
         let needsCycle = q.contains("cycle") || q.contains("period") || q.contains("phase")
