@@ -62,6 +62,21 @@
    - Model's job: turn structured data into friendly sentences
    - Never ask model to do arithmetic or retrieve from memory
 
+## Evaluation Harness Baseline (AIEvalHarness.swift)
+
+| Metric | Score | Target |
+|--------|-------|--------|
+| Food logging precision | 19/19 (100%) | >= 85% |
+| Food logging false positives | 0/8 (0%) | <= 10% |
+| Weight logging precision | 6/6 (100%) | >= 83% |
+| Weight false positives | 0/4 (0%) | 0% |
+| Chain-of-thought routing | 15/15 (100%) | >= 85% |
+| Amount parsing | 9/9 (100%) | >= 78% |
+| Compound food protection | 3/3 (100%) | 100% |
+| Response quality cleaner | Pass | Pass |
+
+Run: `xcodebuild test -only-testing:'DriftTests/AIEvalHarness'`
+
 ## Ideas for Next Session
 
 ### High Impact
