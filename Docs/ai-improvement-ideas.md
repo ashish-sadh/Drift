@@ -97,6 +97,6 @@ Run: `xcodebuild test -only-testing:'DriftTests/AIEvalHarness'`
 - [ ] **On-device embedding for semantic search** — MiniLM or similar for better food matching
 - [ ] **Exercise form videos** — link exercises to demonstration videos (YouTube API or bundled clips)
 - [ ] **Fine-tuning the model** — create a small dataset of health Q&A pairs and fine-tune Qwen2.5-1.5B
-- [ ] **Metal GPU via own xcframework** — RESEARCHED: clone llama.cpp, run `build-xcframework.sh` with latest Xcode (has A19 Pro Metal SDK), replace LLM.swift's prebuilt binary. 2-4 hours. Would enable GPU inference = 10-20x faster. See `ggml-org/llama.cpp` tag b8672+.
+- [ ] **Metal GPU via latest xcframework** — RESEARCHED: ggml-org/llama.cpp ships DAILY xcframework builds (167MB). Download `llama-b8672-xcframework.zip`, fork LLM.swift to use it (or create thin SPM package with binaryTarget). Remove CPU-only workaround from LlamaCppBackend.swift. Set n_gpu_layers=999. Expected 3-10x speedup. Concrete steps documented by research agent.
 - [ ] **Larger context window** — increase to 4096 tokens for more context (needs memory testing on device)
 - [ ] **Model distillation** — fine-tune SmolLM2-360M to match Qwen2.5-1.5B quality for faster inference
