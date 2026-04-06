@@ -64,6 +64,14 @@ struct AIChatView: View {
 
             Divider().overlay(Color.white.opacity(0.06))
 
+            // Disclaimer note
+            Text("Small on-device model \u{2014} responses may not be perfect. Your data never leaves your phone. Improving in next release. Turn off in More \u{2192} Settings.")
+                .font(.system(size: 9))
+                .foregroundStyle(.quaternary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 16)
+                .padding(.top, 4)
+
             // Input bar
             HStack(spacing: 8) {
                 TextField("Ask anything...", text: $inputText, axis: .vertical)
@@ -88,7 +96,6 @@ struct AIChatView: View {
             if messages.isEmpty {
                 messages.append(ChatMessage(role: .assistant, text: pageInsight))
                 // Show disclaimers only once
-                messages.append(ChatMessage(role: .assistant, text: "This is a small on-device model \u{2014} responses may not always be perfect. Everything runs locally and your data never leaves your phone. Faster and smarter models coming in the next release. Thanks for testing!"))
             }
             if !aiService.isModelLoaded && aiService.state == .ready {
                 aiService.loadModel()
