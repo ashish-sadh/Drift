@@ -8,122 +8,107 @@ NEVER STOP. Keep improving until human changes status to STOP.
 Commit frequently. Don't publish TestFlight unless asked.
 Check this file before every improvement cycle.
 
-80% of energy on PRIORITY 1 (text chat quality).
-20% on exploration/research.
+Read Docs/ai-architecture-plan.md FIRST — it defines the new architecture.
+80% energy on Priorities 1-2. 20% on POC/research.
 
-=== PRIORITY 1: MAKE TEXT CHAT FEEL SMARTER THAN THE MODEL IS (80%) ===
+=== PRIORITY 1: REARCHITECT — LLM FOR INTENT, SWIFT FOR EXECUTION ===
 
-The model is small (1.5B). Customers will notice limitations.
-The goal: hide the model's weaknesses by being REALLY smart about
-what we compute in Swift vs what we ask the model to do.
+Read: Docs/ai-architecture-plan.md
 
-Study how Claude Code CLI works (leaked repo, web articles):
-- Claude Code pre-computes everything and gives the model structured context
-- The model's job is ONLY to phrase things naturally
-- Intent classification happens in code, not in the model
-- The CLI shows what it's doing (tool calls, thinking) so users feel informed
+Current approach is wrong — hardcodes 30+ keyword checks in Swift for intent.
+The 1.5B model IS good at understanding intent and extracting values.
+What it's bad at is math, data recall, reasoning — Swift handles those.
 
-Apply these principles to Drift AI:
+New split:
+- LLM classifies intent + extracts values from natural language
+- Swift does computation, DB operations, UI actions
 
-1) EXPAND RULE ENGINE — handle more queries WITHOUT the LLM
-   - "How's my protein?" → instant answer with target comparison
-   - "What did I eat today?" → instant meal-grouped list
-   - "Am I on track?" → instant weight trend + deficit analysis
-   - "Calories left?" → instant with protein reminder
-   - The more we handle in Swift, the faster AND more accurate
-   - Goal: 60-70% of common queries answered instantly, no LLM needed
+Key changes:
+1. Update system prompt to teach model structured actions:
+   [LOG_FOOD: name amount], [CREATE_WORKOUT: exercise 3x15@135], etc.
+2. Remove most hardcoded keyword checks from sendMessage()
+   Keep rule engine ONLY for exact matches (summary, calories left)
+   Everything else → LLM classifies → Swift executes
+3. LLM should ask clarifying questions when ambiguous, not guess
 
-2) WHEN LLM IS NEEDED, PRE-DIGEST EVERYTHING
-   - Never ask the model to compute — do all math in Swift
-   - Give the model a pre-written conclusion: "Assessment: losing at healthy pace"
-   - The model just wraps it in natural language
-   - Include 1 short example in the context for tone/format guidance
-   - Keep context TIGHT — every token matters at 2048 window
+=== PRIORITY 2: CONVERSATIONAL WORKOUT BUILDER ===
 
-3) MAKE THE CHAT FEEL INTELLIGENT THROUGH UX
-   - Show "thinking" steps: "Checking your meals..." → "Analyzing weight..."
-   - Stream tokens so responses appear word-by-word (already done)
-   - Smart suggestion pills that change based on screen + time + data
-   - When food is found: "Found Egg (78 cal). Opening to confirm..." (already done)
-   - Multi-turn: "What did you eat?" → user says "rice" → opens food search
-   - These make the app feel smart even when the model gives a basic response
+Read: Docs/ai-architecture-plan.md — "Conversational Workout Builder" section
 
-4) RESPONSE QUALITY — MAKE EVERY LLM RESPONSE CLEAN
-   - Strip markdown, preambles, disclaimers, format echoes (already done)
-   - Catch low-quality/garbage responses and show fallback
-   - Truncate incomplete sentences
-   - If response doesn't reference the actual data, try again or use rule engine
-   - Test with eval harness after every change
+Three flows to implement:
+A) Start from template: "let's do push day" → open ActiveWorkoutView
+B) Build from conversation: "I did push ups 3x15, bench 3x10@135" → create workout
+C) AI suggests: "what should I train?" → build plan from history + recovery
 
-5) FOOD LOGGING — THE KILLER FEATURE
-   - "log chicken and rice" → finds both, opens search
-   - "I just had 2 samosas for lunch" → natural phrasing works
-   - "a couple of eggs" → amounts parsed correctly
-   - "2 slices of pizza" → qualifiers stripped
-   - After logging: show remaining calories immediately
-   - This should be FLAWLESS — test every edge case
+Implementation:
+- New action [CREATE_WORKOUT: ...] in AIActionParser
+- AIChatView presents ActiveWorkoutView via .sheet
+- Multi-turn: AI asks "how many sets?" if not specified
+- Save completed workout to DB
 
-6) EVAL HARNESS — MEASURE EVERYTHING
-   - 50+ test queries with expected behavior
-   - Precision: does it trigger the right action?
-   - Recall: does it handle the query or fall to fallback?
-   - Run after every change: xcodebuild test -only-testing:'DriftTests/AIEvalHarness'
-   - Add new test cases for every bug found
-   - This is the safety net against regressions
+=== PRIORITY 3: RESPONSE QUALITY + EVAL HARNESS ===
 
-=== PRIORITY 2: POC / EXPLORATION (20%) — don't commit, just learn ===
+Make every response clean and test everything:
+- Strip markdown, preambles, disclaimers (already done)
+- Catch low-quality responses → show fallback
+- Run eval harness after every change
+- Add workout intent test cases to harness
+- Goal: 50+ test queries, all passing
 
-These are research spikes. Write code to test, but use a git branch
-or /tmp directory. Don't merge into main unless it works end-to-end.
+=== PRIORITY 4: FOOD LOGGING POLISH ===
+
+Food logging via chat should be FLAWLESS:
+- All natural phrasing works
+- Multi-food: "chicken and rice"
+- Amounts: "a couple", "1/3", "half"
+- Qualifiers: "2 slices of pizza"
+- After action: show remaining calories
+- Multi-turn: "What did you eat?" → "rice" → opens search
+
+=== PRIORITY 5: POC / EXPLORATION (20%) — don't commit to main ===
+
+These are research spikes. Use branches or /tmp. Don't merge unless works.
 
 A) VISION MODEL SPIKE
    - Can llama.cpp b7310 load Qwen3-VL-2B + mmproj?
-   - Does our xcframework include clip/llava headers?
-   - If not, what build flags are needed?
-   - Write a minimal test: load model + mmproj, feed an image, get text
-   - Document findings in Docs/ai-improvement-ideas.md
-   - DON'T commit to main — just learn if it's possible
+   - Write minimal test, document findings
+   - DON'T commit to main
 
 B) METAL GPU FIX SPIKE
-   - Try building llama.cpp with GGML_METAL_USE_BF16=OFF
-   - Does that fix the A19 Pro shader crash?
-   - If yes, rebuild xcframework and test on device
-   - Try latest llama.cpp (b8600+) — maybe they fixed the shader bug
+   - Try GGML_METAL_USE_BF16=OFF — does it fix A19 Pro shader crash?
+   - Try latest llama.cpp — maybe they fixed the shader bug
    - Document findings
 
 C) STUDY CLAUDE CODE CLI PATTERNS
-   - Search web for claude code architecture, leaked repo analysis
-   - How does it handle tool calling, context management, streaming?
-   - What patterns can we apply to make Drift AI feel like a big model?
-   - Key insight: Claude Code is smart because of the HARNESS, not just the model
-   - Save findings to Docs/ai-improvement-ideas.md
+   - How does it handle tool calling, context management?
+   - What makes the harness smart (not just the model)?
+   - Save to Docs/ai-improvement-ideas.md
 
-=== PRIORITY 3: BUG HUNTING ===
+=== PRIORITY 6: BUG HUNTING ===
 
-- Look at recent commits — that's where bugs hide
+- Recent commits = where bugs hide
 - Write tests for every new feature
-- Check edge cases: empty DB, no HealthKit, model not downloaded
-- Test full flow on simulator
+- Edge cases: empty DB, no HealthKit, model not downloaded
+- Full flow testing on simulator
 
-=== PRIORITY 4: RESEARCH IDEAS (curate only) ===
+=== RESEARCH IDEAS (curate only, save to Docs/) ===
 
-Save to Docs/ai-improvement-ideas.md:
-1) Voice input: iOS speech-to-text → AI chat
-2) Weekly AI summary push notification
+1) Voice input: speech-to-text → AI chat
+2) Weekly AI summary notification
 3) Fine-tuning health Q&A dataset
 4) Apple Neural Engine via CoreML
-5) Exercise form videos/images
-6) On-device embeddings for semantic food search
+5) Exercise form videos
+6) On-device embeddings for food search
+7) Photo food logging (after vision model POC)
 
 === HOW TO WORK ===
 
 - Check .claude-stop status before every cycle
-- Commit after each meaningful improvement (Priority 1 only)
-- POC work goes in branches or /tmp — never main
-- Run tests after every change
-- Build after every change
+- Read Docs/ai-architecture-plan.md before starting
+- Commit after each meaningful improvement
+- POC work in branches or /tmp — never main
+- Run tests + build after every change
 - Push to git frequently
-- When stuck, search the web
 
 Status options:
 - RUNNING: continue the loop
