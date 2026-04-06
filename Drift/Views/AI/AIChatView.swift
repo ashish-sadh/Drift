@@ -437,7 +437,8 @@ struct AIChatView: View {
                 }
             }
             if !found.isEmpty {
-                messages.append(ChatMessage(role: .assistant, text: "Found: \(found.joined(separator: ", ")). Opening to log..."))
+                let extra = intents.count > 1 ? " Say \"log \(intents[1].query)\" after to add the rest." : ""
+                messages.append(ChatMessage(role: .assistant, text: "Found: \(found.joined(separator: ", ")). Opening first item...\(extra)"))
             } else {
                 messages.append(ChatMessage(role: .assistant, text: "Searching for \(intents.map(\.query).joined(separator: ", "))..."))
             }
