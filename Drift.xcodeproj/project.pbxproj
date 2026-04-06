@@ -622,7 +622,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				A0800830A85682E9EA5E8575 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
-				74AA54CFD37A7835341C2CB3 /* XCRemoteSwiftPackageReference "LLM.swift" */,
+				6CBE960E205D1BAF6B3072BD /* XCRemoteSwiftPackageReference "LLM-metal" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0EA67573775347F2DA7F1A99 /* Products */;
@@ -1021,9 +1021,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		74AA54CFD37A7835341C2CB3 /* XCRemoteSwiftPackageReference "LLM.swift" */ = {
+		6CBE960E205D1BAF6B3072BD /* XCRemoteSwiftPackageReference "LLM-metal" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/eastriverlee/LLM.swift";
+			repositoryURL = "https://github.com/ashish-sadh/LLM-metal";
 			requirement = {
 				branch = main;
 				kind = branch;
@@ -1047,7 +1047,7 @@
 		};
 		9D027B373F40785E72CCD81F /* LLM */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 74AA54CFD37A7835341C2CB3 /* XCRemoteSwiftPackageReference "LLM.swift" */;
+			package = 6CBE960E205D1BAF6B3072BD /* XCRemoteSwiftPackageReference "LLM-metal" */;
 			productName = LLM;
 		};
 /* End XCSwiftPackageProductDependency section */
