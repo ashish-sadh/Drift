@@ -1,7 +1,7 @@
 Control file for Drift self-improvement loop.
 Check this file before every cycle.
 
-Current status: RUNNING
+Current status: REDIRECT
 Direction:
 
 NEVER STOP. Keep improving until human changes status to STOP.
@@ -91,6 +91,42 @@ C) STUDY CLAUDE CODE CLI PATTERNS
 - Edge cases: empty DB, no HealthKit, model not downloaded
 - Full flow testing on simulator
 
+=== ADDITIONAL DIRECTION: THINK BIGGER — INTELLIGENT PIPELINE ===
+
+The priorities above are correct. But as you work on them, think about
+the BIGGER PICTURE of what abstractions this system needs long-term.
+Use this as a lens for making architectural decisions:
+
+The #1 mission: REMOVE ALL FRICTION OF FORM FILLING IN THE APP.
+Every manual data entry should be doable through natural conversation.
+
+Think systematically about what infrastructure enables that:
+- Memory layer (on-device KNN, embeddings, user preference recall)
+- RAG-style retrieval (pull relevant past data before generating)
+- Tool/skill registry (discrete tools LLM can invoke, each with schema)
+- Intent identification (semantic, not keyword — the model IS good at this)
+- Prompt routing (domain-specific prompts per intent, not one giant blob)
+- Context orchestration (right data injected for each intent — context is king)
+- Multi-turn state (conversation flows that span multiple messages)
+
+Study Claude Code CLI for inspiration — how the HARNESS makes a small
+model powerful through tool orchestration, context management, and
+smart prompt routing. The model doesn't need to be smart. The system does.
+
+Form-fill targets to keep in mind (all should work via chat eventually):
+- Log food naturally ("chicken and rice", "200g paneer", "I had lunch")
+- Log weight ("I weigh 75.2", "166 lbs")
+- Nutrition queries ("top 3 protein items today", "calories left?")
+- Food suggestions ("what should I eat? 600 cal left")
+- Start workout from template ("let's do push day")
+- Build workout from conversation ("bench 3x10@135, OHP 3x8@95")
+- Smart workout suggestions ("what should I train today?")
+- Training history ("what did I train last?")
+- Build schedules ("make me a PPL split")
+
+These are limitless questions. Build the pipeline so adding new
+capabilities is just adding a new tool + prompt, not rewriting the system.
+
 === RESEARCH IDEAS (curate only, save to Docs/) ===
 
 1) Voice input: speech-to-text → AI chat
@@ -100,6 +136,8 @@ C) STUDY CLAUDE CODE CLI PATTERNS
 5) Exercise form videos
 6) On-device embeddings for food search
 7) Photo food logging (after vision model POC)
+8) Disk-based KNN for similar food/exercise retrieval
+9) On-device RAG with local embeddings
 
 === HOW TO WORK ===
 

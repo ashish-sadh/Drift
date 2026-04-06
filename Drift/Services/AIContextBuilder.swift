@@ -376,19 +376,33 @@ enum AIContextBuilder {
     }
 
     static func screenContext(screen: AIScreen) -> String {
+        var context: String
         switch screen {
-        case .dashboard: return fullDayContext()
-        case .weight, .goal: return weightContext()
-        case .food: return foodContext()
-        case .exercise: return workoutContext()
-        case .supplements: return supplementContext()
-        case .bodyRhythm: return sleepRecoveryContext()
-        case .cycle: return cycleContext()
-        case .bodyComposition: return dexaContext()
-        case .glucose: return glucoseContext()
-        case .biomarkers: return biomarkerContext()
-        case .settings, .algorithm: return ""
+        case .dashboard: context = fullDayContext()
+        case .weight, .goal: context = weightContext()
+        case .food: context = foodContext()
+        case .exercise: context = workoutContext()
+        case .supplements: context = supplementContext()
+        case .bodyRhythm: context = sleepRecoveryContext()
+        case .cycle: context = cycleContext()
+        case .bodyComposition: context = dexaContext()
+        case .glucose: context = glucoseContext()
+        case .biomarkers: context = biomarkerContext()
+        case .settings, .algorithm: context = ""
         }
+
+        // Screen-specific action hints — narrow the "tool surface" per turn
+        switch screen {
+        case .food:
+            context += "\nActions: [LOG_FOOD: name amount]"
+        case .exercise:
+            context += "\nActions: [START_WORKOUT: name], [CREATE_WORKOUT: Exercise 3x10@135]"
+        case .weight, .goal:
+            context += "\nActions: [LOG_WEIGHT: value unit]"
+        default: break
+        }
+
+        return context
     }
 
     // MARK: - Page Context (legacy — uses tab index)
