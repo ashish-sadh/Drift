@@ -80,18 +80,24 @@ struct AIChatView: View {
 
             // Input bar
             HStack(spacing: 8) {
+                Image(systemName: "sparkles")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.accent.opacity(0.6))
+
                 TextField("Ask anything...", text: $inputText, axis: .vertical)
                     .textFieldStyle(.plain).font(.subheadline)
                     .lineLimit(1...3).focused($inputFocused)
                     .onSubmit { sendMessage() }
 
                 Button { sendMessage() } label: {
-                    Image(systemName: "arrow.up.circle.fill").font(.title3)
-                        .foregroundStyle(inputText.isEmpty ? Color.gray : Theme.accent)
+                    Image(systemName: "arrow.up.circle.fill").font(.title2)
+                        .foregroundStyle(inputText.isEmpty ? Color.gray.opacity(0.5) : Theme.accent)
                 }
                 .disabled(inputText.isEmpty || isGenerating)
             }
-            .padding(.horizontal, 12).padding(.vertical, 8)
+            .padding(.horizontal, 12).padding(.vertical, 10)
+            .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 20))
+            .padding(.horizontal, 8).padding(.bottom, 4)
         }
         .sheet(isPresented: $showingFoodSearch) {
             NavigationStack {
