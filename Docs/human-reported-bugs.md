@@ -23,10 +23,15 @@ When user asks "how many calories left", the AI chat returns the wrong number. I
 ## FEAT-001: Estimate calories from description
 
 **Reported:** 2026-04-06
-**Status:** Open
+**Status:** Partially done (commit a342697 + 93095e6)
 **Priority:** Medium
 
 User should be able to ask "how many calories in a samosa?" or "estimate calories for butter chicken with 2 roti" and get a reasonable answer from the AI — without logging it. This is a lookup/estimation feature, not a logging action.
+
+**Done so far:**
+- Instant DB lookup for "calories in X" — shows nutrition + offers to log (a342697)
+- Expanded routing keywords: "estimate calories", "nutrition for", "calories for" (93095e6)
+- Falls through to LLM for estimation if food not in DB
 
 **Implementation ideas:**
 - Route "how many calories" / "estimate calories" / "calories in X" queries to a new intent
