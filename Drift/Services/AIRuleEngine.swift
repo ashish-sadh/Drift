@@ -145,7 +145,7 @@ enum AIRuleEngine {
         let nutrition = (try? AppDatabase.shared.fetchDailyNutrition(for: today)) ?? .zero
         let tdee = TDEEEstimator.shared.current?.tdee ?? 2000
         let deficit = WeightGoal.load()?.requiredDailyDeficit ?? 0
-        let target = tdee - deficit
+        let target = max(500, tdee - deficit) // Floor at 500 to prevent negative
 
         if nutrition.calories == 0 {
             return "No food logged yet. Your target is \(Int(target)) cal."
