@@ -943,6 +943,31 @@ final class AIEvalHarness: XCTestCase {
         XCTAssertEqual(ruleEngineQueries.count, 19, "Should have 19 rule engine patterns")
     }
 
+    // MARK: - Calorie Estimation Routing
+
+    @MainActor
+    func testCalorieEstimationRouting() {
+        let queries = [
+            "how many calories in a banana",
+            "calories in chicken breast",
+            "estimate calories for 2 eggs and toast",
+            "nutrition for paneer butter masala",
+            "how much protein in dal",
+            "calories for a samosa",
+            "nutritional value of oatmeal",
+        ]
+
+        var correct = 0
+        for query in queries {
+            let steps = AIChainOfThought.plan(query: query, screen: .dashboard)
+            let hasNutrition = steps?.contains(where: { $0.label.lowercased().contains("nutrition") || $0.label.lowercased().contains("look") }) ?? false
+            if hasNutrition { correct += 1 }
+            else { print("MISS (calorie est): '\(query)'") }
+        }
+        let precision = Double(correct) / Double(queries.count)
+        XCTAssertGreaterThanOrEqual(precision, 0.85, "Calorie estimation routing: \(correct)/\(queries.count)")
+    }
+
     // MARK: - Keyword Precision Tests
 
     @MainActor

@@ -74,7 +74,10 @@ enum AIChainOfThought {
             || q.contains("my day") || q.contains("summary") || q.contains("how's my day")
         let needsNutritionLookup = (q.contains("how many calorie") || q.contains("nutrition in")
             || q.contains("calories in") || q.contains("protein in") || q.contains("macros in")
-            || q.contains("carbs in") || q.contains("fat in"))
+            || q.contains("carbs in") || q.contains("fat in")
+            || q.contains("estimate calorie") || q.contains("how much protein in")
+            || q.contains("nutritional value") || q.contains("nutrition for")
+            || q.contains("calories for"))
         let needsComparison = q.contains("compare") || q.contains("versus") || q.contains("vs")
             || q.contains("last week") || q.contains("this week")
             || q.contains("better than") || q.contains("worse than") || q.contains("compared to")
@@ -89,12 +92,13 @@ enum AIChainOfThought {
         // Nutrition lookup — search DB for specific food
         if needsNutritionLookup {
             steps.append(Step(label: "Looking up nutrition...") {
-                // Extract food name: take everything after the last " in " or " of "
+                // Extract food name from various patterns
                 var foodName = ""
-                if let inRange = q.range(of: " in ", options: .backwards) {
-                    foodName = String(q[inRange.upperBound...])
-                } else if let ofRange = q.range(of: " of ", options: .backwards) {
-                    foodName = String(q[ofRange.upperBound...])
+                for separator in [" in ", " of ", " for "] {
+                    if let range = q.range(of: separator, options: .backwards) {
+                        foodName = String(q[range.upperBound...])
+                        break
+                    }
                 }
                 foodName = foodName
                     .replacingOccurrences(of: "a ", with: "")
