@@ -26,8 +26,8 @@ enum AIResponseCleaner {
             text = bulletRegex.stringByReplacingMatches(in: text, range: NSRange(text.startIndex..., in: text), withTemplate: "\u{2022} ")
         }
 
-        // Clean up numbered lists: "1. " → "1) " (more conversational)
-        let numberedPattern = #"(\d+)\.\s"#
+        // Clean up numbered lists at line start: "1. " → "1) " (more conversational)
+        let numberedPattern = #"(?m)^(\d+)\.\s"#
         if let regex = try? NSRegularExpression(pattern: numberedPattern) {
             text = regex.stringByReplacingMatches(in: text, range: NSRange(text.startIndex..., in: text), withTemplate: "$1) ")
         }
