@@ -25,6 +25,11 @@ final class AIEvalHarness: XCTestCase {
             "log a bowl of oatmeal",
             "i just had chicken and rice",
             "ate a couple of eggs",
+            "just had some dal",
+            "i ate a few rotis",
+            "had a scoop of protein",
+            "log eggs for dinner",
+            "ate a lot of rice",
         ]
 
         var detected = 0
