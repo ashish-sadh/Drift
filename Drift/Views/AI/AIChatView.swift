@@ -227,6 +227,10 @@ struct AIChatView: View {
             pills.append("Am I on track?")
         case .exercise:
             pills.append("What should I train?")
+            // Add first template name as quick-start pill
+            if let templates = try? WorkoutService.fetchTemplates(), let first = templates.first {
+                pills.append("Start \(first.name)")
+            }
         case .bodyRhythm:
             pills.append("How'd I sleep?")
         case .glucose:
