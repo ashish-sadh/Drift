@@ -28,13 +28,9 @@ Read `Docs/project-state.md` first - it has the complete project state, tech sta
 Always run `xcodegen generate` after changing project.yml or adding new files.
 
 ## Self-Improvement Loop
-When asked to run a self-improvement session, read `Docs/deep-self-improvement-plan.md` for the full multi-agent protocol. Check `.claude-stop` for control:
-- `RUNNING` = continue
-- `STOP` = halt
-- `PAUSE` = wait
-- `REDIRECT` = read Direction field for human feedback, apply it, continue
+When asked to run a self-improvement session, read `program.md` and follow it exactly. It contains the full autonomous loop: steering notes, startup/recovery, build/test commands, logging, and LOOP FOREVER cycle.
 
-The human can give live feedback by editing `.claude-stop` without stopping the session.
+The human steers by editing the steering notes section in `program.md`. Change `_Human override:_` to `STOP` to halt.
 
 ## Working Directory
 The project lives at `/Users/ashishsadh/workspace/Drift` (was renamed from Calibrate).
