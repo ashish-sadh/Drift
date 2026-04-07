@@ -25,19 +25,19 @@ protocol AIBackend: AnyObject, Sendable {
 /// Which model to download based on device capabilities.
 enum AIModelTier: Sendable {
     case small   // SmolLM2-360M Q8 (~368MB) — 6GB devices
-    case large   // Qwen2.5-1.5B Q4_K_M (~1065MB) — 8GB+ devices, best quality
+    case large   // Gemma 4 E2B Q4_K_M (~2900MB) — 8GB+ devices, best tool calling
 
     var displayName: String {
         switch self {
         case .small: "SmolLM2"
-        case .large: "Qwen 1.5B"
+        case .large: "Gemma 4"
         }
     }
 
     var downloadSizeMB: Int {
         switch self {
         case .small: 368
-        case .large: 1065
+        case .large: 2900
         }
     }
 
@@ -46,7 +46,7 @@ enum AIModelTier: Sendable {
         case .small:
             return [ModelFile(name: "smollm2-360m-instruct-q8_0.gguf", sizeMB: 368)]
         case .large:
-            return [ModelFile(name: "qwen2.5-1.5b-instruct-q4_k_m.gguf", sizeMB: 1065)]
+            return [ModelFile(name: "gemma-4-e2b-q4_k_m.gguf", sizeMB: 2900)]
         }
     }
 
