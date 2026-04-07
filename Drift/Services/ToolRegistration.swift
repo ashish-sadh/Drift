@@ -63,6 +63,13 @@ enum ToolRegistration {
         ))
 
         r.register(ToolSchema(
+            id: "food.copy_yesterday", name: "copy_yesterday", service: "food",
+            description: "User wants to COPY or REPEAT yesterday's food. Use when they say 'same as yesterday', 'copy yesterday'.",
+            parameters: [],
+            handler: { _ in .text(FoodService.copyYesterday()) }
+        ))
+
+        r.register(ToolSchema(
             id: "food.delete_food", name: "delete_food", service: "food",
             description: "User wants to REMOVE or DELETE a food entry. Use when they say 'remove', 'delete', 'undo food'.",
             parameters: [ToolParam("name", "string", "Food name to remove, or 'last' for most recent entry")],

@@ -175,6 +175,43 @@ enum FoodService {
         return "Removed \(found.foodName) (\(Int(found.entry.calories)) cal)."
     }
 
+    // MARK: - Copy Yesterday
+
+    /// Copy all of yesterday's food entries to today. Returns confirmation.
+    static func copyYesterday() -> String {
+        guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) else {
+            return "Couldn't determine yesterday's date."
+        }
+        let yesterdayStr = DateFormatters.dateOnly.string(from: yesterday)
+        let todayStr = DateFormatters.todayString
+        guard let mealLogs = try? AppDatabase.shared.fetchMealLogs(for: yesterdayStr), !mealLogs.isEmpty else {
+            return "No food logged yesterday."
+        }
+
+        var copied = 0
+        for ml in mealLogs {
+            guard let mlId = ml.id,
+                  let entries = try? AppDatabase.shared.fetchFoodEntries(forMealLog: mlId),
+                  !entries.isEmpty else { continue }
+            // Create a meal log for today with same meal type
+            var newLog = MealLog(date: todayStr, mealType: ml.mealType)
+            guard let _ = try? AppDatabase.shared.saveMealLog(&newLog), let newLogId = newLog.id else { continue }
+            for entry in entries {
+                var newEntry = FoodEntry(mealLogId: newLogId, foodId: entry.foodId, foodName: entry.foodName,
+                                          servingSizeG: entry.servingSizeG, servings: entry.servings,
+                                          calories: entry.calories, proteinG: entry.proteinG,
+                                          carbsG: entry.carbsG, fatG: entry.fatG)
+                try? AppDatabase.shared.saveFoodEntry(&newEntry)
+                copied += 1
+            }
+        }
+        if copied == 0 { return "No entries to copy from yesterday." }
+        let cal = mealLogs.flatMap { ml in
+            (try? AppDatabase.shared.fetchFoodEntries(forMealLog: ml.id ?? 0)) ?? []
+        }.reduce(0.0) { $0 + $1.calories }
+        return "Copied \(copied) items from yesterday (\(Int(cal)) cal total)."
+    }
+
     // MARK: - Explain
 
     /// Break down the calories math: TDEE, deficit, target, eaten, remaining.

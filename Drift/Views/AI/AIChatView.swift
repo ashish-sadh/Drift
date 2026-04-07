@@ -454,6 +454,13 @@ struct AIChatView: View {
             }
         }
 
+        // Copy yesterday's food: "copy yesterday", "same as yesterday"
+        if lower == "copy yesterday" || lower == "same as yesterday" || lower == "repeat yesterday"
+            || lower == "log same as yesterday" || lower == "yesterday's food" {
+            messages.append(ChatMessage(role: .assistant, text: FoodService.copyYesterday()))
+            return
+        }
+
         // Correction: "actually 3" or "make it 3" after a food log
         if (lower.hasPrefix("actually") || lower.hasPrefix("make it") || lower.hasPrefix("no,")) {
             // Check if previous message was a food log confirmation
