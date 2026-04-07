@@ -6,15 +6,17 @@ _(pick from Ready)_
 
 ## Ready
 
-### Tool-Calling Polish (Phase 2b)
-- [x] **TC-11: Pre-tool validation hooks** — c1e2ee7+
-- [x] **TC-12: Post-tool response hooks** — 0546387+
-- [ ] **TC-13: Remove old keyword routing** — DEFERRED: keywords still needed for context fetching (what data to include in prompt). Tools handle execution, not context selection.
-- [x] **TC-14: Screen-aware tool filtering** — Already in ToolRegistry.toolsForScreen() + schemaPrompt(forScreen:)
-- [ ] **MQ-1: Test tool-calling models** — Try Hermes-3-Llama-3.2-1B for structured JSON output. Compare with Qwen2.5-1.5B on eval harness.
-- [ ] **MQ-2: Grammar-constrained sampling** — Use llama.cpp grammar to force valid JSON tool calls.
-- [x] **Multi-turn workout accumulation** — 2563804+
-- [x] **Eval harness 80→86** — Multi-turn, spell correction, tool execution, validation, unknown tool
+### Next Up
+- [ ] **Saved meals (one-tap re-log)** — Save multi-item meals as a group. One tap to re-log "My usual breakfast". Most-requested feature.
+- [ ] **Time-of-day food search boost** — Coffee/oats ranked higher in morning, protein at dinner. Boost in search ranking, not separate UI.
+- [ ] **Workout streak tracking** — Show current + longest streak on Exercise tab alongside consistency chart.
+- [ ] **Eval harness to 100+** — Add more tool-call format tests, multi-turn conversation tests, ambiguous query tests.
+- [ ] **Quick-add raw calories** — "Just enter 500 cal" button in Food tab for eating out.
+
+### Blocked (needs device/model)
+- [ ] **MQ-1: Test tool-calling models** — Try Hermes-3-Llama-3.2-1B. Needs device + model download.
+- [ ] **MQ-2: Grammar-constrained sampling** — llama.cpp grammar for JSON. Needs device testing.
+- [ ] **Metal GPU acceleration** — b7400 xcframework ready, needs device test on A19 Pro.
 
 ### Previous Sprint (remaining)
 
