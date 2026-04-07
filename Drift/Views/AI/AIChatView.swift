@@ -20,6 +20,7 @@ struct AIChatView: View {
     @State private var showingRecipeBuilder = false
     @State private var pendingRecipeItems: [QuickAddView.RecipeItem] = []
     @State private var pendingRecipeName = ""
+    @State private var showingBarcodeScanner = false
     @FocusState private var inputFocused: Bool
 
     enum GeneratingState: Equatable {
@@ -133,6 +134,9 @@ struct AIChatView: View {
                     }
                 }
             }
+        }
+        .fullScreenCover(isPresented: $showingBarcodeScanner) {
+            BarcodeLookupView(viewModel: FoodLogViewModel())
         }
         .sheet(isPresented: $showingRecipeBuilder) {
             QuickAddView(viewModel: FoodLogViewModel(),
@@ -452,6 +456,14 @@ struct AIChatView: View {
                 messages.append(ChatMessage(role: .assistant, text: FoodService.deleteEntry(matching: name)))
                 return
             }
+        }
+
+        // Barcode scan: "scan barcode", "scan food", "scan a product"
+        if lower == "scan barcode" || lower == "scan food" || lower == "scan" || lower == "scan a product"
+            || lower == "barcode" || lower.contains("scan barcode") {
+            messages.append(ChatMessage(role: .assistant, text: "Opening barcode scanner..."))
+            showingBarcodeScanner = true
+            return
         }
 
         // Add supplement: "add vitamin D", "add creatine 5g to my stack"
