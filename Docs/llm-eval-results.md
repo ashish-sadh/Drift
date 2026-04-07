@@ -47,6 +47,17 @@ Qwen3 is WORSE at tool calling. It prefers to respond naturally instead of outpu
 4. **Food questions** → Swift handles directly (LLM only 40%)
 5. **Exercise/weight** → Swift handles directly (LLM only 13-20%)
 
-## Gemma 4 E2B (2026-04-07)
+## Gemma 4 E2B (2026-04-07) — BEST OVERALL
 
-Could not test — llama.cpp b7400 doesn't support `gemma4` architecture. Rebuilding xcframework from latest llama.cpp failed due to dylib linking complexity (need to merge ggml backends into single framework binary). Blocked until xcframework rebuild is done properly.
+xcframework rebuilt from latest llama.cpp (commit 69c28f1). Gemma 4 now loads and runs.
+
+| Category | Qwen2.5-1.5B (1.1GB) | Qwen3-1.7B (1.1GB) | **Gemma 4 E2B (2.9GB)** |
+|----------|----------------------|---------------------|-------------------------|
+| Food Logging | **100%** | 30% | 90% |
+| Food Questions | 40% | — | **70%** |
+| Weight | 20% | — | **50%** |
+| Exercise | 13% | — | **80%** |
+
+**Gemma 4 is the best general tool-caller.** Dramatically better on exercise (13%→80%) and food questions (40%→70%). Trade-off: 3x larger (2.9GB vs 1.1GB).
+
+**Recommendation:** Use Gemma 4 E2B for 8GB+ devices, keep Qwen2.5-1.5B as fallback for 6GB devices.
