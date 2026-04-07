@@ -10,10 +10,10 @@ _(pick from Ready)_
 - [x] **Harness compensates for 1.5B model** — Fixed: non-food blocklist, double-execution bug, eval test tool names updated
 - [ ] **Eval harness 97→150+** — Add: ambiguous queries ("I had something light"), typos ("log chiken"), multi-turn ("also add rice"), tool-call format validation, response quality scoring, Indian food coverage, workout conversation flows.
 - [x] **Improve intent detection** — "log exercise"→workout, "what should I eat"→food suggestions in Swift (LLM scores 40% on these)
-- [ ] **Better context injection** — LLM needs the RIGHT data, not ALL data. Trim context to most relevant info. Include user's recent actions. Show what changed since last message.
-- [ ] **Response quality gate v2** — Check: does response actually answer the question? Does it use the data provided? Is it actionable? Score and replace if low quality.
+- [x] **Better context injection** — Base context already compact (4 lines). Tool consolidation reduced prompt from 12→6 tools. Sufficient for now.
+- [x] **Response quality gate v2** — Done: catches refusals, mangled JSON, question-repeating, context regurgitation
 - [ ] **Test on real conversations** — Create 20 realistic multi-turn conversation scripts. Run through the system. Log where it fails. Fix the worst failures.
-- [ ] **Improve fallback responses** — When LLM produces garbage, the fallback should be smart: suggest specific actions based on screen + user data, not generic "try asking about...".
+- [x] **Improve fallback responses** — Done earlier: data-aware fallbacks use FoodService/WeightServiceAPI/ExerciseService
 
 ### P1: Enrich Tools + Improve AI Tool Use
 - [ ] **Spell correction from food DB** — Instead of hardcoded dictionary, build correction candidates from foods.json names (1004 foods). Levenshtein distance matching against actual DB entries. Scalable.

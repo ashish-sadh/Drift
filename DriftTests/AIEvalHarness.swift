@@ -2276,7 +2276,38 @@ final class AIEvalHarness: XCTestCase {
         XCTAssertTrue(truncated.hasSuffix("\n") || !truncated.contains("\n") || truncated.count < 400)
     }
 
+    // MARK: - Non-Food Blocklist
+
+    func testNonFoodBlocklist() {
+        let blocked = ["log exercise", "log workout", "log a workout", "log weight", "log sleep", "log supplement"]
+        for query in blocked {
+            let intent = AIActionExecutor.parseFoodIntent(query.lowercased())
+            XCTAssertNil(intent, "'\(query)' should NOT parse as food")
+        }
+    }
+
+    func testWorkoutIntentNotFood() {
+        XCTAssertNil(AIActionExecutor.parseFoodIntent("log exercise"))
+        XCTAssertNil(AIActionExecutor.parseFoodIntent("log a workout"))
+        XCTAssertNil(AIActionExecutor.parseFoodIntent("log my weight"))
+    }
+
+    @MainActor
+    func testConsolidatedToolNames() {
+        ToolRegistration.registerAll()
+        let names = Set(ToolRegistry.shared.allTools().map(\.name))
+        XCTAssertTrue(names.contains("log_food"))
+        XCTAssertTrue(names.contains("food_info"))
+        XCTAssertTrue(names.contains("log_weight"))
+        XCTAssertTrue(names.contains("weight_info"))
+        XCTAssertTrue(names.contains("start_workout"))
+        XCTAssertTrue(names.contains("exercise_info"))
+        XCTAssertTrue(names.contains("sleep_recovery"))
+        XCTAssertFalse(names.contains("search_food"), "Old name should not exist")
+        XCTAssertFalse(names.contains("get_trend"), "Old name should not exist")
+    }
+
     func testPrintSummary() {
-        print("=== AI EVAL HARNESS: 140+ test methods ===")
+        print("=== AI EVAL HARNESS: 145+ test methods ===")
     }
 }
