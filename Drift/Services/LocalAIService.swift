@@ -154,8 +154,34 @@ final class LocalAIService {
 
     // MARK: - Management
 
+    private var unloadTimer: Timer?
+
     func stop() {
-        // No-op for now — LLM.swift doesn't expose cancel cleanly
+        // No-op for now
+    }
+
+    /// Unload model from GPU after a delay. Frees ~3GB GPU memory.
+    /// Called when user leaves AI chat.
+    func scheduleUnload(delay: TimeInterval = 60) {
+        unloadTimer?.invalidate()
+        unloadTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
+            Task { @MainActor in
+                guard let self, self.backend != nil else { return }
+                Log.app.info("AI: unloading model (idle \(Int(delay))s)")
+                self.backend?.unload()
+                self.backend = nil
+                // Keep state as .ready so it reloads on next use
+                if self.modelManager.isModelDownloaded {
+                    self.state = .ready
+                }
+            }
+        }
+    }
+
+    /// Cancel pending unload — user came back to AI chat.
+    func cancelUnload() {
+        unloadTimer?.invalidate()
+        unloadTimer = nil
     }
 
     func resetChat() {

@@ -118,13 +118,16 @@ struct AIChatView: View {
             }
         }
         .onAppear {
+            aiService.cancelUnload()  // User is here — don't unload
             if messages.isEmpty {
                 messages.append(ChatMessage(role: .assistant, text: pageInsight))
-                // Show disclaimers only once
             }
             if !aiService.isModelLoaded && aiService.state == .ready {
                 aiService.loadModel()
             }
+        }
+        .onDisappear {
+            aiService.scheduleUnload(delay: 60)  // Unload after 60s away — frees ~3GB GPU
         }
     }
 
