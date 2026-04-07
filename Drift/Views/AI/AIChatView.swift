@@ -14,6 +14,7 @@ struct AIChatView: View {
     @State private var foodSearchServings: Double? = nil
     @State private var showingWorkout = false
     @State private var workoutTemplate: WorkoutTemplate? = nil
+    @State private var pendingExercises: [AIActionParser.WorkoutExercise] = []  // Multi-turn workout accumulation
     @FocusState private var inputFocused: Bool
 
     enum GeneratingState: Equatable {
@@ -369,6 +370,16 @@ struct AIChatView: View {
             messages.append(ChatMessage(role: .assistant, text: "Anytime! Let me know if you need anything else."))
             return
         }
+        // "done" with pending workout → open it
+        if (lower == "done" || lower == "start" || lower == "let's go" || lower == "ready") && !pendingExercises.isEmpty {
+            if let template = workoutTemplate {
+                messages.append(ChatMessage(role: .assistant, text: "Starting workout with \(pendingExercises.count) exercises!"))
+                pendingExercises = []
+                showingWorkout = true
+                return
+            }
+        }
+
         if lower == "undo" || lower == "remove that" || lower == "delete that" || lower == "nevermind" {
             messages.append(ChatMessage(role: .assistant, text: "I can't undo actions yet. To remove a food entry, tap it in the Food tab. To delete a weight entry, long-press it."))
             return
@@ -665,20 +676,22 @@ struct AIChatView: View {
                     messages.append(ChatMessage(role: .assistant, text: "Head to the Exercise tab to start your workout."))
                 }
             case .createWorkout(let exercises):
-                // Build a temporary template with reps and weight info
-                let templateExercises = exercises.map { e in
+                // Accumulate exercises across turns
+                pendingExercises.append(contentsOf: exercises)
+                let allExercises = pendingExercises
+                let templateExercises = allExercises.map { e in
                     var notes = "\(e.reps) reps"
                     if let w = e.weight { notes += " @ \(Int(w)) lbs" }
                     return WorkoutTemplate.TemplateExercise(name: e.name, sets: e.sets, notes: notes)
                 }
                 if let json = try? JSONEncoder().encode(templateExercises),
                    let jsonStr = String(data: json, encoding: .utf8) {
-                    let summary = exercises.map { e in
+                    let summary = allExercises.map { e in
                         var s = "\(e.name) \(e.sets)x\(e.reps)"
                         if let w = e.weight { s += " @ \(Int(w)) lbs" }
                         return s
                     }.joined(separator: ", ")
-                    messages.append(ChatMessage(role: .assistant, text: "Workout ready: \(summary). Say \"also did X\" to add more, or opening now..."))
+                    messages.append(ChatMessage(role: .assistant, text: "Workout (\(allExercises.count) exercises): \(summary). Say \"also did X\" to add more, or \"done\" to start."))
 
                     let template = WorkoutTemplate(
                         name: "AI Workout",
@@ -686,7 +699,7 @@ struct AIChatView: View {
                         createdAt: DateFormatters.iso8601.string(from: Date())
                     )
                     workoutTemplate = template
-                    showingWorkout = true
+                    // Don't auto-open — wait for "done" or next message
                 }
             default:
                 break

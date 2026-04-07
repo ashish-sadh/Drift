@@ -13,7 +13,7 @@ _(pick from Ready)_
 - [x] **TC-14: Screen-aware tool filtering** — Already in ToolRegistry.toolsForScreen() + schemaPrompt(forScreen:)
 - [ ] **MQ-1: Test tool-calling models** — Try Hermes-3-Llama-3.2-1B for structured JSON output. Compare with Qwen2.5-1.5B on eval harness.
 - [ ] **MQ-2: Grammar-constrained sampling** — Use llama.cpp grammar to force valid JSON tool calls.
-- [ ] **Multi-turn workout accumulation** — "I did bench" → "also did OHP" → combine in Swift state.
+- [x] **Multi-turn workout accumulation** — 2563804+
 - [x] **Eval harness 80→86** — Multi-turn, spell correction, tool execution, validation, unknown tool
 
 ### Previous Sprint (remaining)
