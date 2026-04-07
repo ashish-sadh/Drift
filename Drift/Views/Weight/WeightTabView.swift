@@ -24,7 +24,7 @@ struct WeightTabView: View {
 
                         // Compact metrics + weight changes
                         if let fullTrend = viewModel.fullTrend {
-                            WeightInsightsView(trend: fullTrend, unit: viewModel.weightUnit, isLosing: viewModel.isLosing)
+                            WeightInsightsView(trend: fullTrend, unit: viewModel.weightUnit, entries: viewModel.allEntries, isLosing: viewModel.isLosing)
                         }
 
                         // Collapsible history log
@@ -57,7 +57,9 @@ struct WeightTabView: View {
         .scrollContentBackground(.hidden)
         .background(Theme.background.ignoresSafeArea())
         .sheet(isPresented: $showingAddWeight) {
-            WeightEntryView(unit: viewModel.weightUnit) { value, date in viewModel.addWeight(value: value, date: date) }
+            WeightEntryView(unit: viewModel.weightUnit) { value, date, bodyFat, bmi, water in
+                viewModel.addWeight(value: value, date: date, bodyFatPct: bodyFat, bmi: bmi, waterPct: water)
+            }
         }
         .onChange(of: viewModel.milestoneMessage) { _, message in
             if message != nil {

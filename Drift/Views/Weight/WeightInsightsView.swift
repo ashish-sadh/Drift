@@ -1,9 +1,14 @@
 import SwiftUI
+import Charts
 
 struct WeightInsightsView: View {
     let trend: WeightTrendCalculator.WeightTrend
     let unit: WeightUnit
+    let entries: [WeightEntry]
     var isLosing: Bool = true
+    @State private var showingBodyFatChart = false
+    @State private var showingBMIChart = false
+    @State private var showingWaterChart = false
     private func changeColor(_ value: Double) -> Color {
         let isDecrease = value < -0.01
         let isIncrease = value > 0.01
@@ -88,11 +93,108 @@ struct WeightInsightsView: View {
             // Compact weight-change chips
             weightChangesRow
 
+            // Body composition cards (only if data exists)
+            if entries.contains(where: \.hasBodyComposition) {
+                bodyCompositionSection
+            }
+
             // Weekday pattern insight
             if trend.dataPoints.count >= 14 {
                 weekdayInsight
             }
         }
+    }
+
+    // MARK: - Body Composition
+
+    private var bodyCompositionSection: some View {
+        VStack(spacing: 8) {
+            Text("Body Composition")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 4)
+
+            HStack(spacing: 8) {
+                if let latest = entries.last(where: { $0.bodyFatPct != nil }) {
+                    bodyCompCard(label: "Body Fat", value: latest.bodyFatPct!, unit: "%",
+                                 previous: entries.dropLast().last(where: { $0.bodyFatPct != nil })?.bodyFatPct)
+                    .onTapGesture { showingBodyFatChart = true }
+                }
+                if let latest = entries.last(where: { $0.bmi != nil }) {
+                    bodyCompCard(label: "BMI", value: latest.bmi!, unit: "",
+                                 previous: entries.dropLast().last(where: { $0.bmi != nil })?.bmi)
+                    .onTapGesture { showingBMIChart = true }
+                }
+                if let latest = entries.last(where: { $0.waterPct != nil }) {
+                    bodyCompCard(label: "Water", value: latest.waterPct!, unit: "%",
+                                 previous: entries.dropLast().last(where: { $0.waterPct != nil })?.waterPct)
+                    .onTapGesture { showingWaterChart = true }
+                }
+            }
+        }
+        .sheet(isPresented: $showingBodyFatChart) {
+            bodyCompChartSheet(title: "Body Fat %", entries: entries.compactMap { e in
+                e.bodyFatPct.map { (date: e.date, value: $0) }
+            })
+        }
+        .sheet(isPresented: $showingBMIChart) {
+            bodyCompChartSheet(title: "BMI", entries: entries.compactMap { e in
+                e.bmi.map { (date: e.date, value: $0) }
+            })
+        }
+        .sheet(isPresented: $showingWaterChart) {
+            bodyCompChartSheet(title: "Water %", entries: entries.compactMap { e in
+                e.waterPct.map { (date: e.date, value: $0) }
+            })
+        }
+    }
+
+    private func bodyCompCard(label: String, value: Double, unit: String, previous: Double?) -> some View {
+        VStack(spacing: 4) {
+            Text(label).font(.caption2).foregroundStyle(.secondary)
+            HStack(spacing: 2) {
+                Text(String(format: "%.1f", value))
+                    .font(.title3.weight(.bold).monospacedDigit())
+                if !unit.isEmpty { Text(unit).font(.caption2).foregroundStyle(.tertiary) }
+            }
+            if let prev = previous {
+                let delta = value - prev
+                HStack(spacing: 2) {
+                    Image(systemName: delta < 0 ? "arrow.down.right" : delta > 0 ? "arrow.up.right" : "arrow.right")
+                    Text(String(format: "%+.1f", delta))
+                }
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(delta < 0 ? Theme.deficit : delta > 0 ? Theme.surplus : .secondary)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 14))
+    }
+
+    private func bodyCompChartSheet(title: String, entries: [(date: String, value: Double)]) -> some View {
+        NavigationStack {
+            if entries.count < 2 {
+                ContentUnavailableView("Not enough data", systemImage: "chart.line.uptrend.xyaxis",
+                                       description: Text("Log at least 2 entries to see a trend."))
+            } else {
+                Chart {
+                    ForEach(entries, id: \.date) { entry in
+                        if let d = DateFormatters.dateOnly.date(from: entry.date) {
+                            LineMark(x: .value("Date", d), y: .value(title, entry.value))
+                                .foregroundStyle(Theme.accent)
+                            PointMark(x: .value("Date", d), y: .value(title, entry.value))
+                                .foregroundStyle(Theme.accent)
+                        }
+                    }
+                }
+                .chartYScale(domain: .automatic(includesZero: false))
+                .padding()
+            }
+        }
+        .navigationTitle(title)
+        .presentationDetents([.medium])
     }
 
     // MARK: - Weekday Pattern

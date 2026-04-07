@@ -94,9 +94,10 @@ final class WeightViewModel {
     // Milestone detection
     var milestoneMessage: String?
 
-    func addWeight(value: Double, date: Date = Date()) {
+    func addWeight(value: Double, date: Date = Date(), bodyFatPct: Double? = nil, bmi: Double? = nil, waterPct: Double? = nil) {
         let kg = weightUnit.convertToKg(value)
-        var entry = WeightEntry(date: DateFormatters.dateOnly.string(from: date), weightKg: kg, source: "manual")
+        var entry = WeightEntry(date: DateFormatters.dateOnly.string(from: date), weightKg: kg, source: "manual",
+                                bodyFatPct: bodyFatPct, bmi: bmi, waterPct: waterPct)
         do {
             // Check for milestone BEFORE saving (compare against existing entries)
             let existingWeights = allEntries.map(\.weightKg)

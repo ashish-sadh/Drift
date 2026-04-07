@@ -314,5 +314,14 @@ enum Migrations {
                 t.add(column: "exercise_order", .integer).notNull().defaults(to: 0)
             }
         }
+
+        // v18: Body composition fields on weight entries
+        migrator.registerMigration("v18_body_composition") { db in
+            try db.alter(table: "weight_entry") { t in
+                t.add(column: "body_fat_pct", .double)  // 0-100, nullable
+                t.add(column: "bmi", .double)            // e.g. 22.5, nullable
+                t.add(column: "water_pct", .double)      // 0-100, nullable
+            }
+        }
     }
 }
