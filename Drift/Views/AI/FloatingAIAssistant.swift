@@ -204,7 +204,7 @@ struct FloatingAIAssistant: View {
                     let freeGB = String(format: "%.1f", DeviceCapability.freeDiskGB)
                     Text("\(aiService.downloadSizeText) download · \(freeGB) GB available")
                         .font(.caption2).foregroundStyle(.tertiary)
-                    Text("Frees memory when not chatting · Remove in Settings")
+                    Text("Only uses memory while chatting · Remove in Settings")
                         .font(.caption2).foregroundStyle(.tertiary)
                 }
 
