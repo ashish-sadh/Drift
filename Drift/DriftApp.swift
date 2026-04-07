@@ -18,6 +18,8 @@ struct DriftApp: App {
                             try await HealthKitService.shared.requestAuthorization()
                             let count = try await HealthKitService.shared.syncWeight()
                             Log.app.info("Initial sync: \(count) weight entries")
+                            let bodyComp = try await HealthKitService.shared.syncBodyComposition()
+                            Log.app.info("Initial sync: \(bodyComp) body composition entries")
                         } catch {
                             Log.app.error("Initial sync failed: \(error.localizedDescription)")
                         }

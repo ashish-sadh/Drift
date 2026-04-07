@@ -26,6 +26,9 @@ final class HealthKitService {
         if let cervical = HKObjectType.categoryType(forIdentifier: .cervicalMucusQuality) { types.insert(cervical) }
         if let spotting = HKObjectType.categoryType(forIdentifier: .intermenstrualBleeding) { types.insert(spotting) }
         if let bbt = HKObjectType.quantityType(forIdentifier: .basalBodyTemperature) { types.insert(bbt) }
+        if let bodyFat = HKObjectType.quantityType(forIdentifier: .bodyFatPercentage) { types.insert(bodyFat) }
+        if let bmi = HKObjectType.quantityType(forIdentifier: .bodyMassIndex) { types.insert(bmi) }
+        if let leanMass = HKObjectType.quantityType(forIdentifier: .leanBodyMass) { types.insert(leanMass) }
         // biologicalSex and dateOfBirth are characteristics — no auth needed
         return types
     }
@@ -146,6 +149,71 @@ final class HealthKitService {
         Log.healthKit.info("Synced \(count) weight entries from HealthKit")
         return count
     #endif
+    }
+
+    /// Sync body composition (body fat %, BMI) from Apple Health → body_composition table.
+    func syncBodyComposition() async throws -> Int {
+        #if targetEnvironment(simulator)
+        return 0
+        #else
+        guard isAvailable else { return 0 }
+        let database = AppDatabase.shared
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+
+        var count = 0
+
+        // Sync body fat percentage
+        if let fatType = HKQuantityType.quantityType(forIdentifier: .bodyFatPercentage) {
+            let samples = try await queryRecentSamples(type: fatType, days: 90)
+            for sample in samples {
+                let dateStr = formatter.string(from: sample.startDate)
+                let pct = sample.quantity.doubleValue(for: .percent()) * 100 // HK stores as 0.0-1.0
+                // Check if we already have an entry for this date
+                let existing = (try? database.fetchBodyComposition())?.first { $0.date == dateStr && $0.source == "healthkit" }
+                if existing == nil {
+                    var entry = BodyComposition(date: dateStr, bodyFatPct: pct, source: "healthkit")
+                    try database.saveBodyComposition(&entry)
+                    count += 1
+                }
+            }
+        }
+
+        // Sync BMI
+        if let bmiType = HKQuantityType.quantityType(forIdentifier: .bodyMassIndex) {
+            let samples = try await queryRecentSamples(type: bmiType, days: 90)
+            for sample in samples {
+                let dateStr = formatter.string(from: sample.startDate)
+                let bmi = sample.quantity.doubleValue(for: .count())
+                // Update existing entry for this date or create new
+                let existing = (try? database.fetchBodyComposition())?.first { $0.date == dateStr && $0.source == "healthkit" }
+                if var entry = existing {
+                    entry.bmi = bmi
+                    try database.saveBodyComposition(&entry)
+                } else {
+                    var entry = BodyComposition(date: dateStr, bmi: bmi, source: "healthkit")
+                    try database.saveBodyComposition(&entry)
+                    count += 1
+                }
+            }
+        }
+
+        Log.healthKit.info("Synced \(count) body composition entries from HealthKit")
+        return count
+        #endif
+    }
+
+    private func queryRecentSamples(type: HKQuantityType, days: Int) async throws -> [HKQuantitySample] {
+        let start = Calendar.current.date(byAdding: .day, value: -days, to: Date())!
+        let predicate = HKQuery.predicateForSamples(withStart: start, end: Date(), options: .strictStartDate)
+        return try await withCheckedThrowingContinuation { continuation in
+            let query = HKSampleQuery(sampleType: type, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)]) { _, results, error in
+                if let error { continuation.resume(throwing: error); return }
+                continuation.resume(returning: (results as? [HKQuantitySample]) ?? [])
+            }
+            healthStore.execute(query)
+        }
     }
 
     /// Force a full re-sync by clearing the saved anchor.
