@@ -285,6 +285,17 @@ enum AIActionExecutor {
             return (num, food.trimmingCharacters(in: .whitespaces))
         }
 
+        // Mid-string number: "protein 2 scoop" → food="protein", amount=2
+        let allWords = text.split(separator: " ").map(String.init)
+        for i in 1..<allWords.count {
+            if let num = Double(allWords[i]), num > 0, num <= 10 {
+                let food = allWords[0..<i].joined(separator: " ")
+                if !food.isEmpty {
+                    return (num, food.trimmingCharacters(in: .whitespaces))
+                }
+            }
+        }
+
         // No amount found — entire text is food name
         return (nil, text)
     }

@@ -7,6 +7,7 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
     private var context: OpaquePointer?                     // llama_context *
     private var smpl: UnsafeMutablePointer<llama_sampler>?  // llama_sampler *
     private let modelPath: URL
+    private var isGemma: Bool = false  // Gemma uses different chat template
 
     var isLoaded: Bool { model != nil && context != nil }
     var supportsVision: Bool { false }
@@ -113,7 +114,9 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
         llama_sampler_chain_add(s, llama_sampler_init_dist(UInt32.random(in: .min ... .max)))
         smpl = s
 
-        Log.app.info("AI: model loaded via raw C API (ctx=\(ctxParams.n_ctx))")
+        // Detect model family from filename for chat template
+        self.isGemma = modelPath.lastPathComponent.lowercased().contains("gemma")
+        Log.app.info("AI: model loaded via raw C API (ctx=\(ctxParams.n_ctx), gemma=\(self.isGemma))")
     }
 
     // MARK: - Inference
@@ -125,8 +128,15 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
     func respondStreaming(to prompt: String, systemPrompt: String, onToken: @escaping @Sendable (String) -> Void) async -> String {
         guard let model, let context, let smpl else { return "" }
 
-        // Build ChatML prompt
-        let fullPrompt = "<|im_start|>system\n\(systemPrompt)<|im_end|>\n<|im_start|>user\n\(prompt)<|im_end|>\n<|im_start|>assistant\n"
+        // Build prompt using model-appropriate chat template
+        let fullPrompt: String
+        if isGemma {
+            // Gemma uses <start_of_turn> format
+            fullPrompt = "<start_of_turn>user\n\(systemPrompt)\n\n\(prompt)<end_of_turn>\n<start_of_turn>model\n"
+        } else {
+            // ChatML for Qwen, SmolLM, etc.
+            fullPrompt = "<|im_start|>system\n\(systemPrompt)<|im_end|>\n<|im_start|>user\n\(prompt)<|im_end|>\n<|im_start|>assistant\n"
+        }
 
         // Tokenize and enforce context limit (leave room for generation)
         var tokens = tokenize(text: fullPrompt, addBos: true)
@@ -166,7 +176,9 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
 
                 // Stream the token piece to caller
                 let tokenStr = String(cString: Array(piece) + [0])
-                if !tokenStr.contains("<|im_end|>") && !tokenStr.contains("<|im_start|>") {
+                // Filter out chat template tokens from streaming
+                let stopTokens = ["<|im_end|>", "<|im_start|>", "<end_of_turn>", "<start_of_turn>"]
+                if !stopTokens.contains(where: { tokenStr.contains($0) }) {
                     onToken(tokenStr)
                 }
             }
@@ -174,10 +186,10 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
             // Check stop sequence — only check tail (not entire buffer)
             let bufLen = outputBuf.count
             if bufLen >= 10 {
-                let tailStart = max(0, bufLen - 14)
+                let tailStart = max(0, bufLen - 16)
                 let tail = Array(outputBuf[tailStart...]) + [0]
                 let tailStr = String(cString: tail)
-                if tailStr.contains("<|im_end|>") { break }
+                if tailStr.contains("<|im_end|>") || tailStr.contains("<end_of_turn>") { break }
             }
 
             // Feed token back
@@ -190,8 +202,11 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
 
         guard !outputBuf.isEmpty else { return "" }
         var result = String(cString: outputBuf + [0])
-        if let range = result.range(of: "<|im_end|>") {
-            result = String(result[..<range.lowerBound])
+        // Strip any trailing chat template tokens
+        for stop in ["<|im_end|>", "<|im_start|>", "<end_of_turn>", "<start_of_turn>"] {
+            if let range = result.range(of: stop) {
+                result = String(result[..<range.lowerBound])
+            }
         }
         return result.trimmingCharacters(in: .whitespacesAndNewlines)
     }
