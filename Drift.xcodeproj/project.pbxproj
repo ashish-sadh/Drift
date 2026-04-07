@@ -23,6 +23,7 @@
 		27536FF4DD83AB95ADECF5AB /* Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFFBCB3D524DCFEA822DB53 /* Persistence.swift */; };
 		2789843CBA7CA913FA86CCEB /* biomarkers.json in Resources */ = {isa = PBXBuildFile; fileRef = 059465804E239D09C0E9C1D4 /* biomarkers.json */; };
 		2789D96230755D58B91B3175 /* WorkoutPersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 46E22593ED4EAC860EFBF887 /* WorkoutPersistenceTests.swift */; };
+		29C556485877B9BA84899A44 /* WeightService2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98998A5705EBF13038A98C27 /* WeightService2.swift */; };
 		29FCA567A01752328CAEFFED /* ExerciseDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0653C13FD227ACE4F774C46 /* ExerciseDatabase.swift */; };
 		2A30C354DF8C230F664C7811 /* LLMIntegrationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6ECA6D7172DB943CC6950F55 /* LLMIntegrationTest.swift */; };
 		2CCF5E1D415E462AE9997DD4 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C555B3F9005A7C75FAAD51 /* DashboardViewModel.swift */; };
@@ -212,6 +213,7 @@
 		8F4D8D947C82941F66C3E892 /* LabReportStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabReportStorage.swift; sourceTree = "<group>"; };
 		9317E4AADEC72D6DC385E722 /* LabReportDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabReportDetailView.swift; sourceTree = "<group>"; };
 		9887274AA907DE6C5349B2D1 /* OpenFoodFactsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenFoodFactsService.swift; sourceTree = "<group>"; };
+		98998A5705EBF13038A98C27 /* WeightService2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightService2.swift; sourceTree = "<group>"; };
 		99C89E28D8FBE125273FB677 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		9B410A7B058246A1F98F46E9 /* DefaultFoods.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultFoods.swift; sourceTree = "<group>"; };
 		9F9F051926CE39DF3E0A47DA /* BodySpecPDFParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodySpecPDFParser.swift; sourceTree = "<group>"; };
@@ -552,6 +554,7 @@
 				5C93A5EC7AC72AD0108FAC30 /* SpellCorrectService.swift */,
 				BC5309A92CB03534993AE5E9 /* TDEEEstimator.swift */,
 				C170D4FEDFB68CA8A61E1D03 /* ToolSchema.swift */,
+				98998A5705EBF13038A98C27 /* WeightService2.swift */,
 				FD5DFCD5C5ED2C0D7E5CD8EF /* WeightTrendCalculator.swift */,
 				6F84469D20EBBA0BD037FBCA /* WorkoutService.swift */,
 			);
@@ -780,6 +783,7 @@
 				B26EFEA29CD8570813193C98 /* WeightGoal.swift in Sources */,
 				1E11E5682458FC83023281D7 /* WeightInsightsView.swift in Sources */,
 				12608375BDCD57D211C64849 /* WeightLogListView.swift in Sources */,
+				29C556485877B9BA84899A44 /* WeightService2.swift in Sources */,
 				0884D534B3ADDE47643801F8 /* WeightTabView.swift in Sources */,
 				ADFD099AC0AEB4154AF6063B /* WeightTrendCalculator.swift in Sources */,
 				6A4AC25199199579681FCAD4 /* WeightViewModel.swift in Sources */,
