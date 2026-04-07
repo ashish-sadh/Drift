@@ -17,31 +17,34 @@ enum DietPreference: String, Codable, CaseIterable, Sendable {
     }
 
     /// Protein g/kg bodyweight
+    /// Sources: ISSN position stand (1.6-2.2 g/kg for active), USDA (0.8 g/kg sedentary)
     var proteinPerKg: Double {
         switch self {
-        case .balanced: 1.6
-        case .highProtein: 2.2
-        case .lowCarb: 1.8
-        case .lowFat: 1.4
+        case .balanced: 1.6     // Active general: 1.6 g/kg (ISSN lower bound)
+        case .highProtein: 2.2  // Muscle-sparing deficit: 2.2 g/kg (ISSN upper bound)
+        case .lowCarb: 1.8     // Moderate-high protein for satiety
+        case .lowFat: 1.4      // Lower protein allows more carb calories
         }
     }
 
     /// Fat as fraction of total calories (before floor)
+    /// Sources: USDA DGA 20-35%, WHO 15-30%, ISSN 0.5-1.5 g/kg
+    /// Key: fat is essential for hormones, satiety, vitamin absorption
     var fatCalorieFraction: Double {
         switch self {
-        case .balanced: 0.25
-        case .highProtein: 0.25
-        case .lowCarb: 0.40
-        case .lowFat: 0.15
+        case .balanced: 0.30    // Was 0.25 — 30% is mid-range of USDA 20-35%, better for satiety
+        case .highProtein: 0.25 // Lower fat to make room for high protein
+        case .lowCarb: 0.45    // Was 0.40 — keto-adjacent, fat replaces carbs
+        case .lowFat: 0.20     // Was 0.15 — 20% is USDA minimum, 15% was too aggressive
         }
     }
 
     var subtitle: String {
         switch self {
-        case .balanced: "25% fat, 1.6 g/kg protein"
-        case .highProtein: "2.2 g/kg protein, muscle-sparing"
-        case .lowCarb: "40% fat, fewer carbs"
-        case .lowFat: "15% fat, higher carbs"
+        case .balanced: "30% fat, 1.6 g/kg protein, flexible"
+        case .highProtein: "2.2 g/kg protein, muscle-focused"
+        case .lowCarb: "45% fat, fewer carbs, keto-friendly"
+        case .lowFat: "20% fat, higher carbs, endurance-friendly"
         }
     }
 }
@@ -82,13 +85,13 @@ struct WeightGoal: Codable, Sendable {
     /// Minimum fat: research-based.
     /// - Absolute floor: 0.3 g/kg (essential fatty acid synthesis, hormone production)
     /// - Recommended floor: max(0.5 g/kg, 15% of calorie target)
-    /// Sources: ISSN position stand on diets, WHO dietary fat guidelines,
-    ///          Helms et al. (2014) natural bodybuilding contest prep review.
+    /// Minimum fat intake — protects hormones, vitamin absorption, and satiety.
+    /// Sources: ISSN position stand, WHO guidelines, Helms et al. (2014).
+    /// USDA: minimum 20% of calories from fat. ISSN: 0.5-1.5 g/kg.
     static func minimumFatG(bodyweightKg: Double, calorieTarget: Double?) -> Double {
-        let absoluteFloor = bodyweightKg * 0.3  // essential minimum
-        let recommended = bodyweightKg * 0.5     // safe minimum for hormones
-        let fifteenPct = (calorieTarget ?? 2000) * 0.15 / 9  // WHO: >=15% of energy from fat
-        return max(absoluteFloor, max(recommended, fifteenPct))
+        let absoluteFloor = bodyweightKg * 0.5   // ISSN minimum: 0.5 g/kg for hormonal health
+        let twentyPct = (calorieTarget ?? 2000) * 0.20 / 9  // USDA: >=20% of calories from fat
+        return max(absoluteFloor, twentyPct)
     }
 
     /// Compute daily calorie target.
