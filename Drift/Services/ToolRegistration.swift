@@ -31,13 +31,33 @@ enum ToolRegistration {
                 if !query.isEmpty, let result = FoodService.getNutrition(name: query) {
                     return .text("\(result.perServing) Say 'log \(result.food.name.lowercased())' to add it.")
                 }
-                // Otherwise show calories left + suggestions
+                // Show comprehensive food info: calories, macros, balance, suggestions
                 let totals = FoodService.getDailyTotals()
-                var lines = ["\(totals.remaining > 0 ? "\(totals.remaining)" : "0") cal remaining (\(totals.eaten)/\(totals.target)). \(totals.proteinG)g protein so far."]
+                var lines: [String] = []
+                lines.append("\(totals.remaining > 0 ? "\(totals.remaining)" : "0") cal remaining (\(totals.eaten)/\(totals.target)).")
+
+                // Macro balance
+                if let goal = WeightGoal.load(), let targets = goal.macroTargets() {
+                    let pLeft = max(0, Int(targets.proteinG) - totals.proteinG)
+                    let cLeft = max(0, Int(targets.carbsG) - totals.carbsG)
+                    let fLeft = max(0, Int(targets.fatG) - totals.fatG)
+                    lines.append("Macros: \(totals.proteinG)P/\(totals.carbsG)C/\(totals.fatG)F. Need: \(pLeft)P \(cLeft)C \(fLeft)F more.")
+                }
+
+                // Suggestions
                 let suggestions = FoodService.suggestMeal()
                 if !suggestions.isEmpty {
-                    lines.append("Suggestions: " + suggestions.prefix(3).map { "\($0.name) (\(Int($0.calories))cal, \(Int($0.proteinG))P)" }.joined(separator: ", "))
+                    lines.append("Try: " + suggestions.prefix(3).map { "\($0.name) (\(Int($0.calories))cal, \(Int($0.proteinG))P)" }.joined(separator: ", "))
                 }
+
+                // Top protein if protein is low
+                if totals.proteinG < 50 {
+                    let topP = FoodService.topProteinFoods(limit: 3)
+                    if !topP.isEmpty {
+                        lines.append("High protein: " + topP.map { "\($0.name) (\(Int($0.proteinG))P)" }.joined(separator: ", "))
+                    }
+                }
+
                 return .text(lines.joined(separator: "\n"))
             }
         ))

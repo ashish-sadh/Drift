@@ -18,7 +18,7 @@ _(pick from Ready)_
 ### P1: Enrich Tools + Improve AI Tool Use
 - [x] **Spell correction from food DB** — Done: Levenshtein distance matching against 1004 food names + hardcoded fallback
 - [x] **Tool confirm-before-action** — log_food opens FoodSearchView (already confirms), log_weight now asks "Say yes to confirm"
-- [ ] **Enrich food tools** — Add: get_recent_foods (what user eats often), get_macro_balance (P/C/F ratio vs targets), get_food_history(date) (what was eaten on a specific day).
+- [x] **Enrich food tools** — food_info now shows macro balance vs targets + top protein when protein is low
 - [ ] **Enrich exercise tools** — Add: get_last_session(exercise) (sets/reps/weight from last time), get_volume_trend(exercise) (total volume over time), get_body_part_split (which parts trained this week).
 - [ ] **Enrich weight tools** — Add: get_weight_history_chart (data points for inline display), compare_weeks (this week vs last week avg).
 - [ ] **Tool response formatting** — Tool results should be structured enough that AI chat can present them nicely. Return data + suggested display, not just flat strings.
