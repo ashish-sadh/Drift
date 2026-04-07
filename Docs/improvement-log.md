@@ -154,3 +154,23 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 ## b46d000 improve: Quality gate v2 — catch refusals, mangled JSON
 ## 797fd43 improve: SpellCorrect uses food DB fuzzy matching
 ## 1c686a2 test: Eval 122→128
+
+## 2026-04-07 Session (18 cycles)
+1. Mark supplement taken via chat (tool + handler)
+2. Delete food entry via chat (tool + handler)
+3. Copy yesterday's food (tool + handler)
+4. Quick-add raw calories (regex handler)
+5. Set weight goal via chat (tool + regex handler)
+6. Fix "suggest me workout" (12 phrasings)
+7. Instant "how many workouts this week" (rule engine)
+8. Gemma 4 prompt tuning (5 new tool examples)
+9. Log completed activities ("I did yoga", "went running")
+10. Cross-domain analysis ("should I eat more", "I feel tired")
+11. Body comp entry via chat ("body fat 18%", "bmi 22.5")
+12. Weekly comparison instant answer
+13. Inline macro logging ("400 cal 30g protein lunch")
+14. Add supplement to stack
+15. Trigger barcode scan from chat
+16. Fix "what's healthy for dinner" (meal suggestions + macros)
+17. Fix "I had a cheat meal" (ask what they ate)
+18. Handle "how much sugar today" (carbs proxy)
