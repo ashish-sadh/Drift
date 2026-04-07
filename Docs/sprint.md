@@ -15,10 +15,10 @@ _(pick from Ready)_
 - [x] **SVC-1: FoodService** — c8cc327+
 - [x] **SVC-2: WeightService** — bc80c11+
 - [x] **SVC-3: ExerciseService** — 7894260+
-- [ ] **SVC-4: SleepRecoveryService** — Consolidate HealthKit biometrics. Methods: get_sleep, get_recovery, get_hrv, get_readiness. Wraps HealthKitService + RecoveryEstimator.
-- [ ] **SVC-5: SupplementService** — Light wrapper. Methods: get_status, mark_taken.
-- [ ] **SVC-6: GlucoseService** — Methods: get_readings, detect_spikes.
-- [ ] **SVC-7: BiomarkerService** — Methods: get_results, get_detail, parse_report (AI-enhanced).
+- [x] **SVC-4: SleepRecoveryService** — 17adc16+
+- [x] **SVC-5: SupplementService** — 17adc16+
+- [x] **SVC-6: GlucoseService** — 17adc16+
+- [x] **SVC-7: BiomarkerService** — 17adc16+
 
 ### Wiring
 - [ ] **WIRE-1: Register all tools** — Register every service method in ToolRegistry with schema + handler closure.

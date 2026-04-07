@@ -1,0 +1,36 @@
+import Foundation
+
+/// Unified supplement service — used by both UI views and AI tool calls.
+@MainActor
+enum SupplementService {
+
+    /// Get today's supplement status: taken/total + remaining names.
+    static func getStatus() -> String {
+        let today = DateFormatters.todayString
+        guard let supplements = try? AppDatabase.shared.fetchActiveSupplements(),
+              !supplements.isEmpty else { return "No supplements set up." }
+        let logs = (try? AppDatabase.shared.fetchSupplementLogs(for: today)) ?? []
+        let takenIds = Set(logs.filter(\.taken).compactMap(\.supplementId))
+        let taken = takenIds.count
+        let total = supplements.count
+
+        if taken == total { return "All \(total) supplements taken today." }
+        let untaken = supplements.filter { !takenIds.contains($0.id ?? 0) }.map(\.name)
+        return "Supplements: \(taken)/\(total) taken. Still need: \(untaken.joined(separator: ", "))."
+    }
+
+    /// Mark a supplement as taken by name.
+    static func markTaken(name: String) -> String {
+        let today = DateFormatters.todayString
+        guard let supplements = try? AppDatabase.shared.fetchActiveSupplements() else {
+            return "No supplements found."
+        }
+        let lower = name.lowercased()
+        guard let match = supplements.first(where: { $0.name.lowercased().contains(lower) }),
+              let id = match.id else {
+            return "Couldn't find a supplement matching '\(name)'."
+        }
+        try? AppDatabase.shared.toggleSupplementTaken(supplementId: id, date: today)
+        return "Marked \(match.name) as taken."
+    }
+}
