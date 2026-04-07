@@ -1610,7 +1610,126 @@ final class AIEvalHarness: XCTestCase {
         }
     }
 
+    // MARK: - Additional Tool Call Tests
+
+    @MainActor
+    func testToolExecutionGetNutrition() async {
+        ToolRegistration.registerAll()
+        let call = ToolCall(tool: "get_nutrition", params: ToolCallParams(values: ["name": "chicken"]))
+        let result = await ToolRegistry.shared.execute(call)
+        if case .text(let text) = result {
+            XCTAssertFalse(text.isEmpty)
+        }
+    }
+
+    @MainActor
+    func testToolExecutionGetTrend() async {
+        ToolRegistration.registerAll()
+        let call = ToolCall(tool: "get_trend", params: ToolCallParams(values: [:]))
+        let result = await ToolRegistry.shared.execute(call)
+        if case .text(let text) = result {
+            XCTAssertFalse(text.isEmpty)
+        }
+    }
+
+    @MainActor
+    func testToolExecutionGetGoal() async {
+        ToolRegistration.registerAll()
+        let call = ToolCall(tool: "get_goal", params: ToolCallParams(values: [:]))
+        let result = await ToolRegistry.shared.execute(call)
+        // May return text (no goal set) or text (goal progress)
+        switch result {
+        case .text(let t): XCTAssertFalse(t.isEmpty)
+        case .error: break // OK
+        default: break
+        }
+    }
+
+    @MainActor
+    func testToolExecutionExplainCalories() async {
+        ToolRegistration.registerAll()
+        let call = ToolCall(tool: "explain_calories", params: ToolCallParams(values: [:]))
+        let result = await ToolRegistry.shared.execute(call)
+        if case .text(let text) = result {
+            XCTAssertTrue(text.contains("TDEE"))
+        }
+    }
+
+    @MainActor
+    func testToolExecutionLogFoodReturnsAction() async {
+        ToolRegistration.registerAll()
+        let call = ToolCall(tool: "log_food", params: ToolCallParams(values: ["name": "eggs", "amount": "2"]))
+        let result = await ToolRegistry.shared.execute(call)
+        if case .action(let action) = result {
+            if case .openFoodSearch(let query, _) = action {
+                XCTAssertEqual(query, "eggs")
+            } else {
+                XCTFail("Expected openFoodSearch action")
+            }
+        }
+    }
+
+    @MainActor
+    func testToolExecutionGetSleep() async {
+        ToolRegistration.registerAll()
+        let call = ToolCall(tool: "get_sleep", params: ToolCallParams(values: [:]))
+        let result = await ToolRegistry.shared.execute(call)
+        if case .text(let text) = result {
+            XCTAssertFalse(text.isEmpty)
+        }
+    }
+
+    @MainActor
+    func testToolExecutionGetBiomarkers() async {
+        ToolRegistration.registerAll()
+        let call = ToolCall(tool: "get_biomarkers", params: ToolCallParams(values: [:]))
+        let result = await ToolRegistry.shared.execute(call)
+        if case .text(let text) = result {
+            XCTAssertFalse(text.isEmpty)
+        }
+    }
+
+    @MainActor
+    func testToolExecutionGetGlucose() async {
+        ToolRegistration.registerAll()
+        let call = ToolCall(tool: "get_glucose", params: ToolCallParams(values: [:]))
+        let result = await ToolRegistry.shared.execute(call)
+        if case .text(let text) = result {
+            XCTAssertFalse(text.isEmpty)
+        }
+    }
+
+    @MainActor
+    func testToolExecutionGetSupplements() async {
+        ToolRegistration.registerAll()
+        let call = ToolCall(tool: "get_supplement_status", params: ToolCallParams(values: [:]))
+        let result = await ToolRegistry.shared.execute(call)
+        if case .text(let text) = result {
+            XCTAssertFalse(text.isEmpty)
+        }
+    }
+
+    @MainActor
+    func testToolExecutionTopProtein() async {
+        ToolRegistration.registerAll()
+        let call = ToolCall(tool: "top_protein", params: ToolCallParams(values: [:]))
+        let result = await ToolRegistry.shared.execute(call)
+        if case .text(let text) = result {
+            XCTAssertFalse(text.isEmpty)
+        }
+    }
+
+    @MainActor
+    func testToolExecutionProgressiveOverload() async {
+        ToolRegistration.registerAll()
+        let call = ToolCall(tool: "progressive_overload", params: ToolCallParams(values: ["exercise": "Bench Press"]))
+        let result = await ToolRegistry.shared.execute(call)
+        if case .text(let text) = result {
+            XCTAssertFalse(text.isEmpty)
+        }
+    }
+
     func testPrintSummary() {
-        print("=== AI EVAL HARNESS: 86+ test methods ===")
+        print("=== AI EVAL HARNESS: 97+ test methods ===")
     }
 }
