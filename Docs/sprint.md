@@ -6,6 +6,15 @@ _(pick from Ready)_
 
 ## Ready
 
+### P0: AI Chat Quality — NEVER DONE (highest priority, always improve)
+- [ ] **Harness compensates for 1.5B model** — The model is weak. The harness must be smart. Pre-parse intent in Swift before calling LLM. Post-validate LLM output. Fallback to rule engine when LLM fails. The system around the model matters more than the model.
+- [ ] **Eval harness 97→150+** — Add: ambiguous queries ("I had something light"), typos ("log chiken"), multi-turn ("also add rice"), tool-call format validation, response quality scoring, Indian food coverage, workout conversation flows.
+- [ ] **Improve intent detection** — Current keyword matching misses natural phrasing. Add fuzzy matching, common synonyms, implicit intents ("I'm hungry" → suggest_meal tool).
+- [ ] **Better context injection** — LLM needs the RIGHT data, not ALL data. Trim context to most relevant info. Include user's recent actions. Show what changed since last message.
+- [ ] **Response quality gate v2** — Check: does response actually answer the question? Does it use the data provided? Is it actionable? Score and replace if low quality.
+- [ ] **Test on real conversations** — Create 20 realistic multi-turn conversation scripts. Run through the system. Log where it fails. Fix the worst failures.
+- [ ] **Improve fallback responses** — When LLM produces garbage, the fallback should be smart: suggest specific actions based on screen + user data, not generic "try asking about...".
+
 ### P1: Enrich Tools + Improve AI Tool Use
 - [ ] **Spell correction from food DB** — Instead of hardcoded dictionary, build correction candidates from foods.json names (1004 foods). Levenshtein distance matching against actual DB entries. Scalable.
 - [ ] **Tool confirm-before-action** — Tools that write data (log_food, log_weight, mark_supplement) should return a confirmation prompt first, not execute immediately. "Log 2 eggs (140 cal)? Say yes to confirm."
