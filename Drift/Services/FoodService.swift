@@ -87,13 +87,31 @@ enum FoodService {
 
     // MARK: - Suggestions
 
-    /// Top protein foods from DB, sorted by protein per serving.
+    /// High-protein foods the user actually eats, that fit remaining calories.
+    /// Falls back to DB top-protein if no user history.
     static func topProteinFoods(limit: Int = 5) -> [Food] {
-        // Query foods sorted by protein descending
-        guard let foods = try? AppDatabase.shared.reader.read({ db in
-            try Food.order(Column("protein_g").desc).limit(limit).fetchAll(db)
-        }) else { return [] }
-        return foods
+        let totals = getDailyTotals()
+        let calBudget = max(0, totals.remaining)
+
+        // Prefer user's recent foods — they actually eat these
+        let recents = (try? AppDatabase.shared.fetchRecentFoods(limit: 30)) ?? []
+        let fitting = recents
+            .filter { $0.proteinG >= 15 && $0.calories <= Double(max(calBudget, 200)) }
+            .sorted { $0.proteinG > $1.proteinG }
+
+        if fitting.count >= limit { return Array(fitting.prefix(limit)) }
+
+        // Fill with DB high-protein foods not already in list
+        let recentNames = Set(fitting.map(\.name))
+        let dbFoods = (try? AppDatabase.shared.reader.read { db in
+            try Food.filter(Column("protein_g") >= 15)
+                .order(Column("protein_g").desc)
+                .limit(limit * 2)
+                .fetchAll(db)
+        }) ?? []
+        let extra = dbFoods.filter { !recentNames.contains($0.name) && $0.calories <= Double(max(calBudget, 200)) }
+
+        return Array((fitting + extra).prefix(limit))
     }
 
     /// Suggest foods that fit remaining calorie/protein budget.

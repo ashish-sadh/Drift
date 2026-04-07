@@ -6,7 +6,7 @@ Autonomous loop. Follow this exactly.
 
 **Re-read before every cycle.** Human may change at any time.
 
-_Directive:_ **Work top-down through sprint.md. Bugs first.**
+_Directive:_ **AI chat is the showstopper. Close parity gaps from `Docs/ai-parity.md`. Make every feature reachable from conversation. Improve prompts, tools, eval, multi-turn. Work through sprint.md top-down. Bugs first.**
 
 _Override:_ CONTINUE
 
@@ -16,10 +16,11 @@ _Override:_ CONTINUE
 
 **Fresh start:**
 1. Read `CLAUDE.md`
-2. Read `Docs/sprint.md` — this is where priorities live
-3. Read `Docs/human-reported-bugs.md` — fix these FIRST
-4. Build: `xcodebuild build -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' > /tmp/drift-build.log 2>&1 && echo "OK" || echo "FAIL"`
-5. Start the loop
+2. Read `Docs/ai-parity.md` — this is what to build next
+3. Read `Docs/sprint.md` — prioritized work items
+4. Read `Docs/human-reported-bugs.md` — fix these FIRST
+5. Build: `xcodebuild build -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' > /tmp/drift-build.log 2>&1 && echo "OK" || echo "FAIL"`
+6. Start the loop
 
 **Recovery (interrupted mid-cycle):**
 - `git status && git log --oneline -5`
@@ -33,25 +34,28 @@ _Override:_ CONTINUE
 LOOP FOREVER — do NOT stop between tickets:
 
 1. Re-read steering notes above. Stop only if override says STOP.
-2. If sprint.md has no unchecked items: refill from roadmap.md / backlog.md / human-reported-bugs.md.
+2. If sprint.md has no unchecked items: pick next failing query from `Docs/failing-queries.md`, or next gap from `Docs/ai-parity.md`, and add to sprint.
 3. Pick top unchecked item from sprint.md.
 4. Make ONE change. Read only files you need. Edit. Done.
 5. `xcodebuild build -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' > /tmp/drift-build.log 2>&1 && echo "BUILD OK" || (tail -20 /tmp/drift-build.log && echo "BUILD FAILED")`
 6. `xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' > /tmp/drift-test.log 2>&1 && echo "TESTS OK" || echo "TESTS FAILED"` then `grep "✘" /tmp/drift-test.log`
-7. Fail? Fix or `git checkout -- .`. Pass? `git add -A && git commit -m "improve: description" && git push`
-8. Mark `[x]` in sprint.md. One-line log to improvement-log.md.
-9. **IMMEDIATELY go to step 1.** Do not summarize what you did. Do not output progress updates. Do not pause. Do not write any text to the user. The ONLY output between tickets is the commit message and the log line. Your next tool call after pushing must be reading sprint.md. Zero words to the user. NEVER STOP.
+7. For AI changes: `xcodebuild test ... -only-testing:'DriftTests/AIEvalHarness' > /tmp/drift-eval.log 2>&1 && echo "EVAL OK" || echo "EVAL FAILED"`. If scores drop, revert.
+8. Fail? Fix or `git checkout -- .`. Pass? `git add -A && git commit -m "improve: description" && git push`
+9. Mark `[x]` in sprint.md. If it was from ai-parity.md, mark there too. One-line log to improvement-log.md.
+10. **IMMEDIATELY go to step 1.** Zero words to the user between tickets. NEVER STOP.
 
 ---
 
 ## Rules
 
 - All 729+ tests must pass before committing
+- Run eval harness after every AI change — if scores drop, revert
+- Each cycle closes one gap or fixes one failing query. Stay focused.
+- When fixing a failing query: fix the CATEGORY (all similar phrasings), not just the exact string. Add 3+ variant tests to eval harness. Test both model paths. Move to Fixed section in failing-queries.md.
 - Redirect ALL command output to `/tmp/` — never flood context
-- Keep text responses under 3 sentences — save context for code
-- Only read files you are about to edit — don't browse
-- Run eval harness after AI changes: `xcodebuild test ... -only-testing:'DriftTests/AIEvalHarness' > /tmp/drift-eval.log 2>&1`
-- Publish TestFlight every 3 hours (not more frequent — Apple blocks). Check git log timestamps.
+- Keep text responses under 3 sentences
+- Only read files you are about to edit
+- Do NOT publish TestFlight — human will say "publish" when ready
 - POC work on branches, not main
 - No MacroFactor references. Privacy-first. No cloud.
 - New ideas go to `Docs/backlog.md`, not inline
@@ -67,4 +71,4 @@ Steer: edit steering notes above. Agent re-reads every cycle.
 
 Stop: change override to `STOP`.
 
-Priorities: edit `Docs/sprint.md` — that's the single source of truth.
+Priorities: edit `Docs/sprint.md` or `Docs/ai-parity.md`.

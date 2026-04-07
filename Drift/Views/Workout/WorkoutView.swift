@@ -127,13 +127,25 @@ struct WorkoutView: View {
                 }
 
                 // Start buttons
-                Button {
-                    WorkoutService.clearSession()
-                    selectedTemplate = nil
-                    showingNewWorkout = true
-                } label: {
-                    Label("Start Empty Workout", systemImage: "plus.circle.fill").frame(maxWidth: .infinity)
-                }.buttonStyle(.borderedProminent).tint(Theme.accent)
+                HStack(spacing: 10) {
+                    Button {
+                        WorkoutService.clearSession()
+                        selectedTemplate = nil
+                        showingNewWorkout = true
+                    } label: {
+                        Label("Empty Workout", systemImage: "plus.circle.fill").frame(maxWidth: .infinity)
+                    }.buttonStyle(.borderedProminent).tint(Theme.accent)
+
+                    Button {
+                        if let smart = ExerciseService.buildSmartSession() {
+                            selectedTemplate = smart
+                            showingNewWorkout = true
+                        }
+                    } label: {
+                        Label("Coach Me", systemImage: "brain.head.profile").frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent).tint(Theme.accent.opacity(0.7))
+                }
 
                 // Templates
                 VStack(alignment: .leading, spacing: 8) {
@@ -229,8 +241,12 @@ struct WorkoutView: View {
                 if workouts.isEmpty && !isLoading {
                     VStack(spacing: 12) {
                         Image(systemName: "dumbbell.fill").font(.system(size: 40)).foregroundStyle(Theme.accent.opacity(0.5))
-                        Text("No Workouts").font(.headline)
-                        Text("Start a workout or import from Strong / Hevy").font(.caption).foregroundStyle(.secondary)
+                        Text("No Workouts Yet").font(.headline)
+                        Text("Start a workout above, or import your history").font(.caption).foregroundStyle(.secondary)
+                        Button { showingImport = true } label: {
+                            Label("Import from Strong / Hevy", systemImage: "square.and.arrow.down")
+                                .font(.caption)
+                        }.buttonStyle(.bordered)
                     }.padding(.top, 30)
                 } else {
                     VStack(alignment: .leading, spacing: 10) {
@@ -994,6 +1010,10 @@ struct ActiveWorkoutView: View {
                 if restored { return }
                 if let t = template {
                     workoutName = t.name
+                    // Smart sessions (no DB id) — use coach reasoning as workout notes
+                    if t.id == nil, let reasoning = ExerciseService.lastSessionReasoning {
+                        workoutNotes = reasoning
+                    }
                     let warmups = t.exercises.filter(\.isWarmup)
                     let working = t.exercises.filter { !$0.isWarmup }
                     // Add warmup exercises
@@ -1354,8 +1374,10 @@ struct ActiveWorkoutView: View {
             }
         }
 
+        // Auto-add form tip if no notes provided
+        let finalNotes = notes ?? ExerciseService.formTip(for: name).map { "Tip: \($0)" }
         exercises.append(ActiveExercise(name: name, restTime: restTime, isWarmupExercise: isWarmup,
-                                         notes: notes, sets: sets, previousSets: Array(previous)))
+                                         notes: finalNotes, sets: sets, previousSets: Array(previous)))
     }
 
     private func saveWorkout(andDismiss: Bool = true) {

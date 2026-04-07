@@ -4,6 +4,8 @@ import SwiftUI
 
 struct QuickAddView: View {
     @Bindable var viewModel: FoodLogViewModel
+    var initialItems: [RecipeItem] = []   // pre-populated ingredients (from AI chat)
+    var initialName: String = ""          // pre-set recipe name (e.g., "Lunch")
     @Environment(\.dismiss) private var dismiss
     @State private var recipeName = ""
     @State private var items: [RecipeItem] = []
@@ -124,15 +126,24 @@ struct QuickAddView: View {
             .background(Theme.background)
             .navigationTitle("Recipe").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
+            .onAppear {
+                if items.isEmpty && !initialItems.isEmpty {
+                    items = initialItems
+                    recipeName = initialName
+                }
+            }
             .sheet(isPresented: $showingIngredientPicker) {
                 IngredientPickerView { item in items.append(item) }
             }
             .sheet(item: editingIndexBinding) { idx in
-                IngredientPickerView { replacement in
-                    if idx.value < items.count {
-                        items[idx.value] = replacement
-                    }
-                }
+                IngredientPickerView(
+                    onAdd: { replacement in
+                        if idx.value < items.count {
+                            items[idx.value] = replacement
+                        }
+                    },
+                    editingItem: idx.value < items.count ? items[idx.value] : nil
+                )
             }
         }
     }
@@ -175,6 +186,7 @@ struct IdentifiableInt: Identifiable {
 
 private struct IngredientPickerView: View {
     let onAdd: (QuickAddView.RecipeItem) -> Void
+    var editingItem: QuickAddView.RecipeItem? = nil  // non-nil = edit mode (pre-populate)
     @Environment(\.dismiss) private var dismiss
     @State private var query = ""
     @State private var results: [Food] = []
@@ -224,12 +236,26 @@ private struct IngredientPickerView: View {
                     ingredientList
                 }
             }
-            .navigationTitle("Add Ingredient").navigationBarTitleDisplayMode(.inline)
+            .navigationTitle(editingItem != nil ? "Edit Ingredient" : "Add Ingredient").navigationBarTitleDisplayMode(.inline)
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } } }
             .sheet(isPresented: $showingManual) { manualIngredientSheet }
             .onAppear {
                 recentIngredients = (try? AppDatabase.shared.fetchRecentFoods(limit: 5)) ?? []
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { searchFocused = true }
+                if let item = editingItem {
+                    // Edit mode: pre-fill search and auto-select the food
+                    query = item.name
+                    results = (try? AppDatabase.shared.searchFoodsRanked(query: item.name)) ?? []
+                    if let food = results.first, food.name.lowercased() == item.name.lowercased() {
+                        selectedFood = food
+                        // Calculate amount from stored serving size
+                        if food.servingSize > 0 && item.servingSizeG > 0 {
+                            let servings = item.servingSizeG / food.servingSize
+                            amount = servings == Double(Int(servings)) ? "\(Int(servings))" : String(format: "%.1f", servings)
+                        }
+                    }
+                } else {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { searchFocused = true }
+                }
             }
         }
     }

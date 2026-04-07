@@ -105,14 +105,27 @@ final class ToolRegistry {
         return sorted
     }
 
-    /// Compact schema string for the LLM prompt. Max 6 tools — small models can't handle more.
-    func schemaPrompt(forScreen screen: String? = nil) -> String {
-        let relevant = screen.map { toolsForScreen($0) } ?? allTools()
-        let lines = relevant.prefix(6).map { t in
+    /// Compact schema string for the LLM prompt.
+    /// Large models (Gemma 4) get ALL tools with a screen hint. Small models get max 6, screen-filtered.
+    func schemaPrompt(forScreen screen: String? = nil, isLargeModel: Bool = false) -> String {
+        let toolList: [ToolSchema]
+        if isLargeModel {
+            // Gemma 4: show all tools — it handles 10+ tools well
+            toolList = Array(allTools().sorted { $0.name < $1.name })
+        } else {
+            // Small model: screen-filtered, max 6
+            let relevant = screen.map { toolsForScreen($0) } ?? allTools()
+            toolList = Array(relevant.prefix(6))
+        }
+        let lines = toolList.map { t in
             let params = t.parameters.map { "\($0.name):\($0.type)" }.joined(separator: ", ")
             return "- \(t.name)(\(params)) — \(t.description)"
         }
-        return "Tools:\n\(lines.joined(separator: "\n"))"
+        var result = "Tools:\n\(lines.joined(separator: "\n"))"
+        if isLargeModel, let screen {
+            result += "\nCurrent screen: \(screen)"
+        }
+        return result
     }
 
     /// Execute a tool call by name. Runs validation first, post-hook after.

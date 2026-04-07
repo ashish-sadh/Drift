@@ -9,6 +9,7 @@ struct FoodTabView: View {
     @State private var showingScanner = false
     @State private var loggedDays: [Date: Double] = [:]
     @State private var showingDatePicker = false
+    @State private var showingGoalSetup = false
     @State private var editingEntry: FoodEntry?
     @State private var isCopying = false
     @State private var editAmount = "1"
@@ -43,6 +44,14 @@ struct FoodTabView: View {
             .fullScreenCover(isPresented: $showingScanner) { BarcodeLookupView(viewModel: viewModel) }
             .sheet(isPresented: $showingSearch) { FoodSearchView(viewModel: viewModel) }
             .sheet(isPresented: $showingRecipeBuilder) { QuickAddView(viewModel: viewModel) }
+            .sheet(isPresented: $showingGoalSetup) {
+                NavigationStack {
+                    GoalSetupView(existingGoal: WeightGoal.load()) { goal in
+                        goal.save()
+                        reload()
+                    }
+                }
+            }
             .sheet(item: $editingEntry) { entry in editEntrySheet(entry) }
             .onAppear { AIScreenTracker.shared.currentScreen = .food; weekOffset = 0; reload() }
             .onChange(of: showingSearch) { _, showing in if !showing { reload() } }
@@ -214,21 +223,25 @@ struct FoodTabView: View {
                 }
             }
 
-            // Macro progress bars (show when goals exist)
+            // Macro progress bars (show when goals exist) — tap to edit diet/goal
             if let t = targets {
                 VStack(spacing: 6) {
                     macroProgressRow("P", eaten: n.proteinG, target: t.proteinG, color: Theme.proteinRed)
                     macroProgressRow("C", eaten: n.carbsG, target: t.carbsG, color: Theme.carbsGreen)
                     macroProgressRow("F", eaten: n.fatG, target: t.fatG, color: Theme.fatYellow)
                 }
+                .contentShape(Rectangle())
+                .onTapGesture { showingGoalSetup = true }
             } else {
-                // No goal - show simple pills
+                // No goal - show simple pills, tap to set up goal
                 HStack(spacing: 8) {
                     macroPill("P", value: n.proteinG, color: Theme.proteinRed)
                     macroPill("C", value: n.carbsG, color: Theme.carbsGreen)
                     macroPill("F", value: n.fatG, color: Theme.fatYellow)
                     macroPill("Fiber", value: n.fiberG, color: Theme.fiberBrown)
                 }
+                .contentShape(Rectangle())
+                .onTapGesture { showingGoalSetup = true }
             }
         }
         .card()

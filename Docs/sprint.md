@@ -1,82 +1,55 @@
 # Sprint Board
 
+Priority: close AI chat parity gaps from `Docs/ai-parity.md`. AI chat is the showstopper.
+
 ## In Progress
 
 _(pick from Ready)_
 
 ## Ready
 
-### P0: AI Chat Quality — NEVER DONE (highest priority, always improve)
-- [x] **Harness compensates for 1.5B model** — Fixed: non-food blocklist, double-execution bug, eval test tool names updated
-- [ ] **Eval harness 97→150+** — Add: ambiguous queries ("I had something light"), typos ("log chiken"), multi-turn ("also add rice"), tool-call format validation, response quality scoring, Indian food coverage, workout conversation flows.
-- [x] **Improve intent detection** — "log exercise"→workout, "what should I eat"→food suggestions in Swift (LLM scores 40% on these)
-- [x] **Better context injection** — Base context already compact (4 lines). Tool consolidation reduced prompt from 12→6 tools. Sufficient for now.
-- [x] **Response quality gate v2** — Done: catches refusals, mangled JSON, question-repeating, context regurgitation
-- [ ] **Test on real conversations** — Create 20 realistic multi-turn conversation scripts. Run through the system. Log where it fails. Fix the worst failures.
-- [x] **Improve fallback responses** — Done earlier: data-aware fallbacks use FoodService/WeightServiceAPI/ExerciseService
+### P0: Close AI Chat Parity Gaps (from ai-parity.md)
+- [ ] **Mark supplement taken via chat** — "took my creatine", "took vitamin D". Add handler + supplement tool to mark taken by name.
+- [ ] **Edit/delete food entry via chat** — "remove the rice", "delete last entry", "undo". Add delete tool that removes most recent matching entry.
+- [ ] **Copy yesterday's food** — "copy yesterday", "same as yesterday". Add tool that duplicates yesterday's food entries to today.
+- [ ] **Quick-add raw calories** — "just log 500 cal for lunch", "log 400 calories". Parse calorie-only intents, create manual entry.
+- [ ] **Set/update weight goal** — "set goal to 160 lbs", "change goal to 75 kg". Add goal tool that updates WeightGoal.
 
-### P1: Enrich Tools + Improve AI Tool Use
-- [x] **Spell correction from food DB** — Done: Levenshtein distance matching against 1004 food names + hardcoded fallback
-- [x] **Tool confirm-before-action** — log_food opens FoodSearchView (already confirms), log_weight now asks "Say yes to confirm"
-- [x] **Enrich food tools** — food_info now shows macro balance vs targets + top protein when protein is low
-- [x] **Enrich exercise tools** — exercise_info now shows last weight + streak alongside progressive overload
-- [x] **Enrich weight tools** — weight_info includes trend + goal + body comp from describeTrend()
-- [x] **Tool response formatting** — All tools now return user-friendly text with suggestions, not raw data
-- [x] **Log food from tool result** — food_info already shows "Say 'log [name]' to add it" after nutrition lookup
-- [x] **Eval: tool-call accuracy** — 144 eval tests + 100-query LLM eval (food 100%, questions 40%, exercise 13%, weight 20%)
+### P0.5: Fix Failing Queries (from failing-queries.md)
+- [ ] **"suggest me workout"** — Handle workout suggestion variants. Small model: keyword handler. Large model: ensure exercise_info tool called. Add eval tests for 5+ phrasings.
+- [ ] **"I did yoga today"** — Log completed workout by name. Small: parse "I did [activity]". Large: LLM calls tool. Eval tests.
+- [ ] **"how many workouts this week"** — Instant answer from WorkoutService. Add to rule engine. Eval tests.
 
-### P2: AI Chat Quality
-- [x] **Better system prompt** — Done: LOGGING/QUESTION/CHAT framework, 7 examples, 6-tool limit
-- [ ] **Conversation context in tool calls** — Pass recent conversation to tool handlers
-- [x] **Handle tool failures** — Done: data-aware fallbacks using actual services
-- [ ] **Reduce hallucination** — Post-response check: verify numbers match tool output
+### P1: AI Chat Quality + Multi-Turn (Gemma 4)
+- [ ] **Gemma 4 prompt tuning** — More per-tool examples, better tool selection accuracy. Test with 100-query eval.
+- [ ] **Multi-turn meal planning** — "plan my meals for today" → iterative macro-aware suggestions. Gemma 4 only.
+- [ ] **Cross-domain analysis** — "why am I not losing weight?" → combine food + weight + exercise context in one answer.
+- [ ] **Eval harness 212→300+** — Cross-domain queries, screen-bias regression, multi-turn scenarios, supplement/goal commands.
 
-### P3: Traditional UI Improvements
-- [ ] **Saved meals (one-tap re-log)** — Save multi-item meals as a group for quick re-logging.
-- [x] **Workout streak display** — Flame icon + "X week streak" + "Best: Yw" above consistency chart
-- [x] **Time-of-day food search boost** — FoodSearchView now uses FoodService.searchFood (includes time boost + spell correction)
-- [x] **Quick-add raw calories** — Already exists in FoodSearchView → manual entry section
+### P2: More Chat Features
+- [ ] **Body comp entry via chat** — "my body fat is 18%", "log body fat". Add body comp tool.
+- [ ] **Trigger barcode scan from chat** — "scan barcode", "scan food". Open camera sheet.
+- [ ] **Manual food with inline macros** — "log 400 cal 30g protein lunch". Parse calorie+macro intent.
+- [ ] **Add supplement to stack** — "add vitamin D 2000 IU". Supplement management tool.
+- [ ] **Weekly comparison** — "compare this week to last". Trend analysis response.
 
-### Eval Results
-- [x] **Qwen3-1.7B eval** — Food Logging: 30% (vs Qwen2.5 100%). Qwen3 is WORSE. Keeping Qwen2.5.
-
-### Next Sprint (refilled)
-- [x] **Conversation context** — Deferred: tools already return comprehensive data, history not needed per-tool yet
-- [x] **Reduce hallucination** — hasHallucinatedNumbers() checks response numbers vs context; replaces with fallback if >2 unknown numbers
-- [x] **Eval harness → 200** — Done: beverages, snacks, amounts, keyword precision, body comp, services, JSON, token budget
-- [ ] **Saved meals (one-tap re-log)** — Save multi-item meals as a group
-- [x] **Publish build 85** — Uploaded to TestFlight
-
-### Next Sprint
-- [ ] **Saved meals (one-tap re-log)** — Save multi-item meals as a group
-- [ ] **Eval harness 200→250** — Keep growing: more ambiguous queries, multi-turn, edge cases
-- [x] **AI chat: handle "yes" after weight confirm** — Parses weight from confirmation message, saves on "yes"
-- [ ] **HealthKit body composition sync** — Sync body fat % and BMI from Apple Health
-- [ ] **Accessibility pass** — VoiceOver labels on key screens
-
-### Blocked (needs device)
-- [ ] **MQ-1: Test tool-calling models** — Hermes-3-Llama-3.2-1B for structured JSON.
-- [ ] **MQ-2: Grammar-constrained sampling** — llama.cpp grammar for valid JSON.
-- [ ] **Metal GPU acceleration** — b7400 xcframework ready, needs A19 Pro test.
-- [ ] **Metal GPU acceleration** — b7400 xcframework ready, needs A19 Pro test.
+### P3: UI Polish
+- [ ] **Saved meals (one-tap re-log)** — Save multi-item meals for quick re-logging from UI.
+- [ ] **Accessibility pass** — VoiceOver labels on key screens.
 
 ## Done
 
-- [x] TC-1: ToolSchema + ToolRegistry
-- [x] TC-2: SpellCorrectService
-- [x] TC-3: JSON tool-call parser
-- [x] SVC-1-7: All 8 services (Food, Weight, Exercise, SleepRecovery, Supplement, Glucose, Biomarker)
-- [x] WIRE-1: 20 tools registered
-- [x] WIRE-2: System prompt injects tool schemas
-- [x] WIRE-3: AIChatView uses ToolRegistry.execute()
-- [x] WIRE-4: Block health questions
-- [x] WIRE-5: Smart workout fallback
-- [x] TC-11/12: Pre/post tool hooks
-- [x] TC-14: Screen-aware tool filtering
-- [x] Multi-turn workout accumulation
-- [x] Eval harness 97 test methods
-- [x] Flaky session tests fixed
-- [x] FEAT-001: Calorie estimation
-- [x] BUG-001: Calories left
-- [x] Workout streak logic
-- [x] Docs rewrite
+- [x] Dual-model architecture (SmolLM + Gemma 4)
+- [x] Screen bias removal (fullDayContext, universal pills, all tools for Gemma)
+- [x] Model-aware routing, universal suggestion pills, "Start smart workout" pill
+- [x] Loading indicator ("Preparing AI assistant...")
+- [x] 10 consolidated tools with JSON tool-calling
+- [x] Gemma 4 integration (xcframework, Metal GPU, chat template)
+- [x] Meal logging flow ("log lunch" → recipe builder)
+- [x] Exercise logging flow ("add exercise" → parse exercises → template)
+- [x] "Coach Me" button in Exercise tab with reasoning notes
+- [x] Gram-based food logging ("log paneer biryani 300 gram")
+- [x] "Start" after workout recommendation fix
+- [x] End-of-turn tail buffer widened (16→32)
+- [x] Body composition tracking, HealthKit sync, auto-refresh
+- [x] 212+ eval tests + 100-query LLM eval

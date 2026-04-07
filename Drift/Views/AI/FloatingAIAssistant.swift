@@ -59,6 +59,26 @@ struct FloatingAIAssistant: View {
         }
         .animation(.spring(response: 0.35, dampingFraction: 0.85), value: isExpanded)
         .animation(.spring(response: 0.3), value: showReadyBanner)
+        .onChange(of: isExpanded) { _, expanded in
+            if expanded {
+                aiService.cancelUnload()
+            } else {
+                aiService.scheduleUnload(delay: 60)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
+            // App going to background — unload immediately to free GPU memory
+            if aiService.isModelLoaded {
+                Log.app.info("AI: app backgrounding — scheduling quick unload")
+                aiService.scheduleUnload(delay: 10)
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
+            // App came back — cancel unload if chat is open
+            if isExpanded {
+                aiService.cancelUnload()
+            }
+        }
         .onChange(of: modelManager.downloadState) { old, new in
             if case .downloading = new, isExpanded { isExpanded = false }
             if case .completed = new {

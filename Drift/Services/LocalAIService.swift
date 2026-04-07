@@ -21,25 +21,55 @@ final class LocalAIService {
 
     var supportsVision: Bool { backend?.supportsVision ?? false }
     var isModelLoaded: Bool { backend?.isLoaded ?? false }
+    var isLargeModel: Bool { modelManager.currentTier == .large }
 
     private var systemPrompt: String {
-        let tools = ToolRegistry.shared.schemaPrompt(forScreen: AIScreenTracker.shared.currentScreen.rawValue)
-        return """
-        You help track food, weight, and workouts. \
-        LOGGING (user ate/did something) → call log tool. \
-        QUESTION (user asks about data) → call info tool. \
-        CHAT (greeting, thanks) → respond naturally, no tool. \
-        Never give health advice. Never invent numbers. \
-        Examples: \
-        "I had 2 eggs" → {"tool":"log_food","params":{"name":"eggs","amount":"2"}} \
-        "calories left" → {"tool":"food_info","params":{}} \
-        "how's my weight" → {"tool":"weight_info","params":{}} \
-        "start chest workout" → {"tool":"start_workout","params":{"name":"chest"}} \
-        "what should I train" → {"tool":"exercise_info","params":{}} \
-        "how'd I sleep" → {"tool":"sleep_recovery","params":{}} \
-        "thanks" → You're welcome! (no tool) \
-        \(tools)
-        """
+        let screen = AIScreenTracker.shared.currentScreen.rawValue
+        let large = isLargeModel
+        let tools = ToolRegistry.shared.schemaPrompt(forScreen: screen, isLargeModel: large)
+
+        if large {
+            // Gemma 4: richer prompt, all tools, cross-domain awareness
+            return """
+            You are a health tracking assistant. You help log food, weight, and workouts, \
+            and answer questions about the user's health data. \
+            Classify the user's intent: \
+            LOGGING (ate food, did workout, weigh-in) → call the appropriate log tool with JSON. \
+            QUESTION (asks about data, progress, trends) → call the appropriate info tool with JSON. \
+            CHAT (greeting, thanks, small talk) → respond naturally, no tool call. \
+            Rules: Never give health/medical advice. Never invent numbers — only use data from context. \
+            Always respond with EITHER a JSON tool call OR a short natural language answer, never both. \
+            Tool call format: {"tool":"tool_name","params":{"key":"value"}} \
+            Examples: \
+            "I had 2 eggs" → {"tool":"log_food","params":{"name":"eggs","amount":"2"}} \
+            "calories left" → {"tool":"food_info","params":{}} \
+            "how's my weight" → {"tool":"weight_info","params":{}} \
+            "start chest workout" → {"tool":"start_workout","params":{"name":"chest"}} \
+            "what should I train" → {"tool":"exercise_info","params":{}} \
+            "how'd I sleep" → {"tool":"sleep_recovery","params":{}} \
+            "how am I doing" → {"tool":"food_info","params":{}} \
+            "thanks" → You're welcome! \
+            \(tools)
+            """
+        } else {
+            // Small model: concise prompt, filtered tools
+            return """
+            You help track food, weight, and workouts. \
+            LOGGING (user ate/did something) → call log tool. \
+            QUESTION (user asks about data) → call info tool. \
+            CHAT (greeting, thanks) → respond naturally, no tool. \
+            Never give health advice. Never invent numbers. \
+            Examples: \
+            "I had 2 eggs" → {"tool":"log_food","params":{"name":"eggs","amount":"2"}} \
+            "calories left" → {"tool":"food_info","params":{}} \
+            "how's my weight" → {"tool":"weight_info","params":{}} \
+            "start chest workout" → {"tool":"start_workout","params":{"name":"chest"}} \
+            "what should I train" → {"tool":"exercise_info","params":{}} \
+            "how'd I sleep" → {"tool":"sleep_recovery","params":{}} \
+            "thanks" → You're welcome! (no tool) \
+            \(tools)
+            """
+        }
     }
 
     init() {
@@ -101,15 +131,21 @@ final class LocalAIService {
             return
         }
 
+        // Load on background thread so UI can show "Preparing AI assistant..." spinner
         let llama = LlamaCppBackend(modelPath: modelPath)
-        do {
-            try llama.loadSync()
-            backend = llama
-            // Don't say ready yet — run a health check
-            Task { await healthCheck() }
-        } catch {
-            Log.app.error("AI: load failed: \(error)")
-            state = .error(error.localizedDescription)
+        Task.detached(priority: .userInitiated) {
+            do {
+                try llama.loadSync()
+                await MainActor.run {
+                    self.backend = llama
+                    Task { await self.healthCheck() }
+                }
+            } catch {
+                await MainActor.run {
+                    Log.app.error("AI: load failed: \(error)")
+                    self.state = .error(error.localizedDescription)
+                }
+            }
         }
     }
 
@@ -180,6 +216,9 @@ final class LocalAIService {
 
     /// Cancel pending unload — user came back to AI chat.
     func cancelUnload() {
+        if unloadTimer != nil {
+            Log.app.info("AI: unload cancelled (user returned)")
+        }
         unloadTimer?.invalidate()
         unloadTimer = nil
     }

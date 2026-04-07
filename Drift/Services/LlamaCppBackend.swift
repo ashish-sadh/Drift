@@ -186,7 +186,7 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
             // Check stop sequence — only check tail (not entire buffer)
             let bufLen = outputBuf.count
             if bufLen >= 10 {
-                let tailStart = max(0, bufLen - 16)
+                let tailStart = max(0, bufLen - 32) // 32 bytes for multi-token stop sequences
                 let tail = Array(outputBuf[tailStart...]) + [0]
                 let tailStr = String(cString: tail)
                 if tailStr.contains("<|im_end|>") || tailStr.contains("<end_of_turn>") { break }

@@ -12,21 +12,28 @@ xcodebuild test -project Drift.xcodeproj -scheme Drift \
 # Quick pass/fail check
 xcodebuild test ... 2>&1 | grep "✘"  # empty = all pass
 
-# AI eval harness only (63 test methods)
+# AI eval harness only (212+ test methods)
 xcodebuild test -project Drift.xcodeproj -scheme Drift \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
   -only-testing:'DriftTests/AIEvalHarness'
+
+# LLM tool-calling eval (needs model on simulator — 100 queries)
+xcodebuild test -project Drift.xcodeproj -scheme Drift \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  -only-testing:'DriftTests/LLMToolCallingEval'
 
 # Specific test class
 xcodebuild test ... -only-testing:DriftTests/WorkoutTests
 ```
 
-## Test Files (14 files, 729+ tests)
+## Test Files (19 files, 729+ tests, 248 methods)
 
 | File | Tests | Covers |
 |------|-------|--------|
 | `FoodLoggingTests.swift` | 180+ | Food search, logging, recipes, macros, TDEE |
-| `AIEvalHarness.swift` | 63 methods (~400 cases) | Food/weight/workout intent, routing, response quality |
+| `AIEvalHarness.swift` | 212+ methods | Food/weight/workout intent, routing, response quality, tools, JSON parsing |
+| `LLMToolCallingEval.swift` | 100 queries | Real model inference: food logging, questions, weight, exercise, sleep, no-tool |
+| `LLMGemma4Eval.swift` | — | Gemma 4 comparison eval |
 | `WorkoutTests.swift` | 68+ | Workouts, CSV import, recovery, templates |
 | `WorkoutPersistenceTests.swift` | 40+ | Session save/load, exercise persistence |
 | `UIFlowTests.swift` | 49 | DB CRUD: weight, food, supplements, DEXA, glucose |
@@ -44,33 +51,36 @@ xcodebuild test ... -only-testing:DriftTests/WorkoutTests
 
 The eval harness (`DriftTests/AIEvalHarness.swift`) is the gold-standard test suite for AI quality. Run it after every AI change.
 
-### Current Coverage (63 test methods)
+### Current Coverage (212+ test methods)
 - Food logging precision: 23 positive cases, 12 false positive checks
 - Indian food logging: 12 cases
-- Food phrasing variety: 12 cases
-- Beverages/snacks: 9 cases
-- Amount parsing: 9 cases + 7 edge cases + 3 fractions + 5 exact amounts
+- Food phrasing variety: 12 cases, beverages: 9, snacks: 9
+- Amount parsing: 9 cases + 7 edge cases + 3 fractions + 5 exact amounts + mid-string numbers
 - Weight logging: 6 positive, 4 false positive, 5 unit detection, 3+4 edge cases
 - Workout routing: 7 queries, 4 false positive checks
-- Workout parsing: CREATE (2 exercises, single, no weight, 3-exercise, weight extraction), START (5 templates)
+- Workout parsing: CREATE + START with various formats
 - Chain-of-thought routing: 25 queries across all domains
 - Calorie estimation: 7 routing + 4 false positive checks
 - Nutrition lookup: 8 query formats
 - Cross-screen routing: 6 cases
 - Keyword false positive prevention: 5 broad-term cases
-- Screen fallback context: 5 screens
-- Response cleaner: markdown, preambles, ChatML, format echo, disclaimers, dedup, truncation, low quality, good responses
-- Action parser: 10 tag formats, 3 clean text preservation
-- Meal hints: 4 cases
-- Compound food protection: 3 cases
-- Multi-food logging: 3 cases
-- Edge cases: 7 empty/special inputs, 5 mixed intents
-- Token budget: truncation + all contexts under budget
+- Response cleaner: markdown, preambles, ChatML, Gemma artifacts, quality gate, hallucination detection
+- Tool call JSON parsing: valid, malformed, edge cases
+- Spell correction: Levenshtein, known corrections, food word detection
+- Service tests: FoodService, WeightServiceAPI, ExerciseService, SleepRecovery
+- Body composition: entry, HealthKit sync, charts
 - Rule engine: 19 exact-match patterns
 - Domain routing: 9 domains verified
+- Token budget: truncation + all contexts under budget
 
-### Target: 200+ test methods
-Priority areas for expansion: calorie estimation accuracy, calories remaining, multi-turn conversations, ambiguous queries, Indian food amounts.
+### Dual-Model Eval
+- **AIEvalHarness (212+ methods):** Runs without model — tests parsing, routing, tools, quality gates
+- **LLMToolCallingEval (100 queries):** Loads actual model, sends prompts with tool schemas, checks JSON output
+  - Categories: food logging (20), food questions (15), weight (15), exercise (23), sleep (10), no-tool (11), ambiguous (5)
+  - Gemma 4 baseline: food 90%, questions 70%, exercise 50%, weight 80%
+
+### Target: 300+ test methods
+Priority areas: cross-domain queries, screen-bias regression tests, multi-turn scenarios, separate SmolLM vs Gemma 4 metrics.
 
 ## Test Patterns
 

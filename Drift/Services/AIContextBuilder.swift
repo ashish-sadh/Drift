@@ -535,38 +535,57 @@ enum AIContextBuilder {
     // MARK: - DEXA / Body Composition Context
 
     static func dexaContext() -> String {
-        guard let scans = try? AppDatabase.shared.fetchDEXAScans(),
-              let latest = scans.first else { return "No DEXA data on file." }
+        var lines: [String] = []
 
-        var lines = ["DEXA (\(latest.scanDate)):"]
-        if let bf = latest.bodyFatPct {
-            let category: String
-            switch bf {
-            case ..<15: category = "athletic"
-            case ..<20: category = "fit"
-            case ..<25: category = "average"
-            case ..<30: category = "above average"
-            default: category = "high"
-            }
-            lines.append("  BF: \(String(format: "%.1f", bf))% (\(category))")
-        }
-        if let lean = latest.leanMassLbs { lines.append("  Lean: \(String(format: "%.1f", lean))lbs") }
-        if let fat = latest.fatMassLbs { lines.append("  Fat: \(String(format: "%.1f", fat))lbs") }
-        if let visc = latest.visceralFatKg { lines.append("  Visceral: \(String(format: "%.2f", visc))kg") }
-        if let rmr = latest.rmrCalories { lines.append("  RMR: \(Int(rmr))kcal") }
+        // Check body_composition table first (HealthKit + manual entries — more common)
+        if let entries = try? AppDatabase.shared.fetchBodyComposition(), let latest = entries.first {
+            lines.append("Body Composition (\(latest.date)):")
+            if let bf = latest.bodyFatPct { lines.append("  Body Fat: \(String(format: "%.1f", bf))%") }
+            if let bmi = latest.bmi { lines.append("  BMI: \(String(format: "%.1f", bmi))") }
+            if let water = latest.waterPct { lines.append("  Water: \(String(format: "%.1f", water))%") }
+            if let muscle = latest.muscleMassKg { lines.append("  Muscle: \(String(format: "%.1f", muscle * 2.20462)) lbs") }
+            if let bone = latest.boneMassKg { lines.append("  Bone: \(String(format: "%.1f", bone * 2.20462)) lbs") }
+            if let visc = latest.visceralFat { lines.append("  Visceral Fat: \(visc)") }
 
-        // Compare with previous scan if available
-        if scans.count > 1 {
-            let prev = scans[1]
-            if let curBf = latest.bodyFatPct, let prevBf = prev.bodyFatPct {
-                lines.append("  Change from \(prev.scanDate): \(String(format: "%+.1f", curBf - prevBf))% body fat")
-            }
-            if let curLean = latest.leanMassKg, let prevLean = prev.leanMassKg {
-                let deltaLbs = (curLean - prevLean) * 2.20462
-                lines.append("  Lean mass: \(String(format: "%+.1f", deltaLbs)) lbs")
+            // Compare with previous entry
+            if entries.count > 1 {
+                let prev = entries[1]
+                if let curBf = latest.bodyFatPct, let prevBf = prev.bodyFatPct {
+                    lines.append("  Change from \(prev.date): \(String(format: "%+.1f", curBf - prevBf))% body fat")
+                }
+                if let curM = latest.muscleMassKg, let prevM = prev.muscleMassKg {
+                    lines.append("  Muscle: \(String(format: "%+.1f", (curM - prevM) * 2.20462)) lbs")
+                }
             }
         }
-        return lines.joined(separator: "\n")
+
+        // Also check DEXA scans (from BodySpec PDF imports)
+        if let scans = try? AppDatabase.shared.fetchDEXAScans(), let latest = scans.first {
+            lines.append("DEXA Scan (\(latest.scanDate)):")
+            if let bf = latest.bodyFatPct {
+                let category: String
+                switch bf {
+                case ..<15: category = "athletic"
+                case ..<20: category = "fit"
+                case ..<25: category = "average"
+                case ..<30: category = "above average"
+                default: category = "high"
+                }
+                lines.append("  BF: \(String(format: "%.1f", bf))% (\(category))")
+            }
+            if let lean = latest.leanMassLbs { lines.append("  Lean: \(String(format: "%.1f", lean)) lbs") }
+            if let fat = latest.fatMassLbs { lines.append("  Fat: \(String(format: "%.1f", fat)) lbs") }
+            if let rmr = latest.rmrCalories { lines.append("  RMR: \(Int(rmr)) kcal") }
+
+            if scans.count > 1 {
+                let prev = scans[1]
+                if let curBf = latest.bodyFatPct, let prevBf = prev.bodyFatPct {
+                    lines.append("  Change from \(prev.scanDate): \(String(format: "%+.1f", curBf - prevBf))% body fat")
+                }
+            }
+        }
+
+        return lines.isEmpty ? "No body composition data. Log measurements from the Body Composition screen or import a DEXA scan." : lines.joined(separator: "\n")
     }
 
     // MARK: - Cycle Context

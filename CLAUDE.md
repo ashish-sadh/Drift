@@ -1,7 +1,9 @@
 # Drift — Claude Code Instructions
 
 ## The App
-Drift is a local-first iOS health tracker with an on-device AI assistant. Privacy-first: everything runs on-device, no cloud, no accounts, no analytics. The AI uses a small language model (1.5B Qwen via llama.cpp) to remove form-filling friction through tool calling.
+Drift is an AI-first local health tracker. AI chat is the showstopper — the primary way users interact. Every data entry should be doable through conversation. Traditional UI exists for visual analytics and as a fallback.
+
+**Dual-model:** SmolLM (360M) does heavy lifting with hardcoded harness. Gemma 4 (2B) uplifts with intelligence — smart tool calling, multi-turn, cross-domain reasoning. Privacy-first: everything on-device, no cloud, no accounts.
 
 ## Two Operating Modes
 
@@ -14,12 +16,14 @@ Human says "run self-improvement" or "never stop". Read `program.md` and follow 
 ## Doc Map
 | Doc | What it is |
 |-----|-----------|
-| `Docs/state.md` | Current build, test count, features, tech stack |
-| `Docs/architecture.md` | Tool-calling SLM vision — the core design doc |
-| `Docs/tools.md` | Service → tool mapping for the SLM |
-| `Docs/sprint.md` | Current sprint board (active tickets) |
-| `Docs/backlog.md` | Long-term ticket queue |
-| `Docs/roadmap.md` | Product phases (past → current → future) |
+| `Docs/ai-parity.md` | **AI chat vs UI feature gap** — what to build next |
+| `Docs/failing-queries.md` | **Failing queries** — real queries that don't work, fix systematically |
+| `Docs/architecture.md` | AI-first dual-model architecture |
+| `Docs/sprint.md` | Current sprint (close parity gaps) |
+| `Docs/state.md` | Current build, test count, features |
+| `Docs/tools.md` | Service → tool mapping (10 JSON tools) |
+| `Docs/backlog.md` | Long-term tickets (organized by AI gaps) |
+| `Docs/roadmap.md` | Product phases |
 | `Docs/testing.md` | How to run tests, eval harness |
 | `Docs/develop.md` | Dev setup, architecture, adding features |
 | `Docs/human-reported-bugs.md` | User bug reports — fix these first |

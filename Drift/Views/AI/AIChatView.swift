@@ -15,6 +15,11 @@ struct AIChatView: View {
     @State private var showingWorkout = false
     @State private var workoutTemplate: WorkoutTemplate? = nil
     @State private var pendingExercises: [AIActionParser.WorkoutExercise] = []  // Multi-turn workout accumulation
+    @State private var pendingMealName: String? = nil  // "lunch" after "What did you have for lunch?"
+    @State private var pendingWorkoutLog = false  // true after "What exercises did you do?"
+    @State private var showingRecipeBuilder = false
+    @State private var pendingRecipeItems: [QuickAddView.RecipeItem] = []
+    @State private var pendingRecipeName = ""
     @FocusState private var inputFocused: Bool
 
     enum GeneratingState: Equatable {
@@ -58,6 +63,18 @@ struct AIChatView: View {
                         proxy.scrollTo(last.id, anchor: .bottom)
                     }
                 }
+            }
+
+            // Model loading indicator — shown when model is reloading after idle unload
+            if case .loading = aiService.state {
+                HStack(spacing: 6) {
+                    ProgressView().scaleEffect(0.6)
+                    Text("Preparing AI assistant...")
+                        .font(.caption2).foregroundStyle(.tertiary)
+                }
+                .padding(.horizontal, 14).padding(.vertical, 4)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .transition(.opacity)
             }
 
             // Smart suggestion pills
@@ -117,6 +134,11 @@ struct AIChatView: View {
                 }
             }
         }
+        .sheet(isPresented: $showingRecipeBuilder) {
+            QuickAddView(viewModel: FoodLogViewModel(),
+                         initialItems: pendingRecipeItems,
+                         initialName: pendingRecipeName)
+        }
         .onAppear {
             aiService.cancelUnload()  // User is here — don't unload
             if messages.isEmpty {
@@ -156,14 +178,18 @@ struct AIChatView: View {
 
     private func buildConversationHistory() -> String {
         // Compact format: Q/A instead of User/Assistant (saves tokens)
-        let recent = messages.suffix(4) // Last 2 exchanges — keep tight for small models
+        let large = aiService.isLargeModel
+        let recentCount = large ? 6 : 4   // Gemma can handle more context
+        let charBudget = large ? 600 : 300
+        let msgLimit = large ? 250 : 150
+        let recent = messages.suffix(recentCount)
         var lines: [String] = []
         var charCount = 0
         for msg in recent {
             let prefix = msg.role == .user ? "Q" : "A"
-            let truncatedText = msg.text.prefix(150) // Truncate long messages
+            let truncatedText = msg.text.prefix(msgLimit)
             let line = "\(prefix): \(truncatedText)"
-            if charCount + line.count > 300 { break } // Tighter budget
+            if charCount + line.count > charBudget { break }
             lines.append(line)
             charCount += line.count
         }
@@ -172,6 +198,15 @@ struct AIChatView: View {
 
     /// Resolve pronouns like "it", "that", "this" by scanning recent messages for food mentions.
     /// "log it" after discussing banana → "log banana"
+    /// Split food list: "rice, dal, chicken curry" → ["rice", "dal", "chicken curry"]
+    private func splitFoodItems(_ text: String) -> [String] {
+        var parts = [text]
+        for sep in [", and ", " and ", ", "] {
+            parts = parts.flatMap { $0.components(separatedBy: sep) }
+        }
+        return parts.map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+    }
+
     private func resolvePronouns(_ text: String) -> String {
         let pronounPatterns = ["log it", "log that", "log this", "add it", "add that", "add this", "track it", "track that"]
         guard pronounPatterns.contains(where: { text.contains($0) }) else { return text }
@@ -229,38 +264,40 @@ struct AIChatView: View {
         let hour = Calendar.current.component(.hour, from: Date())
         let screen = screenTracker.currentScreen
 
-        // Food-based suggestions — time and context aware
+        // --- Universal pills (always shown, regardless of screen) ---
+
+        // Food: time-aware meal logging or calorie check
         if nutrition.calories == 0 {
             pills.append(hour < 11 ? "Log breakfast" : hour < 15 ? "Log lunch" : "Log dinner")
         } else {
             pills.append("Calories left")
-            if nutrition.proteinG < 80 && hour > 14 {
-                pills.append("How's my protein?")
-            }
-            if hour >= 17 && hour <= 21 {
-                pills.append("What should I eat for dinner?")
-            }
         }
 
+        // Exercise: smart workout on all screens
+        pills.append("Start smart workout")
+
+        // Insight: cross-domain
         if hour >= 20 || (hour >= 18 && nutrition.calories > 0) {
             pills.append("Daily summary")
+        } else {
+            pills.append("How am I doing?")
         }
 
-        // Weekly on weekends or end of day
-        let weekday = Calendar.current.component(.weekday, from: Date())
-        if weekday == 1 || weekday == 7 || hour >= 20 {
-            pills.append("Weekly summary")
-        }
-
-        // Screen-specific pills
+        // --- Screen-specific pills (1-2 extras for current context) ---
         switch screen {
         case .weight, .goal:
             pills.append("Am I on track?")
         case .exercise:
             pills.append("What should I train?")
-            pills.append("Log a workout")
             if let templates = try? WorkoutService.fetchTemplates(), let first = templates.first {
                 pills.append("Start \(first.name)")
+            }
+        case .food:
+            if nutrition.proteinG < 80 && hour > 14 {
+                pills.append("How's my protein?")
+            }
+            if hour >= 17 && hour <= 21 {
+                pills.append("What should I eat for dinner?")
             }
         case .bodyRhythm:
             pills.append("How'd I sleep?")
@@ -268,24 +305,18 @@ struct AIChatView: View {
             pills.append("Any spikes today?")
         case .biomarkers:
             pills.append("Which markers are out of range?")
-            // Show first out-of-range biomarker as a specific pill
-            if let results = try? AppDatabase.shared.fetchLatestBiomarkerResults() {
-                for r in results.prefix(10) {
-                    if let def = BiomarkerKnowledgeBase.byId[r.biomarkerId],
-                       def.status(for: r.normalizedValue) != .optimal {
-                        pills.append("How's my \(def.name.lowercased())?")
-                        break
-                    }
-                }
-            }
         case .cycle:
             pills.append("What phase am I in?")
         case .supplements:
             pills.append("Did I take everything?")
         case .bodyComposition:
-            pills.append("Compare my DEXA scans")
+            pills.append("How's my body comp?")
         default:
-            if nutrition.calories > 0 { pills.append("Calories left today?") }
+            // Weekly on weekends or end of day
+            let weekday = Calendar.current.component(.weekday, from: Date())
+            if weekday == 1 || weekday == 7 || hour >= 20 {
+                pills.append("Weekly summary")
+            }
         }
 
         return pills
@@ -373,10 +404,10 @@ struct AIChatView: View {
             messages.append(ChatMessage(role: .assistant, text: "Anytime! Let me know if you need anything else."))
             return
         }
-        // "done" with pending workout → open it
-        if (lower == "done" || lower == "start" || lower == "let's go" || lower == "ready") && !pendingExercises.isEmpty {
-            if let template = workoutTemplate {
-                messages.append(ChatMessage(role: .assistant, text: "Starting workout with \(pendingExercises.count) exercises!"))
+        // "done"/"start" with pending workout → open it
+        if lower == "done" || lower == "start" || lower == "let's go" || lower == "ready" || lower == "begin" {
+            if workoutTemplate != nil {
+                messages.append(ChatMessage(role: .assistant, text: "Starting workout!"))
                 pendingExercises = []
                 showingWorkout = true
                 return
@@ -454,6 +485,20 @@ struct AIChatView: View {
             messages.append(ChatMessage(role: .assistant, text: AIRuleEngine.caloriesLeft()))
             return
         }
+        // Supplement taken: "took my creatine", "took vitamin D", "had my fish oil"
+        let supplementVerbs = ["took my ", "took ", "had my ", "taken my ", "take my "]
+        if let verb = supplementVerbs.first(where: { lower.hasPrefix($0) }) {
+            let name = String(lower.dropFirst(verb.count)).trimmingCharacters(in: .whitespaces)
+            if !name.isEmpty && !["breakfast", "lunch", "dinner", "snack"].contains(name) {
+                // Check if it matches a supplement (not food)
+                if let supplements = try? AppDatabase.shared.fetchActiveSupplements(),
+                   supplements.contains(where: { $0.name.lowercased().contains(name.lowercased()) }) {
+                    messages.append(ChatMessage(role: .assistant, text: SupplementService.markTaken(name: name)))
+                    return
+                }
+            }
+        }
+
         if lower == "supplements" || lower == "did i take my supplements" || lower == "supplement status" {
             messages.append(ChatMessage(role: .assistant, text: AIRuleEngine.supplementStatus()))
             return
@@ -481,6 +526,18 @@ struct AIChatView: View {
             // Not found in DB — fall through to LLM for estimation
         }
 
+        // Meal logging: "log breakfast/lunch/dinner/snack" → ask what they ate, then build recipe
+        let mealWords: Set<String> = ["breakfast", "lunch", "dinner", "snack"]
+        if let verb = ["log ", "ate ", "had "].first(where: { lower.hasPrefix($0) }) {
+            let remainder = String(lower.dropFirst(verb.count)).trimmingCharacters(in: .whitespaces)
+            if mealWords.contains(remainder) {
+                pendingMealName = remainder
+                messages.append(ChatMessage(role: .assistant,
+                    text: "What did you have for \(remainder)? List everything — I'll build a meal entry."))
+                return
+            }
+        }
+
         // Resolve pronouns from conversation context: "log it", "log that", "add this"
         let resolved = resolvePronouns(lower)
 
@@ -488,7 +545,7 @@ struct AIChatView: View {
         if let intents = AIActionExecutor.parseMultiFoodIntent(resolved) {
             var found: [String] = []
             for intent in intents {
-                if let match = AIActionExecutor.findFood(query: intent.query, servings: intent.servings) {
+                if let match = AIActionExecutor.findFood(query: intent.query, servings: intent.servings, gramAmount: intent.gramAmount) {
                     found.append("\(match.food.name) (\(Int(match.food.calories * match.servings))cal)")
                 }
             }
@@ -504,16 +561,36 @@ struct AIChatView: View {
             return
         }
 
-        // Single food intent: "log 2 eggs", "ate avocado"
+        // Single food intent: "log 2 eggs", "ate avocado", "log paneer biryani 300 gram"
         // Always open search/confirmation sheet — show what we found
         if let intent = AIActionExecutor.parseFoodIntent(resolved) {
             foodSearchQuery = intent.query
             foodSearchServings = intent.servings
             // Show what we found before opening the sheet
-            if let match = AIActionExecutor.findFood(query: intent.query, servings: intent.servings) {
+            if let match = AIActionExecutor.findFood(query: intent.query, servings: intent.servings, gramAmount: intent.gramAmount) {
                 let f = match.food
                 let cal = Int(f.calories * match.servings)
-                messages.append(ChatMessage(role: .assistant, text: "Found \(f.name) (\(cal) cal). Opening to confirm..."))
+                foodSearchServings = match.servings // Use gram-converted servings if applicable
+                let gramNote = intent.gramAmount.map { " (\(Int($0))g = \(String(format: "%.1f", match.servings)) servings)" } ?? ""
+                messages.append(ChatMessage(role: .assistant, text: "Found \(f.name) (\(cal) cal)\(gramNote). Opening to confirm..."))
+            } else if aiService.isLargeModel && aiService.isModelLoaded {
+                // Gemma 4: try LLM normalization before opening search
+                let query = intent.query
+                let servings = intent.servings
+                messages.append(ChatMessage(role: .assistant, text: "Looking up \(query)..."))
+                Task {
+                    if let match = await AIActionExecutor.findFoodWithAI(query: query, servings: servings) {
+                        foodSearchQuery = match.food.name
+                        foodSearchServings = match.servings
+                        if let idx = messages.indices.last(where: { messages[$0].role == .assistant }) {
+                            messages[idx].text = "Found \(match.food.name) (\(Int(match.food.calories * match.servings)) cal). Opening to confirm..."
+                        }
+                    } else {
+                        foodSearchQuery = query
+                    }
+                    showingFoodSearch = true
+                }
+                return
             } else {
                 messages.append(ChatMessage(role: .assistant, text: "Searching for \(intent.query)..."))
             }
@@ -521,29 +598,52 @@ struct AIChatView: View {
             return
         }
 
-        // Workout intent: "log exercise", "log workout", "log a workout"
-        if lower.hasPrefix("log ") {
-            let remainder = String(lower.dropFirst(4)).trimmingCharacters(in: .whitespaces)
-            let workoutWords: Set<String> = ["exercise", "workout", "a workout", "my workout", "training"]
-            if workoutWords.contains(remainder) {
-                messages.append(ChatMessage(role: .assistant, text: ExerciseService.suggestWorkout()))
-                return
+        // Workout intent: "log exercise", "add exercise", "track workout", etc.
+        let exerciseVerbs = ["log ", "add ", "track "]
+        for verb in exerciseVerbs {
+            if lower.hasPrefix(verb) {
+                let remainder = String(lower.dropFirst(verb.count)).trimmingCharacters(in: .whitespaces)
+                let workoutWords: Set<String> = ["exercise", "workout", "a workout", "my workout", "training",
+                                                  "exercises", "an exercise"]
+                if workoutWords.contains(remainder) {
+                    pendingWorkoutLog = true
+                    messages.append(ChatMessage(role: .assistant,
+                        text: "What exercises did you do? List them like:\nbench press 3x10 at 135, squats 3x8"))
+                    return
+                }
             }
         }
 
-        // Food question routing (LLM scores 40% on these — Swift handles better)
-        let foodQuestions = ["what should i eat", "what to eat", "suggest food", "suggest meal",
-                            "what can i eat", "i'm hungry", "im hungry", "feeling hungry",
-                            "what should i have", "need food ideas"]
-        if foodQuestions.contains(where: { lower.contains($0) }) {
-            let totals = FoodService.getDailyTotals()
-            var response = "\(totals.remaining > 0 ? "\(totals.remaining)" : "0") cal remaining."
-            let suggestions = FoodService.suggestMeal()
-            if !suggestions.isEmpty {
-                response += " Try: " + suggestions.prefix(3).map { "\($0.name) (\(Int($0.calories))cal, \(Int($0.proteinG))P)" }.joined(separator: ", ")
+        // "Start smart workout" / "surprise me" — build AI session from history
+        if lower == "start smart workout" || lower == "smart workout" || lower == "surprise me"
+            || lower == "surprise me with a workout" || lower == "build me a workout" {
+            if let smart = ExerciseService.buildSmartSession() {
+                let exercises = smart.exercises.prefix(5).map { "\($0.name) — \($0.notes ?? "3x10")" }
+                messages.append(ChatMessage(role: .assistant, text: "Built a session based on your history:\n\(exercises.joined(separator: "\n"))"))
+                workoutTemplate = smart
+                showingWorkout = true
+            } else {
+                messages.append(ChatMessage(role: .assistant, text: ExerciseService.suggestWorkout()))
             }
-            messages.append(ChatMessage(role: .assistant, text: response))
             return
+        }
+
+        // Food question routing — Swift handles better than LLM for small model
+        // Large model (Gemma 4) skips this and lets the LLM use food_info tool instead
+        if !aiService.isLargeModel {
+            let foodQuestions = ["what should i eat", "what to eat", "suggest food", "suggest meal",
+                                "what can i eat", "i'm hungry", "im hungry", "feeling hungry",
+                                "what should i have", "need food ideas"]
+            if foodQuestions.contains(where: { lower.contains($0) }) {
+                let totals = FoodService.getDailyTotals()
+                var response = "\(totals.remaining > 0 ? "\(totals.remaining)" : "0") cal remaining."
+                let suggestions = FoodService.suggestMeal()
+                if !suggestions.isEmpty {
+                    response += " Try: " + suggestions.prefix(3).map { "\($0.name) (\(Int($0.calories))cal, \(Int($0.proteinG))P)" }.joined(separator: ", ")
+                }
+                messages.append(ChatMessage(role: .assistant, text: response))
+                return
+            }
         }
 
         // Direct template start: "start push day", "start legs", "let's do chest day"
@@ -578,6 +678,83 @@ struct AIChatView: View {
             try? AppDatabase.shared.saveWeightEntry(&entry)
             let display = String(format: "%.1f", weightIntent.weightValue)
             messages.append(ChatMessage(role: .assistant, text: "Logged \(display) \(weightIntent.unit.displayName) for today."))
+            return
+        }
+
+        // Multi-turn: pending workout log → parse exercises from user's response
+        if pendingWorkoutLog,
+           !["yes", "no", "ok", "okay", "nevermind", "cancel", "thanks"].contains(lower),
+           lower.count > 3 {
+            pendingWorkoutLog = false
+            // Try parsing as workout exercises via the action parser
+            let exercises = AIActionParser.parseWorkoutExercises(lower)
+            if !exercises.isEmpty {
+                pendingExercises = exercises
+                let templateExercises = exercises.map { e in
+                    var notes = "\(e.reps) reps"
+                    if let w = e.weight { notes += " @ \(Int(w)) lbs" }
+                    return WorkoutTemplate.TemplateExercise(name: e.name, sets: e.sets, notes: notes)
+                }
+                if let json = try? JSONEncoder().encode(templateExercises),
+                   let jsonStr = String(data: json, encoding: .utf8) {
+                    let summary = exercises.map { e in
+                        var s = "\(e.name) \(e.sets)x\(e.reps)"
+                        if let w = e.weight { s += " @ \(Int(w)) lbs" }
+                        return s
+                    }.joined(separator: ", ")
+                    messages.append(ChatMessage(role: .assistant, text: "Workout (\(exercises.count) exercises): \(summary). Say \"done\" to start, or add more."))
+                    workoutTemplate = WorkoutTemplate(
+                        name: "AI Workout",
+                        exercisesJson: jsonStr,
+                        createdAt: DateFormatters.iso8601.string(from: Date()))
+                }
+            } else {
+                // Couldn't parse — suggest format
+                pendingWorkoutLog = true // keep listening
+                messages.append(ChatMessage(role: .assistant,
+                    text: "I couldn't parse that. Try: bench press 3x10 at 135, squats 3x8"))
+            }
+            return
+        }
+
+        // Multi-turn: pending meal → build recipe from listed ingredients
+        if let mealName = pendingMealName,
+           !lower.contains("summary") && !lower.contains("calorie") && lower.count > 2
+           && !["yes", "no", "ok", "okay", "sure", "nah", "nope", "yeah", "yep", "thanks", "thank you", "nevermind", "cancel"].contains(lower) {
+            pendingMealName = nil
+            let items = splitFoodItems(lower)
+            var recipeItems: [QuickAddView.RecipeItem] = []
+            var notFound: [String] = []
+
+            for item in items {
+                let trimmed = item.trimmingCharacters(in: .whitespaces)
+                if let match = AIActionExecutor.findFood(query: trimmed, servings: nil) {
+                    let f = match.food
+                    recipeItems.append(QuickAddView.RecipeItem(
+                        name: f.name, portionText: "1 serving",
+                        calories: f.calories, proteinG: f.proteinG,
+                        carbsG: f.carbsG, fatG: f.fatG, fiberG: f.fiberG,
+                        servingSizeG: f.servingSize))
+                } else {
+                    notFound.append(trimmed)
+                }
+            }
+
+            if recipeItems.isEmpty {
+                // Nothing found → open food search
+                foodSearchQuery = lower
+                showingFoodSearch = true
+                messages.append(ChatMessage(role: .assistant, text: "Searching for \(lower)..."))
+            } else {
+                var msg = "Building \(mealName): \(recipeItems.map { "\($0.name) (\(Int($0.calories)) cal)" }.joined(separator: ", "))."
+                if !notFound.isEmpty {
+                    msg += " Couldn't find: \(notFound.joined(separator: ", ")) — add them manually in the recipe."
+                }
+                messages.append(ChatMessage(role: .assistant, text: msg))
+                pendingRecipeItems = recipeItems
+                pendingRecipeName = mealName.capitalized
+                showingRecipeBuilder = true
+            }
             return
         }
 
@@ -673,7 +850,8 @@ struct AIChatView: View {
                 }
             }
 
-            if let idx = messages.firstIndex(where: { $0.id == streamingMessageId }) {
+            let responseMessageId = streamingMessageId
+            if let idx = messages.firstIndex(where: { $0.id == responseMessageId }) {
                 messages[idx].text = finalResponse
             }
             streamingMessageId = nil
@@ -684,7 +862,7 @@ struct AIChatView: View {
                 let result = await ToolRegistry.shared.execute(toolCall)
                 switch result {
                 case .text(let text):
-                    if let idx = messages.firstIndex(where: { $0.id == streamingMessageId }) {
+                    if let idx = messages.firstIndex(where: { $0.id == responseMessageId }) {
                         messages[idx].text = text
                     }
                 case .action(let action):
@@ -698,12 +876,15 @@ struct AIChatView: View {
                            let matched = templates.first(where: { $0.name.lowercased().contains(templateName.lowercased()) }) {
                             workoutTemplate = matched
                             showingWorkout = true
+                        } else if let smart = ExerciseService.buildSmartSession(muscleGroup: templateName) {
+                            workoutTemplate = smart
+                            showingWorkout = true
                         }
                     case .openWeightEntry: break
                     case .navigate: break
                     }
                 case .error(let msg):
-                    if let idx = messages.firstIndex(where: { $0.id == streamingMessageId }) {
+                    if let idx = messages.firstIndex(where: { $0.id == responseMessageId }) {
                         messages[idx].text = msg
                     }
                 }

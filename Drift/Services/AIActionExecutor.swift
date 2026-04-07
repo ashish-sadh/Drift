@@ -8,6 +8,7 @@ enum AIActionExecutor {
         let query: String
         let servings: Double?
         var mealHint: String? = nil // "breakfast", "lunch", "dinner", "snack" if user specified
+        var gramAmount: Double? = nil // "300 gram" → 300, used to calculate servings from food's serving size
     }
 
     struct WeightIntent {
@@ -55,17 +56,18 @@ enum AIActionExecutor {
 
         guard !remainder.isEmpty else { return nil }
 
-        let (amount, food) = extractAmount(from: remainder)
+        let (amount, food, grams) = extractAmount(from: remainder)
         guard !food.isEmpty else { return nil }
 
         // Reject non-food words that get caught by "log" prefix
         let nonFoodWords: Set<String> = [
             "exercise", "workout", "a workout", "weight", "sleep", "supplement",
             "supplements", "recovery", "template", "a template", "my weight",
+            "breakfast", "lunch", "dinner", "snack", // meal names → ask follow-up
         ]
         if nonFoodWords.contains(food.lowercased()) { return nil }
 
-        return FoodIntent(query: food, servings: amount, mealHint: mealHint)
+        return FoodIntent(query: food, servings: amount, mealHint: mealHint, gramAmount: grams)
     }
 
     /// Try to parse a weight logging intent.
@@ -140,8 +142,8 @@ enum AIActionExecutor {
         guard parts.count > 1 else { return nil } // Single item — use parseFoodIntent instead
 
         return parts.map { part in
-            let (amount, food) = extractAmount(from: part)
-            return FoodIntent(query: food, servings: amount)
+            let (amount, food, grams) = extractAmount(from: part)
+            return FoodIntent(query: food, servings: amount, gramAmount: grams)
         }
     }
 
@@ -152,8 +154,16 @@ enum AIActionExecutor {
         let servings: Double
     }
 
-    /// Search local DB for food with fuzzy matching. Returns best match or nil.
-    static func findFood(query: String, servings: Double?) -> FoodMatch? {
+    /// Search local DB for food. If gram amount is provided, converts to servings using food's serving size.
+    static func findFood(query: String, servings: Double?, gramAmount: Double? = nil) -> FoodMatch? {
+        // Helper: calculate servings from gram amount if applicable
+        func resolveServings(for food: Food) -> Double {
+            if let grams = gramAmount, food.servingSize > 0 {
+                return grams / food.servingSize
+            }
+            return servings ?? 1
+        }
+
         // Try exact search first
         if let results = try? AppDatabase.shared.searchFoodsRanked(query: query),
            let best = results.first {
@@ -161,7 +171,7 @@ enum AIActionExecutor {
             let nameWords = best.name.lowercased()
             let matchCount = queryWords.filter { nameWords.contains($0) }.count
             if matchCount > 0 {
-                return FoodMatch(food: best, servings: servings ?? 1)
+                return FoodMatch(food: best, servings: resolveServings(for: best))
             }
         }
         // Try without trailing 's' (eggs → egg, bananas → banana)
@@ -169,7 +179,7 @@ enum AIActionExecutor {
         if singular != query,
            let results = try? AppDatabase.shared.searchFoodsRanked(query: singular),
            let best = results.first {
-            return FoodMatch(food: best, servings: servings ?? 1)
+            return FoodMatch(food: best, servings: resolveServings(for: best))
         }
         // Try stripping qualifiers: "slices of pizza" → "pizza", "cups of rice" → "rice"
         let qualifiers = ["slices of ", "slice of ", "pieces of ", "piece of ", "cups of ", "cup of ",
@@ -180,7 +190,7 @@ enum AIActionExecutor {
                 let stripped = String(query.dropFirst(qual.count))
                 if let results = try? AppDatabase.shared.searchFoodsRanked(query: stripped),
                    let best = results.first {
-                    return FoodMatch(food: best, servings: servings ?? 1)
+                    return FoodMatch(food: best, servings: resolveServings(for: best))
                 }
             }
         }
@@ -189,7 +199,7 @@ enum AIActionExecutor {
         if firstWord != query && firstWord.count >= 3,
            let results = try? AppDatabase.shared.searchFoodsRanked(query: firstWord),
            let best = results.first {
-            return FoodMatch(food: best, servings: servings ?? 1)
+            return FoodMatch(food: best, servings: resolveServings(for: best))
         }
         return nil
     }
@@ -243,17 +253,46 @@ enum AIActionExecutor {
     // MARK: - Amount Parsing
 
     /// Extract amount from beginning of string: "1/3 avocado" → (0.33, "avocado")
-    private static func extractAmount(from text: String) -> (Double?, String) {
+    /// Also returns gram amount separately: "paneer biryani 300 gram" → (nil, "paneer biryani", 300)
+    private static func extractAmount(from text: String) -> (Double?, String, Double?) {
         // Multi-word amounts first
         let multiWord: [(String, Double)] = [("a couple of ", 2), ("couple of ", 2), ("a few ", 3), ("a lot of ", 2), ("lots of ", 2)]
         for (prefix, amount) in multiWord {
             if text.lowercased().hasPrefix(prefix) {
-                return (amount, String(text.dropFirst(prefix.count)).trimmingCharacters(in: .whitespaces))
+                return (amount, String(text.dropFirst(prefix.count)).trimmingCharacters(in: .whitespaces), nil)
+            }
+        }
+
+        // Trailing quantity: "paneer biryani 300 gram", "chicken 200g", "fairlife protein 2 scoop"
+        let weightUnits: Set<String> = ["g", "gram", "grams", "gm", "oz", "ml", "kg",
+                                         "scoop", "scoops", "tbsp", "tsp", "cup", "cups",
+                                         "piece", "pieces", "slice", "slices", "serving", "servings"]
+        let allWords = text.split(separator: " ").map(String.init)
+        if allWords.count >= 3 {
+            let lastWord = allWords.last!.lowercased()
+            let secondLast = allWords[allWords.count - 2]
+            if weightUnits.contains(lastWord), let grams = Double(secondLast) {
+                let food = allWords[0..<(allWords.count - 2)].joined(separator: " ")
+                if !food.isEmpty {
+                    return (nil, food.trimmingCharacters(in: .whitespaces), grams)
+                }
+            }
+        }
+        // Trailing compact: "chicken 200g", "rice 300ml"
+        if allWords.count >= 2 {
+            let lastWord = allWords.last!.lowercased()
+            for unit in weightUnits {
+                if lastWord.hasSuffix(unit), let grams = Double(lastWord.dropLast(unit.count)) {
+                    let food = allWords[0..<(allWords.count - 1)].joined(separator: " ")
+                    if !food.isEmpty {
+                        return (nil, food.trimmingCharacters(in: .whitespaces), grams)
+                    }
+                }
             }
         }
 
         let parts = text.split(separator: " ", maxSplits: 1)
-        guard let first = parts.first else { return (nil, text) }
+        guard let first = parts.first else { return (nil, text, nil) }
         let firstStr = String(first)
 
         // Fraction: "1/3", "1/2"
@@ -261,7 +300,7 @@ enum AIActionExecutor {
             let fracParts = firstStr.split(separator: "/")
             if fracParts.count == 2, let num = Double(fracParts[0]), let den = Double(fracParts[1]), den > 0 {
                 let food = parts.count > 1 ? String(parts[1]) : ""
-                return (num / den, food.trimmingCharacters(in: .whitespaces))
+                return (num / den, food.trimmingCharacters(in: .whitespaces), nil)
             }
         }
 
@@ -272,7 +311,16 @@ enum AIActionExecutor {
         ]
         if let amount = wordAmounts[firstStr] {
             let food = parts.count > 1 ? String(parts[1]) : ""
-            return (amount, food.trimmingCharacters(in: .whitespaces))
+            return (amount, food.trimmingCharacters(in: .whitespaces), nil)
+        }
+
+        // Leading number with unit: "200g chicken" → strip unit, treat as gram amount
+        let leadingLower = firstStr.lowercased()
+        for unit in weightUnits {
+            if leadingLower.hasSuffix(unit), let grams = Double(leadingLower.dropLast(unit.count)) {
+                let food = parts.count > 1 ? String(parts[1]) : ""
+                return (nil, food.trimmingCharacters(in: .whitespaces), grams)
+            }
         }
 
         // Number: "2", "0.5", "200"
@@ -280,23 +328,29 @@ enum AIActionExecutor {
             let food = parts.count > 1 ? String(parts[1]) : ""
             // If number is large (>10), it might be grams not servings — include with food name
             if num > 10 {
-                return (nil, text) // "200g chicken" — let food search handle it
+                return (nil, text, nil) // "200g chicken" — let food search handle it
             }
-            return (num, food.trimmingCharacters(in: .whitespaces))
+            return (num, food.trimmingCharacters(in: .whitespaces), nil)
         }
 
         // Mid-string number: "protein 2 scoop" → food="protein", amount=2
-        let allWords = text.split(separator: " ").map(String.init)
+        // "fairlife protein with 2 scoop" → strip "with" → food="fairlife protein", amount=2
+        let connectors: Set<String> = ["with", "of", "and", "plus", "w/", "x"]
         for i in 1..<allWords.count {
             if let num = Double(allWords[i]), num > 0, num <= 10 {
-                let food = allWords[0..<i].joined(separator: " ")
+                var foodWords = Array(allWords[0..<i])
+                // Strip trailing connectors: "fairlife protein with" → "fairlife protein"
+                while let last = foodWords.last, connectors.contains(last.lowercased()) {
+                    foodWords.removeLast()
+                }
+                let food = foodWords.joined(separator: " ")
                 if !food.isEmpty {
-                    return (num, food.trimmingCharacters(in: .whitespaces))
+                    return (num, food.trimmingCharacters(in: .whitespaces), nil)
                 }
             }
         }
 
         // No amount found — entire text is food name
-        return (nil, text)
+        return (nil, text, nil)
     }
 }

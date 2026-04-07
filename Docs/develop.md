@@ -21,13 +21,13 @@ xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iO
 ├── ViewModels/      → @Observable classes bridging Views ↔ Services
 ├── Services/        → Business logic + AI system (27 service files)
 │   ├── AI Layer     → LocalAIService, LlamaCppBackend, AIChainOfThought, AIContextBuilder,
-│   │                  AIActionParser, AIActionExecutor, AIRuleEngine, AIResponseCleaner
+│   │                  ToolSchema, ToolRegistration, AIActionExecutor, AIRuleEngine, AIResponseCleaner
 │   ├── Health       → HealthKitService, WeightTrendCalculator, TDEEEstimator, RecoveryEstimator
 │   ├── Data         → WorkoutService, ExerciseDatabase, DefaultFoods, DefaultTemplates
 │   └── Import       → LabReportOCR, BodySpecPDFParser, CGMImportService, OpenFoodFactsService
-├── Database/        → GRDB setup, 12 migrations
+├── Database/        → GRDB setup, 20 migrations
 ├── Resources/       → foods.json (1004), exercises.json (873), biomarkers.json (65)
-├── Frameworks/      → llama.xcframework (built from source, b7400)
+├── Frameworks/      → llama.xcframework (rebuilt from source, latest llama.cpp)
 └── Utilities/       → Theme, Log, DateFormatters, CSVParser
 ```
 
@@ -38,11 +38,14 @@ xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iO
 - GRDB `ValueObservation` for reactive UI
 - All models: `Codable + FetchableRecord + PersistableRecord`
 
-### AI System
-- See `Docs/architecture.md` for the tool-calling vision
-- See `Docs/tools.md` for the service → tool mapping
-- Each service method = a potential tool the SLM can invoke
-- System prompt + context → SLM → action tags → Swift executes
+### AI System — Dual-Model Architecture
+- See `Docs/architecture.md` for the dual-path design (SmolLM + Gemma 4)
+- See `Docs/tools.md` for the 10 consolidated tools
+- **SmolLM path:** Hardcoded keyword/rule engine handles 80%+, model handles overflow
+- **Gemma 4 path:** LLM decides which tool to call with all 10 tools visible
+- Tool calls are JSON: `{"tool":"log_food","params":{"name":"eggs","amount":"2"}}`
+- `LocalAIService.isLargeModel` flag drives routing decisions
+- Run eval harness after any AI change: `xcodebuild test ... -only-testing:'DriftTests/AIEvalHarness'`
 
 ### HealthKit
 - `HealthKitService` is an `actor` for thread safety
@@ -61,5 +64,5 @@ xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iO
 
 ## Dependencies
 - **GRDB.swift** v7.x (SQLite) — only external SPM dependency
-- **llama.xcframework** — embedded, built from source (llama.cpp b7400)
+- **llama.xcframework** — embedded, rebuilt from latest llama.cpp (supports Gemma 4, Qwen, SmolLM)
 - Everything else is Apple-native

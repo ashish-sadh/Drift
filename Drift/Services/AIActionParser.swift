@@ -97,7 +97,7 @@ enum AIActionParser {
     }
 
     /// Parse "Push Ups 3x15, Bench Press 3x10@135" into WorkoutExercise array.
-    private static func parseWorkoutExercises(_ input: String) -> [WorkoutExercise] {
+    static func parseWorkoutExercises(_ input: String) -> [WorkoutExercise] {
         input.split(separator: ",").compactMap { part in
             let trimmed = part.trimmingCharacters(in: .whitespaces)
             // Match: "Exercise Name 3x15" or "Exercise Name 3x10@135"

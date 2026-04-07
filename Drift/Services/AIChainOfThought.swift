@@ -167,11 +167,17 @@ enum AIChainOfThought {
             steps.append(Step(label: "Checking supplements...") { AIContextBuilder.supplementContext() })
         }
 
-        // If no keyword matched, use the current screen as a hint
+        // If no keyword matched, give the LLM broad context (reduces screen bias)
+        // Always include fullDayContext so cross-domain queries get good answers regardless of screen
         if steps.isEmpty {
+            if q.count <= 5 { return nil } // Too short for chain (greetings, etc.)
+
+            // Base: always give a full-day overview for unmatched queries
+            steps.append(Step(label: "Checking your day...") { AIContextBuilder.fullDayContext() })
+
+            // Add screen-specific data as supplementary (not exclusive)
             switch screen {
-            case .weight, .goal: steps.append(Step(label: "Checking weight data...") { AIContextBuilder.weightContext() })
-            case .food: steps.append(Step(label: "Checking meals...") { AIContextBuilder.foodContext() })
+            case .weight, .goal: steps.append(Step(label: "Checking weight...") { AIContextBuilder.weightContext() })
             case .exercise: steps.append(Step(label: "Looking at workouts...") { AIContextBuilder.workoutContext() })
             case .bodyRhythm: steps.append(Step(label: "Checking sleep...") { AIContextBuilder.sleepRecoveryContext() })
             case .glucose: steps.append(Step(label: "Reading glucose...") { AIContextBuilder.glucoseContext() })
@@ -179,14 +185,8 @@ enum AIChainOfThought {
             case .cycle: steps.append(Step(label: "Checking cycle...") { AIContextBuilder.cycleContext() })
             case .bodyComposition: steps.append(Step(label: "Checking DEXA...") { AIContextBuilder.dexaContext() })
             case .supplements: steps.append(Step(label: "Checking supplements...") { AIContextBuilder.supplementContext() })
-            case .dashboard:
-                // Unmatched dashboard query — give LLM a broad overview if query has substance
-                if q.count > 10 {
-                    steps.append(Step(label: "Checking your day...") { AIContextBuilder.fullDayContext() })
-                } else {
-                    return nil
-                }
-            default: return nil // Settings/algorithm — single-shot
+            case .settings, .algorithm: return nil // Single-shot
+            default: break // Dashboard/food — fullDayContext already covers it
             }
         }
 
@@ -229,7 +229,8 @@ enum AIChainOfThought {
 
         onStep("Writing response...")
         let rawContext = contextParts.joined(separator: "\n")
-        let enrichedContext = AIContextBuilder.truncateToFit(rawContext, maxTokens: 800)
+        let tokenBudget = LocalAIService.shared.isLargeModel ? 1200 : 800
+        let enrichedContext = AIContextBuilder.truncateToFit(rawContext, maxTokens: tokenBudget)
         return await LocalAIService.shared.respondStreaming(to: query, context: enrichedContext, history: history, onToken: onToken)
     }
 }

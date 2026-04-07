@@ -1,64 +1,54 @@
-# Backlog — Long-Term Ticket Queue
+# Backlog — Organized by AI Chat Parity
 
-Organized by area. Items move to `sprint.md` when picked up.
+Items move to `sprint.md` when picked up. Priority: close AI chat gaps first.
 
 ---
 
-## AI / Tool Calling
+## AI Chat Gap Closing (from ai-parity.md)
 
-- **Grammar-constrained sampling** — Force valid JSON tool calls via llama.cpp grammar sampling. Eliminates regex parsing errors.
-- **Find/fine-tune tool-calling model** — Candidates: Hermes-3-Llama-3.2-1B (tool-tuned), Qwen2.5-1.5B fine-tune on health Q&A. Test: does it reliably output `{"tool": "log_food", "params": {...}}`?
-- **Metal GPU acceleration** — b7400 xcframework has the bfloat/half shader fix for A19 Pro. Untested on device. Would 3-5x speed up inference.
-- **Vision model POC** — Can llama.cpp load Qwen3-VL-2B + mmproj? Photo → food description → tool call.
-- **Larger context window** — Test 4096 tokens (currently 2048). Needs memory profiling on device.
-- **On-device embeddings** — MiniLM or similar for semantic food/exercise search instead of keyword matching.
-- **Voice input** — iOS 26 SpeechAnalyzer: fully on-device speech-to-text → AI chat.
-- **Weekly AI summary notification** — Background task generates insight, delivers as push notification.
-- **Multi-turn workout accumulation** — "I did bench" → "also did OHP" → combines into single workout in Swift state.
+### Friction Reducers
+- **Mark supplement taken** — "took my creatine". Match by name, mark today's entry.
+- **Edit/delete food** — "remove the rice", "delete last entry". Find + remove from DB.
+- **Copy yesterday** — "same as yesterday". Duplicate all yesterday's food_entry rows.
+- **Quick-add calories** — "log 500 cal lunch". Parse number + "cal" pattern.
+- **Set weight goal** — "set goal to 160". Update WeightGoal model.
+- **Body comp entry** — "body fat 18%". Save to body_composition table.
+- **Add supplement** — "add vitamin D 2000 IU". Insert into supplement table.
+- **Trigger barcode** — "scan barcode". Open camera sheet from chat action.
+- **Manual macros** — "log 400cal 30P 50C 20F". Parse inline macro notation.
 
-## Food Logging
+### Multi-Turn (Gemma 4)
+- **Meal planner** — "plan my meals today". Multi-turn: suggest → adjust → confirm → log all.
+- **Workout split** — "build me a PPL split". Design across multiple sessions.
+- **Cross-domain** — "why am I not losing?". Combine food deficit + weight trend + exercise data.
+- **Comparison** — "this week vs last". Side-by-side trend analysis.
+- **Coaching** — "am I eating enough for my workouts?". Contextual using real data.
+- **Conversation memory** — Pass tool results back to next turn. "You logged 2 eggs (140 cal)."
 
-- **Photo food logging** — Core ML food classifier (Food101/MobileNetV3) → local DB match → confirm. On-device, no cloud.
-- **Saved meals (one-tap re-log)** — Users eat same breakfast ~80% of time. Save multi-item meals.
-- **Multi-add / batch select** — Check multiple foods from search results, add all at once.
-- **Copy from any past day** — Not just yesterday.
-- **Inline editing** — Tap any number in diary to edit directly.
-- **Time-of-day search context** — Show coffee/oats in morning, protein at dinner.
-- **Quick-add raw calories** — "Just enter 500 cal" button for eating out.
+### Chat Quality
+- **Grammar-constrained sampling** — Force valid JSON from SmolLM via llama.cpp grammar.
+- **Fine-tune SmolLM** — Collect Gemma 4 tool-calling examples → distill to SmolLM.
+- **Gemma 4 few-shot per tool** — 2-3 examples per tool. Measure accuracy vs token cost.
+- **Larger context window** — Test 4096 tokens (currently 2048). Memory profiling needed.
+- **Streaming quality** — Clean artifacts during streaming, not just after.
 
-## Exercise
+## Input Expansion
+- **Voice input** — iOS 26 SpeechAnalyzer → on-device speech-to-text → AI chat.
+- **Photo food logging** — Core ML food classifier → DB match → chat confirmation.
+- **Vision model POC** — llama.cpp vision model for food photo → description → tool call.
 
-- **Exercise demonstrations** — Options: (1) Static JPGs from free-exercise-db (already bundled, ~2MB), (2) Lottie animations (~12MB for 1470 exercises), (3) YouTube deep links (zero storage). Recommendation: start with option 1.
-- **Workout streak tracking** — Current + longest streak alongside consistency chart.
-- **Post-workout summary card** — Shareable card with PRs, volume, duration.
-- **Swipe gestures on sets** — Swipe to adjust reps +/- 1.
-- **Auto rep counting** — Apple Watch accelerometer (Motra-style). ~70% accuracy for isolation moves.
-
-## Data & Health
-
-- **Export data** — CSV export for weight, food, workout data.
-- **Epic MyChart lab format** — ~35% of US hospitals. `Component | Value | Flag | Range | Units`.
-- **Cerner/Oracle Health format** — ~25% of hospitals.
-- **Body fat from smart scales** — Apple Health body fat → Katch-McArdle BMR.
-- **VO2 Max** — Fitness level indicator from Apple Watch.
-
-## UI / UX
-
-- **iOS widgets** — Calories remaining, recovery score on home screen.
+## Traditional UI
+- **Saved meals** — One-tap re-log of multi-item meals.
+- **Inline diary editing** — Tap number to edit directly.
+- **Exercise demos** — Static images from free-exercise-db.
+- **Post-workout card** — Shareable summary with PRs.
+- **iOS widgets** — Calories remaining, recovery score.
 - **Haptic feedback** — Subtle haptics on key interactions.
-- **Accessibility** — Zero VoiceOver labels currently. Needs systematic pass.
-- **Macro rings** — Apple Fitness-style concentric rings for P/C/F progress.
-- **Time since last meal** — Dashboard shows "Last logged 4h ago".
-- **Weekday weight pattern** — "You weigh least on Wednesdays".
+- **Accessibility** — VoiceOver labels.
+- **Macro rings** — Apple Fitness-style concentric rings.
 
-## Architecture
-
-- **UserDefaults key centralization** — 30+ hardcoded string keys. Create Constants.swift enum.
-- **Cache recovery baselines** — Dashboard fetches 42 HealthKit queries per load. Cache for 6 hours.
-- **Schofield equation** — Alternative TDEE base when no profile exists.
-
-## Research
-
-- **Apple Health+ monitoring** — If Apple adds native food tracking, Drift's advantage shifts to algorithm/AI.
-- **Passio Nutrition-AI SDK** — On-device Core ML, 2.5M food DB. Token pricing ($2.50/M).
-- **Model distillation** — Fine-tune SmolLM2-360M to match Qwen2.5-1.5B quality for faster inference.
+## Data & Architecture
+- **Export CSV** — Weight, food, workout data.
+- **UserDefaults centralization** — 30+ hardcoded keys → enum.
+- **Cache HealthKit baselines** — 42 queries per dashboard load → cache 6h.
+- **Weekly AI summary notification** — Background task → push.

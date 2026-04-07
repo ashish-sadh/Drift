@@ -1,164 +1,113 @@
-# Tool Registry — SLM Tool-Calling Surface
+# Tool Registry — AI Tool-Calling Surface
 
-Each service in Drift exposes tools the small language model can invoke.
+AI chat is the primary interface. Tools are how chat controls the app.
+Each service exposes tools the model can invoke via JSON. See `Docs/ai-parity.md` for gap tracking.
+
 The model's job: understand intent, pick tool, extract parameters.
 Swift's job: execute tool, compute results, present UI.
 
-## Tool Format
+## Tool Call Format
 
 ```json
-{
-  "name": "tool_name",
-  "description": "What this tool does (shown to model)",
-  "parameters": { "param1": "type", "param2": "type" },
-  "returns": "What the tool returns",
-  "action": "What happens in UI (sheet, navigation, inline response)"
-}
+{"tool": "log_food", "params": {"name": "eggs", "amount": "2"}}
 ```
 
----
+Model outputs JSON. Swift parses via `parseToolCallJSON()`, executes via `ToolRegistry.shared.execute()`.
 
-## Food Tools
+## Dual-Model Tool Filtering
 
-**Source:** `AIActionExecutor.swift`, `AppDatabase.swift`, `FoodLogViewModel.swift`
+**Gemma 4 (large):** Sees ALL 10 tools + `Current screen: X` hint. LLM decides which tool to call.
 
-| Tool | Parameters | Returns | UI Action |
-|------|-----------|---------|-----------|
-| `search_food` | query: String | Food name, calories, macros per serving | Inline response |
-| `log_food` | name: String, amount: Double?, meal: String? | Confirmation | Opens FoodSearchView sheet |
-| `get_nutrition` | name: String | Cal/P/C/F/fiber per serving | Inline response |
-| `get_daily_totals` | date: String? | Calories eaten, remaining, macros | Inline response |
-| `get_calories_left` | — | Remaining cal, protein needed, time context | Inline response |
-
-**Current implementation:** `parseFoodIntent()`, `parseMultiFoodIntent()`, `findFood()` in AIActionExecutor.swift. Action tag: `[LOG_FOOD: name amount]`.
+**SmolLM (small):** Sees 6 tools, screen-relevant first. Screen drives tool selection more heavily.
 
 ---
 
-## Weight Tools
+## Food Tools (3)
 
-**Source:** `AIActionExecutor.swift`, `WeightTrendCalculator.swift`, `AppDatabase.swift`
+**Source:** `ToolRegistration.swift`, `FoodService.swift`, `AIActionExecutor.swift`
 
 | Tool | Parameters | Returns | UI Action |
 |------|-----------|---------|-----------|
-| `log_weight` | value: Double, unit: String | Confirmation | Saves to DB |
-| `get_weight_trend` | — | Current, weekly rate, direction, changes | Inline response |
-| `get_goal_progress` | — | Target, % done, projection date | Inline response |
+| `log_food` | name: String, amount: Number? | — | Opens FoodSearchView sheet |
+| `food_info` | query: String? | Calories left, macros, balance, meal suggestions, top protein | Inline response |
+| `explain_calories` | — | TDEE calculation breakdown | Inline response |
 
-**Current implementation:** `parseWeightIntent()` in AIActionExecutor.swift. Action tag: `[LOG_WEIGHT: value unit]`.
+**`food_info`** is a smart router: tries nutrition lookup first, then falls back to daily totals + macro balance + meal suggestions + high-protein foods.
 
 ---
 
-## Workout Tools
+## Weight Tools (2)
 
-**Source:** `WorkoutService.swift`, `ExerciseDatabase.swift`, `AIActionParser.swift`
+**Source:** `ToolRegistration.swift`, `WeightServiceAPI.swift`
 
 | Tool | Parameters | Returns | UI Action |
 |------|-----------|---------|-----------|
-| `start_workout` | template_name: String | Template exercises | Opens ActiveWorkoutView sheet |
-| `create_workout` | exercises: [{name, sets, reps, weight?}] | Workout summary | Opens ActiveWorkoutView sheet |
-| `suggest_workout` | — | Body parts needing training, template suggestion | Inline response |
-| `get_workout_history` | limit: Int? | Recent workouts with exercises | Inline response |
-| `get_exercise_info` | name: String | Body part, muscles, equipment | Inline response |
+| `log_weight` | value: Number, unit: String? | Confirmation prompt | Inline (asks "Say yes to confirm") |
+| `weight_info` | — | Trend, weekly rate, goal progress, body comp | Inline response |
 
-**Current implementation:** Direct template matching in AIChatView.swift. Action tags: `[START_WORKOUT: name]`, `[CREATE_WORKOUT: Exercise 3x10@135]`.
+**`log_weight`** has a validation hook: rejects values outside 20-500 range.
 
 ---
 
-## Sleep & Recovery Tools
+## Exercise Tools (2)
 
-**Source:** `HealthKitService.swift`, `RecoveryEstimator.swift`, `AIDataCache.swift`
+**Source:** `ToolRegistration.swift`, `ExerciseService.swift`, `WorkoutService.swift`
 
 | Tool | Parameters | Returns | UI Action |
 |------|-----------|---------|-----------|
-| `get_sleep` | — | Hours, stages, quality | Inline response |
-| `get_recovery` | — | Recovery %, HRV, RHR | Inline response |
-| `get_readiness` | — | Training readiness assessment | Inline response |
+| `start_workout` | name: String | Template exercises or smart session | Opens ActiveWorkoutView or inline |
+| `exercise_info` | exercise: String? | Progressive overload, last weight, suggestion, streak | Inline response |
 
-**Current implementation:** `sleepRecoveryContext()` in AIContextBuilder.swift.
+**`start_workout`** tries template match first, then builds smart session via `ExerciseService.buildSmartSession()` (muscle group rotation, user history, last weights).
 
 ---
 
-## Supplement Tools
+## Health Tools (4)
 
-**Source:** `AppDatabase.swift`
-
-| Tool | Parameters | Returns | UI Action |
-|------|-----------|---------|-----------|
-| `get_supplement_status` | — | Taken/total, remaining names | Inline response |
-| `mark_supplement_taken` | name: String | Confirmation | Updates DB |
-
-**Current implementation:** `supplementStatus()` in AIRuleEngine.swift.
-
----
-
-## Glucose Tools
-
-**Source:** `AppDatabase.swift`, `AIContextBuilder.swift`
+**Source:** `ToolRegistration.swift`, `SleepRecoveryService.swift`, `SupplementService.swift`, `GlucoseService.swift`, `BiomarkerService.swift`
 
 | Tool | Parameters | Returns | UI Action |
 |------|-----------|---------|-----------|
-| `get_glucose` | — | Average, range, in-zone %, spikes | Inline response |
-| `get_glucose_after_meal` | meal: String | Pre-meal, peak, rise | Inline response |
-
-**Current implementation:** `glucoseContext()` in AIContextBuilder.swift.
-
----
-
-## Biomarker Tools
-
-**Source:** `AppDatabase.swift`, `BiomarkerKnowledgeBase.swift`
-
-| Tool | Parameters | Returns | UI Action |
-|------|-----------|---------|-----------|
-| `get_biomarkers` | — | Out-of-range markers with values | Inline response |
-| `get_biomarker_detail` | name: String | Value, range, trend, improvement tips | Inline response |
-
-**Current implementation:** `biomarkerContext()` in AIContextBuilder.swift.
-
----
-
-## Navigation Tools
-
-| Tool | Parameters | Returns | UI Action |
-|------|-----------|---------|-----------|
-| `open_food_tab` | — | — | Switches to Food tab |
-| `open_weight_tab` | — | — | Switches to Weight tab |
-| `open_exercise_tab` | — | — | Switches to Exercise tab |
-
-**Current implementation:** `[SHOW_WEIGHT]`, `[SHOW_NUTRITION]` parsed but not yet executed.
+| `sleep_recovery` | — | Sleep hours/quality, HRV, RHR, recovery %, readiness | Inline response |
+| `supplements` | — | Taken/total, remaining names | Inline response |
+| `glucose` | — | Average, range, in-zone %, spikes | Inline response |
+| `biomarkers` | — | Out-of-range markers with values and ranges | Inline response |
 
 ---
 
 ## Rule Engine (Instant — No Model Needed)
 
-These bypass the model entirely for speed:
+These bypass the model entirely. Both SmolLM and Gemma 4 paths check these first.
 
-| Pattern | Handler | Source |
-|---------|---------|--------|
-| "daily summary" / "summary" | `AIRuleEngine.dailySummary()` | AIRuleEngine.swift |
-| "how's my protein" | Computed from daily nutrition | AIChatView.swift |
-| "what did I eat today" | `AIContextBuilder.foodContext()` | AIChatView.swift |
-| "yesterday" | `AIRuleEngine.yesterdaySummary()` | AIRuleEngine.swift |
-| "weekly summary" | `AIRuleEngine.weeklySummary()` | AIRuleEngine.swift |
-| "calories left" | `AIRuleEngine.caloriesLeft()` | AIRuleEngine.swift |
-| "supplements" | `AIRuleEngine.supplementStatus()` | AIRuleEngine.swift |
-| "calories in [food]" | DB lookup → instant nutrition | AIChatView.swift |
+| Pattern | Handler |
+|---------|---------|
+| "daily summary" | `AIRuleEngine.dailySummary()` |
+| "how's my protein" | Computed from daily nutrition + goal targets |
+| "what did I eat today" | `AIContextBuilder.foodContext()` |
+| "yesterday" | `AIRuleEngine.yesterdaySummary()` |
+| "weekly summary" | `AIRuleEngine.weeklySummary()` |
+| "calories left" | `AIRuleEngine.caloriesLeft()` |
+| "supplements" | `AIRuleEngine.supplementStatus()` |
+| "calories in [food]" | DB lookup → instant nutrition |
 
 ---
 
-## Migration Path: Action Tags → Native Tool Calling
+## Hardcoded Intent Parsers (No Model Needed)
 
-**Current (v1):** Model outputs `[LOG_FOOD: eggs 2]` as text, Swift regex-parses it.
+| Intent | Parser | Example |
+|--------|--------|---------|
+| Food logging | `AIActionExecutor.parseFoodIntent()` | "log 2 eggs", "ate chicken" |
+| Multi-food | `AIActionExecutor.parseMultiFoodIntent()` | "log chicken and rice" |
+| Weight logging | `AIActionExecutor.parseWeightIntent()` | "I weigh 165" |
+| Template start | Direct string matching | "start push day" |
+| Smart workout | Direct string matching | "start smart workout" |
 
-**Target (v2):** Model outputs structured JSON:
-```json
-{"tool": "log_food", "params": {"name": "eggs", "amount": 2}}
-```
+---
 
-**How to get there:**
-1. Define tool schemas in JSON format (this file)
-2. Inject schemas into system prompt: "Available tools: [...]"
-3. Find/fine-tune a model that outputs tool calls reliably at 1.5B scale
-4. Candidates: Qwen2.5-1.5B-Instruct (current), Hermes-3-Llama-3.2-1B (tool-tuned), custom fine-tune
-5. Add grammar-constrained sampling in llama.cpp to force valid JSON output
-6. Swift parses JSON instead of regex — cleaner, more reliable
+## System Prompt (Model-Aware)
+
+**Gemma 4:** Richer prompt with cross-domain awareness, all tools, examples for each tool, "Current screen: X" hint.
+
+**SmolLM:** Concise prompt — LOGGING/QUESTION/CHAT framework, 6 examples, 6 tools max.
+
+Both enforce: "Never give health advice. Never invent numbers."

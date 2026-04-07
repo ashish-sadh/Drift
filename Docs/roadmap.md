@@ -1,67 +1,52 @@
 # Product Roadmap
 
+## Vision
+AI-first health tracker. AI chat is the primary interface — every data entry doable through conversation. Traditional UI for visual analytics and fallback.
+
 ## Phase 1: Core Health Tracking (DONE)
+Built the foundation: weight, food, exercise, sleep, supplements, body comp, glucose, biomarkers, cycle tracking. All local, no cloud.
 
-Local-first health tracking with no cloud dependency.
+## Phase 2: AI Chat Foundation (DONE)
+- On-device inference: llama.cpp, Metal GPU
+- Dual-model: SmolLM (reliable harness) + Gemma 4 (intelligence)
+- 10 JSON tools, screen bias removed, chain-of-thought
+- Food/weight/exercise/health logging and queries from chat
+- Eval harness: 212+ tests + 100-query LLM eval
 
-- Dashboard with deficit/surplus, weight trend, energy balance, sleep, recovery
-- Weight tracking: manual + HealthKit sync, EMA trend, goal projection
-- Food logging: 1004+ food DB, barcode scanner, OCR, recipes, smart search, Indian foods
-- Exercise: 873 exercises, templates, Strong/Hevy import, live workout timer, recovery map
-- Sleep & Recovery: Apple Health integration, WHOOP-style scores
-- Supplements: daily checklist, consistency tracking
-- Body Composition: BodySpec DEXA PDF import, scan comparison
-- Glucose: Apple Health + Lingo CSV import, spike detection
-- Biomarkers: 65 blood markers, lab report OCR (Quest/Labcorp/WHOOP), encrypted storage
-- Cycle Tracking: Apple Health period data, phase timeline, biometric correlation
+## Phase 3: AI Chat Parity (CURRENT)
+Close the gap between AI chat and UI. See `Docs/ai-parity.md`.
 
-## Phase 2: AI Assistant — On-Device SLM (CURRENT)
+### 3a: Friction Reducers (IN PROGRESS)
+- Mark supplement taken via chat
+- Edit/delete food entries via chat
+- Copy yesterday's food
+- Quick-add raw calories
+- Set/update weight goal
+- Trigger barcode scan from chat
 
-Remove form-filling friction. Every data entry should be doable through natural conversation.
+### 3b: Multi-Turn Intelligence — Gemma 4 (IN PROGRESS)
+- Meal planning dialogue ("plan my meals for today")
+- Workout split builder ("build me a PPL")
+- Cross-domain analysis ("why am I not losing weight?")
+- Weekly comparison with trend data
+- Coaching conversations using real user data
 
-### 2a: Foundation (DONE)
-- On-device inference: raw llama.cpp C API, Qwen2.5-1.5B Q4_K_M
-- Chat UI with streaming, thinking indicators, suggestion pills
-- Chain-of-thought: classify query → fetch relevant data → call LLM
-- Action tags: [LOG_FOOD:], [LOG_WEIGHT:], [START_WORKOUT:], [CREATE_WORKOUT:]
-- Response cleaner: strips artifacts, preambles, disclaimers, deduplicates
-- Quality gate: catches garbage, generic fillers, context regurgitation
-- Eval harness: 63 test methods, ~400 individual test cases
-- Screen awareness: 11 screens tracked, context adapted per screen
-- Conversation history: last 2 exchanges, compact Q/A format
+### 3c: Chat Quality (CONTINUOUS)
+- Prompt optimization per tool
+- Eval expansion (300+ tests)
+- Response quality scoring
+- Multi-turn context management
+- Conversation memory (tool results in history)
 
-### 2b: Tool-Calling Architecture (IN PROGRESS)
-- Each service = a tool with defined schema (name, params, returns)
-- Model decides which tool to call (not hardcoded keyword matching)
-- Pre-tool hooks: validate inputs, check permissions
-- Post-tool hooks: format output, suggest follow-ups
-- Structured output: model produces JSON tool calls, Swift executes
-- Fine-tune or find pre-tuned tool-calling model for on-device
-
-### 2c: Conversational Flows (IN PROGRESS)
-- Food logging via chat: "I had 2 eggs and toast" → opens confirmation
-- Weight logging: "I weigh 165" → saves instantly
-- Workout builder: "start push day", "I did bench 3x10@135"
-- Nutrition lookup: "calories in banana" → instant DB answer
-- Multi-turn: "also did OHP" after bench press
-- Calorie estimation for unknown foods via LLM
-
-## Phase 3: Input Expansion (NEXT)
-
-- Voice input: iOS SpeechAnalyzer (on-device, iOS 26+)
-- Photo food logging: Core ML food classifier → local DB match → confirm
-- Exercise demonstrations: Lottie animations or static images from free-exercise-db
+## Phase 4: Input Expansion (NEXT)
+- Voice input: iOS 26 SpeechAnalyzer (on-device) → AI chat
+- Photo food logging: Core ML classifier → chat confirmation
 - iOS widgets: calories remaining, recovery score
 - Apple Watch: workout detection hints
-- Smart suggestions from eating patterns ("You usually eat eggs at 8am on weekdays")
 
-## Phase 4: Intelligence (FUTURE)
-
-- Fine-tuned model: health Q&A dataset trained on Qwen2.5-1.5B
-- Metal GPU acceleration: b7400 xcframework has the fix, needs device testing
+## Phase 5: Deep Intelligence (FUTURE)
+- Fine-tuned SmolLM on Drift tool-calling dataset
+- Grammar-constrained sampling for reliable JSON
 - On-device embeddings: semantic food/exercise search
-- Meal planning: "plan my meals for today" based on remaining macros + history
-- Training programming: build workout splits from goals + history
+- Training programming across weeks
 - Weekly AI summary push notification
-- Export data as CSV
-- Apple Health+ integration (if launched)

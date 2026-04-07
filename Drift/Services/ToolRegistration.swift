@@ -116,10 +116,9 @@ enum ToolRegistration {
                 if let _ = ExerciseService.startTemplate(name: name) {
                     return .action(.openWorkout(templateName: name))
                 }
-                // Build smart session for muscle group
-                if let template = ExerciseService.buildSmartSession(muscleGroup: name) {
-                    let exercises = template.exercises.prefix(5).map { "\($0.name) — \($0.notes ?? "3x10")" }
-                    return .text("Workout: \(template.name)\n" + exercises.joined(separator: "\n") + "\nSay 'start' to begin.")
+                // Build smart session for muscle group — open directly
+                if let _ = ExerciseService.buildSmartSession(muscleGroup: name) {
+                    return .action(.openWorkout(templateName: name))
                 }
                 return .text("No template for '\(name)'. Try 'chest', 'legs', 'back', or 'push day'.")
             }
@@ -177,6 +176,16 @@ enum ToolRegistration {
             handler: { _ in .text(SupplementService.getStatus()) }
         ))
 
+        r.register(ToolSchema(
+            id: "health.mark_supplement", name: "mark_supplement", service: "supplement",
+            description: "User TOOK a supplement. Use when they say 'took my creatine', 'had vitamin D', 'took fish oil'.",
+            parameters: [ToolParam("name", "string", "Supplement name")],
+            handler: { params in
+                guard let name = params.string("name") else { return .error("Which supplement?") }
+                return .text(SupplementService.markTaken(name: name))
+            }
+        ))
+
         // NOTE: Glucose, biomarker, and body composition tools are registered but NOT shown
         // in the default 6-tool prompt. They appear when user is on those specific screens.
         // This keeps the main prompt focused for the 1.5B model.
@@ -193,6 +202,13 @@ enum ToolRegistration {
             description: "User asks about lab results, blood tests, or biomarkers.",
             parameters: [],
             handler: { _ in .text(BiomarkerService.getResults()) }
+        ))
+
+        r.register(ToolSchema(
+            id: "health.body_comp", name: "body_comp", service: "bodycomp",
+            description: "User asks about body composition, body fat %, BMI, lean mass, DEXA scans, or muscle mass.",
+            parameters: [],
+            handler: { _ in .text(AIContextBuilder.dexaContext()) }
         ))
     }
 }
