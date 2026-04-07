@@ -19,7 +19,7 @@ Real queries that don't work well. The self-improvement loop picks from here, fi
 ### Food
 - [x] **"what's healthy for dinner"** — Fixed: handler with suggestMeal + macro awareness + protein deficit.
 - [x] **"I had a cheat meal"** — Fixed: asks what they ate, logs via pendingMealName flow. No judgment.
-- [ ] **"how much sugar today"** — No sugar tracking in daily totals display. Similar: "sugar intake", "how much sugar did I eat"
+- [x] **"how much sugar today"** — Fixed: shows carbs + note that sugar isn't tracked separately.
 
 ### Weight
 - [x] **"am I making progress"** — Fixed: added to needsOverview keywords, gets fullDayContext + weight.

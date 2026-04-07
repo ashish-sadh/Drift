@@ -851,6 +851,18 @@ struct AIChatView: View {
             return
         }
 
+        // Sugar query: "how much sugar today" — we track carbs not sugar specifically
+        if lower.contains("sugar") && (lower.contains("how much") || lower.contains("today") || lower.contains("intake")) {
+            let n = (try? AppDatabase.shared.fetchDailyNutrition(for: DateFormatters.todayString)) ?? .zero
+            var response = "\(Int(n.carbsG))g carbs today."
+            if let goal = WeightGoal.load(), let targets = goal.macroTargets() {
+                response += " Target: \(Int(targets.carbsG))g."
+            }
+            response += " (Drift tracks total carbs — sugar isn't broken out separately.)"
+            messages.append(ChatMessage(role: .assistant, text: response))
+            return
+        }
+
         // Healthy meal suggestions — both models use Swift
         let healthyFoodQuestions = ["what's healthy", "healthy meal", "healthy food", "healthy dinner",
                                      "healthy lunch", "healthy breakfast", "good dinner", "good lunch",
