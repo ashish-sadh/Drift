@@ -202,10 +202,12 @@ struct FloatingAIAssistant: View {
 
                 VStack(spacing: 2) {
                     let freeGB = String(format: "%.1f", DeviceCapability.freeDiskGB)
-                    Text("\(aiService.downloadSizeText) download · \(freeGB) GB available")
+                    Text("Storage: \(aiService.downloadSizeText) needed · \(freeGB) GB available")
                         .font(.caption2).foregroundStyle(.tertiary)
-                    Text("Only uses memory while chatting · Remove in Settings")
+                    Text("Memory: only used while chatting, freed automatically")
                         .font(.caption2).foregroundStyle(.tertiary)
+                    Text("You can always clean up from Settings")
+                        .font(.caption2).foregroundStyle(.quaternary)
                 }
 
                 Button { Task { await aiService.downloadModel() } } label: {
