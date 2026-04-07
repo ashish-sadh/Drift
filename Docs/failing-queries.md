@@ -13,7 +13,7 @@ Real queries that don't work well. The self-improvement loop picks from here, fi
 
 ### Exercise
 - [x] **"suggest me workout"** — Fixed: hardcoded handler catches 12 phrasings. Both models use Swift path.
-- [ ] **"I did yoga today"** — No handler for logging a completed workout by name. Should create a workout entry. Similar: "I went running", "did 30 min cardio", "just finished pilates"
+- [x] **"I did yoga today"** — Fixed: parses activity name + optional duration, creates Workout entry. Handles "went running", "did 30 min cardio", "just finished pilates".
 - [x] **"how many workouts this week"** — Fixed: instant rule engine handler with streak info.
 
 ### Food

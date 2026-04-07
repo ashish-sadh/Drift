@@ -17,7 +17,7 @@ _(pick from Ready)_
 
 ### P0.5: Fix Failing Queries (from failing-queries.md)
 - [x] **"suggest me workout"** — Handle workout suggestion variants. Small model: keyword handler. Large model: ensure exercise_info tool called. Add eval tests for 5+ phrasings.
-- [ ] **"I did yoga today"** — Log completed workout by name. Small: parse "I did [activity]". Large: LLM calls tool. Eval tests.
+- [x] **"I did yoga today"** — Log completed workout by name. Small: parse "I did [activity]". Large: LLM calls tool. Eval tests.
 - [x] **"how many workouts this week"** — Instant answer from WorkoutService. Add to rule engine. Eval tests.
 
 ### P1: AI Chat Quality + Multi-Turn (Gemma 4)

@@ -691,6 +691,35 @@ struct AIChatView: View {
             }
         }
 
+        // Completed activity: "I did yoga today", "went running", "did 30 min cardio"
+        let activityPrefixes = ["i did ", "i went ", "just did ", "just finished ", "did "]
+        if let prefix = activityPrefixes.first(where: { lower.hasPrefix($0) }) {
+            var activity = String(lower.dropFirst(prefix.count)).trimmingCharacters(in: .whitespaces)
+            // Strip trailing "today", "this morning", etc.
+            for suffix in [" today", " this morning", " this evening", " just now"] {
+                if activity.hasSuffix(suffix) { activity = String(activity.dropLast(suffix.count)) }
+            }
+            // Parse optional duration: "30 min yoga" → 30 min, "yoga"
+            var durationMin: Int? = nil
+            let durPattern = #"^(\d+)\s*(?:min(?:ute)?s?)\s+"#
+            if let durRegex = try? NSRegularExpression(pattern: durPattern),
+               let durMatch = durRegex.firstMatch(in: activity, range: NSRange(activity.startIndex..., in: activity)),
+               let numRange = Range(durMatch.range(at: 1), in: activity) {
+                durationMin = Int(String(activity[numRange]))
+                activity = String(activity[activity.index(activity.startIndex, offsetBy: durMatch.range.length)...]).trimmingCharacters(in: .whitespaces)
+            }
+            if !activity.isEmpty && activity.count > 2 {
+                let name = activity.capitalized
+                var workout = Workout(name: name, date: DateFormatters.todayString,
+                                       durationSeconds: durationMin.map { $0 * 60 },
+                                       notes: nil, createdAt: DateFormatters.iso8601.string(from: Date()))
+                try? WorkoutService.saveWorkout(&workout)
+                let durText = durationMin.map { " (\($0) min)" } ?? ""
+                messages.append(ChatMessage(role: .assistant, text: "Logged \(name)\(durText) for today."))
+                return
+            }
+        }
+
         // "Start smart workout" / "surprise me" — build AI session from history
         if lower == "start smart workout" || lower == "smart workout" || lower == "surprise me"
             || lower == "surprise me with a workout" || lower == "build me a workout" {
