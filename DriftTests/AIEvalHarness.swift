@@ -1920,7 +1920,158 @@ final class AIEvalHarness: XCTestCase {
         }
     }
 
+    // MARK: - System Prompt Quality (via ToolRegistry)
+
+    @MainActor
+    func testToolSchemaPromptHasContent() {
+        ToolRegistration.registerAll()
+        let prompt = ToolRegistry.shared.schemaPrompt()
+        XCTAssertTrue(prompt.contains("Tools:"))
+        XCTAssertTrue(prompt.count > 100, "Schema prompt should have substantial content")
+    }
+
+    // MARK: - Realistic Conversation Tests
+
+    func testRealisticFoodLogging() {
+        let conversations = [
+            "had 2 eggs and toast for breakfast",
+            "just ate a bowl of dal with rice",
+            "log a protein shake",
+            "I made pasta for dinner",
+            "drank a coffee",
+        ]
+        var parsed = 0
+        for msg in conversations {
+            let lower = msg.lowercased()
+            if AIActionExecutor.parseFoodIntent(lower) != nil || AIActionExecutor.parseMultiFoodIntent(lower) != nil {
+                parsed += 1
+            }
+        }
+        XCTAssertGreaterThanOrEqual(parsed, 4, "Realistic food: \(parsed)/\(conversations.count)")
+    }
+
+    func testRealisticWeightLogging() {
+        let conversations = [
+            "i weigh 165 today",
+            "my weight is 75 kg",
+            "scale says 170",
+        ]
+        var parsed = 0
+        for msg in conversations {
+            if AIActionExecutor.parseWeightIntent(msg.lowercased()) != nil { parsed += 1 }
+        }
+        XCTAssertGreaterThanOrEqual(parsed, 2, "Realistic weight: \(parsed)/\(conversations.count)")
+    }
+
+    @MainActor
+    func testRealisticQuestions() {
+        let questions: [(String, AIScreen, Bool)] = [
+            ("am I eating enough protein", .food, true),
+            ("show me my weight trend", .weight, true),
+            ("what muscle groups haven't I trained", .exercise, true),
+            ("how'd I sleep last night", .bodyRhythm, true),
+            ("are my labs okay", .biomarkers, true),
+            ("any glucose spikes after lunch", .glucose, true),
+        ]
+        var routed = 0
+        for (q, screen, _) in questions {
+            if AIChainOfThought.plan(query: q, screen: screen) != nil { routed += 1 }
+        }
+        XCTAssertGreaterThanOrEqual(routed, 5, "Realistic questions: \(routed)/\(questions.count)")
+    }
+
+    // MARK: - Response Cleaner Comprehensive
+
+    func testCleanerHandlesVariousGarbage() {
+        let garbage = [
+            "<|im_start|>assistant\nSure!<|im_end|>",
+            "A: Based on your data, you've eaten 1500 cal.",
+            "**Summary**\n## Nutrition\n* Protein: 80g",
+            "I'm here to help! What would you like to know?",
+            String(repeating: "protein ", count: 30),
+        ]
+        for input in garbage {
+            let cleaned = AIResponseCleaner.clean(input)
+            XCTAssertFalse(cleaned.contains("<|"), "ChatML not stripped")
+            XCTAssertFalse(cleaned.hasPrefix("A: "), "Format echo not stripped")
+            XCTAssertFalse(cleaned.contains("**"), "Markdown not stripped")
+        }
+    }
+
+    // MARK: - Action Tag + JSON Coexistence
+
+    func testBothFormatsDetected() {
+        // Action tag format
+        let (action1, _) = AIActionParser.parse("Logged! [LOG_FOOD: banana]")
+        if case .logFood = action1 { } else { XCTFail("Action tag not parsed") }
+
+        // JSON format
+        let (action2, _) = AIActionParser.parse(#"{"tool":"log_food","params":{"name":"banana"}}"#)
+        if case .logFood = action2 { } else { XCTFail("JSON tool call not parsed") }
+    }
+
+    // MARK: - FoodService Integration
+
+    @MainActor
+    func testFoodServiceExplainCaloriesStructure() {
+        let explanation = FoodService.explainCalories()
+        XCTAssertTrue(explanation.contains("TDEE"))
+        XCTAssertTrue(explanation.contains("target") || explanation.contains("Target"))
+        XCTAssertTrue(explanation.contains("Eaten") || explanation.contains("eaten"))
+    }
+
+    @MainActor
+    func testFoodServiceSuggestMealDoesntCrash() {
+        let _ = FoodService.suggestMeal()
+        let _ = FoodService.suggestMeal(caloriesLeft: 500, proteinNeeded: 30)
+    }
+
+    @MainActor
+    func testFoodServiceTopProtein() {
+        let foods = FoodService.topProteinFoods(limit: 3)
+        // May be empty on test DB
+        XCTAssertTrue(foods.count <= 3)
+    }
+
+    // MARK: - ExerciseService Integration
+
+    @MainActor
+    func testExerciseServicePopularExercises() {
+        let popular = ExerciseService.popularExercises(limit: 5)
+        XCTAssertTrue(popular.count <= 5)
+    }
+
+    @MainActor
+    func testExerciseServiceExercisesByMuscle() {
+        let chest = ExerciseService.exercisesByMuscle(group: "chest")
+        // Should find exercises (from bundled DB)
+        XCTAssertFalse(chest.isEmpty, "Should find chest exercises in DB")
+    }
+
+    @MainActor
+    func testExerciseServiceProgressiveOverloadNoData() {
+        let info = ExerciseService.getProgressiveOverload(exercise: "CompletelyFakeExercise99")
+        if let info {
+            XCTAssertEqual(info.status, .insufficientData)
+        }
+    }
+
+    // MARK: - WeightService Integration
+
+    @MainActor
+    func testWeightServiceLogRejectsInvalid() {
+        let tooLight = WeightServiceAPI.logWeight(value: 5, unit: "kg")
+        XCTAssertNil(tooLight, "Should reject 5 kg")
+        let tooHeavy = WeightServiceAPI.logWeight(value: 500, unit: "kg")
+        XCTAssertNil(tooHeavy, "Should reject 500 kg")
+    }
+
+    @MainActor
+    func testWeightServiceGoalProgressNoCrash() {
+        let _ = WeightServiceAPI.getGoalProgress()
+    }
+
     func testPrintSummary() {
-        print("=== AI EVAL HARNESS: 110+ test methods ===")
+        print("=== AI EVAL HARNESS: 125+ test methods ===")
     }
 }
