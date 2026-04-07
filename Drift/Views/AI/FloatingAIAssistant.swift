@@ -203,7 +203,7 @@ struct FloatingAIAssistant: View {
                 VStack(spacing: 2) {
                     let freeGB = String(format: "%.1f", DeviceCapability.freeDiskGB)
                     let freeRAM = String(format: "%.0f", DeviceCapability.ramGB)
-                    let ramNeeded = modelManager.currentTier == .large ? "~3 GB" : "~0.5 GB"
+                    let ramNeeded = modelManager.currentTier == .large ? "~2.9 GB" : "~0.4 GB"
                     Text("Storage: \(aiService.downloadSizeText) needed · \(freeGB) GB available")
                         .font(.caption2).foregroundStyle(.tertiary)
                     Text("Memory: \(ramNeeded) while chatting (\(freeRAM) GB on device) · won't slow your phone")
