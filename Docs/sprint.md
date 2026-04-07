@@ -21,7 +21,7 @@ _(pick from Ready)_
 - [x] **"how many workouts this week"** — Instant answer from WorkoutService. Add to rule engine. Eval tests.
 
 ### P1: AI Chat Quality + Multi-Turn (Gemma 4)
-- [ ] **Gemma 4 prompt tuning** — More per-tool examples, better tool selection accuracy. Test with 100-query eval.
+- [x] **Gemma 4 prompt tuning** — Added 5 new tool examples (mark_supplement, delete_food, set_goal, body_comp, copy_yesterday).
 - [ ] **Multi-turn meal planning** — "plan my meals for today" → iterative macro-aware suggestions. Gemma 4 only.
 - [ ] **Cross-domain analysis** — "why am I not losing weight?" → combine food + weight + exercise context in one answer.
 - [ ] **Eval harness 212→300+** — Cross-domain queries, screen-bias regression, multi-turn scenarios, supplement/goal commands.

@@ -47,6 +47,11 @@ final class LocalAIService {
             "start chest workout" → {"tool":"start_workout","params":{"name":"chest"}} \
             "what should I train" → {"tool":"exercise_info","params":{}} \
             "how'd I sleep" → {"tool":"sleep_recovery","params":{}} \
+            "took my creatine" → {"tool":"mark_supplement","params":{"name":"creatine"}} \
+            "remove the rice" → {"tool":"delete_food","params":{"name":"rice"}} \
+            "set goal to 160" → {"tool":"set_goal","params":{"target":"160","unit":"lbs"}} \
+            "how's my body fat" → {"tool":"body_comp","params":{}} \
+            "same as yesterday" → {"tool":"copy_yesterday","params":{}} \
             "how am I doing" → {"tool":"food_info","params":{}} \
             "thanks" → You're welcome! \
             \(tools)
