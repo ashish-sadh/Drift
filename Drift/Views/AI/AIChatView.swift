@@ -458,6 +458,14 @@ struct AIChatView: View {
             }
         }
 
+        // Cheat meal / ate out: "I had a cheat meal", "I ate out", "I went off plan"
+        let cheatPhrases = ["cheat meal", "cheat day", "ate out", "went off plan", "off track", "binge"]
+        if cheatPhrases.contains(where: { lower.contains($0) }) {
+            pendingMealName = "cheat meal"
+            messages.append(ChatMessage(role: .assistant, text: "No judgment! What did you have? I'll log it for you."))
+            return
+        }
+
         // Barcode scan: "scan barcode", "scan food", "scan a product"
         if lower == "scan barcode" || lower == "scan food" || lower == "scan" || lower == "scan a product"
             || lower == "barcode" || lower.contains("scan barcode") {
@@ -840,6 +848,25 @@ struct AIChatView: View {
             } else {
                 messages.append(ChatMessage(role: .assistant, text: ExerciseService.suggestWorkout()))
             }
+            return
+        }
+
+        // Healthy meal suggestions — both models use Swift
+        let healthyFoodQuestions = ["what's healthy", "healthy meal", "healthy food", "healthy dinner",
+                                     "healthy lunch", "healthy breakfast", "good dinner", "good lunch",
+                                     "what's a good meal", "healthy snack", "clean eating"]
+        if healthyFoodQuestions.contains(where: { lower.contains($0) }) {
+            let totals = FoodService.getDailyTotals()
+            var response = "\(totals.remaining > 0 ? "\(totals.remaining)" : "0") cal remaining."
+            let suggestions = FoodService.suggestMeal()
+            if !suggestions.isEmpty {
+                response += " Try: " + suggestions.prefix(3).map { "\($0.name) (\(Int($0.calories)) cal, \(Int($0.proteinG))P)" }.joined(separator: ", ")
+            }
+            if let goal = WeightGoal.load(), let targets = goal.macroTargets() {
+                let pLeft = max(0, Int(targets.proteinG) - totals.proteinG)
+                if pLeft > 20 { response += ". Still need \(pLeft)g protein." }
+            }
+            messages.append(ChatMessage(role: .assistant, text: response))
             return
         }
 

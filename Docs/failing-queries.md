@@ -17,8 +17,8 @@ Real queries that don't work well. The self-improvement loop picks from here, fi
 - [x] **"how many workouts this week"** — Fixed: instant rule engine handler with streak info.
 
 ### Food
-- [ ] **"what's healthy for dinner"** — LLM gets this but response quality is poor. Should use suggestMeal with macro awareness. Similar: "healthy meal ideas", "what's a good dinner"
-- [ ] **"I had a cheat meal"** — No handler. Should ask what they ate. Similar: "I went off plan", "I ate out"
+- [x] **"what's healthy for dinner"** — Fixed: handler with suggestMeal + macro awareness + protein deficit.
+- [x] **"I had a cheat meal"** — Fixed: asks what they ate, logs via pendingMealName flow. No judgment.
 - [ ] **"how much sugar today"** — No sugar tracking in daily totals display. Similar: "sugar intake", "how much sugar did I eat"
 
 ### Weight
