@@ -30,7 +30,7 @@ _(pick from Ready)_
 - [x] **Body comp entry via chat** — "my body fat is 18%", "log body fat", "bmi 22.5". Hardcoded + log_body_comp tool.
 - [ ] **Trigger barcode scan from chat** — "scan barcode", "scan food". Open camera sheet.
 - [x] **Manual food with inline macros** — "log 400 cal 30g protein lunch", "500cal 25p 60c 20f". Parse calorie+macro intent.
-- [ ] **Add supplement to stack** — "add vitamin D 2000 IU". Supplement management tool.
+- [x] **Add supplement to stack** — "add vitamin D 2000 IU", "add creatine 5g". Hardcoded + add_supplement tool.
 - [x] **Weekly comparison** — "compare this week to last". Instant rule engine answer from comparisonContext().
 
 ### P3: UI Polish

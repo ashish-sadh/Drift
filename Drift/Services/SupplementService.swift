@@ -33,4 +33,19 @@ enum SupplementService {
         try? AppDatabase.shared.toggleSupplementTaken(supplementId: id, date: today)
         return "Marked \(match.name) as taken."
     }
+
+    /// Add a new supplement to the stack.
+    static func addSupplement(name: String, dosage: String? = nil) -> String {
+        guard let supplements = try? AppDatabase.shared.fetchActiveSupplements() else {
+            return "Couldn't access supplements."
+        }
+        // Check if already exists
+        if supplements.contains(where: { $0.name.lowercased() == name.lowercased() }) {
+            return "\(name) is already in your stack."
+        }
+        var supp = Supplement(name: name.capitalized, dosage: dosage, unit: nil,
+                               isActive: true, sortOrder: supplements.count, dailyDoses: 1)
+        try? AppDatabase.shared.saveSupplement(&supp)
+        return "Added \(name.capitalized)\(dosage.map { " (\($0))" } ?? "") to your supplement stack."
+    }
 }

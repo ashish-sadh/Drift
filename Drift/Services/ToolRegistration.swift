@@ -214,6 +214,17 @@ enum ToolRegistration {
         ))
 
         r.register(ToolSchema(
+            id: "health.add_supplement", name: "add_supplement", service: "supplement",
+            description: "User wants to ADD a new supplement to their daily stack. NOT for marking taken.",
+            parameters: [ToolParam("name", "string", "Supplement name"),
+                         ToolParam("dosage", "string", "Dosage like '5g' or '2000 IU'", required: false)],
+            handler: { params in
+                guard let name = params.string("name") else { return .error("Which supplement?") }
+                return .text(SupplementService.addSupplement(name: name, dosage: params.string("dosage")))
+            }
+        ))
+
+        r.register(ToolSchema(
             id: "health.mark_supplement", name: "mark_supplement", service: "supplement",
             description: "User TOOK a supplement. Use when they say 'took my creatine', 'had vitamin D', 'took fish oil'.",
             parameters: [ToolParam("name", "string", "Supplement name")],

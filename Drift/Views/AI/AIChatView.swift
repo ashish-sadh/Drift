@@ -454,6 +454,28 @@ struct AIChatView: View {
             }
         }
 
+        // Add supplement: "add vitamin D", "add creatine 5g to my stack"
+        if (lower.hasPrefix("add ") && (lower.contains("supplement") || lower.contains("vitamin") || lower.contains("to my stack")))
+            || lower.hasPrefix("add creatine") || lower.hasPrefix("add fish oil") || lower.hasPrefix("add magnesium") {
+            var name = lower.replacingOccurrences(of: "add ", with: "")
+                .replacingOccurrences(of: " to my stack", with: "")
+                .replacingOccurrences(of: " supplement", with: "")
+                .trimmingCharacters(in: .whitespaces)
+            // Extract dosage if present: "creatine 5g" → name="creatine", dosage="5g"
+            var dosage: String? = nil
+            let dosagePattern = #"\s+(\d+\s*(?:g|mg|iu|mcg|ml))\s*$"#
+            if let dRegex = try? NSRegularExpression(pattern: dosagePattern, options: .caseInsensitive),
+               let dMatch = dRegex.firstMatch(in: name, range: NSRange(name.startIndex..., in: name)),
+               let dRange = Range(dMatch.range(at: 1), in: name) {
+                dosage = String(name[dRange])
+                name = String(name[..<dRange.lowerBound]).trimmingCharacters(in: .whitespaces)
+            }
+            if !name.isEmpty {
+                messages.append(ChatMessage(role: .assistant, text: SupplementService.addSupplement(name: name, dosage: dosage)))
+                return
+            }
+        }
+
         // Weekly comparison: "compare this week to last", "this week vs last"
         if lower.contains("this week") && (lower.contains("last") || lower.contains("compare") || lower.contains("vs")) {
             let comparison = AIContextBuilder.comparisonContext()
