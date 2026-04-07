@@ -45,7 +45,7 @@ _(pick from Ready)_
 - [x] **Reduce hallucination** — hasHallucinatedNumbers() checks response numbers vs context; replaces with fallback if >2 unknown numbers
 - [x] **Eval harness → 200** — Done: beverages, snacks, amounts, keyword precision, body comp, services, JSON, token budget
 - [ ] **Saved meals (one-tap re-log)** — Save multi-item meals as a group
-- [ ] **Publish build 85** — TestFlight update with all improvements
+- [x] **Publish build 85** — Uploaded to TestFlight
 
 ### Blocked (needs device)
 - [ ] **MQ-1: Test tool-calling models** — Hermes-3-Llama-3.2-1B for structured JSON.
