@@ -55,6 +55,7 @@
 		6A5E607A5053083EB25372F7 /* AIActionExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8C1323C593FD4D57F250E362 /* AIActionExecutor.swift */; };
 		6B0CE72048898157F8BA881F /* BarcodeCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = F4EFC6AC02BBE73CDE74B5E2 /* BarcodeCache.swift */; };
 		70F621B0C5089E738C2DEA5E /* FoodTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A981E37D718D28A6679F9C8 /* FoodTabView.swift */; };
+		7430C66B3A1C306F1199C3FA /* ToolSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = C170D4FEDFB68CA8A61E1D03 /* ToolSchema.swift */; };
 		7BDC02B8C99F8B719546A8A1 /* WeightEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = F237A2E1C7747DBE102B665C /* WeightEntry.swift */; };
 		8224D8220B6D9328EDDDB648 /* DEXAOverviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5893DE4C163CA3CF50E74C1A /* DEXAOverviewView.swift */; };
 		86211210D2E5528F57C90AEF /* WorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2998A31AEC29094C6F4062 /* WorkoutView.swift */; };
@@ -233,6 +234,7 @@
 		BC5309A92CB03534993AE5E9 /* TDEEEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TDEEEstimator.swift; sourceTree = "<group>"; };
 		BE56F885D3FD4E44B8999557 /* Workout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Workout.swift; sourceTree = "<group>"; };
 		C10970FB3ED143760EC6C8C5 /* exercises.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = exercises.json; sourceTree = "<group>"; };
+		C170D4FEDFB68CA8A61E1D03 /* ToolSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolSchema.swift; sourceTree = "<group>"; };
 		C182889F4730B18DE0244F02 /* MealLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealLog.swift; sourceTree = "<group>"; };
 		C2C63097444CD8E010008D65 /* FavoriteFood.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFood.swift; sourceTree = "<group>"; };
 		CB475E92982AD4F8897D5D8E /* RecoveryEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryEstimator.swift; sourceTree = "<group>"; };
@@ -543,6 +545,7 @@
 				9887274AA907DE6C5349B2D1 /* OpenFoodFactsService.swift */,
 				CB475E92982AD4F8897D5D8E /* RecoveryEstimator.swift */,
 				BC5309A92CB03534993AE5E9 /* TDEEEstimator.swift */,
+				C170D4FEDFB68CA8A61E1D03 /* ToolSchema.swift */,
 				FD5DFCD5C5ED2C0D7E5CD8EF /* WeightTrendCalculator.swift */,
 				6F84469D20EBBA0BD037FBCA /* WorkoutService.swift */,
 			);
@@ -761,6 +764,7 @@
 				2159F8ABA37706FCF57C3A63 /* SupplementsTabView.swift in Sources */,
 				F1E4DA4DB8A18FEE2C6A4413 /* TDEEEstimator.swift in Sources */,
 				5F4476C2F1B7DC3E662A1DBC /* Theme.swift in Sources */,
+				7430C66B3A1C306F1199C3FA /* ToolSchema.swift in Sources */,
 				9CBCD31AD1998B4E5237C1A6 /* Units.swift in Sources */,
 				DFFA7CC42D60E67CB40222E8 /* WeightChartView.swift in Sources */,
 				7BDC02B8C99F8B719546A8A1 /* WeightEntry.swift in Sources */,
