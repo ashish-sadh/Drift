@@ -26,16 +26,19 @@ _(pick from Ready)_
 - [ ] **Eval: tool-call accuracy** — Add 20+ eval tests: given user message, does the right tool get called with right params? Test ambiguous cases.
 
 ### P2: AI Chat Quality
-- [ ] **Better system prompt for tool selection** — The model needs clearer instructions on WHEN to call a tool vs respond naturally. Add examples of both.
-- [ ] **Conversation context in tool calls** — Pass recent conversation to tool handlers so they can give contextual responses (e.g., "you asked about protein earlier, here are high-protein options").
-- [ ] **Handle tool failures gracefully** — When a tool returns .error, the AI should explain and suggest alternatives, not just show the error.
-- [ ] **Reduce hallucination** — Add post-response check: if LLM mentions specific numbers, verify they match tool output. Flag mismatches.
+- [x] **Better system prompt** — Done: LOGGING/QUESTION/CHAT framework, 7 examples, 6-tool limit
+- [ ] **Conversation context in tool calls** — Pass recent conversation to tool handlers
+- [x] **Handle tool failures** — Done: data-aware fallbacks using actual services
+- [ ] **Reduce hallucination** — Post-response check: verify numbers match tool output
 
 ### P3: Traditional UI Improvements
 - [ ] **Saved meals (one-tap re-log)** — Save multi-item meals as a group for quick re-logging.
+- [ ] **Workout streak display** — Show current + longest streak on Exercise tab (logic already in WorkoutService.workoutStreak()).
 - [ ] **Time-of-day food search boost** — Morning: coffee/oats, evening: protein/dinner items.
 - [ ] **Quick-add raw calories** — "Just enter 500 cal" button for eating out.
-- [ ] **Workout streak display** — Show current + longest streak on Exercise tab (logic already in WorkoutService.workoutStreak()).
+
+### Next: Run Qwen3 eval and compare
+- [ ] **Qwen3-1.7B eval** — Run testQwen3FoodLogging, testQwen3FoodQuestions, testQwen3Weight, testQwen3Exercise. Compare with Qwen2.5 baseline.
 
 ### Blocked (needs device)
 - [ ] **MQ-1: Test tool-calling models** — Hermes-3-Llama-3.2-1B for structured JSON.
