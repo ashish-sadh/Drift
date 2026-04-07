@@ -59,6 +59,7 @@ struct ToolSchema: Identifiable {
     let service: String         // "food"
     let description: String     // Shown to LLM
     let parameters: [ToolParam]
+    var validate: (@MainActor (ToolCallParams) -> String?)?  // Returns error message if invalid, nil if OK
     let handler: @MainActor (ToolCallParams) async -> ToolResult
 }
 
@@ -113,10 +114,14 @@ final class ToolRegistry {
         return "Tools:\n\(lines.joined(separator: "\n"))"
     }
 
-    /// Execute a tool call by name.
+    /// Execute a tool call by name. Runs validation first if defined.
     func execute(_ call: ToolCall) async -> ToolResult {
         guard let tool = tools[call.tool] else {
             return .error("Unknown tool: \(call.tool)")
+        }
+        // Pre-tool validation hook
+        if let validate = tool.validate, let error = validate(call.params) {
+            return .error(error)
         }
         return await tool.handler(call.params)
     }

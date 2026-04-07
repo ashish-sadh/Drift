@@ -90,12 +90,18 @@ enum ToolRegistration {
             id: "weight.log_weight", name: "log_weight", service: "weight",
             description: "Log a body weight entry",
             parameters: [ToolParam("value", "number", "Weight value"), ToolParam("unit", "string", "kg or lbs", required: false)],
+            validate: { params in
+                guard let value = params.double("value") else { return "Missing weight value" }
+                let unit = params.string("unit") ?? "lbs"
+                let kg = unit.lowercased().hasPrefix("kg") ? value : value / 2.20462
+                if kg < 20 || kg > 300 { return "Weight \(value) \(unit) is outside valid range (20-300 kg)" }
+                return nil
+            },
             handler: { params in
                 guard let value = params.double("value") else { return .error("Missing weight value") }
                 let unit = params.string("unit") ?? "lbs"
-                if let entry = WeightServiceAPI.logWeight(value: value, unit: unit) {
-                    let display = String(format: "%.1f", value)
-                    return .text("Logged \(display) \(unit).")
+                if let _ = WeightServiceAPI.logWeight(value: value, unit: unit) {
+                    return .text("Logged \(String(format: "%.1f", value)) \(unit).")
                 }
                 return .error("Invalid weight value.")
             }

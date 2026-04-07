@@ -7,7 +7,7 @@ _(pick from Ready)_
 ## Ready
 
 ### Tool-Calling Polish (Phase 2b)
-- [ ] **TC-11: Pre-tool validation hooks** — Add optional `validate` closure to ToolSchema. Check weight in range, food name non-empty before executing.
+- [x] **TC-11: Pre-tool validation hooks** — c1e2ee7+
 - [ ] **TC-12: Post-tool response hooks** — After tool executes, suggest follow-up ("Want to log something else?", "Say 'start push day' to begin").
 - [ ] **TC-13: Remove old keyword routing** — Delete AIChainOfThought keyword matching for domains where tools handle it. Keep rule engine for instant answers only.
 - [ ] **TC-14: Screen-aware tool filtering** — Only inject relevant tools per screen in system prompt. Reduces prompt tokens.
