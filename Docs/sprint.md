@@ -14,7 +14,7 @@ _(pick from Ready)_
 ### Services (one per domain — UI and AI share these)
 - [x] **SVC-1: FoodService** — c8cc327+
 - [x] **SVC-2: WeightService** — bc80c11+
-- [ ] **SVC-3: ExerciseService** — Consolidate workout + exercise. Methods: start_template, build_smart_session (max 5 exercises, popular first, add notes), create_workout, get_workout_history, suggest_workout, get_progressive_overload, exercises_by_muscle, popular_exercises. Wraps WorkoutService + ExerciseDatabase.
+- [x] **SVC-3: ExerciseService** — 7894260+
 - [ ] **SVC-4: SleepRecoveryService** — Consolidate HealthKit biometrics. Methods: get_sleep, get_recovery, get_hrv, get_readiness. Wraps HealthKitService + RecoveryEstimator.
 - [ ] **SVC-5: SupplementService** — Light wrapper. Methods: get_status, mark_taken.
 - [ ] **SVC-6: GlucoseService** — Methods: get_readings, detect_spikes.
