@@ -530,6 +530,21 @@ struct AIChatView: View {
             }
             return
         }
+        // Workout count: "how many workouts this week", "workout count"
+        if lower.contains("how many workout") || lower.contains("workout count") || lower.contains("how often did i train")
+            || lower.contains("workouts this week") || lower.contains("how many times did i work") {
+            let count = (try? WorkoutService.fetchWorkouts(limit: 7))?.filter {
+                guard let d = DateFormatters.dateOnly.date(from: $0.date) else { return false }
+                return Calendar.current.isDate(d, equalTo: Date(), toGranularity: .weekOfYear)
+            }.count ?? 0
+            var response = "\(count) workout\(count == 1 ? "" : "s") this week."
+            if let streak = try? WorkoutService.workoutStreak() {
+                response += " Streak: \(streak.current) weeks (best: \(streak.longest))."
+            }
+            messages.append(ChatMessage(role: .assistant, text: response))
+            return
+        }
+
         if lower == "what did i eat today" || lower == "what did i eat" || lower == "today's food" {
             let context = AIContextBuilder.foodContext()
             messages.append(ChatMessage(role: .assistant, text: context.isEmpty ? "No food logged today yet." : context))

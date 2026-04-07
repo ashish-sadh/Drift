@@ -14,7 +14,7 @@ Real queries that don't work well. The self-improvement loop picks from here, fi
 ### Exercise
 - [x] **"suggest me workout"** — Fixed: hardcoded handler catches 12 phrasings. Both models use Swift path.
 - [ ] **"I did yoga today"** — No handler for logging a completed workout by name. Should create a workout entry. Similar: "I went running", "did 30 min cardio", "just finished pilates"
-- [ ] **"how many workouts this week"** — Falls to LLM, should be instant from WorkoutService. Similar: "workout count", "how often did I train"
+- [x] **"how many workouts this week"** — Fixed: instant rule engine handler with streak info.
 
 ### Food
 - [ ] **"what's healthy for dinner"** — LLM gets this but response quality is poor. Should use suggestMeal with macro awareness. Similar: "healthy meal ideas", "what's a good dinner"
