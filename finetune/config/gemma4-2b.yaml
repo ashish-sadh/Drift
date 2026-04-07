@@ -1,0 +1,23 @@
+model_id: "google/gemma-3-1b-it"
+chat_template: "gemma"
+lora:
+  r: 16
+  alpha: 32
+  dropout: 0.05
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+training:
+  epochs: 3
+  batch_size: 2
+  gradient_accumulation: 8
+  learning_rate: 2.0e-4
+  max_seq_length: 512
+  optim: "adamw_torch"
+  warmup_ratio: 0.05
+  lr_scheduler: "cosine"

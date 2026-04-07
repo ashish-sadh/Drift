@@ -1,0 +1,42 @@
+{"query": "I had 2 eggs", "tool": "log_food", "params": {"name": "eggs", "amount": "2"}, "category": "food_logging"}
+{"query": "log chicken breast", "tool": "log_food", "params": {"name": "chicken breast", "amount": "1"}, "category": "food_logging"}
+{"query": "ate a banana for lunch", "tool": "log_food", "params": {"name": "banana", "amount": "1"}, "category": "food_logging"}
+{"query": "had dal and rice", "tool": "log_food", "params": {"name": "dal and rice", "amount": "1"}, "category": "food_logging"}
+{"query": "I just had a samosa", "tool": "log_food", "params": {"name": "samosa", "amount": "1"}, "category": "food_logging"}
+{"query": "ate 3 rotis for dinner", "tool": "log_food", "params": {"name": "rotis", "amount": "3"}, "category": "food_logging"}
+{"query": "log paneer butter masala", "tool": "log_food", "params": {"name": "paneer butter masala", "amount": "1"}, "category": "food_logging"}
+{"query": "had biryani for lunch", "tool": "log_food", "params": {"name": "biryani", "amount": "1"}, "category": "food_logging"}
+{"query": "drank a glass of milk", "tool": "log_food", "params": {"name": "milk", "amount": "1"}, "category": "food_logging"}
+{"query": "calories left?", "tool": "food_info", "params": {}, "category": "food_questions"}
+{"query": "how much protein in banana", "tool": "food_info", "params": {"query": "protein in banana"}, "category": "food_questions"}
+{"query": "what should I eat for dinner", "tool": "food_info", "params": {"query": "dinner suggestions"}, "category": "food_questions"}
+{"query": "suggest something high protein", "tool": "food_info", "params": {"query": "high protein foods"}, "category": "food_questions"}
+{"query": "what did I eat today", "tool": "food_info", "params": {}, "category": "food_questions"}
+{"query": "I weigh 165 lbs", "tool": "log_weight", "params": {"value": "165", "unit": "lbs"}, "category": "weight_logging"}
+{"query": "my weight is 75 kg", "tool": "log_weight", "params": {"value": "75", "unit": "kg"}, "category": "weight_logging"}
+{"query": "scale says 170 today", "tool": "log_weight", "params": {"value": "170", "unit": "lbs"}, "category": "weight_logging"}
+{"query": "weighed in at 80 kg", "tool": "log_weight", "params": {"value": "80", "unit": "kg"}, "category": "weight_logging"}
+{"query": "how's my weight trend", "tool": "weight_info", "params": {}, "category": "weight_questions"}
+{"query": "am I on track to reach my goal", "tool": "weight_info", "params": {}, "category": "weight_questions"}
+{"query": "what's my BMI", "tool": "weight_info", "params": {}, "category": "weight_questions"}
+{"query": "am I losing weight", "tool": "weight_info", "params": {}, "category": "weight_questions"}
+{"query": "start push day", "tool": "start_workout", "params": {"name": "push day"}, "category": "exercise_start"}
+{"query": "start chest workout", "tool": "start_workout", "params": {"name": "chest"}, "category": "exercise_start"}
+{"query": "I want to do legs today", "tool": "start_workout", "params": {"name": "legs"}, "category": "exercise_start"}
+{"query": "build me a back workout", "tool": "start_workout", "params": {"name": "back"}, "category": "exercise_start"}
+{"query": "what should I train today", "tool": "exercise_info", "params": {}, "category": "exercise_questions"}
+{"query": "am I making progress on bench", "tool": "exercise_info", "params": {"exercise": "bench press"}, "category": "exercise_questions"}
+{"query": "how's my training volume", "tool": "exercise_info", "params": {}, "category": "exercise_questions"}
+{"query": "how'd I sleep last night", "tool": "sleep_recovery", "params": {}, "category": "sleep_recovery"}
+{"query": "what's my recovery score", "tool": "sleep_recovery", "params": {}, "category": "sleep_recovery"}
+{"query": "should I train today or rest", "tool": "sleep_recovery", "params": {}, "category": "sleep_recovery"}
+{"query": "what's my HRV", "tool": "sleep_recovery", "params": {}, "category": "sleep_recovery"}
+{"query": "did I take my vitamins", "tool": "supplements", "params": {}, "category": "supplements"}
+{"query": "what supplements should I take", "tool": "supplements", "params": {}, "category": "supplements"}
+{"query": "thanks!", "tool": null, "params": null, "category": "no_tool"}
+{"query": "hello", "tool": null, "params": null, "category": "no_tool"}
+{"query": "ok got it", "tool": null, "params": null, "category": "no_tool"}
+{"query": "what can you do", "tool": null, "params": null, "category": "no_tool"}
+{"query": "how much does chicken weigh", "tool": null, "params": null, "category": "hard_negatives"}
+{"query": "I need to exercise more discipline", "tool": null, "params": null, "category": "hard_negatives"}
+{"query": "I'm weighing my options", "tool": null, "params": null, "category": "hard_negatives"}

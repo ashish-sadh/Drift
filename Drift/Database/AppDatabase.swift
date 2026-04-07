@@ -863,4 +863,30 @@ extension AppDatabase {
                 """, arguments: ["%\(escaped)%"])
         }
     }
+
+    // MARK: - Body Composition
+
+    func saveBodyComposition(_ entry: inout BodyComposition) throws {
+        try dbWriter.write { db in
+            try entry.save(db)
+        }
+    }
+
+    func fetchBodyComposition() throws -> [BodyComposition] {
+        try dbWriter.read { db in
+            try BodyComposition.order(Column("date").desc).fetchAll(db)
+        }
+    }
+
+    func fetchLatestBodyComposition() throws -> BodyComposition? {
+        try dbWriter.read { db in
+            try BodyComposition.order(Column("date").desc).fetchOne(db)
+        }
+    }
+
+    func deleteBodyComposition(id: Int64) throws {
+        try dbWriter.write { db in
+            _ = try BodyComposition.deleteOne(db, id: id)
+        }
+    }
 }

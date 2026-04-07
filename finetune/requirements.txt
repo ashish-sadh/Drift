@@ -1,0 +1,10 @@
+torch>=2.6.0
+transformers>=4.46.0
+peft>=0.14.0
+trl>=0.13.0
+datasets>=3.0.0
+accelerate>=1.2.0
+anthropic>=0.40.0
+llama-cpp-python>=0.3.0
+pyyaml>=6.0
+sentencepiece>=0.2.0

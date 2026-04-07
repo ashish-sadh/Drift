@@ -6,6 +6,8 @@ struct WeightInsightsView: View {
     let unit: WeightUnit
     let entries: [WeightEntry]
     var isLosing: Bool = true
+    var onAddBodyComp: (() -> Void)? = nil
+    @State private var bodyCompEntries: [BodyComposition] = []
     @State private var showingBodyFatChart = false
     @State private var showingBMIChart = false
     @State private var showingWaterChart = false
@@ -93,10 +95,9 @@ struct WeightInsightsView: View {
             // Compact weight-change chips
             weightChangesRow
 
-            // Body composition cards (only if data exists)
-            if entries.contains(where: \.hasBodyComposition) {
-                bodyCompositionSection
-            }
+            // Body composition cards (from body_composition table)
+            bodyCompositionSection
+                .onAppear { bodyCompEntries = (try? AppDatabase.shared.fetchBodyComposition()) ?? [] }
 
             // Weekday pattern insight
             if trend.dataPoints.count >= 14 {
@@ -109,42 +110,66 @@ struct WeightInsightsView: View {
 
     private var bodyCompositionSection: some View {
         VStack(spacing: 8) {
-            Text("Body Composition")
-                .font(.caption.weight(.medium))
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 4)
+            HStack {
+                Text("Body Composition")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(.secondary)
+                Spacer()
+                if let onAdd = onAddBodyComp {
+                    Button { onAdd() } label: {
+                        Label("Add", systemImage: "plus.circle")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(Theme.accent)
+                    }
+                }
+            }
+            .padding(.horizontal, 4)
 
-            HStack(spacing: 8) {
-                if let latest = entries.last(where: { $0.bodyFatPct != nil }) {
-                    bodyCompCard(label: "Body Fat", value: latest.bodyFatPct!, unit: "%",
-                                 previous: entries.dropLast().last(where: { $0.bodyFatPct != nil })?.bodyFatPct)
-                    .onTapGesture { showingBodyFatChart = true }
+            if bodyCompEntries.isEmpty {
+                // Empty state — invite user to add
+                Button { onAddBodyComp?() } label: {
+                    HStack {
+                        Image(systemName: "figure.arms.open").foregroundStyle(.secondary)
+                        Text("Track body fat, BMI, water % — tap to add")
+                            .font(.caption).foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 14))
                 }
-                if let latest = entries.last(where: { $0.bmi != nil }) {
-                    bodyCompCard(label: "BMI", value: latest.bmi!, unit: "",
-                                 previous: entries.dropLast().last(where: { $0.bmi != nil })?.bmi)
-                    .onTapGesture { showingBMIChart = true }
-                }
-                if let latest = entries.last(where: { $0.waterPct != nil }) {
-                    bodyCompCard(label: "Water", value: latest.waterPct!, unit: "%",
-                                 previous: entries.dropLast().last(where: { $0.waterPct != nil })?.waterPct)
-                    .onTapGesture { showingWaterChart = true }
+                .buttonStyle(.plain)
+            } else {
+                HStack(spacing: 8) {
+                    if let latest = bodyCompEntries.first(where: { $0.bodyFatPct != nil }) {
+                        let prev = bodyCompEntries.dropFirst().first(where: { $0.bodyFatPct != nil })?.bodyFatPct
+                        bodyCompCard(label: "Body Fat", value: latest.bodyFatPct!, unit: "%", previous: prev)
+                            .onTapGesture { showingBodyFatChart = true }
+                    }
+                    if let latest = bodyCompEntries.first(where: { $0.bmi != nil }) {
+                        let prev = bodyCompEntries.dropFirst().first(where: { $0.bmi != nil })?.bmi
+                        bodyCompCard(label: "BMI", value: latest.bmi!, unit: "", previous: prev)
+                            .onTapGesture { showingBMIChart = true }
+                    }
+                    if let latest = bodyCompEntries.first(where: { $0.waterPct != nil }) {
+                        let prev = bodyCompEntries.dropFirst().first(where: { $0.waterPct != nil })?.waterPct
+                        bodyCompCard(label: "Water", value: latest.waterPct!, unit: "%", previous: prev)
+                            .onTapGesture { showingWaterChart = true }
+                    }
                 }
             }
         }
         .sheet(isPresented: $showingBodyFatChart) {
-            bodyCompChartSheet(title: "Body Fat %", entries: entries.compactMap { e in
+            bodyCompChartSheet(title: "Body Fat %", entries: bodyCompEntries.compactMap { e in
                 e.bodyFatPct.map { (date: e.date, value: $0) }
             })
         }
         .sheet(isPresented: $showingBMIChart) {
-            bodyCompChartSheet(title: "BMI", entries: entries.compactMap { e in
+            bodyCompChartSheet(title: "BMI", entries: bodyCompEntries.compactMap { e in
                 e.bmi.map { (date: e.date, value: $0) }
             })
         }
         .sheet(isPresented: $showingWaterChart) {
-            bodyCompChartSheet(title: "Water %", entries: entries.compactMap { e in
+            bodyCompChartSheet(title: "Water %", entries: bodyCompEntries.compactMap { e in
                 e.waterPct.map { (date: e.date, value: $0) }
             })
         }

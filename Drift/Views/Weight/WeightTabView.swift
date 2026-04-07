@@ -6,6 +6,7 @@ struct WeightTabView: View {
     @Binding var selectedTab: Int
     @State private var viewModel = WeightViewModel()
     @State private var showingAddWeight = false
+    @State private var showingAddBodyComp = false
     @State private var showLog = false
     @State private var showMilestone = false
 
@@ -24,7 +25,8 @@ struct WeightTabView: View {
 
                         // Compact metrics + weight changes
                         if let fullTrend = viewModel.fullTrend {
-                            WeightInsightsView(trend: fullTrend, unit: viewModel.weightUnit, entries: viewModel.allEntries, isLosing: viewModel.isLosing)
+                            WeightInsightsView(trend: fullTrend, unit: viewModel.weightUnit, entries: viewModel.allEntries, isLosing: viewModel.isLosing,
+                                              onAddBodyComp: { showingAddBodyComp = true })
                         }
 
                         // Collapsible history log
@@ -57,9 +59,24 @@ struct WeightTabView: View {
         .scrollContentBackground(.hidden)
         .background(Theme.background.ignoresSafeArea())
         .sheet(isPresented: $showingAddWeight) {
-            WeightEntryView(unit: viewModel.weightUnit) { value, date, bodyFat, bmi, water in
-                viewModel.addWeight(value: value, date: date, bodyFatPct: bodyFat, bmi: bmi, waterPct: water)
+            WeightEntryView(unit: viewModel.weightUnit) { value, date in
+                viewModel.addWeight(value: value, date: date)
             }
+        }
+        .sheet(isPresented: $showingAddBodyComp) {
+            BodyCompEntryView(
+                onSave: { bodyFat, bmi, water, date in
+                    var entry = BodyComposition(
+                        date: DateFormatters.dateOnly.string(from: date),
+                        bodyFatPct: bodyFat, bmi: bmi, waterPct: water
+                    )
+                    try? AppDatabase.shared.saveBodyComposition(&entry)
+                    viewModel.loadEntries()
+                },
+                lastBodyFat: (try? AppDatabase.shared.fetchLatestBodyComposition())?.bodyFatPct,
+                lastBMI: (try? AppDatabase.shared.fetchLatestBodyComposition())?.bmi,
+                lastWater: (try? AppDatabase.shared.fetchLatestBodyComposition())?.waterPct
+            )
         }
         .onChange(of: viewModel.milestoneMessage) { _, message in
             if message != nil {

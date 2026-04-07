@@ -318,10 +318,32 @@ enum Migrations {
         // v18: Body composition fields on weight entries
         migrator.registerMigration("v18_body_composition") { db in
             try db.alter(table: "weight_entry") { t in
-                t.add(column: "body_fat_pct", .double)  // 0-100, nullable
-                t.add(column: "bmi", .double)            // e.g. 22.5, nullable
-                t.add(column: "water_pct", .double)      // 0-100, nullable
+                t.add(column: "body_fat_pct", .double)
+                t.add(column: "bmi", .double)
+                t.add(column: "water_pct", .double)
             }
+        }
+
+        // v19: Separate body_composition table + migrate from weight_entry
+        migrator.registerMigration("v19_body_composition_table") { db in
+            try db.create(table: "body_composition") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("date", .text).notNull()
+                t.column("body_fat_pct", .double)
+                t.column("bmi", .double)
+                t.column("water_pct", .double)
+                t.column("source", .text).notNull().defaults(to: "manual")
+                t.column("created_at", .text).notNull().defaults(sql: "datetime('now')")
+            }
+            try db.create(indexOn: "body_composition", columns: ["date"])
+
+            // Migrate existing data from weight_entry
+            try db.execute(sql: """
+                INSERT INTO body_composition (date, body_fat_pct, bmi, water_pct, source, created_at)
+                SELECT date, body_fat_pct, bmi, water_pct, 'manual', created_at
+                FROM weight_entry
+                WHERE body_fat_pct IS NOT NULL OR bmi IS NOT NULL OR water_pct IS NOT NULL
+            """)
         }
     }
 }
