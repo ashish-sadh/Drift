@@ -183,7 +183,7 @@ struct FloatingAIAssistant: View {
 
             if case .downloading = modelManager.downloadState {
                 ProgressView().tint(Theme.accent)
-                Text("Setting up AI...")
+                Text("Downloading Drift Brain...")
                     .font(.caption.weight(.medium)).foregroundStyle(.secondary)
                 Text("This may take a few minutes")
                     .font(.caption2).foregroundStyle(.tertiary)
@@ -194,22 +194,41 @@ struct FloatingAIAssistant: View {
                     Label("Try Again", systemImage: "arrow.clockwise").font(.caption)
                 }.buttonStyle(.bordered)
             } else {
-                Image(systemName: "arrow.down.circle")
+                Image(systemName: "brain.head.profile")
                     .font(.system(size: 36)).foregroundStyle(Theme.accent.opacity(0.5))
-                Text("One-time setup · ~\(aiService.downloadSizeText)")
-                    .font(.caption.weight(.medium)).foregroundStyle(.secondary)
-                Text("Wi-Fi recommended")
-                    .font(.caption2).foregroundStyle(.tertiary)
+
+                VStack(spacing: 4) {
+                    Text("Download Drift Brain")
+                        .font(.subheadline.weight(.semibold))
+                    Text("One-time setup · ~\(aiService.downloadSizeText)")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+
+                // Device info
+                VStack(spacing: 3) {
+                    let freeGB = String(format: "%.1f", DeviceCapability.freeDiskGB)
+                    let ramGB = String(format: "%.0f", DeviceCapability.ramGB)
+                    Text("Your phone: \(ramGB) GB RAM · \(freeGB) GB free storage")
+                        .font(.caption2).foregroundStyle(.tertiary)
+                    Text("Auto-unloads from memory when you're not chatting")
+                        .font(.caption2).foregroundStyle(.tertiary)
+                    Text("Clean up anytime from More \u{2192} Settings")
+                        .font(.caption2).foregroundStyle(.tertiary)
+                }
+
                 Button { Task { await aiService.downloadModel() } } label: {
-                    Label("Set Up AI", systemImage: "sparkles").font(.subheadline)
+                    Label("Download Drift Brain", systemImage: "sparkles").font(.subheadline)
                 }.buttonStyle(.borderedProminent).tint(Theme.accent)
+
+                Text("Wi-Fi recommended")
+                    .font(.caption2).foregroundStyle(.quaternary)
             }
 
             Spacer()
 
             HStack(spacing: 4) {
                 Image(systemName: "lock.shield.fill").font(.system(size: 9))
-                Text("100% on-device · Private")
+                Text("100% on-device · Nothing leaves your phone")
                     .font(.system(size: 9))
             }
             .foregroundStyle(.quaternary)
