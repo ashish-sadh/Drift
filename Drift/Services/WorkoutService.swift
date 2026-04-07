@@ -148,6 +148,28 @@ enum WorkoutService {
         }.reversed()
     }
 
+    /// Calculate workout streak: consecutive weeks with at least 1 workout.
+    static func workoutStreak() throws -> (current: Int, longest: Int) {
+        let counts = try weeklyWorkoutCounts(weeks: 52)
+        var current = 0
+        var longest = 0
+        var streak = 0
+
+        // Count from most recent week backwards
+        for week in counts.reversed() {
+            if week.count > 0 {
+                streak += 1
+                longest = max(longest, streak)
+            } else {
+                if current == 0 { current = streak } // First break = current streak
+                streak = 0
+            }
+        }
+        if current == 0 { current = streak } // Still going
+        longest = max(longest, streak)
+        return (current, longest)
+    }
+
     // MARK: - Exercise Favorites
 
     private static let exerciseFavoritesKey = "drift_exercise_favorites"

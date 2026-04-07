@@ -9,7 +9,7 @@ _(pick from Ready)_
 ### Next Up
 - [ ] **Saved meals (one-tap re-log)** — Save multi-item meals as a group. One tap to re-log "My usual breakfast". Most-requested feature.
 - [ ] **Time-of-day food search boost** — Coffee/oats ranked higher in morning, protein at dinner. Boost in search ranking, not separate UI.
-- [ ] **Workout streak tracking** — Show current + longest streak on Exercise tab alongside consistency chart.
+- [x] **Workout streak tracking** — WorkoutService.workoutStreak() added (consecutive weeks)
 - [x] **Eval harness 86→97** — Tool execution tests for all registered tools
 - [ ] **Quick-add raw calories** — "Just enter 500 cal" button in Food tab for eating out.
 
