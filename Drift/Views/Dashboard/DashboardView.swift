@@ -130,7 +130,14 @@ struct DashboardView: View {
                 }
             }
             .onAppear { AIScreenTracker.shared.currentScreen = .dashboard }
-            .task { await viewModel.loadToday() }
+            .task {
+                await viewModel.loadToday()
+                // Auto-refresh every 3 minutes
+                while !Task.isCancelled {
+                    try? await Task.sleep(for: .seconds(180))
+                    await viewModel.loadToday()
+                }
+            }
             .refreshable { await viewModel.loadToday() }
             .onChange(of: syncComplete) { _, done in
                 if done { Task { await viewModel.loadToday() } }

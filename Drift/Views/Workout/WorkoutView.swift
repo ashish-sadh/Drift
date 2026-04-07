@@ -474,11 +474,21 @@ struct WorkoutView: View {
         .onChange(of: showingNewWorkout) { _, showing in if !showing { loadData() } }
         .onChange(of: showingCreateTemplate) { _, showing in if !showing { loadData() } }
         .task {
-            let hk = HealthKitService.shared
-            activeCalories = (try? await hk.fetchCaloriesBurned(for: Date()).active) ?? 0
-            steps = (try? await hk.fetchSteps(for: Date())) ?? 0
-            healthWorkouts = (try? await hk.fetchRecentWorkouts(days: 7)) ?? []
+            // Initial fetch
+            await refreshHealthData()
+            // Auto-refresh every 3 minutes while on this tab
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(180))
+                await refreshHealthData()
+            }
         }
+    }
+
+    private func refreshHealthData() async {
+        let hk = HealthKitService.shared
+        activeCalories = (try? await hk.fetchCaloriesBurned(for: Date()).active) ?? 0
+        steps = (try? await hk.fetchSteps(for: Date())) ?? 0
+        healthWorkouts = (try? await hk.fetchRecentWorkouts(days: 7)) ?? []
     }
 
     private var consistencyChart: some View {
