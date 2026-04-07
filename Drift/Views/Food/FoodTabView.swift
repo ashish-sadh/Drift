@@ -253,9 +253,11 @@ struct FoodTabView: View {
             Text(label).font(.caption2.weight(.semibold)).foregroundStyle(color).frame(width: 14)
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 2).fill(color.opacity(0.15)).frame(height: 6)
-                    RoundedRectangle(cornerRadius: 2).fill(color)
-                        .frame(width: min(geo.size.width, geo.size.width * fraction), height: 6)
+                    RoundedRectangle(cornerRadius: 2).fill(color.opacity(0.08)).frame(height: 6)
+                    if fraction > 0 {
+                        RoundedRectangle(cornerRadius: 2).fill(color)
+                            .frame(width: max(0, geo.size.width * fraction), height: 6)
+                    }
                 }
             }.frame(height: 6)
             Text("\(Int(eaten))/\(Int(target))g")

@@ -51,9 +51,14 @@ enum FoodService {
     static func getDailyTotals(date: String? = nil) -> DailyTotals {
         let dateStr = date ?? DateFormatters.todayString
         let nutrition = (try? AppDatabase.shared.fetchDailyNutrition(for: dateStr)) ?? .zero
-        let tdee = TDEEEstimator.shared.current?.tdee ?? 2000
-        let deficit = WeightGoal.load()?.requiredDailyDeficit ?? 0
-        let target = max(500, Int(tdee - deficit))
+        // Use same calorie target as Food tab (WeightGoal → macroTargets → resolvedCalorieTarget)
+        let target: Int
+        if let goalTarget = WeightGoal.load()?.macroTargets()?.calorieTarget {
+            target = max(500, Int(goalTarget))
+        } else {
+            let tdee = TDEEEstimator.shared.current?.tdee ?? 2000
+            target = max(500, Int(tdee))
+        }
         let remaining = target - Int(nutrition.calories)
 
         return DailyTotals(
