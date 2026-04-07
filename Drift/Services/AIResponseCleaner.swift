@@ -127,6 +127,13 @@ enum AIResponseCleaner {
 
         // Model echoing the system prompt or instructions
         if trimmed.contains("action tag") || trimmed.contains("[log_food") || trimmed.contains("[create_workout") { return true }
+        if trimmed.contains("\"tool\"") && trimmed.contains("\"params\"") && !trimmed.contains("{") { return true } // Mangled JSON
+
+        // Model refusing to answer or being overly cautious
+        if trimmed.hasPrefix("i cannot") || trimmed.hasPrefix("i can't answer") || trimmed.hasPrefix("i don't have") { return true }
+
+        // Model just repeating the question
+        if trimmed.count < 100 && trimmed.contains("?") && !trimmed.contains(where: \.isNumber) { return true }
 
         return false
     }
