@@ -78,6 +78,7 @@
 		92B596C732C7784167EC8CDE /* WorkoutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1A884AC137C46CE932FEE1C9 /* WorkoutTests.swift */; };
 		92F6CD33F11BF82738AAF81C /* LabReportOCRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D1E187818C8B9D2196B4B9D /* LabReportOCRTests.swift */; };
 		940612EB003CCC2F1FF36DD1 /* AIEvalHarness.swift in Sources */ = {isa = PBXBuildFile; fileRef = BADD153523D188C4ED89B55D /* AIEvalHarness.swift */; };
+		96605BFA273722E91FA3546C /* LLMQwen3Eval.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5F0A341A2D529D8301F7BFD /* LLMQwen3Eval.swift */; };
 		9870D7B4B5A001CA244B3785 /* SpellCorrectService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C93A5EC7AC72AD0108FAC30 /* SpellCorrectService.swift */; };
 		98FBDD66D792C10086005407 /* AIBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BFDDB952907C50869B4078 /* AIBackend.swift */; };
 		98FF97CFE71A6BBCFF976259 /* UIFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1A5DA3E3543A99260250279 /* UIFlowTests.swift */; };
@@ -268,6 +269,7 @@
 		E1A5DA3E3543A99260250279 /* UIFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIFlowTests.swift; sourceTree = "<group>"; };
 		E342C8090873CF9612C8A63E /* LabReportOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabReportOCR.swift; sourceTree = "<group>"; };
 		E4BD88646DFE4A17724D4407 /* AddSupplementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSupplementView.swift; sourceTree = "<group>"; };
+		E5F0A341A2D529D8301F7BFD /* LLMQwen3Eval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMQwen3Eval.swift; sourceTree = "<group>"; };
 		E6B95CCD0C984C915051F482 /* sample_lingo_export.csv */ = {isa = PBXFileReference; path = sample_lingo_export.csv; sourceTree = "<group>"; };
 		E96402659F73046846B409D5 /* WeightTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightTabView.swift; sourceTree = "<group>"; };
 		EE0664FF9B8E28C6F853B820 /* ExerciseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseService.swift; sourceTree = "<group>"; };
@@ -381,6 +383,7 @@
 				B3D6A44D7C25BC4956132FE8 /* FoodLoggingTests.swift */,
 				5D1E187818C8B9D2196B4B9D /* LabReportOCRTests.swift */,
 				6ECA6D7172DB943CC6950F55 /* LLMIntegrationTest.swift */,
+				E5F0A341A2D529D8301F7BFD /* LLMQwen3Eval.swift */,
 				2793708784AD10466DB74D52 /* LLMToolCallingEval.swift */,
 				1575030FD9A7BEF5BC9E0612 /* NutritionOCRTests.swift */,
 				647116F9E4F78CE702CB870C /* RobustnessTests.swift */,
@@ -833,6 +836,7 @@
 				F29E79872466C7556AC9D549 /* EdgeCaseTests.swift in Sources */,
 				5D88D4133DC583D407E81955 /* FoodLoggingTests.swift in Sources */,
 				2A30C354DF8C230F664C7811 /* LLMIntegrationTest.swift in Sources */,
+				96605BFA273722E91FA3546C /* LLMQwen3Eval.swift in Sources */,
 				3B3171C4A98EBB12170E88E6 /* LLMToolCallingEval.swift in Sources */,
 				92F6CD33F11BF82738AAF81C /* LabReportOCRTests.swift in Sources */,
 				FC725819F735636B40300619 /* NutritionOCRTests.swift in Sources */,
