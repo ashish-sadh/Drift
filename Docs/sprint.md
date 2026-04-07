@@ -22,7 +22,7 @@ _(pick from Ready)_
 
 ### Wiring
 - [x] **WIRE-1: Register all tools** — d72c698+
-- [ ] **WIRE-2: Update system prompt** — Inject ToolRegistry.schemaPrompt() into LLM context. Screen-aware filtering.
+- [x] **WIRE-2: Update system prompt** — 6042fee+
 - [ ] **WIRE-3: Replace AIChatView routing** — Use ToolRegistry.execute() instead of hardcoded sendMessage() routing. Keep rule engine for instant answers.
 - [ ] **WIRE-4: Block health questions** — System prompt: "Don't give health advice. Show user's data instead. Redirect to service tools."
 - [ ] **WIRE-5: Smart workout when no template** — If user says "I want to work out" and has no templates, call build_smart_session instead of listing empty templates.
