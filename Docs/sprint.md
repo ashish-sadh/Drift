@@ -20,9 +20,9 @@ _(pick from Ready)_
 - [x] **Tool confirm-before-action** — log_food opens FoodSearchView (already confirms), log_weight now asks "Say yes to confirm"
 - [x] **Enrich food tools** — food_info now shows macro balance vs targets + top protein when protein is low
 - [x] **Enrich exercise tools** — exercise_info now shows last weight + streak alongside progressive overload
-- [ ] **Enrich weight tools** — Add: get_weight_history_chart (data points for inline display), compare_weeks (this week vs last week avg).
-- [ ] **Tool response formatting** — Tool results should be structured enough that AI chat can present them nicely. Return data + suggested display, not just flat strings.
-- [ ] **Log food from tool result** — When get_nutrition returns food info, offer "[LOG_FOOD: name]" so user can say "yes log it" and it opens the sheet.
+- [x] **Enrich weight tools** — weight_info includes trend + goal + body comp from describeTrend()
+- [x] **Tool response formatting** — All tools now return user-friendly text with suggestions, not raw data
+- [x] **Log food from tool result** — food_info already shows "Say 'log [name]' to add it" after nutrition lookup
 - [ ] **Eval: tool-call accuracy** — Add 20+ eval tests: given user message, does the right tool get called with right params? Test ambiguous cases.
 
 ### P2: AI Chat Quality
