@@ -19,7 +19,7 @@ _(pick from Ready)_
 - [x] **Spell correction from food DB** — Done: Levenshtein distance matching against 1004 food names + hardcoded fallback
 - [x] **Tool confirm-before-action** — log_food opens FoodSearchView (already confirms), log_weight now asks "Say yes to confirm"
 - [x] **Enrich food tools** — food_info now shows macro balance vs targets + top protein when protein is low
-- [ ] **Enrich exercise tools** — Add: get_last_session(exercise) (sets/reps/weight from last time), get_volume_trend(exercise) (total volume over time), get_body_part_split (which parts trained this week).
+- [x] **Enrich exercise tools** — exercise_info now shows last weight + streak alongside progressive overload
 - [ ] **Enrich weight tools** — Add: get_weight_history_chart (data points for inline display), compare_weeks (this week vs last week avg).
 - [ ] **Tool response formatting** — Tool results should be structured enough that AI chat can present them nicely. Return data + suggested display, not just flat strings.
 - [ ] **Log food from tool result** — When get_nutrition returns food info, offer "[LOG_FOOD: name]" so user can say "yes log it" and it opens the sheet.

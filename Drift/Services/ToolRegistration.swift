@@ -131,12 +131,24 @@ enum ToolRegistration {
             parameters: [ToolParam("exercise", "string", "Specific exercise name if asking about progress", required: false)],
             handler: { params in
                 if let exercise = params.string("exercise") {
+                    var lines: [String] = []
+                    // Progressive overload
                     if let info = ExerciseService.getProgressiveOverload(exercise: exercise) {
-                        return .text(info.trend)
+                        lines.append(info.trend)
                     }
-                    return .text("No data for '\(exercise)' yet.")
+                    // Last session data
+                    if let w = (try? WorkoutService.lastWeight(for: exercise)) ?? nil {
+                        lines.append("Last weight: \(Int(w)) lbs")
+                    }
+                    return .text(lines.isEmpty ? "No data for '\(exercise)' yet." : lines.joined(separator: "\n"))
                 }
-                return .text(ExerciseService.suggestWorkout())
+                // General workout suggestion with body part coverage
+                var lines: [String] = [ExerciseService.suggestWorkout()]
+                // Streak info
+                if let streak = try? WorkoutService.workoutStreak() {
+                    lines.append("Streak: \(streak.current) weeks (longest: \(streak.longest))")
+                }
+                return .text(lines.joined(separator: "\n"))
             }
         ))
 
