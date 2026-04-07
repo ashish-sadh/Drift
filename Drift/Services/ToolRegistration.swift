@@ -110,9 +110,23 @@ enum ToolRegistration {
 
         r.register(ToolSchema(
             id: "weight.get_trend", name: "get_trend", service: "weight",
-            description: "Show weight trend: current, rate, direction",
+            description: "Show weight trend: current, rate, direction, body composition",
             parameters: [],
             handler: { _ in .text(WeightServiceAPI.describeTrend()) }
+        ))
+
+        r.register(ToolSchema(
+            id: "weight.get_body_composition", name: "get_body_composition", service: "weight",
+            description: "Show body fat %, BMI, water % from latest entry",
+            parameters: [],
+            handler: { _ in
+                guard let trend = WeightServiceAPI.getTrend() else { return .text("No weight data.") }
+                var parts: [String] = []
+                if let bf = trend.bodyFatPct { parts.append("Body fat: \(String(format: "%.1f", bf))%") }
+                if let bmi = trend.bmi { parts.append("BMI: \(String(format: "%.1f", bmi))") }
+                if let water = trend.waterPct { parts.append("Water: \(String(format: "%.1f", water))%") }
+                return .text(parts.isEmpty ? "No body composition data logged yet. Add it when logging weight." : parts.joined(separator: "\n"))
+            }
         ))
 
         r.register(ToolSchema(

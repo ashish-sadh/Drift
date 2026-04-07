@@ -24,13 +24,17 @@ enum WeightServiceAPI {
         let input = entries.map { (date: $0.date, weightKg: $0.weightKg) }
         guard let trend = WeightTrendCalculator.calculateTrend(entries: input) else { return nil }
         let u = Preferences.weightUnit
+        let latest = entries.last
         return WeightTrendInfo(
             currentWeight: u.convert(fromKg: trend.currentEMA),
             unit: u.displayName,
             weeklyRate: u.convert(fromKg: trend.weeklyRateKg),
             direction: "\(trend.trendDirection)",
             sevenDayChange: trend.weightChanges.sevenDay.map { u.convert(fromKg: $0) },
-            thirtyDayChange: trend.weightChanges.thirtyDay.map { u.convert(fromKg: $0) }
+            thirtyDayChange: trend.weightChanges.thirtyDay.map { u.convert(fromKg: $0) },
+            bodyFatPct: latest?.bodyFatPct,
+            bmi: latest?.bmi,
+            waterPct: latest?.waterPct
         )
     }
 
@@ -75,6 +79,9 @@ enum WeightServiceAPI {
         if let d30 = trend.thirtyDayChange {
             lines.append("30-day change: \(String(format: "%+.1f", d30))\(trend.unit)")
         }
+        if let bf = trend.bodyFatPct { lines.append("Body fat: \(String(format: "%.1f", bf))%") }
+        if let bmi = trend.bmi { lines.append("BMI: \(String(format: "%.1f", bmi))") }
+        if let water = trend.waterPct { lines.append("Water: \(String(format: "%.1f", water))%") }
         return lines.joined(separator: "\n")
     }
 }
@@ -88,6 +95,9 @@ struct WeightTrendInfo: Sendable {
     let direction: String
     let sevenDayChange: Double?
     let thirtyDayChange: Double?
+    let bodyFatPct: Double?
+    let bmi: Double?
+    let waterPct: Double?
 }
 
 struct GoalProgressInfo: Sendable {
