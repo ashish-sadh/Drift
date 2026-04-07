@@ -1,32 +1,20 @@
 import Foundation
 
 /// Registers all service tools in the ToolRegistry.
-/// Called once at app startup (from LocalAIService or DriftApp).
+/// Called once at app startup.
 @MainActor
 enum ToolRegistration {
 
     static func registerAll() {
         let r = ToolRegistry.shared
 
-        // MARK: - Food Tools
-
-        r.register(ToolSchema(
-            id: "food.search_food", name: "search_food", service: "food",
-            description: "Search foods by name",
-            parameters: [ToolParam("query", "string", "Food name to search")],
-            handler: { params in
-                guard let q = params.string("query") else { return .error("Missing query") }
-                let results = FoodService.searchFood(query: q)
-                if results.isEmpty { return .text("No foods found for '\(q)'.") }
-                let list = results.prefix(3).map { "\($0.name) — \(Int($0.calories)) cal, \(Int($0.proteinG))g P" }
-                return .text(list.joined(separator: "\n"))
-            }
-        ))
+        // MARK: - Food Tools (3 — consolidated from 7)
+        // Small models need FEWER, MORE DISTINCT tools
 
         r.register(ToolSchema(
             id: "food.log_food", name: "log_food", service: "food",
-            description: "Log a food entry",
-            parameters: [ToolParam("name", "string", "Food name"), ToolParam("amount", "number", "Servings", required: false), ToolParam("meal", "string", "Meal type", required: false)],
+            description: "User wants to LOG/ADD food they ate. Use this when they say 'I had', 'ate', 'log', 'add'.",
+            parameters: [ToolParam("name", "string", "Food name"), ToolParam("amount", "number", "How many servings", required: false)],
             handler: { params in
                 guard let name = params.string("name") else { return .error("Missing food name") }
                 return .action(.openFoodSearch(query: name, servings: params.double("amount")))
@@ -34,68 +22,44 @@ enum ToolRegistration {
         ))
 
         r.register(ToolSchema(
-            id: "food.get_nutrition", name: "get_nutrition", service: "food",
-            description: "Look up nutrition for a food",
-            parameters: [ToolParam("name", "string", "Food name")],
+            id: "food.food_info", name: "food_info", service: "food",
+            description: "User asks ABOUT food: calories, protein, nutrition, 'what should I eat', diet questions. NOT for logging.",
+            parameters: [ToolParam("query", "string", "What they asked about", required: false)],
             handler: { params in
-                guard let name = params.string("name") else { return .error("Missing food name") }
-                if let result = FoodService.getNutrition(name: name) {
-                    return .text(result.perServing)
+                let query = params.string("query") ?? ""
+                // Try nutrition lookup first
+                if !query.isEmpty, let result = FoodService.getNutrition(name: query) {
+                    return .text("\(result.perServing) Say 'log \(result.food.name.lowercased())' to add it.")
                 }
-                return .text("'\(name)' not found in database.")
+                // Otherwise show calories left + suggestions
+                let totals = FoodService.getDailyTotals()
+                var lines = ["\(totals.remaining > 0 ? "\(totals.remaining)" : "0") cal remaining (\(totals.eaten)/\(totals.target)). \(totals.proteinG)g protein so far."]
+                let suggestions = FoodService.suggestMeal()
+                if !suggestions.isEmpty {
+                    lines.append("Suggestions: " + suggestions.prefix(3).map { "\($0.name) (\(Int($0.calories))cal, \(Int($0.proteinG))P)" }.joined(separator: ", "))
+                }
+                return .text(lines.joined(separator: "\n"))
             }
-        ))
-
-        r.register(ToolSchema(
-            id: "food.get_calories_left", name: "get_calories_left", service: "food",
-            description: "Show remaining calories and protein for today",
-            parameters: [],
-            handler: { _ in .text(FoodService.getCaloriesLeft()) },
-            postHook: { _ in "Say 'suggest meal' for food ideas or 'explain calories' for the math." }
         ))
 
         r.register(ToolSchema(
             id: "food.explain_calories", name: "explain_calories", service: "food",
-            description: "Explain calorie math: TDEE, deficit, target breakdown",
+            description: "User asks HOW calories are calculated, what TDEE means, or why their target is a certain number.",
             parameters: [],
             handler: { _ in .text(FoodService.explainCalories()) }
         ))
 
-        r.register(ToolSchema(
-            id: "food.suggest_meal", name: "suggest_meal", service: "food",
-            description: "Suggest foods that fit remaining calorie/protein budget",
-            parameters: [],
-            handler: { _ in
-                let suggestions = FoodService.suggestMeal()
-                if suggestions.isEmpty { return .text("No suggestions — log some food first so I can learn your preferences.") }
-                let list = suggestions.map { "\($0.name) — \(Int($0.calories)) cal, \(Int($0.proteinG))g protein" }
-                return .text("Try:\n" + list.joined(separator: "\n"))
-            }
-        ))
-
-        r.register(ToolSchema(
-            id: "food.top_protein", name: "top_protein", service: "food",
-            description: "Show top high-protein foods from database",
-            parameters: [],
-            handler: { _ in
-                let foods = FoodService.topProteinFoods(limit: 5)
-                if foods.isEmpty { return .text("No food data available.") }
-                let list = foods.map { "\($0.name) — \(Int($0.proteinG))g protein, \(Int($0.calories)) cal" }
-                return .text("Top protein:\n" + list.joined(separator: "\n"))
-            }
-        ))
-
-        // MARK: - Weight Tools
+        // MARK: - Weight Tools (2 — consolidated from 4)
 
         r.register(ToolSchema(
             id: "weight.log_weight", name: "log_weight", service: "weight",
-            description: "Log a body weight entry",
-            parameters: [ToolParam("value", "number", "Weight value"), ToolParam("unit", "string", "kg or lbs", required: false)],
+            description: "User wants to LOG their body weight. Use when they say 'I weigh', 'my weight is', 'scale says'.",
+            parameters: [ToolParam("value", "number", "Weight number"), ToolParam("unit", "string", "kg or lbs", required: false)],
             validate: { params in
                 guard let value = params.double("value") else { return "Missing weight value" }
                 let unit = params.string("unit") ?? "lbs"
                 let kg = unit.lowercased().hasPrefix("kg") ? value : value / 2.20462
-                if kg < 20 || kg > 300 { return "Weight \(value) \(unit) is outside valid range (20-300 kg)" }
+                if kg < 20 || kg > 300 { return "Weight \(value) \(unit) is outside valid range" }
                 return nil
             },
             handler: { params in
@@ -109,160 +73,96 @@ enum ToolRegistration {
         ))
 
         r.register(ToolSchema(
-            id: "weight.get_trend", name: "get_trend", service: "weight",
-            description: "Show weight trend: current, rate, direction, body composition",
-            parameters: [],
-            handler: { _ in .text(WeightServiceAPI.describeTrend()) }
-        ))
-
-        r.register(ToolSchema(
-            id: "weight.get_body_composition", name: "get_body_composition", service: "weight",
-            description: "Show body fat %, BMI, water % from latest entry",
+            id: "weight.weight_info", name: "weight_info", service: "weight",
+            description: "User asks ABOUT their weight: trend, progress, goal, body fat, BMI. NOT for logging.",
             parameters: [],
             handler: { _ in
-                guard let trend = WeightServiceAPI.getTrend() else { return .text("No weight data.") }
-                var parts: [String] = []
-                if let bf = trend.bodyFatPct { parts.append("Body fat: \(String(format: "%.1f", bf))%") }
-                if let bmi = trend.bmi { parts.append("BMI: \(String(format: "%.1f", bmi))") }
-                if let water = trend.waterPct { parts.append("Water: \(String(format: "%.1f", water))%") }
-                return .text(parts.isEmpty ? "No body composition data logged yet. Add it when logging weight." : parts.joined(separator: "\n"))
+                var lines: [String] = []
+                lines.append(WeightServiceAPI.describeTrend())
+                if let goal = WeightServiceAPI.getGoalProgress() {
+                    lines.append("Goal: \(String(format: "%.1f", goal.currentWeight)) → \(String(format: "%.1f", goal.targetWeight))\(goal.unit), \(goal.progressPct)% done.")
+                }
+                return .text(lines.joined(separator: "\n"))
             }
         ))
 
-        r.register(ToolSchema(
-            id: "weight.get_goal", name: "get_goal", service: "weight",
-            description: "Show goal progress: target, % done",
-            parameters: [],
-            handler: { _ in
-                guard let goal = WeightServiceAPI.getGoalProgress() else { return .text("No weight goal set.") }
-                return .text("\(String(format: "%.1f", goal.currentWeight))\(goal.unit) → \(String(format: "%.1f", goal.targetWeight))\(goal.unit). \(goal.progressPct)% done.")
-            }
-        ))
-
-        // MARK: - Exercise Tools
+        // MARK: - Exercise Tools (2 — consolidated from 4)
 
         r.register(ToolSchema(
-            id: "exercise.start_template", name: "start_template", service: "exercise",
-            description: "Start a workout from a saved template",
-            parameters: [ToolParam("name", "string", "Template name")],
+            id: "exercise.start_workout", name: "start_workout", service: "exercise",
+            description: "User wants to START or BEGIN a workout. Use when they say 'start', 'begin', 'let's do', or name a body part.",
+            parameters: [ToolParam("name", "string", "Template name or muscle group like 'chest', 'legs', 'push day'")],
             handler: { params in
-                guard let name = params.string("name") else { return .error("Missing template name") }
+                guard let name = params.string("name") else { return .text(ExerciseService.suggestWorkout()) }
+                // Try template first
                 if let _ = ExerciseService.startTemplate(name: name) {
                     return .action(.openWorkout(templateName: name))
                 }
-                return .text("No template matching '\(name)' found.")
-            }
-        ))
-
-        r.register(ToolSchema(
-            id: "exercise.build_smart_session", name: "build_smart_session", service: "exercise",
-            description: "Build a workout session (max 5 exercises, based on history)",
-            parameters: [ToolParam("muscle_group", "string", "Target muscle group", required: false)],
-            handler: { params in
-                let group = params.string("muscle_group")
-                if let template = ExerciseService.buildSmartSession(muscleGroup: group) {
+                // Build smart session for muscle group
+                if let template = ExerciseService.buildSmartSession(muscleGroup: name) {
                     let exercises = template.exercises.prefix(5).map { "\($0.name) — \($0.notes ?? "3x10")" }
-                    return .text("Workout: \(template.name)\n" + exercises.joined(separator: "\n"))
+                    return .text("Workout: \(template.name)\n" + exercises.joined(separator: "\n") + "\nSay 'start' to begin.")
                 }
-                return .text("Couldn't build a session. Try specifying a muscle group.")
+                return .text("No template for '\(name)'. Try 'chest', 'legs', 'back', or 'push day'.")
             }
         ))
 
         r.register(ToolSchema(
-            id: "exercise.suggest_workout", name: "suggest_workout", service: "exercise",
-            description: "Suggest what to train based on recent history",
-            parameters: [],
-            handler: { _ in .text(ExerciseService.suggestWorkout()) }
-        ))
-
-        r.register(ToolSchema(
-            id: "exercise.progressive_overload", name: "progressive_overload", service: "exercise",
-            description: "Check if you're making progress on an exercise",
-            parameters: [ToolParam("exercise", "string", "Exercise name")],
+            id: "exercise.exercise_info", name: "exercise_info", service: "exercise",
+            description: "User asks ABOUT workouts: what to train, progress, history, recovery. NOT for starting a workout.",
+            parameters: [ToolParam("exercise", "string", "Specific exercise name if asking about progress", required: false)],
             handler: { params in
-                guard let name = params.string("exercise") else { return .error("Missing exercise name") }
-                if let info = ExerciseService.getProgressiveOverload(exercise: name) {
-                    return .text(info.trend)
+                if let exercise = params.string("exercise") {
+                    if let info = ExerciseService.getProgressiveOverload(exercise: exercise) {
+                        return .text(info.trend)
+                    }
+                    return .text("No data for '\(exercise)' yet.")
                 }
-                return .text("No data for '\(name)'. Log some workouts first.")
+                return .text(ExerciseService.suggestWorkout())
             }
         ))
 
-        // MARK: - Sleep & Recovery Tools
+        // MARK: - Health Data Tools (2 — consolidated from 5)
 
         r.register(ToolSchema(
-            id: "sleep.get_sleep", name: "get_sleep", service: "sleep",
-            description: "Show last night's sleep data",
+            id: "health.sleep_recovery", name: "sleep_recovery", service: "sleep",
+            description: "User asks about SLEEP, RECOVERY, HRV, heart rate, tiredness, or whether to rest vs train.",
             parameters: [],
-            handler: { _ in .text(SleepRecoveryService.getSleep()) }
+            handler: { _ in
+                var lines: [String] = []
+                let sleep = SleepRecoveryService.getSleep()
+                let recovery = SleepRecoveryService.getRecovery()
+                let readiness = SleepRecoveryService.getReadiness()
+                if !sleep.contains("No ") { lines.append(sleep) }
+                if !recovery.contains("No ") { lines.append(recovery) }
+                lines.append(readiness)
+                return .text(lines.joined(separator: "\n"))
+            }
         ))
 
         r.register(ToolSchema(
-            id: "sleep.get_recovery", name: "get_recovery", service: "sleep",
-            description: "Show recovery score, HRV, resting heart rate",
-            parameters: [],
-            handler: { _ in .text(SleepRecoveryService.getRecovery()) }
-        ))
-
-        r.register(ToolSchema(
-            id: "sleep.get_readiness", name: "get_readiness", service: "sleep",
-            description: "Assess training readiness based on recovery + sleep",
-            parameters: [],
-            handler: { _ in .text(SleepRecoveryService.getReadiness()) }
-        ))
-
-        // MARK: - Supplement Tools
-
-        r.register(ToolSchema(
-            id: "supplement.get_status", name: "get_supplement_status", service: "supplement",
-            description: "Check which supplements taken today",
+            id: "health.supplements", name: "supplements", service: "supplement",
+            description: "User asks about SUPPLEMENTS or VITAMINS: what they took, what's remaining.",
             parameters: [],
             handler: { _ in .text(SupplementService.getStatus()) }
         ))
 
-        r.register(ToolSchema(
-            id: "supplement.mark_taken", name: "mark_supplement_taken", service: "supplement",
-            description: "Mark a supplement as taken",
-            parameters: [ToolParam("name", "string", "Supplement name")],
-            handler: { params in
-                guard let name = params.string("name") else { return .error("Missing supplement name") }
-                return .text(SupplementService.markTaken(name: name))
-            }
-        ))
-
-        // MARK: - Glucose Tools
+        // NOTE: Glucose, biomarker, and body composition tools are registered but NOT shown
+        // in the default 6-tool prompt. They appear when user is on those specific screens.
+        // This keeps the main prompt focused for the 1.5B model.
 
         r.register(ToolSchema(
-            id: "glucose.get_readings", name: "get_glucose", service: "glucose",
-            description: "Show today's glucose readings summary",
+            id: "health.glucose", name: "glucose", service: "glucose",
+            description: "User asks about blood sugar, glucose readings, or spikes.",
             parameters: [],
-            handler: { _ in .text(GlucoseService.getReadings()) }
+            handler: { _ in .text(GlucoseService.getReadings() + "\n" + GlucoseService.detectSpikes()) }
         ))
 
         r.register(ToolSchema(
-            id: "glucose.detect_spikes", name: "detect_spikes", service: "glucose",
-            description: "Check for glucose spikes today",
-            parameters: [],
-            handler: { _ in .text(GlucoseService.detectSpikes()) }
-        ))
-
-        // MARK: - Biomarker Tools
-
-        r.register(ToolSchema(
-            id: "biomarker.get_results", name: "get_biomarkers", service: "biomarker",
-            description: "Show out-of-range biomarker results",
+            id: "health.biomarkers", name: "biomarkers", service: "biomarker",
+            description: "User asks about lab results, blood tests, or biomarkers.",
             parameters: [],
             handler: { _ in .text(BiomarkerService.getResults()) }
-        ))
-
-        r.register(ToolSchema(
-            id: "biomarker.get_detail", name: "get_biomarker_detail", service: "biomarker",
-            description: "Get details for a specific biomarker",
-            parameters: [ToolParam("name", "string", "Biomarker name")],
-            handler: { params in
-                guard let name = params.string("name") else { return .error("Missing biomarker name") }
-                return .text(BiomarkerService.getDetail(name: name))
-            }
         ))
     }
 }

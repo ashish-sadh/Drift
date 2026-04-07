@@ -105,10 +105,10 @@ final class ToolRegistry {
         return sorted
     }
 
-    /// Compact schema string for the LLM prompt. Keeps token count low.
+    /// Compact schema string for the LLM prompt. Max 6 tools — small models can't handle more.
     func schemaPrompt(forScreen screen: String? = nil) -> String {
         let relevant = screen.map { toolsForScreen($0) } ?? allTools()
-        let lines = relevant.prefix(12).map { t in
+        let lines = relevant.prefix(6).map { t in
             let params = t.parameters.map { "\($0.name):\($0.type)" }.joined(separator: ", ")
             return "- \(t.name)(\(params)) — \(t.description)"
         }

@@ -24,30 +24,20 @@ final class LLMToolCallingEval: XCTestCase {
     // MARK: - System Prompt
 
     private func systemPrompt(screen: String) -> String {
-        // Exactly what the app sends — tools filtered by screen
+        // Consolidated tools — 6 max for 1.5B model. Clear WHEN-to-use descriptions.
         let allTools: [(name: String, params: String, desc: String)] = [
-            ("log_food", "name:string, amount:number", "Log a food entry"),
-            ("get_nutrition", "name:string", "Look up nutrition for a food"),
-            ("get_calories_left", "", "Show remaining calories and protein"),
-            ("suggest_meal", "", "Suggest foods that fit remaining budget"),
-            ("top_protein", "", "Show top high-protein foods"),
-            ("explain_calories", "", "Explain calorie math: TDEE, deficit, target"),
-            ("log_weight", "value:number, unit:string", "Log a body weight entry"),
-            ("get_trend", "", "Show weight trend: current, rate, direction"),
-            ("get_goal", "", "Show goal progress"),
-            ("get_body_composition", "", "Show body fat %, BMI, water %"),
-            ("start_template", "name:string", "Start a workout from saved template"),
-            ("build_smart_session", "muscle_group:string", "Build a workout (max 5 exercises)"),
-            ("suggest_workout", "", "Suggest what to train based on history"),
-            ("progressive_overload", "exercise:string", "Check progress on an exercise"),
-            ("get_sleep", "", "Show last night's sleep data"),
-            ("get_recovery", "", "Show recovery score, HRV, resting HR"),
-            ("get_readiness", "", "Assess training readiness"),
-            ("get_supplement_status", "", "Check supplement status"),
+            ("log_food", "name:string, amount:number", "User wants to LOG food they ate"),
+            ("food_info", "query:string", "User asks ABOUT food: calories, protein, what to eat"),
+            ("log_weight", "value:number, unit:string", "User wants to LOG body weight"),
+            ("weight_info", "", "User asks ABOUT weight: trend, goal, body fat, BMI"),
+            ("start_workout", "name:string", "User wants to START a workout or name a body part"),
+            ("exercise_info", "exercise:string", "User asks ABOUT workouts: what to train, progress"),
+            ("sleep_recovery", "", "User asks about SLEEP, recovery, HRV, tiredness"),
+            ("supplements", "", "User asks about supplements or vitamins"),
         ]
 
-        // Screen-filter: put relevant tools first, limit to 6
-        let screenService: String? = switch screen {
+        // Screen-filter: put relevant tools first
+        let screenPrefix: String? = switch screen {
         case "food": "food"
         case "weight": "weight"
         case "exercise": "exercise"
@@ -55,29 +45,29 @@ final class LLMToolCallingEval: XCTestCase {
         }
 
         let sorted = allTools.sorted { a, b in
-            let aMatch = screenService != nil && a.name.contains(screenService!)
-            let bMatch = screenService != nil && b.name.contains(screenService!)
+            let aMatch = screenPrefix != nil && a.name.contains(screenPrefix!)
+            let bMatch = screenPrefix != nil && b.name.contains(screenPrefix!)
             if aMatch && !bMatch { return true }
             if !aMatch && bMatch { return false }
             return false
         }
 
-        let toolLines = sorted.prefix(8).map { "- \($0.name)(\($0.params)) — \($0.desc)" }
+        let toolLines = sorted.prefix(6).map { "- \($0.name)(\($0.params)) — \($0.desc)" }
 
         return """
-        You help with food, weight, and workout tracking. Rules: \
-        1) Use ONLY the numbers from context. Never invent data. \
-        2) When user wants to LOG something, call a tool: {"tool":"log_food","params":{"name":"eggs","amount":"2"}} \
-        3) When user asks a QUESTION about their data, call a tool: {"tool":"get_calories_left","params":{}} \
-        4) When user just TALKS, respond naturally in 1-2 sentences. No tool call needed. \
-        5) Do NOT give health/medical advice. Show their data instead. \
-        6) If unsure what user wants, ask ONE question. \
-        Example: "I had eggs" → {"tool":"log_food","params":{"name":"eggs"}} \
-        Example: "how many calories left" → {"tool":"get_calories_left","params":{}} \
-        Example: "start push day" → {"tool":"start_template","params":{"name":"push day"}} \
-        Example: "what should I train" → {"tool":"suggest_workout","params":{}} \
-        Example: "build me a chest workout" → {"tool":"build_smart_session","params":{"muscle_group":"chest"}} \
-        Example: "thanks" → Just say "You're welcome!" (no tool call) \
+        You help track food, weight, and workouts. \
+        LOGGING (user ate/did something) → call log tool. \
+        QUESTION (user asks about data) → call info tool. \
+        CHAT (greeting, thanks) → respond naturally, no tool. \
+        Never give health advice. Never invent numbers. \
+        Examples: \
+        "I had 2 eggs" → {"tool":"log_food","params":{"name":"eggs","amount":"2"}} \
+        "calories left" → {"tool":"food_info","params":{}} \
+        "how's my weight" → {"tool":"weight_info","params":{}} \
+        "start chest workout" → {"tool":"start_workout","params":{"name":"chest"}} \
+        "what should I train" → {"tool":"exercise_info","params":{}} \
+        "how'd I sleep" → {"tool":"sleep_recovery","params":{}} \
+        "thanks" → You're welcome! (no tool) \
         Tools:\n\(toolLines.joined(separator: "\n"))
         """
     }
@@ -154,21 +144,21 @@ final class LLMToolCallingEval: XCTestCase {
         guard Self.backend != nil else { throw XCTSkip("Model not available") }
 
         let queries: [(String, String)] = [
-            ("calories left?", "get_calories_left"),
-            ("how much protein in banana", "get_nutrition"),
-            ("what should I eat for dinner", "suggest_meal"),
-            ("calories in a samosa", "get_nutrition"),
-            ("how many carbs in rice", "get_nutrition"),
-            ("suggest something high protein", "suggest_meal"),
-            ("what are good protein sources", "top_protein"),
-            ("explain my calories", "explain_calories"),
-            ("am I eating too much", "get_calories_left"),
-            ("what did I eat today", "get_calories_left"),
-            ("I'm hungry what should I have", "suggest_meal"),
-            ("how's my protein intake", "get_calories_left"),
-            ("nutrition info for chicken", "get_nutrition"),
-            ("I need to eat more fiber", "suggest_meal"),
-            ("is my diet balanced", "get_calories_left"),
+            ("calories left?", "food_info"),
+            ("how much protein in banana", "food_info"),
+            ("what should I eat for dinner", "food_info"),
+            ("calories in a samosa", "food_info"),
+            ("how many carbs in rice", "food_info"),
+            ("suggest something high protein", "food_info"),
+            ("what are good protein sources", "food_info"),
+            ("explain my calories", "food_info"),
+            ("am I eating too much", "food_info"),
+            ("what did I eat today", "food_info"),
+            ("I'm hungry what should I have", "food_info"),
+            ("how's my protein intake", "food_info"),
+            ("nutrition info for chicken", "food_info"),
+            ("I need to eat more fiber", "food_info"),
+            ("is my diet balanced", "food_info"),
         ]
 
         var correct = 0
@@ -191,19 +181,19 @@ final class LLMToolCallingEval: XCTestCase {
         let queries: [(String, String)] = [
             ("I weigh 165 lbs", "log_weight"),
             ("my weight is 75 kg", "log_weight"),
-            ("how's my weight trend", "get_trend"),
-            ("am I on track to reach my goal", "get_goal"),
-            ("how much have I lost this month", "get_trend"),
-            ("show my weight history", "get_trend"),
-            ("what's my body fat", "get_body_composition"),
-            ("what's my BMI", "get_body_composition"),
-            ("am I losing weight", "get_trend"),
+            ("how's my weight trend", "weight_info"),
+            ("am I on track to reach my goal", "weight_info"),
+            ("how much have I lost this month", "weight_info"),
+            ("show my weight history", "weight_info"),
+            ("what's my body fat", "weight_info"),
+            ("what's my BMI", "weight_info"),
+            ("am I losing weight", "weight_info"),
             ("scale says 170 today", "log_weight"),
-            ("how fast am I losing", "get_trend"),
-            ("what's my goal progress", "get_goal"),
+            ("how fast am I losing", "weight_info"),
+            ("what's my goal progress", "weight_info"),
             ("weighed in at 80 kg", "log_weight"),
-            ("when will I reach my target", "get_goal"),
-            ("my weight is going up why", "get_trend"),
+            ("when will I reach my target", "weight_info"),
+            ("my weight is going up why", "weight_info"),
         ]
 
         var correct = 0
@@ -224,29 +214,29 @@ final class LLMToolCallingEval: XCTestCase {
         guard Self.backend != nil else { throw XCTSkip("Model not available") }
 
         let queries: [(String, String)] = [
-            ("what should I train today", "suggest_workout"),
-            ("start push day", "start_template"),
-            ("start chest workout", "build_smart_session"),
-            ("I want to do legs today", "build_smart_session"),
-            ("build me a back workout", "build_smart_session"),
-            ("suggest a shoulder routine", "build_smart_session"),
-            ("what muscle haven't I trained", "suggest_workout"),
-            ("how many workouts this week", "suggest_workout"),
-            ("start a full body session", "build_smart_session"),
-            ("am I making progress on bench", "progressive_overload"),
-            ("am I getting stronger on squats", "progressive_overload"),
-            ("start pull day", "start_template"),
-            ("give me a quick arm workout", "build_smart_session"),
-            ("I want to work out", "suggest_workout"),
-            ("start leg day", "start_template"),
-            ("build me a PPL split", "build_smart_session"),
-            ("what did I train last", "suggest_workout"),
-            ("coach me through a workout", "build_smart_session"),
-            ("is my bench press improving", "progressive_overload"),
-            ("suggest exercises for core", "build_smart_session"),
-            ("start my usual workout", "start_template"),
-            ("how's my training volume", "suggest_workout"),
-            ("plan a hypertrophy session", "build_smart_session"),
+            ("what should I train today", "exercise_info"),
+            ("start push day", "start_workout"),
+            ("start chest workout", "start_workout"),
+            ("I want to do legs today", "start_workout"),
+            ("build me a back workout", "start_workout"),
+            ("suggest a shoulder routine", "start_workout"),
+            ("what muscle haven't I trained", "exercise_info"),
+            ("how many workouts this week", "exercise_info"),
+            ("start a full body session", "start_workout"),
+            ("am I making progress on bench", "exercise_info"),
+            ("am I getting stronger on squats", "exercise_info"),
+            ("start pull day", "start_workout"),
+            ("give me a quick arm workout", "start_workout"),
+            ("I want to work out", "exercise_info"),
+            ("start leg day", "start_workout"),
+            ("build me a PPL split", "start_workout"),
+            ("what did I train last", "exercise_info"),
+            ("coach me through a workout", "start_workout"),
+            ("is my bench press improving", "exercise_info"),
+            ("suggest exercises for core", "start_workout"),
+            ("start my usual workout", "start_workout"),
+            ("how's my training volume", "exercise_info"),
+            ("plan a hypertrophy session", "start_workout"),
         ]
 
         var correct = 0
@@ -267,16 +257,16 @@ final class LLMToolCallingEval: XCTestCase {
         guard Self.backend != nil else { throw XCTSkip("Model not available") }
 
         let queries: [(String, String)] = [
-            ("how'd I sleep last night", "get_sleep"),
-            ("what's my recovery score", "get_recovery"),
-            ("should I train today or rest", "get_readiness"),
-            ("I'm feeling tired", "get_sleep"),
-            ("what's my HRV", "get_recovery"),
-            ("am I recovered enough", "get_readiness"),
-            ("how's my resting heart rate", "get_recovery"),
-            ("I feel exhausted", "get_sleep"),
-            ("did I sleep well", "get_sleep"),
-            ("is my recovery good enough to lift", "get_readiness"),
+            ("how'd I sleep last night", "sleep_recovery"),
+            ("what's my recovery score", "sleep_recovery"),
+            ("should I train today or rest", "sleep_recovery"),
+            ("I'm feeling tired", "sleep_recovery"),
+            ("what's my HRV", "sleep_recovery"),
+            ("am I recovered enough", "sleep_recovery"),
+            ("how's my resting heart rate", "sleep_recovery"),
+            ("I feel exhausted", "sleep_recovery"),
+            ("did I sleep well", "sleep_recovery"),
+            ("is my recovery good enough to lift", "sleep_recovery"),
         ]
 
         var correct = 0
@@ -328,10 +318,10 @@ final class LLMToolCallingEval: XCTestCase {
         guard Self.backend != nil else { throw XCTSkip("Model not available") }
 
         let queries: [(String, String)] = [
-            ("log exercise", "suggest_workout"),
-            ("log a workout", "suggest_workout"),
-            ("did I take my vitamins", "get_supplement_status"),
-            ("what supplements should I take", "get_supplement_status"),
+            ("log exercise", "exercise_info"),
+            ("log a workout", "exercise_info"),
+            ("did I take my vitamins", "supplements"),
+            ("what supplements should I take", "supplements"),
         ]
 
         var correct = 0
