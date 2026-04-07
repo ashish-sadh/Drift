@@ -2070,7 +2070,85 @@ final class AIEvalHarness: XCTestCase {
         let _ = WeightServiceAPI.getGoalProgress()
     }
 
+    // MARK: - Edge Case Food Intents
+
+    func testFoodIntentWithNumbers() {
+        let cases = [
+            ("log 200g chicken", true),
+            ("ate 1.5 cups rice", true),
+            ("had 0.5 avocado", true),
+            ("log 3 slices pizza", true),
+        ]
+        for (query, shouldParse) in cases {
+            let intent = AIActionExecutor.parseFoodIntent(query.lowercased())
+            XCTAssertEqual(intent != nil, shouldParse, "'\(query)' parse=\(intent != nil)")
+        }
+    }
+
+    func testFoodIntentRejectsNonFood() {
+        let nonFood = [
+            "how are you",
+            "hello there",
+            "what time is it",
+            "thanks for helping",
+            "tell me a joke",
+        ]
+        for query in nonFood {
+            let intent = AIActionExecutor.parseFoodIntent(query.lowercased())
+            XCTAssertNil(intent, "'\(query)' should NOT be food intent")
+        }
+    }
+
+    // MARK: - Tool Call Parameter Extraction
+
+    func testToolCallParamTypes() {
+        let json = #"{"tool":"log_weight","params":{"value":"75.5","unit":"kg"}}"#
+        let call = parseToolCallJSON(json)!
+        XCTAssertEqual(call.params.double("value"), 75.5)
+        XCTAssertEqual(call.params.string("unit"), "kg")
+        XCTAssertNil(call.params.int("missing"))
+    }
+
+    func testToolCallEmptyParams() {
+        let json = #"{"tool":"get_sleep","params":{}}"#
+        let call = parseToolCallJSON(json)!
+        XCTAssertEqual(call.tool, "get_sleep")
+        XCTAssertNil(call.params.string("any"))
+    }
+
+    // MARK: - Comprehensive Action Tag Tests
+
+    func testAllActionTagFormats() {
+        let tags: [(String, Bool)] = [
+            ("[LOG_FOOD: eggs 2]", true),
+            ("[LOG_WEIGHT: 165 lbs]", true),
+            ("[START_WORKOUT: Push Day]", true),
+            ("[CREATE_WORKOUT: Bench 3x10@135]", true),
+            ("[SHOW_WEIGHT]", true),
+            ("[SHOW_NUTRITION]", true),
+            ("No tags here", false),
+        ]
+        for (text, hasAction) in tags {
+            let (action, _) = AIActionParser.parse(text)
+            if hasAction {
+                if case .none = action { XCTFail("Should parse action from '\(text)'") }
+            }
+        }
+    }
+
+    // MARK: - Context Budget Verification
+
+    @MainActor
+    func testAllScreenContextsUnderBudget() {
+        let screens: [AIScreen] = [.dashboard, .food, .weight, .exercise, .bodyRhythm, .glucose, .biomarkers, .supplements, .bodyComposition, .cycle]
+        for screen in screens {
+            let context = AIContextBuilder.buildContext(screen: screen)
+            let tokens = AIContextBuilder.estimateTokens(context)
+            XCTAssertLessThanOrEqual(tokens, 800, "\(screen) context \(tokens) tokens > 800")
+        }
+    }
+
     func testPrintSummary() {
-        print("=== AI EVAL HARNESS: 125+ test methods ===")
+        print("=== AI EVAL HARNESS: 130+ test methods ===")
     }
 }
