@@ -3,7 +3,7 @@ import Foundation
 // MARK: - Serving Units
 
 enum ServingUnit: String, CaseIterable, Sendable {
-    case grams, cups, tablespoons, teaspoons, pieces, ml
+    case grams, cups, tablespoons, teaspoons, pieces, ml, flOz
 
     var label: String {
         switch self {
@@ -13,6 +13,7 @@ enum ServingUnit: String, CaseIterable, Sendable {
         case .teaspoons: "tsp"
         case .pieces: "pc"
         case .ml: "ml"
+        case .flOz: "fl oz"
         }
     }
 
@@ -24,6 +25,7 @@ enum ServingUnit: String, CaseIterable, Sendable {
         case .teaspoons: return amount * ingredient.gramsPerCup / 48
         case .pieces: return amount * ingredient.gramsPerPiece
         case .ml: return amount
+        case .flOz: return amount * 29.5735 // 1 fl oz = 29.57 ml ≈ g for water-based liquids
         }
     }
 }
@@ -153,6 +155,7 @@ extension ServingUnit {
         case .tablespoons: return amount * 15
         case .teaspoons: return amount * 5
         case .ml: return amount
+        case .flOz: return amount * 29.5735
         }
     }
 }
@@ -237,14 +240,19 @@ struct FoodUnit: Hashable {
         }
 
         let liquidSubstrings = ["milk", "juice", "buttermilk", "coconut water",
-                                "smoothie", "broth", "soup", "shake"]
+                                "smoothie", "broth", "soup", "shake", "lemonade",
+                                "soda", "cola", "kombucha", "water"]
         let isLiquid = liquidSubstrings.contains(where: { lower.contains($0) })
             || words.contains("lassi") || words.contains("tea") || words.contains("chai")
+            || words.contains("latte") || words.contains("coffee") || words.contains("espresso")
         if isLiquid {
-            if primary.label != "ml" {
+            if !units.contains(where: { $0.label == "ml" }) {
                 units.append(FoodUnit(label: "ml", gramsEquivalent: 1))
             }
-            if primary.label != "cup" && !units.contains(where: { $0.label == "cup" }) {
+            if !units.contains(where: { $0.label == "fl oz" }) {
+                units.append(FoodUnit(label: "fl oz", gramsEquivalent: 29.5735))
+            }
+            if !units.contains(where: { $0.label == "cup" }) {
                 units.append(FoodUnit(label: "cup", gramsEquivalent: 240))
             }
         }
