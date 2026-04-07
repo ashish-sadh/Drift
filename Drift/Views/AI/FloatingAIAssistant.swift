@@ -197,31 +197,20 @@ struct FloatingAIAssistant: View {
                 Image(systemName: "brain.head.profile")
                     .font(.system(size: 36)).foregroundStyle(Theme.accent.opacity(0.5))
 
-                VStack(spacing: 4) {
-                    Text("Download Drift Brain")
-                        .font(.subheadline.weight(.semibold))
-                    Text("One-time setup · ~\(aiService.downloadSizeText)")
-                        .font(.caption).foregroundStyle(.secondary)
-                }
+                Text("Download Drift Brain")
+                    .font(.subheadline.weight(.semibold))
 
-                // Device info
-                VStack(spacing: 3) {
+                VStack(spacing: 2) {
                     let freeGB = String(format: "%.1f", DeviceCapability.freeDiskGB)
-                    let ramGB = String(format: "%.0f", DeviceCapability.ramGB)
-                    Text("Your phone: \(ramGB) GB RAM · \(freeGB) GB free storage")
+                    Text("\(aiService.downloadSizeText) download · \(freeGB) GB available")
                         .font(.caption2).foregroundStyle(.tertiary)
-                    Text("Auto-unloads from memory when you're not chatting")
-                        .font(.caption2).foregroundStyle(.tertiary)
-                    Text("Clean up anytime from More \u{2192} Settings")
+                    Text("Frees memory when not chatting · Remove in Settings")
                         .font(.caption2).foregroundStyle(.tertiary)
                 }
 
                 Button { Task { await aiService.downloadModel() } } label: {
-                    Label("Download Drift Brain", systemImage: "sparkles").font(.subheadline)
+                    Label("Download", systemImage: "sparkles").font(.subheadline)
                 }.buttonStyle(.borderedProminent).tint(Theme.accent)
-
-                Text("Wi-Fi recommended")
-                    .font(.caption2).foregroundStyle(.quaternary)
             }
 
             Spacer()
