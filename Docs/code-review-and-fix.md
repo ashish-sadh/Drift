@@ -44,6 +44,14 @@
 - Use `@Environment(AppDatabase.self)` for database injection
 - Avoid heavy computation in `body` - move to ViewModel
 
+### AI System Rules
+7. **Eval harness** must pass after any AI change
+8. **Action tags** must be parseable by AIActionParser regex patterns
+9. **Context budget** stays under 800 tokens (AIContextBuilder.truncateToFit)
+10. **Response cleaner** must strip all markdown/ChatML artifacts
+11. **System prompt** stays short — every token matters at 1.5B scale
+12. **Tool schemas** in Docs/tools.md must match actual service methods
+
 ## Fix Process
 
 ### When a Bug is Found

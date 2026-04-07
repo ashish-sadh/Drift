@@ -9,21 +9,25 @@ You are an autonomous agent. Follow this program exactly.
 
 _Current directive:_ **Work through priorities in order. 80% on P1-P2, 20% on P3-P6.**
 
-_Human override:_ CONTINUE
+_Human override:_ STOP
 
 **Priorities:**
 
-1. **Rearchitect: LLM for intent, Swift for execution** — Read `Docs/ai-architecture-plan.md`. Replace hardcoded keyword checks in `sendMessage()` with LLM intent classification. Keep rule engine only for exact matches (summary, calories left). Everything else → LLM classifies → Swift executes.
+1. **Rearchitect: LLM for intent, Swift for execution** — Read `Docs/architecture.md`. Replace hardcoded keyword checks in `sendMessage()` with LLM intent classification. Keep rule engine only for exact matches (summary, calories left). Everything else → LLM classifies → Swift executes.
 
 2. **Conversational workout builder** — Three flows: (A) start from template, (B) build from conversation ("I did push ups 3x15"), (C) AI suggests based on history. Uses `[CREATE_WORKOUT:]` and `[START_WORKOUT:]` action tags. Opens ActiveWorkoutView via sheet.
 
-3. **Response quality + eval harness (target: 200+ test cases)** — Current count is ~22, far too low. Grow steadily: add 10-20 tests per cycle covering food logging, workout intents, edge cases, multi-turn, amounts, units, Indian foods, negation, ambiguity. Strip artifacts, catch low-quality responses. Run harness after every AI change. Don't rush — quality cases over quantity.
+3. **Response quality + eval harness (target: 200+ test cases)** — Current count is ~48, target is 200+. Grow steadily: add 10-20 tests per cycle covering food logging, workout intents, edge cases, multi-turn, amounts, units, Indian foods, negation, ambiguity, **calorie estimation queries** ("how many calories in X"), **calories remaining accuracy**. Strip artifacts, catch low-quality responses. Run harness after every AI change. Don't rush — quality cases over quantity.
 
 4. **Food logging polish** — All natural phrasing works flawlessly. Multi-food, amounts, qualifiers, multi-turn.
 
 5. **POC / exploration** — Vision model, GPU Metal fix, Claude Code patterns. Use branches, never main.
 
 6. **Bug hunting** — Test edge cases, empty DB, no HealthKit, model not downloaded.
+
+7. **Estimate calories feature** — "How many calories in X?" should look up foods.json first, fall back to LLM estimation. Show cal/protein/carbs/fat. Offer to log after. Works for Indian foods, multi-item, restaurant meals. See `Docs/human-reported-bugs.md` FEAT-001 for details.
+
+**Human-reported bugs: Always check `Docs/human-reported-bugs.md` — these are top priority above numbered items. Fix before new feature work.**
 
 **Bigger picture:** Remove all friction of form filling. Every manual data entry should be doable through natural conversation.
 
@@ -33,10 +37,12 @@ _Human override:_ CONTINUE
 
 **Fresh start (no prior work this session):**
 
-1. Read `CLAUDE.md` for project rules.
+1. Read `CLAUDE.md` for project rules and doc map.
 2. Read this file's steering notes (above).
-3. Read `Docs/ai-architecture-plan.md` for current architecture direction.
-4. Check `Docs/improvement-log.md` — read the last 5 entries to know what was done recently.
+3. Read `Docs/architecture.md` for tool-calling SLM vision.
+4. Read `Docs/sprint.md` for current tickets.
+5. Read `Docs/human-reported-bugs.md` — fix these first, they come from real usage.
+6. Check `Docs/improvement-log.md` — read the last 5 entries to know what was done recently.
 5. Run a quick build to confirm the project compiles:
    ```bash
    xcodebuild build -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' 2>&1 | tail -5
@@ -57,7 +63,7 @@ _Human override:_ CONTINUE
 **What you MUST do:**
 - Build after every change: `xcodebuild build ... 2>&1 | tail -20`
 - Test after every change: `xcodebuild test ... 2>&1 | grep -E "Test Suite|✘|Executed"` 
-- All 566+ tests must pass before committing
+- All 729+ tests must pass before committing
 - Commit after each meaningful improvement
 - Log every cycle to `Docs/improvement-log.md`
 - Re-read steering notes before every cycle
@@ -72,7 +78,7 @@ _Human override:_ CONTINUE
 - Add analytics or cloud features (privacy-first)
 - Stop to ask "should I continue?" — the human will edit steering notes if they want you to stop
 - Leave the loop idle — always have a next step
-- Add entirely new major features not in priorities (write ideas to `Docs/future-ideas.md`)
+- Add entirely new major features not in priorities (write ideas to `Docs/backlog.md`)
 - Delete user data or break data models without migration
 - Change core architecture (MVVM, local-first, no cloud)
 
@@ -86,7 +92,7 @@ _Human override:_ CONTINUE
 
 **Don't overthink.** A good fix shipped now beats a perfect fix that never happens because you got stuck planning.
 
-**Escalate by logging, not by stopping.** If you hit something genuinely uncertain (data model change, removing a feature), write it to `Docs/future-ideas.md` and keep working on other things.
+**Escalate by logging, not by stopping.** If you hit something genuinely uncertain (data model change, removing a feature), write it to `Docs/backlog.md` and keep working on other things.
 
 ## Finding work when priorities are unclear
 
