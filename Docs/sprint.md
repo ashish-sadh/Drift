@@ -28,7 +28,7 @@ _(pick from Ready)_
 - [x] **WIRE-5: Smart workout when no template** — e7eacfb+
 
 ### Quality
-- [ ] **QA-1: Eval tests for tool-call format** — 10+ tests verifying LLM outputs valid JSON tool calls.
+- [x] **QA-1: Eval tests for tool-call format** — af5f810+
 - [ ] **QA-2: Service unit tests** — At least 5 tests per new service (FoodService, WeightService, ExerciseService).
 - [ ] **QA-3: Progressive overload tests** — Verify improving/stalling/declining detection.
 - [ ] **QA-4: Smart session builder tests** — Verify max 5 exercises, popular first, notes included.

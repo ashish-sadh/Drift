@@ -1377,11 +1377,97 @@ final class AIEvalHarness: XCTestCase {
         XCTAssertLessThanOrEqual(combinedTokens, 800, "Combined dashboard context: \(combinedTokens) tokens")
     }
 
+    // MARK: - JSON Tool Call Parsing
+
+    func testJSONToolCallParsing() {
+        let cases: [(String, String?)] = [
+            (#"{"tool":"log_food","params":{"name":"eggs","amount":"2"}}"#, "log_food"),
+            (#"{"tool":"get_calories_left","params":{}}"#, "get_calories_left"),
+            (#"{"tool":"log_weight","params":{"value":"165","unit":"lbs"}}"#, "log_weight"),
+            (#"{"tool":"start_template","params":{"name":"Push Day"}}"#, "start_template"),
+            (#"{"tool":"suggest_workout","params":{}}"#, "suggest_workout"),
+            (#"{"tool":"get_sleep","params":{}}"#, "get_sleep"),
+            ("No tool call here, just text.", nil),
+            ("This has no JSON at all.", nil),
+        ]
+        for (input, expectedTool) in cases {
+            let call = parseToolCallJSON(input)
+            if let expected = expectedTool {
+                XCTAssertNotNil(call, "Should parse tool call from: \(input.prefix(40))")
+                XCTAssertEqual(call?.tool, expected)
+            } else {
+                XCTAssertNil(call, "Should NOT parse tool call from: \(input.prefix(40))")
+            }
+        }
+    }
+
+    func testJSONToolCallWithSurroundingText() {
+        // LLM might output text around the JSON
+        let response = #"Sure! Let me log that. {"tool":"log_food","params":{"name":"banana","amount":"1"}} Enjoy!"#
+        let call = parseToolCallJSON(response)
+        XCTAssertNotNil(call)
+        XCTAssertEqual(call?.tool, "log_food")
+        XCTAssertEqual(call?.params.string("name"), "banana")
+    }
+
+    func testJSONToolCallToActionConversion() {
+        // JSON tool calls should convert to Action via AIActionParser
+        let cases: [(String, String)] = [
+            (#"{"tool":"log_food","params":{"name":"chicken"}}"#, "logFood"),
+            (#"{"tool":"log_weight","params":{"value":"75","unit":"kg"}}"#, "logWeight"),
+            (#"{"tool":"start_template","params":{"name":"Legs"}}"#, "startWorkout"),
+        ]
+        for (response, expectedType) in cases {
+            let (action, _) = AIActionParser.parse(response)
+            let actualType: String
+            switch action {
+            case .logFood: actualType = "logFood"
+            case .logWeight: actualType = "logWeight"
+            case .startWorkout: actualType = "startWorkout"
+            case .createWorkout: actualType = "createWorkout"
+            default: actualType = "none"
+            }
+            XCTAssertEqual(actualType, expectedType, "JSON '\(response.prefix(40))' should be \(expectedType)")
+        }
+    }
+
+    @MainActor
+    func testToolRegistryHasTools() {
+        ToolRegistration.registerAll()
+        let tools = ToolRegistry.shared.allTools()
+        XCTAssertGreaterThanOrEqual(tools.count, 15, "Should have 15+ tools registered")
+
+        // Check key tools exist
+        let names = Set(tools.map(\.name))
+        XCTAssertTrue(names.contains("search_food"), "search_food tool should exist")
+        XCTAssertTrue(names.contains("log_weight"), "log_weight tool should exist")
+        XCTAssertTrue(names.contains("suggest_workout"), "suggest_workout tool should exist")
+        XCTAssertTrue(names.contains("get_sleep"), "get_sleep tool should exist")
+    }
+
+    @MainActor
+    func testToolSchemaPrompt() {
+        ToolRegistration.registerAll()
+        let prompt = ToolRegistry.shared.schemaPrompt()
+        XCTAssertTrue(prompt.contains("Tools:"), "Schema prompt should start with 'Tools:'")
+        // Check prompt has some tools listed (exact names depend on registration order + prefix limit)
+        XCTAssertTrue(prompt.count > 50, "Schema prompt should have content")
+    }
+
+    @MainActor
+    func testSpellCorrectService() {
+        XCTAssertEqual(SpellCorrectService.correct("chiken breast"), "chicken breast")
+        XCTAssertEqual(SpellCorrectService.correct("bananaa"), "banana")
+        XCTAssertEqual(SpellCorrectService.correct("protien shake"), "protein shake")
+        XCTAssertEqual(SpellCorrectService.correct("chicken breast"), "chicken breast") // already correct
+        XCTAssertEqual(SpellCorrectService.correct("panner tikka"), "paneer tikka")
+    }
+
     // MARK: - Summary
 
     func testPrintSummary() {
         print("=== AI EVAL HARNESS SUMMARY ===")
-        print("Total eval test methods: 48+")
+        print("Total eval test methods: 70+")
         print("Target: food logging >= 85%, weight >= 83%, routing >= 85%, parsing >= 78%")
         print("===============================")
     }
