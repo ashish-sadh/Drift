@@ -35,7 +35,7 @@ _(pick from Ready)_
 - [ ] **Saved meals (one-tap re-log)** — Save multi-item meals as a group for quick re-logging.
 - [x] **Workout streak display** — Flame icon + "X week streak" + "Best: Yw" above consistency chart
 - [x] **Time-of-day food search boost** — FoodSearchView now uses FoodService.searchFood (includes time boost + spell correction)
-- [ ] **Quick-add raw calories** — "Just enter 500 cal" button for eating out.
+- [x] **Quick-add raw calories** — Already exists in FoodSearchView → manual entry section
 
 ### Next: Run Qwen3 eval and compare
 - [x] **Qwen3-1.7B eval** — Food Logging: 30% (vs Qwen2.5 100%). Qwen3 is WORSE. Keeping Qwen2.5.
