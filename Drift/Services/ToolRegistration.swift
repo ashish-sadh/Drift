@@ -121,6 +121,26 @@ enum ToolRegistration {
             }
         ))
 
+        r.register(ToolSchema(
+            id: "weight.set_goal", name: "set_goal", service: "weight",
+            description: "User wants to SET or UPDATE their weight goal. Use when they say 'set goal to', 'target weight', 'I want to weigh'.",
+            parameters: [ToolParam("target", "number", "Target weight"), ToolParam("unit", "string", "kg or lbs", required: false)],
+            handler: { params in
+                guard let target = params.double("target") else { return .error("Missing target weight") }
+                let unit = params.string("unit") ?? Preferences.weightUnit.rawValue
+                let targetKg = unit.lowercased().hasPrefix("kg") ? target : target / 2.20462
+                if targetKg < 20 || targetKg > 200 { return .error("Target \(target) \(unit) is outside valid range.") }
+
+                let currentKg = (try? AppDatabase.shared.fetchWeightEntries())?.first?.weightKg ?? targetKg
+                var goal = WeightGoal.load() ?? WeightGoal(targetWeightKg: targetKg, monthsToAchieve: 6,
+                    startDate: DateFormatters.todayString, startWeightKg: currentKg)
+                goal.targetWeightKg = targetKg
+                goal.save()
+                let display = unit.lowercased().hasPrefix("kg") ? String(format: "%.1f kg", target) : String(format: "%.0f lbs", target)
+                return .text("Goal set to \(display).")
+            }
+        ))
+
         // MARK: - Exercise Tools (2 — consolidated from 4)
 
         r.register(ToolSchema(

@@ -12,8 +12,8 @@ _(pick from Ready)_
 - [x] **Mark supplement taken via chat** — "took my creatine", "took vitamin D". Add handler + supplement tool to mark taken by name.
 - [x] **Edit/delete food entry via chat** — "remove the rice", "delete last entry", "undo". Add delete tool that removes most recent matching entry.
 - [x] **Copy yesterday's food** — "copy yesterday", "same as yesterday". Add tool that duplicates yesterday's food entries to today.
-- [ ] **Quick-add raw calories** — "just log 500 cal for lunch", "log 400 calories". Parse calorie-only intents, create manual entry.
-- [ ] **Set/update weight goal** — "set goal to 160 lbs", "change goal to 75 kg". Add goal tool that updates WeightGoal.
+- [x] **Quick-add raw calories** — "just log 500 cal for lunch", "log 400 calories". Parse calorie-only intents, create manual entry.
+- [x] **Set/update weight goal** — "set goal to 160 lbs", "change goal to 75 kg". Add goal tool that updates WeightGoal.
 
 ### P0.5: Fix Failing Queries (from failing-queries.md)
 - [ ] **"suggest me workout"** — Handle workout suggestion variants. Small model: keyword handler. Large model: ensure exercise_info tool called. Add eval tests for 5+ phrasings.

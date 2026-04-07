@@ -454,6 +454,31 @@ struct AIChatView: View {
             }
         }
 
+        // Set weight goal: "set goal to 160", "target weight 75 kg", "I want to weigh 150"
+        let goalPattern = #"(?:set goal to|target weight|i want to weigh|goal weight|my goal is)\s+(\d+\.?\d*)\s*(kg|lbs|lb|pounds?)?"#
+        if let goalRegex = try? NSRegularExpression(pattern: goalPattern),
+           let goalMatch = goalRegex.firstMatch(in: lower, range: NSRange(lower.startIndex..., in: lower)),
+           let numRange = Range(goalMatch.range(at: 1), in: lower),
+           let target = Double(String(lower[numRange])) {
+            let unit: String
+            if let unitRange = Range(goalMatch.range(at: 2), in: lower) {
+                unit = String(lower[unitRange]).hasPrefix("kg") ? "kg" : "lbs"
+            } else {
+                unit = Preferences.weightUnit.rawValue
+            }
+            let targetKg = unit == "kg" ? target : target / 2.20462
+            if targetKg >= 20 && targetKg <= 200 {
+                let currentKg = (try? AppDatabase.shared.fetchWeightEntries())?.first?.weightKg ?? targetKg
+                var goal = WeightGoal.load() ?? WeightGoal(targetWeightKg: targetKg, monthsToAchieve: 6,
+                    startDate: DateFormatters.todayString, startWeightKg: currentKg)
+                goal.targetWeightKg = targetKg
+                goal.save()
+                let display = unit == "kg" ? String(format: "%.1f kg", target) : String(format: "%.0f lbs", target)
+                messages.append(ChatMessage(role: .assistant, text: "Goal set to \(display)."))
+                return
+            }
+        }
+
         // Quick-add raw calories: "log 500 cal", "just log 400 calories for lunch"
         let calPattern = #"(\d+)\s*(?:cal(?:ories?)?|kcal)"#
         if let regex = try? NSRegularExpression(pattern: calPattern),
