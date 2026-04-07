@@ -51,7 +51,7 @@ LOOP FOREVER — do NOT stop between tickets:
 - Keep text responses under 3 sentences — save context for code
 - Only read files you are about to edit — don't browse
 - Run eval harness after AI changes: `xcodebuild test ... -only-testing:'DriftTests/AIEvalHarness' > /tmp/drift-eval.log 2>&1`
-- Don't publish TestFlight unless steering says to
+- Publish TestFlight every 3 hours (not more frequent — Apple blocks). Check git log timestamps.
 - POC work on branches, not main
 - No MacroFactor references. Privacy-first. No cloud.
 - New ideas go to `Docs/backlog.md`, not inline
