@@ -65,12 +65,20 @@ struct WeightTabView: View {
         }
         .sheet(isPresented: $showingAddBodyComp) {
             BodyCompEntryView(
-                onSave: { bodyFat, bmi, water, date in
-                    var entry = BodyComposition(
-                        date: DateFormatters.dateOnly.string(from: date),
-                        bodyFatPct: bodyFat, bmi: bmi, waterPct: water
-                    )
-                    try? AppDatabase.shared.saveBodyComposition(&entry)
+                unit: viewModel.weightUnit,
+                onSave: { weight, bodyFat, bmi, water, date in
+                    let dateStr = DateFormatters.dateOnly.string(from: date)
+                    // Save weight if provided
+                    if let w = weight {
+                        viewModel.addWeight(value: w, date: date)
+                    }
+                    // Save body composition if any values provided
+                    if bodyFat != nil || bmi != nil || water != nil {
+                        var entry = BodyComposition(
+                            date: dateStr, bodyFatPct: bodyFat, bmi: bmi, waterPct: water
+                        )
+                        try? AppDatabase.shared.saveBodyComposition(&entry)
+                    }
                     viewModel.loadEntries()
                 },
                 lastBodyFat: (try? AppDatabase.shared.fetchLatestBodyComposition())?.bodyFatPct,

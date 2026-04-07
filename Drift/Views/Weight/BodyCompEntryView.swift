@@ -1,13 +1,16 @@
 import SwiftUI
 
-/// Standalone entry view for body composition (fat %, BMI, water %).
+/// Entry view for body composition + optional weight.
+/// Most smart scales give weight + body fat + BMI together.
 struct BodyCompEntryView: View {
-    let onSave: (Double?, Double?, Double?, Date) -> Void  // bodyFat, bmi, water, date
+    let unit: WeightUnit
+    let onSave: (Double?, Double?, Double?, Double?, Date) -> Void  // weight, bodyFat, bmi, water, date
     var lastBodyFat: Double? = nil
     var lastBMI: Double? = nil
     var lastWater: Double? = nil
 
     @Environment(\.dismiss) private var dismiss
+    @State private var weightText = ""
     @State private var bodyFatText = ""
     @State private var bmiText = ""
     @State private var waterText = ""
@@ -16,6 +19,22 @@ struct BodyCompEntryView: View {
     var body: some View {
         NavigationStack {
             Form {
+                Section {
+                    HStack {
+                        Label("Weight", systemImage: "scalemass.fill")
+                        Spacer()
+                        TextField("—", text: $weightText)
+                            .keyboardType(.decimalPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 80)
+                        Text(unit.displayName).foregroundStyle(.secondary)
+                    }
+                } header: {
+                    Text("Weight (Optional)")
+                } footer: {
+                    Text("Add weight if your scale shows it alongside body composition.")
+                }
+
                 Section {
                     HStack {
                         Label("Body Fat", systemImage: "figure.arms.open")
@@ -27,7 +46,7 @@ struct BodyCompEntryView: View {
                         Text("%").foregroundStyle(.secondary)
                     }
                     HStack {
-                        Label("BMI", systemImage: "scalemass")
+                        Label("BMI", systemImage: "heart.text.clipboard")
                         Spacer()
                         TextField(lastBMI.map { String(format: "%.1f", $0) } ?? "—", text: $bmiText)
                             .keyboardType(.decimalPad)
@@ -53,7 +72,7 @@ struct BodyCompEntryView: View {
                     DatePicker("Date", selection: $selectedDate, displayedComponents: .date)
                 }
             }
-            .navigationTitle("Log Body Composition")
+            .navigationTitle("Log Measurement")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -61,14 +80,15 @@ struct BodyCompEntryView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
+                        let weight = Double(weightText)
                         let bf = Double(bodyFatText)
                         let bmi = Double(bmiText)
                         let water = Double(waterText)
-                        guard bf != nil || bmi != nil || water != nil else { return }
-                        onSave(bf, bmi, water, selectedDate)
+                        guard weight != nil || bf != nil || bmi != nil || water != nil else { return }
+                        onSave(weight, bf, bmi, water, selectedDate)
                         dismiss()
                     }
-                    .disabled(bodyFatText.isEmpty && bmiText.isEmpty && waterText.isEmpty)
+                    .disabled(weightText.isEmpty && bodyFatText.isEmpty && bmiText.isEmpty && waterText.isEmpty)
                 }
             }
         }
