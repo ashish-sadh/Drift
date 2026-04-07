@@ -29,7 +29,7 @@ _(pick from Ready)_
 ### P2: More Chat Features
 - [x] **Body comp entry via chat** — "my body fat is 18%", "log body fat", "bmi 22.5". Hardcoded + log_body_comp tool.
 - [ ] **Trigger barcode scan from chat** — "scan barcode", "scan food". Open camera sheet.
-- [ ] **Manual food with inline macros** — "log 400 cal 30g protein lunch". Parse calorie+macro intent.
+- [x] **Manual food with inline macros** — "log 400 cal 30g protein lunch", "500cal 25p 60c 20f". Parse calorie+macro intent.
 - [ ] **Add supplement to stack** — "add vitamin D 2000 IU". Supplement management tool.
 - [x] **Weekly comparison** — "compare this week to last". Instant rule engine answer from comparisonContext().
 

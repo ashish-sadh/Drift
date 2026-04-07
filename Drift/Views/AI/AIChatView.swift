@@ -510,6 +510,50 @@ struct AIChatView: View {
             }
         }
 
+        // Inline macros: "log 400 cal 30g protein lunch" or "log 500cal 25p 60c 20f"
+        let macroPattern = #"(\d+)\s*(?:cal|kcal).*?(\d+)\s*(?:g\s*)?(?:p(?:rotein)?)"#
+        if let macroRegex = try? NSRegularExpression(pattern: macroPattern),
+           let macroMatch = macroRegex.firstMatch(in: lower, range: NSRange(lower.startIndex..., in: lower)),
+           let calRange = Range(macroMatch.range(at: 1), in: lower),
+           let protRange = Range(macroMatch.range(at: 2), in: lower),
+           let cal = Int(String(lower[calRange])), let prot = Int(String(lower[protRange])),
+           cal >= 50 && cal <= 5000 {
+            // Try to extract carbs and fat too
+            var carbs = 0.0
+            var fat = 0.0
+            let carbPat = #"(\d+)\s*(?:g\s*)?(?:c(?:arbs?)?)"#
+            if let cRegex = try? NSRegularExpression(pattern: carbPat),
+               let cMatch = cRegex.firstMatch(in: lower, range: NSRange(lower.startIndex..., in: lower)),
+               let cRange = Range(cMatch.range(at: 1), in: lower) { carbs = Double(String(lower[cRange])) ?? 0 }
+            let fatPat = #"(\d+)\s*(?:g\s*)?(?:f(?:at)?)"#
+            if let fRegex = try? NSRegularExpression(pattern: fatPat),
+               let fMatch = fRegex.firstMatch(in: lower, range: NSRange(lower.startIndex..., in: lower)),
+               let fRange = Range(fMatch.range(at: 1), in: lower) { fat = Double(String(lower[fRange])) ?? 0 }
+            // Detect meal
+            var meal: String? = nil
+            for (kw, m) in [("breakfast", "breakfast"), ("lunch", "lunch"), ("dinner", "dinner"), ("snack", "snack")] {
+                if lower.contains(kw) { meal = m; break }
+            }
+            let today = DateFormatters.todayString
+            let mealType = meal ?? { let h = Calendar.current.component(.hour, from: Date()); return h < 11 ? "breakfast" : h < 15 ? "lunch" : h < 21 ? "dinner" : "snack" }()
+            do {
+                var mealLogs = try AppDatabase.shared.fetchMealLogs(for: today)
+                var mealLog = mealLogs.first { $0.mealType == mealType }
+                if mealLog == nil {
+                    var newLog = MealLog(date: today, mealType: mealType)
+                    try AppDatabase.shared.saveMealLog(&newLog)
+                    mealLog = newLog
+                }
+                if let mlId = mealLog?.id {
+                    var entry = FoodEntry(mealLogId: mlId, foodName: "Quick Add", servingSizeG: 0, servings: 1,
+                                           calories: Double(cal), proteinG: Double(prot), carbsG: carbs, fatG: fat)
+                    try AppDatabase.shared.saveFoodEntry(&entry)
+                    messages.append(ChatMessage(role: .assistant, text: "Logged \(cal) cal, \(prot)P\(carbs > 0 ? " \(Int(carbs))C" : "")\(fat > 0 ? " \(Int(fat))F" : "") for \(mealType)."))
+                    return
+                }
+            } catch {}
+        }
+
         // Quick-add raw calories: "log 500 cal", "just log 400 calories for lunch"
         let calPattern = #"(\d+)\s*(?:cal(?:ories?)?|kcal)"#
         if let regex = try? NSRegularExpression(pattern: calPattern),
