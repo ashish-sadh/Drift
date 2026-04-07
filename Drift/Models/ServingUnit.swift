@@ -271,6 +271,14 @@ struct FoodUnit: Hashable {
             units.append(FoodUnit(label: "half", gramsEquivalent: 2.5))
         }
 
+        // Universal: always include "piece" as an option for every food
+        // Countable labels like "egg", "banana", "piece" already cover some foods
+        let countableLabels: Set<String> = ["piece", "egg", "banana", "apple", "orange", "meatball", "slice"]
+        if !units.contains(where: { countableLabels.contains($0.label) }) {
+            let pieceWeight = food.servingSize > 0 ? food.servingSize : 100
+            units.append(FoodUnit(label: "piece", gramsEquivalent: pieceWeight))
+        }
+
         return units
     }
 
@@ -287,6 +295,11 @@ struct FoodUnit: Hashable {
            name.contains("samosa") || name.contains("pakora") || name.contains("momo") {
             return FoodUnit(label: "piece", gramsEquivalent: ss)
         }
+        if name.contains("date") && !name.contains("update") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
+        if name.contains("tortilla") || name.contains("wrap") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
+        if name.contains("wing") || name.contains("nugget") || name.contains("tender") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
+        if name.contains("waffle") || name.contains("pancake") || name.contains("donut") || name.contains("doughnut") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
+        if name.contains("brownie") || name.contains("muffin") || name.contains("cupcake") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
         if name.contains("banana") && ss < 160 { return FoodUnit(label: "banana", gramsEquivalent: ss) }
         if name.contains("apple") && ss < 250 { return FoodUnit(label: "apple", gramsEquivalent: ss) }
         if name.contains("orange") && ss < 200 { return FoodUnit(label: "orange", gramsEquivalent: ss) }
