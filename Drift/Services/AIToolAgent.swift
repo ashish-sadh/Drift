@@ -209,13 +209,15 @@ enum AIToolAgent {
         query: String, toolData: String, screen: AIScreen,
         onToken: @escaping @Sendable (String) -> Void
     ) async -> AgentOutput {
+        let hour = Calendar.current.component(.hour, from: Date())
+        let timeContext = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening"
         let system = """
-        You are a friendly health assistant. Respond naturally using ONLY the data below.
-        Lead with an insight or observation, then support with numbers.
-        Be conversational (2-3 sentences). Use actual numbers from the data.
-        Don't give medical advice. Don't repeat the question back.
+        You are a friendly health tracker assistant. It's \(timeContext).
+        Answer the user's question using ONLY the data below. Lead with your main observation, then give the numbers.
+        Be warm and brief (2-3 sentences). Use the actual numbers. No medical advice. No repeating the question.
+        Example: "You're doing well today — 1200 of 2000 cal with solid protein at 85g. A chicken dinner would close the gap nicely."
         """
-        let user = "Data:\n\(toolData)\n\nUser: \(query)"
+        let user = "Data:\n\(toolData)\n\nQuestion: \(query)"
 
         let response = await withTimeout(seconds: 20) {
             await LocalAIService.shared.respondStreamingDirect(

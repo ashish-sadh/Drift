@@ -123,10 +123,15 @@ enum ToolRegistration {
                     return .text(lines.joined(separator: "\n"))
                 }
 
-                // General food info: calories, macros, suggestions
+                // General food info: calories, macros, suggestions, context
                 let totals = FoodService.getDailyTotals()
                 var lines: [String] = []
-                lines.append("\(totals.remaining > 0 ? "\(totals.remaining)" : "0") cal remaining (\(totals.eaten)/\(totals.target)).")
+                let pctEaten = totals.target > 0 ? Int(Double(totals.eaten) / Double(totals.target) * 100) : 0
+                lines.append("Calories: \(totals.eaten) eaten of \(totals.target) target (\(totals.remaining > 0 ? "\(totals.remaining) remaining" : "\(abs(totals.remaining)) over")).")
+                // Progress indicator for LLM context
+                if pctEaten < 30 { lines.append("Status: early in the day, plenty of budget left.") }
+                else if pctEaten >= 80 && pctEaten <= 105 { lines.append("Status: close to target, on track.") }
+                else if pctEaten > 105 { lines.append("Status: over target by \(abs(totals.remaining)) cal.") }
 
                 if let t = targets {
                     let pLeft = max(0, Int(t.proteinG) - totals.proteinG)
