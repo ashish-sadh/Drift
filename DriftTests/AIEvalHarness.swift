@@ -62,6 +62,10 @@ final class AIEvalHarness: XCTestCase {
             ("i did yoga for 30 minutes", ""),
             ("i did push ups", ""),
             ("just did 20 min cardio", ""),
+            // Diet/fitness advice
+            ("i want to reduce fat", "advice"),
+            ("how to lose fat", "advice"),
+            ("tips to cut fat", "advice"),
         ]
         for (query, _) in ruleQueries {
             let result = StaticOverrides.match(query)

@@ -12,7 +12,7 @@ Real queries that don't work well. Fix systematically, then move to Fixed.
 ## Failing
 
 ### Normalizer / Natural Language
-- [ ] **"I had 2 to 3 bananas"** — extractAmount doesn't handle ranges. Normalizer should rewrite to "log 3 banana". Test normalizer on-device.
+- [x] **"I had 2 to 3 bananas"** — FIXED: extractAmount now handles ranges "X to Y" by taking higher number.
 - [ ] **"I ate three biryani"** — Word number + food. extractAmount has "three"→3 but may not work in all phrasings. Normalizer backup.
 - [ ] **"set my goal to one sixty"** — Word number "one sixty" = 160. Normalizer should rewrite.
 - [ ] **"I did yoga for like half an hour"** — "like half an hour" = 30 min. Normalizer should rewrite.

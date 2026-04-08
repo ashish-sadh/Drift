@@ -340,6 +340,22 @@ enum StaticOverrides {
             }
         }
 
+        // Diet/fitness advice (prevents LLM misclassification as food logging)
+        let adviceKeywords = ["reduce fat", "lose fat", "burn fat", "cut fat", "how to lose",
+                               "tips to cut", "i need to burn", "i want to lose weight",
+                               "how to gain muscle", "how to bulk", "what's a good diet"]
+        if adviceKeywords.contains(where: { lower.contains($0) }) {
+            return .handler {
+                let n = (try? AppDatabase.shared.fetchDailyNutrition(for: DateFormatters.todayString)) ?? .zero
+                if let goal = WeightGoal.load(), let targets = goal.macroTargets() {
+                    let calsLeft = max(0, Int(targets.calorieTarget - n.calories))
+                    let protLeft = max(0, Int(targets.proteinG - n.proteinG))
+                    return "Focus on protein (\(protLeft)g left today), stay in calorie budget (\(calsLeft) cal left). High-protein foods: chicken, eggs, greek yogurt, paneer, dal."
+                }
+                return "Key tips: prioritize protein, eat in a calorie deficit for fat loss (or surplus for muscle gain). Track your meals to stay on target."
+            }
+        }
+
         // Completed activity (both models)
         let activityPrefixes = ["i did ", "i went ", "just did ", "just finished ", "did "]
         if let prefix = activityPrefixes.first(where: { lower.hasPrefix($0) }) {
