@@ -72,6 +72,40 @@ enum StaticOverrides {
         if lower == "supplements" || lower == "did i take my supplements" || lower == "supplement status" {
             return .handler { AIRuleEngine.supplementStatus() }
         }
+        // Weight progress: "how much have I lost", "am I losing weight"
+        let weightProgressPatterns = ["how much have i lost", "how much weight have i lost",
+                                       "am i losing weight", "weight progress", "how's my weight",
+                                       "am i on track", "weight trend"]
+        if weightProgressPatterns.contains(where: { lower.contains($0) }) {
+            return .handler {
+                guard let entries = try? AppDatabase.shared.fetchWeightEntries(), entries.count >= 2 else {
+                    return "Need at least 2 weight entries to show a trend. Log your weight to get started."
+                }
+                let unit = Preferences.weightUnit
+                let latest = entries.first!
+                let oldest = entries.last!
+                let totalChange = unit.convert(fromKg: latest.weightKg - oldest.weightKg)
+                let direction = totalChange > 0 ? "gained" : totalChange < 0 ? "lost" : "maintained"
+                var lines = ["Weight: \(String(format: "%.1f", unit.convert(fromKg: latest.weightKg))) \(unit.displayName) (latest)"]
+                lines.append("You've \(direction) \(String(format: "%.1f", abs(totalChange))) \(unit.displayName) total (\(entries.count) entries)")
+
+                // Weekly trend
+                let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+                let weekStr = DateFormatters.dateOnly.string(from: weekAgo)
+                let recentEntries = entries.filter { $0.date >= weekStr }
+                if recentEntries.count >= 2, let weekOldest = recentEntries.last {
+                    let weekChange = unit.convert(fromKg: latest.weightKg - weekOldest.weightKg)
+                    lines.append("This week: \(weekChange >= 0 ? "+" : "")\(String(format: "%.1f", weekChange)) \(unit.displayName)")
+                }
+
+                if let goal = WeightGoal.load() {
+                    let remaining = unit.convert(fromKg: abs(latest.weightKg - goal.targetWeightKg))
+                    lines.append("Goal: \(String(format: "%.1f", unit.convert(fromKg: goal.targetWeightKg))) \(unit.displayName) (\(String(format: "%.1f", remaining)) to go)")
+                }
+                return lines.joined(separator: "\n")
+            }
+        }
+
         // Undo: "undo", "undo that", "undo last" — same as "delete last entry"
         if lower == "undo" || lower == "undo that" || lower == "undo last" {
             return .handler {

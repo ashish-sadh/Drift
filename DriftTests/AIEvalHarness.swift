@@ -69,6 +69,9 @@ final class AIEvalHarness: XCTestCase {
             ("delete last entry", "delete"),
             ("remove the rice", "delete"),
             ("undo last food", "delete"),
+            // Weight progress
+            ("how much have i lost", "weight"), ("am i losing weight", "weight"),
+            ("weight progress", "weight"), ("how's my weight", "weight"),
             // Undo
             ("undo", "undo"), ("undo that", "undo"), ("undo last", "undo"),
             // TDEE/BMR
