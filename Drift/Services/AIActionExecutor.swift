@@ -286,6 +286,34 @@ enum AIActionExecutor {
             }
         }
 
+        // Compact leading: "200ml milk", "100g chicken", "300g rice"
+        if leadingWords.count >= 2 {
+            let first = leadingWords[0].lowercased()
+            for unit in gramUnitsLeading {
+                if first.hasSuffix(unit), let num = Double(first.dropLast(unit.count)) {
+                    let food = leadingWords[1...].joined(separator: " ")
+                    return (nil, food.trimmingCharacters(in: .whitespaces), num)
+                }
+            }
+        }
+
+        // Word amount + unit: "half cup oats", "quarter cup rice"
+        let wordAmountsLeading: [String: Double] = ["half": 0.5, "quarter": 0.25, "one": 1, "two": 2, "three": 3]
+        if leadingWords.count >= 3, let amt = wordAmountsLeading[leadingWords[0].lowercased()] {
+            let unit = leadingWords[1].lowercased()
+            let isGramUnit = gramUnitsLeading.contains(unit)
+            let isCountUnit = countUnitsLeading.contains(unit)
+            if isGramUnit || isCountUnit {
+                var foodStart = 2
+                if leadingWords.count > 3 && leadingWords[2].lowercased() == "of" { foodStart = 3 }
+                let food = leadingWords[foodStart...].joined(separator: " ")
+                if !food.isEmpty {
+                    if isGramUnit { return (nil, food.trimmingCharacters(in: .whitespaces), amt) }
+                    else { return (amt, food.trimmingCharacters(in: .whitespaces), nil) }
+                }
+            }
+        }
+
         // Multi-word amounts first
         let multiWord: [(String, Double)] = [("a couple of ", 2), ("couple of ", 2), ("a few ", 3), ("a lot of ", 2), ("lots of ", 2)]
         for (prefix, amount) in multiWord {

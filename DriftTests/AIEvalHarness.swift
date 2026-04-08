@@ -655,6 +655,14 @@ final class AIEvalHarness: XCTestCase {
             ("100 gram of rice", nil, 100),       // servings=nil, grams=100
             ("200 ml of milk", nil, 200),
             ("50 g paneer", nil, 50),
+            // Compact leading: "200ml milk"
+            ("200ml milk", nil, 200),
+            ("100g chicken", nil, 100),
+            ("300g rice", nil, 300),
+            // Word amount + unit: "half cup oats"
+            ("half cup oats", 0.5, nil),
+            ("two scoops protein", 2, nil),
+            ("quarter cup rice", 0.25, nil),
         ]
         var correct = 0
         for (input, expectedServings, expectedGrams) in countCases {
