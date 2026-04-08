@@ -56,7 +56,7 @@ The self-improvement loop picks from the **Gap** section to close parity.
 - [ ] **Meal planning** — "plan my meals for today" → iterative suggestions based on remaining macros + history.
 - [ ] **Workout split builder** — "build me a PPL split" → multi-turn designing across sessions.
 - [x] **Cross-domain analysis** — "why am I not losing weight?" → combines food + weight + exercise data. StaticOverrides handler.
-- [ ] **Weekly comparison** — "compare this week to last" → trend analysis with data.
+- [x] **Weekly comparison** — "compare this week to last" → week-over-week calorie average comparison.
 - [x] **Coaching dialogue** — "am I eating enough protein for my workouts?" → cross-domain handler with contextual advice using real data.
 
 ### P3 — Nice to Have
