@@ -229,10 +229,19 @@ enum ToolRanker {
                 }
             }
         case "food_info":
-            // Pass macro focus if asking about specific macro
+            // Pass macro focus if asking about specific macro, or raw query for context
             if lower.contains("protein") { params["query"] = "protein" }
             else if lower.contains("carb") { params["query"] = "carbs" }
             else if lower.contains("fat") && !lower.contains("body fat") { params["query"] = "fat" }
+            else if lower.contains("yesterday") { params["query"] = "yesterday" }
+            else if lower.contains("week") { params["query"] = "weekly" }
+            else if lower.contains("suggest") || lower.contains("what should") || lower.contains("what to eat") { params["query"] = "suggest" }
+            else { params["query"] = lower } // pass raw query for LLM context
+        case "sleep_recovery":
+            // Pass period context for weekly queries
+            if lower.contains("week") || lower.contains("trend") || lower.contains("last") {
+                params["period"] = "week"
+            }
         default:
             break // Many tools take no params (weight_info, sleep_recovery, etc.)
         }
@@ -346,7 +355,11 @@ enum ToolRanker {
             triggers: [("calories", 2.5), ("protein", 2), ("macros", 2.5), ("nutrition", 2),
                        ("diet", 1.5), ("hungry", 1.5), ("remaining", 2), ("left", 2),
                        ("calories left", 3), ("how am i doing", 3), ("on track", 2),
-                       ("what should i eat", 3), ("what to eat", 2.5)],
+                       ("what should i eat", 3), ("what to eat", 2.5),
+                       ("daily summary", 3.5), ("summary", 2), ("yesterday", 2.5),
+                       ("weekly summary", 3), ("this week", 2.5), ("what did i eat", 3),
+                       ("how are you doing", 3), ("how's my day", 3), ("suggest", 2),
+                       ("meal ideas", 3), ("food ideas", 3)],
             logBoost: -1, queryBoost: 2,
             screens: [.food: 0.5, .dashboard: 0.3],
             antiKeywords: ["log", "remove", "delete", "ate", "had"]
@@ -390,7 +403,9 @@ enum ToolRanker {
         p["weight_info"] = ToolProfile(
             triggers: [("weight", 2), ("trend", 2.5), ("progress", 2), ("gaining", 2.5),
                        ("losing", 2.5), ("how's my weight", 3.5), ("am i on track", 3),
-                       ("goal", 1.5)],
+                       ("goal", 1.5), ("how much have i lost", 4), ("weight progress", 3.5),
+                       ("am i losing", 3), ("compare this week", 3),
+                       ("why am i not losing", 3.5), ("plateau", 3), ("not losing weight", 3.5)],
             logBoost: -1, queryBoost: 2,
             screens: [.weight: 0.5, .goal: 0.5, .dashboard: 0.2],
             antiKeywords: ["log", "set", "target", "i weigh", "scale"]
@@ -443,7 +458,8 @@ enum ToolRanker {
         p["sleep_recovery"] = ToolProfile(
             triggers: [("sleep", 3), ("recovery", 2.5), ("hrv", 3), ("tired", 2), ("energy", 1.5),
                        ("rest", 1.5), ("rested", 2), ("how'd i sleep", 4), ("am i recovered", 3.5),
-                       ("heart rate", 2)],
+                       ("heart rate", 2), ("sleep trend", 3.5), ("last night", 3), ("sleep quality", 3),
+                       ("sleep score", 3), ("how was my sleep", 3.5)],
             logBoost: 0, queryBoost: 1.5,
             screens: [.bodyRhythm: 0.5],
             antiKeywords: ["food", "ate", "weight"]

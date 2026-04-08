@@ -28,7 +28,9 @@ Human says "run self-improvement" or "never stop". Read `program.md` and follow 
 | `Docs/develop.md` | Dev setup, architecture, adding features |
 | `Docs/human-reported-bugs.md` | User bug reports — fix these first |
 | `Docs/improvement-log.md` | Loop cycle log |
+| `Docs/principles/` | Code quality reference cards (Clean Code, Design Patterns, DDD, SwiftUI) |
 | `program.md` | Autonomous loop program |
+| `code-improvement.md` | Code quality autonomous loop |
 
 ## Rules
 - Build and test after every change

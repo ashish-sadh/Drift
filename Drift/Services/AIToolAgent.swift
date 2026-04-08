@@ -210,8 +210,10 @@ enum AIToolAgent {
         onToken: @escaping @Sendable (String) -> Void
     ) async -> AgentOutput {
         let system = """
-        You are a health assistant. Answer using ONLY the data below.
-        Be concise (1-3 sentences). Use actual numbers. No health advice.
+        You are a friendly health assistant. Respond naturally using ONLY the data below.
+        Lead with an insight or observation, then support with numbers.
+        Be conversational (2-3 sentences). Use actual numbers from the data.
+        Don't give medical advice. Don't repeat the question back.
         """
         let user = "Data:\n\(toolData)\n\nUser: \(query)"
 

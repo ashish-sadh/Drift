@@ -54,24 +54,11 @@ enum StaticOverrides {
 
         // --- Gemma: only exact rule engine matches below this point ---
 
-        // Exact rule engine (both models — pure data, no ambiguity)
-        if lower == "daily summary" || lower == "summary" {
-            return .handler { AIRuleEngine.dailySummary() }
-        }
-        if lower == "calories left" || lower == "calories left today" || lower == "how many calories left" {
-            return .handler { AIRuleEngine.caloriesLeft() }
-        }
-        if lower == "yesterday" || lower == "what did i eat yesterday"
-            || lower == "and yesterday?" || lower == "and yesterday"
-            || lower == "what about yesterday?" || lower == "how about yesterday?" {
-            return .handler { AIRuleEngine.yesterdaySummary() }
-        }
-        if lower == "this week" || lower == "weekly summary" || lower == "how was my week" {
-            return .handler { AIRuleEngine.weeklySummary() }
-        }
-        if lower == "supplements" || lower == "did i take my supplements" || lower == "supplement status" {
-            return .handler { AIRuleEngine.supplementStatus() }
-        }
+        // Info queries (daily summary, calories left, yesterday, weekly, supplements, weight progress,
+        // meal suggestions, "how am I doing", cross-domain, sleep) are NOT handled here.
+        // They route through AIToolAgent → tool execution → LLM streaming presentation
+        // for natural conversational responses. Only COMMANDS stay in StaticOverrides.
+
         // Barcode scan: "scan barcode", "scan food"
         let scanPatterns = ["scan barcode", "scan food", "scan a barcode", "barcode",
                              "scan something", "scan a food", "scan it"]
@@ -79,66 +66,7 @@ enum StaticOverrides {
             return .uiAction(.navigate(tab: 0), "Opening barcode scanner...")
         }
 
-        // Meal suggestions: "what should I eat", "suggest dinner", "what's healthy for dinner"
-        let mealSuggestionPatterns = ["what should i eat", "suggest me food", "what to eat",
-                                       "suggest dinner", "suggest lunch", "suggest breakfast",
-                                       "what's healthy for", "what's good for dinner",
-                                       "meal ideas", "food ideas", "what can i eat"]
-        if mealSuggestionPatterns.contains(where: { lower.contains($0) }) {
-            return .handler {
-                let totals = FoodService.getDailyTotals()
-                let calsLeft = totals.remaining
-                let targets = WeightGoal.load()?.macroTargets()
-                let protLeft = targets.map { max(0, Int($0.proteinG) - totals.proteinG) }
-                let suggestions = FoodService.suggestMeal(caloriesLeft: calsLeft, proteinNeeded: protLeft)
-                if suggestions.isEmpty {
-                    return "\(calsLeft) cal remaining. Try something with protein like chicken, eggs, or greek yogurt."
-                }
-                let items = suggestions.prefix(3).map { "\($0.name) (\(Int($0.calories)) cal, \(Int($0.proteinG))P)" }
-                return "\(calsLeft) cal remaining\(protLeft.map { ", need \($0)g protein" } ?? ""). Try: " + items.joined(separator: ", ")
-            }
-        }
-
-        // General status: "how am I doing", "how's my day"
-        let statusPatterns = ["how am i doing", "how's my day", "how is my day",
-                               "how am i today", "status", "my status", "give me a summary"]
-        if statusPatterns.contains(where: { lower == $0 || lower.hasPrefix($0) }) {
-            return .handler { AIRuleEngine.dailySummary() }
-        }
-
-        // Weight progress: "how much have I lost", "am I losing weight"
-        let weightProgressPatterns = ["how much have i lost", "how much weight have i lost",
-                                       "am i losing weight", "weight progress", "how's my weight",
-                                       "am i on track", "weight trend"]
-        if weightProgressPatterns.contains(where: { lower.contains($0) }) {
-            return .handler {
-                guard let entries = try? AppDatabase.shared.fetchWeightEntries(), entries.count >= 2 else {
-                    return "Need at least 2 weight entries to show a trend. Log your weight to get started."
-                }
-                let unit = Preferences.weightUnit
-                let latest = entries.first!
-                let oldest = entries.last!
-                let totalChange = unit.convert(fromKg: latest.weightKg - oldest.weightKg)
-                let direction = totalChange > 0 ? "gained" : totalChange < 0 ? "lost" : "maintained"
-                var lines = ["Weight: \(String(format: "%.1f", unit.convert(fromKg: latest.weightKg))) \(unit.displayName) (latest)"]
-                lines.append("You've \(direction) \(String(format: "%.1f", abs(totalChange))) \(unit.displayName) total (\(entries.count) entries)")
-
-                // Weekly trend
-                let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
-                let weekStr = DateFormatters.dateOnly.string(from: weekAgo)
-                let recentEntries = entries.filter { $0.date >= weekStr }
-                if recentEntries.count >= 2, let weekOldest = recentEntries.last {
-                    let weekChange = unit.convert(fromKg: latest.weightKg - weekOldest.weightKg)
-                    lines.append("This week: \(weekChange >= 0 ? "+" : "")\(String(format: "%.1f", weekChange)) \(unit.displayName)")
-                }
-
-                if let goal = WeightGoal.load() {
-                    let remaining = unit.convert(fromKg: abs(latest.weightKg - goal.targetWeightKg))
-                    lines.append("Goal: \(String(format: "%.1f", unit.convert(fromKg: goal.targetWeightKg))) \(unit.displayName) (\(String(format: "%.1f", remaining)) to go)")
-                }
-                return lines.joined(separator: "\n")
-            }
-        }
+        // Meal suggestions, general status, weight progress → routed through AIToolAgent for LLM presentation
 
         // Undo: "undo", "undo that", "undo last" — same as "delete last entry"
         if lower == "undo" || lower == "undo that" || lower == "undo last" {
@@ -348,23 +276,7 @@ enum StaticOverrides {
             return .handler { ExerciseService.suggestWorkout() }
         }
 
-        // Healthy meal suggestions
-        let healthyFoodQuestions = ["what's healthy", "healthy meal", "healthy food", "healthy dinner",
-                                     "healthy breakfast", "healthy lunch", "healthy snack",
-                                     "what's good to eat", "what should i eat", "suggest food",
-                                     "suggest meal", "suggest a meal", "what to eat", "need food ideas",
-                                     "i'm hungry", "im hungry", "feeling hungry"]
-        if healthyFoodQuestions.contains(where: { lower.contains($0) }) {
-            return .handler {
-                let totals = FoodService.getDailyTotals()
-                var response = "\(totals.remaining > 0 ? "\(totals.remaining)" : "0") cal remaining."
-                let suggestions = FoodService.suggestMeal()
-                if !suggestions.isEmpty {
-                    response += " Try: " + suggestions.prefix(3).map { "\($0.name) (\(Int($0.calories))cal, \(Int($0.proteinG))P)" }.joined(separator: ", ")
-                }
-                return response
-            }
-        }
+        // Meal suggestions, healthy food queries → routed through AIToolAgent for LLM presentation
 
         // Body comp entry
         let bfPattern = #"(?:body fat|bf|body fat %|bodyfat)\s*(?:is\s+)?(\d+\.?\d*)"#
@@ -497,100 +409,7 @@ enum StaticOverrides {
             }
         }
 
-        // Weekly comparison: "compare this week to last"
-        if lower.contains("compare this week") || lower.contains("week vs last") || lower.contains("this week vs") {
-            return .handler {
-                let cal = Calendar.current
-                let today = Date()
-                var thisWeekCals: [Double] = []
-                var lastWeekCals: [Double] = []
-
-                for offset in 0..<7 {
-                    if let d = cal.date(byAdding: .day, value: -offset, to: today) {
-                        let date = DateFormatters.dateOnly.string(from: d)
-                        let n = (try? AppDatabase.shared.fetchDailyNutrition(for: date)) ?? .zero
-                        if n.calories > 0 { thisWeekCals.append(n.calories) }
-                    }
-                    if let d = cal.date(byAdding: .day, value: -offset - 7, to: today) {
-                        let date = DateFormatters.dateOnly.string(from: d)
-                        let n = (try? AppDatabase.shared.fetchDailyNutrition(for: date)) ?? .zero
-                        if n.calories > 0 { lastWeekCals.append(n.calories) }
-                    }
-                }
-
-                var lines: [String] = []
-                let thisAvg = thisWeekCals.isEmpty ? 0 : thisWeekCals.reduce(0, +) / Double(thisWeekCals.count)
-                let lastAvg = lastWeekCals.isEmpty ? 0 : lastWeekCals.reduce(0, +) / Double(lastWeekCals.count)
-
-                lines.append("This week: avg \(Int(thisAvg)) cal/day (\(thisWeekCals.count) days logged)")
-                if !lastWeekCals.isEmpty {
-                    lines.append("Last week: avg \(Int(lastAvg)) cal/day (\(lastWeekCals.count) days)")
-                    let diff = Int(thisAvg - lastAvg)
-                    lines.append("Change: \(diff >= 0 ? "+" : "")\(diff) cal/day \(diff < 0 ? "(eating less)" : diff > 0 ? "(eating more)" : "(same)")")
-                } else {
-                    lines.append("No data from last week to compare.")
-                }
-                return lines.joined(separator: "\n")
-            }
-        }
-
-        // Cross-domain analysis: "why am I not losing weight?", "am I eating enough protein for workouts?"
-        let crossDomainPatterns = ["why am i not losing", "why aren't i losing", "not losing weight",
-                                    "weight plateau", "weight stalled", "am i eating enough protein for"]
-        if crossDomainPatterns.contains(where: { lower.contains($0) }) {
-            return .handler {
-                var lines: [String] = []
-                let today = DateFormatters.todayString
-
-                // Food data
-                let n = (try? AppDatabase.shared.fetchDailyNutrition(for: today)) ?? .zero
-                let goal = WeightGoal.load()
-                let targets = goal?.macroTargets()
-                let tdee = TDEEEstimator.shared.current?.tdee ?? 2000
-                let deficit = goal?.requiredDailyDeficit ?? 0
-                let calTarget = max(500, Int(tdee - deficit))
-
-                // Weight trend
-                if let entries = try? AppDatabase.shared.fetchWeightEntries(), entries.count >= 2 {
-                    let recent = entries.suffix(7)
-                    let first = recent.first!.weightKg
-                    let last = recent.last!.weightKg
-                    let unit = Preferences.weightUnit
-                    let change = unit.convert(fromKg: last - first)
-                    let direction = change > 0 ? "up" : change < 0 ? "down" : "flat"
-                    lines.append("Weight: \(direction) \(String(format: "%.1f", abs(change))) \(unit.displayName) over \(recent.count) entries")
-                }
-
-                // Calorie analysis
-                if n.calories > 0 {
-                    let surplus = Int(n.calories) - calTarget
-                    if surplus > 200 {
-                        lines.append("Today: \(Int(n.calories)) cal eaten — \(surplus) over target (\(calTarget)). This could slow progress.")
-                    } else {
-                        lines.append("Today: \(Int(n.calories))/\(calTarget) cal — on track.")
-                    }
-                }
-
-                // Protein check
-                if let t = targets, n.proteinG > 0 {
-                    let pctProtein = n.proteinG / t.proteinG * 100
-                    if pctProtein < 50 {
-                        lines.append("Protein: only \(Int(n.proteinG))g of \(Int(t.proteinG))g target. Low protein can slow fat loss and muscle retention.")
-                    }
-                }
-
-                // Workout frequency
-                if let workouts = try? WorkoutService.fetchWorkouts(limit: 14) {
-                    let thisWeek = workouts.filter { $0.date >= (Calendar.current.date(byAdding: .day, value: -7, to: Date()).map { DateFormatters.dateOnly.string(from: $0) } ?? "") }
-                    lines.append("Workouts this week: \(thisWeek.count)")
-                }
-
-                if lines.isEmpty {
-                    return "Not enough data yet. Log your meals and weight consistently, then I can analyze trends."
-                }
-                return lines.joined(separator: "\n")
-            }
-        }
+        // Weekly comparison + cross-domain → routed through AIToolAgent for LLM presentation
 
         // Diet/fitness advice (prevents LLM misclassification as food logging)
         let adviceKeywords = ["reduce fat", "lose fat", "burn fat", "cut fat", "how to lose",

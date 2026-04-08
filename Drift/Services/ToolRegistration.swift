@@ -102,6 +102,27 @@ enum ToolRegistration {
                     return .text("\(Int(n.fatG))g fat today.\(left.map { " Target: \(Int(targets!.fatG))g. \($0 > 0 ? "Need \($0)g more." : "Reached!")" } ?? "")")
                 }
 
+                // Yesterday summary
+                if query.contains("yesterday") {
+                    return .text(AIRuleEngine.yesterdaySummary())
+                }
+                // Weekly summary
+                if query.contains("weekly") || query.contains("week") {
+                    return .text(AIRuleEngine.weeklySummary())
+                }
+                // Meal suggestions
+                if query.contains("suggest") || query.contains("what should") || query.contains("what to eat") {
+                    let totals = FoodService.getDailyTotals()
+                    let targets = goal?.macroTargets()
+                    let protLeft = targets.map { max(0, Int($0.proteinG) - totals.proteinG) }
+                    let suggestions = FoodService.suggestMeal(caloriesLeft: totals.remaining, proteinNeeded: protLeft)
+                    var lines = ["\(totals.remaining) cal remaining. \(protLeft.map { "Need \($0)g more protein." } ?? "")"]
+                    if !suggestions.isEmpty {
+                        lines.append("Suggestions: " + suggestions.prefix(3).map { "\($0.name) (\(Int($0.calories)) cal, \(Int($0.proteinG))g protein)" }.joined(separator: ", "))
+                    }
+                    return .text(lines.joined(separator: "\n"))
+                }
+
                 // General food info: calories, macros, suggestions
                 let totals = FoodService.getDailyTotals()
                 var lines: [String] = []
@@ -185,6 +206,22 @@ enum ToolRegistration {
                 lines.append(WeightServiceAPI.describeTrend())
                 if let goal = WeightServiceAPI.getGoalProgress() {
                     lines.append("Goal: \(String(format: "%.1f", goal.currentWeight)) → \(String(format: "%.1f", goal.targetWeight))\(goal.unit), \(goal.progressPct)% done.")
+                }
+                // Enrich with total change + weekly trend for LLM presentation
+                let unit = Preferences.weightUnit
+                if let entries = try? AppDatabase.shared.fetchWeightEntries(), entries.count >= 2 {
+                    let latest = entries.first!
+                    let oldest = entries.last!
+                    let totalChange = unit.convert(fromKg: latest.weightKg - oldest.weightKg)
+                    lines.append("Total change: \(totalChange >= 0 ? "+" : "")\(String(format: "%.1f", totalChange)) \(unit.displayName) over \(entries.count) entries")
+                    // Weekly
+                    let weekAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+                    let weekStr = DateFormatters.dateOnly.string(from: weekAgo)
+                    let recent = entries.filter { $0.date >= weekStr }
+                    if recent.count >= 2, let weekOldest = recent.last {
+                        let weekChange = unit.convert(fromKg: latest.weightKg - weekOldest.weightKg)
+                        lines.append("This week: \(weekChange >= 0 ? "+" : "")\(String(format: "%.1f", weekChange)) \(unit.displayName)")
+                    }
                 }
                 return .text(lines.joined(separator: "\n"))
             }

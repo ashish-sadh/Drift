@@ -33,17 +33,10 @@ final class AIEvalHarness: XCTestCase {
     @MainActor
     func testStaticOverridesRuleEngine() {
         let ruleQueries: [(String, String)] = [
-            // Summaries
-            ("daily summary", "day"), ("summary", "day"),
-            ("yesterday", ""), ("this week", ""), ("weekly summary", ""),
-            // Nutrition status
-            ("calories left", "cal"), ("how many calories left", "cal"),
-            ("what did i eat today", ""), ("what did i eat", ""),
-            // Supplements
-            ("supplements", ""), ("did i take everything", ""),
+            // Commands that stay in StaticOverrides (instant, no LLM):
             // Copy
             ("copy yesterday", ""),
-            // Topic continuation
+            // Topic continuation (macro lookups)
             ("what about protein?", "protein"), ("what about carbs?", "carb"),
             ("how about fat?", "fat"), ("and protein?", "protein"),
             ("what's my protein", "protein"),
@@ -59,7 +52,7 @@ final class AIEvalHarness: XCTestCase {
             // Greetings & closers
             ("hi", "greet"), ("hello", "greet"), ("hey", "greet"),
             ("thanks", "thanks"), ("thank you", "thanks"), ("ok", "ok"),
-            // Activity/exercise via StaticOverrides
+            // Activity/exercise
             ("i did yoga for 30 minutes", ""),
             ("i did push ups", ""),
             ("just did 20 min cardio", ""),
@@ -71,24 +64,11 @@ final class AIEvalHarness: XCTestCase {
             ("undo last food", "delete"),
             // Barcode scan
             ("scan barcode", "scan"), ("scan food", "scan"),
-            // Meal suggestions
-            ("what should i eat", "suggest"), ("what should i eat for dinner", "suggest"),
-            ("food ideas", "suggest"),
-            // General status
-            ("how am i doing", "status"), ("how's my day", "status"),
-            // Weight progress
-            ("how much have i lost", "weight"), ("am i losing weight", "weight"),
-            ("weight progress", "weight"), ("how's my weight", "weight"),
             // Undo
             ("undo", "undo"), ("undo that", "undo"), ("undo last", "undo"),
             // TDEE/BMR
             ("what's my tdee", "tdee"), ("explain tdee", "tdee"),
             ("how many calories do i burn", "tdee"),
-            // Weekly comparison
-            ("compare this week to last", "weekly"),
-            // Cross-domain analysis
-            ("why am i not losing weight", "cross"),
-            ("am i eating enough protein for my workouts", "cross"),
             // Calorie estimation
             ("calories in samosa", "estimate"),
             ("estimate calories for biryani", "estimate"),
@@ -98,9 +78,6 @@ final class AIEvalHarness: XCTestCase {
             ("i want to reduce fat", "advice"),
             ("how to lose fat", "advice"),
             ("tips to cut fat", "advice"),
-            // Topic continuation — yesterday
-            ("and yesterday?", "yesterday"),
-            ("what about yesterday?", "yesterday"),
         ]
         for (query, _) in ruleQueries {
             let result = StaticOverrides.match(query)
@@ -541,18 +518,11 @@ final class AIEvalHarness: XCTestCase {
         }
 
         let tests: [LayerTest] = [
-            // StaticOverrides layer
+            // StaticOverrides layer (commands only)
             LayerTest(query: "hi", expectedLayer: "static"),
             LayerTest(query: "hello", expectedLayer: "static"),
-            LayerTest(query: "daily summary", expectedLayer: "static"),
-            LayerTest(query: "summary", expectedLayer: "static"),
-            LayerTest(query: "calories left", expectedLayer: "static"),
             LayerTest(query: "body fat 18", expectedLayer: "static"),
             LayerTest(query: "log 500 cal", expectedLayer: "static"),
-            LayerTest(query: "yesterday", expectedLayer: "static"),
-            LayerTest(query: "this week", expectedLayer: "static"),
-            LayerTest(query: "weekly summary", expectedLayer: "static"),
-            LayerTest(query: "supplements", expectedLayer: "static"),
             LayerTest(query: "copy yesterday", expectedLayer: "static"),
             LayerTest(query: "thanks", expectedLayer: "static"),
             LayerTest(query: "set goal to 160 lbs", expectedLayer: "static"),
@@ -574,6 +544,14 @@ final class AIEvalHarness: XCTestCase {
             LayerTest(query: "I weigh 165 lbs", expectedLayer: "weight_parser"),
             LayerTest(query: "weight is 75.2 kg", expectedLayer: "weight_parser"),
             LayerTest(query: "scale says 82 kg", expectedLayer: "weight_parser"),
+
+            // Tool ranker layer (info queries — routed to LLM presentation)
+            LayerTest(query: "daily summary", expectedLayer: "tool_ranker"),
+            LayerTest(query: "calories left", expectedLayer: "tool_ranker"),
+            LayerTest(query: "how am I doing", expectedLayer: "tool_ranker"),
+            LayerTest(query: "what should I eat", expectedLayer: "tool_ranker"),
+            LayerTest(query: "sleep trend", expectedLayer: "tool_ranker"),
+            LayerTest(query: "how much have I lost", expectedLayer: "tool_ranker"),
         ]
 
         for test in tests {
