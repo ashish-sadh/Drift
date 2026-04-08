@@ -64,9 +64,12 @@ enum AIToolAgent {
         }
 
         // ── Phase 2: LLM normalize → re-run rules (Gemma only) ──
+        // Track the best query version: normalizer may clean up spelling/phrasing
+        var bestQuery = message
         if isLargeModel {
             onStep(stepMessage(for: message))
             if let rewritten = await normalizeQuery(message, history: history) {
+                bestQuery = rewritten
                 if let toolCall = ToolRanker.tryRulePick(query: rewritten, screen: screen) {
                     return await executeTool(toolCall)
                 }
@@ -82,8 +85,9 @@ enum AIToolAgent {
         }
 
         // ── Phase 3: Tool-first execution → stream presentation (both models) ──
-        onStep(stepMessage(for: message))
-        let toolResults = await executeRelevantTools(query: message, screen: screen)
+        // Use bestQuery (possibly rewritten by normalizer) for better tool matching + presentation
+        onStep(stepMessage(for: bestQuery))
+        let toolResults = await executeRelevantTools(query: bestQuery, screen: screen)
 
         // If a tool returned a UI action, return it directly
         if let actionResult = toolResults.first(where: { $0.action != nil }) {
@@ -97,7 +101,7 @@ enum AIToolAgent {
             if isLargeModel {
                 onStep("Preparing answer...")
                 return await streamPresentation(
-                    query: message, toolData: data, screen: screen, onToken: onToken
+                    query: bestQuery, toolData: data, screen: screen, onToken: onToken
                 )
             } else {
                 return AgentOutput(text: data, action: nil, toolsCalled: toolResults.flatMap(\.toolsCalled))
