@@ -667,6 +667,11 @@ final class AIEvalHarness: XCTestCase {
             // Edge cases
             ("log half avocado", "avocado", nil),
             ("ate a couple of eggs", "eggs", 2),
+            // More edge cases
+            ("log 50 ml milk", nil, nil),
+            ("ate 100g paneer tikka", nil, nil),
+            ("log 2 tbsp of ghee", "ghee", 2),
+            ("had quarter cup of rice", "rice", nil),
         ]
         var correct = 0
         for (input, expectedQuery, expectedServings) in cases {
