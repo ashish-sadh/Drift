@@ -283,6 +283,12 @@ final class AIEvalHarness: XCTestCase {
             ("how many calories in rice", "food_info"),
             ("macros today", "food_info"),
             ("what are the macros in chicken", "food_info"),
+            // Queries that were removed from StaticOverrides — must route here
+            ("daily summary", "food_info"),
+            ("how am I doing", "food_info"),
+            ("yesterday", "food_info"),
+            ("how are you doing", "food_info"),
+            ("what did I eat today", "food_info"),
         ]
         for (query, expectedTool) in foodInfoQueries {
             let tools = ToolRanker.rank(query: query.lowercased(), screen: .food)
@@ -298,6 +304,11 @@ final class AIEvalHarness: XCTestCase {
             ("how's my weight trend", "weight_info", .weight),
             ("am I on track to reach my goal", "weight_info", .weight),
             ("set goal to 160", "set_goal", .goal),
+            // Removed from StaticOverrides — must route here
+            ("how much have I lost", "weight_info", .weight),
+            ("am I losing weight", "weight_info", .weight),
+            ("weight progress", "weight_info", .weight),
+            ("why am I not losing weight", "weight_info", .weight),
         ]
         for (query, expectedTool, screen) in queries {
             let tools = ToolRanker.rank(query: query.lowercased(), screen: screen)
@@ -331,6 +342,10 @@ final class AIEvalHarness: XCTestCase {
             ("any glucose spikes", "glucose", .glucose),
             ("lab results", "biomarkers", .biomarkers),
             ("how's my body fat", "body_comp", .bodyComposition),
+            // Sleep routing for removed StaticOverrides queries
+            ("sleep trend", "sleep_recovery", .bodyRhythm),
+            ("how was my sleep", "sleep_recovery", .bodyRhythm),
+            ("sleep quality", "sleep_recovery", .bodyRhythm),
         ]
         for (query, expectedTool, screen) in queries {
             let tools = ToolRanker.rank(query: query.lowercased(), screen: screen)
