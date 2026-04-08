@@ -21,7 +21,7 @@ _(pick from Ready)_
 
 ### P2: Streaming & Latency
 - [ ] **Tool-first streaming** — For "how am I doing", execute food_info + weight_info in parallel, then stream presentation with real data. First token in ~2s.
-- [ ] **Parallel rule check + normalize** — While normalizer runs (~3s), also check rules on raw input. If rules match, cancel normalizer.
+- [x] **Parallel rule check + normalize** — Already effective: StaticOverrides + food/weight parsers in AIChatView run before AIToolAgent. Phase 1 in agent runs rules instantly before normalizer.
 - [ ] **Progressive multi-item disclosure** — For "rice and dal", show each found item as it's discovered, don't batch.
 
 ### P3: UI Polish

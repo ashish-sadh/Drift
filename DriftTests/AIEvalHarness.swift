@@ -69,6 +69,9 @@ final class AIEvalHarness: XCTestCase {
             ("delete last entry", "delete"),
             ("remove the rice", "delete"),
             ("undo last food", "delete"),
+            // Cross-domain analysis
+            ("why am i not losing weight", "cross"),
+            ("am i eating enough protein for my workouts", "cross"),
             // Calorie estimation
             ("calories in samosa", "estimate"),
             ("estimate calories for biryani", "estimate"),

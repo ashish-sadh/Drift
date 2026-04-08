@@ -403,6 +403,65 @@ enum StaticOverrides {
             }
         }
 
+        // Cross-domain analysis: "why am I not losing weight?", "am I eating enough protein for workouts?"
+        let crossDomainPatterns = ["why am i not losing", "why aren't i losing", "not losing weight",
+                                    "weight plateau", "weight stalled", "am i eating enough protein for",
+                                    "compare this week to last", "how's my week vs last"]
+        if crossDomainPatterns.contains(where: { lower.contains($0) }) {
+            return .handler {
+                var lines: [String] = []
+                let today = DateFormatters.todayString
+
+                // Food data
+                let n = (try? AppDatabase.shared.fetchDailyNutrition(for: today)) ?? .zero
+                let goal = WeightGoal.load()
+                let targets = goal?.macroTargets()
+                let tdee = TDEEEstimator.shared.current?.tdee ?? 2000
+                let deficit = goal?.requiredDailyDeficit ?? 0
+                let calTarget = max(500, Int(tdee - deficit))
+
+                // Weight trend
+                if let entries = try? AppDatabase.shared.fetchWeightEntries(), entries.count >= 2 {
+                    let recent = entries.suffix(7)
+                    let first = recent.first!.weightKg
+                    let last = recent.last!.weightKg
+                    let unit = Preferences.weightUnit
+                    let change = unit.convert(fromKg: last - first)
+                    let direction = change > 0 ? "up" : change < 0 ? "down" : "flat"
+                    lines.append("Weight: \(direction) \(String(format: "%.1f", abs(change))) \(unit.displayName) over \(recent.count) entries")
+                }
+
+                // Calorie analysis
+                if n.calories > 0 {
+                    let surplus = Int(n.calories) - calTarget
+                    if surplus > 200 {
+                        lines.append("Today: \(Int(n.calories)) cal eaten — \(surplus) over target (\(calTarget)). This could slow progress.")
+                    } else {
+                        lines.append("Today: \(Int(n.calories))/\(calTarget) cal — on track.")
+                    }
+                }
+
+                // Protein check
+                if let t = targets, n.proteinG > 0 {
+                    let pctProtein = n.proteinG / t.proteinG * 100
+                    if pctProtein < 50 {
+                        lines.append("Protein: only \(Int(n.proteinG))g of \(Int(t.proteinG))g target. Low protein can slow fat loss and muscle retention.")
+                    }
+                }
+
+                // Workout frequency
+                if let workouts = try? WorkoutService.fetchWorkouts(limit: 14) {
+                    let thisWeek = workouts.filter { $0.date >= (Calendar.current.date(byAdding: .day, value: -7, to: Date()).map { DateFormatters.dateOnly.string(from: $0) } ?? "") }
+                    lines.append("Workouts this week: \(thisWeek.count)")
+                }
+
+                if lines.isEmpty {
+                    return "Not enough data yet. Log your meals and weight consistently, then I can analyze trends."
+                }
+                return lines.joined(separator: "\n")
+            }
+        }
+
         // Diet/fitness advice (prevents LLM misclassification as food logging)
         let adviceKeywords = ["reduce fat", "lose fat", "burn fat", "cut fat", "how to lose",
                                "tips to cut", "i need to burn", "i want to lose weight",
