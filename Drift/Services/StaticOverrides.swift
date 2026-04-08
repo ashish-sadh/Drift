@@ -427,12 +427,36 @@ enum StaticOverrides {
                 if activity.hasSuffix(suffix) { activity = String(activity.dropLast(suffix.count)) }
             }
             var durationMin: Int? = nil
+            // Leading duration: "30 min yoga", "20 minutes cardio"
             let durPattern = #"^(\d+)\s*(?:min(?:ute)?s?)\s+"#
             if let durRegex = try? NSRegularExpression(pattern: durPattern),
                let durMatch = durRegex.firstMatch(in: activity, range: NSRange(activity.startIndex..., in: activity)),
                let numRange = Range(durMatch.range(at: 1), in: activity) {
                 durationMin = Int(String(activity[numRange]))
                 activity = String(activity[activity.index(activity.startIndex, offsetBy: durMatch.range.length)...]).trimmingCharacters(in: .whitespaces)
+            }
+            // Trailing duration: "yoga for 30 min", "yoga for like half an hour", "yoga for about 45 minutes"
+            let trailingDur = #"\s+for\s+(?:like |about |roughly )?(\d+)\s*(?:min(?:ute)?s?|hrs?|hours?)"#
+            if let tRegex = try? NSRegularExpression(pattern: trailingDur),
+               let tMatch = tRegex.firstMatch(in: activity, range: NSRange(activity.startIndex..., in: activity)),
+               let nRange = Range(tMatch.range(at: 1), in: activity) {
+                let val = Int(String(activity[nRange])) ?? 0
+                let fullRange = Range(tMatch.range, in: activity)!
+                let unit = activity[fullRange].lowercased()
+                durationMin = unit.contains("hr") || unit.contains("hour") ? val * 60 : val
+                activity = String(activity[..<fullRange.lowerBound]).trimmingCharacters(in: .whitespaces)
+            }
+            // Word durations: "for half an hour" = 30, "for an hour" = 60
+            let wordDurs: [(String, Int)] = [
+                ("for like half an hour", 30), ("for half an hour", 30), ("for about half an hour", 30),
+                ("for an hour", 60), ("for like an hour", 60), ("for about an hour", 60),
+            ]
+            for (phrase, mins) in wordDurs {
+                if activity.hasSuffix(phrase) {
+                    durationMin = mins
+                    activity = String(activity.dropLast(phrase.count)).trimmingCharacters(in: .whitespaces)
+                    break
+                }
             }
             if !activity.isEmpty && activity.count > 2 {
                 let name = activity.capitalized

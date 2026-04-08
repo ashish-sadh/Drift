@@ -63,6 +63,8 @@ final class AIEvalHarness: XCTestCase {
             ("i did yoga for 30 minutes", ""),
             ("i did push ups", ""),
             ("just did 20 min cardio", ""),
+            ("i did yoga for like half an hour", ""),
+            ("i did running for about 45 minutes", ""),
             // Delete/remove food
             ("delete last entry", "delete"),
             ("remove the rice", "delete"),
