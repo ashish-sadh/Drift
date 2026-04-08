@@ -247,8 +247,18 @@ enum ToolRegistration {
                     }
                     return .text(lines.isEmpty ? "No data for '\(exercise)' yet." : lines.joined(separator: "\n"))
                 }
-                // General workout suggestion with body part coverage
+                // General workout info: suggestion + history + streak
                 var lines: [String] = [ExerciseService.suggestWorkout()]
+                // Recent workouts from HealthKit
+                if let recent = try? await HealthKitService.shared.fetchRecentWorkouts(days: 7), !recent.isEmpty {
+                    lines.append("Recent workouts:")
+                    for w in recent.prefix(5) {
+                        let dur = Int(w.duration / 60)
+                        let cal = Int(w.calories)
+                        let day = DateFormatters.shortDisplay.string(from: w.date)
+                        lines.append("  \(day): \(w.type) — \(dur) min, \(cal) cal")
+                    }
+                }
                 // Streak info
                 if let streak = try? WorkoutService.workoutStreak() {
                     lines.append("Streak: \(streak.current) weeks (longest: \(streak.longest))")

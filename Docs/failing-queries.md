@@ -20,7 +20,7 @@ Real queries that don't work well. Fix systematically, then move to Fixed.
 ### Multi-Turn
 - [x] **Second meal item after recipe builder** — "Log dinner" → "rice and dal" → recipe opens. Then "also add broccoli" doesn't continue the meal. FIXED: meal continuation handler prepends to pendingRecipeItems.
 - [x] **"what about protein?" after food chat** — Normalizer needs to resolve from history. 2B model may not reliably infer. FIXED: topic continuation in StaticOverrides.
-- [ ] **"and yesterday?" after today's data** — Same pronoun resolution issue.
+- [x] **"and yesterday?" after today's data** — FIXED: Added to StaticOverrides as topic continuation pattern.
 - [ ] **"plan my meals for today"** — Should be iterative: suggest breakfast → confirm → suggest lunch. Currently single response.
 
 ### Exercise
