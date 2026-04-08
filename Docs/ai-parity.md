@@ -47,7 +47,7 @@ The self-improvement loop picks from the **Gap** section to close parity.
 - [x] **Set/update weight goal** — "set goal to 160 lbs", "I want to lose 10 lbs". StaticOverrides regex + word number resolver.
 
 ### P1 — Data Entry from Chat
-- [ ] **Trigger barcode scan** — "scan barcode", "scan food". Needs: open camera from chat.
+- [x] **Trigger barcode scan** — "scan barcode", "scan food". StaticOverrides uiAction opens scanner.
 - [x] **Manual food with macros** — "log 400 cal 30g protein lunch". StaticOverrides inline macro parser.
 - [x] **Body comp entry** — "my body fat is 18%", "log body fat 18". StaticOverrides regex handler.
 - [x] **Add supplement to stack** — "add vitamin D", "add creatine 5g". add_supplement tool in ToolRegistration.
