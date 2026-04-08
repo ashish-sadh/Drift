@@ -34,7 +34,7 @@ Real queries that don't work well. Fix systematically, then move to Fixed.
 
 ### Intent Misclassification
 - [x] **"I want to reduce fat"** — FIXED: StaticOverrides catches diet/fitness advice queries. Returns personalized macro advice instead of falling through to LLM.
-- [ ] **"I want to estimate calories for samosa"** — Should trigger calorie estimation/food lookup for samosa. Currently misclassified and returns daily calorie intake summary instead.
+- [x] **"I want to estimate calories for samosa"** — FIXED: StaticOverrides nutrition estimation handler extracts food name and looks up in DB.
 
 ### Food Search Quality
 - [x] **"I had couple of bananas"** — FIXED: singular-first search + LENGTH tiebreaker ranks plain Banana first.

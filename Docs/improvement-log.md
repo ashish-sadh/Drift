@@ -19,6 +19,9 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 - **Workout history**: exercise_info now shows recent 7-day workout history from HealthKit.
 - **Weekly sleep**: sleep_recovery tool accepts period param, shows 7-day avg sleep.
 - **Word number resolver**: "set my goal to one sixty" → 160. resolveWordNumbers() handles compound word numbers.
+- **Delete food from chat**: "delete last entry", "remove the rice" — StaticOverrides handler finds and deletes matching food entry.
+- **Calorie estimation**: "calories in samosa", "estimate calories for biryani" — nutrition lookup handler in StaticOverrides.
+- **Parity gaps closed**: All P0 (5/5) and P1 (3/4) AI chat parity gaps now done. Only barcode scan remains as P1.
 
 ---
 
