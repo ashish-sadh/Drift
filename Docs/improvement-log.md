@@ -27,8 +27,9 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 - **Activity trailing duration**: "I did yoga for like half an hour" → 30 min. Strips filler words.
 - **Calorie estimation from chat**: "calories in samosa", "estimate calories for biryani" — instant DB lookup.
 
-**Session totals:** 21 cycles, 20 commits pushed. All P0/P1 sprint items done. All but 1 failing query fixed.
-Eval: 330+ scenarios, 90-100% across all categories.
+**Session totals:** 28 cycles, 28 commits. All P0/P1 sprint items + tool-first streaming done. All failing queries fixed except meal planning.
+New features: undo, weight progress, TDEE/BMR, meal suggestions, "how am I doing" instant, cross-domain analysis, calorie estimation.
+Eval: 370+ scenarios, 90-100% across all categories.
 
 ---
 
