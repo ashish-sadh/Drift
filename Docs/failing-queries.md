@@ -15,7 +15,7 @@ Real queries that don't work well. Fix systematically, then move to Fixed.
 - [x] **"I had 2 to 3 bananas"** — FIXED: extractAmount now handles ranges "X to Y" by taking higher number.
 - [x] **"I ate three biryani"** — FIXED: extractAmount already handles "three"→3. Verified with eval test.
 - [x] **"set my goal to one sixty"** — FIXED: resolveWordNumbers() converts "one sixty"→160 before regex matching.
-- [ ] **"I did yoga for like half an hour"** — "like half an hour" = 30 min. Normalizer should rewrite.
+- [x] **"I did yoga for like half an hour"** — FIXED: trailing duration parser handles "for like half an hour" → 30 min.
 
 ### Multi-Turn
 - [x] **Second meal item after recipe builder** — "Log dinner" → "rice and dal" → recipe opens. Then "also add broccoli" doesn't continue the meal. FIXED: meal continuation handler prepends to pendingRecipeItems.
