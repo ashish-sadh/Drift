@@ -4,6 +4,13 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 
 ---
 
+## Cycle · 2026-04-08
+
+- **Fix test isolation**: 12 mutating tests got own DB (shared seededDB caused flaky failures). Fixed extractAmount to return servings for count units (slices/cups) vs grams for weight units.
+- **Multi-turn via history detection**: Added detectMealFromHistory() and detectWorkoutFromHistory() — conversation continues from history even when state vars are nil. Enhanced normalizer with continuation examples.
+
+---
+
 ## Cycle 1 · 2026-04-06 08:37
 
 **Priority:** P1 (Rearchitect: LLM for intent)

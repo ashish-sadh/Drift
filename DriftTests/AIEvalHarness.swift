@@ -489,6 +489,71 @@ final class AIEvalHarness: XCTestCase {
         } else { XCTFail("Expected startWorkout") }
     }
 
+    // MARK: - Messy Input Parsing (normalizer accuracy targets)
+
+    @MainActor
+    func testMessyFoodInputParsing() {
+        // These test the deterministic parser — messy inputs that should work WITHOUT LLM normalizer
+        let cases: [(String, String?, Double?)] = [
+            // Count unit parsing: "2 slices of pizza" → servings=2
+            ("log 2 slices of pizza", "pizza", 2),
+            ("ate 3 pieces of chicken", "chicken", 3),
+            ("had 2 cups of rice", "rice", 2),
+            ("log 2 scoops protein", "protein", 2),
+            // Gram parsing
+            ("log 100 gram of rice", "rice", nil),
+            ("ate 200g chicken", "chicken", nil),
+            // Natural phrasing
+            ("i had some rice", "rice", nil),
+            ("just had eggs", "eggs", nil),
+            ("i ate chicken and rice", nil, nil), // multi-food, no single parse
+        ]
+        var correct = 0
+        for (input, expectedQuery, expectedServings) in cases {
+            let intent = AIActionExecutor.parseFoodIntent(input)
+            if let expectedQuery {
+                if intent != nil && intent!.query.lowercased().contains(expectedQuery) {
+                    if let expectedServings {
+                        if intent!.servings == expectedServings { correct += 1 }
+                        else { print("MESSY: '\(input)' servings=\(intent?.servings as Any) expected=\(expectedServings)") }
+                    } else { correct += 1 }
+                } else {
+                    print("MESSY: '\(input)' query=\(intent?.query ?? "nil") expected=\(expectedQuery)")
+                }
+            } else {
+                correct += 1  // no specific query expectation
+            }
+        }
+        let pct = Double(correct) / Double(cases.count) * 100
+        print("📊 Messy food input: \(correct)/\(cases.count) (\(String(format: "%.0f", pct))%)")
+        XCTAssertGreaterThanOrEqual(correct, cases.count * 80 / 100)
+    }
+
+    @MainActor
+    func testCountUnitExtraction() {
+        // extractAmount should return servings for count units, grams for weight units
+        let countCases: [(String, Double?, Double?)] = [
+            ("2 slices of pizza", 2, nil),       // servings=2, grams=nil
+            ("3 pieces of chicken", 3, nil),
+            ("2 cups of dal", 2, nil),
+            ("1 serving of rice", 1, nil),
+            ("100 gram of rice", nil, 100),       // servings=nil, grams=100
+            ("200 ml of milk", nil, 200),
+            ("50 g paneer", nil, 50),
+        ]
+        var correct = 0
+        for (input, expectedServings, expectedGrams) in countCases {
+            let (servings, _, grams) = AIActionExecutor.extractAmount(from: input)
+            let servingsOk = servings == expectedServings
+            let gramsOk = grams == expectedGrams
+            if servingsOk && gramsOk { correct += 1 }
+            else { print("EXTRACT: '\(input)' servings=\(servings as Any)/\(expectedServings as Any) grams=\(grams as Any)/\(expectedGrams as Any)") }
+        }
+        let pct = Double(correct) / Double(countCases.count) * 100
+        print("📊 Count unit extraction: \(correct)/\(countCases.count) (\(String(format: "%.0f", pct))%)")
+        XCTAssertGreaterThanOrEqual(correct, countCases.count * 85 / 100)
+    }
+
     // MARK: - Chain-of-Thought Routing
 
     @MainActor
