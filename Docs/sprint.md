@@ -15,10 +15,11 @@ _(pick from Ready)_
 - [x] **SmolLM fallback templates** — addInsightPrefix() adds "Looking good —" / "Heads up —" based on data content.
 
 ### P1: Tool Calling Accuracy
-- [ ] **LLM eval on tool routing** — Run 40+ queries through Gemma 4 tool-calling path. Measure: does it pick the right tool? Does it extract the right params? Track accuracy and fix misroutes.
-- [ ] **Normalizer → tool pick chain** — After normalizer rewrites, does tryRulePick find the right tool? Test messy variants: "hows my protien", "wat shud i eat", "cals left".
-- [ ] **Tool param extraction quality** — ToolRanker.extractParamsForTool is basic regex. Test: does food_info get the right query param? Does sleep_recovery get "week" when user says "sleep this week"?
-- [ ] **Anti-keyword tuning** — "how much does chicken weigh" should NOT trigger log_weight. "I want to reduce fat" should NOT trigger log_food. Audit anti-keywords across all 19 tool profiles.
+- [x] **Tool routing verification** — 12 new eval cases verifying removed StaticOverrides queries route correctly. daily summary→food_info, sleep trend→sleep_recovery, weight progress→weight_info.
+- [ ] **LLM eval on tool routing** — Run 40+ queries through Gemma 4 tool-calling path on device. Requires LLM eval (not unit test).
+- [x] **Normalizer → tool pick chain** — bestQuery flows from normalizer through Phase 3 tool execution.
+- [x] **Tool param extraction quality** — food_info gets yesterday/weekly/suggest context. sleep_recovery gets period=week. General queries pass raw query for LLM context.
+- [x] **Anti-keyword tuning** — Verified: "how much does chicken weigh" suppressed by "how" anti-keyword on log_weight. "reduce fat" caught by diet advice handler.
 
 ### P2: Latency & Streaming
 - [ ] **Measure end-to-end latency** — Time each pipeline stage for 10 common queries. Where is time spent? Normalizer? Tool execution? LLM presentation? Find the bottleneck.
