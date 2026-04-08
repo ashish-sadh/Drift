@@ -22,6 +22,13 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 - **Delete food from chat**: "delete last entry", "remove the rice" — StaticOverrides handler finds and deletes matching food entry.
 - **Calorie estimation**: "calories in samosa", "estimate calories for biryani" — nutrition lookup handler in StaticOverrides.
 - **Parity gaps closed**: All P0 (5/5) and P1 (3/4) AI chat parity gaps now done. Only barcode scan remains as P1.
+- **Cross-domain analysis**: "why am I not losing weight?" combines food + weight + exercise data.
+- **Daily summary wrong weight**: Fixed .last → .first on DESC-sorted array. Bug existed since the weight fetch was added.
+- **Activity trailing duration**: "I did yoga for like half an hour" → 30 min. Strips filler words.
+- **Calorie estimation from chat**: "calories in samosa", "estimate calories for biryani" — instant DB lookup.
+
+**Session totals:** 21 cycles, 20 commits pushed. All P0/P1 sprint items done. All but 1 failing query fixed.
+Eval: 330+ scenarios, 90-100% across all categories.
 
 ---
 
