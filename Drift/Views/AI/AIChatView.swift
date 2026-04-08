@@ -200,6 +200,29 @@ struct AIChatView: View {
         return lines.isEmpty ? "" : lines.joined(separator: "\n")
     }
 
+    /// Detect meal context from conversation history.
+    /// If the last assistant message was "What did you have for X?", returns the meal name.
+    /// Also detects continuation after recipe building ("also add X", "and broccoli").
+    private func detectMealFromHistory() -> String? {
+        guard let lastAssistant = messages.last(where: { $0.role == .assistant }) else { return nil }
+        let text = lastAssistant.text.lowercased()
+        // "What did you have for lunch?" pattern
+        let meals = ["breakfast", "lunch", "dinner", "snack"]
+        for meal in meals {
+            if text.contains("what did you have for \(meal)") || text.contains("building \(meal)") {
+                return meal
+            }
+        }
+        return nil
+    }
+
+    /// Detect workout logging context from history ("What exercises did you do?")
+    private func detectWorkoutFromHistory() -> Bool {
+        guard let lastAssistant = messages.last(where: { $0.role == .assistant }) else { return false }
+        let text = lastAssistant.text.lowercased()
+        return text.contains("what exercises did you do") || text.contains("list them like")
+    }
+
     /// Resolve pronouns like "it", "that", "this" by scanning recent messages for food mentions.
     /// "log it" after discussing banana → "log banana"
     /// Split food list: "rice, dal, chicken curry" → ["rice", "dal", "chicken curry"]
@@ -523,7 +546,8 @@ struct AIChatView: View {
         // --- Multi-turn handlers (both models — BEFORE food parsers) ---
 
         // Pending workout log: user listing exercises after "What exercises did you do?"
-        if pendingWorkoutLog,
+        // Uses state var OR history detection as fallback
+        if (pendingWorkoutLog || detectWorkoutFromHistory()),
            !["yes", "no", "ok", "okay", "nevermind", "cancel", "thanks"].contains(lower),
            lower.count > 3 {
             pendingWorkoutLog = false
@@ -557,7 +581,9 @@ struct AIChatView: View {
         }
 
         // Pending meal: user listing food after "What did you have for lunch?"
-        if let mealName = pendingMealName,
+        // Uses state var OR history detection as fallback (survives navigation/state loss)
+        let resolvedMealName = pendingMealName ?? detectMealFromHistory()
+        if let mealName = resolvedMealName,
            !lower.contains("summary") && !lower.contains("calorie") && lower.count > 2
            && !["yes", "no", "ok", "okay", "sure", "nah", "nope", "yeah", "yep", "thanks", "thank you", "nevermind", "cancel"].contains(lower) {
             pendingMealName = nil

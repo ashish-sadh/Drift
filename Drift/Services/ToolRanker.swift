@@ -103,6 +103,9 @@ enum ToolRanker {
         "I did yoga for like half an hour" → i did yoga 30 min
         "what about protein?" → how is my protein
         "bannana" → banana
+        If chat shows meal logging, treat food lists as continuation:
+        Chat: "What did you have for lunch?" User: "rice and dal" → log rice and dal
+        Chat: "Building lunch" User: "also add broccoli" → log broccoli
         """
         var user = query
         if !history.isEmpty {
