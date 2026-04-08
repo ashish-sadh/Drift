@@ -66,6 +66,9 @@ final class AIEvalHarness: XCTestCase {
             ("i want to reduce fat", "advice"),
             ("how to lose fat", "advice"),
             ("tips to cut fat", "advice"),
+            // Topic continuation — yesterday
+            ("and yesterday?", "yesterday"),
+            ("what about yesterday?", "yesterday"),
         ]
         for (query, _) in ruleQueries {
             let result = StaticOverrides.match(query)
@@ -443,6 +446,9 @@ final class AIEvalHarness: XCTestCase {
             // Range parsing: "2 to 3 bananas" → 3
             ("2 to 3 bananas", 3, "bananas"),
             ("1 or 2 eggs", 2, "eggs"),
+            // Word number + food
+            ("three biryani", 3, "biryani"),
+            ("two rotis", 2, "rotis"),
         ]
         var correct = 0
         for (input, expectedAmount, _) in cases {

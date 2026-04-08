@@ -61,7 +61,9 @@ enum StaticOverrides {
         if lower == "calories left" || lower == "calories left today" || lower == "how many calories left" {
             return .handler { AIRuleEngine.caloriesLeft() }
         }
-        if lower == "yesterday" || lower == "what did i eat yesterday" {
+        if lower == "yesterday" || lower == "what did i eat yesterday"
+            || lower == "and yesterday?" || lower == "and yesterday"
+            || lower == "what about yesterday?" || lower == "how about yesterday?" {
             return .handler { AIRuleEngine.yesterdaySummary() }
         }
         if lower == "this week" || lower == "weekly summary" || lower == "how was my week" {

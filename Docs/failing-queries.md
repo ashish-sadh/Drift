@@ -13,7 +13,7 @@ Real queries that don't work well. Fix systematically, then move to Fixed.
 
 ### Normalizer / Natural Language
 - [x] **"I had 2 to 3 bananas"** — FIXED: extractAmount now handles ranges "X to Y" by taking higher number.
-- [ ] **"I ate three biryani"** — Word number + food. extractAmount has "three"→3 but may not work in all phrasings. Normalizer backup.
+- [x] **"I ate three biryani"** — FIXED: extractAmount already handles "three"→3. Verified with eval test.
 - [ ] **"set my goal to one sixty"** — Word number "one sixty" = 160. Normalizer should rewrite.
 - [ ] **"I did yoga for like half an hour"** — "like half an hour" = 30 min. Normalizer should rewrite.
 
@@ -33,7 +33,7 @@ Real queries that don't work well. Fix systematically, then move to Fixed.
 - [ ] **"Daily summary"** — Reports wrong weight. AI service reads weight from different source than UI. Should use same service/query as the weight display on screen.
 
 ### Intent Misclassification
-- [ ] **"I want to reduce fat"** — Should be food_info (diet advice). Currently misclassified as food logging, returns "log greek yogurt (0% fa)\<start_of_turn\>". Also leaks Gemma chat template tokens. Variants: "how to lose fat", "tips to cut fat", "I need to burn fat".
+- [x] **"I want to reduce fat"** — FIXED: StaticOverrides catches diet/fitness advice queries. Returns personalized macro advice instead of falling through to LLM.
 
 ### Food Search Quality
 - [x] **"I had couple of bananas"** — FIXED: singular-first search + LENGTH tiebreaker ranks plain Banana first.
