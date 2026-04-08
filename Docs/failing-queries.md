@@ -30,7 +30,7 @@ Real queries that don't work well. Fix systematically, then move to Fixed.
 - [x] **"How is my sleep quality last week"** — FIXED: sleep_recovery now accepts period param, fetches 7-day sleep average from HealthKit.
 
 ### Data Accuracy
-- [ ] **"Daily summary"** — Reports wrong weight. AI service reads weight from different source than UI. Should use same service/query as the weight display on screen.
+- [x] **"Daily summary"** — FIXED: dailySummary() was using .last (oldest) on DESC-sorted array. Changed to .first (most recent).
 
 ### Intent Misclassification
 - [x] **"I want to reduce fat"** — FIXED: StaticOverrides catches diet/fitness advice queries. Returns personalized macro advice instead of falling through to LLM.
