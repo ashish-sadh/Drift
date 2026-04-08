@@ -582,6 +582,8 @@ final class AIEvalHarness: XCTestCase {
                 hitLayer = "weight_parser"
             } else if ToolRanker.tryRulePick(query: lower, screen: .dashboard) != nil {
                 hitLayer = "tool_ranker"
+            } else if !ToolRanker.rank(query: lower, screen: .dashboard, topN: 2).isEmpty {
+                hitLayer = "tool_ranker" // Phase 3: tool-first execution via rank()
             }
 
             XCTAssertEqual(hitLayer, test.expectedLayer,
