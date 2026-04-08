@@ -9,10 +9,10 @@ _(pick from Ready)_
 ## Ready
 
 ### P0: Chat Response Quality
-- [ ] **Presentation prompt tuning** — Current prompt is generic. Test 5+ prompt variants on real queries ("how am I doing", "calories left", "sleep trend"). Measure: does the LLM lead with insight? Does it feel like a friend? Tune for Gemma 4 2B specifically.
-- [ ] **Include user query in presentation context** — Pass the (possibly rewritten) query from normalizer to streamPresentation so LLM knows what was actually asked. Currently only raw tool data is passed — LLM doesn't know if user said "how am I doing" vs "calories left".
-- [ ] **Richer tool data for presentation** — food_info returns bare numbers. Add context: time of day, how far through the day, whether protein is lagging, trending up/down vs yesterday. Give LLM material to form an insight.
-- [ ] **SmolLM fallback templates** — Small model can't stream presentation. Improve the raw data strings it returns — add one-line insight prefix based on data (e.g. "On track — " or "Watch out — ").
+- [x] **Presentation prompt tuning** — Added time-of-day context, example response, "warm and brief" tone. Tuned for Gemma 4 2B.
+- [x] **Include user query in presentation context** — bestQuery (normalizer output) now flows through Phase 3 tool execution + LLM presentation.
+- [x] **Richer tool data for presentation** — food_info has progress status indicator, weight_info has total change + weekly trend.
+- [x] **SmolLM fallback templates** — addInsightPrefix() adds "Looking good —" / "Heads up —" based on data content.
 
 ### P1: Tool Calling Accuracy
 - [ ] **LLM eval on tool routing** — Run 40+ queries through Gemma 4 tool-calling path. Measure: does it pick the right tool? Does it extract the right params? Track accuracy and fix misroutes.
