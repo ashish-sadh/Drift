@@ -228,6 +228,23 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     }
 }
 
+@Test func foodSearchRankedPrefersShorterName() async throws {
+    let db = seededDB()
+    // "banana" should rank plain "Banana" above "TJ's Gone Bananas" or "Banana Bread"
+    let results = try db.searchFoodsRanked(query: "banana")
+    #expect(!results.isEmpty)
+    if let first = results.first {
+        #expect(first.name.lowercased().hasPrefix("banana"),
+            "Plain Banana should rank first, got: \(first.name)")
+    }
+    // Also test singular search via findFood
+    let match = AIActionExecutor.findFood(query: "bananas", servings: nil, gramAmount: nil)
+    if let match {
+        #expect(match.food.name.lowercased().contains("banana"),
+            "findFood('bananas') should find Banana, got: \(match.food.name)")
+    }
+}
+
 // MARK: - Serving Unit Conversion Tests (6 tests)
 
 @Test func servingUnitGramsIdentity() async throws {

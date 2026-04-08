@@ -16,7 +16,7 @@ _(pick from Ready)_
 
 ### P1: Food Logging Quality
 - [x] **Multi-item meal continuation** — After "Log lunch" → "rice and dal" builds recipe, user should be able to say "also add broccoli" without re-triggering "Log lunch".
-- [ ] **Gram/unit parsing improvements** — "100 gram of rice" works (new NUMBER UNIT of FOOD pattern). Test: "200ml milk", "2 scoops protein", "half cup oats".
+- [x] **Gram/unit parsing improvements** — "100 gram of rice" works (new NUMBER UNIT of FOOD pattern). Test: "200ml milk", "2 scoops protein", "half cup oats".
 - [ ] **Food search ranking** — Singular-first search added. Test that "bananas" → plain Banana, not "TJ's Gone Bananas". Consider name-length tiebreaker.
 
 ### P2: Streaming & Latency
