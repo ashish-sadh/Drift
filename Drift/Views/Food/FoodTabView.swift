@@ -681,22 +681,45 @@ struct FoodTabView: View {
                     }
                     .card()
 
-                    // Plant indicator + ingredients
-                    let plantClass = PlantPointsService.classify(entry.foodName)
-                    if plantClass != .notPlant {
-                        HStack(spacing: 6) {
-                            Image(systemName: "leaf.fill").foregroundStyle(Theme.plantGreen)
-                            Text(plantClass == .herbSpice ? "Herb/Spice (¼ pt)" : "Plant (1 pt)")
-                                .font(.caption.weight(.medium))
-                            Spacer()
+                    // Ingredients + plant indicator
+                    let dbFood: Food? = {
+                        if let fid = entry.foodId {
+                            return try? AppDatabase.shared.reader.read { db in try Food.fetchOne(db, id: fid) }
                         }
-                        .padding(.horizontal, 4)
+                        // Fallback: match by name
+                        return (try? AppDatabase.shared.searchFoods(query: entry.foodName, limit: 1))?.first
+                    }()
+                    let nova = dbFood?.novaGroup
+                    let hasIngredients = dbFood.map { $0.ingredientList.count > 1 || $0.ingredientList.first != $0.name } ?? false
+
+                    // Plant indicator — respect NOVA: don't show for NOVA 3-4 foods (their ingredients count, not the food)
+                    if nova == nil || (nova ?? 0) <= 2 {
+                        let plantClass = PlantPointsService.classify(entry.foodName)
+                        if plantClass != .notPlant {
+                            HStack(spacing: 6) {
+                                Image(systemName: "leaf.fill").foregroundStyle(Theme.plantGreen)
+                                Text(plantClass == .herbSpice ? "Herb/Spice (¼ pt)" : "Plant (1 pt)")
+                                    .font(.caption.weight(.medium))
+                                Spacer()
+                            }
+                            .padding(.horizontal, 4)
+                        }
+                    } else if hasIngredients {
+                        // NOVA 3+: show that ingredients contribute to plant points, not the food itself
+                        let plantIngredients = dbFood!.ingredientList.filter { PlantPointsService.classify($0) != .notPlant }
+                        if !plantIngredients.isEmpty {
+                            HStack(spacing: 6) {
+                                Image(systemName: "leaf.fill").foregroundStyle(Theme.plantGreen)
+                                Text("\(plantIngredients.count) plant ingredients")
+                                    .font(.caption.weight(.medium))
+                                Spacer()
+                            }
+                            .padding(.horizontal, 4)
+                        }
                     }
 
-                    // Ingredients (if food has them)
-                    if let foodId = entry.foodId,
-                       let dbFood = try? AppDatabase.shared.reader.read({ db in try Food.fetchOne(db, id: foodId) }),
-                       dbFood.ingredientList.count > 1 || dbFood.ingredientList.first != dbFood.name {
+                    // Ingredients display
+                    if hasIngredients, let dbFood {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Ingredients").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
                             Text(dbFood.ingredientList.joined(separator: ", "))
