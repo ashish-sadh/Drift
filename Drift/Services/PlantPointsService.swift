@@ -233,15 +233,14 @@ enum PlantPointsService {
         "navy bean", "lima bean", "soybean", "tofu", "tempeh",
         "hummus", "falafel", "sprouts",
 
-        // Whole Grains
+        // Whole Grains (raw/minimally processed only — not bread, pasta, roti)
         "oats", "oatmeal", "overnight oats", "rice", "chawal",
         "brown rice", "quinoa", "barley", "jau", "millet", "bajra",
         "jowar", "sorghum", "ragi", "nachni", "finger millet",
         "amaranth", "rajgira", "buckwheat", "kuttu", "bulgur",
-        "couscous", "farro", "freekeh", "wheat", "atta", "roti",
-        "chapati", "paratha", "whole wheat", "multigrain",
-        "poha", "flattened rice", "dosa", "idli", "upma",
-        "cornmeal", "polenta", "pasta",
+        "couscous", "farro", "freekeh", "wheat berries", "whole wheat",
+        "poha", "flattened rice",
+        "cornmeal", "polenta",
 
         // Nuts
         "almond", "almonds", "walnut", "walnuts", "cashew", "cashews",
@@ -266,12 +265,29 @@ enum PlantPointsService {
         "steak", "ribs", "kebab", "tikka", "tandoori",
     ]
 
+    /// Processed plant-derived foods that don't count as whole plants.
+    private static let processedPlantFoods: Set<String> = [
+        "bread", "wheat bread", "white bread", "whole wheat bread",
+        "naan", "roti", "chapati", "paratha", "puri", "kulcha",
+        "pasta", "spaghetti", "macaroni", "noodles", "ramen", "udon",
+        "tortilla", "wrap", "pita", "croutons", "baguette",
+        "dosa", "idli", "upma", "uttapam",
+        "flour", "maida", "atta", "wheat", "semolina", "suji",
+        "chips", "crackers", "cookie", "biscuit",
+        "juice", "soda", "syrup",
+        "cereal", "granola bar",
+        "toasted bread", "toast",
+    ]
+
     /// Category names from the food DB that are clearly plant-based.
     private static let plantCategories: Set<String> = [
         "fruits", "vegetables", "nuts & seeds",
     ]
 
     private static func isPlantFood(_ name: String) -> Bool {
+        // Reject processed plant-derived foods (bread, pasta, naan, etc.)
+        if processedPlantFoods.contains(name) { return false }
+
         // Reject if it matches non-plant overrides
         for keyword in nonPlantOverrides {
             if name.contains(keyword) { return false }
