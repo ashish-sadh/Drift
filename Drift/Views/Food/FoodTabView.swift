@@ -111,6 +111,7 @@ struct FoodTabView: View {
             .onChange(of: showingSearch) { _, showing in if !showing { reload() } }
             .onChange(of: showingRecipeBuilder) { _, showing in if !showing { reload() } }
             .onChange(of: showingScanner) { _, showing in if !showing { reload() } }
+            .onChange(of: viewModel.selectedDate) { _, _ in foodSortMode = .time }
         }
     }
 
