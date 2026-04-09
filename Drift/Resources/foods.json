@@ -875,7 +875,9 @@
     "fat_g": 8,
     "fiber_g": 5,
     "ingredients": [
-      "Overnight Oats"
+      "oats",
+      "chia seeds",
+      "milk"
     ]
   },
   {
@@ -2221,7 +2223,9 @@
     "fat_g": 10,
     "fiber_g": 3.5,
     "ingredients": [
-      "Granola"
+      "oats",
+      "nuts",
+      "honey"
     ]
   },
   {
@@ -3599,7 +3603,9 @@
     "fat_g": 16,
     "fiber_g": 7,
     "ingredients": [
-      "Avocado Toast"
+      "wheat bread",
+      "avocado",
+      "lime"
     ]
   },
   {
@@ -3630,7 +3636,10 @@
     "fat_g": 10,
     "fiber_g": 8,
     "ingredients": [
-      "Acai Bowl"
+      "acai",
+      "banana",
+      "granola",
+      "blueberry"
     ]
   },
   {
@@ -4184,7 +4193,9 @@
     "fat_g": 5,
     "fiber_g": 2,
     "ingredients": [
-      "TJ's Cauliflower Gnocchi"
+      "cauliflower",
+      "potato",
+      "cassava"
     ]
   },
   {
@@ -4198,7 +4209,10 @@
     "fat_g": 10,
     "fiber_g": 1,
     "ingredients": [
-      "TJ's Mandarin Orange Chicken"
+      "orange",
+      "garlic",
+      "ginger",
+      "soy sauce"
     ]
   },
   {
@@ -4282,7 +4296,10 @@
     "fat_g": 0,
     "fiber_g": 0,
     "ingredients": [
-      "TJ's Everything But The Bagel Seasoning"
+      "sesame seeds",
+      "poppy seeds",
+      "garlic",
+      "onion"
     ]
   },
   {
@@ -4338,7 +4355,11 @@
     "fat_g": 11,
     "fiber_g": 2,
     "ingredients": [
-      "TJ's Chicken Tikka Masala"
+      "tomato",
+      "onion",
+      "garlic",
+      "ginger",
+      "garam masala"
     ]
   },
   {
@@ -13982,7 +14003,11 @@
     "fat_g": 12,
     "fiber_g": 4,
     "ingredients": [
-      "Pozole"
+      "hominy",
+      "onion",
+      "garlic",
+      "oregano",
+      "chili"
     ]
   },
   {
@@ -13996,7 +14021,10 @@
     "fat_g": 22,
     "fiber_g": 4,
     "ingredients": [
-      "Chilaquiles"
+      "tortilla",
+      "tomato",
+      "onion",
+      "cilantro"
     ]
   },
   {
