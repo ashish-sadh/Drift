@@ -18,11 +18,14 @@ struct WorkoutDetailView: View {
         t += "🏋️ \(Int(summary.totalVolume)) lb\n"
         if let notes = summary.workout.notes, !notes.isEmpty { t += "📝 \(notes)\n" }
         t += "\n"
-        let grouped = Dictionary(grouping: sets.filter { !$0.isWarmup }) { $0.exerciseName }
+        let grouped = Dictionary(grouping: sets) { $0.exerciseName }
         for ex in summary.exercises {
             if let exSets = grouped[ex] {
                 t += "\(ex)\n"
-                for s in exSets { t += "  \(s.setOrder). \(s.display)\n" }
+                for s in exSets {
+                    let prefix = s.isWarmup ? "  W\(s.setOrder). " : "  \(s.setOrder). "
+                    t += "\(prefix)\(s.display)\n"
+                }
                 t += "\n"
             }
         }

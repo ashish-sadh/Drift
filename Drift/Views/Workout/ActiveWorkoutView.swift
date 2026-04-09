@@ -146,6 +146,7 @@ struct ActiveWorkoutView: View {
             }
             .sheet(isPresented: $showingFinishOptions) {
                 NavigationStack {
+                    ScrollView {
                     VStack(spacing: 20) {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.system(size: 48))
@@ -199,8 +200,6 @@ struct ActiveWorkoutView: View {
                                 .background(Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 10))
                         }
 
-                        Spacer()
-
                         Button {
                             showingFinishOptions = false
                             if favoriteAllToggle {
@@ -222,7 +221,10 @@ struct ActiveWorkoutView: View {
                         .padding(.bottom, 16)
                     }
                     .padding(.horizontal, 16)
+                    .padding(.bottom, 20)
+                    }  // ScrollView
                     .background(Theme.background)
+                    .scrollDismissesKeyboard(.interactively)
                     .navigationBarTitleDisplayMode(.inline)
                     .toolbar {
                         ToolbarItem(placement: .cancellationAction) {
@@ -230,7 +232,7 @@ struct ActiveWorkoutView: View {
                         }
                     }
                 }
-                .presentationDetents([.medium])
+                .presentationDetents([.medium, .large])
             }
             .sheet(isPresented: $showingCompletionSheet) {
                 // Dismiss everything when completion sheet closes
