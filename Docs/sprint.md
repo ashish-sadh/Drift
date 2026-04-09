@@ -51,7 +51,7 @@ Current: keyword-matching on food names only. Fix: every food gets an `ingredien
 
 ### P1.5: Data Model Cleanup
 - [x] **Rename `favorite_food` → `saved_food`** — Migration v23. SavedFood model. All 40 references updated across 11 files. No typealias.
-- [ ] **Unify user-created food storage** — Currently: DB foods in `food`, recipes in `favorite_food`, manual entries in neither (only `food_entry` + `food_usage`). After rename, `saved_food` becomes the single table for all user-created foods: recipes, manual "save for future" entries, barcode scans (move from `food`?). The seeded `food` table stays read-only.
+- [x] **Unify food storage foundation** — Added `source` column to `food` table (migration v24): 'database', 'barcode', 'recipe', 'custom'. Backfills existing data. `saved_food` still exists for now — recipes can migrate to `food` table when ready.
 
 ### P1: Workout History & Editing
 Goal: let users add past workouts and edit existing ones. Currently workouts are live-only — no way to log a gym session after the fact or fix mistakes.
