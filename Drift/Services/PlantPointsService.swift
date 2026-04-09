@@ -15,20 +15,47 @@ enum PlantPointsService {
         var plantCount: Int { uniquePlants.count + uniqueHerbsSpices.count }
     }
 
-    /// Classify a list of food names into plant points.
-    static func calculate(from foodNames: [String]) -> PlantPoints {
+    /// Food item with NOVA processing level for accurate plant point calculation.
+    struct FoodItem {
+        let name: String
+        let ingredients: [String]?  // parsed ingredient names, nil = use name
+        let novaGroup: Int?         // 1-4, nil = treat as unprocessed
+    }
+
+    /// Classify food items into plant points with NOVA-aware logic.
+    /// - NOVA 1-2: count directly
+    /// - NOVA 3: skip food name, count ingredients individually
+    /// - NOVA 4: skip entirely (food + ingredients)
+    /// - No ingredients + no NOVA: classify by name (backwards compat)
+    static func calculate(from items: [FoodItem]) -> PlantPoints {
         var plants: Set<String> = []
         var herbsSpices: Set<String> = []
 
-        // Expand spice blends before classification
-        let expanded = expandSpiceBlends(foodNames)
+        for item in items {
+            // NOVA 4: ultra-processed — skip entirely
+            if item.novaGroup == 4 { continue }
 
-        for name in expanded {
-            let normalized = normalize(name)
-            if isHerbOrSpice(normalized) {
-                herbsSpices.insert(normalized)
-            } else if isPlantFood(normalized) {
-                plants.insert(normalized)
+            // Determine which names to classify
+            let namesToClassify: [String]
+            if item.novaGroup == 3, let ingredients = item.ingredients, !ingredients.isEmpty {
+                // NOVA 3: processed — skip food name, use ingredients
+                namesToClassify = ingredients
+            } else if let ingredients = item.ingredients, ingredients.count > 1 {
+                // Has ingredients list — use it (more granular)
+                namesToClassify = ingredients
+            } else {
+                // Simple food or no ingredients — use name
+                namesToClassify = [item.name]
+            }
+
+            let expanded = expandSpiceBlends(namesToClassify)
+            for name in expanded {
+                let normalized = resolveAlias(normalize(name))
+                if isHerbOrSpice(normalized) {
+                    herbsSpices.insert(normalized)
+                } else if isPlantFood(normalized) {
+                    plants.insert(normalized)
+                }
             }
         }
 
@@ -36,6 +63,11 @@ enum PlantPointsService {
             uniquePlants: plants.sorted(),
             uniqueHerbsSpices: herbsSpices.sorted()
         )
+    }
+
+    /// Legacy: classify a list of plain food names (backwards compat for tests/simple callers).
+    static func calculate(from foodNames: [String]) -> PlantPoints {
+        calculate(from: foodNames.map { FoodItem(name: $0, ingredients: nil, novaGroup: nil) })
     }
 
     /// Classify a single food name.
@@ -48,6 +80,45 @@ enum PlantPointsService {
         if isHerbOrSpice(n) { return .herbSpice }
         if isPlantFood(n) { return .plant }
         return .notPlant
+    }
+
+    // MARK: - Alias Normalization (Hindi → English canonical names)
+
+    private static let plantAliases: [String: String] = [
+        // Vegetables
+        "palak": "spinach", "aloo": "potato", "tamatar": "tomato",
+        "pyaaz": "onion", "gobi": "cauliflower", "gajar": "carrot",
+        "bhindi": "okra", "baingan": "eggplant", "matar": "peas",
+        "lehsun": "garlic", "adrak": "ginger", "kheera": "cucumber",
+        "kaddu": "pumpkin", "lauki": "bottle gourd", "turai": "ridge gourd",
+        "karela": "bitter gourd", "mooli": "radish", "shalgam": "turnip",
+        "shimla mirch": "bell pepper", "patta gobi": "cabbage",
+        "chukandar": "beetroot", "shakarkandi": "sweet potato",
+        "makka": "corn", "kachha kela": "raw banana",
+        // Spices
+        "haldi": "turmeric", "jeera": "cumin", "dalchini": "cinnamon",
+        "elaichi": "cardamom", "laung": "cloves", "dhania": "coriander",
+        "saunf": "fennel", "methi": "fenugreek", "rai": "mustard seeds",
+        "hing": "asafoetida", "kesar": "saffron", "ajwain": "carom seeds",
+        "kalonji": "nigella seeds", "jaiphal": "nutmeg", "til": "sesame seeds",
+        // Fruits
+        "nariyal": "coconut", "aam": "mango", "kela": "banana",
+        "seb": "apple", "angoor": "grapes", "santara": "orange",
+        // Legumes
+        "rajma": "kidney beans", "chana": "chickpeas", "urad": "black gram",
+        "moong": "mung bean", "masoor": "red lentils", "toor": "pigeon pea",
+        // Dairy (non-plant — alias for consistency)
+        "dahi": "yogurt", "paneer": "cottage cheese",
+    ]
+
+    private static func resolveAlias(_ name: String) -> String {
+        // Check exact match first
+        if let canonical = plantAliases[name] { return canonical }
+        // Check if name starts with an alias (e.g. "palak paneer" → "spinach")
+        for (alias, canonical) in plantAliases {
+            if name.hasPrefix(alias + " ") { return canonical }
+        }
+        return name
     }
 
     // MARK: - Normalization

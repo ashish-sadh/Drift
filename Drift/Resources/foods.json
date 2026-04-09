@@ -11,7 +11,8 @@
     "fiber_g": 15.2,
     "ingredients": [
       "moong dal"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Toor Dal (cooked)",
@@ -25,7 +26,8 @@
     "fiber_g": 10.2,
     "ingredients": [
       "toor dal"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Masoor Dal (cooked)",
@@ -39,7 +41,8 @@
     "fiber_g": 16,
     "ingredients": [
       "masoor dal"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chana Dal (cooked)",
@@ -53,7 +56,8 @@
     "fiber_g": 10,
     "ingredients": [
       "chana dal"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Urad Dal (cooked)",
@@ -67,7 +71,8 @@
     "fiber_g": 7,
     "ingredients": [
       "urad dal"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dal Makhani",
@@ -87,7 +92,8 @@
       "garlic",
       "ginger",
       "garam masala"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Rajma (cooked)",
@@ -101,7 +107,8 @@
     "fiber_g": 11,
     "ingredients": [
       "kidney beans"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "White Rice (cooked)",
@@ -115,7 +122,8 @@
     "fiber_g": 0.6,
     "ingredients": [
       "rice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Brown Rice (cooked)",
@@ -129,7 +137,8 @@
     "fiber_g": 3.2,
     "ingredients": [
       "brown rice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Jeera Rice",
@@ -144,7 +153,8 @@
     "ingredients": [
       "rice",
       "cumin"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Biryani Rice",
@@ -164,7 +174,8 @@
       "bay leaf",
       "cardamom",
       "cinnamon"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Roti / Chapati",
@@ -178,7 +189,8 @@
     "fiber_g": 3.6,
     "ingredients": [
       "wheat"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Naan",
@@ -193,7 +205,8 @@
     "ingredients": [
       "wheat",
       "yogurt"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Paratha (plain)",
@@ -207,7 +220,8 @@
     "fiber_g": 2,
     "ingredients": [
       "wheat"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Aloo Paratha",
@@ -226,7 +240,8 @@
       "cumin",
       "coriander",
       "green chili"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Puri",
@@ -240,7 +255,8 @@
     "fiber_g": 1,
     "ingredients": [
       "wheat"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dosa (plain)",
@@ -255,7 +271,8 @@
     "ingredients": [
       "rice",
       "urad dal"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Masala Dosa",
@@ -275,7 +292,8 @@
       "mustard seeds",
       "turmeric",
       "curry leaves"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Idli (2 pieces)",
@@ -290,7 +308,8 @@
     "ingredients": [
       "rice",
       "urad dal"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Upma",
@@ -309,7 +328,8 @@
       "mustard seeds",
       "curry leaves",
       "peanuts"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Poha",
@@ -329,7 +349,8 @@
       "turmeric",
       "mustard seeds",
       "curry leaves"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Paneer",
@@ -343,7 +364,8 @@
     "fiber_g": 0,
     "ingredients": [
       "milk"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Palak Paneer",
@@ -363,7 +385,8 @@
       "ginger",
       "cumin",
       "garam masala"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Paneer Butter Masala",
@@ -383,7 +406,8 @@
       "ginger",
       "garam masala",
       "turmeric"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Aloo Gobi",
@@ -403,7 +427,8 @@
       "turmeric",
       "cumin",
       "coriander"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Bhindi / Okra Sabzi",
@@ -422,7 +447,8 @@
       "turmeric",
       "cumin",
       "coriander"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Baingan Bharta",
@@ -442,7 +468,8 @@
       "green chili",
       "coriander",
       "cumin"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Mixed Veg Curry",
@@ -464,7 +491,8 @@
       "turmeric",
       "cumin",
       "coriander"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sambar",
@@ -486,7 +514,8 @@
       "mustard seeds",
       "cumin",
       "curry leaves"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Rasam",
@@ -506,7 +535,8 @@
       "mustard seeds",
       "curry leaves",
       "garlic"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Raita (plain)",
@@ -522,7 +552,8 @@
       "cucumber",
       "yogurt",
       "cumin"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pickle / Achar",
@@ -540,7 +571,8 @@
       "fenugreek",
       "turmeric",
       "chili powder"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Papad (roasted)",
@@ -554,7 +586,8 @@
     "fiber_g": 1,
     "ingredients": [
       "urad dal"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chicken Breast (cooked)",
@@ -568,7 +601,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Chicken Breast (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Chicken Thigh (cooked)",
@@ -582,7 +616,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Chicken Thigh (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Chicken Tikka",
@@ -596,7 +631,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Chicken Tikka"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Butter Chicken",
@@ -610,7 +646,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Butter Chicken"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Tandoori Chicken",
@@ -624,7 +661,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Tandoori Chicken"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Egg (whole, boiled)",
@@ -638,7 +676,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Egg (whole, boiled)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Egg (scrambled, 2 eggs)",
@@ -652,7 +691,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Egg (scrambled, 2 eggs)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Egg White (1)",
@@ -666,7 +706,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Egg White (1)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Salmon (cooked)",
@@ -680,7 +721,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Salmon (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Tuna (canned, water)",
@@ -694,7 +736,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Tuna (canned, water)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Shrimp (cooked)",
@@ -708,7 +751,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Shrimp (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Tofu (firm)",
@@ -722,7 +766,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Tofu (firm)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Greek Yogurt (plain)",
@@ -736,7 +781,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Greek Yogurt (plain)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Cottage Cheese / Paneer (low fat)",
@@ -750,7 +796,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Cottage Cheese / Paneer (low fat)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Fish Curry",
@@ -764,7 +811,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Fish Curry"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Egg Bhurji",
@@ -778,7 +826,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Egg Bhurji"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Keema (minced meat)",
@@ -792,7 +841,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Keema (minced meat)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Whey Protein Powder",
@@ -806,7 +856,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Whey Protein Powder"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Casein Protein Powder",
@@ -820,7 +871,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Casein Protein Powder"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Protein Bar",
@@ -834,7 +886,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Protein Bar"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "MCT Oil",
@@ -848,7 +901,8 @@
     "fiber_g": 0,
     "ingredients": [
       "MCT Oil"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Oats (cooked)",
@@ -862,7 +916,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Oats (cooked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Overnight Oats",
@@ -878,7 +933,8 @@
       "oats",
       "chia seeds",
       "milk"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Whole Wheat Bread (1 slice)",
@@ -892,7 +948,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Whole Wheat Bread (1 slice)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "White Bread (1 slice)",
@@ -906,7 +963,8 @@
     "fiber_g": 0.6,
     "ingredients": [
       "White Bread (1 slice)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pasta (cooked)",
@@ -920,7 +978,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Pasta (cooked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Quinoa (cooked)",
@@ -934,7 +993,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Quinoa (cooked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Muesli",
@@ -948,7 +1008,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Muesli"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Cornflakes",
@@ -962,7 +1023,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Cornflakes"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Milk (whole)",
@@ -976,7 +1038,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Milk (whole)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Milk (2%)",
@@ -990,7 +1053,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Milk (2%)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Milk (skim)",
@@ -1004,7 +1068,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Milk (skim)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Almond Milk (unsweetened)",
@@ -1018,7 +1083,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Almond Milk (unsweetened)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Curd / Yogurt (plain)",
@@ -1032,7 +1098,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Curd / Yogurt (plain)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Lassi (sweet)",
@@ -1046,7 +1113,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Lassi (sweet)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chaas / Buttermilk",
@@ -1060,7 +1128,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Chaas / Buttermilk"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Cheese (cheddar)",
@@ -1074,7 +1143,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Cheese (cheddar)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Butter",
@@ -1088,7 +1158,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Butter"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Ghee",
@@ -1102,7 +1173,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Ghee"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Banana",
@@ -1116,7 +1188,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Banana"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Apple",
@@ -1130,7 +1203,8 @@
     "fiber_g": 4.4,
     "ingredients": [
       "Apple"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Mango",
@@ -1144,7 +1218,8 @@
     "fiber_g": 2.6,
     "ingredients": [
       "Mango"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Orange",
@@ -1158,7 +1233,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Orange"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Grapes",
@@ -1172,7 +1248,8 @@
     "fiber_g": 1.4,
     "ingredients": [
       "Grapes"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Papaya",
@@ -1186,7 +1263,8 @@
     "fiber_g": 2.5,
     "ingredients": [
       "Papaya"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Watermelon",
@@ -1200,7 +1278,8 @@
     "fiber_g": 1.1,
     "ingredients": [
       "Watermelon"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Blueberries",
@@ -1214,7 +1293,8 @@
     "fiber_g": 3.6,
     "ingredients": [
       "Blueberries"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Strawberries",
@@ -1228,7 +1308,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Strawberries"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Dates (2 pieces)",
@@ -1242,7 +1323,8 @@
     "fiber_g": 3.2,
     "ingredients": [
       "Dates (2 pieces)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Spinach (cooked)",
@@ -1256,7 +1338,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Spinach (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Broccoli (cooked)",
@@ -1270,7 +1353,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Broccoli (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Sweet Potato (baked)",
@@ -1284,7 +1368,8 @@
     "fiber_g": 4.5,
     "ingredients": [
       "Sweet Potato (baked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Potato (boiled)",
@@ -1298,7 +1383,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Potato (boiled)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Carrot (raw)",
@@ -1312,7 +1398,8 @@
     "fiber_g": 2.3,
     "ingredients": [
       "Carrot (raw)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Cucumber",
@@ -1326,7 +1413,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Cucumber"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Tomato",
@@ -1340,7 +1428,8 @@
     "fiber_g": 1.8,
     "ingredients": [
       "Tomato"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Onion",
@@ -1354,7 +1443,8 @@
     "fiber_g": 1.7,
     "ingredients": [
       "Onion"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Cauliflower (cooked)",
@@ -1368,7 +1458,8 @@
     "fiber_g": 2.5,
     "ingredients": [
       "Cauliflower (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Green Peas (cooked)",
@@ -1382,7 +1473,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Green Peas (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Mixed Salad",
@@ -1396,7 +1488,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Mixed Salad"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Almonds",
@@ -1410,7 +1503,8 @@
     "fiber_g": 3.5,
     "ingredients": [
       "Almonds"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Walnuts",
@@ -1424,7 +1518,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Walnuts"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Cashews",
@@ -1438,7 +1533,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Cashews"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Peanuts",
@@ -1452,7 +1548,8 @@
     "fiber_g": 2.4,
     "ingredients": [
       "Peanuts"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Peanut Butter",
@@ -1466,7 +1563,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Peanut Butter"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Flax Seeds",
@@ -1480,7 +1578,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Flax Seeds"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Olive Oil",
@@ -1494,7 +1593,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Olive Oil"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Coconut Oil",
@@ -1508,7 +1608,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Coconut Oil"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Mustard Oil",
@@ -1522,7 +1623,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Mustard Oil"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Avocado Oil",
@@ -1536,7 +1638,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Avocado Oil"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Avocado (half)",
@@ -1550,7 +1653,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Avocado (half)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Honey",
@@ -1564,7 +1668,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Honey"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Sugar (1 tsp)",
@@ -1578,7 +1683,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Sugar (1 tsp)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Jaggery / Gur",
@@ -1592,7 +1698,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Jaggery / Gur"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Tea (with milk, sugar)",
@@ -1606,7 +1713,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Tea (with milk, sugar)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Tea (black, no sugar)",
@@ -1620,7 +1728,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Tea (black, no sugar)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Coffee (black)",
@@ -1634,7 +1743,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Coffee (black)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Coffee (with milk)",
@@ -1648,7 +1758,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Coffee (with milk)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Coconut Water",
@@ -1662,7 +1773,8 @@
     "fiber_g": 2.6,
     "ingredients": [
       "Coconut Water"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Orange Juice",
@@ -1676,7 +1788,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Orange Juice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Protein Shake (whey + milk)",
@@ -1690,7 +1803,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Protein Shake (whey + milk)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dark Chocolate (1 square)",
@@ -1704,7 +1818,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Dark Chocolate (1 square)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Namkeen / Trail Mix",
@@ -1718,7 +1833,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Namkeen / Trail Mix"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Rice Cake",
@@ -1732,7 +1848,8 @@
     "fiber_g": 0.4,
     "ingredients": [
       "Rice Cake"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Khakhra",
@@ -1746,7 +1863,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Khakhra"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Dhokla (2 pieces)",
@@ -1760,7 +1878,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Dhokla (2 pieces)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Gulab Jamun (1 piece)",
@@ -1774,7 +1893,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Gulab Jamun (1 piece)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Rasgulla (1 piece)",
@@ -1788,7 +1908,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Rasgulla (1 piece)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Kheer (rice pudding)",
@@ -1802,7 +1923,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Kheer (rice pudding)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Halwa (sooji)",
@@ -1816,7 +1938,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Halwa (sooji)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Egg/Besan Chilla",
@@ -1832,7 +1955,8 @@
       "chickpea flour",
       "onion",
       "green chili"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Turkey Breast (roasted)",
@@ -1846,7 +1970,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Turkey Breast (roasted)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Salmon (baked)",
@@ -1860,7 +1985,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Salmon (baked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Tuna (canned in water)",
@@ -1874,7 +2000,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Tuna (canned in water)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Pork Tenderloin (roasted)",
@@ -1888,7 +2015,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Pork Tenderloin (roasted)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Ground Beef 85% lean",
@@ -1902,7 +2030,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Ground Beef 85% lean"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Ground Beef 93% lean",
@@ -1916,7 +2045,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Ground Beef 93% lean"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Lamb Chops (grilled)",
@@ -1930,7 +2060,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Lamb Chops (grilled)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Sardines (canned)",
@@ -1944,7 +2075,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Sardines (canned)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Cod (baked)",
@@ -1958,7 +2090,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Cod (baked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Tilapia (baked)",
@@ -1972,7 +2105,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Tilapia (baked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Bison (ground)",
@@ -1986,7 +2120,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Bison (ground)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Tempeh",
@@ -2000,7 +2135,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Tempeh"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Seitan",
@@ -2014,7 +2150,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Seitan"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Cottage Cheese (2%)",
@@ -2028,7 +2165,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Cottage Cheese (2%)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Mozzarella Cheese",
@@ -2042,7 +2180,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Mozzarella Cheese"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Cheddar Cheese",
@@ -2056,7 +2195,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Cheddar Cheese"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Parmesan Cheese",
@@ -2070,7 +2210,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Parmesan Cheese"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Cream Cheese",
@@ -2084,7 +2225,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Cream Cheese"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Heavy Cream",
@@ -2098,7 +2240,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Heavy Cream"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sour Cream",
@@ -2112,7 +2255,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Sour Cream"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kefir",
@@ -2126,7 +2270,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kefir"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Oatmeal (cooked)",
@@ -2140,7 +2285,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Oatmeal (cooked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "White Bread",
@@ -2154,7 +2300,8 @@
     "fiber_g": 0.6,
     "ingredients": [
       "White Bread"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Whole Wheat Bread",
@@ -2168,7 +2315,8 @@
     "fiber_g": 1.9,
     "ingredients": [
       "Whole Wheat Bread"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Tortilla (flour)",
@@ -2182,7 +2330,8 @@
     "fiber_g": 1.3,
     "ingredients": [
       "Tortilla (flour)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Tortilla (corn)",
@@ -2196,7 +2345,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Tortilla (corn)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Couscous (cooked)",
@@ -2210,7 +2360,8 @@
     "fiber_g": 2.2,
     "ingredients": [
       "Couscous (cooked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Granola",
@@ -2226,7 +2377,8 @@
       "oats",
       "nuts",
       "honey"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Corn Flakes",
@@ -2240,7 +2392,8 @@
     "fiber_g": 0.3,
     "ingredients": [
       "Corn Flakes"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Bagel (plain)",
@@ -2254,7 +2407,8 @@
     "fiber_g": 2.3,
     "ingredients": [
       "Bagel (plain)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "English Muffin",
@@ -2268,7 +2422,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "English Muffin"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pita Bread",
@@ -2282,7 +2437,8 @@
     "fiber_g": 1.3,
     "ingredients": [
       "Pita Bread"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Broccoli (steamed)",
@@ -2296,7 +2452,8 @@
     "fiber_g": 5.1,
     "ingredients": [
       "Broccoli (steamed)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Spinach (raw)",
@@ -2310,7 +2467,8 @@
     "fiber_g": 0.7,
     "ingredients": [
       "Spinach (raw)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Kale (raw)",
@@ -2324,7 +2482,8 @@
     "fiber_g": 1.3,
     "ingredients": [
       "Kale (raw)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Bell Pepper (raw)",
@@ -2338,7 +2497,8 @@
     "fiber_g": 2.1,
     "ingredients": [
       "Bell Pepper (raw)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Zucchini",
@@ -2352,7 +2512,8 @@
     "fiber_g": 1.2,
     "ingredients": [
       "Zucchini"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Asparagus",
@@ -2366,7 +2527,8 @@
     "fiber_g": 2.1,
     "ingredients": [
       "Asparagus"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Brussels Sprouts",
@@ -2380,7 +2542,8 @@
     "fiber_g": 3.8,
     "ingredients": [
       "Brussels Sprouts"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Green Beans",
@@ -2394,7 +2557,8 @@
     "fiber_g": 3.4,
     "ingredients": [
       "Green Beans"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Cauliflower",
@@ -2408,7 +2572,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Cauliflower"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Mushrooms (white)",
@@ -2422,7 +2587,8 @@
     "fiber_g": 0.7,
     "ingredients": [
       "Mushrooms (white)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Avocado",
@@ -2436,7 +2602,8 @@
     "fiber_g": 10,
     "ingredients": [
       "Avocado"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Corn (cooked)",
@@ -2450,7 +2617,8 @@
     "fiber_g": 3.6,
     "ingredients": [
       "Corn (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Peas (cooked)",
@@ -2464,7 +2632,8 @@
     "fiber_g": 8.8,
     "ingredients": [
       "Peas (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Celery",
@@ -2478,7 +2647,8 @@
     "fiber_g": 1.6,
     "ingredients": [
       "Celery"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Lettuce (romaine)",
@@ -2492,7 +2662,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Lettuce (romaine)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Edamame (shelled)",
@@ -2506,7 +2677,8 @@
     "fiber_g": 8,
     "ingredients": [
       "Edamame (shelled)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Pineapple",
@@ -2520,7 +2692,8 @@
     "fiber_g": 2.3,
     "ingredients": [
       "Pineapple"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Mango (sliced)",
@@ -2534,7 +2707,8 @@
     "fiber_g": 2.6,
     "ingredients": [
       "Mango (sliced)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Peach",
@@ -2548,7 +2722,8 @@
     "fiber_g": 2.3,
     "ingredients": [
       "Peach"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Raspberries",
@@ -2562,7 +2737,8 @@
     "fiber_g": 8,
     "ingredients": [
       "Raspberries"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Cherries",
@@ -2576,7 +2752,8 @@
     "fiber_g": 2.9,
     "ingredients": [
       "Cherries"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Dates (medjool)",
@@ -2590,7 +2767,8 @@
     "fiber_g": 1.6,
     "ingredients": [
       "Dates (medjool)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Pecans",
@@ -2604,7 +2782,8 @@
     "fiber_g": 2.7,
     "ingredients": [
       "Pecans"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Pistachios",
@@ -2618,7 +2797,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Pistachios"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Sunflower Seeds",
@@ -2632,7 +2812,8 @@
     "fiber_g": 2.4,
     "ingredients": [
       "Sunflower Seeds"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Pumpkin Seeds",
@@ -2646,7 +2827,8 @@
     "fiber_g": 1.7,
     "ingredients": [
       "Pumpkin Seeds"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Macadamia Nuts",
@@ -2660,7 +2842,8 @@
     "fiber_g": 2.4,
     "ingredients": [
       "Macadamia Nuts"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Apple Juice",
@@ -2674,7 +2857,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Apple Juice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Oat Milk",
@@ -2688,7 +2872,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Oat Milk"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Latte (whole milk)",
@@ -2702,7 +2887,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Latte (whole milk)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Green Tea",
@@ -2716,7 +2902,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Green Tea"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kombucha",
@@ -2730,7 +2917,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kombucha"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Coca-Cola",
@@ -2744,7 +2932,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Coca-Cola"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Beer (regular)",
@@ -2758,7 +2947,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Beer (regular)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Red Wine",
@@ -2772,7 +2962,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Red Wine"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chicken Biryani",
@@ -2796,7 +2987,8 @@
       "bay leaf",
       "cardamom",
       "cinnamon"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chole (Chickpea Curry)",
@@ -2817,7 +3009,8 @@
       "cumin",
       "coriander",
       "garam masala"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Tandoori Chicken (leg)",
@@ -2836,7 +3029,8 @@
       "turmeric",
       "cumin",
       "paprika"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Raita",
@@ -2852,7 +3046,8 @@
       "cucumber",
       "yogurt",
       "cumin"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Rasmalai (1 piece)",
@@ -2866,7 +3061,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Rasmalai (1 piece)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Jalebi (1 piece)",
@@ -2880,7 +3076,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Jalebi (1 piece)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Pizza Slice (cheese)",
@@ -2895,7 +3092,8 @@
     "ingredients": [
       "wheat",
       "tomato"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Cheeseburger",
@@ -2912,7 +3110,8 @@
       "lettuce",
       "tomato",
       "onion"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "French Fries (medium)",
@@ -2926,7 +3125,8 @@
     "fiber_g": 4,
     "ingredients": [
       "potato"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Chicken Nuggets (6 pc)",
@@ -2940,7 +3140,8 @@
     "fiber_g": 1,
     "ingredients": [
       "wheat"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Burrito (chicken)",
@@ -2958,7 +3159,8 @@
       "beans",
       "onion",
       "tomato"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Taco (beef)",
@@ -2975,7 +3177,8 @@
       "onion",
       "cilantro",
       "lime"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Hot Dog",
@@ -2989,7 +3192,8 @@
     "fiber_g": 0.8,
     "ingredients": [
       "bread"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Caesar Salad",
@@ -3004,7 +3208,8 @@
     "ingredients": [
       "romaine lettuce",
       "croutons"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Chicken Sandwich (grilled)",
@@ -3020,7 +3225,8 @@
       "wheat bread",
       "lettuce",
       "tomato"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Sushi Roll (California)",
@@ -3037,7 +3243,8 @@
       "seaweed",
       "avocado",
       "cucumber"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Pad Thai",
@@ -3056,7 +3263,8 @@
       "scallion",
       "lime",
       "tamarind"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Fried Rice",
@@ -3074,7 +3282,8 @@
       "carrot",
       "onion",
       "soy sauce"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Chicken Tikka Masala",
@@ -3095,7 +3304,8 @@
       "garam masala",
       "turmeric",
       "cumin"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Hummus",
@@ -3109,7 +3319,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Hummus"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Guacamole",
@@ -3128,7 +3339,8 @@
       "cilantro",
       "lime",
       "jalapeno"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Trail Mix",
@@ -3142,7 +3354,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Trail Mix"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Potato Chips",
@@ -3156,7 +3369,8 @@
     "fiber_g": 1.2,
     "ingredients": [
       "Potato Chips"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Pretzels",
@@ -3170,7 +3384,8 @@
     "fiber_g": 0.9,
     "ingredients": [
       "Pretzels"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Protein Bar (average)",
@@ -3184,7 +3399,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Protein Bar (average)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Beef Jerky",
@@ -3198,7 +3414,8 @@
     "fiber_g": 0.4,
     "ingredients": [
       "Beef Jerky"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Dark Chocolate (70%+)",
@@ -3212,7 +3429,8 @@
     "fiber_g": 3.4,
     "ingredients": [
       "Dark Chocolate (70%+)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Almond Butter",
@@ -3226,7 +3444,8 @@
     "fiber_g": 3.3,
     "ingredients": [
       "Almond Butter"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Ice Cream (vanilla)",
@@ -3240,7 +3459,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Ice Cream (vanilla)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Brownie",
@@ -3254,7 +3474,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Brownie"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Chocolate Chip Cookie",
@@ -3268,7 +3489,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Chocolate Chip Cookie"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Cheesecake (slice)",
@@ -3282,7 +3504,8 @@
     "fiber_g": 0.3,
     "ingredients": [
       "Cheesecake (slice)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Muffin (blueberry)",
@@ -3296,7 +3519,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Muffin (blueberry)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Pancakes (2 medium)",
@@ -3310,7 +3534,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Pancakes (2 medium)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Donut (glazed)",
@@ -3324,7 +3549,8 @@
     "fiber_g": 0.7,
     "ingredients": [
       "Donut (glazed)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Ketchup",
@@ -3338,7 +3564,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Ketchup"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Mayonnaise",
@@ -3352,7 +3579,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Mayonnaise"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Soy Sauce",
@@ -3366,7 +3594,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Soy Sauce"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Maple Syrup",
@@ -3380,7 +3609,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Maple Syrup"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Salsa",
@@ -3394,7 +3624,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Salsa"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Ranch Dressing",
@@ -3408,7 +3639,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Ranch Dressing"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Balsamic Vinaigrette",
@@ -3422,7 +3654,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Balsamic Vinaigrette"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Black Beans (cooked)",
@@ -3436,7 +3669,8 @@
     "fiber_g": 15,
     "ingredients": [
       "black beans"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kidney Beans (cooked)",
@@ -3450,7 +3684,8 @@
     "fiber_g": 11,
     "ingredients": [
       "kidney beans"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Lentils (cooked)",
@@ -3464,7 +3699,8 @@
     "fiber_g": 16,
     "ingredients": [
       "lentils"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chickpeas (cooked)",
@@ -3478,7 +3714,8 @@
     "fiber_g": 12.5,
     "ingredients": [
       "chickpeas"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Casein Protein Shake",
@@ -3492,7 +3729,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Casein Protein Shake"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Mass Gainer Shake",
@@ -3506,7 +3744,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Mass Gainer Shake"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Smoothie (fruit + protein)",
@@ -3520,7 +3759,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Smoothie (fruit + protein)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Green Smoothie",
@@ -3534,7 +3774,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Green Smoothie"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Scrambled Eggs (2)",
@@ -3548,7 +3789,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Scrambled Eggs (2)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Boiled Egg (1)",
@@ -3562,7 +3804,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Boiled Egg (1)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Bacon (2 slices)",
@@ -3576,7 +3819,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Bacon (2 slices)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Sausage Link (1)",
@@ -3590,7 +3834,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Sausage Link (1)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Avocado Toast",
@@ -3606,7 +3851,8 @@
       "wheat bread",
       "avocado",
       "lime"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Breakfast Burrito",
@@ -3623,7 +3869,8 @@
       "potato",
       "onion",
       "pepper"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Acai Bowl",
@@ -3640,7 +3887,8 @@
       "banana",
       "granola",
       "blueberry"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Chia Pudding",
@@ -3654,7 +3902,8 @@
     "fiber_g": 10,
     "ingredients": [
       "Chia Pudding"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Croissant",
@@ -3668,7 +3917,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Croissant"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Grilled Chicken Salad",
@@ -3682,7 +3932,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Grilled Chicken Salad"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Turkey Sandwich",
@@ -3698,7 +3949,8 @@
       "wheat bread",
       "lettuce",
       "tomato"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Soup (Chicken Noodle)",
@@ -3715,7 +3967,8 @@
       "carrot",
       "celery",
       "onion"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Soup (Tomato)",
@@ -3732,7 +3985,8 @@
       "onion",
       "garlic",
       "basil"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Greek Salad",
@@ -3750,7 +4004,8 @@
       "onion",
       "olive",
       "bell pepper"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Poke Bowl",
@@ -3764,7 +4019,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Poke Bowl"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Wrap (Chicken Caesar)",
@@ -3778,7 +4034,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Wrap (Chicken Caesar)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Steak (8oz ribeye)",
@@ -3792,7 +4049,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Steak (8oz ribeye)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Pasta with Meat Sauce",
@@ -3806,7 +4064,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Pasta with Meat Sauce"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Grilled Salmon Fillet",
@@ -3820,7 +4079,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Grilled Salmon Fillet"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Mashed Potatoes",
@@ -3834,7 +4094,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Mashed Potatoes"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Steamed Rice (white)",
@@ -3848,7 +4109,8 @@
     "fiber_g": 0.6,
     "ingredients": [
       "Steamed Rice (white)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Mixed Green Salad",
@@ -3862,7 +4124,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Mixed Green Salad"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "String Cheese",
@@ -3876,7 +4139,8 @@
     "fiber_g": 0,
     "ingredients": [
       "String Cheese"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Baby Carrots",
@@ -3890,7 +4154,8 @@
     "fiber_g": 2.4,
     "ingredients": [
       "Baby Carrots"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Banana (medium)",
@@ -3904,7 +4169,8 @@
     "fiber_g": 3.1,
     "ingredients": [
       "Banana (medium)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Protein Shake (whey)",
@@ -3918,7 +4184,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Protein Shake (whey)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Mixed Nuts",
@@ -3932,7 +4199,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Mixed Nuts"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Yogurt Parfait",
@@ -3946,7 +4214,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Yogurt Parfait"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Rajma (Kidney Bean Curry)",
@@ -3960,7 +4229,8 @@
     "fiber_g": 8,
     "ingredients": [
       "Rajma (Kidney Bean Curry)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Paneer Tikka",
@@ -3974,7 +4244,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Paneer Tikka"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Malai Kofta",
@@ -3988,7 +4259,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Malai Kofta"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pav Bhaji",
@@ -4008,7 +4280,8 @@
       "onion",
       "butter",
       "pav bhaji masala"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Vada Pav",
@@ -4026,7 +4299,8 @@
       "bread",
       "garlic",
       "green chili"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Biryani (Veg)",
@@ -4040,7 +4314,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Biryani (Veg)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Egg Curry",
@@ -4054,7 +4329,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Egg Curry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Masala Chai",
@@ -4068,7 +4344,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Masala Chai"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Papad (fried)",
@@ -4082,7 +4359,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Papad (fried)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Pakora (4 pieces)",
@@ -4096,7 +4374,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Pakora (4 pieces)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Chicken Thigh (boneless)",
@@ -4110,7 +4389,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Chicken Thigh (boneless)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Whey Protein Isolate",
@@ -4124,7 +4404,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Whey Protein Isolate"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Granola Bar",
@@ -4138,7 +4419,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Granola Bar"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Greek Yogurt (0% fat)",
@@ -4152,7 +4434,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Greek Yogurt (0% fat)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Chicken Meatballs (1 meatball)",
@@ -4166,7 +4449,8 @@
     "fiber_g": 0,
     "ingredients": [
       "TJ's Chicken Meatballs (1 meatball)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Turkey Meatballs (1 meatball)",
@@ -4180,7 +4464,8 @@
     "fiber_g": 0,
     "ingredients": [
       "TJ's Turkey Meatballs (1 meatball)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Cauliflower Gnocchi",
@@ -4196,7 +4481,8 @@
       "cauliflower",
       "potato",
       "cassava"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Mandarin Orange Chicken",
@@ -4213,7 +4499,8 @@
       "garlic",
       "ginger",
       "soy sauce"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Southwest Salad Kit",
@@ -4227,7 +4514,8 @@
     "fiber_g": 3,
     "ingredients": [
       "TJ's Southwest Salad Kit"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Caesar Salad Kit",
@@ -4241,7 +4529,8 @@
     "fiber_g": 2,
     "ingredients": [
       "TJ's Caesar Salad Kit"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Mediterranean Salad Kit",
@@ -4255,7 +4544,8 @@
     "fiber_g": 3,
     "ingredients": [
       "TJ's Mediterranean Salad Kit"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Asian Chopped Salad Kit",
@@ -4269,7 +4559,8 @@
     "fiber_g": 2,
     "ingredients": [
       "TJ's Asian Chopped Salad Kit"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Frozen Brown Rice",
@@ -4283,7 +4574,8 @@
     "fiber_g": 3,
     "ingredients": [
       "TJ's Frozen Brown Rice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Everything But The Bagel Seasoning",
@@ -4300,7 +4592,8 @@
       "poppy seeds",
       "garlic",
       "onion"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Reduced Guilt Mac & Cheese",
@@ -4314,7 +4607,8 @@
     "fiber_g": 2,
     "ingredients": [
       "TJ's Reduced Guilt Mac & Cheese"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Greek Yogurt (plain, nonfat)",
@@ -4328,7 +4622,8 @@
     "fiber_g": 0,
     "ingredients": [
       "TJ's Greek Yogurt (plain, nonfat)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Protein Bar (various)",
@@ -4342,7 +4637,8 @@
     "fiber_g": 5,
     "ingredients": [
       "TJ's Protein Bar (various)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Chicken Tikka Masala",
@@ -4360,7 +4656,8 @@
       "garlic",
       "ginger",
       "garam masala"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Organic Hummus",
@@ -4374,7 +4671,8 @@
     "fiber_g": 1,
     "ingredients": [
       "TJ's Organic Hummus"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF Caesar Salad Kit",
@@ -4389,7 +4687,8 @@
     "ingredients": [
       "romaine lettuce",
       "croutons"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF Kale & Quinoa Salad Kit",
@@ -4406,7 +4705,8 @@
       "quinoa",
       "cranberry",
       "pumpkin seeds"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF Organic Rotisserie Chicken (per 100g)",
@@ -4420,7 +4720,8 @@
     "fiber_g": 0,
     "ingredients": [
       "WF Organic Rotisserie Chicken (per 100g)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF 365 Organic Chicken Breast",
@@ -4434,7 +4735,8 @@
     "fiber_g": 0,
     "ingredients": [
       "WF 365 Organic Chicken Breast"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Organic Eggs (1 large)",
@@ -4448,7 +4750,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kirkland Organic Eggs (1 large)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Rotisserie Chicken (per 100g)",
@@ -4462,7 +4765,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kirkland Rotisserie Chicken (per 100g)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Protein Bars",
@@ -4476,7 +4780,8 @@
     "fiber_g": 15,
     "ingredients": [
       "Kirkland Protein Bars"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Greek Yogurt (plain)",
@@ -4490,7 +4795,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kirkland Greek Yogurt (plain)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Organic Chicken Breast",
@@ -4504,7 +4810,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kirkland Organic Chicken Breast"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Mixed Nuts",
@@ -4518,7 +4825,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Kirkland Mixed Nuts"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Costco Food Court Hot Dog",
@@ -4532,7 +4840,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Costco Food Court Hot Dog"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Costco Food Court Pizza Slice",
@@ -4546,7 +4855,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Costco Food Court Pizza Slice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Avocado (medium)",
@@ -4560,7 +4870,8 @@
     "fiber_g": 10,
     "ingredients": [
       "Avocado (medium)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sweet Potato (medium, baked)",
@@ -4574,7 +4885,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Sweet Potato (medium, baked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Ground Turkey (93% lean, cooked)",
@@ -4588,7 +4900,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Ground Turkey (93% lean, cooked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Ground Beef (90% lean, cooked)",
@@ -4602,7 +4915,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Ground Beef (90% lean, cooked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Salmon Fillet (baked)",
@@ -4616,7 +4930,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Salmon Fillet (baked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Peanut Butter (2 tbsp)",
@@ -4630,7 +4945,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Peanut Butter (2 tbsp)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Almond Butter (2 tbsp)",
@@ -4644,7 +4960,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Almond Butter (2 tbsp)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Protein Shake (whey, 1 scoop)",
@@ -4658,7 +4975,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Protein Shake (whey, 1 scoop)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "AG1 (Athletic Greens, 1 serving)",
@@ -4672,7 +4990,8 @@
     "fiber_g": 2,
     "ingredients": [
       "AG1 (Athletic Greens, 1 serving)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Cottage Cheese (low fat)",
@@ -4686,7 +5005,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Cottage Cheese (low fat)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Beef Jerky (1 oz)",
@@ -4700,7 +5020,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Beef Jerky (1 oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "String Cheese (1 stick)",
@@ -4714,7 +5035,8 @@
     "fiber_g": 0,
     "ingredients": [
       "String Cheese (1 stick)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Tortilla Wrap (large, flour)",
@@ -4728,7 +5050,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Tortilla Wrap (large, flour)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Hummus (2 tbsp)",
@@ -4742,7 +5065,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Hummus (2 tbsp)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Granola (1/3 cup)",
@@ -4756,7 +5080,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Granola (1/3 cup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Overnight Oats (prepared)",
@@ -4770,7 +5095,8 @@
     "fiber_g": 6,
     "ingredients": [
       "Overnight Oats (prepared)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Açaí Bowl (medium)",
@@ -4784,7 +5110,8 @@
     "fiber_g": 8,
     "ingredients": [
       "Açaí Bowl (medium)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Whey Protein Drink Mix",
@@ -4798,7 +5125,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Whey Protein Drink Mix"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "2% Milk",
@@ -4812,7 +5140,8 @@
     "fiber_g": 0,
     "ingredients": [
       "2% Milk"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "20g Protein Vanilla",
@@ -4826,7 +5155,8 @@
     "fiber_g": 2,
     "ingredients": [
       "20g Protein Vanilla"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Ag1",
@@ -4840,7 +5170,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Ag1"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Almond Flour Tortillas",
@@ -4854,7 +5185,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Almond Flour Tortillas"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Almonds, Raw",
@@ -4868,7 +5200,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Almonds, Raw"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Apple, Fresh, With Skin",
@@ -4882,7 +5215,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Apple, Fresh, With Skin"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Atlantic Salmon",
@@ -4896,7 +5230,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Atlantic Salmon"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Avocado Ranch",
@@ -4910,7 +5245,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Avocado Ranch"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Avocado Ranch Salad Kit",
@@ -4927,7 +5263,8 @@
       "avocado",
       "corn",
       "tomato"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Avocados Raw",
@@ -4941,7 +5278,8 @@
     "fiber_g": 11,
     "ingredients": [
       "Avocados Raw"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Banana, Fresh",
@@ -4955,7 +5293,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Banana, Fresh"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Biryani (Indian Seasoned Rice), Without Meat",
@@ -4969,7 +5308,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Biryani (Indian Seasoned Rice), Without Meat"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Blueberries, Fresh",
@@ -4983,7 +5323,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Blueberries, Fresh"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Carrots Baby Raw",
@@ -4997,7 +5338,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Carrots Baby Raw"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Cashews, Raw",
@@ -5011,7 +5353,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Cashews, Raw"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Quaker Instant Oatmeal Apple Cinnamon (prepared)",
@@ -5025,7 +5368,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Quaker Instant Oatmeal Apple Cinnamon (prepared)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Quaker Instant Oatmeal Cinnamon Spice",
@@ -5039,7 +5383,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Quaker Instant Oatmeal Cinnamon Spice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Cereals, Quaker, Quick Oats, Dry",
@@ -5053,7 +5398,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Cereals, Quaker, Quick Oats, Dry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chai Biscuits Karachi",
@@ -5067,7 +5413,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Chai Biscuits Karachi"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chai Latte",
@@ -5081,7 +5428,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Chai Latte"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chicken Breakfast Sausage Patties",
@@ -5095,7 +5443,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Chicken Breakfast Sausage Patties"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Chicken Karaage",
@@ -5109,7 +5458,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Chicken Karaage"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Chicken Malai Boti",
@@ -5123,7 +5473,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Chicken Malai Boti"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Chicken Manchurian",
@@ -5137,7 +5488,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Chicken Manchurian"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Chicken Meatballs",
@@ -5151,7 +5503,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Chicken Meatballs"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Chicken Shawarma",
@@ -5170,7 +5523,8 @@
       "cumin",
       "turmeric",
       "paprika"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Chicken Skewer",
@@ -5184,7 +5538,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Chicken Skewer"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Chobani Zero Added Sugar Mango",
@@ -5198,7 +5553,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Chobani Zero Added Sugar Mango"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chocolate Nutrition Shake",
@@ -5212,7 +5568,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Chocolate Nutrition Shake"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Chole Saag Rice",
@@ -5226,7 +5583,8 @@
     "fiber_g": 8,
     "ingredients": [
       "Chole Saag Rice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Clarified Butter (Ghee)",
@@ -5240,7 +5598,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Clarified Butter (Ghee)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Classic Greek Salad",
@@ -5258,7 +5617,8 @@
       "onion",
       "olive",
       "bell pepper"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Collagen Peptides Unflavoured",
@@ -5272,7 +5632,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Collagen Peptides Unflavoured"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Cooked White Rice",
@@ -5286,7 +5647,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Cooked White Rice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Cookies & Cream",
@@ -5300,7 +5662,8 @@
     "fiber_g": 6,
     "ingredients": [
       "Cookies & Cream"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Cookies & Cream Protein Bar",
@@ -5314,7 +5677,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Cookies & Cream Protein Bar"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Creamy Dill Pickle Chopped Kit",
@@ -5330,7 +5694,8 @@
       "romaine lettuce",
       "cucumber",
       "dill"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Crunch Sesame Ramen Salad - Correct",
@@ -5347,7 +5712,8 @@
       "carrot",
       "scallion",
       "sesame seeds"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Cucumber, Raw, Without Peel",
@@ -5361,7 +5727,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Cucumber, Raw, Without Peel"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Cup Tea Milk",
@@ -5375,7 +5742,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Cup Tea Milk"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dates Medjool",
@@ -5389,7 +5757,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Dates Medjool"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dill-Icious Chopped Salad Kit",
@@ -5406,7 +5775,8 @@
       "cucumber",
       "dill",
       "onion"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Edamame with Salt",
@@ -5420,7 +5790,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Edamame with Salt"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Egg Scrambled",
@@ -5434,7 +5805,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Egg Scrambled"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Egg Whole Omelet",
@@ -5448,7 +5820,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Egg Whole Omelet"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Enchilada Sauce, Red, Store Bought",
@@ -5462,7 +5835,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Enchilada Sauce, Red, Store Bought"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Fage Total 2% With Blueberry",
@@ -5476,7 +5850,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Fage Total 2% With Blueberry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Fudge Brownie",
@@ -5490,7 +5865,8 @@
     "fiber_g": 7,
     "ingredients": [
       "Fudge Brownie"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Fully Cooked Chicken Breast Bites",
@@ -5504,7 +5880,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Fully Cooked Chicken Breast Bites"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Fresh Additions Chicken Breast Bites",
@@ -5518,7 +5895,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Fresh Additions Chicken Breast Bites"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Garlic Naan",
@@ -5532,7 +5910,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Garlic Naan"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Ginger Tea With Low Fat Milk",
@@ -5546,7 +5925,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Ginger Tea With Low Fat Milk"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Gold Standard Whey Vanilla",
@@ -5560,7 +5940,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Gold Standard Whey Vanilla"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Gold Standard Whey Chocolate",
@@ -5574,7 +5955,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Gold Standard Whey Chocolate"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Greek Side Salad",
@@ -5591,7 +5973,8 @@
       "tomato",
       "onion",
       "olive"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Greek Yogurt Blueberry",
@@ -5605,7 +5988,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Greek Yogurt Blueberry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Gulab Jamun (Fried Milk in Sugar Syrup)",
@@ -5619,7 +6003,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Gulab Jamun (Fried Milk in Sugar Syrup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Gyro Meat",
@@ -5633,7 +6018,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Gyro Meat"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Hair Skin Nails Gummies",
@@ -5647,7 +6033,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Hair Skin Nails Gummies"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Hakashi Roll",
@@ -5661,7 +6048,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Hakashi Roll"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Harmeless Coconut Water",
@@ -5675,7 +6063,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Harmeless Coconut Water"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Harvest Bowl",
@@ -5692,7 +6081,8 @@
       "sweet potato",
       "kale",
       "chickpeas"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "High Protein Paneer",
@@ -5706,7 +6096,8 @@
     "fiber_g": 0,
     "ingredients": [
       "High Protein Paneer"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "High Protein Tofu Super Firm",
@@ -5720,7 +6111,8 @@
     "fiber_g": 3,
     "ingredients": [
       "High Protein Tofu Super Firm"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Hot and Spicy Peperoni Salami",
@@ -5734,7 +6126,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Hot and Spicy Peperoni Salami"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Indian Fare Punjab Choley",
@@ -5748,7 +6141,8 @@
     "fiber_g": 6,
     "ingredients": [
       "Indian Fare Punjab Choley"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Instant Oatmeal",
@@ -5762,7 +6156,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Instant Oatmeal"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Instant Oatmeal Cinnamon & Spice",
@@ -5776,7 +6171,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Instant Oatmeal Cinnamon & Spice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Instant Oatmeal Flavor Variety",
@@ -5790,7 +6186,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Instant Oatmeal Flavor Variety"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Instant Oatmeal Original",
@@ -5804,7 +6201,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Instant Oatmeal Original"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kacchi Dabeli",
@@ -5818,7 +6216,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Kacchi Dabeli"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Greek Yogurt",
@@ -5832,7 +6231,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kirkland Greek Yogurt"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Lemon Tahini Crunch Chopped Salad Kit",
@@ -5850,7 +6250,8 @@
       "tahini",
       "lemon",
       "sunflower seeds"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Lemon Wedge",
@@ -5864,7 +6265,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Lemon Wedge"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Malabar Mixture",
@@ -5878,7 +6280,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Malabar Mixture"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Mango Malai Kulfi",
@@ -5892,7 +6295,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Mango Malai Kulfi"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Mediterranean Crunch Chopped Salad Kit",
@@ -5910,7 +6314,8 @@
       "tomato",
       "olive",
       "chickpeas"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Melanie Roll",
@@ -5924,7 +6329,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Melanie Roll"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Mexican Street Corn Chopped Kit",
@@ -5942,7 +6348,8 @@
       "tomato",
       "cilantro",
       "lime"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Milk, 2% Fat (Reduced Fat)",
@@ -5956,7 +6363,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Milk, 2% Fat (Reduced Fat)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Milk, Whole",
@@ -5970,7 +6378,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Milk, Whole"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Miso Crunch Chopped Salad Kit",
@@ -5987,7 +6396,8 @@
       "carrot",
       "edamame",
       "scallion"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Moong Daal",
@@ -6001,7 +6411,8 @@
     "fiber_g": 18,
     "ingredients": [
       "Moong Daal"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Psyllium Husk Fiber",
@@ -6015,7 +6426,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Psyllium Husk Fiber"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Naturally Refined Avocado Oil",
@@ -6029,7 +6441,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Naturally Refined Avocado Oil"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Not So Fried Chicken Sandwich",
@@ -6043,7 +6456,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Not So Fried Chicken Sandwich"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Omega 3 Fish Oil",
@@ -6057,7 +6471,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Omega 3 Fish Oil"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Onion, White, Yellow or Red, Raw",
@@ -6071,7 +6486,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Onion, White, Yellow or Red, Raw"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Orange Tomato, Raw",
@@ -6085,7 +6501,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Orange Tomato, Raw"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Organic Coconut Water",
@@ -6099,7 +6516,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Organic Coconut Water"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Organic Green Split Peas",
@@ -6113,7 +6531,8 @@
     "fiber_g": 13,
     "ingredients": [
       "Organic Green Split Peas"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Organic Large Grade a Eggs",
@@ -6127,7 +6546,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Organic Large Grade a Eggs"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Organic Lemon Parmesan Chopped Kit",
@@ -6141,7 +6561,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Organic Lemon Parmesan Chopped Kit"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Organic Mediterranean Style Salad Kit",
@@ -6155,7 +6576,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Organic Mediterranean Style Salad Kit"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Organic Plain Greek Yogurt",
@@ -6169,7 +6591,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Organic Plain Greek Yogurt"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Palak Paneer (ready-to-eat)",
@@ -6183,7 +6606,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Palak Paneer (ready-to-eat)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pan-Fried Gyoza with Dipping Sauce",
@@ -6197,7 +6621,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Pan-Fried Gyoza with Dipping Sauce"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Paneer Indian Style Cooking Cheese",
@@ -6211,7 +6636,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Paneer Indian Style Cooking Cheese"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Paratha (Layered Indian Bread), White",
@@ -6225,7 +6651,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Paratha (Layered Indian Bread), White"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pears Asian Raw",
@@ -6239,7 +6666,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Pears Asian Raw"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pickled Ginger",
@@ -6253,7 +6681,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Pickled Ginger"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pineapple Curry Fried Rice",
@@ -6267,7 +6696,8 @@
     "fiber_g": 6,
     "ingredients": [
       "Pineapple Curry Fried Rice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pistachio Nuts, Raw",
@@ -6281,7 +6711,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Pistachio Nuts, Raw"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Pistachio Nuts, Roasted, Salted",
@@ -6295,7 +6726,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Pistachio Nuts, Roasted, Salted"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Pita Chicken",
@@ -6309,7 +6741,8 @@
     "fiber_g": 7,
     "ingredients": [
       "Pita Chicken"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Poha 3 Minute Breakfast",
@@ -6323,7 +6756,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Poha 3 Minute Breakfast"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Protein Shake",
@@ -6337,7 +6771,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Protein Shake"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Quaker Instant Oatmeal Maple Brown Sugar",
@@ -6351,7 +6786,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Quaker Instant Oatmeal Maple Brown Sugar"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Quinoa Soya Chunk Khichdi",
@@ -6365,7 +6801,8 @@
     "fiber_g": 7,
     "ingredients": [
       "Quinoa Soya Chunk Khichdi"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Quinoa, Dry",
@@ -6379,7 +6816,8 @@
     "fiber_g": 7,
     "ingredients": [
       "Quinoa, Dry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Ready to Eat Chicken Breast Bites",
@@ -6393,7 +6831,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Ready to Eat Chicken Breast Bites"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Roasted Chicken Sandwich",
@@ -6407,7 +6846,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Roasted Chicken Sandwich"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Roasted Duck",
@@ -6421,7 +6861,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Roasted Duck"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Roti (Indian Bread), Whole Wheat",
@@ -6435,7 +6876,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Roti (Indian Bread), Whole Wheat"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Roti Paratha Whole Meal",
@@ -6449,7 +6891,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Roti Paratha Whole Meal"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sabudana Khichdi",
@@ -6463,7 +6906,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Sabudana Khichdi"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Salmon Bites",
@@ -6477,7 +6921,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Salmon Bites"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Salmon Burgers",
@@ -6491,7 +6936,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Salmon Burgers"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Santa Fe Style",
@@ -6505,7 +6951,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Santa Fe Style"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Santa Fe Chicken Bowl",
@@ -6523,7 +6970,8 @@
       "corn",
       "bell pepper",
       "onion"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Santa Fe Chicken Grain Bowl",
@@ -6541,7 +6989,8 @@
       "corn",
       "bell pepper",
       "onion"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Sauteed Mushroom, Swiss Chard, and Tomato",
@@ -6555,7 +7004,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Sauteed Mushroom, Swiss Chard, and Tomato"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sesame Crunch Chopped Salad Kit",
@@ -6569,7 +7019,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Sesame Crunch Chopped Salad Kit"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Shredded Cabbage",
@@ -6583,7 +7034,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Shredded Cabbage"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Side Chicken Skewer",
@@ -6597,7 +7049,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Side Chicken Skewer"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Side Greek Salad",
@@ -6611,7 +7064,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Side Greek Salad"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Small Original Cheese & Tomato Pizza Classic Crust",
@@ -6625,7 +7079,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Small Original Cheese & Tomato Pizza Classic Crust"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Soups and Sauces Wasabi",
@@ -6639,7 +7094,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Soups and Sauces Wasabi"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Southwestern Chopped Salad",
@@ -6653,7 +7109,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Southwestern Chopped Salad"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Soya Chunks",
@@ -6667,7 +7124,8 @@
     "fiber_g": 7,
     "ingredients": [
       "Soya Chunks"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Spinach Cooked Boiled Drained With Salt",
@@ -6681,7 +7139,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Spinach Cooked Boiled Drained With Salt"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Stir Fry Vegetable Blend",
@@ -6695,7 +7154,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Stir Fry Vegetable Blend"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Strawberries, Fresh",
@@ -6709,7 +7169,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Strawberries, Fresh"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sugar",
@@ -6723,7 +7184,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Sugar"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sugar Free White Peach",
@@ -6737,7 +7199,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Sugar Free White Peach"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sweet Kale Chopped Kit",
@@ -6751,7 +7214,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Sweet Kale Chopped Kit"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Toor Dal",
@@ -6765,7 +7229,8 @@
     "fiber_g": 8,
     "ingredients": [
       "Toor Dal"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Total 2% Milkfat With Black Cherry",
@@ -6779,7 +7244,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Total 2% Milkfat With Black Cherry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Uncooked Whole Durum Wheat Flour Phulka",
@@ -6793,7 +7259,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Uncooked Whole Durum Wheat Flour Phulka"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Vanilla",
@@ -6807,7 +7274,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Vanilla"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Vanilla Cake Slice, Vanilla",
@@ -6821,7 +7289,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Vanilla Cake Slice, Vanilla"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Whey Protein (24g per scoop)",
@@ -6835,7 +7304,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Whey Protein (24g per scoop)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "White Rice, Uncooked",
@@ -6849,7 +7319,8 @@
     "fiber_g": 1,
     "ingredients": [
       "White Rice, Uncooked"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Whole Food Supplement",
@@ -6863,7 +7334,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Whole Food Supplement"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Whole Milk Lactose Free",
@@ -6877,7 +7349,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Whole Milk Lactose Free"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Capsicum",
@@ -6891,7 +7364,8 @@
     "fiber_g": 0.0,
     "ingredients": [
       "Capsicum"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Cherry Tomato",
@@ -6905,7 +7379,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Cherry Tomato"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Eggplant (cooked)",
@@ -6919,7 +7394,8 @@
     "fiber_g": 2.5,
     "ingredients": [
       "Eggplant (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Feta Cheese",
@@ -6933,7 +7409,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Feta Cheese"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kale",
@@ -6947,7 +7424,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Kale"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Mushroom",
@@ -6961,7 +7439,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Mushroom"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Parmesan",
@@ -6975,7 +7454,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Parmesan"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Rice",
@@ -6989,7 +7469,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Rice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Saag (Spinach Curry)",
@@ -7003,7 +7484,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Saag (Spinach Curry)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Spinach",
@@ -7017,7 +7499,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Spinach"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Zucchini (cooked)",
@@ -7031,7 +7514,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Zucchini (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Asparagus (cooked)",
@@ -7045,7 +7529,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Asparagus (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Green Beans (cooked)",
@@ -7059,7 +7544,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Green Beans (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Kale (raw, chopped)",
@@ -7073,7 +7559,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Kale (raw, chopped)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Mixed Greens (salad base)",
@@ -7087,7 +7574,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Mixed Greens (salad base)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Cherry Tomatoes (1 cup)",
@@ -7101,7 +7589,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Cherry Tomatoes (1 cup)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Grapes (1 cup)",
@@ -7115,7 +7604,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Grapes (1 cup)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Watermelon (diced, 1 cup)",
@@ -7129,7 +7619,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Watermelon (diced, 1 cup)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Pineapple (chunks)",
@@ -7143,7 +7634,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Pineapple (chunks)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "TJ's Riced Cauliflower (frozen)",
@@ -7157,7 +7649,8 @@
     "fiber_g": 2,
     "ingredients": [
       "TJ's Riced Cauliflower (frozen)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Chicken Gyoza (6 potstickers)",
@@ -7171,7 +7664,8 @@
     "fiber_g": 1,
     "ingredients": [
       "TJ's Chicken Gyoza (6 potstickers)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Unexpected Cheddar Cheese",
@@ -7185,7 +7679,8 @@
     "fiber_g": 0,
     "ingredients": [
       "TJ's Unexpected Cheddar Cheese"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Organic Marinara Sauce",
@@ -7199,7 +7694,8 @@
     "fiber_g": 2,
     "ingredients": [
       "TJ's Organic Marinara Sauce"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Organic Coconut Milk (canned)",
@@ -7213,7 +7709,8 @@
     "fiber_g": 0,
     "ingredients": [
       "TJ's Organic Coconut Milk (canned)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Frozen Organic Acai Puree",
@@ -7227,7 +7724,8 @@
     "fiber_g": 4,
     "ingredients": [
       "TJ's Frozen Organic Acai Puree"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Organic Peanut Butter (2 tbsp)",
@@ -7241,7 +7739,8 @@
     "fiber_g": 2,
     "ingredients": [
       "TJ's Organic Peanut Butter (2 tbsp)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Dark Chocolate Peanut Butter Cups (2)",
@@ -7255,7 +7754,8 @@
     "fiber_g": 2,
     "ingredients": [
       "TJ's Dark Chocolate Peanut Butter Cups (2)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Everything Ciabatta Rolls",
@@ -7269,7 +7769,8 @@
     "fiber_g": 2,
     "ingredients": [
       "TJ's Everything Ciabatta Rolls"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Organic Tomato Basil Soup",
@@ -7283,7 +7784,8 @@
     "fiber_g": 2,
     "ingredients": [
       "TJ's Organic Tomato Basil Soup"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Frozen Palak Paneer",
@@ -7297,7 +7799,8 @@
     "fiber_g": 6,
     "ingredients": [
       "TJ's Frozen Palak Paneer"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Organic Chicken Broth",
@@ -7311,7 +7814,8 @@
     "fiber_g": 0,
     "ingredients": [
       "TJ's Organic Chicken Broth"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Organic Extra Firm Tofu",
@@ -7325,7 +7829,8 @@
     "fiber_g": 1,
     "ingredients": [
       "TJ's Organic Extra Firm Tofu"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Mini Naan (1 piece)",
@@ -7339,7 +7844,8 @@
     "fiber_g": 1,
     "ingredients": [
       "TJ's Mini Naan (1 piece)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Shawarma Chicken Thighs",
@@ -7353,7 +7859,8 @@
     "fiber_g": 0,
     "ingredients": [
       "TJ's Shawarma Chicken Thighs"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF 365 Organic Black Beans (canned)",
@@ -7367,7 +7874,8 @@
     "fiber_g": 6,
     "ingredients": [
       "black beans"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF 365 Organic Pinto Beans (canned)",
@@ -7381,7 +7889,8 @@
     "fiber_g": 6,
     "ingredients": [
       "pinto beans"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF Deli Turkey Breast (sliced)",
@@ -7395,7 +7904,8 @@
     "fiber_g": 0,
     "ingredients": [
       "WF Deli Turkey Breast (sliced)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF Asian Chopped Salad Kit",
@@ -7413,7 +7923,8 @@
       "edamame",
       "sesame seeds",
       "ginger"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF Power Greens (spinach/kale mix)",
@@ -7429,7 +7940,8 @@
       "spinach",
       "kale",
       "chard"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF 365 Almond Milk Unsweetened",
@@ -7443,7 +7955,8 @@
     "fiber_g": 0,
     "ingredients": [
       "WF 365 Almond Milk Unsweetened"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF 365 Organic Quinoa",
@@ -7457,7 +7970,8 @@
     "fiber_g": 3,
     "ingredients": [
       "WF 365 Organic Quinoa"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF 365 Organic Brown Rice",
@@ -7471,7 +7985,8 @@
     "fiber_g": 2,
     "ingredients": [
       "WF 365 Organic Brown Rice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Organic Chicken Stock",
@@ -7485,7 +8000,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kirkland Organic Chicken Stock"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Almond Butter (2 tbsp)",
@@ -7499,7 +8015,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Kirkland Almond Butter (2 tbsp)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Organic Peanut Butter (2 tbsp)",
@@ -7513,7 +8030,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Kirkland Organic Peanut Butter (2 tbsp)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Frozen Stir-Fry Vegetables",
@@ -7527,7 +8045,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Kirkland Frozen Stir-Fry Vegetables"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Frozen Broccoli Florets",
@@ -7541,7 +8060,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Kirkland Frozen Broccoli Florets"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Atlantic Salmon (frozen)",
@@ -7555,7 +8075,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kirkland Atlantic Salmon (frozen)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Organic Ground Beef 88/12",
@@ -7569,7 +8090,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kirkland Organic Ground Beef 88/12"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Bagels (1 bagel)",
@@ -7583,7 +8105,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Kirkland Bagels (1 bagel)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Croissants (1 croissant)",
@@ -7597,7 +8120,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Kirkland Croissants (1 croissant)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Hummus Singles",
@@ -7611,7 +8135,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Kirkland Hummus Singles"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Olive Oil (1 tbsp)",
@@ -7625,7 +8150,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Olive Oil (1 tbsp)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Butter (1 tbsp)",
@@ -7639,7 +8165,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Butter (1 tbsp)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Cream Cheese (2 tbsp)",
@@ -7653,7 +8180,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Cream Cheese (2 tbsp)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sour Cream (2 tbsp)",
@@ -7667,7 +8195,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Sour Cream (2 tbsp)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Cheddar Cheese (1 oz)",
@@ -7681,7 +8210,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Cheddar Cheese (1 oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Mozzarella Cheese (1 oz)",
@@ -7695,7 +8225,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Mozzarella Cheese (1 oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Parmesan Cheese (2 tbsp)",
@@ -7709,7 +8240,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Parmesan Cheese (2 tbsp)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Heavy Cream (1 tbsp)",
@@ -7723,7 +8255,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Heavy Cream (1 tbsp)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Oat Milk (1 cup)",
@@ -7737,7 +8270,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Oat Milk (1 cup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Almond Milk Unsweetened (1 cup)",
@@ -7751,7 +8285,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Almond Milk Unsweetened (1 cup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Soy Milk (1 cup)",
@@ -7765,7 +8300,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Soy Milk (1 cup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Turkey Breast (deli)",
@@ -7779,7 +8315,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Turkey Breast (deli)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Ham (deli)",
@@ -7793,7 +8330,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Ham (deli)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Tofu (firm, 1/5 block)",
@@ -7807,7 +8345,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Tofu (firm, 1/5 block)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Pasta (cooked, 1 cup)",
@@ -7821,7 +8360,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Pasta (cooked, 1 cup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sourdough Bread (1 slice)",
@@ -7835,7 +8375,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Sourdough Bread (1 slice)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "White Rice (cooked, 1 cup)",
@@ -7849,7 +8390,8 @@
     "fiber_g": 1,
     "ingredients": [
       "White Rice (cooked, 1 cup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Instant Ramen (1 packet)",
@@ -7863,7 +8405,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Instant Ramen (1 packet)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dark Chocolate (1 oz)",
@@ -7877,7 +8420,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Dark Chocolate (1 oz)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Popcorn (air-popped, 3 cups)",
@@ -7891,7 +8435,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Popcorn (air-popped, 3 cups)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Trail Mix (1/4 cup)",
@@ -7905,7 +8450,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Trail Mix (1/4 cup)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Rice Cakes (2)",
@@ -7919,7 +8465,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Rice Cakes (2)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Pretzels (1 oz)",
@@ -7933,7 +8480,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Pretzels (1 oz)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Tortilla Chips (1 oz)",
@@ -7947,7 +8495,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Tortilla Chips (1 oz)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Guacamole (2 tbsp)",
@@ -7961,7 +8510,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Guacamole (2 tbsp)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Salsa (2 tbsp)",
@@ -7975,7 +8525,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Salsa (2 tbsp)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Soy Sauce (1 tbsp)",
@@ -7989,7 +8540,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Soy Sauce (1 tbsp)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Hot Sauce (1 tsp)",
@@ -8003,7 +8555,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Hot Sauce (1 tsp)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Ranch Dressing (2 tbsp)",
@@ -8017,7 +8570,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Ranch Dressing (2 tbsp)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Balsamic Vinaigrette (2 tbsp)",
@@ -8031,7 +8585,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Balsamic Vinaigrette (2 tbsp)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Maple Syrup (1 tbsp)",
@@ -8045,7 +8600,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Maple Syrup (1 tbsp)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Honey (1 tbsp)",
@@ -8059,7 +8615,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Honey (1 tbsp)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Coconut Oil (1 tbsp)",
@@ -8073,7 +8630,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Coconut Oil (1 tbsp)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Sesame Oil (1 tbsp)",
@@ -8087,7 +8645,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Sesame Oil (1 tbsp)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Iced Coffee (black)",
@@ -8101,7 +8660,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Iced Coffee (black)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chai Tea Latte",
@@ -8115,7 +8675,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Chai Tea Latte"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Matcha Latte",
@@ -8129,7 +8690,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Matcha Latte"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sparkling Water",
@@ -8143,7 +8705,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Sparkling Water"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Chicken Sausage (1 link)",
@@ -8157,7 +8720,8 @@
     "fiber_g": 0,
     "ingredients": [
       "TJ's Chicken Sausage (1 link)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Frozen Shrimp (raw)",
@@ -8171,7 +8735,8 @@
     "fiber_g": 0,
     "ingredients": [
       "TJ's Frozen Shrimp (raw)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Turkey Burgers (frozen)",
@@ -8185,7 +8750,8 @@
     "fiber_g": 0,
     "ingredients": [
       "TJ's Turkey Burgers (frozen)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Organic Brown Rice (frozen)",
@@ -8199,7 +8765,8 @@
     "fiber_g": 2,
     "ingredients": [
       "TJ's Organic Brown Rice (frozen)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Kale Cashew Pesto",
@@ -8213,7 +8780,8 @@
     "fiber_g": 1,
     "ingredients": [
       "TJ's Kale Cashew Pesto"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Tzatziki Dip",
@@ -8227,7 +8795,8 @@
     "fiber_g": 0,
     "ingredients": [
       "TJ's Tzatziki Dip"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Frozen Edamame",
@@ -8241,7 +8810,8 @@
     "fiber_g": 4,
     "ingredients": [
       "TJ's Frozen Edamame"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Mini Chicken Tacos (4)",
@@ -8255,7 +8825,8 @@
     "fiber_g": 1,
     "ingredients": [
       "TJ's Mini Chicken Tacos (4)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Everything Bagel Seasoned Smoked Salmon",
@@ -8269,7 +8840,8 @@
     "fiber_g": 0,
     "ingredients": [
       "TJ's Everything Bagel Seasoned Smoked Salmon"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Chicken Wings (frozen)",
@@ -8283,7 +8855,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kirkland Chicken Wings (frozen)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Organic Blueberries (frozen)",
@@ -8297,7 +8870,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Kirkland Organic Blueberries (frozen)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Organic Strawberries (frozen)",
@@ -8311,7 +8885,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Kirkland Organic Strawberries (frozen)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Organic Mango Chunks (frozen)",
@@ -8325,7 +8900,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Kirkland Organic Mango Chunks (frozen)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Trail Mix",
@@ -8339,7 +8915,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Kirkland Trail Mix"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Organic Chicken Thighs",
@@ -8353,7 +8930,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kirkland Organic Chicken Thighs"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Corn Tortilla (1)",
@@ -8367,7 +8945,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Corn Tortilla (1)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pita Bread (1 round)",
@@ -8381,7 +8960,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Pita Bread (1 round)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Lentils (cooked, 1 cup)",
@@ -8395,7 +8975,8 @@
     "fiber_g": 16,
     "ingredients": [
       "Lentils (cooked, 1 cup)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Black Beans (cooked, 1 cup)",
@@ -8409,7 +8990,8 @@
     "fiber_g": 15,
     "ingredients": [
       "Black Beans (cooked, 1 cup)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Chickpeas (cooked, 1 cup)",
@@ -8423,7 +9005,8 @@
     "fiber_g": 12,
     "ingredients": [
       "Chickpeas (cooked, 1 cup)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Coconut Cream (canned)",
@@ -8437,7 +9020,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Coconut Cream (canned)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Feta Cheese (crumbled)",
@@ -8451,7 +9035,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Feta Cheese (crumbled)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Ricotta Cheese (part skim)",
@@ -8465,7 +9050,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Ricotta Cheese (part skim)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Tahini (2 tbsp)",
@@ -8479,7 +9065,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Tahini (2 tbsp)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Flax Seeds (2 tbsp)",
@@ -8493,7 +9080,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Flax Seeds (2 tbsp)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Sunflower Seeds (1/4 cup)",
@@ -8507,7 +9095,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Sunflower Seeds (1/4 cup)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Hemp Seeds (3 tbsp)",
@@ -8521,7 +9110,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Hemp Seeds (3 tbsp)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Frozen Mixed Berries (1 cup)",
@@ -8535,7 +9125,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Frozen Mixed Berries (1 cup)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Dried Cranberries (1/4 cup)",
@@ -8549,7 +9140,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Dried Cranberries (1/4 cup)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Chick-fil-A Grilled Nuggets (8ct)",
@@ -8563,7 +9155,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Chick-fil-A Grilled Nuggets (8ct)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Subway Turkey Sub (6in)",
@@ -8577,7 +9170,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Subway Turkey Sub (6in)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Kind Bar (Dark Chocolate Nuts)",
@@ -8591,7 +9185,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Kind Bar (Dark Chocolate Nuts)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "RX Bar (Chocolate Sea Salt)",
@@ -8605,7 +9200,8 @@
     "fiber_g": 5,
     "ingredients": [
       "RX Bar (Chocolate Sea Salt)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Quest Bar (Cookies & Cream)",
@@ -8619,7 +9215,8 @@
     "fiber_g": 14,
     "ingredients": [
       "Quest Bar (Cookies & Cream)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Nature Valley Granola Bar (2 bars)",
@@ -8633,7 +9230,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Nature Valley Granola Bar (2 bars)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Fairlife Protein Shake (chocolate)",
@@ -8647,7 +9245,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Fairlife Protein Shake (chocolate)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Premier Protein Shake",
@@ -8661,7 +9260,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Premier Protein Shake"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Chobani Greek Yogurt (plain, nonfat)",
@@ -8675,7 +9275,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Chobani Greek Yogurt (plain, nonfat)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Siggi's Icelandic Yogurt",
@@ -8689,7 +9290,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Siggi's Icelandic Yogurt"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Baby Spinach (bag)",
@@ -8703,7 +9305,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Baby Spinach (bag)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Arugula",
@@ -8717,7 +9320,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Arugula"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Romaine Lettuce (chopped)",
@@ -8731,7 +9335,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Romaine Lettuce (chopped)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Corn (canned)",
@@ -8745,7 +9350,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Corn (canned)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Green Peas (frozen)",
@@ -8759,7 +9365,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Green Peas (frozen)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Mushrooms (sliced, raw)",
@@ -8773,7 +9380,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Mushrooms (sliced, raw)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Celery (2 stalks)",
@@ -8787,7 +9395,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Celery (2 stalks)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Ginger (fresh, 1 tbsp)",
@@ -8801,7 +9410,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Ginger (fresh, 1 tbsp)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Garlic (2 cloves)",
@@ -8815,7 +9425,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Garlic (2 cloves)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Lemon Juice (1 tbsp)",
@@ -8829,7 +9440,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Lemon Juice (1 tbsp)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Lime Juice (1 tbsp)",
@@ -8843,7 +9455,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Lime Juice (1 tbsp)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Dried Pasta (uncooked)",
@@ -8857,7 +9470,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Dried Pasta (uncooked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Flour Tortilla (8in)",
@@ -8871,7 +9485,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Flour Tortilla (8in)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Jasmine Rice (cooked)",
@@ -8885,7 +9500,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Jasmine Rice (cooked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Basmati Rice (cooked)",
@@ -8899,7 +9515,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Basmati Rice (cooked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Ezekiel Bread (1 slice)",
@@ -8913,7 +9530,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Ezekiel Bread (1 slice)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dave's Killer Bread (1 slice)",
@@ -8927,7 +9545,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Dave's Killer Bread (1 slice)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Peach (medium)",
@@ -8941,7 +9560,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Peach (medium)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Plum (1 medium)",
@@ -8955,7 +9575,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Plum (1 medium)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Kiwi (1 medium)",
@@ -8969,7 +9590,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Kiwi (1 medium)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "TJ's Dark Chocolate Almonds",
@@ -8983,7 +9605,8 @@
     "fiber_g": 3,
     "ingredients": [
       "TJ's Dark Chocolate Almonds"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Chicken Burrito Bowl (frozen)",
@@ -8997,7 +9620,8 @@
     "fiber_g": 5,
     "ingredients": [
       "TJ's Chicken Burrito Bowl (frozen)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Butter Chicken (frozen)",
@@ -9011,7 +9635,8 @@
     "fiber_g": 3,
     "ingredients": [
       "TJ's Butter Chicken (frozen)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Korean Beef Bowl (frozen)",
@@ -9025,7 +9650,8 @@
     "fiber_g": 2,
     "ingredients": [
       "TJ's Korean Beef Bowl (frozen)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Spinach Artichoke Dip",
@@ -9039,7 +9665,8 @@
     "fiber_g": 0,
     "ingredients": [
       "TJ's Spinach Artichoke Dip"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Trail Mix Crackers",
@@ -9053,7 +9680,8 @@
     "fiber_g": 1,
     "ingredients": [
       "TJ's Trail Mix Crackers"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Gone Bananas (chocolate covered)",
@@ -9067,7 +9695,8 @@
     "fiber_g": 2,
     "ingredients": [
       "TJ's Gone Bananas (chocolate covered)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "TJ's Chicken Fried Rice (frozen)",
@@ -9081,7 +9710,8 @@
     "fiber_g": 2,
     "ingredients": [
       "TJ's Chicken Fried Rice (frozen)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Canned Albacore Tuna",
@@ -9095,7 +9725,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kirkland Canned Albacore Tuna"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Canned Chicken Breast",
@@ -9109,7 +9740,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kirkland Canned Chicken Breast"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Organic Peanut Butter Cups (2)",
@@ -9123,7 +9755,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Kirkland Organic Peanut Butter Cups (2)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Organic Tortilla Chips",
@@ -9137,7 +9770,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Kirkland Organic Tortilla Chips"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Organic Chicken Bone Broth",
@@ -9151,7 +9785,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kirkland Organic Chicken Bone Broth"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Costco Açaí Bowl (food court)",
@@ -9165,7 +9800,8 @@
     "fiber_g": 7,
     "ingredients": [
       "Costco Açaí Bowl (food court)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Costco Chicken Bake (food court)",
@@ -9179,7 +9815,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Costco Chicken Bake (food court)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF Hot Bar Chicken Tikka Masala",
@@ -9193,7 +9830,8 @@
     "fiber_g": 3,
     "ingredients": [
       "WF Hot Bar Chicken Tikka Masala"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF Sushi Roll (8 pieces)",
@@ -9207,7 +9845,8 @@
     "fiber_g": 3,
     "ingredients": [
       "WF Sushi Roll (8 pieces)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF 365 Organic Olive Oil (1 tbsp)",
@@ -9221,7 +9860,8 @@
     "fiber_g": 0,
     "ingredients": [
       "WF 365 Organic Olive Oil (1 tbsp)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF Organic Baby Kale",
@@ -9235,7 +9875,8 @@
     "fiber_g": 2,
     "ingredients": [
       "WF Organic Baby Kale"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "WF 365 Organic Coconut Oil (1 tbsp)",
@@ -9249,7 +9890,8 @@
     "fiber_g": 0,
     "ingredients": [
       "WF 365 Organic Coconut Oil (1 tbsp)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Nurri Vanilla Protein Shake (11 fl oz)",
@@ -9263,7 +9905,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Nurri Vanilla Protein Shake (11 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Nurri Strawberry Protein Shake (11 fl oz)",
@@ -9277,7 +9920,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Nurri Strawberry Protein Shake (11 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Nurri Chocolate Protein Shake (11 fl oz)",
@@ -9291,7 +9935,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Nurri Chocolate Protein Shake (11 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Nurri Coffee Protein Shake (11 fl oz)",
@@ -9305,7 +9950,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Nurri Coffee Protein Shake (11 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Premier Protein Shake, Vanilla (11.5 fl oz)",
@@ -9319,7 +9965,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Premier Protein Shake, Vanilla (11.5 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Premier Protein Shake, Chocolate (11.5 fl oz)",
@@ -9333,7 +9980,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Premier Protein Shake, Chocolate (11.5 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Premier Protein Shake, Caramel (11.5 fl oz)",
@@ -9347,7 +9995,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Premier Protein Shake, Caramel (11.5 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Premier Protein Shake, Cafe Latte (11.5 fl oz)",
@@ -9361,7 +10010,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Premier Protein Shake, Cafe Latte (11.5 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Fairlife Core Power Chocolate (14 fl oz)",
@@ -9375,7 +10025,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Fairlife Core Power Chocolate (14 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Fairlife Core Power Vanilla (14 fl oz)",
@@ -9389,7 +10040,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Fairlife Core Power Vanilla (14 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Orgain 30g Protein Shake, Vanilla Bean (11 fl oz)",
@@ -9403,7 +10055,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Orgain 30g Protein Shake, Vanilla Bean (11 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Orgain 30g Protein Shake, Chocolate Fudge (11 fl oz)",
@@ -9417,7 +10070,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Orgain 30g Protein Shake, Chocolate Fudge (11 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Muscle Milk Chocolate Protein Shake (11 fl oz)",
@@ -9431,7 +10085,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Muscle Milk Chocolate Protein Shake (11 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Signature Protein Bar, Chocolate Brownie",
@@ -9445,7 +10100,8 @@
     "fiber_g": 7,
     "ingredients": [
       "Kirkland Signature Protein Bar, Chocolate Brownie"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kirkland Signature Protein Bar, Cookies & Cream",
@@ -9459,7 +10115,8 @@
     "fiber_g": 11,
     "ingredients": [
       "Kirkland Signature Protein Bar, Cookies & Cream"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Oikos Pro Yogurt, Vanilla",
@@ -9473,7 +10130,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Oikos Pro Yogurt, Vanilla"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Oikos Pro Yogurt, Mixed Berry",
@@ -9487,7 +10145,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Oikos Pro Yogurt, Mixed Berry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Oikos Pro Yogurt, Strawberry",
@@ -9501,7 +10160,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Oikos Pro Yogurt, Strawberry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Oikos Pro Yogurt, Peach",
@@ -9515,7 +10175,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Oikos Pro Yogurt, Peach"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Oikos Pro Yogurt, Plain",
@@ -9529,7 +10190,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Oikos Pro Yogurt, Plain"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Oikos Triple Zero Yogurt, Vanilla",
@@ -9543,7 +10205,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Oikos Triple Zero Yogurt, Vanilla"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Oikos Triple Zero Yogurt, Mixed Berry",
@@ -9557,7 +10220,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Oikos Triple Zero Yogurt, Mixed Berry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Oikos Triple Zero Yogurt, Strawberry",
@@ -9571,7 +10235,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Oikos Triple Zero Yogurt, Strawberry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Oikos Greek Yogurt, Plain (Nonfat)",
@@ -9585,7 +10250,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Oikos Greek Yogurt, Plain (Nonfat)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Fairlife 2% Reduced Fat Milk (1 cup)",
@@ -9599,7 +10265,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Fairlife 2% Reduced Fat Milk (1 cup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Fairlife Fat Free Milk (1 cup)",
@@ -9613,7 +10280,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Fairlife Fat Free Milk (1 cup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Fairlife Whole Milk (1 cup)",
@@ -9627,7 +10295,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Fairlife Whole Milk (1 cup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Fairlife Core Power Elite Chocolate (42g protein, 14 fl oz)",
@@ -9641,7 +10310,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Fairlife Core Power Elite Chocolate (42g protein, 14 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Fairlife Core Power Elite Vanilla (42g protein, 14 fl oz)",
@@ -9655,7 +10325,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Fairlife Core Power Elite Vanilla (42g protein, 14 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Clif Bar (Chocolate Chip)",
@@ -9669,7 +10340,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Clif Bar (Chocolate Chip)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Swiss Cheese (1 slice)",
@@ -9683,7 +10355,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Swiss Cheese (1 slice)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Mango Lassi",
@@ -9697,7 +10370,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Mango Lassi"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Gulab Jamun (2 pieces)",
@@ -9711,7 +10385,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Gulab Jamun (2 pieces)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Pav Bhaji (1 serving with 2 pav)",
@@ -9725,7 +10400,8 @@
     "fiber_g": 6,
     "ingredients": [
       "Pav Bhaji (1 serving with 2 pav)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Cottage Cheese (full fat, 1/2 cup)",
@@ -9739,7 +10415,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Cottage Cheese (full fat, 1/2 cup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Greek Yogurt (plain, whole milk)",
@@ -9753,7 +10430,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Greek Yogurt (plain, whole milk)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "McDonald's Big Mac",
@@ -9767,7 +10445,8 @@
     "fiber_g": 3,
     "ingredients": [
       "McDonald's Big Mac"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "McDonald's McChicken",
@@ -9781,7 +10460,8 @@
     "fiber_g": 2,
     "ingredients": [
       "McDonald's McChicken"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "McDonald's Medium Fries",
@@ -9795,7 +10475,8 @@
     "fiber_g": 4,
     "ingredients": [
       "McDonald's Medium Fries"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "McDonald's Egg McMuffin",
@@ -9809,7 +10490,8 @@
     "fiber_g": 2,
     "ingredients": [
       "McDonald's Egg McMuffin"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Starbucks Caffè Latte (Grande, 2% milk)",
@@ -9823,7 +10505,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Starbucks Caffè Latte (Grande, 2% milk)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Starbucks Caramel Macchiato (Grande)",
@@ -9837,7 +10520,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Starbucks Caramel Macchiato (Grande)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Starbucks Cold Brew (Grande, black)",
@@ -9851,7 +10535,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Starbucks Cold Brew (Grande, black)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Taco Bell Crunchy Taco",
@@ -9865,7 +10550,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Taco Bell Crunchy Taco"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Taco Bell Burrito Supreme (Beef)",
@@ -9879,7 +10565,8 @@
     "fiber_g": 7,
     "ingredients": [
       "Taco Bell Burrito Supreme (Beef)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Wendy's Dave's Single",
@@ -9893,7 +10580,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Wendy's Dave's Single"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Wendy's Medium Frosty (Chocolate)",
@@ -9907,7 +10595,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Wendy's Medium Frosty (Chocolate)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Dahi / Plain Curd (1 cup)",
@@ -9921,7 +10610,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Dahi / Plain Curd (1 cup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chicken Korma (1 cup)",
@@ -9935,7 +10625,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Chicken Korma (1 cup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chicken Vindaloo (1 cup)",
@@ -9949,7 +10640,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Chicken Vindaloo (1 cup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Medu Vada (2 pieces)",
@@ -9963,7 +10655,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Medu Vada (2 pieces)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Rava Dosa",
@@ -9977,7 +10670,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Rava Dosa"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pesarattu (Green Moong Dosa)",
@@ -9991,7 +10685,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Pesarattu (Green Moong Dosa)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Jalebi (2 pieces)",
@@ -10005,7 +10700,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Jalebi (2 pieces)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Celsius Energy Drink (12 fl oz)",
@@ -10019,7 +10715,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Celsius Energy Drink (12 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Monster Energy (16 fl oz)",
@@ -10033,7 +10730,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Monster Energy (16 fl oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Boba / Bubble Tea (medium)",
@@ -10047,7 +10745,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Boba / Bubble Tea (medium)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Goldfish Crackers (55 pieces)",
@@ -10061,7 +10760,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Goldfish Crackers (55 pieces)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Cheez-It Crackers (27 crackers)",
@@ -10075,7 +10775,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Cheez-It Crackers (27 crackers)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Lays Classic Potato Chips (1 oz)",
@@ -10089,7 +10790,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Lays Classic Potato Chips (1 oz)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Skinny Pop Popcorn (3.5 cups)",
@@ -10103,7 +10805,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Skinny Pop Popcorn (3.5 cups)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Built Bar (Peanut Butter)",
@@ -10117,7 +10820,8 @@
     "fiber_g": 6,
     "ingredients": [
       "Built Bar (Peanut Butter)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Cooking Spray Oil (per spray)",
@@ -10131,7 +10835,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Cooking Spray Oil (per spray)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Avocado Oil Spray (per spray)",
@@ -10145,7 +10850,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Avocado Oil Spray (per spray)"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Chipotle Chicken Burrito Bowl",
@@ -10159,7 +10865,8 @@
     "fiber_g": 12,
     "ingredients": [
       "Chipotle Chicken Burrito Bowl"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Chipotle Chicken Burrito",
@@ -10173,7 +10880,8 @@
     "fiber_g": 14,
     "ingredients": [
       "Chipotle Chicken Burrito"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Chipotle Steak Bowl",
@@ -10187,7 +10895,8 @@
     "fiber_g": 12,
     "ingredients": [
       "Chipotle Steak Bowl"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Chipotle Sofritas Bowl",
@@ -10201,7 +10910,8 @@
     "fiber_g": 14,
     "ingredients": [
       "Chipotle Sofritas Bowl"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Chipotle Chips & Guacamole",
@@ -10215,7 +10925,8 @@
     "fiber_g": 10,
     "ingredients": [
       "Chipotle Chips & Guacamole"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Panda Express Orange Chicken",
@@ -10229,7 +10940,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Panda Express Orange Chicken"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Panda Express Chow Mein",
@@ -10243,7 +10955,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Panda Express Chow Mein"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Panda Express Beijing Beef",
@@ -10257,7 +10970,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Panda Express Beijing Beef"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Panda Express Fried Rice",
@@ -10271,7 +10985,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Panda Express Fried Rice"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Chick-fil-A Original Sandwich",
@@ -10285,7 +11000,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Chick-fil-A Original Sandwich"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Chick-fil-A Waffle Fries (Medium)",
@@ -10299,7 +11015,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Chick-fil-A Waffle Fries (Medium)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Chick-fil-A Spicy Chicken Sandwich",
@@ -10313,7 +11030,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Chick-fil-A Spicy Chicken Sandwich"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Popeyes Chicken Sandwich",
@@ -10327,7 +11045,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Popeyes Chicken Sandwich"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Five Guys Little Cheeseburger",
@@ -10341,7 +11060,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Five Guys Little Cheeseburger"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "In-N-Out Double-Double",
@@ -10355,7 +11075,8 @@
     "fiber_g": 3,
     "ingredients": [
       "In-N-Out Double-Double"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Domino's Cheese Pizza (1 slice, medium)",
@@ -10369,7 +11090,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Domino's Cheese Pizza (1 slice, medium)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Shake Shack ShackBurger",
@@ -10383,7 +11105,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Shake Shack ShackBurger"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Dunkin' Glazed Donut",
@@ -10397,7 +11120,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Dunkin' Glazed Donut"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Dunkin' Bacon Egg & Cheese Croissant",
@@ -10411,7 +11135,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Dunkin' Bacon Egg & Cheese Croissant"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Pho (beef, large)",
@@ -10425,7 +11150,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Pho (beef, large)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "General Tso's Chicken",
@@ -10439,7 +11165,8 @@
     "fiber_g": 1,
     "ingredients": [
       "General Tso's Chicken"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Teriyaki Chicken Bowl",
@@ -10453,7 +11180,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Teriyaki Chicken Bowl"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Mac and Cheese (homemade)",
@@ -10467,7 +11195,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Mac and Cheese (homemade)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kraft Mac & Cheese (prepared)",
@@ -10481,7 +11210,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Kraft Mac & Cheese (prepared)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Grilled Cheese Sandwich",
@@ -10495,7 +11225,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Grilled Cheese Sandwich"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "PB&J Sandwich",
@@ -10509,7 +11240,8 @@
     "fiber_g": 3,
     "ingredients": [
       "PB&J Sandwich"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "BLT Sandwich",
@@ -10525,7 +11257,8 @@
       "wheat bread",
       "lettuce",
       "tomato"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chicken Stir Fry (homemade)",
@@ -10539,7 +11272,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Chicken Stir Fry (homemade)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Beef Stew (homemade)",
@@ -10553,7 +11287,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Beef Stew (homemade)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Meatloaf (1 slice)",
@@ -10567,7 +11302,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Meatloaf (1 slice)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pulled Pork (plain)",
@@ -10581,7 +11317,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Pulled Pork (plain)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Waffles (frozen, 2)",
@@ -10595,7 +11332,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Waffles (frozen, 2)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "French Toast (2 slices)",
@@ -10609,7 +11347,8 @@
     "fiber_g": 1,
     "ingredients": [
       "French Toast (2 slices)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Breakfast Sandwich (egg & cheese)",
@@ -10623,7 +11362,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Breakfast Sandwich (egg & cheese)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chia Seeds",
@@ -10637,7 +11377,8 @@
     "fiber_g": 10,
     "ingredients": [
       "Chia Seeds"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Flaxseed (ground)",
@@ -10651,7 +11392,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Flaxseed (ground)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Hemp Seeds",
@@ -10665,7 +11407,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Hemp Seeds"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Popcorn (air-popped)",
@@ -10679,7 +11422,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Popcorn (air-popped)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Rice Cakes (plain)",
@@ -10693,7 +11437,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Rice Cakes (plain)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Spring Roll (fresh)",
@@ -10707,7 +11452,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Spring Roll (fresh)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Egg Fried Rice",
@@ -10721,7 +11467,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Egg Fried Rice"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Mushrooms (cooked)",
@@ -10735,7 +11482,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Mushrooms (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Asparagus (6 spears)",
@@ -10749,7 +11497,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Asparagus (6 spears)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Brussels Sprouts (roasted)",
@@ -10763,7 +11512,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Brussels Sprouts (roasted)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Samosa (1 piece)",
@@ -10777,7 +11527,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Samosa (1 piece)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pakora / Bhajia (5 pieces)",
@@ -10791,7 +11542,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Pakora / Bhajia (5 pieces)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Bhel Puri",
@@ -10810,7 +11562,8 @@
       "cilantro",
       "chaat masala",
       "tamarind"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pani Puri (6 pieces)",
@@ -10824,7 +11577,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Pani Puri (6 pieces)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Butter Naan",
@@ -10838,7 +11592,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Butter Naan"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Gobi Manchurian",
@@ -10852,7 +11607,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Gobi Manchurian"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "KIND Energy Bar",
@@ -10866,7 +11622,8 @@
     "fiber_g": 3,
     "ingredients": [
       "KIND Energy Bar"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Veggie Burger Patty",
@@ -10880,7 +11637,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Veggie Burger Patty"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Impossible Burger Patty",
@@ -10894,7 +11652,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Impossible Burger Patty"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Cauliflower Rice (cooked)",
@@ -10908,7 +11667,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Cauliflower Rice (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Zucchini Noodles (raw)",
@@ -10922,7 +11682,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Zucchini Noodles (raw)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Sauerkraut",
@@ -10936,7 +11697,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Sauerkraut"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Kimchi",
@@ -10950,7 +11712,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Kimchi"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Falafel (3 pieces)",
@@ -10964,7 +11727,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Falafel (3 pieces)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Brie Cheese",
@@ -10978,7 +11742,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Brie Cheese"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pepperoni (10 slices)",
@@ -10992,7 +11757,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Pepperoni (10 slices)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Prosciutto (2 slices)",
@@ -11006,7 +11772,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Prosciutto (2 slices)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Smoothie Bowl (mixed berry)",
@@ -11020,7 +11787,8 @@
     "fiber_g": 6,
     "ingredients": [
       "Smoothie Bowl (mixed berry)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Fish Tacos (2)",
@@ -11034,7 +11802,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Fish Tacos (2)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Quesadilla (cheese)",
@@ -11048,7 +11817,8 @@
     "fiber_g": 2,
     "ingredients": [
       "tortilla"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Miso Soup",
@@ -11062,7 +11832,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Miso Soup"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Lentil Soup",
@@ -11076,7 +11847,8 @@
     "fiber_g": 8,
     "ingredients": [
       "Lentil Soup"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chicken Tenders (4 pieces)",
@@ -11090,7 +11862,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Chicken Tenders (4 pieces)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Baked Potato (medium)",
@@ -11104,7 +11877,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Baked Potato (medium)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Corn on the Cob (1 ear)",
@@ -11118,7 +11892,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Corn on the Cob (1 ear)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Egg White Omelet (3 whites)",
@@ -11132,7 +11907,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Egg White Omelet (3 whites)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Protein Pancakes (2)",
@@ -11146,7 +11922,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Protein Pancakes (2)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "BBQ Sauce",
@@ -11160,7 +11937,8 @@
     "fiber_g": 0,
     "ingredients": [
       "BBQ Sauce"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Honey Mustard Dressing",
@@ -11174,7 +11952,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Honey Mustard Dressing"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Moong Dal (dry)",
@@ -11188,7 +11967,8 @@
     "fiber_g": 16,
     "ingredients": [
       "Moong Dal (dry)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Toor Dal (dry)",
@@ -11202,7 +11982,8 @@
     "fiber_g": 15,
     "ingredients": [
       "Toor Dal (dry)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Masoor Dal (dry)",
@@ -11216,7 +11997,8 @@
     "fiber_g": 11,
     "ingredients": [
       "Masoor Dal (dry)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chana Dal (dry)",
@@ -11230,7 +12012,8 @@
     "fiber_g": 18,
     "ingredients": [
       "Chana Dal (dry)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Urad Dal (dry)",
@@ -11244,7 +12027,8 @@
     "fiber_g": 18,
     "ingredients": [
       "Urad Dal (dry)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Red Lentils (dry)",
@@ -11258,7 +12042,8 @@
     "fiber_g": 11,
     "ingredients": [
       "Red Lentils (dry)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Green Lentils (dry)",
@@ -11272,7 +12057,8 @@
     "fiber_g": 11,
     "ingredients": [
       "Green Lentils (dry)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Black Lentils / Whole Urad (dry)",
@@ -11286,7 +12072,8 @@
     "fiber_g": 18,
     "ingredients": [
       "Black Lentils / Whole Urad (dry)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Yellow Lentils (dry)",
@@ -11300,7 +12087,8 @@
     "fiber_g": 12,
     "ingredients": [
       "Yellow Lentils (dry)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Red Lentils (cooked)",
@@ -11314,7 +12102,8 @@
     "fiber_g": 8,
     "ingredients": [
       "Red Lentils (cooked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Green Lentils (cooked)",
@@ -11328,7 +12117,8 @@
     "fiber_g": 16,
     "ingredients": [
       "Green Lentils (cooked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dal Tadka",
@@ -11342,7 +12132,8 @@
     "fiber_g": 6,
     "ingredients": [
       "Dal Tadka"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dal Fry",
@@ -11356,7 +12147,8 @@
     "fiber_g": 7,
     "ingredients": [
       "Dal Fry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dal Palak (Spinach Dal)",
@@ -11370,7 +12162,8 @@
     "fiber_g": 8,
     "ingredients": [
       "Dal Palak (Spinach Dal)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sambhar",
@@ -11384,7 +12177,8 @@
     "fiber_g": 6,
     "ingredients": [
       "Sambhar"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Deli Turkey",
@@ -11398,7 +12192,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Deli Turkey"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Navy Beans (cooked)",
@@ -11412,7 +12207,8 @@
     "fiber_g": 19,
     "ingredients": [
       "Navy Beans (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Butternut Squash (cooked)",
@@ -11426,7 +12222,8 @@
     "fiber_g": 7,
     "ingredients": [
       "Butternut Squash (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Tuna Salad",
@@ -11440,7 +12237,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Tuna Salad"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Egg Salad",
@@ -11454,7 +12252,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Egg Salad"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Alfredo Sauce",
@@ -11468,7 +12267,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Alfredo Sauce"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Pita Chips",
@@ -11482,7 +12282,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Pita Chips"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "RXBAR (Chocolate Sea Salt)",
@@ -11496,7 +12297,8 @@
     "fiber_g": 5,
     "ingredients": [
       "RXBAR (Chocolate Sea Salt)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Chicken 65",
@@ -11510,7 +12312,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Chicken 65"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Papdi Chaat",
@@ -11524,7 +12327,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Papdi Chaat"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Aloo Tikki (2 pieces)",
@@ -11538,7 +12342,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Aloo Tikki (2 pieces)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dahi Vada (2 pieces)",
@@ -11552,7 +12357,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Dahi Vada (2 pieces)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sirloin Steak (grilled, 6oz)",
@@ -11566,7 +12372,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Sirloin Steak (grilled, 6oz)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Filet Mignon (grilled, 6oz)",
@@ -11580,7 +12387,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Filet Mignon (grilled, 6oz)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "NY Strip Steak (grilled, 8oz)",
@@ -11594,7 +12402,8 @@
     "fiber_g": 0,
     "ingredients": [
       "NY Strip Steak (grilled, 8oz)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Cheerios (1 cup)",
@@ -11608,7 +12417,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Cheerios (1 cup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Special K (1 cup)",
@@ -11622,7 +12432,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Special K (1 cup)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Vanilla Ice Cream (1/2 cup)",
@@ -11636,7 +12447,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Vanilla Ice Cream (1/2 cup)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Halo Top Vanilla (1/2 cup)",
@@ -11650,7 +12462,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Halo Top Vanilla (1/2 cup)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "IPA Beer (12oz)",
@@ -11664,7 +12477,8 @@
     "fiber_g": 0,
     "ingredients": [
       "IPA Beer (12oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Light Beer (12oz)",
@@ -11678,7 +12492,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Light Beer (12oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "White Wine (5oz)",
@@ -11692,7 +12507,8 @@
     "fiber_g": 0,
     "ingredients": [
       "White Wine (5oz)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Margarita",
@@ -11706,7 +12522,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Margarita"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Hash Browns (frozen, cooked)",
@@ -11720,7 +12537,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Hash Browns (frozen, cooked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Spaghetti (cooked)",
@@ -11734,7 +12552,8 @@
     "fiber_g": 2.5,
     "ingredients": [
       "Spaghetti (cooked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Lasagna (meat, homemade)",
@@ -11748,7 +12567,8 @@
     "fiber_g": 2.5,
     "ingredients": [
       "Lasagna (meat, homemade)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Blackberries",
@@ -11762,7 +12582,8 @@
     "fiber_g": 7.6,
     "ingredients": [
       "Blackberries"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Cantaloupe (cubed)",
@@ -11776,7 +12597,8 @@
     "fiber_g": 1.4,
     "ingredients": [
       "Cantaloupe (cubed)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Grapefruit (half)",
@@ -11790,7 +12612,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Grapefruit (half)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Pomegranate Seeds",
@@ -11804,7 +12627,8 @@
     "fiber_g": 3.5,
     "ingredients": [
       "Pomegranate Seeds"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Lemonade",
@@ -11818,7 +12642,8 @@
     "fiber_g": 0.2,
     "ingredients": [
       "Lemonade"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chocolate Milk",
@@ -11832,7 +12657,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Chocolate Milk"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Espresso (1 shot)",
@@ -11846,7 +12672,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Espresso (1 shot)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Hot Chocolate (with milk)",
@@ -11860,7 +12687,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Hot Chocolate (with milk)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Gatorade",
@@ -11874,7 +12702,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Gatorade"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sriracha",
@@ -11888,7 +12717,8 @@
     "fiber_g": 0.1,
     "ingredients": [
       "Sriracha"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Yellow Mustard",
@@ -11902,7 +12732,8 @@
     "fiber_g": 0.2,
     "ingredients": [
       "Yellow Mustard"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Italian Dressing",
@@ -11916,7 +12747,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Italian Dressing"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Fish Sauce",
@@ -11930,7 +12762,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Fish Sauce"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Hoisin Sauce",
@@ -11944,7 +12777,8 @@
     "fiber_g": 0.3,
     "ingredients": [
       "Hoisin Sauce"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Apple Cider Vinegar",
@@ -11958,7 +12792,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Apple Cider Vinegar"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Lobster (cooked)",
@@ -11972,7 +12807,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Lobster (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Crab Meat (cooked)",
@@ -11986,7 +12822,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Crab Meat (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Scallops (cooked)",
@@ -12000,7 +12837,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Scallops (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Pork Chop (boneless, grilled)",
@@ -12014,7 +12852,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Pork Chop (boneless, grilled)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Beets (cooked, sliced)",
@@ -12028,7 +12867,8 @@
     "fiber_g": 3.4,
     "ingredients": [
       "Beets (cooked, sliced)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Bok Choy (cooked)",
@@ -12042,7 +12882,8 @@
     "fiber_g": 1.7,
     "ingredients": [
       "Bok Choy (cooked)"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Cornbread",
@@ -12056,7 +12897,8 @@
     "fiber_g": 1.4,
     "ingredients": [
       "Cornbread"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Barley (cooked)",
@@ -12070,7 +12912,8 @@
     "fiber_g": 6,
     "ingredients": [
       "Barley (cooked)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Graham Crackers",
@@ -12084,7 +12927,8 @@
     "fiber_g": 0.7,
     "ingredients": [
       "Graham Crackers"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Hazelnuts",
@@ -12098,7 +12942,8 @@
     "fiber_g": 2.7,
     "ingredients": [
       "Hazelnuts"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Sesame Seeds",
@@ -12112,7 +12957,8 @@
     "fiber_g": 1.1,
     "ingredients": [
       "Sesame Seeds"
-    ]
+    ],
+    "nova_group": 1
   },
   {
     "name": "Besan / Gram Flour",
@@ -12126,7 +12972,8 @@
     "fiber_g": 11,
     "ingredients": [
       "Besan / Gram Flour"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Rice Flour",
@@ -12140,7 +12987,8 @@
     "fiber_g": 2.4,
     "ingredients": [
       "Rice Flour"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Maida / All Purpose Flour",
@@ -12154,7 +13002,8 @@
     "fiber_g": 2.7,
     "ingredients": [
       "Maida / All Purpose Flour"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Ragi Flour / Finger Millet",
@@ -12168,7 +13017,8 @@
     "fiber_g": 11,
     "ingredients": [
       "Ragi Flour / Finger Millet"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Jowar Flour / Sorghum",
@@ -12182,7 +13032,8 @@
     "fiber_g": 7,
     "ingredients": [
       "Jowar Flour / Sorghum"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Bajra Flour / Pearl Millet",
@@ -12196,7 +13047,8 @@
     "fiber_g": 9,
     "ingredients": [
       "Bajra Flour / Pearl Millet"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kulcha",
@@ -12210,7 +13062,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Kulcha"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Uttapam",
@@ -12224,7 +13077,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Uttapam"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Thepla",
@@ -12238,7 +13092,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Thepla"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Methi Paratha",
@@ -12252,7 +13107,8 @@
     "fiber_g": 2.5,
     "ingredients": [
       "Methi Paratha"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Paneer Paratha",
@@ -12266,7 +13122,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Paneer Paratha"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Gobi Paratha",
@@ -12280,7 +13137,8 @@
     "fiber_g": 2.5,
     "ingredients": [
       "Gobi Paratha"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Bhatura",
@@ -12294,7 +13152,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Bhatura"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Rumali Roti",
@@ -12308,7 +13167,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Rumali Roti"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Missi Roti",
@@ -12322,7 +13182,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Missi Roti"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Makki Ki Roti",
@@ -12336,7 +13197,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Makki Ki Roti"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Lachha Paratha",
@@ -12350,7 +13212,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Lachha Paratha"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Tandoori Roti",
@@ -12364,7 +13227,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Tandoori Roti"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Lemon Rice",
@@ -12378,7 +13242,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Lemon Rice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Curd Rice",
@@ -12392,7 +13257,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Curd Rice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pulao / Pilaf",
@@ -12406,7 +13272,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Pulao / Pilaf"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Tamarind Rice",
@@ -12420,7 +13287,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Tamarind Rice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Coconut Rice",
@@ -12434,7 +13302,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Coconut Rice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Tomato Rice",
@@ -12448,7 +13317,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Tomato Rice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kadhi / Yogurt Curry",
@@ -12462,7 +13332,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Kadhi / Yogurt Curry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dal Bukhara",
@@ -12476,7 +13347,8 @@
     "fiber_g": 8,
     "ingredients": [
       "Dal Bukhara"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Panchmel Dal",
@@ -12490,7 +13362,8 @@
     "fiber_g": 6,
     "ingredients": [
       "Panchmel Dal"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sprouted Moong",
@@ -12504,7 +13377,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Sprouted Moong"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Khichdi",
@@ -12522,7 +13396,8 @@
       "turmeric",
       "cumin",
       "ghee"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Shahi Paneer",
@@ -12536,7 +13411,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Shahi Paneer"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Mutter Paneer",
@@ -12550,7 +13426,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Mutter Paneer"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kadai Paneer",
@@ -12564,7 +13441,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Kadai Paneer"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Aloo Matar",
@@ -12578,7 +13456,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Aloo Matar"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Bhindi Masala / Okra",
@@ -12592,7 +13471,8 @@
     "fiber_g": 3.5,
     "ingredients": [
       "Bhindi Masala / Okra"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Lauki / Bottle Gourd Curry",
@@ -12606,7 +13486,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Lauki / Bottle Gourd Curry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Karela / Bitter Gourd",
@@ -12620,7 +13501,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Karela / Bitter Gourd"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Drumstick Curry",
@@ -12634,7 +13516,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Drumstick Curry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Undhiyu",
@@ -12648,7 +13531,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Undhiyu"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Aviyal",
@@ -12662,7 +13546,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Aviyal"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kootu",
@@ -12676,7 +13561,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Kootu"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Poriyal / Stir Fry Veg",
@@ -12690,7 +13576,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Poriyal / Stir Fry Veg"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dum Aloo",
@@ -12704,7 +13591,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Dum Aloo"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Aloo Jeera",
@@ -12718,7 +13606,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Aloo Jeera"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Aloo Methi",
@@ -12732,7 +13621,8 @@
     "fiber_g": 3.5,
     "ingredients": [
       "Aloo Methi"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Paneer Bhurji",
@@ -12746,7 +13636,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Paneer Bhurji"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Bharwa Baingan",
@@ -12760,7 +13651,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Bharwa Baingan"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Tinda Curry",
@@ -12774,7 +13666,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Tinda Curry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Olan",
@@ -12788,7 +13681,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Olan"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Keema / Minced Meat Curry",
@@ -12802,7 +13696,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Keema / Minced Meat Curry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Prawn Curry",
@@ -12816,7 +13711,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Prawn Curry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Mutton Rogan Josh",
@@ -12830,7 +13726,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Mutton Rogan Josh"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Mutton Curry",
@@ -12844,7 +13741,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Mutton Curry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chicken Chettinad",
@@ -12858,7 +13756,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Chicken Chettinad"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Fish Fry",
@@ -12872,7 +13771,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Fish Fry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Goan Fish Curry",
@@ -12886,7 +13786,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Goan Fish Curry"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Lamb Biryani",
@@ -12900,7 +13801,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Lamb Biryani"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pongal",
@@ -12914,7 +13816,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Pongal"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Appam",
@@ -12928,7 +13831,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Appam"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Puttu",
@@ -12942,7 +13846,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Puttu"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Rava Idli (2 pieces)",
@@ -12956,7 +13861,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Rava Idli (2 pieces)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Set Dosa (2 pieces)",
@@ -12970,7 +13876,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Set Dosa (2 pieces)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Neer Dosa (2 pieces)",
@@ -12984,7 +13891,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Neer Dosa (2 pieces)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Bisi Bele Bath",
@@ -12998,7 +13906,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Bisi Bele Bath"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Lemon Sevai",
@@ -13012,7 +13921,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Lemon Sevai"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kachori",
@@ -13026,7 +13936,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Kachori"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Murukku",
@@ -13040,7 +13951,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Murukku"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Mathri",
@@ -13054,7 +13966,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Mathri"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Namak Pare",
@@ -13068,7 +13981,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Namak Pare"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dahi Papdi Chaat",
@@ -13082,7 +13996,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Dahi Papdi Chaat"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Aloo Chaat",
@@ -13096,7 +14011,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Aloo Chaat"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sev Puri (4 pieces)",
@@ -13110,7 +14026,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Sev Puri (4 pieces)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Ragda Pattice",
@@ -13124,7 +14041,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Ragda Pattice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Misal Pav",
@@ -13138,7 +14056,8 @@
     "fiber_g": 6,
     "ingredients": [
       "Misal Pav"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chole Bhature",
@@ -13152,7 +14071,8 @@
     "fiber_g": 8,
     "ingredients": [
       "Chole Bhature"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Bread Pakora (2 pieces)",
@@ -13166,7 +14086,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Bread Pakora (2 pieces)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Besan Ladoo",
@@ -13180,7 +14101,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Besan Ladoo"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Motichoor Ladoo",
@@ -13194,7 +14116,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Motichoor Ladoo"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Boondi Ladoo",
@@ -13208,7 +14131,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Boondi Ladoo"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Kaju Barfi",
@@ -13222,7 +14146,8 @@
     "fiber_g": 0.3,
     "ingredients": [
       "Kaju Barfi"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Kaju Katli",
@@ -13236,7 +14161,8 @@
     "fiber_g": 0.3,
     "ingredients": [
       "Kaju Katli"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Sandesh",
@@ -13250,7 +14176,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Sandesh"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Peda",
@@ -13264,7 +14191,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Peda"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Mysore Pak",
@@ -13278,7 +14206,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Mysore Pak"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Shrikhand",
@@ -13292,7 +14221,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Shrikhand"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Rabri",
@@ -13306,7 +14236,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Rabri"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Gajar Ka Halwa",
@@ -13320,7 +14251,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Gajar Ka Halwa"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Moong Dal Halwa",
@@ -13334,7 +14266,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Moong Dal Halwa"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Rasmalai",
@@ -13348,7 +14281,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Rasmalai"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Rasgulla",
@@ -13363,7 +14297,8 @@
     "ingredients": [
       "milk",
       "sugar"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Milk Cake",
@@ -13377,7 +14312,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Milk Cake"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Soan Papdi",
@@ -13391,7 +14327,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Soan Papdi"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Chikki / Peanut Brittle",
@@ -13405,7 +14342,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Chikki / Peanut Brittle"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Coconut Barfi",
@@ -13419,7 +14357,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Coconut Barfi"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Puran Poli",
@@ -13433,7 +14372,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Puran Poli"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Modak",
@@ -13447,7 +14387,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Modak"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Malpua",
@@ -13461,7 +14402,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Malpua"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Kalakand",
@@ -13475,7 +14417,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kalakand"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Shakkar Pare",
@@ -13489,7 +14432,8 @@
     "fiber_g": 0.3,
     "ingredients": [
       "Shakkar Pare"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Mint Chutney",
@@ -13503,7 +14447,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Mint Chutney"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Tamarind Chutney",
@@ -13517,7 +14462,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Tamarind Chutney"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Coconut Chutney",
@@ -13531,7 +14477,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Coconut Chutney"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Tomato Chutney",
@@ -13545,7 +14492,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Tomato Chutney"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Onion Chutney",
@@ -13559,7 +14507,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Onion Chutney"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Mango Pickle / Achar",
@@ -13573,7 +14522,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Mango Pickle / Achar"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Lime Pickle",
@@ -13587,7 +14537,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Lime Pickle"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Mixed Vegetable Pickle",
@@ -13601,7 +14552,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Mixed Vegetable Pickle"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Thandai",
@@ -13615,7 +14567,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Thandai"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Jaljeera",
@@ -13629,7 +14582,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Jaljeera"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Aam Panna",
@@ -13643,7 +14597,8 @@
     "fiber_g": 0.5,
     "ingredients": [
       "Aam Panna"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Rooh Afza",
@@ -13657,7 +14612,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Rooh Afza"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Badam Milk",
@@ -13671,7 +14627,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Badam Milk"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Haldi Doodh / Turmeric Milk",
@@ -13685,7 +14642,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Haldi Doodh / Turmeric Milk"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Nimbu Pani / Lemon Water",
@@ -13699,7 +14657,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Nimbu Pani / Lemon Water"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sugarcane Juice",
@@ -13713,7 +14672,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Sugarcane Juice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Kokum Sharbat",
@@ -13727,7 +14687,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Kokum Sharbat"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sattu Drink",
@@ -13741,7 +14702,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Sattu Drink"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Filter Coffee (South Indian)",
@@ -13755,7 +14717,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Filter Coffee (South Indian)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Veg Frankie / Wrap",
@@ -13769,7 +14732,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Veg Frankie / Wrap"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Egg Roll (Kolkata)",
@@ -13783,7 +14747,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Egg Roll (Kolkata)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dabeli",
@@ -13797,7 +14762,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Dabeli"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pav Sandwich",
@@ -13811,7 +14777,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Pav Sandwich"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Litti Chokha",
@@ -13825,7 +14792,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Litti Chokha"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Dal Bati Churma",
@@ -13839,7 +14807,8 @@
     "fiber_g": 5,
     "ingredients": [
       "Dal Bati Churma"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Sarson Ka Saag",
@@ -13853,7 +14822,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Sarson Ka Saag"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Momos Veg",
@@ -13867,7 +14837,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Momos Veg"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Momos Chicken",
@@ -13881,7 +14852,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Momos Chicken"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Thukpa",
@@ -13895,7 +14867,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Thukpa"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Vodka (1 shot)",
@@ -13909,7 +14882,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Vodka (1 shot)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Whiskey (1 shot)",
@@ -13923,7 +14897,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Whiskey (1 shot)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Rum (1 shot)",
@@ -13937,7 +14912,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Rum (1 shot)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Gin (1 shot)",
@@ -13951,7 +14927,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Gin (1 shot)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Tequila (1 shot)",
@@ -13965,7 +14942,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Tequila (1 shot)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Nachos with Cheese",
@@ -13979,7 +14957,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Nachos with Cheese"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Churros (2 pieces)",
@@ -13993,7 +14972,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Churros (2 pieces)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chicken Fajitas",
@@ -14007,7 +14987,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Chicken Fajitas"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Beef Fajitas",
@@ -14021,7 +15002,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Beef Fajitas"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Tamale (1 piece)",
@@ -14035,7 +15017,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Tamale (1 piece)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Elote (Mexican Street Corn)",
@@ -14049,7 +15032,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Elote (Mexican Street Corn)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pozole",
@@ -14067,7 +15051,8 @@
       "garlic",
       "oregano",
       "chili"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Chilaquiles",
@@ -14084,7 +15069,8 @@
       "tomato",
       "onion",
       "cilantro"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Tostada (1 piece)",
@@ -14098,7 +15084,8 @@
     "fiber_g": 3,
     "ingredients": [
       "Tostada (1 piece)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Carnitas (pork)",
@@ -14112,7 +15099,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Carnitas (pork)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Barbacoa (beef)",
@@ -14126,7 +15114,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Barbacoa (beef)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Al Pastor (pork)",
@@ -14140,7 +15129,8 @@
     "fiber_g": 1,
     "ingredients": [
       "Al Pastor (pork)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Carne Asada (grilled steak)",
@@ -14154,7 +15144,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Carne Asada (grilled steak)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Refried Beans",
@@ -14168,7 +15159,8 @@
     "fiber_g": 7,
     "ingredients": [
       "Refried Beans"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Mexican Rice",
@@ -14182,7 +15174,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Mexican Rice"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pico de Gallo",
@@ -14196,7 +15189,8 @@
     "fiber_g": 0.3,
     "ingredients": [
       "Pico de Gallo"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Queso Dip",
@@ -14210,7 +15204,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Queso Dip"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pickled Jalapenos",
@@ -14224,7 +15219,8 @@
     "fiber_g": 0.7,
     "ingredients": [
       "Pickled Jalapenos"
-    ]
+    ],
+    "nova_group": 2
   },
   {
     "name": "Horchata",
@@ -14238,7 +15234,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Horchata"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Tres Leches Cake",
@@ -14252,7 +15249,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Tres Leches Cake"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Flan (Mexican custard)",
@@ -14266,7 +15264,8 @@
     "fiber_g": 0,
     "ingredients": [
       "Flan (Mexican custard)"
-    ]
+    ],
+    "nova_group": 4
   },
   {
     "name": "Empanada (beef)",
@@ -14280,7 +15279,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Empanada (beef)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Pupusa (cheese)",
@@ -14294,7 +15294,8 @@
     "fiber_g": 2,
     "ingredients": [
       "Pupusa (cheese)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Taco (chicken)",
@@ -14308,7 +15309,8 @@
     "fiber_g": 1.5,
     "ingredients": [
       "Taco (chicken)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Taco (veggie/bean)",
@@ -14322,7 +15324,8 @@
     "fiber_g": 4,
     "ingredients": [
       "Taco (veggie/bean)"
-    ]
+    ],
+    "nova_group": 3
   },
   {
     "name": "Taco (pork/carnitas)",
@@ -14336,6 +15339,7 @@
     "fiber_g": 1,
     "ingredients": [
       "Taco (pork/carnitas)"
-    ]
+    ],
+    "nova_group": 3
   }
 ]

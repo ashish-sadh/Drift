@@ -267,27 +267,43 @@ extension AppDatabase {
     }
 
     /// Unique ingredient names for plant points. Uses ingredients JSON when available, falls back to food_name.
-    func fetchUniqueIngredients(from startDate: String, to endDate: String) throws -> [String] {
+    /// Fetch food items with ingredients + NOVA for plant points calculation.
+    func fetchFoodItemsForPlantPoints(from startDate: String, to endDate: String) throws -> [PlantPointsService.FoodItem] {
         try dbWriter.read { db in
             let rows = try Row.fetchAll(db, sql: """
-                SELECT DISTINCT fe.food_name, f.ingredients
+                SELECT DISTINCT fe.food_name, f.ingredients, f.nova_group
                 FROM food_entry fe
                 LEFT JOIN food f ON f.id = fe.food_id
+                LEFT JOIN meal_log ml ON fe.meal_log_id = ml.id
                 WHERE fe.date BETWEEN ? AND ?
-                """, arguments: [startDate, endDate])
-            var allIngredients: Set<String> = []
-            for row in rows {
+                   OR (fe.date IS NULL AND ml.date BETWEEN ? AND ?)
+                """, arguments: [startDate, endDate, startDate, endDate])
+            return rows.map { row in
                 let foodName: String = row["food_name"]
-                if let json: String = row["ingredients"],
-                   let data = json.data(using: .utf8),
-                   let arr = try? JSONDecoder().decode([String].self, from: data), !arr.isEmpty {
-                    for ingredient in arr { allIngredients.insert(ingredient.lowercased()) }
-                } else {
-                    allIngredients.insert(foodName.lowercased())
+                let ingredientsJson: String? = row["ingredients"]
+                let novaGroup: Int? = row["nova_group"]
+                let ingredients: [String]? = ingredientsJson.flatMap { json in
+                    guard let data = json.data(using: .utf8),
+                          let arr = try? JSONDecoder().decode([String].self, from: data), !arr.isEmpty else { return nil }
+                    return arr
                 }
+                return PlantPointsService.FoodItem(name: foodName, ingredients: ingredients, novaGroup: novaGroup)
             }
-            return Array(allIngredients)
         }
+    }
+
+    /// Legacy: unique ingredient names flattened (for backwards compat).
+    func fetchUniqueIngredients(from startDate: String, to endDate: String) throws -> [String] {
+        let items = try fetchFoodItemsForPlantPoints(from: startDate, to: endDate)
+        var all: Set<String> = []
+        for item in items {
+            if let ingredients = item.ingredients, !ingredients.isEmpty {
+                for i in ingredients { all.insert(i.lowercased()) }
+            } else {
+                all.insert(item.name.lowercased())
+            }
+        }
+        return Array(all)
     }
 
     /// Unique food names logged in a date range (for plant points — legacy, prefer fetchUniqueIngredients).

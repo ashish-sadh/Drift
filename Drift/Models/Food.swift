@@ -17,12 +17,14 @@ struct Food: Identifiable, Codable, Sendable {
     var isRecipe: Bool = false
     var sortOrder: Int = 0
     var defaultServings: Double = 1
+    var novaGroup: Int?       // NOVA 1-4: processing level for plant points
 
     enum CodingKeys: String, CodingKey {
         case id, name, category, calories, ingredients, source
         case isRecipe = "is_recipe"
         case sortOrder = "sort_order"
         case defaultServings = "default_servings"
+        case novaGroup = "nova_group"
         case servingSize = "serving_size"
         case servingUnit = "serving_unit"
         case proteinG = "protein_g"
@@ -46,7 +48,8 @@ struct Food: Identifiable, Codable, Sendable {
         source: String? = nil,
         isRecipe: Bool = false,
         sortOrder: Int = 0,
-        defaultServings: Double = 1
+        defaultServings: Double = 1,
+        novaGroup: Int? = nil
     ) {
         self.id = id
         self.name = name
@@ -63,6 +66,7 @@ struct Food: Identifiable, Codable, Sendable {
         self.isRecipe = isRecipe
         self.sortOrder = sortOrder
         self.defaultServings = defaultServings
+        self.novaGroup = novaGroup
     }
 
     init(from decoder: Decoder) throws {
@@ -87,6 +91,7 @@ struct Food: Identifiable, Codable, Sendable {
         isRecipe = try c.decodeIfPresent(Bool.self, forKey: .isRecipe) ?? false
         sortOrder = try c.decodeIfPresent(Int.self, forKey: .sortOrder) ?? 0
         defaultServings = try c.decodeIfPresent(Double.self, forKey: .defaultServings) ?? 1
+        novaGroup = try c.decodeIfPresent(Int.self, forKey: .novaGroup)
     }
 
     /// Compact macro string like "165cal 31P 0C 4F"

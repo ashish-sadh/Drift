@@ -317,21 +317,21 @@ final class FoodLogViewModel {
         let weekEnd = DateFormatters.dateOnly.string(from: weekEndDate)
 
         do {
-            // Use ingredients-aware query for accurate plant point counting
-            let weekNames = try database.fetchUniqueIngredients(from: weekStart, to: weekEnd)
-            weeklyPlantPoints = PlantPointsService.calculate(from: weekNames)
+            // NOVA-aware plant point counting
+            let weekItems = try database.fetchFoodItemsForPlantPoints(from: weekStart, to: weekEnd)
+            weeklyPlantPoints = PlantPointsService.calculate(from: weekItems)
 
             // Count new plants added today vs rest of week
             let todayStr = dateString
-            let todayNames = try database.fetchUniqueIngredients(from: todayStr, to: todayStr)
-            let todayPlants = PlantPointsService.calculate(from: todayNames)
+            let todayItems = try database.fetchFoodItemsForPlantPoints(from: todayStr, to: todayStr)
+            let todayPlants = PlantPointsService.calculate(from: todayItems)
 
             // Plants logged before today this week
             let yesterdayDate = cal.date(byAdding: .day, value: -1, to: selectedDate) ?? selectedDate
             let beforeToday = DateFormatters.dateOnly.string(from: yesterdayDate)
             if weekStart <= beforeToday {
-                let priorNames = try database.fetchUniqueIngredients(from: weekStart, to: beforeToday)
-                let priorPlants = PlantPointsService.calculate(from: priorNames)
+                let priorItems = try database.fetchFoodItemsForPlantPoints(from: weekStart, to: beforeToday)
+                let priorPlants = PlantPointsService.calculate(from: priorItems)
                 let priorSet = Set(priorPlants.uniquePlants + priorPlants.uniqueHerbsSpices)
                 let todaySet = Set(todayPlants.uniquePlants + todayPlants.uniqueHerbsSpices)
                 dailyNewPlants = todaySet.subtracting(priorSet).count

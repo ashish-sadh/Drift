@@ -17,6 +17,7 @@ enum OpenFoodFactsService {
         let fiberG: Double
         let servingSizeG: Double?  // parsed serving size in grams
         let ingredientsText: String?  // raw ingredients string from OpenFoodFacts
+        let novaGroup: Int?           // NOVA 1-4 processing level
     }
 
     enum LookupError: LocalizedError {
@@ -35,7 +36,7 @@ enum OpenFoodFactsService {
 
     /// Look up a product by barcode (EAN/UPC).
     static func lookup(barcode: String) async throws -> Product {
-        let urlString = "https://world.openfoodfacts.org/api/v2/product/\(barcode).json?fields=product_name,brands,serving_size,nutriments,ingredients_text"
+        let urlString = "https://world.openfoodfacts.org/api/v2/product/\(barcode).json?fields=product_name,brands,serving_size,nutriments,ingredients_text,nova_group"
         guard let url = URL(string: urlString) else {
             throw LookupError.networkError("Invalid URL")
         }
@@ -81,8 +82,9 @@ enum OpenFoodFactsService {
 
         let servingG = parseServingSize(servingStr)
         let ingredientsText = product["ingredients_text"] as? String
+        let novaGroup = product["nova_group"] as? Int
 
-        Log.foodLog.info("Found: \(name) (\(brand ?? "")) - \(Int(calories))cal/100g")
+        Log.foodLog.info("Found: \(name) (\(brand ?? "")) - \(Int(calories))cal/100g, NOVA \(novaGroup ?? 0)")
 
         return Product(
             barcode: barcode,
@@ -95,7 +97,8 @@ enum OpenFoodFactsService {
             fatG: fat,
             fiberG: fiber,
             servingSizeG: servingG,
-            ingredientsText: ingredientsText
+            ingredientsText: ingredientsText,
+            novaGroup: novaGroup
         )
     }
 
@@ -134,7 +137,8 @@ enum OpenFoodFactsService {
             return Product(barcode: barcode, name: name, brand: brand, servingSize: servingStr,
                            calories: calories, proteinG: protein, carbsG: carbs, fatG: fat,
                            fiberG: fiber, servingSizeG: parseServingSize(servingStr),
-                           ingredientsText: product["ingredients_text"] as? String)
+                           ingredientsText: product["ingredients_text"] as? String,
+                           novaGroup: product["nova_group"] as? Int)
         }
     }
 

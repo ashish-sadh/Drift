@@ -447,5 +447,34 @@ enum Migrations {
             // Index for date queries
             try db.create(index: "idx_food_entry_date", on: "food_entry", columns: ["date"])
         }
+
+        // v27: Add NOVA processing group to food table for plant points accuracy
+        migrator.registerMigration("v27_food_nova_group") { db in
+            try db.alter(table: "food") { t in
+                t.add(column: "nova_group", .integer) // 1=unprocessed, 2=culinary, 3=processed, 4=ultra-processed
+            }
+            // Backfill NOVA groups based on food category
+            // NOVA 1: Unprocessed/minimally processed
+            try db.execute(sql: """
+                UPDATE food SET nova_group = 1 WHERE category IN (
+                    'Fruits', 'Vegetables', 'Nuts & Seeds', 'Proteins'
+                ) AND nova_group IS NULL
+                """)
+            // NOVA 2: Processed culinary ingredients
+            try db.execute(sql: """
+                UPDATE food SET nova_group = 2 WHERE category IN (
+                    'Oils & Fats', 'Condiments', 'Sweeteners'
+                ) AND nova_group IS NULL
+                """)
+            // NOVA 4: Ultra-processed
+            try db.execute(sql: """
+                UPDATE food SET nova_group = 4 WHERE category IN (
+                    'Fast Food', 'Snacks', 'Ready Meals', 'Desserts', 'Indian Sweets',
+                    'Supplements & Shakes'
+                ) AND nova_group IS NULL
+                """)
+            // NOVA 3: Everything else (Dairy, Grains, Indian Staples, US Staples, Mexican, etc.)
+            try db.execute(sql: "UPDATE food SET nova_group = 3 WHERE nova_group IS NULL")
+        }
     }
 }

@@ -330,7 +330,8 @@ struct BarcodeLookupView: View {
                     proteinG: cached.proteinGPer100g, carbsG: cached.carbsGPer100g,
                     fatG: cached.fatGPer100g, fiberG: cached.fiberGPer100g,
                     servingSizeG: cached.servingSizeG,
-                    ingredientsText: nil  // cached items don't store ingredients yet
+                    ingredientsText: nil,
+                    novaGroup: nil
                 )
                 product = p
                 amount = "1"; selectedUnitIndex = 0
@@ -369,7 +370,8 @@ struct BarcodeLookupView: View {
                         carbsG: p.carbsG * servingG / 100,
                         fatG: p.fatG * servingG / 100,
                         fiberG: p.fiberG * servingG / 100,
-                        ingredients: ingredientsJson)
+                        ingredients: ingredientsJson,
+                        novaGroup: p.novaGroup)
         try? AppDatabase.shared.saveScannedFood(&food)
         // Calculate servings multiplier from amount + unit
         let units = FoodUnit.smartUnits(for: food)
