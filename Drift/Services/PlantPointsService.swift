@@ -124,15 +124,9 @@ enum PlantPointsService {
     // MARK: - Normalization
 
     private static func normalize(_ name: String) -> String {
+        // Strip all parentheticals: "(cooked)", "(half)", "(medium)", "(2 pieces)", etc.
         name.lowercased()
-            .replacingOccurrences(of: "(cooked)", with: "")
-            .replacingOccurrences(of: "(raw)", with: "")
-            .replacingOccurrences(of: "(baked)", with: "")
-            .replacingOccurrences(of: "(boiled)", with: "")
-            .replacingOccurrences(of: "(steamed)", with: "")
-            .replacingOccurrences(of: "(roasted)", with: "")
-            .replacingOccurrences(of: "(grilled)", with: "")
-            .replacingOccurrences(of: "(fried)", with: "")
+            .replacingOccurrences(of: #"\s*\([^)]*\)"#, with: "", options: .regularExpression)
             .trimmingCharacters(in: .whitespaces)
     }
 

@@ -1637,7 +1637,7 @@
     "fat_g": 14,
     "fiber_g": 0,
     "ingredients": [
-      "Avocado Oil"
+      "avocado oil"
     ],
     "nova_group": 2
   },
@@ -1652,7 +1652,7 @@
     "fat_g": 10,
     "fiber_g": 5,
     "ingredients": [
-      "Avocado (half)"
+      "avocado"
     ],
     "nova_group": 1
   },
@@ -4869,7 +4869,7 @@
     "fat_g": 22,
     "fiber_g": 10,
     "ingredients": [
-      "Avocado (medium)"
+      "avocado"
     ],
     "nova_group": 3
   },
@@ -5244,7 +5244,7 @@
     "fat_g": 12,
     "fiber_g": 3,
     "ingredients": [
-      "Avocado Ranch"
+      "avocado"
     ],
     "nova_group": 3
   },
@@ -5277,7 +5277,7 @@
     "fat_g": 24,
     "fiber_g": 11,
     "ingredients": [
-      "Avocados Raw"
+      "avocado"
     ],
     "nova_group": 3
   },
@@ -6440,7 +6440,7 @@
     "fat_g": 9,
     "fiber_g": 0,
     "ingredients": [
-      "Naturally Refined Avocado Oil"
+      "avocado oil"
     ],
     "nova_group": 3
   },
@@ -10849,7 +10849,7 @@
     "fat_g": 0.2,
     "fiber_g": 0,
     "ingredients": [
-      "Avocado Oil Spray (per spray)"
+      "avocado oil"
     ],
     "nova_group": 2
   },
