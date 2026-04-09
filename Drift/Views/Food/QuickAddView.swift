@@ -282,6 +282,27 @@ private struct IngredientPickerView: View {
                     .font(.subheadline).foregroundStyle(Theme.accent)
             }
 
+            // Category quick-browse chips when search is empty
+            if query.isEmpty {
+                Section("Browse") {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 8) {
+                            ForEach(["Vegetables", "Fruits", "Proteins", "Grains & Cereals", "Nuts & Seeds", "Dairy"], id: \.self) { cat in
+                                Button {
+                                    results = (try? AppDatabase.shared.fetchFoodsByCategory(cat)) ?? []
+                                } label: {
+                                    Text(cat == "Grains & Cereals" ? "Grains" : cat)
+                                        .font(.caption.weight(.medium))
+                                        .padding(.horizontal, 12).padding(.vertical, 6)
+                                        .background(Theme.accent.opacity(0.15), in: Capsule())
+                                }
+                                .tint(.primary)
+                            }
+                        }.padding(.horizontal, 4)
+                    }
+                }
+            }
+
             if query.isEmpty && !recentIngredients.isEmpty {
                 Section("Recent") {
                     ForEach(recentIngredients) { food in

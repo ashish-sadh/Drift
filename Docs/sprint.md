@@ -50,7 +50,7 @@ Current: keyword-matching on food names only. Fix: every food gets an `ingredien
 - [x] **No ML model needed** — Confirmed: ingredients column + recipe builder + spice expansion covers ~95%. Tiny model deferred.
 
 ### P1.5: Data Model Cleanup
-- [ ] **Rename `favorite_food` → `saved_food`** — Table holds favorites, recipes, and (soon) saved custom entries. `FavoriteFood` model → `SavedFood`. Migration: `ALTER TABLE favorite_food RENAME TO saved_food`. Update all references: model, AppDatabase queries, FoodLogViewModel, QuickAddView, DefaultFoods, FoodService, StaticOverrides, AI tools, tests. `isRecipe` flag stays. Consider adding `isFavorite` bool alongside it.
+- [x] **Rename `favorite_food` → `saved_food`** — Migration v23. SavedFood model. All 40 references updated across 11 files. No typealias.
 - [ ] **Unify user-created food storage** — Currently: DB foods in `food`, recipes in `favorite_food`, manual entries in neither (only `food_entry` + `food_usage`). After rename, `saved_food` becomes the single table for all user-created foods: recipes, manual "save for future" entries, barcode scans (move from `food`?). The seeded `food` table stays read-only.
 
 ### P1: Workout History & Editing
@@ -65,7 +65,7 @@ Goal: let users add past workouts and edit existing ones. Currently workouts are
 Goal: let users build Sweetgreen-style salads without fatigue. Existing recipe builder is the foundation.
 
 - [ ] **Salad base templates** — 5-8 pre-built starting points: "Green Salad Base" (spinach + lettuce), "Grain Bowl" (quinoa + greens), "Protein Bowl" (chicken + rice). User picks base → customizes. Lives in recipe builder flow.
-- [ ] **Recent ingredients in picker** — Show recently used ingredients at top of ingredient picker (already tracked via food_usage). Reduces fatigue for repeat builders.
+- [x] **Recent ingredients in picker** — Already implemented: "Recent" section shows when search is empty in IngredientPickerView.
 - [ ] **Category tabs in ingredient picker** — Show tabs (Greens, Proteins, Toppings, Dressings) alongside search. Pre-filter by Food.category for faster browsing.
 - [ ] **Ingredient persistence** — Use the `ingredient_names` JSON column (from plant points task) — already stores ingredient list. For salad rebuilding, also store per-ingredient macros in `favorite_food.ingredients_json` (full RecipeItem data). Enables: recipe rebuilding, "what's in this?" via AI chat. No new table.
 

@@ -560,6 +560,16 @@ extension AppDatabase {
          .replacingOccurrences(of: "_", with: "\\_")
     }
 
+    /// Fetch foods by category, sorted by name.
+    func fetchFoodsByCategory(_ category: String, limit: Int = 20) throws -> [Food] {
+        try dbWriter.read { db in
+            try Food.filter(Column("category") == category)
+                .order(Column("name"))
+                .limit(limit)
+                .fetchAll(db)
+        }
+    }
+
     func searchFoods(query: String, limit: Int = 50) throws -> [Food] {
         try dbWriter.read { db in
             if query.isEmpty { return [] }
