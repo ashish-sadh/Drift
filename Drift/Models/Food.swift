@@ -13,9 +13,10 @@ struct Food: Identifiable, Codable, Sendable {
     var fatG: Double
     var fiberG: Double
     var ingredients: String?  // JSON array of ingredient names, e.g. '["rice","onion","turmeric"]'
+    var source: String?       // "database", "recipe", "barcode", "custom". nil = database (legacy)
 
     enum CodingKeys: String, CodingKey {
-        case id, name, category, calories, ingredients
+        case id, name, category, calories, ingredients, source
         case servingSize = "serving_size"
         case servingUnit = "serving_unit"
         case proteinG = "protein_g"
@@ -35,7 +36,8 @@ struct Food: Identifiable, Codable, Sendable {
         carbsG: Double = 0,
         fatG: Double = 0,
         fiberG: Double = 0,
-        ingredients: String? = nil
+        ingredients: String? = nil,
+        source: String? = nil
     ) {
         self.id = id
         self.name = name
@@ -48,6 +50,7 @@ struct Food: Identifiable, Codable, Sendable {
         self.fatG = fatG
         self.fiberG = fiberG
         self.ingredients = ingredients
+        self.source = source
     }
 
     init(from decoder: Decoder) throws {
@@ -68,6 +71,7 @@ struct Food: Identifiable, Codable, Sendable {
         } else {
             ingredients = try c.decodeIfPresent(String.self, forKey: .ingredients)
         }
+        source = try c.decodeIfPresent(String.self, forKey: .source)
     }
 
     /// Compact macro string like "165cal 31P 0C 4F"

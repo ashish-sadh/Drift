@@ -398,5 +398,16 @@ enum Migrations {
         migrator.registerMigration("v23_rename_saved_food") { db in
             try db.rename(table: "favorite_food", to: "saved_food")
         }
+
+        // v24: Add source column to food table for unified food storage
+        migrator.registerMigration("v24_food_source") { db in
+            try db.alter(table: "food") { t in
+                t.add(column: "source", .text) // "database", "recipe", "barcode", "custom"
+            }
+            // Mark existing seeded foods
+            try db.execute(sql: "UPDATE food SET source = 'database' WHERE source IS NULL AND category != 'Scanned'")
+            // Mark barcode scans
+            try db.execute(sql: "UPDATE food SET source = 'barcode' WHERE source IS NULL AND category = 'Scanned'")
+        }
     }
 }
