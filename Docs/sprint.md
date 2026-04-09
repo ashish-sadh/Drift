@@ -33,7 +33,7 @@ _(pick from Ready)_
 
 ### P0: UI Bugs & Features (human-reported)
 - [x] **BUG: Recent foods missing macros** — Fixed: added macro columns to food_usage, trackFoodUsage() stores macros, fetchRecentEntryNames() reads directly. Migration v21 backfills.
-- [ ] **Copy to today from past day** — When viewing a past day's food log, show a "Copy to today" option per item. Don't show when viewing today. Brief toast confirms without navigating. Files: `FoodTabView.swift`, `FoodLogViewModel.swift`.
+- [x] **Copy to today from past day** — Context menu "Copy to Today" on past day entries. Green toast confirmation. copyEntryToToday() in ViewModel.
 - [x] **Plant points date awareness** — Fixed: shows "Today" or actual date (e.g. "Apr 5") based on selectedDate.
 
 ### P1: Plant Points Accuracy
