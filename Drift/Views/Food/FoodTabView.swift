@@ -767,9 +767,12 @@ struct FoodTabView: View {
                     }
                     .padding(.top, 8)
 
-                    // Time picker
-                    DatePicker("Time eaten", selection: $editEntryTime, displayedComponents: .hourAndMinute)
-                        .font(.subheadline).foregroundStyle(.secondary)
+                    // Compact time picker
+                    HStack {
+                        Image(systemName: "clock").font(.caption).foregroundStyle(.tertiary)
+                        DatePicker("", selection: $editEntryTime, displayedComponents: .hourAndMinute)
+                            .labelsHidden()
+                    }
 
                     // Shared serving input
                     if !units.isEmpty {
