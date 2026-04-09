@@ -39,7 +39,7 @@ _(pick from Ready)_
 ### P1: Plant Points Accuracy
 Current implementation is keyword-matching on food names only. Composite foods like "Chicken Biryani" count as 0-1 points instead of decomposing into rice + onion + spices = 2.25 points. Avocado may be excluded. Design: count by ingredients, not recipe names.
 
-- [ ] **Ingredient-level plant counting** — Add `recipe_ingredient` table to persist ingredients when recipes are built. At log time, count unique ingredients for plant points (not recipe names). For seeded DB foods with known compositions, precompute ingredient lists.
+- [ ] **Ingredient-level plant counting** — Add `ingredient_names TEXT` column (JSON array) to `food_entry` and `favorite_food` tables. When recipe is saved in `saveAndLogRecipe()`, store `["rice", "dal", "onion"]` from `items.map(\.name)`. Plant points reads `ingredient_names` if present, falls back to `food_name`. No new table needed — just a column + migration. For seeded FavoriteFoods, precompute ingredient lists.
 - [ ] **Six-category alignment** — Match the "Super Six": Vegetables, Fruits, Whole Grains, Legumes, Nuts/Seeds, Herbs/Spices (¼ pt each). Use Food.category field from DB (exists, currently unused by PlantPointsService). Map: "Fruits"→Fruits, "Vegetables"→Vegetables, "Nuts & Seeds"→Nuts/Seeds, "Indian Staples" with dal/lentil→Legumes, "Grains & Cereals"→Whole Grains.
 - [ ] **Avocado + edge case audit** — Avocado is a fruit (should count). May be blocked by non-plant overrides. Audit: coconut (fruit), quinoa (seed), tofu (legume-derived). Ensure all "Fruits"/"Vegetables" category foods pass classification.
 - [ ] **Tiny model for ingredient inference + plant classification** — Evaluate if a ≤500M model is needed or if rules + DB precomputation suffice. Decision tree:
@@ -56,7 +56,7 @@ Goal: let users build Sweetgreen-style salads without fatigue. Existing recipe b
 - [ ] **Salad base templates** — 5-8 pre-built starting points: "Green Salad Base" (spinach + lettuce), "Grain Bowl" (quinoa + greens), "Protein Bowl" (chicken + rice). User picks base → customizes. Lives in recipe builder flow.
 - [ ] **Recent ingredients in picker** — Show recently used ingredients at top of ingredient picker (already tracked via food_usage). Reduces fatigue for repeat builders.
 - [ ] **Category tabs in ingredient picker** — Show tabs (Greens, Proteins, Toppings, Dressings) alongside search. Pre-filter by Food.category for faster browsing.
-- [ ] **Ingredient persistence** — New `recipe_ingredient` table: `(recipe_id, food_id, food_name, servings, calories, ...)`. When recipe is saved, persist individual ingredients. Enables: plant point counting, recipe rebuilding, "what's in this?" queries via AI chat.
+- [ ] **Ingredient persistence** — Use the `ingredient_names` JSON column (from plant points task) — already stores ingredient list. For salad rebuilding, also store per-ingredient macros in `favorite_food.ingredients_json` (full RecipeItem data). Enables: recipe rebuilding, "what's in this?" via AI chat. No new table.
 
 ## Done
 
