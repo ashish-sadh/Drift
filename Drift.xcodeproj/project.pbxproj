@@ -70,6 +70,7 @@
 		72F5D9C470D2FE034CE2094E /* LLMGemma4Eval.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA011B2F5DA344904EFAD4D3 /* LLMGemma4Eval.swift */; };
 		737105D5DE25A898AC31BEA8 /* AIContextBuilder+Health.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ACBCA936A73C1825C28C312 /* AIContextBuilder+Health.swift */; };
 		7430C66B3A1C306F1199C3FA /* ToolSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = C170D4FEDFB68CA8A61E1D03 /* ToolSchema.swift */; };
+		7821B033A6CDE13D6ED6040C /* DashboardView+Cards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733818AD9667283F81C5D1C5 /* DashboardView+Cards.swift */; };
 		7BDC02B8C99F8B719546A8A1 /* WeightEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = F237A2E1C7747DBE102B665C /* WeightEntry.swift */; };
 		7FF64D8FECEB7302909982E6 /* LLMQwen3Eval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C100ED24DAB0D032BD8C5BD /* LLMQwen3Eval.swift */; };
 		813BBE938E8D3E2FF5A34A60 /* AppDatabase+FoodUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E7E108AC25A8262DC23EB7 /* AppDatabase+FoodUsage.swift */; };
@@ -245,6 +246,7 @@
 		6D6B07DD56345F8A5F5448BC /* CSVParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVParserTests.swift; sourceTree = "<group>"; };
 		6E4A88611445C2672FD84570 /* BiomarkerDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomarkerDefinition.swift; sourceTree = "<group>"; };
 		6F84469D20EBBA0BD037FBCA /* WorkoutService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutService.swift; sourceTree = "<group>"; };
+		733818AD9667283F81C5D1C5 /* DashboardView+Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DashboardView+Cards.swift"; sourceTree = "<group>"; };
 		7392F1C1953721F1AD362662 /* LlamaCppBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LlamaCppBackend.swift; sourceTree = "<group>"; };
 		7395A23088568B416917E2A6 /* DriftLLMEvalTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DriftLLMEvalTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		790C2D3452366D6B473DE2B1 /* Supplement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Supplement.swift; sourceTree = "<group>"; };
@@ -498,6 +500,7 @@
 			isa = PBXGroup;
 			children = (
 				DD2565511DFA43570D0CE9EA /* DashboardView.swift */,
+				733818AD9667283F81C5D1C5 /* DashboardView+Cards.swift */,
 				E0EA24C208A1C32DB52709A4 /* SleepRecoveryView.swift */,
 			);
 			path = Dashboard;
@@ -850,6 +853,7 @@
 				4C8D307CC64DADDCE400F45B /* DEXARegion.swift in Sources */,
 				3BBB59B401ACCCDB35D323F3 /* DEXAScan.swift in Sources */,
 				37AE19FE7D95B7FA8B8477DE /* DailyNutrition.swift in Sources */,
+				7821B033A6CDE13D6ED6040C /* DashboardView+Cards.swift in Sources */,
 				FE2EC2B62CB693DA85CD1544 /* DashboardView.swift in Sources */,
 				2CCF5E1D415E462AE9997DD4 /* DashboardViewModel.swift in Sources */,
 				DAD2FB33C19A3574C2643082 /* DateFormatters.swift in Sources */,
