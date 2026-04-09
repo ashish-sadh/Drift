@@ -931,7 +931,7 @@ struct FoodTabView: View {
                 }
             }
         }
-        .presentationDetents([.medium, .large])
+        .presentationDetents([.fraction(0.85), .large])
     }
 
     private func editMacroChip(_ label: String, value: Double, color: Color) -> some View {
