@@ -32,9 +32,26 @@ _(pick from Ready)_
 - [ ] **Conversation memory** — Pass previous tool results to next turn so LLM can reference them ("you mentioned protein was low earlier").
 
 ### P0: UI Bugs & Features (human-reported)
-- [ ] **BUG: Recent foods missing macros** — When a manual entry (quick-add) is saved, it doesn't copy calories/macros to the recent foods list. Re-logging from recents shows 0 cal. Investigate how quick-add saves to food_usage and whether it stores the nutrition data.
-- [ ] **Copy to today from past day** — When viewing a past day's food log, show a "Copy to today" option on each item (or a bulk copy). Don't show when already viewing today. Show a brief toast/nudge confirming the item was added without navigating away.
-- [ ] **Plant points date awareness** — "Today" label under plant points doesn't update when viewing a different date. Change to show the actual date when not viewing today (e.g. "Apr 5" instead of "Today"). Week and month sections are fine.
+- [ ] **BUG: Recent foods missing macros** — When a manual entry (quick-add) is saved, it doesn't copy calories/macros to the recent foods list. Re-logging from recents shows 0 cal. Investigate `trackFoodUsage()` in `AppDatabase+FoodUsage.swift` — likely stores name but not nutrition. Fix: pass macros through to usage tracking.
+- [ ] **Copy to today from past day** — When viewing a past day's food log, show a "Copy to today" option per item. Don't show when viewing today. Brief toast confirms without navigating. Files: `FoodTabView.swift`, `FoodLogViewModel.swift`.
+- [ ] **Plant points date awareness** — "Today" label in `PlantPointsCardView.swift` doesn't update when viewing a different date. Show actual date (e.g. "Apr 5") when not today. Week/month fine.
+
+### P1: Plant Points Accuracy
+Current implementation is keyword-matching on food names only. Composite foods like "Chicken Biryani" count as 0-1 points instead of decomposing into rice + onion + spices = 2.25 points. Avocado may be excluded. Design: count by ingredients, not recipe names.
+
+- [ ] **Ingredient-level plant counting** — Add `recipe_ingredient` table to persist ingredients when recipes are built. At log time, count unique ingredients for plant points (not recipe names). For seeded DB foods with known compositions, precompute ingredient lists.
+- [ ] **Six-category alignment** — Match the "Super Six": Vegetables, Fruits, Whole Grains, Legumes, Nuts/Seeds, Herbs/Spices (¼ pt each). Use Food.category field from DB (exists, currently unused by PlantPointsService). Map: "Fruits"→Fruits, "Vegetables"→Vegetables, "Nuts & Seeds"→Nuts/Seeds, "Indian Staples" with dal/lentil→Legumes, "Grains & Cereals"→Whole Grains.
+- [ ] **Avocado + edge case audit** — Avocado is a fruit (should count). May be blocked by non-plant overrides. Audit: coconut (fruit), quinoa (seed), tofu (legume-derived). Ensure all "Fruits"/"Vegetables" category foods pass classification.
+- [ ] **SmolLM ingredient inference** — For composite foods without stored ingredients (e.g. "Butter Chicken"), use the 360M model: "List plant ingredients in Butter Chicken:" → "onion, tomato, garlic, ginger, spices". Run once on first log, cache in `food_plant_ingredients` table. Fallback: hardcode top 50 dishes.
+- [ ] **Herbs/spices composite expansion** — "Garam Masala" = cumin + coriander + cardamom + cloves + pepper (1.25 pts, not 0.25). Expand known spice blends.
+
+### P2: Salad Bowl / Custom Meal Builder
+Goal: let users build Sweetgreen-style salads without fatigue. Existing recipe builder is the foundation.
+
+- [ ] **Salad base templates** — 5-8 pre-built starting points: "Green Salad Base" (spinach + lettuce), "Grain Bowl" (quinoa + greens), "Protein Bowl" (chicken + rice). User picks base → customizes. Lives in recipe builder flow.
+- [ ] **Recent ingredients in picker** — Show recently used ingredients at top of ingredient picker (already tracked via food_usage). Reduces fatigue for repeat builders.
+- [ ] **Category tabs in ingredient picker** — Show tabs (Greens, Proteins, Toppings, Dressings) alongside search. Pre-filter by Food.category for faster browsing.
+- [ ] **Ingredient persistence** — New `recipe_ingredient` table: `(recipe_id, food_id, food_name, servings, calories, ...)`. When recipe is saved, persist individual ingredients. Enables: plant point counting, recipe rebuilding, "what's in this?" queries via AI chat.
 
 ## Done
 
