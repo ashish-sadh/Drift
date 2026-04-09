@@ -66,7 +66,7 @@ Goal: let users build Sweetgreen-style salads without fatigue. Existing recipe b
 
 - [ ] **Salad base templates** — 5-8 pre-built starting points: "Green Salad Base" (spinach + lettuce), "Grain Bowl" (quinoa + greens), "Protein Bowl" (chicken + rice). User picks base → customizes. Lives in recipe builder flow.
 - [x] **Recent ingredients in picker** — Already implemented: "Recent" section shows when search is empty in IngredientPickerView.
-- [ ] **Category tabs in ingredient picker** — Show tabs (Greens, Proteins, Toppings, Dressings) alongside search. Pre-filter by Food.category for faster browsing.
+- [x] **Category tabs in ingredient picker** — Horizontal chips: Vegetables, Fruits, Proteins, Grains, Nuts & Seeds, Dairy. fetchFoodsByCategory().
 - [ ] **Ingredient persistence** — Use the `ingredient_names` JSON column (from plant points task) — already stores ingredient list. For salad rebuilding, also store per-ingredient macros in `favorite_food.ingredients_json` (full RecipeItem data). Enables: recipe rebuilding, "what's in this?" via AI chat. No new table.
 
 ## Done
