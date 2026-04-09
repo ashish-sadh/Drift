@@ -14,15 +14,6 @@ struct FoodTabView: View {
     @State private var isCopying = false
     @State private var showingPlantPointsDetail = false
     @State private var copiedToTodayName: String? = nil
-    @State private var editAmount = "1"
-    @State private var editUnitIndex = 0
-    @State private var editEntryIsFav = false
-    @State private var editEntryTime = Date()
-    @State private var editCal = ""
-    @State private var editP = ""
-    @State private var editC = ""
-    @State private var editF = ""
-    @State private var editFb = ""
     @State private var foodSortMode: FoodSortMode = .time
 
     enum FoodSortMode: String, CaseIterable {
@@ -102,7 +93,14 @@ struct FoodTabView: View {
                     }
                 }
             }
-            .sheet(item: $editingEntry) { entry in editEntrySheet(entry) }
+            .sheet(item: $editingEntry) { entry in
+                EditFoodEntrySheet(entry: entry, viewModel: viewModel,
+                    onCopiedToToday: { name in
+                        copiedToTodayName = name
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copiedToTodayName = nil }
+                    },
+                    onDone: { reload() })
+            }
             .sheet(isPresented: $showingPlantPointsDetail) {
                 NavigationStack { PlantPointsCardView(viewModel: viewModel) }
                     .presentationDetents([.medium, .large])
@@ -486,30 +484,6 @@ struct FoodTabView: View {
         .accessibilityElement(children: .combine)
         .accessibilityLabel("\(entry.foodName), \(Int(entry.totalCalories)) calories, \(Int(entry.totalProtein)) protein, \(Int(entry.totalCarbs)) carbs, \(Int(entry.totalFat)) fat")
         .onTapGesture {
-            if entry.servingSizeG > 0 {
-                let food = Food(name: entry.foodName, category: "", servingSize: entry.servingSizeG,
-                                servingUnit: "g", calories: entry.calories)
-                let units = FoodUnit.smartUnits(for: food)
-                let primary = units.first ?? FoodUnit(label: "serving", gramsEquivalent: entry.servingSizeG)
-                let totalG = entry.servingSizeG * entry.servings
-                let amountInPrimary = primary.gramsEquivalent > 0 ? totalG / primary.gramsEquivalent : entry.servings
-                editAmount = amountInPrimary == Double(Int(amountInPrimary))
-                    ? "\(Int(amountInPrimary))" : String(format: "%.1f", amountInPrimary)
-                editUnitIndex = 0
-            } else {
-                // Manual/recipe entry — use a simple multiplier
-                editAmount = entry.servings == Double(Int(entry.servings))
-                    ? "\(Int(entry.servings))" : String(format: "%.1f", entry.servings)
-                editUnitIndex = 0
-            }
-            editEntryIsFav = (try? AppDatabase.shared.isFoodFavorite(name: entry.foodName)) ?? false
-            editEntryTime = parseTimestamp(entry.loggedAt) ?? Date()
-            // For custom entries: populate editable macros
-            editCal = "\(Int(entry.calories))"
-            editP = "\(Int(entry.proteinG))"
-            editC = "\(Int(entry.carbsG))"
-            editF = "\(Int(entry.fatG))"
-            editFb = "\(Int(entry.fiberG))"
             editingEntry = entry
         }
         .contextMenu {
@@ -733,229 +707,9 @@ struct FoodTabView: View {
         }
     }
 
-    // MARK: - Edit Entry Sheet
+    // Edit entry sheet in EditFoodEntrySheet.swift
 
-    private func editEntrySheet(_ entry: FoodEntry) -> some View {
-        let hasServingSize = entry.servingSizeG > 0
-        // For DB foods: reconstruct Food for smart units
-        let food = hasServingSize
-            ? Food(name: entry.foodName, category: "", servingSize: entry.servingSizeG,
-                   servingUnit: "g", calories: entry.calories,
-                   proteinG: entry.proteinG, carbsG: entry.carbsG,
-                   fatG: entry.fatG, fiberG: entry.fiberG)
-            : nil
-        let units = food.map { FoodUnit.smartUnits(for: $0) } ?? []
-        let safeIndex = min(editUnitIndex, max(units.count - 1, 0))
-        let unit = units.isEmpty ? FoodUnit(label: "serving", gramsEquivalent: max(entry.servingSizeG, 1)) : units[safeIndex]
-        let amountNum = Double(editAmount) ?? 0
-        let multiplier: Double = hasServingSize
-            ? (entry.servingSizeG > 0 ? (amountNum * unit.gramsEquivalent) / entry.servingSizeG : amountNum)
-            : amountNum  // manual/recipe: amount IS the multiplier
-
-        return NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    VStack(spacing: 4) {
-                        Text(entry.foodName).font(.title3.weight(.semibold))
-                        if hasServingSize {
-                            let primaryLabel = units.first?.label ?? "serving"
-                            let perText = primaryLabel == "g" || primaryLabel == "ml"
-                                ? "\(Int(entry.calories))cal per \(Int(entry.servingSizeG))g"
-                                : "\(Int(entry.calories))cal per 1 \(primaryLabel) (\(Int(entry.servingSizeG))g)"
-                            Text(perText).font(.caption).foregroundStyle(.secondary)
-                        } else {
-                            Text("\(Int(entry.calories))cal per serving")
-                                .font(.caption).foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(.top, 8)
-
-                    // Compact time picker
-                    HStack {
-                        Image(systemName: "clock").font(.caption).foregroundStyle(.tertiary)
-                        DatePicker("", selection: $editEntryTime, displayedComponents: .hourAndMinute)
-                            .labelsHidden()
-                    }
-
-                    // Shared serving input
-                    if !units.isEmpty {
-                        ServingInputView(amount: $editAmount, selectedUnitIndex: $editUnitIndex,
-                                         units: units, servingSize: entry.servingSizeG)
-                    } else {
-                        TextField("1", text: $editAmount)
-                            .keyboardType(.decimalPad)
-                            .font(.title2.weight(.medium).monospacedDigit())
-                            .multilineTextAlignment(.center)
-                            .frame(width: 80)
-                            .padding(.vertical, 10)
-                            .background(Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 10))
-                    }
-
-                    if entry.foodId == nil {
-                        // Custom entry — editable macros
-                        VStack(spacing: 8) {
-                            HStack {
-                                Text("Cal").font(.caption.weight(.medium)).foregroundStyle(.secondary).frame(width: 30)
-                                TextField("0", text: $editCal).keyboardType(.numberPad).font(.title2.weight(.bold).monospacedDigit()).multilineTextAlignment(.center)
-                            }
-                            HStack(spacing: 12) {
-                                editableMacroField("P", text: $editP, color: Theme.proteinRed)
-                                editableMacroField("C", text: $editC, color: Theme.carbsGreen)
-                                editableMacroField("F", text: $editF, color: Theme.fatYellow)
-                                editableMacroField("Fb", text: $editFb, color: Theme.fiberBrown)
-                            }
-                        }
-                        .card()
-                    } else {
-                        // DB food — read-only macros (adjusted by serving multiplier)
-                        VStack(spacing: 8) {
-                            HStack(alignment: .firstTextBaseline, spacing: 4) {
-                                Text("\(Int(entry.calories * multiplier))")
-                                    .font(.title.weight(.bold).monospacedDigit())
-                                Text("cal").font(.subheadline).foregroundStyle(.secondary)
-                            }
-                            HStack(spacing: 8) {
-                                editMacroChip("P", value: entry.proteinG * multiplier, color: Theme.proteinRed)
-                                editMacroChip("C", value: entry.carbsG * multiplier, color: Theme.carbsGreen)
-                                editMacroChip("F", value: entry.fatG * multiplier, color: Theme.fatYellow)
-                                if entry.fiberG > 0 {
-                                    editMacroChip("Fb", value: entry.fiberG * multiplier, color: Theme.fiberBrown)
-                                }
-                            }
-                        }
-                        .card()
-                    }
-
-                    // Ingredients + plant indicator
-                    let dbFood: Food? = {
-                        if let fid = entry.foodId {
-                            return try? AppDatabase.shared.reader.read { db in try Food.fetchOne(db, id: fid) }
-                        }
-                        // Fallback: match by name
-                        return (try? AppDatabase.shared.searchFoods(query: entry.foodName, limit: 1))?.first
-                    }()
-                    let nova = dbFood?.novaGroup
-                    let hasIngredients = dbFood.map { $0.ingredientList.count > 1 || $0.ingredientList.first != $0.name } ?? false
-
-                    // Plant indicator — respect NOVA: don't show for NOVA 3-4 foods (their ingredients count, not the food)
-                    if nova == nil || (nova ?? 0) <= 2 {
-                        let plantClass = PlantPointsService.classify(entry.foodName)
-                        if plantClass != .notPlant {
-                            HStack(spacing: 6) {
-                                Image(systemName: "leaf.fill").foregroundStyle(Theme.plantGreen)
-                                Text(plantClass == .herbSpice ? "Herb/Spice (¼ pt)" : "Plant (1 pt)")
-                                    .font(.caption.weight(.medium))
-                                Spacer()
-                            }
-                            .padding(.horizontal, 4)
-                        }
-                    } else if hasIngredients {
-                        // NOVA 3+: show that ingredients contribute to plant points, not the food itself
-                        let plantIngredients = dbFood!.ingredientList.filter { PlantPointsService.classify($0) != .notPlant }
-                        if !plantIngredients.isEmpty {
-                            HStack(spacing: 6) {
-                                Image(systemName: "leaf.fill").foregroundStyle(Theme.plantGreen)
-                                Text("\(plantIngredients.count) plant ingredients")
-                                    .font(.caption.weight(.medium))
-                                Spacer()
-                            }
-                            .padding(.horizontal, 4)
-                        }
-                    }
-
-                    // Ingredients display
-                    if hasIngredients, let dbFood {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Ingredients").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
-                            Text(dbFood.ingredientList.joined(separator: ", "))
-                                .font(.caption).foregroundStyle(.tertiary)
-                        }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(.horizontal, 4)
-                    }
-
-                    // Copy to Today (only when viewing past day)
-                    if !viewModel.isToday {
-                        Button {
-                            viewModel.copyEntryToToday(entry)
-                            copiedToTodayName = entry.foodName
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copiedToTodayName = nil }
-                            editingEntry = nil
-                        } label: {
-                            Label("Copy to Today", systemImage: "doc.on.doc")
-                                .font(.subheadline.weight(.medium))
-                                .frame(maxWidth: .infinity)
-                        }
-                        .buttonStyle(.bordered)
-                        .tint(Theme.accent)
-                    }
-                }
-                .padding(.horizontal, 16)
-            }
-            .scrollDismissesKeyboard(.interactively)
-            .background(Theme.background)
-            .navigationTitle("Edit").navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { editingEntry = nil } }
-                ToolbarItem(placement: .principal) {
-                    Button {
-                        try? AppDatabase.shared.toggleFoodFavorite(name: entry.foodName, foodId: entry.foodId)
-                        editEntryIsFav.toggle()
-                    } label: {
-                        Image(systemName: editEntryIsFav ? "star.fill" : "star")
-                            .foregroundStyle(editEntryIsFav ? Theme.fatYellow : .secondary)
-                    }
-                }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
-                        if let id = entry.id {
-                            if entry.foodId == nil {
-                                // Custom entry — save edited macros
-                                try? AppDatabase.shared.updateFoodEntryMacros(
-                                    id: id, calories: Double(editCal) ?? entry.calories,
-                                    proteinG: Double(editP) ?? entry.proteinG,
-                                    carbsG: Double(editC) ?? entry.carbsG,
-                                    fatG: Double(editF) ?? entry.fatG,
-                                    fiberG: Double(editFb) ?? entry.fiberG)
-                            } else {
-                                viewModel.updateEntryServings(id: id, servings: multiplier)
-                            }
-                            // Update time if changed
-                            let newLoggedAt = DateFormatters.iso8601.string(from: editEntryTime)
-                            if newLoggedAt != entry.loggedAt {
-                                viewModel.updateEntryLoggedAt(id: id, loggedAt: newLoggedAt)
-                            }
-                            reload()
-                        }
-                        editingEntry = nil
-                    }.fontWeight(.semibold)
-                }
-            }
-        }
-        .presentationDetents([.fraction(0.85), .large])
-    }
-
-    private func editMacroChip(_ label: String, value: Double, color: Color) -> some View {
-        HStack(spacing: 2) {
-            RoundedRectangle(cornerRadius: 1).fill(color).frame(width: 2, height: 10)
-            Text("\(Int(value))g \(label)").font(.caption2.weight(.medium).monospacedDigit())
-        }
-        .padding(.horizontal, 8).padding(.vertical, 4)
-        .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 6))
-    }
-
-    private func editableMacroField(_ label: String, text: Binding<String>, color: Color) -> some View {
-        VStack(spacing: 2) {
-            Text(label).font(.caption2.weight(.semibold)).foregroundStyle(color)
-            TextField("0", text: text)
-                .keyboardType(.numberPad)
-                .font(.caption.weight(.medium).monospacedDigit())
-                .multilineTextAlignment(.center)
-                .frame(width: 45)
-                .padding(.vertical, 4)
-                .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 6))
-        }
-    }
+    // Edit entry sheet in EditFoodEntrySheet.swift
 
     // MARK: - Consistency
 

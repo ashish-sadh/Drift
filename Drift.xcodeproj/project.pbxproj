@@ -140,6 +140,7 @@
 		E10A3A33C9E718C1D077AC02 /* WeightEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217B3F5DA6C6AA9BB267D9F3 /* WeightEntryView.swift */; };
 		E16388BC43C225F2C6B7368A /* AIChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA2C56E731BE5610FDC5B12 /* AIChatView.swift */; };
 		E312846BA4FBD129108D7C82 /* ExerciseBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21311CD0AE82F339C988BDD2 /* ExerciseBrowserView.swift */; };
+		E5611698773A5EEF24F10014 /* EditFoodEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30EC2EF2E12E44F63B37582 /* EditFoodEntrySheet.swift */; };
 		EA08170013B8F2A7481FF81F /* Workout.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE56F885D3FD4E44B8999557 /* Workout.swift */; };
 		EA461A149CE8C537C738BF00 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 8D44ABA58001AC21A70DEA3A /* GRDB */; };
 		EB2A292ED2019794749E4839 /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A19AD32FF007540A79C20BC /* AppDatabase.swift */; };
@@ -327,6 +328,7 @@
 		EE0664FF9B8E28C6F853B820 /* ExerciseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseService.swift; sourceTree = "<group>"; };
 		EE2D9672D96D6738FA36D4F2 /* AlgorithmSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlgorithmSettingsView.swift; sourceTree = "<group>"; };
 		F237A2E1C7747DBE102B665C /* WeightEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightEntry.swift; sourceTree = "<group>"; };
+		F30EC2EF2E12E44F63B37582 /* EditFoodEntrySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditFoodEntrySheet.swift; sourceTree = "<group>"; };
 		F36D548F9FA62D8D7E53B1C7 /* BiomarkerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomarkerService.swift; sourceTree = "<group>"; };
 		F3E0BC3660040DBB4942437D /* SupplementLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementLog.swift; sourceTree = "<group>"; };
 		F4EFC6AC02BBE73CDE74B5E2 /* BarcodeCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeCache.swift; sourceTree = "<group>"; };
@@ -417,6 +419,7 @@
 			isa = PBXGroup;
 			children = (
 				55F24D93872F919F1A8CB319 /* BarcodeScannerView.swift */,
+				F30EC2EF2E12E44F63B37582 /* EditFoodEntrySheet.swift */,
 				42A6CAF4720F61DC0C9BD2E7 /* FoodSearchView.swift */,
 				5A981E37D718D28A6679F9C8 /* FoodTabView.swift */,
 				D4683CA86D3045B1534504B0 /* ManualFoodEntrySheet.swift */,
@@ -873,6 +876,7 @@
 				510B0EC55CDC176805887710 /* DefaultFoods.swift in Sources */,
 				307CDADBBCCE0A3FD121817C /* DefaultTemplates.swift in Sources */,
 				4C31E5F32057829ABAA0840A /* DriftApp.swift in Sources */,
+				E5611698773A5EEF24F10014 /* EditFoodEntrySheet.swift in Sources */,
 				E312846BA4FBD129108D7C82 /* ExerciseBrowserView.swift in Sources */,
 				29FCA567A01752328CAEFFED /* ExerciseDatabase.swift in Sources */,
 				6327143E6A1E3CD8CFEEB252 /* ExercisePickerView.swift in Sources */,
