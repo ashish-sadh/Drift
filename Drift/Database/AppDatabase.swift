@@ -309,35 +309,8 @@ extension AppDatabase {
         return Array(all)
     }
 
-    /// Unique food names logged in a date range (for plant points — legacy, prefer fetchUniqueIngredients).
-    func fetchUniqueFoodNames(from startDate: String, to endDate: String) throws -> [String] {
-        try dbWriter.read { db in
-            try String.fetchAll(db, sql: """
-                SELECT DISTINCT fe.food_name
-                FROM food_entry fe
-                WHERE fe.date BETWEEN ? AND ?
-                """, arguments: [startDate, endDate])
-        }
-    }
-
-    /// Unique food names per day in a date range (for daily plant points breakdown).
-    func fetchUniqueFoodNamesByDay(from startDate: String, to endDate: String) throws -> [String: [String]] {
-        try dbWriter.read { db in
-            let rows = try Row.fetchAll(db, sql: """
-                SELECT DISTINCT fe.date, fe.food_name
-                FROM food_entry fe
-                WHERE fe.date BETWEEN ? AND ?
-                ORDER BY fe.date
-                """, arguments: [startDate, endDate])
-            var result: [String: [String]] = [:]
-            for row in rows {
-                if let date: String = row["date"], let name: String = row["food_name"] {
-                    result[date, default: []].append(name)
-                }
-            }
-            return result
-        }
-    }
+    // Legacy fetchUniqueFoodNames and fetchUniqueFoodNamesByDay removed.
+    // Use fetchFoodItemsForPlantPoints() or fetchUniqueIngredients() instead.
 }
 
 // MARK: - Supplement Operations
