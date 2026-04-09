@@ -17,6 +17,7 @@ struct FoodTabView: View {
     @State private var editAmount = "1"
     @State private var editUnitIndex = 0
     @State private var editEntryIsFav = false
+    @State private var editEntryTime = Date()
     @State private var foodSortMode: FoodSortMode = .time
 
     enum FoodSortMode: String, CaseIterable {
@@ -489,6 +490,7 @@ struct FoodTabView: View {
                 editUnitIndex = 0
             }
             editEntryIsFav = (try? AppDatabase.shared.isFoodFavorite(name: entry.foodName)) ?? false
+            editEntryTime = parseTimestamp(entry.loggedAt) ?? Date()
             editingEntry = entry
         }
         .contextMenu {
@@ -749,6 +751,10 @@ struct FoodTabView: View {
                     }
                     .padding(.top, 8)
 
+                    // Time picker
+                    DatePicker("Time eaten", selection: $editEntryTime, displayedComponents: .hourAndMinute)
+                        .font(.subheadline).foregroundStyle(.secondary)
+
                     // Shared serving input
                     if !units.isEmpty {
                         ServingInputView(amount: $editAmount, selectedUnitIndex: $editUnitIndex,
@@ -864,6 +870,11 @@ struct FoodTabView: View {
                     Button("Save") {
                         if let id = entry.id {
                             viewModel.updateEntryServings(id: id, servings: multiplier)
+                            // Update time if changed
+                            let newLoggedAt = DateFormatters.iso8601.string(from: editEntryTime)
+                            if newLoggedAt != entry.loggedAt {
+                                viewModel.updateEntryLoggedAt(id: id, loggedAt: newLoggedAt)
+                            }
                             reload()
                         }
                         editingEntry = nil
