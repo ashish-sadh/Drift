@@ -64,7 +64,7 @@ Goal: let users add past workouts and edit existing ones. Currently workouts are
 ### P2: Salad Bowl / Custom Meal Builder
 Goal: let users build Sweetgreen-style salads without fatigue. Existing recipe builder is the foundation.
 
-- [ ] **Salad base templates** — 5-8 pre-built starting points: "Green Salad Base" (spinach + lettuce), "Grain Bowl" (quinoa + greens), "Protein Bowl" (chicken + rice). User picks base → customizes. Lives in recipe builder flow.
+- [x] **Salad base templates** — 5 templates: Green Salad, Grain Bowl, Protein Bowl, Mediterranean, Poke Bowl. Seeded with ingredients.
 - [x] **Recent ingredients in picker** — Already implemented: "Recent" section shows when search is empty in IngredientPickerView.
 - [x] **Category tabs in ingredient picker** — Horizontal chips: Vegetables, Fruits, Proteins, Grains, Nuts & Seeds, Dairy. fetchFoodsByCategory().
 - [ ] **Ingredient persistence** — Use the `ingredient_names` JSON column (from plant points task) — already stores ingredient list. For salad rebuilding, also store per-ingredient macros in `favorite_food.ingredients_json` (full RecipeItem data). Enables: recipe rebuilding, "what's in this?" via AI chat. No new table.
