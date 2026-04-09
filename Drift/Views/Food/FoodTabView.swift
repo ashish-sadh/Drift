@@ -334,6 +334,19 @@ struct FoodTabView: View {
             HStack {
                 Text("Food Diary").font(.subheadline.weight(.semibold))
                 Spacer()
+                if !viewModel.isToday && !viewModel.todayEntries.isEmpty {
+                    Button {
+                        for entry in viewModel.todayEntries {
+                            viewModel.copyEntryToToday(entry)
+                        }
+                        copiedToTodayName = "all \(viewModel.todayEntries.count) items"
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copiedToTodayName = nil }
+                    } label: {
+                        Label("Copy All", systemImage: "doc.on.doc")
+                            .font(.caption.weight(.medium))
+                    }
+                    .tint(Theme.accent)
+                }
                 if !viewModel.todayEntries.isEmpty {
                     Text("\(viewModel.todayEntries.count) items")
                         .font(.caption.monospacedDigit()).foregroundStyle(.tertiary)
@@ -377,7 +390,12 @@ struct FoodTabView: View {
                 .frame(width: 3, height: 28)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(entry.foodName).font(.subheadline).lineLimit(1)
+                HStack(spacing: 3) {
+                    Text(entry.foodName).font(.subheadline).lineLimit(1)
+                    if PlantPointsService.classify(entry.foodName) != .notPlant {
+                        Image(systemName: "leaf.fill").font(.caption2).foregroundStyle(Theme.plantGreen)
+                    }
+                }
                 HStack(spacing: 4) {
                     if let time = entryTimeString(entry) {
                         HStack(spacing: 3) {
