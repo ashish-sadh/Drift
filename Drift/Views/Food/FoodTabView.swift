@@ -772,7 +772,7 @@ struct FoodTabView: View {
                 }
             }
         }
-        .presentationDetents([.medium])
+        .presentationDetents([.medium, .large])
     }
 
     private func editMacroChip(_ label: String, value: Double, color: Color) -> some View {
