@@ -32,6 +32,7 @@
 		2CCF5E1D415E462AE9997DD4 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C555B3F9005A7C75FAAD51 /* DashboardViewModel.swift */; };
 		2DDEA9907FA6338488A8E1CD /* AITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E7517E5B4779CBBE1C7284 /* AITests.swift */; };
 		307CDADBBCCE0A3FD121817C /* DefaultTemplates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D4BF27A41CD9659EFF50036 /* DefaultTemplates.swift */; };
+		30C7E754FFFD0B3E4FD62CC6 /* PlantPointsCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC7D489024FD036D6FA417EA /* PlantPointsCardView.swift */; };
 		30F7D3160F146CA92713AD13 /* MoreTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F6D2AA89F46A33EAE39DEAC /* MoreTabView.swift */; };
 		310C2BA2AF1BB8CC25FCC976 /* DriftTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1AB1D48F6D71EC9854629ED /* DriftTests.swift */; };
 		3375CEC1D52AFAE8D81F4012 /* AISetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F4C6870115BE53081FA0CDE /* AISetupView.swift */; };
@@ -302,6 +303,7 @@
 		E4BD88646DFE4A17724D4407 /* AddSupplementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSupplementView.swift; sourceTree = "<group>"; };
 		E6B95CCD0C984C915051F482 /* sample_lingo_export.csv */ = {isa = PBXFileReference; path = sample_lingo_export.csv; sourceTree = "<group>"; };
 		E96402659F73046846B409D5 /* WeightTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightTabView.swift; sourceTree = "<group>"; };
+		EC7D489024FD036D6FA417EA /* PlantPointsCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPointsCardView.swift; sourceTree = "<group>"; };
 		EE0664FF9B8E28C6F853B820 /* ExerciseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseService.swift; sourceTree = "<group>"; };
 		EE2D9672D96D6738FA36D4F2 /* AlgorithmSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlgorithmSettingsView.swift; sourceTree = "<group>"; };
 		F237A2E1C7747DBE102B665C /* WeightEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightEntry.swift; sourceTree = "<group>"; };
@@ -397,6 +399,7 @@
 				55F24D93872F919F1A8CB319 /* BarcodeScannerView.swift */,
 				42A6CAF4720F61DC0C9BD2E7 /* FoodSearchView.swift */,
 				5A981E37D718D28A6679F9C8 /* FoodTabView.swift */,
+				EC7D489024FD036D6FA417EA /* PlantPointsCardView.swift */,
 				20576FEB4A7F0371596D08E6 /* QuickAddView.swift */,
 				7F7F3BAFA978301368D148CF /* ServingInputView.swift */,
 			);
@@ -865,6 +868,7 @@
 				B2654B50471C75496A1AA0D7 /* NutritionLabelOCR.swift in Sources */,
 				900DFB12EECDD2D618FEC253 /* OpenFoodFactsService.swift in Sources */,
 				27536FF4DD83AB95ADECF5AB /* Persistence.swift in Sources */,
+				30C7E754FFFD0B3E4FD62CC6 /* PlantPointsCardView.swift in Sources */,
 				5DB274604E30B658591C0CC9 /* PlantPointsService.swift in Sources */,
 				3A45CB30EFB91DF5C4E468AD /* QuickAddView.swift in Sources */,
 				40D9D335AB3F15A1CCB643E9 /* RecoveryEstimator.swift in Sources */,
