@@ -19,19 +19,28 @@ struct RecentEntry: Identifiable, Sendable {
 // MARK: - Food Usage Tracking
 
 extension AppDatabase {
-    /// Track food usage for smart search ranking. Upserts: increments count or inserts new row.
-    func trackFoodUsage(name: String, foodId: Int64?, servings: Double) throws {
+    /// Track food usage for smart search ranking + recents. Upserts with macros.
+    func trackFoodUsage(name: String, foodId: Int64?, servings: Double,
+                        calories: Double = 0, proteinG: Double = 0, carbsG: Double = 0,
+                        fatG: Double = 0, fiberG: Double = 0, servingSizeG: Double = 0) throws {
         try writer.write { db in
             let now = ISO8601DateFormatter().string(from: Date())
             try db.execute(sql: """
-                INSERT INTO food_usage (food_name, food_id, use_count, last_used, last_servings)
-                VALUES (?, ?, 1, ?, ?)
+                INSERT INTO food_usage (food_name, food_id, use_count, last_used, last_servings,
+                                        calories, protein_g, carbs_g, fat_g, fiber_g, serving_size_g)
+                VALUES (?, ?, 1, ?, ?, ?, ?, ?, ?, ?, ?)
                 ON CONFLICT(food_name) DO UPDATE SET
                     use_count = use_count + 1,
                     last_used = excluded.last_used,
                     last_servings = excluded.last_servings,
-                    food_id = COALESCE(excluded.food_id, food_id)
-                """, arguments: [name, foodId, now, servings])
+                    food_id = COALESCE(excluded.food_id, food_id),
+                    calories = CASE WHEN excluded.calories > 0 THEN excluded.calories ELSE food_usage.calories END,
+                    protein_g = CASE WHEN excluded.protein_g > 0 THEN excluded.protein_g ELSE food_usage.protein_g END,
+                    carbs_g = CASE WHEN excluded.carbs_g > 0 THEN excluded.carbs_g ELSE food_usage.carbs_g END,
+                    fat_g = CASE WHEN excluded.fat_g > 0 THEN excluded.fat_g ELSE food_usage.fat_g END,
+                    fiber_g = CASE WHEN excluded.fiber_g > 0 THEN excluded.fiber_g ELSE food_usage.fiber_g END,
+                    serving_size_g = CASE WHEN excluded.serving_size_g > 0 THEN excluded.serving_size_g ELSE food_usage.serving_size_g END
+                """, arguments: [name, foodId, now, servings, calories, proteinG, carbsG, fatG, fiberG, servingSizeG])
         }
     }
 
@@ -48,21 +57,14 @@ extension AppDatabase {
         }
     }
 
-    /// Recent entries including recipes and manual adds (from food_usage table).
+    /// Recent entries including recipes and manual adds — reads macros directly from food_usage.
     func fetchRecentEntryNames(limit: Int = 10) throws -> [RecentEntry] {
         try reader.read { db in
             let rows = try Row.fetchAll(db, sql: """
-                SELECT fu.food_name, fu.food_id, fu.last_servings, fu.use_count,
-                       COALESCE(f.calories, f2.calories, ff.calories, 0) as calories,
-                       COALESCE(f.protein_g, f2.protein_g, ff.protein_g, 0) as protein_g,
-                       COALESCE(f.carbs_g, f2.carbs_g, ff.carbs_g, 0) as carbs_g,
-                       COALESCE(f.fat_g, f2.fat_g, ff.fat_g, 0) as fat_g,
-                       COALESCE(f.serving_size, f2.serving_size, 0) as serving_size
-                FROM food_usage fu
-                LEFT JOIN food f ON f.id = fu.food_id
-                LEFT JOIN food f2 ON LOWER(f2.name) = LOWER(fu.food_name) AND fu.food_id IS NULL
-                LEFT JOIN favorite_food ff ON LOWER(ff.name) = LOWER(fu.food_name)
-                ORDER BY fu.last_used DESC
+                SELECT food_name, food_id, last_servings,
+                       calories, protein_g, carbs_g, fat_g, serving_size_g
+                FROM food_usage
+                ORDER BY last_used DESC
                 LIMIT ?
                 """, arguments: [limit])
             return rows.map { row in
@@ -73,7 +75,7 @@ extension AppDatabase {
                     proteinG: row["protein_g"],
                     carbsG: row["carbs_g"],
                     fatG: row["fat_g"],
-                    servingSize: row["serving_size"],
+                    servingSize: row["serving_size_g"],
                     lastServings: row["last_servings"]
                 )
             }

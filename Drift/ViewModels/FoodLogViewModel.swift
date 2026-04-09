@@ -191,7 +191,10 @@ final class FoodLogViewModel {
                 loggedAt: ISO8601DateFormatter().string(from: loggedAt)
             )
             try database.saveFoodEntry(&entry)
-            try? database.trackFoodUsage(name: food.name, foodId: food.id, servings: servings)
+            try? database.trackFoodUsage(name: food.name, foodId: food.id, servings: servings,
+                                         calories: food.calories, proteinG: food.proteinG,
+                                         carbsG: food.carbsG, fatG: food.fatG, fiberG: food.fiberG,
+                                         servingSizeG: food.servingSize)
             loadTodayMeals()
         } catch {
             Log.foodLog.error("Failed to log food: \(error.localizedDescription)")
@@ -234,7 +237,10 @@ final class FoodLogViewModel {
             try database.saveFoodEntry(&entry)
             // Only track usage for named foods (not generic "Quick Add")
             if name != "Quick Add" && !name.isEmpty {
-                try? database.trackFoodUsage(name: name, foodId: nil, servings: 1)
+                try? database.trackFoodUsage(name: name, foodId: nil, servings: 1,
+                                             calories: calories, proteinG: proteinG,
+                                             carbsG: carbsG, fatG: fatG, fiberG: fiberG,
+                                             servingSizeG: servingSizeG)
             }
             loadTodayMeals()
         } catch {

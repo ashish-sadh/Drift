@@ -355,5 +355,28 @@ enum Migrations {
                 t.add(column: "metabolic_age", .integer)
             }
         }
+
+        // v21: Add macros to food_usage for reliable recents (manual entries had 0 cal)
+        migrator.registerMigration("v21_food_usage_macros") { db in
+            try db.alter(table: "food_usage") { t in
+                t.add(column: "calories", .double).notNull().defaults(to: 0)
+                t.add(column: "protein_g", .double).notNull().defaults(to: 0)
+                t.add(column: "carbs_g", .double).notNull().defaults(to: 0)
+                t.add(column: "fat_g", .double).notNull().defaults(to: 0)
+                t.add(column: "fiber_g", .double).notNull().defaults(to: 0)
+                t.add(column: "serving_size_g", .double).notNull().defaults(to: 0)
+            }
+            // Backfill existing food_usage rows from the food table where possible
+            try db.execute(sql: """
+                UPDATE food_usage SET
+                    calories = COALESCE((SELECT f.calories FROM food f WHERE f.id = food_usage.food_id), 0),
+                    protein_g = COALESCE((SELECT f.protein_g FROM food f WHERE f.id = food_usage.food_id), 0),
+                    carbs_g = COALESCE((SELECT f.carbs_g FROM food f WHERE f.id = food_usage.food_id), 0),
+                    fat_g = COALESCE((SELECT f.fat_g FROM food f WHERE f.id = food_usage.food_id), 0),
+                    fiber_g = COALESCE((SELECT f.fiber_g FROM food f WHERE f.id = food_usage.food_id), 0),
+                    serving_size_g = COALESCE((SELECT f.serving_size FROM food f WHERE f.id = food_usage.food_id), 0)
+                WHERE food_id IS NOT NULL
+                """)
+        }
     }
 }
