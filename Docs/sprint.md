@@ -43,7 +43,7 @@ Current: keyword-matching on food names only. Fix: every food gets an `ingredien
 - [x] **Recipe builder saves ingredients** — `saveAndLogRecipe()` stores `items.map(\.name)` as ingredients JSON.
 - [ ] **Barcode scan saves ingredients** — OpenFoodFacts API returns ingredient list. Parse and store as `ingredients` JSON when saving scanned food.
 - [ ] **Custom entry ingredients** — Default to `[name]`. If built via recipe builder, gets real ingredients automatically.
-- [ ] **PlantPointsService reads ingredients** — Change from `fetchUniqueFoodNames()` to reading `ingredients` JSON from each food_entry. Flatten all ingredient arrays → count unique plants. Falls back to `[food_name]` if ingredients is null (old entries).
+- [x] **PlantPointsService reads ingredients** — fetchUniqueIngredients() reads ingredients JSON, falls back to food_name. ViewModel updated.
 - [ ] **Six-category alignment** — Classify each ingredient into Super Six: Vegetables, Fruits, Whole Grains, Legumes, Nuts/Seeds, Herbs/Spices (¼ pt). Use Food.category field + keyword matching.
 - [x] **Avocado + edge case audit** — Verified: avocado, coconut, quinoa, tofu, edamame, tempeh all in plantKeywords. No false negatives.
 - [ ] **Spice blend expansion** — "Garam Masala" ingredients: `["cumin", "coriander", "cardamom", "cloves", "pepper"]`. Hardcode top 10 spice blends.
