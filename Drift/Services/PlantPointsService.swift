@@ -20,7 +20,10 @@ enum PlantPointsService {
         var plants: Set<String> = []
         var herbsSpices: Set<String> = []
 
-        for name in foodNames {
+        // Expand spice blends before classification
+        let expanded = expandSpiceBlends(foodNames)
+
+        for name in expanded {
             let normalized = normalize(name)
             if isHerbOrSpice(normalized) {
                 herbsSpices.insert(normalized)
@@ -81,6 +84,34 @@ enum PlantPointsService {
         "carom seeds", "nigella seeds", "kalonji", "poppy seeds",
         "sesame seeds", "til"  // sesame as spice quantity
     ]
+
+    /// Spice blends → expand into individual spices for more accurate counting.
+    private static let spiceBlends: [String: [String]] = [
+        "garam masala": ["cumin", "coriander", "cardamom", "cloves", "pepper"],
+        "chaat masala": ["cumin", "coriander", "black salt", "pepper", "ginger powder"],
+        "curry powder": ["turmeric", "cumin", "coriander", "fenugreek", "pepper"],
+        "pumpkin spice": ["cinnamon", "nutmeg", "cloves", "ginger powder"],
+        "chinese five spice": ["star anise", "cloves", "cinnamon", "pepper", "fennel"],
+        "italian seasoning": ["oregano", "basil", "thyme", "rosemary", "sage"],
+        "herbs de provence": ["thyme", "rosemary", "oregano", "basil", "sage"],
+        "taco seasoning": ["cumin", "paprika", "chili powder", "oregano", "garlic powder"],
+        "berbere": ["paprika", "fenugreek", "coriander", "cardamom", "pepper"],
+        "ras el hanout": ["cumin", "coriander", "turmeric", "cinnamon", "pepper"],
+    ]
+
+    /// Expand spice blend names into individual spices.
+    static func expandSpiceBlends(_ names: [String]) -> [String] {
+        var result: [String] = []
+        for name in names {
+            let lower = name.lowercased()
+            if let blend = spiceBlends[lower] {
+                result.append(contentsOf: blend)
+            } else {
+                result.append(name)
+            }
+        }
+        return result
+    }
 
     private static func isHerbOrSpice(_ name: String) -> Bool {
         // Exact match or contained as primary ingredient

@@ -44,7 +44,7 @@ Current: keyword-matching on food names only. Fix: every food gets an `ingredien
 - [ ] **Barcode scan saves ingredients** — OpenFoodFacts API returns ingredient list. Parse and store as `ingredients` JSON when saving scanned food.
 - [ ] **Custom entry ingredients** — Default to `[name]`. If built via recipe builder, gets real ingredients automatically.
 - [x] **PlantPointsService reads ingredients** — fetchUniqueIngredients() reads ingredients JSON, falls back to food_name. ViewModel updated.
-- [ ] **Six-category alignment** — Classify each ingredient into Super Six: Vegetables, Fruits, Whole Grains, Legumes, Nuts/Seeds, Herbs/Spices (¼ pt). Use Food.category field + keyword matching.
+- [x] **Six-category alignment** — Already aligned: Vegetables/Fruits/Grains/Legumes/Nuts = 1pt (plantKeywords), Herbs/Spices = 0.25pt. Food.category unused but plantKeywords cover same foods. No change needed.
 - [x] **Avocado + edge case audit** — Verified: avocado, coconut, quinoa, tofu, edamame, tempeh all in plantKeywords. No false negatives.
 - [ ] **Spice blend expansion** — "Garam Masala" ingredients: `["cumin", "coriander", "cardamom", "cloves", "pepper"]`. Hardcode top 10 spice blends.
 - [ ] **No ML model needed** — Precomputed ingredients in DB + recipe builder + OpenFoodFacts covers ~95% of cases. Tiny model evaluation deferred — revisit only if custom entries without ingredients are common.
