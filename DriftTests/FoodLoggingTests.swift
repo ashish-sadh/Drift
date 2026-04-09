@@ -2047,4 +2047,198 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     #expect(abs(gMultiplier - 3.571) < 0.01)
 }
 
+// MARK: - Plant Points Tests
+
+@Test func plantPointsAliasNormalization() async throws {
+    // palak and spinach should count as 1 plant, not 2
+    let items: [PlantPointsService.FoodItem] = [
+        .init(name: "palak", ingredients: nil, novaGroup: 1),
+        .init(name: "spinach", ingredients: nil, novaGroup: 1),
+    ]
+    let pp = PlantPointsService.calculate(from: items)
+    #expect(pp.uniquePlants.count == 1, "palak + spinach = 1 plant, got \(pp.uniquePlants)")
+}
+
+@Test func plantPointsNOVA3UsesIngredients() async throws {
+    // NOVA 3 food: skip name, count ingredients
+    let items: [PlantPointsService.FoodItem] = [
+        .init(name: "Chicken Biryani", ingredients: ["rice", "onion", "tomato", "turmeric", "cumin"], novaGroup: 3),
+    ]
+    let pp = PlantPointsService.calculate(from: items)
+    #expect(pp.uniquePlants.count >= 3, "Biryani ingredients should yield 3+ plants, got \(pp.uniquePlants)")
+    #expect(!pp.uniquePlants.contains("chicken biryani"), "Food name should not appear in plant list")
+    #expect(pp.uniquePlants.contains("rice"), "Rice should be a plant")
+    #expect(pp.uniquePlants.contains("onion"), "Onion should be a plant")
+}
+
+@Test func plantPointsNOVA4SkipsEverything() async throws {
+    // NOVA 4: skip food AND ingredients
+    let items: [PlantPointsService.FoodItem] = [
+        .init(name: "Chips", ingredients: ["potato", "oil"], novaGroup: 4),
+    ]
+    let pp = PlantPointsService.calculate(from: items)
+    #expect(pp.total == 0, "NOVA 4 should give 0 points, got \(pp.total)")
+}
+
+@Test func plantPointsProcessedExcluded() async throws {
+    // Bread, pasta, naan should not count
+    let items: [PlantPointsService.FoodItem] = [
+        .init(name: "bread", ingredients: nil, novaGroup: nil),
+        .init(name: "pasta", ingredients: nil, novaGroup: nil),
+        .init(name: "naan", ingredients: nil, novaGroup: nil),
+    ]
+    let pp = PlantPointsService.calculate(from: items)
+    #expect(pp.total == 0, "Processed foods should give 0 points, got \(pp.total)")
+}
+
+@Test func plantPointsSpiceBlendExpansion() async throws {
+    let items: [PlantPointsService.FoodItem] = [
+        .init(name: "garam masala", ingredients: nil, novaGroup: nil),
+    ]
+    let pp = PlantPointsService.calculate(from: items)
+    // garam masala expands to cumin, coriander, cardamom, cloves, pepper = 5 spices × 0.25 = 1.25
+    #expect(pp.uniqueHerbsSpices.count == 5, "Garam masala = 5 spices, got \(pp.uniqueHerbsSpices)")
+    #expect(abs(pp.quarterPoints - 1.25) < 0.01, "Should be 1.25 pts, got \(pp.quarterPoints)")
+}
+
+@Test func plantPointsKeywordExtraction() async throws {
+    // "avocado toast" without ingredients should extract keyword "avocado", not store "avocado toast"
+    let items: [PlantPointsService.FoodItem] = [
+        .init(name: "avocado toast", ingredients: nil, novaGroup: nil),
+    ]
+    let pp = PlantPointsService.calculate(from: items)
+    #expect(pp.uniquePlants.contains("avocado"), "Should extract 'avocado' keyword")
+    #expect(!pp.uniquePlants.contains("avocado toast"), "Should not contain full food name")
+}
+
+@Test func plantPointsAvocadoDeduplication() async throws {
+    // Avocado + Avocado (half) should = 1 plant
+    let items: [PlantPointsService.FoodItem] = [
+        .init(name: "Avocado", ingredients: ["avocado"], novaGroup: 1),
+        .init(name: "Avocado (half)", ingredients: ["avocado"], novaGroup: 1),
+        .init(name: "Avocado Toast", ingredients: ["avocado", "lime"], novaGroup: 3),
+    ]
+    let pp = PlantPointsService.calculate(from: items)
+    #expect(pp.uniquePlants.contains("avocado"))
+    #expect(pp.uniquePlants.contains("lime"))
+    #expect(pp.uniquePlants.count == 2, "Avocado + lime = 2, got \(pp.uniquePlants)")
+}
+
+// MARK: - Food Entry Reorder + Edit Tests
+
+@Test func updateFoodEntryLoggedAt() async throws {
+    let db = try AppDatabase.empty()
+    let date = "2026-04-09"
+    var ml = MealLog(date: date, mealType: "lunch")
+    try db.saveMealLog(&ml)
+    var entry = FoodEntry(mealLogId: ml.id!, foodName: "Rice", servingSizeG: 150, calories: 200)
+    try db.saveFoodEntry(&entry)
+
+    // Update time
+    try db.updateFoodEntryLoggedAt(id: entry.id!, loggedAt: "2026-04-09T08:00:00Z")
+    let fetched = try db.fetchFoodEntries(for: date)
+    #expect(fetched.first?.loggedAt == "2026-04-09T08:00:00Z")
+}
+
+@Test func updateFoodEntryMacros() async throws {
+    let db = try AppDatabase.empty()
+    let date = "2026-04-09"
+    var ml = MealLog(date: date, mealType: "lunch")
+    try db.saveMealLog(&ml)
+    var entry = FoodEntry(mealLogId: ml.id!, foodName: "Custom Lunch", servingSizeG: 0, calories: 500, proteinG: 30)
+    try db.saveFoodEntry(&entry)
+
+    // Edit macros
+    try db.updateFoodEntryMacros(id: entry.id!, calories: 600, proteinG: 40, carbsG: 50, fatG: 20, fiberG: 5)
+    let fetched = try db.fetchFoodEntries(for: date)
+    let updated = fetched.first!
+    #expect(updated.calories == 600)
+    #expect(updated.proteinG == 40)
+    #expect(updated.carbsG == 50)
+}
+
+@Test func timestampSwapReorders() async throws {
+    let db = try AppDatabase.empty()
+    let date = "2026-04-09"
+    var ml = MealLog(date: date, mealType: "lunch")
+    try db.saveMealLog(&ml)
+    var e1 = FoodEntry(mealLogId: ml.id!, foodName: "Breakfast", servingSizeG: 100, calories: 300,
+                        loggedAt: "2026-04-09T08:00:00Z")
+    var e2 = FoodEntry(mealLogId: ml.id!, foodName: "Lunch", servingSizeG: 100, calories: 500,
+                        loggedAt: "2026-04-09T12:00:00Z")
+    try db.saveFoodEntry(&e1)
+    try db.saveFoodEntry(&e2)
+
+    // Swap timestamps
+    try db.updateFoodEntryLoggedAt(id: e1.id!, loggedAt: "2026-04-09T12:00:00Z")
+    try db.updateFoodEntryLoggedAt(id: e2.id!, loggedAt: "2026-04-09T08:00:00Z")
+
+    let fetched = try db.fetchFoodEntries(for: date) // sorted DESC
+    #expect(fetched[0].foodName == "Breakfast", "Breakfast should now be at 12:00 (first in DESC)")
+    #expect(fetched[1].foodName == "Lunch", "Lunch should now be at 8:00 (second in DESC)")
+}
+
+@Test func copyEntryToTodayPreservesData() async throws {
+    let db = try AppDatabase.empty()
+    try db.seedFoodsFromJSON()
+    let vm = await FoodLogViewModel(database: db)
+
+    // Log a food for yesterday
+    let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+    await vm.goToDate(yesterday)
+    let eggs = try db.searchFoods(query: "boiled egg")
+    guard let egg = eggs.first else { return }
+    await vm.logFood(egg, servings: 2, mealType: .breakfast)
+
+    // Copy to today
+    let entries = await vm.todayEntries
+    guard let entry = entries.first else { return }
+    await vm.copyEntryToToday(entry)
+
+    // Verify on today
+    await vm.goToDate(Date())
+    await vm.loadTodayMeals()
+    let todayEntries = await vm.todayEntries
+    #expect(!todayEntries.isEmpty, "Should have copied entry to today")
+    if let copied = todayEntries.first {
+        #expect(copied.foodName == egg.name)
+        #expect(copied.calories == egg.calories)
+    }
+}
+
+@Test func plantPointsFoodItemsQuery() async throws {
+    let db = try AppDatabase.empty()
+    try db.seedFoodsFromJSON()
+    let date = "2026-04-09"
+
+    // Log a food with known ingredients
+    let foods = try db.searchFoods(query: "Avocado Toast")
+    guard let avToast = foods.first else { return }
+    var ml = MealLog(date: date, mealType: "lunch")
+    try db.saveMealLog(&ml)
+    var entry = FoodEntry(mealLogId: ml.id!, foodId: avToast.id, foodName: avToast.name,
+                           servingSizeG: avToast.servingSize, calories: avToast.calories)
+    try db.saveFoodEntry(&entry)
+
+    let items = try db.fetchFoodItemsForPlantPoints(from: date, to: date)
+    #expect(!items.isEmpty, "Should return food items")
+    if let item = items.first {
+        #expect(item.ingredients != nil, "Should have ingredients from food DB")
+        #expect(item.novaGroup != nil, "Should have NOVA group from food DB")
+    }
+}
+
+@Test func foodUsageMacrosStored() async throws {
+    let db = try AppDatabase.empty()
+    try db.trackFoodUsage(name: "My Custom Meal", foodId: nil, servings: 1,
+                           calories: 500, proteinG: 30, carbsG: 40, fatG: 20, fiberG: 5)
+    let recents = try db.fetchRecentEntryNames()
+    #expect(!recents.isEmpty)
+    if let recent = recents.first {
+        #expect(recent.name == "My Custom Meal")
+        #expect(recent.calories == 500, "Macros should be stored, got \(recent.calories)")
+        #expect(recent.proteinG == 30)
+    }
+}
+
 enum TestError: Error { case msg(String); init(_ s: String) { self = .msg(s) } }
