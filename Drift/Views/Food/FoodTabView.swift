@@ -12,6 +12,7 @@ struct FoodTabView: View {
     @State private var showingGoalSetup = false
     @State private var editingEntry: FoodEntry?
     @State private var isCopying = false
+    @State private var showingPlantPointsDetail = false
     @State private var copiedToTodayName: String? = nil
     @State private var editAmount = "1"
     @State private var editUnitIndex = 0
@@ -23,7 +24,8 @@ struct FoodTabView: View {
                 VStack(spacing: 14) {
                     dateNav
                     dailyTotalsCard
-                    PlantPointsCardView(viewModel: viewModel)
+                    // PlantPointsCardView moved to compact row in dailyTotalsCard
+                    // Full detail available via sheet tap
                     foodDiary
                     if !loggedDays.isEmpty { consistencySection }
                 }
@@ -67,6 +69,10 @@ struct FoodTabView: View {
                 }
             }
             .sheet(item: $editingEntry) { entry in editEntrySheet(entry) }
+            .sheet(isPresented: $showingPlantPointsDetail) {
+                NavigationStack { PlantPointsCardView(viewModel: viewModel) }
+                    .presentationDetents([.medium, .large])
+            }
             .onAppear { AIScreenTracker.shared.currentScreen = .food; weekOffset = 0; reload() }
             .onChange(of: showingSearch) { _, showing in if !showing { reload() } }
             .onChange(of: showingRecipeBuilder) { _, showing in if !showing { reload() } }
@@ -244,6 +250,14 @@ struct FoodTabView: View {
                     macroProgressRow("P", eaten: n.proteinG, target: t.proteinG, color: Theme.proteinRed)
                     macroProgressRow("C", eaten: n.carbsG, target: t.carbsG, color: Theme.carbsGreen)
                     macroProgressRow("F", eaten: n.fatG, target: t.fatG, color: Theme.fatYellow)
+                    // Fiber — no target, just show amount
+                    if n.fiberG > 0 {
+                        HStack(spacing: 6) {
+                            Text("Fb").font(.caption2.weight(.semibold)).foregroundStyle(Theme.fiberBrown).frame(width: 14)
+                            Text("\(Int(n.fiberG))g").font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
+                            Spacer()
+                        }
+                    }
                 }
                 .contentShape(Rectangle())
                 .onTapGesture { showingGoalSetup = true }
@@ -257,6 +271,26 @@ struct FoodTabView: View {
                 }
                 .contentShape(Rectangle())
                 .onTapGesture { showingGoalSetup = true }
+            }
+            // Compact plant points row
+            let pp = viewModel.weeklyPlantPoints
+            if pp.total > 0 {
+                Divider()
+                HStack(spacing: 6) {
+                    Image(systemName: "leaf.fill").font(.caption2).foregroundStyle(Theme.plantGreen)
+                    Text("\(String(format: pp.total == Double(Int(pp.total)) ? "%.0f" : "%.1f", pp.total))/30")
+                        .font(.caption.weight(.semibold).monospacedDigit())
+                    Text("plants")
+                        .font(.caption2).foregroundStyle(.secondary)
+                    if viewModel.dailyNewPlants > 0 {
+                        Text("+\(viewModel.dailyNewPlants) new")
+                            .font(.caption2.weight(.medium)).foregroundStyle(Theme.plantGreen)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary)
+                }
+                .contentShape(Rectangle())
+                .onTapGesture { showingPlantPointsDetail = true }
             }
         }
         .card()
