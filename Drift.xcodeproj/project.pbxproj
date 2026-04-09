@@ -93,6 +93,7 @@
 		9ACECC13D2365A3DF7F2C28C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F78E3B6C1497F6A200DF8095 /* ContentView.swift */; };
 		9BDC062DA33278D9CE34EFC3 /* exercises.json in Resources */ = {isa = PBXBuildFile; fileRef = C10970FB3ED143760EC6C8C5 /* exercises.json */; };
 		9CBCD31AD1998B4E5237C1A6 /* Units.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88A19640FB19F5628DC8B824 /* Units.swift */; };
+		9E576FCB247BD6516612E63F /* ManualFoodEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4683CA86D3045B1534504B0 /* ManualFoodEntrySheet.swift */; };
 		9F09FCD3472B6C02FEC11B48 /* llama.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4101CD9171B652C6B8D1BB4E /* llama.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A2ACB0BE8811077162EBE463 /* FoodLogViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE2809389EE890A3F01ED675 /* FoodLogViewModel.swift */; };
 		A8ACF4689ACE5AE7AB3FE4DE /* LabReportStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4D8D947C82941F66C3E892 /* LabReportStorage.swift */; };
@@ -290,6 +291,7 @@
 		C2C63097444CD8E010008D65 /* FavoriteFood.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFood.swift; sourceTree = "<group>"; };
 		CB475E92982AD4F8897D5D8E /* RecoveryEstimator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryEstimator.swift; sourceTree = "<group>"; };
 		D0E8B598BCB7486A2C75848E /* WeightViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightViewModel.swift; sourceTree = "<group>"; };
+		D4683CA86D3045B1534504B0 /* ManualFoodEntrySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualFoodEntrySheet.swift; sourceTree = "<group>"; };
 		D4B70DE6FB571839514EFB23 /* FoodService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodService.swift; sourceTree = "<group>"; };
 		D5286E0309471AF898D70E3C /* BodyMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyMapView.swift; sourceTree = "<group>"; };
 		D6B64C16D8106D8EB594C117 /* AIActionParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIActionParser.swift; sourceTree = "<group>"; };
@@ -401,6 +403,7 @@
 				55F24D93872F919F1A8CB319 /* BarcodeScannerView.swift */,
 				42A6CAF4720F61DC0C9BD2E7 /* FoodSearchView.swift */,
 				5A981E37D718D28A6679F9C8 /* FoodTabView.swift */,
+				D4683CA86D3045B1534504B0 /* ManualFoodEntrySheet.swift */,
 				EC7D489024FD036D6FA417EA /* PlantPointsCardView.swift */,
 				20576FEB4A7F0371596D08E6 /* QuickAddView.swift */,
 				7F7F3BAFA978301368D148CF /* ServingInputView.swift */,
@@ -866,6 +869,7 @@
 				F9B44B0CA0EB70D90AFF6AA0 /* LlamaCppBackend.swift in Sources */,
 				FB1D2AF65F10F935076969F6 /* LocalAIService.swift in Sources */,
 				C4412538AE3E1E269685CB2A /* Log.swift in Sources */,
+				9E576FCB247BD6516612E63F /* ManualFoodEntrySheet.swift in Sources */,
 				EE7CBD2147B65BED5FC0047C /* MealLog.swift in Sources */,
 				D7C81264B1FEDD6E3701FD13 /* Migrations.swift in Sources */,
 				30F7D3160F146CA92713AD13 /* MoreTabView.swift in Sources */,

@@ -12,15 +12,6 @@ struct FoodSearchView: View {
     @State private var results: [Food] = []
     @State private var matchingRecipes: [FavoriteFood] = []
     @State private var showingManual = false
-    @State private var manualName = ""
-    @State private var manualCal = ""
-    @State private var manualP = ""
-    @State private var manualC = ""
-    @State private var manualF = ""
-    @State private var manualFb = ""
-    @State private var manualServing = "1"
-    @State private var manualServingUnit = "serving"
-    @State private var manualLogTime = Date()
     @State private var logTime = Date()
     @State private var loggedCount = 0
     @State private var showingRecipeBuilder = false
@@ -92,7 +83,9 @@ struct FoodSearchView: View {
                 }
             }
             .sheet(item: $selectedFood) { food in logFoodSheet(food) }
-            .sheet(isPresented: $showingManual) { manualEntrySheet }
+            .sheet(isPresented: $showingManual) {
+                ManualFoodEntrySheet(viewModel: viewModel) { loggedCount += 1 }
+            }
             .sheet(isPresented: $showingRecipeBuilder) { QuickAddView(viewModel: viewModel) }
             .fullScreenCover(isPresented: $showingScanner) { BarcodeLookupView(viewModel: viewModel) }
             .onChange(of: showingRecipeBuilder) { _, showing in if !showing { viewModel.loadSuggestions() } }
@@ -585,135 +578,6 @@ struct FoodSearchView: View {
     }
 
     // MARK: - Manual Entry Sheet
-
-    private var manualEntrySheet: some View {
-        let p = Double(manualP) ?? 0, c = Double(manualC) ?? 0, f = Double(manualF) ?? 0
-        let macroCalories = Int(p * 4 + c * 4 + f * 9)
-        let enteredCal = Int(Double(manualCal) ?? 0)
-
-        return NavigationStack {
-            ScrollView {
-                VStack(spacing: 20) {
-                    // Name
-                    TextField("Food name", text: $manualName)
-                        .font(.body)
-                        .padding(12)
-                        .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
-
-                    // Calories — hero
-                    VStack(spacing: 4) {
-                        Text("Calories").font(.caption2).foregroundStyle(.tertiary)
-                        TextField("0", text: $manualCal)
-                            .keyboardType(.numberPad)
-                            .font(.system(size: 44, weight: .bold).monospacedDigit())
-                            .multilineTextAlignment(.center)
-                        Text("kcal").font(.caption).foregroundStyle(.secondary)
-                        if macroCalories > 0 && !manualCal.isEmpty && macroCalories != enteredCal {
-                            Text("Macros sum to \(macroCalories) kcal")
-                                .font(.caption2).foregroundStyle(.tertiary)
-                        }
-                    }
-                    .padding(.vertical, 8)
-
-                    // Macros — inline row
-                    HStack(spacing: 10) {
-                        manualMacroField("Protein", value: $manualP, unit: "g", color: Theme.proteinRed)
-                        manualMacroField("Carbs", value: $manualC, unit: "g", color: Theme.carbsGreen)
-                        manualMacroField("Fat", value: $manualF, unit: "g", color: Theme.fatYellow)
-                    }
-
-                    // Fiber — optional, smaller
-                    HStack {
-                        Text("Fiber").font(.caption).foregroundStyle(.secondary)
-                        Spacer()
-                        TextField("0", text: $manualFb)
-                            .keyboardType(.decimalPad)
-                            .font(.subheadline.monospacedDigit())
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 60)
-                        Text("g").font(.caption).foregroundStyle(.tertiary)
-                    }
-                    .padding(.horizontal, 16).padding(.vertical, 10)
-                    .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 10))
-
-                    // Serving size — optional
-                    HStack {
-                        Text("Serving").font(.caption).foregroundStyle(.secondary)
-                        Spacer()
-                        TextField("1", text: $manualServing)
-                            .keyboardType(.decimalPad)
-                            .font(.subheadline.monospacedDigit())
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 50)
-                        Picker("", selection: $manualServingUnit) {
-                            Text("serving").tag("serving")
-                            Text("g").tag("g")
-                            Text("ml").tag("ml")
-                            Text("piece").tag("piece")
-                            Text("cup").tag("cup")
-                            Text("tbsp").tag("tbsp")
-                        }
-                        .pickerStyle(.menu).labelsHidden()
-                    }
-                    .padding(.horizontal, 16).padding(.vertical, 10)
-                    .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 10))
-
-                    // Log time — defaults to now, user can change
-                    DatePicker("Log time", selection: $manualLogTime, displayedComponents: .hourAndMinute)
-                        .font(.caption).foregroundStyle(.secondary)
-                        .padding(.horizontal, 16).padding(.vertical, 10)
-                        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 10))
-                }
-                .padding(.horizontal, 16)
-                .padding(.top, 12)
-            }
-            .scrollDismissesKeyboard(.interactively)
-            .background(Theme.background)
-            .navigationTitle("Quick Add").navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { showingManual = false } }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Log") {
-                        let cal = Double(manualCal) ?? (macroCalories > 0 ? Double(macroCalories) : 0)
-                        let servingVal = Double(manualServing) ?? 1
-                        let servingG: Double = switch manualServingUnit {
-                        case "g": servingVal
-                        case "ml": servingVal
-                        case "cup": servingVal * 240
-                        case "tbsp": servingVal * 15
-                        default: 0
-                        }
-                        let loggedAtStr = ISO8601DateFormatter().string(from: manualLogTime)
-                        viewModel.quickAdd(name: manualName.isEmpty ? "Quick Add" : manualName,
-                                           calories: cal, proteinG: p, carbsG: c, fatG: f,
-                                           fiberG: Double(manualFb) ?? 0, mealType: viewModel.autoMealType,
-                                           loggedAt: loggedAtStr, servingSizeG: servingG)
-                        viewModel.loadSuggestions()
-                        loggedCount += 1
-                        showingManual = false
-                        manualName = ""; manualCal = ""; manualP = ""; manualC = ""; manualF = ""; manualFb = ""
-                        manualServing = "1"; manualServingUnit = "serving"
-                    }
-                    .disabled((Double(manualCal) ?? 0) == 0 && macroCalories == 0)
-                }
-            }
-        }
-    }
-
-    private func manualMacroField(_ label: String, value: Binding<String>, unit: String, color: Color) -> some View {
-        VStack(spacing: 4) {
-            Text(label).font(.caption2).foregroundStyle(.tertiary)
-            TextField("0", text: value)
-                .keyboardType(.decimalPad)
-                .font(.title3.weight(.semibold).monospacedDigit())
-                .multilineTextAlignment(.center)
-            Text(unit).font(.caption2).foregroundStyle(.tertiary)
-        }
-        .padding(.vertical, 10)
-        .frame(maxWidth: .infinity)
-        .background(color.opacity(0.18), in: RoundedRectangle(cornerRadius: 12))
-        .overlay(RoundedRectangle(cornerRadius: 12).stroke(color.opacity(0.35), lineWidth: 1))
-    }
 
     private func popularFoods() -> [Food] {
         let names = ["Egg", "Milk", "Bread", "Almonds", "Greek Yogurt",
