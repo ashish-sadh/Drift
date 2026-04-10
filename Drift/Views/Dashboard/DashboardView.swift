@@ -12,6 +12,26 @@ struct DashboardView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
+                    // Profile nudge (if incomplete)
+                    let config = TDEEEstimator.loadConfig()
+                    if config.sex == nil || config.age == nil || config.heightCm == nil {
+                        NavigationLink { GoalView() } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "person.crop.circle.badge.plus")
+                                    .font(.subheadline).foregroundStyle(Theme.accent)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Complete your profile").font(.caption.weight(.medium))
+                                    Text("Add age, sex & height for better calorie targets")
+                                        .font(.caption2).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary)
+                            }
+                            .padding(10)
+                            .background(Theme.accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+                        }.tint(.primary)
+                    }
+
                     // Privacy banner
                     HStack(spacing: 6) {
                         Image(systemName: "lock.shield.fill")

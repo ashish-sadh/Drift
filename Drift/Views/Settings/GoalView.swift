@@ -8,11 +8,40 @@ struct GoalView: View {
     @State private var currentWeightKg: Double?
     @State private var actualWeeklyRate: Double?
     @State private var actualDailyDeficit: Double?
+    @State private var tdeeConfig = TDEEEstimator.loadConfig()
+    @State private var profileExpanded = false
     private let database = AppDatabase.shared
+
+    private let ageRanges = ["18-24", "25-34", "35-44", "45-54", "55-64", "65+"]
+    private func ageFromRange(_ range: String) -> Int {
+        switch range {
+        case "18-24": return 21
+        case "25-34": return 30
+        case "35-44": return 40
+        case "45-54": return 50
+        case "55-64": return 60
+        case "65+": return 70
+        default: return 30
+        }
+    }
+    private func rangeFromAge(_ age: Int?) -> String {
+        guard let age else { return "25-34" }
+        switch age {
+        case ..<25: return "18-24"
+        case 25..<35: return "25-34"
+        case 35..<45: return "35-44"
+        case 45..<55: return "45-54"
+        case 55..<65: return "55-64"
+        default: return "65+"
+        }
+    }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 14) {
+                // Profile section
+                profileCard
+
                 if let goal {
                     goalProgressCard(goal)
                     macroTargetsCard(goal)
@@ -74,6 +103,98 @@ struct GoalView: View {
             AIScreenTracker.shared.currentScreen = .goal
             goal = WeightGoal.load()
             loadCurrentData()
+        }
+    }
+
+    // MARK: - Profile
+
+    private var profileCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Button {
+                withAnimation { profileExpanded.toggle() }
+            } label: {
+                HStack {
+                    Label("Your Profile", systemImage: "person.crop.circle")
+                        .font(.subheadline.weight(.semibold))
+                    Spacer()
+                    if !profileComplete {
+                        Text("Improve accuracy")
+                            .font(.caption2).foregroundStyle(Theme.fatYellow)
+                    }
+                    Image(systemName: profileExpanded ? "chevron.up" : "chevron.down")
+                        .font(.caption2).foregroundStyle(.tertiary)
+                }
+            }
+            .buttonStyle(.plain)
+
+            if profileExpanded {
+                VStack(spacing: 10) {
+                    // Sex
+                    HStack {
+                        Text("Sex").font(.subheadline).foregroundStyle(.secondary)
+                        Spacer()
+                        Picker("", selection: Binding(
+                            get: { tdeeConfig.sex ?? .male },
+                            set: { tdeeConfig.sex = $0; saveProfile() }
+                        )) {
+                            Text("Male").tag(TDEEEstimator.Sex.male)
+                            Text("Female").tag(TDEEEstimator.Sex.female)
+                        }
+                        .pickerStyle(.segmented).frame(width: 160)
+                    }
+
+                    // Age range
+                    HStack {
+                        Text("Age").font(.subheadline).foregroundStyle(.secondary)
+                        Spacer()
+                        Picker("", selection: Binding(
+                            get: { rangeFromAge(tdeeConfig.age) },
+                            set: { tdeeConfig.age = ageFromRange($0); saveProfile() }
+                        )) {
+                            ForEach(ageRanges, id: \.self) { Text($0) }
+                        }
+                        .pickerStyle(.menu)
+                    }
+
+                    // Height
+                    HStack {
+                        Text("Height").font(.subheadline).foregroundStyle(.secondary)
+                        Spacer()
+                        TextField("170", value: Binding(
+                            get: { tdeeConfig.heightCm ?? 170 },
+                            set: { tdeeConfig.heightCm = $0; saveProfile() }
+                        ), format: .number)
+                        .keyboardType(.numberPad)
+                        .multilineTextAlignment(.trailing)
+                        .frame(width: 60)
+                        Text("cm").font(.caption).foregroundStyle(.tertiary)
+                    }
+                }
+                .padding(.top, 4)
+            }
+        }
+        .card()
+        .onAppear { tryAutoFillProfile() }
+    }
+
+    private var profileComplete: Bool {
+        tdeeConfig.sex != nil && tdeeConfig.age != nil && tdeeConfig.heightCm != nil
+    }
+
+    private func saveProfile() {
+        TDEEEstimator.saveConfig(tdeeConfig)
+        Task { await TDEEEstimator.shared.refresh() }
+    }
+
+    private func tryAutoFillProfile() {
+        guard !profileComplete else { return }
+        Task {
+            let profile = await HealthKitService.shared.fetchUserProfile()
+            var changed = false
+            if tdeeConfig.sex == nil, let sex = profile.sex { tdeeConfig.sex = sex; changed = true }
+            if tdeeConfig.age == nil, let age = profile.age { tdeeConfig.age = age; changed = true }
+            if tdeeConfig.heightCm == nil, let h = profile.heightCm { tdeeConfig.heightCm = h; changed = true }
+            if changed { saveProfile() }
         }
     }
 
