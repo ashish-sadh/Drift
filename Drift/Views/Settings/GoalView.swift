@@ -130,6 +130,16 @@ struct GoalView: View {
                 Text("\(String(format: "%.1f", abs(unit.convert(fromKg: remaining)))) \(unit.displayName) to go")
                     .font(.caption).foregroundStyle(.secondary)
             }
+
+            // Staleness nudge
+            if WeightTrendService.shared.isStale {
+                HStack(spacing: 6) {
+                    Image(systemName: "exclamationmark.triangle.fill").font(.caption2).foregroundStyle(Theme.fatYellow)
+                    Text("Weight not updated recently. Log your current weight for accurate goals.")
+                        .font(.caption2).foregroundStyle(Theme.fatYellow)
+                }
+                .padding(.top, 4)
+            }
         }
         .card()
     }

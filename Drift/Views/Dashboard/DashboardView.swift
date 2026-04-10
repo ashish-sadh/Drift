@@ -6,6 +6,7 @@ struct DashboardView: View {
     @State var viewModel = DashboardViewModel()
     @State var showDeficitExplainer = false
     @AppStorage("drift_ai_enabled") private var aiEnabled = false
+    @State private var showingWeightEntry = false
 
     var body: some View {
         NavigationStack {
@@ -24,7 +25,13 @@ struct DashboardView: View {
                     .padding(.horizontal, 4)
 
                     // Weight + Deficit + Estimated deficit as tiles → Weight tab
-                    Button { selectedTab = 1 } label: {
+                    Button {
+                        if WeightTrendService.shared.isStale || viewModel.currentWeight == nil {
+                            showingWeightEntry = true  // stale/nil → direct log
+                        } else {
+                            selectedTab = 1  // fresh → weight tab
+                        }
+                    } label: {
                         HStack(spacing: 12) {
                             // Left column: Weight
                             VStack(alignment: .leading, spacing: 2) {
@@ -35,8 +42,11 @@ struct DashboardView: View {
                                             .font(.title2.weight(.bold).monospacedDigit())
                                         Text(Preferences.weightUnit.displayName).font(.caption2).foregroundStyle(.tertiary)
                                     }
+                                    if WeightTrendService.shared.isStale {
+                                        Text("Tap to update").font(.caption2).foregroundStyle(Theme.fatYellow)
+                                    }
                                 } else {
-                                    Text("--").font(.title2.weight(.bold)).foregroundStyle(.tertiary)
+                                    Text("Log weight").font(.subheadline.weight(.medium)).foregroundStyle(Theme.accent)
                                 }
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -141,6 +151,12 @@ struct DashboardView: View {
             .refreshable { await viewModel.loadToday() }
             .onChange(of: syncComplete) { _, done in
                 if done { Task { await viewModel.loadToday() } }
+            }
+            .sheet(isPresented: $showingWeightEntry) {
+                WeightEntryView(unit: Preferences.weightUnit) { _, _ in
+                    Task { await viewModel.loadToday() }
+                    WeightTrendService.shared.refresh()
+                }
             }
         }
     }
