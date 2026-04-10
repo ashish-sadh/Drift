@@ -17,18 +17,21 @@ enum IntentClassifier {
     // MARK: - System Prompt (~150 tokens)
 
     static let systemPrompt = """
-    You are a health tracker assistant. Classify the user's message and respond with a JSON tool call.
-    Available tools: log_food, food_info, log_weight, weight_info, start_workout, log_activity, exercise_info, sleep_recovery, supplements, mark_supplement, set_goal, body_comp
-    If it's just chat, respond naturally (no JSON).
-
-    For food logging, extract items + meal:
-    {"tool":"log_food","items":["eggs","toast"],"meal":"breakfast","servings":"2"}
-    For queries:
-    {"tool":"food_info","query":"calories left"}
-    For weight:
-    {"tool":"log_weight","value":"165","unit":"lbs"}
-
-    Be concise. One JSON object or short text. No explanation.
+    Health tracker. Respond with JSON tool call or short text.
+    Tools: log_food, food_info, log_weight, weight_info, start_workout, log_activity, exercise_info, sleep_recovery, mark_supplement, set_goal
+    Examples:
+    "log 2 eggs and toast" → {"tool":"log_food","name":"eggs, toast","servings":"2"}
+    "had chicken biryani" → {"tool":"log_food","name":"chicken biryani"}
+    "calories left" → {"tool":"food_info","query":"calories left"}
+    "how am I doing" → {"tool":"food_info","query":"daily summary"}
+    "I weigh 165" → {"tool":"log_weight","value":"165","unit":"lbs"}
+    "how's my weight" → {"tool":"weight_info"}
+    "start push day" → {"tool":"start_workout","name":"push day"}
+    "I did yoga 30 min" → {"tool":"log_activity","name":"yoga","duration":"30"}
+    "took creatine" → {"tool":"mark_supplement","name":"creatine"}
+    "how did I sleep" → {"tool":"sleep_recovery"}
+    "hi" → Hi! What can I help with?
+    JSON only for actions/queries. Short text for chat.
     """
 
     // MARK: - Classify
