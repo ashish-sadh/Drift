@@ -44,6 +44,12 @@ Execute: find each food → show confirmation UI → log
 - [ ] **Streaming everywhere** — User sees tokens appearing as LLM generates. No "thinking..." delays for simple queries.
 - [ ] **Context-aware responses** — Time of day, progress vs goal, recent history influence tone. Morning: encouraging. Evening: summary-oriented. Over target: gentle nudge.
 
+### P0: Weight Tab Bugs (human-reported)
+- [ ] **BUG: TDEE surplus nonsensical (+3346 kcal)** — TDEEEstimator uses all-time weight data including years-old HealthKit imports (2017, 2018). Only last 30-60 days should be used for TDEE calculation. Old outlier entries skew the algorithm massively.
+- [ ] **BUG: Weight change shows wrong comparison** — "102.1 kg → +15.0 kg" compares to entry from 2018, not previous entry. Should show change vs previous entry in the timeline, not a years-old entry.
+- [ ] **Stale weight data guardrail** — If no weight logged in last 60 days, don't show TDEE/surplus/projected. Show "Log your weight to see trends" instead. Prevents misleading calculations from old data.
+- [ ] **Weight logging not visible** — First-time users don't see how to log weight. Add a prominent "Log Weight" button or empty state on the weight tab.
+
 ### P0: Workout Bugs (human-reported)
 - [ ] **BUG: Save as Template skips completion share screen** — When "Save as template" toggle is on, the workout saves and dismisses immediately without showing the "Nice work!" completion sheet with share button.
 - [ ] **Rest timer confusing / not optional** — Add a "Rest Timer" toggle at the top of active workout. Default OFF. When on, shows countdown between sets.
