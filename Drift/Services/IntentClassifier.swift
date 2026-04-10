@@ -57,7 +57,8 @@ enum IntentClassifier {
 
     // MARK: - Parse Response
 
-    private static func parseResponse(_ response: String) -> ClassifiedIntent? {
+    /// Parse LLM response into intent. Public for testing. Nonisolated (pure parsing).
+    nonisolated static func parseResponse(_ response: String) -> ClassifiedIntent? {
         let trimmed = response.trimmingCharacters(in: .whitespacesAndNewlines)
 
         // Try to extract JSON from response

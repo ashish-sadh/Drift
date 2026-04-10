@@ -615,6 +615,70 @@ final class AIEvalHarness: XCTestCase {
         XCTAssertFalse(artCleaned.contains("<|im_end|>"))
     }
 
+    // MARK: - Intent Classifier JSON Parsing
+
+    func testIntentClassifierFoodLog() {
+        let response = #"{"tool":"log_food","items":["eggs","toast"],"meal":"breakfast","servings":"2"}"#
+        let intent = IntentClassifier.parseResponse(response)
+        XCTAssertNotNil(intent, "Should parse food log JSON")
+        XCTAssertEqual(intent?.tool, "log_food")
+        XCTAssertEqual(intent?.params["meal"], "breakfast")
+        XCTAssertTrue(intent?.params["items"]?.contains("eggs") ?? false)
+    }
+
+    func testIntentClassifierFoodQuery() {
+        let response = #"{"tool":"food_info","query":"calories left"}"#
+        let intent = IntentClassifier.parseResponse(response)
+        XCTAssertNotNil(intent)
+        XCTAssertEqual(intent?.tool, "food_info")
+        XCTAssertEqual(intent?.params["query"], "calories left")
+    }
+
+    func testIntentClassifierWeightLog() {
+        let response = #"{"tool":"log_weight","value":"165","unit":"lbs"}"#
+        let intent = IntentClassifier.parseResponse(response)
+        XCTAssertNotNil(intent)
+        XCTAssertEqual(intent?.tool, "log_weight")
+        XCTAssertEqual(intent?.params["value"], "165")
+        XCTAssertEqual(intent?.params["unit"], "lbs")
+    }
+
+    func testIntentClassifierChatResponse() {
+        // Non-JSON response = chat, should return nil
+        let response = "You're doing great today!"
+        let intent = IntentClassifier.parseResponse(response)
+        XCTAssertNil(intent, "Chat text should return nil (not a tool call)")
+    }
+
+    func testIntentClassifierExercise() {
+        let response = #"{"tool":"start_workout","name":"push day"}"#
+        let intent = IntentClassifier.parseResponse(response)
+        XCTAssertNotNil(intent)
+        XCTAssertEqual(intent?.tool, "start_workout")
+        XCTAssertEqual(intent?.params["name"], "push day")
+    }
+
+    func testIntentClassifierMalformedJSON() {
+        let response = #"{"tool": broken json"#
+        let intent = IntentClassifier.parseResponse(response)
+        XCTAssertNil(intent, "Malformed JSON should return nil")
+    }
+
+    func testIntentClassifierJSONInText() {
+        // LLM sometimes wraps JSON in text
+        let response = #"Sure! {"tool":"food_info","query":"daily summary"} Let me check."#
+        let intent = IntentClassifier.parseResponse(response)
+        XCTAssertNotNil(intent, "Should extract JSON from surrounding text")
+        XCTAssertEqual(intent?.tool, "food_info")
+    }
+
+    func testIntentClassifierNumericParams() {
+        let response = #"{"tool":"log_weight","value":165.5,"unit":"lbs"}"#
+        let intent = IntentClassifier.parseResponse(response)
+        XCTAssertNotNil(intent)
+        XCTAssertEqual(intent?.params["value"], "165.5")
+    }
+
     // MARK: - Workout Action Parsing (Legacy)
 
     func testCreateWorkoutParsing() {
