@@ -21,6 +21,7 @@
 		1E11E5682458FC83023281D7 /* WeightInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A039993077E4BE9F83149249 /* WeightInsightsView.swift */; };
 		1E41F060499A92A9EFB59BE1 /* BiomarkerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155E590DFD0A95014B993B9D /* BiomarkerDetailView.swift */; };
 		2159F8ABA37706FCF57C3A63 /* SupplementsTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58C97F6B46397BDA539E78C /* SupplementsTabView.swift */; };
+		22924BFAA2D56AA975AC02F1 /* IntentClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E52DF869EA41A78F57F6CC8 /* IntentClassifier.swift */; };
 		23175508656029E712B15A2B /* SleepRecoveryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5D8C6A1BAF376B6F58EAB7 /* SleepRecoveryService.swift */; };
 		24CF74D9CA0E8A4555F1EC68 /* SupplementViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D783FD1AF8952C1C8CECD29 /* SupplementViewModel.swift */; };
 		24D454E75E424F7ACA736A91 /* GlucoseTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0DAF3E5EFC6C85282C084A8 /* GlucoseTabView.swift */; };
@@ -219,6 +220,7 @@
 		2A19AD32FF007540A79C20BC /* AppDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabase.swift; sourceTree = "<group>"; };
 		2CFE343BFAFCD99118098211 /* AIToolAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIToolAgent.swift; sourceTree = "<group>"; };
 		2D4B47196E8598EB15359D7C /* SupplementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementService.swift; sourceTree = "<group>"; };
+		2E52DF869EA41A78F57F6CC8 /* IntentClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentClassifier.swift; sourceTree = "<group>"; };
 		3258B6E91169170587AAB02B /* GoalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalView.swift; sourceTree = "<group>"; };
 		32AC5A6130E7655FFC74502F /* DatabaseEdgeCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatabaseEdgeCaseTests.swift; sourceTree = "<group>"; };
 		35CA37F54FABF8B93BB278BB /* DateFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatters.swift; sourceTree = "<group>"; };
@@ -651,6 +653,7 @@
 				E003BCE9AE8B62B2BC163C7B /* GlucoseService.swift */,
 				F57B8BA8C0B119CF10614F14 /* HealthKitService.swift */,
 				36BB15B5D3A14E0D9940B118 /* HealthKitService+Cycle.swift */,
+				2E52DF869EA41A78F57F6CC8 /* IntentClassifier.swift */,
 				E342C8090873CF9612C8A63E /* LabReportOCR.swift */,
 				C6C5FCF45E66161B45683C82 /* LabReportOCR+Biomarkers.swift */,
 				8F4D8D947C82941F66C3E892 /* LabReportStorage.swift */,
@@ -897,6 +900,7 @@
 				C78684F2133F07AAAC383EDB /* GoalView.swift in Sources */,
 				BED961B980821487CA56AD51 /* HealthKitService+Cycle.swift in Sources */,
 				DFCF8C1D8A9F7A20072F37C0 /* HealthKitService.swift in Sources */,
+				22924BFAA2D56AA975AC02F1 /* IntentClassifier.swift in Sources */,
 				8B4A3B20843E58F584398C79 /* LabReport.swift in Sources */,
 				EDBADA2C372F712D791B9CB3 /* LabReportDetailView.swift in Sources */,
 				364C90C5B4A795381274F748 /* LabReportOCR+Biomarkers.swift in Sources */,

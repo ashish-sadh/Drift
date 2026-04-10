@@ -59,15 +59,37 @@ enum AIToolAgent {
     ) async -> AgentOutput {
 
         // ── Phase 1: Try rules on raw input (instant, both models) ──
+        // Only for high-confidence action commands (undo, delete, greetings)
         if let toolCall = ToolRanker.tryRulePick(query: message, screen: screen) {
             return await executeTool(toolCall)
         }
 
-        // ── Phase 2: LLM normalize → re-run rules (Gemma only) ──
-        // Track the best query version: normalizer may clean up spelling/phrasing
+        // ── Phase 2: LLM Intent Classification (Gemma only) ──
+        // Ask the LLM to classify intent + extract tool params in one call
         var bestQuery = message
         if isLargeModel {
             onStep(stepMessage(for: message))
+
+            // Try LLM intent classifier first
+            if let intent = await IntentClassifier.classify(message: message, history: history) {
+                let call = ToolCall(tool: intent.tool, params: ToolCallParams(values: intent.params))
+                // Check if tool exists before executing
+                if isInfoTool(intent.tool) {
+                    // Info tools: execute and present via LLM streaming
+                    let result = await ToolRegistry.shared.execute(call)
+                    if case .text(let data) = result, !data.isEmpty {
+                        onStep("Preparing answer...")
+                        return await streamPresentation(
+                            query: message, toolData: data, screen: screen, onToken: onToken
+                        )
+                    }
+                } else {
+                    // Action tools: execute directly
+                    return await executeTool(call)
+                }
+            }
+
+            // Fallback: normalizer + rule pick (if LLM classifier didn't match)
             if let rewritten = await normalizeQuery(message, history: history) {
                 bestQuery = rewritten
                 if let toolCall = ToolRanker.tryRulePick(query: rewritten, screen: screen) {

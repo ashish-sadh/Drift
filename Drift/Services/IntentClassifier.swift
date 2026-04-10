@@ -1,0 +1,109 @@
+import Foundation
+
+/// LLM-driven intent classification + tool calling.
+/// Replaces keyword-based ToolRanker for Gemma 4.
+/// Compact prompt (~150 tokens system + examples).
+@MainActor
+enum IntentClassifier {
+
+    // MARK: - Intent Types
+
+    struct ClassifiedIntent: Sendable {
+        let tool: String          // tool name or "chat"
+        let params: [String: String]  // extracted parameters
+        let confidence: String    // "high", "medium", "low"
+    }
+
+    // MARK: - System Prompt (~150 tokens)
+
+    static let systemPrompt = """
+    You are a health tracker assistant. Classify the user's message and respond with a JSON tool call.
+    Available tools: log_food, food_info, log_weight, weight_info, start_workout, log_activity, exercise_info, sleep_recovery, supplements, mark_supplement, set_goal, body_comp
+    If it's just chat, respond naturally (no JSON).
+
+    For food logging, extract items + meal:
+    {"tool":"log_food","items":["eggs","toast"],"meal":"breakfast","servings":"2"}
+    For queries:
+    {"tool":"food_info","query":"calories left"}
+    For weight:
+    {"tool":"log_weight","value":"165","unit":"lbs"}
+
+    Be concise. One JSON object or short text. No explanation.
+    """
+
+    // MARK: - Classify
+
+    /// Classify user message into intent + tool call via LLM.
+    /// Returns nil if LLM times out or returns non-JSON (chat response).
+    static func classify(message: String, history: String) async -> ClassifiedIntent? {
+        let userMessage: String
+        if !history.isEmpty {
+            userMessage = "Chat:\n\(String(history.prefix(200)))\n\nUser: \(message)"
+        } else {
+            userMessage = message
+        }
+
+        let msg = userMessage  // capture for Sendable closure
+        let response = await withTimeout(seconds: 10) {
+            await LocalAIService.shared.respondDirect(
+                systemPrompt: systemPrompt,
+                message: msg
+            )
+        }
+
+        guard let response else { return nil }
+        return parseResponse(response)
+    }
+
+    // MARK: - Parse Response
+
+    private static func parseResponse(_ response: String) -> ClassifiedIntent? {
+        let trimmed = response.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Try to extract JSON from response
+        guard let jsonStart = trimmed.firstIndex(of: "{"),
+              let jsonEnd = trimmed.lastIndex(of: "}") else {
+            return nil // Not a tool call — direct chat response
+        }
+
+        let jsonStr = String(trimmed[jsonStart...jsonEnd])
+        guard let data = jsonStr.data(using: .utf8),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let tool = json["tool"] as? String else {
+            return nil
+        }
+
+        // Extract all string params
+        var params: [String: String] = [:]
+        for (key, value) in json where key != "tool" {
+            if let str = value as? String {
+                params[key] = str
+            } else if let arr = value as? [String] {
+                params[key] = arr.joined(separator: ", ")
+            } else if let num = value as? Double {
+                params[key] = "\(num)"
+            }
+        }
+
+        return ClassifiedIntent(
+            tool: tool,
+            params: params,
+            confidence: json["confidence"] as? String ?? "high"
+        )
+    }
+
+    // MARK: - Timeout Helper
+
+    private static func withTimeout<T: Sendable>(seconds: Int, operation: @Sendable @escaping () async -> T?) async -> T? {
+        await withTaskGroup(of: T?.self) { group in
+            group.addTask { await operation() }
+            group.addTask {
+                try? await Task.sleep(nanoseconds: UInt64(seconds) * 1_000_000_000)
+                return nil
+            }
+            let result = await group.next() ?? nil
+            group.cancelAll()
+            return result
+        }
+    }
+}
