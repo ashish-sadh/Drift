@@ -173,9 +173,15 @@ struct DashboardView: View {
                 if done { Task { await viewModel.loadToday() } }
             }
             .sheet(isPresented: $showingWeightEntry) {
-                WeightEntryView(unit: Preferences.weightUnit) { _, _ in
-                    Task { await viewModel.loadToday() }
+                WeightEntryView(unit: Preferences.weightUnit) { value, date in
+                    // Save weight to DB
+                    let kg = Preferences.weightUnit == .kg ? value : value / 2.20462
+                    let dateStr = DateFormatters.dateOnly.string(from: date)
+                    var entry = WeightEntry(date: dateStr, weightKg: kg, source: "manual")
+                    try? AppDatabase.shared.saveWeightEntry(&entry)
+                    // Refresh trend + dashboard
                     WeightTrendService.shared.refresh()
+                    Task { await viewModel.loadToday() }
                 }
             }
         }
