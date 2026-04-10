@@ -11,6 +11,7 @@ struct DEXAOverviewView: View {
     @State private var importMessage: ImportMessage?
     @State private var showingDeleteAll = false
     private let database = AppDatabase.shared
+    private var wu: WeightUnit { Preferences.weightUnit }
 
     struct ImportMessage: Identifiable {
         let id = UUID()
@@ -97,12 +98,12 @@ struct DEXAOverviewView: View {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 overviewCard("Body Fat", value: latest.bodyFatPct.map { String(format: "%.1f%%", $0) } ?? "--",
                              delta: delta(latest.bodyFatPct, previous?.bodyFatPct), deltaUnit: "%", lowerBetter: true)
-                overviewCard("Lean Mass", value: latest.leanMassLbs.map { String(format: "%.1f lbs", $0) } ?? "--",
-                             delta: deltaLbs(latest.leanMassKg, previous?.leanMassKg), deltaUnit: "lbs", lowerBetter: false)
-                overviewCard("Fat Mass", value: latest.fatMassLbs.map { String(format: "%.1f lbs", $0) } ?? "--",
-                             delta: deltaLbs(latest.fatMassKg, previous?.fatMassKg), deltaUnit: "lbs", lowerBetter: true)
-                overviewCard("Visceral Fat", value: latest.visceralFatLbs.map { String(format: "%.1f lbs", $0) } ?? "--",
-                             delta: deltaLbs(latest.visceralFatKg, previous?.visceralFatKg), deltaUnit: "lbs", lowerBetter: true)
+                overviewCard("Lean Mass", value: latest.leanMassKg.map { String(format: "%.1f \(wu.displayName)", wu.convert(fromKg: $0)) } ?? "--",
+                             delta: deltaMass(latest.leanMassKg, previous?.leanMassKg), deltaUnit: wu.displayName, lowerBetter: false)
+                overviewCard("Fat Mass", value: latest.fatMassKg.map { String(format: "%.1f \(wu.displayName)", wu.convert(fromKg: $0)) } ?? "--",
+                             delta: deltaMass(latest.fatMassKg, previous?.fatMassKg), deltaUnit: wu.displayName, lowerBetter: true)
+                overviewCard("Visceral Fat", value: latest.visceralFatKg.map { String(format: "%.1f \(wu.displayName)", wu.convert(fromKg: $0)) } ?? "--",
+                             delta: deltaMass(latest.visceralFatKg, previous?.visceralFatKg), deltaUnit: wu.displayName, lowerBetter: true)
             }
 
             // Extra info row
@@ -279,12 +280,12 @@ struct DEXAOverviewView: View {
             }, unit: "%", color: Theme.stepsOrange)
 
             trendChart("Fat Mass", data: sorted.compactMap { s in
-                guard let d = df.date(from: s.scanDate), let v = s.fatMassLbs else { return nil }; return (d, v)
-            }, unit: "lbs", color: Theme.surplus)
+                guard let d = df.date(from: s.scanDate), let v = s.fatMassKg else { return nil }; return (d, wu.convert(fromKg: v))
+            }, unit: wu.displayName, color: Theme.surplus)
 
             trendChart("Lean Mass", data: sorted.compactMap { s in
-                guard let d = df.date(from: s.scanDate), let v = s.leanMassLbs else { return nil }; return (d, v)
-            }, unit: "lbs", color: Theme.deficit)
+                guard let d = df.date(from: s.scanDate), let v = s.leanMassKg else { return nil }; return (d, wu.convert(fromKg: v))
+            }, unit: wu.displayName, color: Theme.deficit)
         }
     }
 
@@ -485,6 +486,9 @@ struct DEXAOverviewView: View {
     }
     private func deltaLbs(_ a: Double?, _ b: Double?) -> Double? {
         guard let a, let b else { return nil }; return (a - b) * 2.20462
+    }
+    private func deltaMass(_ a: Double?, _ b: Double?) -> Double? {
+        guard let a, let b else { return nil }; return wu.convert(fromKg: a - b)
     }
     private func formatDate(_ s: String) -> String {
         let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"

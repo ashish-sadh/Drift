@@ -22,8 +22,9 @@ enum AIRuleEngine {
                 let deficit = trend.estimatedDailyDeficit
 
                 if rate < -0.1 {
-                    let lbsPerWeek = abs(rate) * 2.20462
-                    return String(format: "You're losing about %.1f lbs/week. Today you've eaten %d calories so far.", lbsPerWeek, Int(nutrition.calories))
+                    let u = Preferences.weightUnit
+                    let rateDisplay = abs(u.convert(fromKg: rate))
+                    return String(format: "You're losing about %.1f %@/week. Today you've eaten %d calories so far.", rateDisplay, u.displayName, Int(nutrition.calories))
                 } else if rate > 0.1 {
                     return "Your weight is trending up. You've eaten \(Int(nutrition.calories)) calories today."
                 } else {

@@ -424,14 +424,14 @@ struct AIChatView: View {
                 pendingExercises = exercises
                 let templateExercises = exercises.map { e in
                     var notes = "\(e.reps) reps"
-                    if let w = e.weight { notes += " @ \(Int(w)) lbs" }
+                    if let w = e.weight { notes += " @ \(Int(w)) \(Preferences.weightUnit.displayName)" }
                     return WorkoutTemplate.TemplateExercise(name: e.name, sets: e.sets, notes: notes)
                 }
                 if let json = try? JSONEncoder().encode(templateExercises),
                    let jsonStr = String(data: json, encoding: .utf8) {
                     let summary = exercises.map { e in
                         var s = "\(e.name) \(e.sets)x\(e.reps)"
-                        if let w = e.weight { s += " @ \(Int(w)) lbs" }
+                        if let w = e.weight { s += " @ \(Int(w)) \(Preferences.weightUnit.displayName)" }
                         return s
                     }.joined(separator: ", ")
                     messages.append(ChatMessage(role: .assistant, text: "Workout (\(exercises.count) exercises): \(summary). Say \"done\" to start, or add more."))
