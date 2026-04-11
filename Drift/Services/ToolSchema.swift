@@ -24,6 +24,7 @@ enum ToolResult: Sendable {
 /// UI actions a tool can trigger.
 enum ToolAction: Sendable {
     case openFoodSearch(query: String, servings: Double?)
+    case openRecipeBuilder(items: [String], mealName: String?)
     case openWorkout(templateName: String)
     case openWeightEntry
     case navigate(tab: Int)

@@ -742,6 +742,24 @@ struct AIChatView: View {
                     foodSearchQuery = query
                     foodSearchServings = servings
                     showingFoodSearch = true
+                case .openRecipeBuilder(let items, let mealName):
+                    pendingRecipeItems = items.compactMap { itemName in
+                        if let found = AIActionExecutor.findFood(query: itemName, servings: nil) {
+                            let cal = found.food.calories * found.servings
+                            let p = found.food.proteinG * found.servings
+                            let c = found.food.carbsG * found.servings
+                            let f = found.food.fatG * found.servings
+                            let fb = found.food.fiberG * found.servings
+                            return QuickAddView.RecipeItem(name: found.food.name,
+                                portionText: found.servings == 1 ? "1 serving" : "\(Int(found.servings)) servings",
+                                calories: cal, proteinG: p, carbsG: c, fatG: f, fiberG: fb,
+                                servingSizeG: found.food.servingSize)
+                        }
+                        return QuickAddView.RecipeItem(name: itemName, portionText: "1 serving",
+                            calories: 0, proteinG: 0, carbsG: 0, fatG: 0, fiberG: 0)
+                    }
+                    pendingRecipeName = mealName ?? currentMealType.rawValue
+                    showingRecipeBuilder = true
                 case .openWorkout(let templateName):
                     if let templates = try? WorkoutService.fetchTemplates(),
                        let matched = templates.first(where: { $0.name.lowercased().contains(templateName.lowercased()) }) {

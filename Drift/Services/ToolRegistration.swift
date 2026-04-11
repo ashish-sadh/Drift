@@ -72,6 +72,12 @@ enum ToolRegistration {
             },
             handler: { params in
                 guard let name = params.string("name") else { return .error("Missing food name") }
+                // Multi-item: open recipe builder with all items
+                if let remaining = params.string("remaining_items"), !remaining.isEmpty {
+                    let allItems = [name] + remaining.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                    let meal = params.string("meal")
+                    return .action(.openRecipeBuilder(items: allItems, mealName: meal))
+                }
                 return .action(.openFoodSearch(query: name, servings: params.double("amount")))
             }
         ))
