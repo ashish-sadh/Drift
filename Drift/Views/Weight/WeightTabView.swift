@@ -67,26 +67,35 @@ struct WeightTabView: View {
         .sheet(isPresented: $showingAddWeight, onDismiss: {
             viewModel.loadEntries()
         }) {
-            WeightEntryView(unit: viewModel.weightUnit) { value, date in
-                viewModel.addWeight(value: value, date: date)
-            }
-        }
-        .sheet(isPresented: $showingAddBodyComp) {
-            BodyCompEntryView(
+            WeightEntryView(
                 unit: viewModel.weightUnit,
-                onSave: { weight, comp, date in
-                    if let w = weight {
-                        viewModel.addWeight(value: w, date: date)
-                    }
-                    if comp.hasData {
-                        var entry = comp
-                        try? AppDatabase.shared.saveBodyComposition(&entry)
-                    }
-                    viewModel.loadEntries()
-                },
                 lastBodyFat: (try? AppDatabase.shared.fetchLatestBodyComposition())?.bodyFatPct,
                 lastBMI: (try? AppDatabase.shared.fetchLatestBodyComposition())?.bmi,
-                lastWater: (try? AppDatabase.shared.fetchLatestBodyComposition())?.waterPct
+                lastWater: (try? AppDatabase.shared.fetchLatestBodyComposition())?.waterPct,
+                onSave: { value, date in
+                    viewModel.addWeight(value: value, date: date)
+                },
+                onSaveBodyComp: { comp in
+                    var entry = comp
+                    try? AppDatabase.shared.saveBodyComposition(&entry)
+                    viewModel.loadEntries()
+                }
+            )
+        }
+        .sheet(isPresented: $showingAddBodyComp) {
+            WeightEntryView(
+                unit: viewModel.weightUnit,
+                lastBodyFat: (try? AppDatabase.shared.fetchLatestBodyComposition())?.bodyFatPct,
+                lastBMI: (try? AppDatabase.shared.fetchLatestBodyComposition())?.bmi,
+                lastWater: (try? AppDatabase.shared.fetchLatestBodyComposition())?.waterPct,
+                onSave: { value, date in
+                    viewModel.addWeight(value: value, date: date)
+                },
+                onSaveBodyComp: { comp in
+                    var entry = comp
+                    try? AppDatabase.shared.saveBodyComposition(&entry)
+                    viewModel.loadEntries()
+                }
             )
         }
         .onChange(of: viewModel.milestoneMessage) { _, message in

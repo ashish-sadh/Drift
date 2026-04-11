@@ -182,13 +182,23 @@ struct DashboardView: View {
             .sheet(isPresented: $showingWeightEntry, onDismiss: {
                 Task { await viewModel.loadToday() }
             }) {
-                WeightEntryView(unit: Preferences.weightUnit) { value, date in
-                    let kg = Preferences.weightUnit == .kg ? value : value / 2.20462
-                    let dateStr = DateFormatters.dateOnly.string(from: date)
-                    var entry = WeightEntry(date: dateStr, weightKg: kg, source: "manual")
-                    try? AppDatabase.shared.saveWeightEntry(&entry)
-                    WeightTrendService.shared.refresh()
-                }
+                WeightEntryView(
+                    unit: Preferences.weightUnit,
+                    lastBodyFat: (try? AppDatabase.shared.fetchLatestBodyComposition())?.bodyFatPct,
+                    lastBMI: (try? AppDatabase.shared.fetchLatestBodyComposition())?.bmi,
+                    lastWater: (try? AppDatabase.shared.fetchLatestBodyComposition())?.waterPct,
+                    onSave: { value, date in
+                        let kg = Preferences.weightUnit == .kg ? value : value / 2.20462
+                        let dateStr = DateFormatters.dateOnly.string(from: date)
+                        var entry = WeightEntry(date: dateStr, weightKg: kg, source: "manual")
+                        try? AppDatabase.shared.saveWeightEntry(&entry)
+                        WeightTrendService.shared.refresh()
+                    },
+                    onSaveBodyComp: { comp in
+                        var c = comp
+                        try? AppDatabase.shared.saveBodyComposition(&c)
+                    }
+                )
             }
         }
     }
