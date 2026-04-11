@@ -43,7 +43,7 @@ Execute: find each food → show confirmation UI → log
 - [ ] **Manual workout entry** — "Add Past Workout" button on workout tab. Pick date, name exercises, enter sets/reps/weight.
 - [ ] **Edit existing workout** — Tap workout in history → edit sets, reps, weight, exercise order.
 - [x] **Edit workout name & notes** — Menu option in detail view, alert with pre-populated fields, WorkoutService.updateWorkout().
-- [ ] **Delete individual sets** — Swipe-to-delete on individual sets.
+- [x] **Delete individual sets** — Swipe-to-delete on sets in detail view. WorkoutService.deleteSet().
 
 ### P2: Presentation Quality
 - [ ] **LLM presentation for ALL responses** — Every response conversational. No raw data dumps.

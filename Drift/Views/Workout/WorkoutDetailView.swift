@@ -14,6 +14,9 @@ struct WorkoutDetailView: View {
     @State private var editName = ""
     @State private var editNotes = ""
     @State private var saveTemplateName = ""
+    @State private var editingSet: WorkoutSet?
+    @State private var editSetWeight = ""
+    @State private var editSetReps = ""
 
     private var shareText: String {
         var t = "💪 \(summary.workout.name)\n📅 \(formatDate(summary.workout.date))\n"
@@ -73,6 +76,12 @@ struct WorkoutDetailView: View {
                                     Spacer()
                                     if let rm = s.estimated1RM { Text("1RM: \(Int(rm))").font(.caption2.monospacedDigit()).foregroundStyle(.tertiary) }
                                 }
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    editingSet = s
+                                    editSetWeight = s.weightLbs.map { "\(Int($0))" } ?? ""
+                                    editSetReps = s.reps.map { "\($0)" } ?? (s.durationSec.map { "\($0)" } ?? "")
+                                }
                                 .swipeActions(edge: .trailing) {
                                     if let sid = s.id {
                                         Button(role: .destructive) {
@@ -127,6 +136,34 @@ struct WorkoutDetailView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Enter a name for this template")
+        }
+        .alert("Edit Set", isPresented: Binding(
+            get: { editingSet != nil },
+            set: { if !$0 { editingSet = nil } }
+        )) {
+            TextField("Weight (lbs)", text: $editSetWeight)
+                .keyboardType(.decimalPad)
+            TextField("Reps", text: $editSetReps)
+                .keyboardType(.numberPad)
+            Button("Save") {
+                if let s = editingSet, let sid = s.id {
+                    let w = Double(editSetWeight)
+                    let r = Int(editSetReps)
+                    let dur = WorkoutSet.isDurationExercise(s.exerciseName) ? r : nil
+                    try? WorkoutService.updateSet(id: sid, weightLbs: w, reps: dur != nil ? nil : r, durationSec: dur)
+                    // Update local state
+                    if let idx = sets.firstIndex(where: { $0.id == sid }) {
+                        sets[idx].weightLbs = w
+                        if dur != nil { sets[idx].durationSec = dur } else { sets[idx].reps = r }
+                    }
+                    editingSet = nil
+                }
+            }
+            Button("Cancel", role: .cancel) { editingSet = nil }
+        } message: {
+            if let s = editingSet {
+                Text("\(s.exerciseName) — Set \(s.setOrder)")
+            }
         }
         .alert("Edit Workout", isPresented: $showingEditName) {
             TextField("Workout name", text: $editName)

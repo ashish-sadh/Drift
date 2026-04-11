@@ -18,6 +18,14 @@ enum WorkoutService {
         } ?? workout
     }
 
+    static func updateSet(id: Int64, weightLbs: Double?, reps: Int?, durationSec: Int? = nil) throws {
+        try db.writer.write { dbConn in
+            try dbConn.execute(
+                sql: "UPDATE workout_set SET weight_lbs = ?, reps = ?, duration_sec = ? WHERE id = ?",
+                arguments: [weightLbs, reps, durationSec, id])
+        }
+    }
+
     static func deleteSet(id: Int64) throws {
         try db.writer.write { dbConn in
             _ = try WorkoutSet.deleteOne(dbConn, id: id)
