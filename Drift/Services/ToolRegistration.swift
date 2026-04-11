@@ -323,23 +323,44 @@ enum ToolRegistration {
         r.register(ToolSchema(
             id: "weight.weight_info", name: "weight_info", service: "weight",
             description: "User asks ABOUT their weight: trend, progress, goal, body fat, BMI. NOT for logging.",
-            parameters: [],
-            handler: { _ in
+            parameters: [ToolParam("query", "string", "What they asked about weight", required: false)],
+            handler: { params in
+                let query = (params.string("query") ?? "").lowercased()
                 var lines: [String] = []
-                lines.append(WeightServiceAPI.describeTrend())
-                if let goal = WeightServiceAPI.getGoalProgress() {
-                    lines.append("Goal: \(String(format: "%.1f", goal.currentWeight)) → \(String(format: "%.1f", goal.targetWeight))\(goal.unit), \(goal.progressPct)% done.")
-                }
-                // Weight changes from centralized service
                 let unit = Preferences.weightUnit
+                let currentKg = WeightTrendService.shared.latestWeightKg
+
+                // Current weight + trend
+                lines.append(WeightServiceAPI.describeTrend())
+
+                // Goal progress
+                if let goal = WeightGoal.load(), let cw = currentKg {
+                    let remaining = abs(goal.remainingKg(currentWeightKg: cw))
+                    let direction = goal.isLosing(currentWeightKg: cw) ? "lose" : "gain"
+                    let progress = goal.progress(currentWeightKg: cw)
+                    lines.append("Goal: \(direction) \(String(format: "%.1f", unit.convert(fromKg: remaining))) \(unit.displayName) to reach \(String(format: "%.1f", unit.convert(fromKg: goal.targetWeightKg))). \(Int(progress * 100))% done.")
+                }
+
+                // Weight changes
                 if let changes = WeightTrendService.shared.weightChanges {
-                    if let d90 = changes.ninetyDay {
-                        lines.append("90-day change: \(String(format: "%+.1f", unit.convert(fromKg: d90))) \(unit.displayName)")
-                    }
                     if let d7 = changes.sevenDay {
                         lines.append("This week: \(String(format: "%+.1f", unit.convert(fromKg: d7))) \(unit.displayName)")
                     }
+                    if let d90 = changes.ninetyDay {
+                        lines.append("90-day: \(String(format: "%+.1f", unit.convert(fromKg: d90))) \(unit.displayName)")
+                    }
                 }
+
+                // TDEE if asked
+                if query.contains("tdee") || query.contains("bmr") || query.contains("burn") {
+                    let est = TDEEEstimator.shared.cachedOrSync()
+                    lines.append("TDEE: \(Int(est.tdee)) cal/day (\(est.source.rawValue)).")
+                    if let goal = WeightGoal.load(), let cw = currentKg {
+                        let target = goal.resolvedCalorieTarget(currentWeightKg: cw) ?? est.tdee
+                        lines.append("Calorie target: \(Int(target)) cal/day.")
+                    }
+                }
+
                 return .text(lines.joined(separator: "\n"))
             }
         ))
