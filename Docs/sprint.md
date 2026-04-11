@@ -59,7 +59,7 @@ Execute: find each food → show confirmation UI → log
 ### Ongoing: Code Improvement Loop
 Autonomous refactoring. Run `code-improvement.md`. Principles in `Docs/principles/`. Log in `Docs/code-improvement-log.md`.
 
-- [ ] **Continue file decomposition** — Files over 700 lines still need splitting (CycleView 633, GoalView 557, StaticOverrides 533, ToolRanker 530).
+- [x] **Continue file decomposition** — GoalSetupView, LabsAndScans, Sleep, TemplatePreviewSheet extracted. Only 3 files over 700 remain (AIChatView, FoodTabView, ActiveWorkoutView) — these need ViewModel extraction.
 - [ ] **Deeper refactoring** — Extract logic from fat functions (AIChatView.sendMessage 491 lines). Move business logic out of views into ViewModels/Services.
 - [ ] **DDD violations** — Direct DB calls in views, business logic in UI layer.
 

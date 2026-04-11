@@ -359,7 +359,12 @@ enum ToolRanker {
                        ("daily summary", 3.5), ("summary", 2), ("yesterday", 2.5),
                        ("weekly summary", 3), ("this week", 2.5), ("what did i eat", 3),
                        ("how are you doing", 3), ("how's my day", 3), ("suggest", 2),
-                       ("meal ideas", 3), ("food ideas", 3)],
+                       ("meal ideas", 3), ("food ideas", 3),
+                       ("sugar", 2), ("carbs today", 3), ("fat today", 3),
+                       ("fiber", 2), ("how much protein", 3.5), ("how much fat", 3.5),
+                       ("calories in", 3), ("estimate calories", 3.5),
+                       ("reduce fat", 2.5), ("lose fat", 2.5), ("burn fat", 2.5),
+                       ("how to lose", 2.5), ("what's a good diet", 3)],
             logBoost: -1, queryBoost: 2,
             screens: [.food: 0.5, .dashboard: 0.3],
             antiKeywords: ["log", "remove", "delete", "ate", "had"]
