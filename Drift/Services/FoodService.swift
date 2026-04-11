@@ -86,7 +86,7 @@ enum FoodService {
         var response = "\(totals.remaining > 0 ? totals.remaining : 0) cal remaining (\(totals.eaten)/\(totals.target))"
 
         // Protein context
-        if let goal = WeightGoal.load(), let targets = goal.macroTargets() {
+        if let goal = WeightGoal.load(), let targets = goal.macroTargets(currentWeightKg: WeightTrendService.shared.latestWeightKg) {
             let pLeft = max(0, Int(targets.proteinG) - totals.proteinG)
             if pLeft > 20 { response += ". Still need \(pLeft)g protein" }
         }
@@ -128,7 +128,7 @@ enum FoodService {
         let totals = getDailyTotals()
         let calBudget = caloriesLeft ?? max(0, totals.remaining)
         let protBudget = proteinNeeded ?? {
-            if let goal = WeightGoal.load(), let targets = goal.macroTargets() {
+            if let goal = WeightGoal.load(), let targets = goal.macroTargets(currentWeightKg: WeightTrendService.shared.latestWeightKg) {
                 return max(0, Int(targets.proteinG) - totals.proteinG)
             }
             return 50

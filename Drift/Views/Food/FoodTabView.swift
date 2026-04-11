@@ -276,7 +276,7 @@ struct FoodTabView: View {
 
     private var dailyTotalsCard: some View {
         let n = viewModel.todayNutrition
-        let targets = WeightGoal.load()?.macroTargets()
+        let targets = WeightGoal.load()?.macroTargets(currentWeightKg: WeightTrendService.shared.latestWeightKg)
 
         return VStack(spacing: 10) {
             // Calories with target

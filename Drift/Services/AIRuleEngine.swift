@@ -153,7 +153,7 @@ enum AIRuleEngine {
             var response = "\(Int(remaining)) cal left (\(Int(nutrition.calories))/\(Int(target)))"
 
             // Protein context
-            if let goal = WeightGoal.load(), let targets = goal.macroTargets() {
+            if let goal = WeightGoal.load(), let targets = goal.macroTargets(currentWeightKg: WeightTrendService.shared.latestWeightKg) {
                 let pLeft = max(0, Int(targets.proteinG - nutrition.proteinG))
                 if pLeft > 20 { response += ". Still need \(pLeft)g protein" }
             }

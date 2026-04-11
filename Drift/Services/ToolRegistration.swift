@@ -146,7 +146,7 @@ enum ToolRegistration {
 
                 let n = (try? AppDatabase.shared.fetchDailyNutrition(for: DateFormatters.todayString)) ?? .zero
                 let goal = WeightGoal.load()
-                let targets = goal?.macroTargets()
+                let targets = goal?.macroTargets(currentWeightKg: WeightTrendService.shared.latestWeightKg)
 
                 // Macro-specific focus: "how is my protein", "carbs today", "fat intake"
                 if query.contains("protein") {
@@ -195,7 +195,7 @@ enum ToolRegistration {
                 // Meal suggestions
                 if query.contains("suggest") || query.contains("what should") || query.contains("what to eat") {
                     let totals = FoodService.getDailyTotals()
-                    let targets = goal?.macroTargets()
+                    let targets = goal?.macroTargets(currentWeightKg: WeightTrendService.shared.latestWeightKg)
                     let protLeft = targets.map { max(0, Int($0.proteinG) - totals.proteinG) }
                     let suggestions = FoodService.suggestMeal(caloriesLeft: totals.remaining, proteinNeeded: protLeft)
                     var lines = ["\(totals.remaining) cal remaining. \(protLeft.map { "Need \($0)g more protein." } ?? "")"]
