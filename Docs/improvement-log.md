@@ -18,6 +18,16 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 - **Multi-turn context**: streamPresentation receives conversation history for LLM to reference prior responses.
 - **Error recovery**: Friendly error messages + tool name sanitization.
 - **Pipeline timing**: Instrumentation for latency measurement per phase.
+- **Multi-item food logging**: Comma-separated items open recipe builder with DB macros.
+- **Tool routing accuracy**: 42 queries across all tools, 80%+ accuracy thresholds.
+- **Error recovery**: Friendly messages + tool name sanitization.
+- **Context-aware tone**: Morning/daytime/evening hints in presentation prompt.
+- **SmolLM presentation**: 8-pattern addInsightPrefix for conversational feel.
+- **Workout editing**: Edit name/notes, tap set to edit weight/reps, swipe-to-delete sets.
+- **Manual workout entry**: "Log Past Workout" button with date picker, no timer.
+- **TemplatePreviewSheet extraction**: Unblocked WorkoutView type checker (595→500 lines).
+
+**Session totals:** 16 commits. P0 LLM redesign complete (5/5 done). P1 Tool Quality complete (5/5). P1 Workout Editing complete (4/4). P2 Presentation Quality (3/3). StaticOverrides 533→393 lines. All 796 tests green.
 
 ---
 

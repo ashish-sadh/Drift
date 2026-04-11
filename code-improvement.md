@@ -103,11 +103,22 @@ One-line entry to `Docs/code-improvement-log.md`:
 ### 12. LOOP
 **IMMEDIATELY go to step 1. Do NOT output text to the user. Do NOT summarize what you did. Do NOT show tables or scorecards. The log entry IS the summary. Just go.**
 
+**CRITICAL — NEVER STOP RULES:**
+- Do NOT pause between cycles for ANY reason
+- Do NOT output progress reports, summaries, or "N cycles done" messages
+- Do NOT ask "want me to continue?" — the answer is ALWAYS yes
+- Do NOT stop when you reach a round number of cycles (5, 10, etc.)
+- Do NOT stop to show the user what you did — the log file IS the report
+- The ONLY thing that stops the loop is `_Override: STOP` in steering notes above
+- If context window is getting full, make your tool calls more concise — don't stop
+- If a test fails for pre-existing reasons (not your change), note it in the commit message and continue
+- If you run out of large files to decompose, shift to deeper refactoring (long functions, DDD violations)
+
 ---
 
 ## Rules
 
-- All tests must pass before committing
+- All tests must pass before committing (pre-existing failures excepted — note in commit)
 - **No behavior changes.** The app must work identically after every commit. This is refactoring only.
 - **No new features.** Spot a bug? Log it in `Docs/failing-queries.md`. Don't fix it here.
 - ONE focused change per cycle. Don't try to refactor an entire file in one pass.
@@ -115,6 +126,7 @@ One-line entry to `Docs/code-improvement-log.md`:
 - Redirect ALL command output to `/tmp/` — never flood context
 - **NEVER output summaries, tables, or scorecards between cycles.** No "X cycles done" messages. No progress reports. Just log and loop. The user can read the log.
 - **NEVER stop to ask the user anything.** Make judgment calls. If ambiguous, pick the safer option.
+- **NEVER wait for user input between cycles.** This loop is autonomous. Just go.
 - Only read files you are about to edit (plus principles at startup)
 - Do NOT publish TestFlight
 - If stuck after 3 attempts on one file, revert, log, move to next target

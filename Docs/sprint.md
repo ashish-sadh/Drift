@@ -46,8 +46,8 @@ Execute: find each food → show confirmation UI → log
 - [x] **Delete individual sets** — Swipe-to-delete on sets in detail view. WorkoutService.deleteSet().
 
 ### P2: Presentation Quality
-- [ ] **LLM presentation for ALL responses** — Every response conversational. No raw data dumps.
-- [ ] **Streaming everywhere** — Tokens appear as LLM generates. No "thinking..." delays.
+- [x] **LLM presentation for ALL responses** — Gemma: streaming LLM presentation. SmolLM: enhanced addInsightPrefix with 8 patterns. No more raw data dumps.
+- [x] **Streaming everywhere** — Gemma: all info responses stream via respondStreamingDirect. SmolLM: instant prefixed data (can't stream reliably). "Thinking..." only shows during classification phase.
 - [x] **Context-aware responses** — Tone hints in presentation prompt: morning=motivating, daytime=practical, evening=summary.
 
 ### P2: Salad Bowl / Custom Meal Builder
