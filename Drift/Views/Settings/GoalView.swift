@@ -46,7 +46,11 @@ struct GoalView: View {
                 profileCard
 
                 if let goal {
-                    goalProgressCard(goal)
+                    GoalProgressCard(
+                        goal: goal,
+                        currentWeightKg: currentWeightKg ?? goal.startWeightKg,
+                        onEdit: { showingSetup = true }
+                    )
                     macroTargetsCard(goal)
                     paceCard(goal)
                     deficitCard(goal)

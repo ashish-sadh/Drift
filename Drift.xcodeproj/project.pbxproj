@@ -78,6 +78,7 @@
 		737105D5DE25A898AC31BEA8 /* AIContextBuilder+Health.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1ACBCA936A73C1825C28C312 /* AIContextBuilder+Health.swift */; };
 		7430C66B3A1C306F1199C3FA /* ToolSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = C170D4FEDFB68CA8A61E1D03 /* ToolSchema.swift */; };
 		7821B033A6CDE13D6ED6040C /* DashboardView+Cards.swift in Sources */ = {isa = PBXBuildFile; fileRef = 733818AD9667283F81C5D1C5 /* DashboardView+Cards.swift */; };
+		7888BCE3E091DCE6F3CD5AA2 /* GoalProgressCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0362D19A4F7D1ABB43FB48F8 /* GoalProgressCard.swift */; };
 		7BDC02B8C99F8B719546A8A1 /* WeightEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = F237A2E1C7747DBE102B665C /* WeightEntry.swift */; };
 		7FF64D8FECEB7302909982E6 /* LLMQwen3Eval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C100ED24DAB0D032BD8C5BD /* LLMQwen3Eval.swift */; };
 		813BBE938E8D3E2FF5A34A60 /* AppDatabase+FoodUsage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62E7E108AC25A8262DC23EB7 /* AppDatabase+FoodUsage.swift */; };
@@ -198,6 +199,7 @@
 
 /* Begin PBXFileReference section */
 		0207D73F0C177B95B548B321 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		0362D19A4F7D1ABB43FB48F8 /* GoalProgressCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoalProgressCard.swift; sourceTree = "<group>"; };
 		059465804E239D09C0E9C1D4 /* biomarkers.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = biomarkers.json; sourceTree = "<group>"; };
 		059967E59D60ABA83A272572 /* LLMToolCallingEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMToolCallingEval.swift; sourceTree = "<group>"; };
 		08E33CA6BE80D735A37ED745 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -495,6 +497,14 @@
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
+		48E205BFDDA2A32A8B8879CA /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				0362D19A4F7D1ABB43FB48F8 /* GoalProgressCard.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
 		4A7204948841850DFF3D940D /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -506,6 +516,7 @@
 				1E13B73313706E9254470E88 /* Food */,
 				FA9DF84BE5D84C9597FCFFA3 /* Glucose */,
 				EC70F8F8DC436EB14CAB3F97 /* Settings */,
+				48E205BFDDA2A32A8B8879CA /* Shared */,
 				0722BA8BD8D3FCE6E6A0257D /* Supplements */,
 				03744AEC99F92BFD0D34F049 /* Weight */,
 				B6B13628C10FC8148ACA6AF2 /* Workout */,
@@ -921,6 +932,7 @@
 				3EF98591577370706EFB2940 /* GlucoseReading.swift in Sources */,
 				17A238D33D727EA1C3C9E814 /* GlucoseService.swift in Sources */,
 				24D454E75E424F7ACA736A91 /* GlucoseTabView.swift in Sources */,
+				7888BCE3E091DCE6F3CD5AA2 /* GoalProgressCard.swift in Sources */,
 				9B11BE8782BE0D44DD4D4816 /* GoalSetupView.swift in Sources */,
 				C78684F2133F07AAAC383EDB /* GoalView.swift in Sources */,
 				BED961B980821487CA56AD51 /* HealthKitService+Cycle.swift in Sources */,
