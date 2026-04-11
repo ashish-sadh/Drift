@@ -863,6 +863,13 @@ final class AIEvalHarness: XCTestCase {
             ("how much protein today", "food_info", .food),
             ("weekly summary", "food_info", .dashboard),
             ("yesterday's food", "food_info", .food),
+            // Migrated from StaticOverrides
+            ("how much sugar today", "food_info", .food),
+            ("how much fat today", "food_info", .food),
+            ("calories in samosa", "food_info", .food),
+            ("estimate calories for biryani", "food_info", .food),
+            ("how to lose fat", "food_info", .food),
+            ("what's a good diet", "food_info", .food),
         ]
         var correct = 0
         for (query, expectedTool, screen) in cases {
