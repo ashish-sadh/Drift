@@ -17,6 +17,7 @@ struct FoodSearchView: View {
     @State private var showingRecipeBuilder = false
     @State private var showingScanner = false
     @State private var editingRecipe: SavedFood?
+    @State private var rebuildingRecipe: SavedFood?
     @State private var isFoodFavorite = false
     @State private var onlineResults: [Food] = []
     @State private var isSearchingOnline = false
@@ -92,6 +93,11 @@ struct FoodSearchView: View {
             .onChange(of: showingScanner) { _, showing in if !showing { viewModel.loadSuggestions() } }
             .sheet(item: $editingRecipe) { recipe in
                 EditRecipeSheet(recipe: recipe) { viewModel.loadSuggestions(); refreshSearch() }
+            }
+            .sheet(item: $rebuildingRecipe) { recipe in
+                QuickAddView(viewModel: viewModel,
+                             initialItems: recipe.recipeItems ?? [],
+                             initialName: recipe.name)
             }
             .onAppear {
                 viewModel.loadSuggestions()
@@ -364,6 +370,17 @@ struct FoodSearchView: View {
                                     matchingRecipes.removeAll { $0.id == id }
                                     viewModel.loadSuggestions()
                                 } label: { Label("Delete", systemImage: "trash") }
+                            }
+                        }
+                        .swipeActions(edge: .leading) {
+                            if recipe.recipeItems != nil {
+                                Button { rebuildingRecipe = recipe } label: {
+                                    Label("Edit", systemImage: "pencil")
+                                }.tint(Theme.accent)
+                            } else {
+                                Button { editingRecipe = recipe } label: {
+                                    Label("Edit", systemImage: "pencil")
+                                }.tint(.orange)
                             }
                         }
                     }

@@ -15,8 +15,8 @@ struct QuickAddView: View {
     @State private var recipeServings = "1"
     private let db = AppDatabase.shared
 
-    struct RecipeItem: Identifiable {
-        let id = UUID()
+    struct RecipeItem: Identifiable, Codable {
+        var id = UUID()
         var name: String
         var portionText: String
         var calories: Double
@@ -187,9 +187,8 @@ struct QuickAddView: View {
         let t = total
         let servings = max(Double(recipeServings) ?? 1, 0.1)
         let name = recipeName.isEmpty ? (items.count == 1 ? items[0].name : "Recipe") : recipeName
-        // Store ingredient names as JSON for plant points
-        let ingredientNames = items.map(\.name)
-        let ingredientsJson = (try? JSONEncoder().encode(ingredientNames))
+        // Store full ingredient data as JSON for recipe rebuilding
+        let ingredientsJson = (try? JSONEncoder().encode(items))
             .flatMap { String(data: $0, encoding: .utf8) }
         // Save recipe with per-serving macros
         let perServingCal = t.cal / servings

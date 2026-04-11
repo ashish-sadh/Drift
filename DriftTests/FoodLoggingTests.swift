@@ -2496,4 +2496,47 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     }
 }
 
+// MARK: - Ingredient Persistence Tests
+
+@Test func recipeItemsRoundTrip() throws {
+    let items: [QuickAddView.RecipeItem] = [
+        .init(name: "Rice", portionText: "200g", calories: 720, proteinG: 14, carbsG: 160, fatG: 2, fiberG: 1.2, servingSizeG: 200),
+        .init(name: "Chicken", portionText: "150g", calories: 180, proteinG: 34.5, carbsG: 0, fatG: 3, fiberG: 0, servingSizeG: 150)
+    ]
+    let json = try JSONEncoder().encode(items)
+    let jsonStr = String(data: json, encoding: .utf8)!
+
+    let food = Food(name: "Chicken Rice", category: "Recipe", servingSize: 1, servingUnit: "serving",
+                    calories: 900, proteinG: 48.5, carbsG: 160, fatG: 5, fiberG: 1.2,
+                    ingredients: jsonStr, isRecipe: true)
+
+    // recipeItems should reconstruct full items
+    let restored = food.recipeItems
+    #expect(restored != nil)
+    #expect(restored!.count == 2)
+    #expect(restored![0].name == "Rice")
+    #expect(restored![0].calories == 720)
+    #expect(restored![0].servingSizeG == 200)
+    #expect(restored![1].name == "Chicken")
+    #expect(restored![1].proteinG == 34.5)
+
+    // ingredientList should still return names
+    #expect(food.ingredientList == ["Rice", "Chicken"])
+}
+
+@Test func ingredientListLegacyFormat() {
+    let legacyJson = "[\"rice\",\"onion\",\"turmeric\"]"
+    let food = Food(name: "Biryani", category: "Recipe", servingSize: 1, servingUnit: "serving",
+                    calories: 400, ingredients: legacyJson, isRecipe: true)
+
+    #expect(food.ingredientList == ["rice", "onion", "turmeric"])
+    #expect(food.recipeItems == nil) // legacy format has no recipe items
+}
+
+@Test func ingredientListNoIngredients() {
+    let food = Food(name: "Apple", category: "Fruit", servingSize: 182, servingUnit: "g", calories: 95)
+    #expect(food.ingredientList == ["Apple"])
+    #expect(food.recipeItems == nil)
+}
+
 enum TestError: Error { case msg(String); init(_ s: String) { self = .msg(s) } }
