@@ -89,9 +89,32 @@ enum ToolRegistration {
             handler: { params in
                 let query = (params.string("query") ?? "").lowercased()
 
-                // Nutrition lookup for specific food: "calories in banana"
-                if !query.isEmpty, let result = FoodService.getNutrition(name: query) {
-                    return .text("\(result.perServing) Say 'log \(result.food.name.lowercased())' to add it.")
+                // Nutrition lookup for specific food: "calories in banana", "estimate calories for samosa"
+                if !query.isEmpty {
+                    // Strip common prefixes to extract just the food name
+                    var foodName = query
+                    let prefixes = ["calories in ", "calories for ", "estimate calories for ", "estimate calories in ",
+                                     "how many calories in ", "how many calories does ", "nutrition for ",
+                                     "macros in ", "macros for ", "protein in ", "how much protein in "]
+                    for prefix in prefixes {
+                        if foodName.hasPrefix(prefix) { foodName = String(foodName.dropFirst(prefix.count)); break }
+                    }
+                    // Strip trailing "have/has/contain" and leading articles
+                    for suffix in [" have", " has", " contain"] {
+                        if foodName.hasSuffix(suffix) { foodName = String(foodName.dropLast(suffix.count)) }
+                    }
+                    for prefix in ["a ", "an ", "one "] {
+                        if foodName.hasPrefix(prefix) { foodName = String(foodName.dropFirst(prefix.count)) }
+                    }
+                    foodName = foodName.trimmingCharacters(in: .whitespaces)
+
+                    if !foodName.isEmpty, let result = FoodService.getNutrition(name: foodName) {
+                        return .text("\(result.perServing) Say 'log \(result.food.name.lowercased())' to add it.")
+                    }
+                    // Also try the raw query as food name
+                    if let result = FoodService.getNutrition(name: query) {
+                        return .text("\(result.perServing) Say 'log \(result.food.name.lowercased())' to add it.")
+                    }
                 }
 
                 let n = (try? AppDatabase.shared.fetchDailyNutrition(for: DateFormatters.todayString)) ?? .zero
