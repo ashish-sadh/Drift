@@ -841,6 +841,33 @@ final class AIEvalHarness: XCTestCase {
         XCTAssertNil(IntentClassifier.parseResponse("Sure, I can help with that!"))
     }
 
+    // MARK: - Full Pipeline Coverage (StaticOverrides → ToolRanker)
+
+    @MainActor
+    func testCommonQueriesReachCorrectLayer() {
+        // Queries that should hit StaticOverrides (instant, no LLM)
+        let staticQueries = ["hi", "hello", "thanks", "help", "undo", "scan barcode",
+                              "copy yesterday", "delete last entry"]
+        for q in staticQueries {
+            XCTAssertNotNil(StaticOverrides.match(q), "'\(q)' should match StaticOverrides")
+        }
+
+        // Queries that should NOT hit StaticOverrides (fall through to ToolRanker)
+        let toolRankerQueries = ["calories left", "how am I doing", "daily summary",
+                            "how much protein today", "suggest dinner",
+                            "weight trend", "tdee", "what should I train",
+                            "how did I sleep", "calories in samosa"]
+        for q in toolRankerQueries {
+            XCTAssertNil(StaticOverrides.match(q.lowercased()), "'\(q)' should NOT match StaticOverrides — should fall through to ToolRanker")
+        }
+
+        // Verify those toolRankerQueries queries DO rank a tool
+        for q in toolRankerQueries {
+            let tools = ToolRanker.rank(query: q.lowercased(), screen: .dashboard)
+            XCTAssertFalse(tools.isEmpty, "'\(q)' should rank at least one tool")
+        }
+    }
+
     // MARK: - Tool Routing Accuracy (100+ queries → correct tool)
 
     @MainActor
