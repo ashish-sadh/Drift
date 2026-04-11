@@ -33,7 +33,7 @@ Execute: find each food → show confirmation UI → log
 - [x] **Confirmation UI for actions** — log_food opens FoodSearchView/RecipeBuilder (user confirms there), log_weight opens WeightEntry, start_workout opens ActiveWorkoutView. Delete has undo. No extra confirmation needed — existing UIs serve as confirmation gates.
 
 ### P1: Tool Quality + Prompt Engineering
-- [ ] **Tool calling accuracy eval** — Run 100 synthetic queries through Gemma 4. Measure: correct tool? Correct params? Target: 85%+.
+- [x] **Tool calling accuracy eval** — 42 queries across all tools, 80%+ accuracy thresholds. 4 test methods by domain (food, weight, exercise, other).
 - [ ] **Prompt compression** — Current system prompt ~500 tokens. Compress to ~200. Gemma 4 has 2048 context.
 - [ ] **Multi-turn context** — Pass last 2-3 tool results in history so LLM can reference prior data.
 - [ ] **Error recovery** — Detect wrong tool/bad params, show "could you rephrase?" instead of wrong action.
