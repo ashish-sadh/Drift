@@ -118,7 +118,7 @@ struct WeightGoal: Codable, Sendable {
     /// Sources: ISSN position stand, WHO guidelines, Helms et al. (2014).
     /// USDA: minimum 20% of calories from fat. ISSN: 0.5-1.5 g/kg.
     static func minimumFatG(bodyweightKg: Double, calorieTarget: Double?) -> Double {
-        let absoluteFloor = bodyweightKg * 0.5   // ISSN minimum: 0.5 g/kg for hormonal health
+        let absoluteFloor = bodyweightKg * 0.7   // 0.7 g/kg — recommended minimum for hormonal health (ISSN: 0.5-1.5, most dietitians: 0.7-1.0)
         let twentyPct = (calorieTarget ?? 2000) * 0.20 / 9  // USDA: >=20% of calories from fat
         return max(absoluteFloor, twentyPct)
     }
