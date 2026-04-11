@@ -163,24 +163,8 @@ enum StaticOverrides {
             }
         }
 
-        // Weekly comparison
-        if lower.contains("this week") && (lower.contains("last") || lower.contains("compare") || lower.contains("vs")) {
-            return .handler {
-                let comparison = AIContextBuilder.comparisonContext()
-                return comparison.isEmpty ? "Not enough data to compare weeks yet." : comparison
-            }
-        }
-
-        // Workout suggestion
-        let workoutQuestions = ["what should i train", "what should i do today", "suggest me workout",
-                                 "suggest a workout", "suggest workout", "give me a workout",
-                                 "recommend a workout", "recommend workout", "what workout",
-                                 "what exercise", "recommend exercises", "give me exercises"]
-        if workoutQuestions.contains(where: { lower.contains($0) }) {
-            return .handler { ExerciseService.suggestWorkout() }
-        }
-
-        // Meal suggestions, healthy food queries → routed through AIToolAgent for LLM presentation
+        // Weekly comparison → food_info tool (has "compare this week" trigger)
+        // Workout suggestions → exercise_info tool (has "suggest workout" trigger)
 
         // Body comp entry
         let bfPattern = #"(?:body fat|bf|body fat %|bodyfat)\s*(?:is\s+)?(\d+\.?\d*)"#
