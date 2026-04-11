@@ -49,13 +49,13 @@ enum FoodService {
 
     /// Single source of truth for daily calorie target. All calorie "remaining" displays should use this.
     static func resolvedCalorieTarget() -> Int {
-        if let goalTarget = WeightGoal.load()?.macroTargets()?.calorieTarget {
-            return max(500, Int(goalTarget))
+        let currentKg = WeightTrendService.shared.latestWeightKg ?? 80
+        if let goalTarget = WeightGoal.load()?.macroTargets(currentWeightKg: currentKg)?.calorieTarget {
+            return max(1200, Int(goalTarget))
         }
         let tdee = TDEEEstimator.shared.current?.tdee ?? 2000
-        let currentKg = WeightTrendService.shared.latestWeightKg ?? 80
         let deficit = WeightGoal.load()?.requiredDailyDeficit(currentWeightKg: currentKg) ?? 0
-        return max(500, Int(tdee + deficit))
+        return max(1200, Int(tdee + deficit))
     }
 
     /// Get today's nutrition totals with target and remaining.
