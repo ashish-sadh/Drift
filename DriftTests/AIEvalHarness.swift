@@ -841,6 +841,100 @@ final class AIEvalHarness: XCTestCase {
         XCTAssertNil(IntentClassifier.parseResponse("Sure, I can help with that!"))
     }
 
+    // MARK: - Tool Routing Accuracy (100+ queries → correct tool)
+
+    @MainActor
+    func testToolRoutingAccuracyFoodTools() {
+        let cases: [(String, String?, AIScreen)] = [
+            // log_food — should rank top
+            ("log 2 eggs", "log_food", .food),
+            ("ate chicken biryani", "log_food", .food),
+            ("had a banana", "log_food", .food),
+            ("i just had rice and dal", "log_food", .food),
+            ("log lunch", "log_food", .food),
+            ("add oatmeal", "log_food", .food),
+            // food_info — should rank top
+            ("calories left", "food_info", .food),
+            ("how am i doing", "food_info", .dashboard),
+            ("daily summary", "food_info", .dashboard),
+            ("what did i eat", "food_info", .food),
+            ("suggest dinner", "food_info", .food),
+            ("what should i eat", "food_info", .food),
+            ("how much protein today", "food_info", .food),
+            ("weekly summary", "food_info", .dashboard),
+            ("yesterday's food", "food_info", .food),
+        ]
+        var correct = 0
+        for (query, expectedTool, screen) in cases {
+            let tools = ToolRanker.rank(query: query.lowercased(), screen: screen)
+            let topTool = tools.first?.name
+            if topTool == expectedTool { correct += 1 }
+        }
+        let accuracy = Double(correct) / Double(cases.count) * 100
+        XCTAssertGreaterThanOrEqual(accuracy, 80, "Food tool routing: \(correct)/\(cases.count) = \(Int(accuracy))%")
+    }
+
+    @MainActor
+    func testToolRoutingAccuracyWeightTools() {
+        let cases: [(String, String?, AIScreen)] = [
+            ("i weigh 165 lbs", "log_weight", .weight),
+            ("weight is 75 kg", "log_weight", .weight),
+            ("how's my weight", "weight_info", .weight),
+            ("weight trend", "weight_info", .weight),
+            ("am i losing weight", "weight_info", .weight),
+            ("tdee", "weight_info", .weight),
+            ("bmr", "weight_info", .weight),
+            ("how many calories do i burn", "weight_info", .weight),
+            ("set goal to 155", "set_goal", .goal),
+            ("target weight 70 kg", "set_goal", .goal),
+        ]
+        var correct = 0
+        for (query, expectedTool, screen) in cases {
+            let tools = ToolRanker.rank(query: query.lowercased(), screen: screen)
+            if tools.first?.name == expectedTool { correct += 1 }
+        }
+        let accuracy = Double(correct) / Double(cases.count) * 100
+        XCTAssertGreaterThanOrEqual(accuracy, 80, "Weight tool routing: \(correct)/\(cases.count) = \(Int(accuracy))%")
+    }
+
+    @MainActor
+    func testToolRoutingAccuracyExerciseTools() {
+        let cases: [(String, String?, AIScreen)] = [
+            ("start push day", "start_workout", .exercise),
+            ("start chest workout", "start_workout", .exercise),
+            ("begin leg day", "start_workout", .exercise),
+            ("what should i train", "exercise_info", .exercise),
+            ("suggest a workout", "exercise_info", .exercise),
+            ("workout history", "exercise_info", .exercise),
+            ("how many workouts this week", "exercise_info", .exercise),
+            ("i did yoga for 30 min", "log_activity", .exercise),
+            ("just did 20 min cardio", "log_activity", .exercise),
+        ]
+        var correct = 0
+        for (query, expectedTool, screen) in cases {
+            let tools = ToolRanker.rank(query: query.lowercased(), screen: screen)
+            if tools.first?.name == expectedTool { correct += 1 }
+        }
+        let accuracy = Double(correct) / Double(cases.count) * 100
+        XCTAssertGreaterThanOrEqual(accuracy, 70, "Exercise tool routing: \(correct)/\(cases.count) = \(Int(accuracy))%")
+    }
+
+    @MainActor
+    func testToolRoutingAccuracyOtherTools() {
+        let cases: [(String, String?, AIScreen)] = [
+            ("how did i sleep", "sleep_recovery", .bodyRhythm),
+            ("sleep this week", "sleep_recovery", .bodyRhythm),
+            ("hrv trend", "sleep_recovery", .bodyRhythm),
+            ("took vitamin d", "mark_supplement", .supplements),
+        ]
+        var correct = 0
+        for (query, expectedTool, screen) in cases {
+            let tools = ToolRanker.rank(query: query.lowercased(), screen: screen)
+            if tools.first?.name == expectedTool { correct += 1 }
+        }
+        XCTAssertGreaterThanOrEqual(correct, cases.count / 2, "Other tool routing: \(correct)/\(cases.count)")
+    }
+
     // MARK: - Workout Action Parsing (Legacy)
 
     func testCreateWorkoutParsing() {

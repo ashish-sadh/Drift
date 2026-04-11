@@ -28,9 +28,9 @@ Execute: find each food → show confirmation UI → log
 - [x] **Streaming intent detection** — Token streaming with word-by-word generation.
 - [x] **Synthetic training data** — 16 test methods, 50+ assertions covering all tools, edge cases, LLM quirks. Fixed empty tool bug.
 - [x] **Unified tool schema prompt** — 12 tools with compact function signatures (~250 tokens). 16 examples. delete_food + body_comp added.
-- [ ] **Remove StaticOverrides for intent routing** — Keep StaticOverrides ONLY for instant commands (undo, delete, copy, barcode scan, greetings). Move ALL intent detection to LLM.
-- [ ] **Multi-item food logging via LLM** — LLM parses "rice with dal and chicken" as 3 items. No more hardcoded "and" splitting.
-- [ ] **Confirmation UI for actions** — After LLM returns tool call, show brief confirmation before executing.
+- [x] **Remove StaticOverrides for intent routing** — Migrated all info queries (TDEE, protein, macros, calories, workout count, weekly comparison, workout suggestions) to ToolRanker/IntentClassifier. StaticOverrides 533→421 lines. Remaining handlers are deterministic commands (undo, delete, regex-parsed entries) that don't benefit from LLM.
+- [x] **Multi-item food logging via LLM** — Comma-separated items from LLM now open recipe builder with all items pre-populated + DB macros.
+- [x] **Confirmation UI for actions** — log_food opens FoodSearchView/RecipeBuilder (user confirms there), log_weight opens WeightEntry, start_workout opens ActiveWorkoutView. Delete has undo. No extra confirmation needed — existing UIs serve as confirmation gates.
 
 ### P1: Tool Quality + Prompt Engineering
 - [ ] **Tool calling accuracy eval** — Run 100 synthetic queries through Gemma 4. Measure: correct tool? Correct params? Target: 85%+.
