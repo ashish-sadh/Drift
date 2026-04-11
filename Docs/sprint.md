@@ -42,7 +42,7 @@ Execute: find each food → show confirmation UI → log
 ### P1: Workout History & Editing
 - [ ] **Manual workout entry** — "Add Past Workout" button on workout tab. Pick date, name exercises, enter sets/reps/weight.
 - [ ] **Edit existing workout** — Tap workout in history → edit sets, reps, weight, exercise order.
-- [ ] **Edit workout name & notes** — Allow renaming from detail view.
+- [x] **Edit workout name & notes** — Menu option in detail view, alert with pre-populated fields, WorkoutService.updateWorkout().
 - [ ] **Delete individual sets** — Swipe-to-delete on individual sets.
 
 ### P2: Presentation Quality

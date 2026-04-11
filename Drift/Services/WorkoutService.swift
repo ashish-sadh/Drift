@@ -18,6 +18,12 @@ enum WorkoutService {
         } ?? workout
     }
 
+    static func deleteSet(id: Int64) throws {
+        try db.writer.write { dbConn in
+            _ = try WorkoutSet.deleteOne(dbConn, id: id)
+        }
+    }
+
     static func updateWorkout(id: Int64, name: String, notes: String?) throws {
         try db.writer.write { dbConn in
             try dbConn.execute(

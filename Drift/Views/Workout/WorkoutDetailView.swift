@@ -73,6 +73,16 @@ struct WorkoutDetailView: View {
                                     Spacer()
                                     if let rm = s.estimated1RM { Text("1RM: \(Int(rm))").font(.caption2.monospacedDigit()).foregroundStyle(.tertiary) }
                                 }
+                                .swipeActions(edge: .trailing) {
+                                    if let sid = s.id {
+                                        Button(role: .destructive) {
+                                            try? WorkoutService.deleteSet(id: sid)
+                                            sets.removeAll { $0.id == sid }
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
+                                }
                             }
                         }.card()
                     }
