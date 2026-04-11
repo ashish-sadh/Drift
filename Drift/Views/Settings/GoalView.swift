@@ -11,6 +11,7 @@ struct GoalView: View {
     @State private var tdeeConfig = TDEEEstimator.loadConfig()
     @State private var profileExpanded = false
     @State private var showSaved = false
+    @State private var heightInFeet = false
     @State private var weightText = ""
     @FocusState private var weightFocused: Bool
     private let database = AppDatabase.shared
@@ -173,22 +174,62 @@ struct GoalView: View {
                         .pickerStyle(.menu)
                     }
 
-                    // Height
+                    // Height — cm or ft/in
                     HStack {
                         Text("Height").font(.subheadline).foregroundStyle(.secondary)
                         Spacer()
-                        TextField("Not set", text: Binding(
-                            get: { tdeeConfig.heightCm.map { "\(Int($0))" } ?? "" },
-                            set: { newValue in
-                                if newValue.isEmpty { tdeeConfig.heightCm = nil }
-                                else if let cm = Double(newValue), cm >= 50, cm <= 300 { tdeeConfig.heightCm = cm }
-                                saveProfile(showFeedback: false)
-                            }
-                        ))
-                        .keyboardType(.numberPad)
-                        .multilineTextAlignment(.trailing)
-                        .frame(width: 60)
-                        Text("cm").font(.caption).foregroundStyle(.tertiary)
+                        if heightInFeet {
+                            TextField("ft", text: Binding(
+                                get: {
+                                    guard let cm = tdeeConfig.heightCm else { return "" }
+                                    return "\(Int(cm / 2.54) / 12)"
+                                },
+                                set: { ft in
+                                    updateHeightFromFtIn(ft: ft, inches: nil)
+                                }
+                            ))
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 30)
+                            Text("'").foregroundStyle(.tertiary)
+                            TextField("in", text: Binding(
+                                get: {
+                                    guard let cm = tdeeConfig.heightCm else { return "" }
+                                    let totalInches = Int(cm / 2.54)
+                                    return "\(totalInches % 12)"
+                                },
+                                set: { inches in
+                                    updateHeightFromFtIn(ft: nil, inches: inches)
+                                }
+                            ))
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 30)
+                            Text("\"").foregroundStyle(.tertiary)
+                        } else {
+                            TextField("Not set", text: Binding(
+                                get: { tdeeConfig.heightCm.map { "\(Int($0))" } ?? "" },
+                                set: { newValue in
+                                    if newValue.isEmpty { tdeeConfig.heightCm = nil }
+                                    else if let cm = Double(newValue), cm >= 50, cm <= 300 { tdeeConfig.heightCm = cm }
+                                    saveProfile(showFeedback: false)
+                                }
+                            ))
+                            .keyboardType(.numberPad)
+                            .multilineTextAlignment(.trailing)
+                            .frame(width: 60)
+                            Text("cm").font(.caption).foregroundStyle(.tertiary)
+                        }
+                        Button {
+                            heightInFeet.toggle()
+                        } label: {
+                            Text(heightInFeet ? "cm" : "ft")
+                                .font(.caption2.weight(.medium))
+                                .padding(.horizontal, 6).padding(.vertical, 3)
+                                .background(Theme.accent.opacity(0.15), in: RoundedRectangle(cornerRadius: 4))
+                                .foregroundStyle(Theme.accent)
+                        }
+                        .buttonStyle(.plain)
                     }
 
                     // Weight
@@ -232,6 +273,20 @@ struct GoalView: View {
         .onAppear {
             tryAutoFillProfile()
             if !profileComplete { profileExpanded = true }
+        }
+    }
+
+    private func updateHeightFromFtIn(ft: String?, inches: String?) {
+        let currentCm = tdeeConfig.heightCm ?? 170
+        let totalInches = Int(currentCm / 2.54)
+        let currentFt = totalInches / 12
+        let currentIn = totalInches % 12
+        let newFt = ft.flatMap { Int($0) } ?? currentFt
+        let newIn = inches.flatMap { Int($0) } ?? currentIn
+        let cm = Double(newFt * 12 + newIn) * 2.54
+        if cm >= 50, cm <= 300 {
+            tdeeConfig.heightCm = cm
+            saveProfile(showFeedback: false)
         }
     }
 
