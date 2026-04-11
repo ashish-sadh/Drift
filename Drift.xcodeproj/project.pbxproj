@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		07703998EC9E02AD418576E8 /* TypingDotsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2771DB577C8DC7CD66E79ED /* TypingDotsView.swift */; };
 		0884D534B3ADDE47643801F8 /* WeightTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96402659F73046846B409D5 /* WeightTabView.swift */; };
 		11AFD9A7915929FB480CFE99 /* CycleCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6C02FCD909BDE67D229EC1 /* CycleCalculationTests.swift */; };
 		12608375BDCD57D211C64849 /* WeightLogListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E78D132A90B0FDC35353646 /* WeightLogListView.swift */; };
@@ -337,6 +338,7 @@
 		E003BCE9AE8B62B2BC163C7B /* GlucoseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseService.swift; sourceTree = "<group>"; };
 		E0EA24C208A1C32DB52709A4 /* SleepRecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SleepRecoveryView.swift; sourceTree = "<group>"; };
 		E1A5DA3E3543A99260250279 /* UIFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIFlowTests.swift; sourceTree = "<group>"; };
+		E2771DB577C8DC7CD66E79ED /* TypingDotsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TypingDotsView.swift; sourceTree = "<group>"; };
 		E342C8090873CF9612C8A63E /* LabReportOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabReportOCR.swift; sourceTree = "<group>"; };
 		E38FF7C7D3E9C7AED0CC8F83 /* WeightServiceAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightServiceAPI.swift; sourceTree = "<group>"; };
 		E4B60275240AEDD1A676B282 /* ConversationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationState.swift; sourceTree = "<group>"; };
@@ -565,6 +567,7 @@
 				188A69D621CC2DF63ADFB21F /* AIChatView+Suggestions.swift */,
 				7F4C6870115BE53081FA0CDE /* AISetupView.swift */,
 				DFF155F20FB2EF069D634C95 /* FloatingAIAssistant.swift */,
+				E2771DB577C8DC7CD66E79ED /* TypingDotsView.swift */,
 			);
 			path = AI;
 			sourceTree = "<group>";
@@ -980,6 +983,7 @@
 				FD04469D134154054159AA4C /* ToolRanker.swift in Sources */,
 				1CCD2D031DB1C7F7BB7E52EF /* ToolRegistration.swift in Sources */,
 				7430C66B3A1C306F1199C3FA /* ToolSchema.swift in Sources */,
+				07703998EC9E02AD418576E8 /* TypingDotsView.swift in Sources */,
 				B47A39B47130D32625A50BE0 /* USDAFoodService.swift in Sources */,
 				9CBCD31AD1998B4E5237C1A6 /* Units.swift in Sources */,
 				DFFA7CC42D60E67CB40222E8 /* WeightChartView.swift in Sources */,

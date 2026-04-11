@@ -160,21 +160,25 @@ struct AIChatView: View {
     // MARK: - Thinking Indicator
 
     private var thinkingIndicator: some View {
-        HStack(spacing: 6) {
+        HStack(alignment: .top, spacing: 8) {
             Image(systemName: "sparkles").font(.system(size: 10))
-                .foregroundStyle(Theme.accent).padding(.top, 1)
-            ProgressView().scaleEffect(0.6)
-            switch generatingState {
-            case .thinking(let step):
-                Text(step).font(.caption2).foregroundStyle(.tertiary)
-            case .generating:
-                Text("Writing response...").font(.caption2).foregroundStyle(.tertiary)
-            case .idle:
-                EmptyView()
+                .foregroundStyle(Theme.accent).padding(.top, 4)
+            VStack(alignment: .leading, spacing: 4) {
+                TypingDotsView()
+                switch generatingState {
+                case .thinking(let step):
+                    Text(step).font(.caption2).foregroundStyle(.tertiary)
+                case .generating:
+                    Text("Writing response...").font(.caption2).foregroundStyle(.tertiary)
+                case .idle:
+                    EmptyView()
+                }
             }
             Spacer()
         }
-        .padding(.horizontal, 14)
+        .padding(.horizontal, 12).padding(.vertical, 6)
+        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
+        .padding(.horizontal, 10)
         .transition(.opacity)
     }
 
