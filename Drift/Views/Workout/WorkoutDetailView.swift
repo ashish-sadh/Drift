@@ -10,6 +10,9 @@ struct WorkoutDetailView: View {
     @State private var showingShare = false
     @State private var showingSaveTemplate = false
     @State private var showingDeleteConfirm = false
+    @State private var showingEditName = false
+    @State private var editName = ""
+    @State private var editNotes = ""
     @State private var saveTemplateName = ""
 
     private var shareText: String {
@@ -82,6 +85,11 @@ struct WorkoutDetailView: View {
             ToolbarItem(placement: .primaryAction) {
                 Menu {
                     Button { showingShare = true } label: { Label("Share", systemImage: "square.and.arrow.up") }
+                    Button {
+                        editName = summary.workout.name
+                        editNotes = summary.workout.notes ?? ""
+                        showingEditName = true
+                    } label: { Label("Edit Name & Notes", systemImage: "pencil") }
                     Button { saveTemplateName = summary.workout.name; showingSaveTemplate = true } label: { Label("Save as Template", systemImage: "doc.on.doc") }
                     if summary.workout.id != nil {
                         Divider()
@@ -109,6 +117,17 @@ struct WorkoutDetailView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Enter a name for this template")
+        }
+        .alert("Edit Workout", isPresented: $showingEditName) {
+            TextField("Workout name", text: $editName)
+            TextField("Notes (optional)", text: $editNotes)
+            Button("Save") {
+                if let wid = summary.workout.id, !editName.isEmpty {
+                    try? WorkoutService.updateWorkout(id: wid, name: editName, notes: editNotes.isEmpty ? nil : editNotes)
+                    onDelete?() // triggers parent reload
+                }
+            }
+            Button("Cancel", role: .cancel) {}
         }
         .onAppear { if let wid = summary.workout.id { sets = (try? WorkoutService.fetchSets(forWorkout: wid)) ?? [] } }
     }

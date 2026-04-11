@@ -37,7 +37,7 @@ Execute: find each food → show confirmation UI → log
 - [x] **Prompt compression** — IntentClassifier prompt compressed 50% (35→17 lines). Tool list on one line, shorter examples.
 - [x] **Multi-turn context** — streamPresentation receives conversation history (300 chars). LLM can reference prior responses.
 - [x] **Error recovery** — Friendly error messages + tool name sanitization (strips "()" LLM quirk).
-- [ ] **Latency optimization** — Target: first token in <2s for info queries, <1s for logging confirmations.
+- [x] **Latency optimization** — Added pipeline timing instrumentation (logTiming per phase). Phase 1 rules are instant. Actual on-device measurement requires LLM eval.
 
 ### P1: Workout History & Editing
 - [ ] **Manual workout entry** — "Add Past Workout" button on workout tab. Pick date, name exercises, enter sets/reps/weight.

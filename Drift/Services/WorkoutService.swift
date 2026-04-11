@@ -18,6 +18,14 @@ enum WorkoutService {
         } ?? workout
     }
 
+    static func updateWorkout(id: Int64, name: String, notes: String?) throws {
+        try db.writer.write { dbConn in
+            try dbConn.execute(
+                sql: "UPDATE workout SET name = ?, notes = ? WHERE id = ?",
+                arguments: [name, notes, id])
+        }
+    }
+
     static func saveSets(_ sets: [WorkoutSet]) throws {
         try db.writer.write { dbConn in
             for var s in sets { try s.insert(dbConn) }
