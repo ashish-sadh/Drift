@@ -400,17 +400,19 @@ import GRDB
 
 @Test func goalOnTrackExact() async throws {
     let g = WeightGoal(targetWeightKg: 50, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 60)
-    #expect(g.isOnTrack(actualWeeklyRateKg: g.requiredWeeklyRateKg) == .onTrack)
+    let rate = g.requiredWeeklyRate(currentWeightKg: 60)
+    #expect(g.isOnTrack(actualWeeklyRateKg: rate, currentWeightKg: 60) == .onTrack)
 }
 
 @Test func goalBehind() async throws {
     let g = WeightGoal(targetWeightKg: 50, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 60)
-    #expect(g.isOnTrack(actualWeeklyRateKg: 0) == .behind)
+    #expect(g.isOnTrack(actualWeeklyRateKg: 0, currentWeightKg: 60) == .behind)
 }
 
 @Test func goalAhead() async throws {
     let g = WeightGoal(targetWeightKg: 50, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 60)
-    #expect(g.isOnTrack(actualWeeklyRateKg: g.requiredWeeklyRateKg * 2) == .ahead)
+    let rate = g.requiredWeeklyRate(currentWeightKg: 60)
+    #expect(g.isOnTrack(actualWeeklyRateKg: rate * 2, currentWeightKg: 60) == .ahead)
 }
 
 // MARK: - Food History (4 tests)

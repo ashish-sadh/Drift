@@ -338,9 +338,10 @@ import Testing
 
 @Test func goalOnTrack() async throws {
     let g = WeightGoal(targetWeightKg: 50.0, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 60.0)
-    #expect(g.isOnTrack(actualWeeklyRateKg: g.requiredWeeklyRateKg) == .onTrack)
-    #expect(g.isOnTrack(actualWeeklyRateKg: g.requiredWeeklyRateKg * 2) == .ahead)
-    #expect(g.isOnTrack(actualWeeklyRateKg: 0) == .behind)
+    let rate = g.requiredWeeklyRate(currentWeightKg: 60)
+    #expect(g.isOnTrack(actualWeeklyRateKg: rate, currentWeightKg: 60) == .onTrack)
+    #expect(g.isOnTrack(actualWeeklyRateKg: rate * 2, currentWeightKg: 60) == .ahead)
+    #expect(g.isOnTrack(actualWeeklyRateKg: 0, currentWeightKg: 60) == .behind)
 }
 
 @Test func goalGaining() async throws {

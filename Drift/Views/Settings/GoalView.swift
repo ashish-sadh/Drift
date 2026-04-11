@@ -347,7 +347,7 @@ struct GoalView: View {
         let targets = goal.macroTargets(currentWeightKg: currentWeightKg)
         let pref = goal.dietPreference ?? .balanced
         let weight = currentWeightKg ?? goal.startWeightKg
-        let explanation = goal.calorieTargetExplanation()
+        let explanation = goal.calorieTargetExplanation(currentWeightKg: currentWeightKg)
 
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
@@ -400,7 +400,7 @@ struct GoalView: View {
 
     private func paceCard(_ goal: WeightGoal) -> some View {
         let unit = Preferences.weightUnit
-        let status = actualWeeklyRate.map { goal.isOnTrack(actualWeeklyRateKg: $0) } ?? .onTrack
+        let status = actualWeeklyRate.map { goal.isOnTrack(actualWeeklyRateKg: $0, currentWeightKg: currentWeightKg) } ?? .onTrack
         let statusColor: Color = (status == .behind || status == .wrongDirection) ? Theme.surplus : Theme.deficit
 
         return VStack(alignment: .leading, spacing: 10) {

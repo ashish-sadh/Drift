@@ -232,11 +232,12 @@ struct WeightGoal: Codable, Sendable {
         return min(fromRatio, fromRemaining)
     }
 
-    /// Whether on track: actual rate vs required rate.
-    func isOnTrack(actualWeeklyRateKg: Double) -> OnTrackStatus {
-        // If target ≈ current weight, consider it achieved
-        guard abs(totalChangeKg) > 0.1 else { return .onTrack }
-        let required = requiredWeeklyRateKg
+    /// Whether on track: actual rate vs required rate. Uses current weight for direction.
+    func isOnTrack(actualWeeklyRateKg: Double, currentWeightKg: Double? = nil) -> OnTrackStatus {
+        let cw = currentWeightKg ?? startWeightKg
+        let remaining = abs(remainingKg(currentWeightKg: cw))
+        guard remaining > 0.5 else { return .onTrack }  // at target
+        let required = requiredWeeklyRate(currentWeightKg: cw)
         guard abs(required) > 0.001 else { return .onTrack }
         let ratio = actualWeeklyRateKg / required
 
