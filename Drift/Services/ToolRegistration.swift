@@ -21,13 +21,35 @@ enum ToolRegistration {
                          ToolParam("carbs", "number", "Custom carbs grams", required: false),
                          ToolParam("fat", "number", "Custom fat grams", required: false)],
             preHook: { params in
-                // Parse gram amounts: "paneer biryani 200g" or amount="200g"
-                guard let rawName = params.string("name") else { return params }
+                guard let rawName = params.string("name")?.trimmingCharacters(in: .whitespaces),
+                      !rawName.isEmpty else {
+                    // Empty name — likely "log lunch" without food specified
+                    let meal = params.string("meal") ?? "food"
+                    return .invalid(reason: "What did you have for \(meal)?")
+                }
+
                 var name = rawName
                 var gramAmount: Double? = nil
                 var servings = params.double("amount")
 
-                // Check if amount contains "g" → treat as grams
+                // --- Route 1: Has custom calories → quick-add directly ---
+                if let cal = params.double("calories"), cal > 0 {
+                    // Validate range
+                    guard cal <= 10000 else { return .invalid(reason: "That's over 10,000 calories — did you mean something else?") }
+                    let p = params.double("protein") ?? 0
+                    let c = params.double("carbs") ?? 0
+                    let f = params.double("fat") ?? 0
+                    guard p >= 0, c >= 0, f >= 0 else { return .invalid(reason: "Macros can't be negative.") }
+                    // Quick-add — no DB search needed
+                    let vm = FoodLogViewModel()
+                    vm.quickAdd(name: name, calories: cal, proteinG: p, carbsG: c, fatG: f,
+                                fiberG: 0, mealType: vm.autoMealType)
+                    let macroLine = [p > 0 ? "\(Int(p))P" : nil, c > 0 ? "\(Int(c))C" : nil, f > 0 ? "\(Int(f))F" : nil]
+                        .compactMap { $0 }.joined(separator: " ")
+                    return .route(.text("Logged \(name) — \(Int(cal)) cal\(macroLine.isEmpty ? "" : " \(macroLine)")."))
+                }
+
+                // Parse gram amounts: "paneer biryani 200g" or amount="200g"
                 if let amtStr = params.string("amount") {
                     let gramPattern = #"^(\d+\.?\d*)\s*g(?:ram)?s?$"#
                     if let regex = try? NSRegularExpression(pattern: gramPattern, options: .caseInsensitive),
@@ -39,7 +61,7 @@ enum ToolRegistration {
                     }
                 }
 
-                // Also parse "200g" or "200 gram" embedded in the name
+                // Parse "200g" embedded in name
                 let nameGramPattern = #"\s+(\d+\.?\d*)\s*g(?:ram)?s?\s*$"#
                 if gramAmount == nil,
                    let regex = try? NSRegularExpression(pattern: nameGramPattern, options: .caseInsensitive),
@@ -50,48 +72,33 @@ enum ToolRegistration {
                     name = String(name[..<name.index(name.startIndex, offsetBy: match.range.location)]).trimmingCharacters(in: .whitespaces)
                 }
 
-                // Handle comma-separated items from LLM intent classifier: "eggs, toast, milk"
+                // --- Route 2: Multi-item → recipe builder ---
                 let items = name.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
                 if items.count > 1 {
-                    // Multi-item: return first item for food search, store rest for follow-up
                     let firstName = items[0]
                     if let food = AIActionExecutor.findFood(query: firstName, servings: servings, gramAmount: gramAmount) {
                         var enriched: [String: String] = ["name": food.food.name, "amount": "\(food.servings)"]
                         enriched["remaining_items"] = items.dropFirst().joined(separator: ", ")
-                        return ToolCallParams(values: enriched)
+                        return .transform(ToolCallParams(values: enriched))
                     }
-                    return ToolCallParams(values: ["name": firstName, "remaining_items": items.dropFirst().joined(separator: ", ")])
+                    return .transform(ToolCallParams(values: ["name": firstName, "remaining_items": items.dropFirst().joined(separator: ", ")]))
                 }
 
-                // DB lookup + gram→serving conversion
+                // --- Route 3: Single food → DB lookup ---
                 if let food = AIActionExecutor.findFood(query: name, servings: servings, gramAmount: gramAmount) {
                     var enriched: [String: String] = ["name": food.food.name]
                     enriched["amount"] = "\(food.servings)"
-                    return ToolCallParams(values: enriched)
+                    return .transform(ToolCallParams(values: enriched))
                 }
 
-                // No match — pass cleaned name through for search
+                // --- Route 4: Not in DB → pass through for search ---
                 var enriched: [String: String] = ["name": name]
                 if let s = servings { enriched["amount"] = "\(s)" }
-                return ToolCallParams(values: enriched)
+                return .transform(ToolCallParams(values: enriched))
             },
             handler: { params in
                 guard let name = params.string("name") else { return .error("Missing food name") }
-                // Custom macros: "chipotle bowl 3000 cal 30p 45c 67f" → quick-add directly
-                if let cal = params.double("calories"), cal > 0 {
-                    let vm = FoodLogViewModel()
-                    vm.quickAdd(name: name, calories: cal,
-                                proteinG: params.double("protein") ?? 0,
-                                carbsG: params.double("carbs") ?? 0,
-                                fatG: params.double("fat") ?? 0,
-                                fiberG: 0, mealType: vm.autoMealType)
-                    let macroLine = [
-                        params.double("protein").map { "\(Int($0))P" },
-                        params.double("carbs").map { "\(Int($0))C" },
-                        params.double("fat").map { "\(Int($0))F" }
-                    ].compactMap { $0 }.joined(separator: " ")
-                    return .text("Logged \(name) — \(Int(cal)) cal\(macroLine.isEmpty ? "" : " \(macroLine)").")
-                }
+                // Custom macros handled by preHook (.route) — won't reach here
                 // Multi-item: open recipe builder with all items
                 if let remaining = params.string("remaining_items"), !remaining.isEmpty {
                     let allItems = [name] + remaining.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }
@@ -437,7 +444,7 @@ enum ToolRegistration {
             ],
             needsConfirmation: true,
             preHook: { params in
-                guard var name = params.string("name") else { return params }
+                guard var name = params.string("name") else { return .invalid(reason: "What activity did you do?") }
                 var duration = params.double("duration")
 
                 // Parse duration embedded in name: "30 min yoga" → 30, "yoga"
@@ -460,9 +467,13 @@ enum ToolRegistration {
                     name = String(name[..<name.index(name.startIndex, offsetBy: match.range.location)]).trimmingCharacters(in: .whitespaces)
                 }
 
+                // Validate duration range
+                if let d = duration, (d < 1 || d > 600) {
+                    return .invalid(reason: "Duration should be 1-600 minutes.")
+                }
                 var enriched: [String: String] = ["name": name]
                 if let d = duration { enriched["duration"] = "\(Int(d))" }
-                return ToolCallParams(values: enriched)
+                return .transform(ToolCallParams(values: enriched))
             },
             handler: { params in
                 guard let name = params.string("name"), !name.isEmpty else {

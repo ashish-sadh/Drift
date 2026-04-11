@@ -53,6 +53,23 @@ struct ToolCall: Sendable {
     let params: ToolCallParams
 }
 
+// MARK: - Hook Result Types
+
+/// PreHook result — validate, transform, route, or ask for confirmation before execution.
+enum PreHookResult: Sendable {
+    case valid(ToolCallParams)                                    // proceed to handler
+    case transform(ToolCallParams)                                // modified params, proceed to handler
+    case invalid(reason: String)                                  // feed back to user/LLM for correction
+    case route(ToolResult)                                        // skip handler, return this result directly
+    case confirm(message: String, params: ToolCallParams)         // ask user before executing
+}
+
+/// PostHook result — verify tool output, optionally reject with fallback.
+enum PostHookResult: Sendable {
+    case accept(followUp: String?)                                // result is good, optional follow-up text
+    case reject(reason: String, fallback: String)                 // result looks wrong, use fallback
+}
+
 /// A registered tool with schema + handler.
 struct ToolSchema: Identifiable {
     let id: String              // "food.search_food"
@@ -61,10 +78,10 @@ struct ToolSchema: Identifiable {
     let description: String     // Shown to LLM
     let parameters: [ToolParam]
     var needsConfirmation: Bool = false  // Tool asks user "yes" before executing
-    var preHook: (@MainActor (ToolCallParams) async -> ToolCallParams)?  // Enrich params before execution
-    var validate: (@MainActor (ToolCallParams) -> String?)?  // Returns error message if invalid, nil if OK
+    var preHook: (@MainActor (ToolCallParams) async -> PreHookResult)?  // Validate + route before execution
+    var validate: (@MainActor (ToolCallParams) -> String?)?  // Legacy validation (returns error or nil)
     let handler: @MainActor (ToolCallParams) async -> ToolResult
-    var postHook: (@MainActor (ToolResult) -> String)?  // Suggest follow-up after execution
+    var postHook: (@MainActor (ToolResult) -> PostHookResult)?  // Verify after execution
 }
 
 // MARK: - Tool Registry
@@ -136,21 +153,58 @@ final class ToolRegistry {
         guard let tool = tools[call.tool] else {
             return .error("Unknown tool: \(call.tool)")
         }
-        // Pre-hook: enrich params (e.g., DB lookup, gram conversion)
+
+        // Pre-hook: validate, transform, route, or confirm
         var params = call.params
         if let preHook = tool.preHook {
-            params = await preHook(params)
+            let hookResult = await preHook(params)
+            switch hookResult {
+            case .valid(let p):
+                params = p
+            case .transform(let p):
+                params = p
+            case .invalid(let reason):
+                // Store in ConversationState so next turn can self-correct
+                ConversationState.shared.pendingIntent = .awaitingParam(
+                    tool: call.tool, missing: reason, partialParams: call.params.values)
+                return .error(reason)
+            case .route(let result):
+                // PreHook decided the action — skip handler entirely
+                ConversationState.shared.recordToolExecution(tool: call.tool, params: call.params.values)
+                return result
+            case .confirm(let message, let confirmParams):
+                // Store for next turn — user needs to say yes
+                ConversationState.shared.pendingIntent = .awaitingConfirmation(
+                    tool: call.tool, message: message, params: confirmParams.values)
+                return .text(message)
+            }
         }
-        // Validation
+
+        // Legacy validation
         if let validate = tool.validate, let error = validate(params) {
             return .error(error)
         }
+
+        // Execute handler
         let result = await tool.handler(params)
-        // Post-hook: append follow-up suggestion
-        if let postHook = tool.postHook, case .text(let text) = result {
-            let followUp = postHook(result)
-            return .text(text + " " + followUp)
+
+        // Record execution for undo + context
+        ConversationState.shared.recordToolExecution(tool: call.tool, params: params.values)
+
+        // Post-hook: verify result
+        if let postHook = tool.postHook {
+            let hookResult = postHook(result)
+            switch hookResult {
+            case .accept(let followUp):
+                if let followUp, case .text(let text) = result {
+                    return .text(text + " " + followUp)
+                }
+                return result
+            case .reject(_, let fallback):
+                return .text(fallback)
+            }
         }
+
         return result
     }
 
