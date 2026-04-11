@@ -206,16 +206,16 @@ struct WeightGoal: Codable, Sendable {
         let totalDistance = abs(targetWeightKg - startWeightKg)
         guard totalDistance > 0.5 else { return 1 }
         // Check if user has reached or passed target
-        let startToTarget = targetWeightKg - startWeightKg  // negative = losing goal
-        let startToCurrent = currentWeightKg - startWeightKg
-        // If moved in goal direction and passed target → 100%
-        if startToTarget < 0 && startToCurrent <= startToTarget { return 1 }  // losing: went below target
-        if startToTarget > 0 && startToCurrent >= startToTarget { return 1 }  // gaining: went above target
-        // Normal progress: how much of the journey is done
-        let achieved = abs(startToCurrent)
-        return startToTarget * startToCurrent > 0  // same direction?
-            ? min(1, achieved / totalDistance)
-            : 0  // went wrong direction
+        let goalDirection = targetWeightKg - startWeightKg  // negative = losing, positive = gaining
+        let currentPosition = currentWeightKg - startWeightKg
+        // Overshoot: moved past target in the goal direction → 100%
+        if goalDirection < 0 && currentPosition <= goalDirection { return 1 }  // losing goal, went below target
+        if goalDirection > 0 && currentPosition >= goalDirection { return 1 }  // gaining goal, went above target
+        // Wrong direction: moved opposite to goal → 0%
+        if goalDirection < 0 && currentPosition > 0 { return 0 }  // losing goal but gained weight past start
+        if goalDirection > 0 && currentPosition < 0 { return 0 }  // gaining goal but lost weight past start
+        // Normal progress
+        return min(1, max(0, abs(currentPosition) / totalDistance))
     }
 
     /// Whether on track: actual rate vs required rate.

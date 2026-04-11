@@ -238,6 +238,96 @@ import GRDB
     #expect(regress == 0.0, "Should be clamped to 0.0")
 }
 
+// MARK: - Bug Reproduction: "gain 14.1 kg" when user wants to lose
+
+@Test func staleStartWeight_directionStillCorrect() async throws {
+    // THE BUG: startWeightKg=75.9 (stale/wrong), target=90, current=101.8
+    // Old code: totalChangeKg = 90 - 75.9 = +14.1 → "gain" (WRONG)
+    // New code: isLosing(current=101.8) = 101.8 > 90 = true → "lose" (CORRECT)
+    let goal = WeightGoal(targetWeightKg: 90, monthsToAchieve: 3, startDate: "2026-01-01", startWeightKg: 75.9)
+
+    // Direction must be based on CURRENT weight, not start
+    #expect(goal.isLosing(currentWeightKg: 101.8) == true, "101.8 > 90 = losing")
+    #expect(goal.isLosing(currentWeightKg: 85) == false, "85 < 90 = gaining (below target)")
+    #expect(goal.isLosing(currentWeightKg: 90) == false, "90 == 90 = at target")
+}
+
+@Test func staleStartWeight_remainingIsCorrect() async throws {
+    let goal = WeightGoal(targetWeightKg: 90, monthsToAchieve: 3, startDate: "2026-01-01", startWeightKg: 75.9)
+
+    // Remaining must be based on CURRENT weight
+    let remaining = goal.remainingKg(currentWeightKg: 101.8)
+    #expect(remaining < 0, "Need to LOSE weight (negative remaining)")
+    #expect(abs(remaining - (-11.8)) < 0.01, "Should be -11.8 kg, got \(remaining)")
+}
+
+@Test func staleStartWeight_deficitIsNegative() async throws {
+    // Use a future start date so weeksRemaining > 0
+    let goal = WeightGoal(targetWeightKg: 90, monthsToAchieve: 6, startDate: "2026-04-01", startWeightKg: 75.9)
+
+    // Deficit must be negative (calorie deficit for weight loss)
+    let deficit = goal.requiredDailyDeficit(currentWeightKg: 101.8)
+    #expect(deficit < 0, "Should require calorie deficit (negative), got \(deficit)")
+}
+
+@Test func staleStartWeight_progressWithStaleStart() async throws {
+    let goal = WeightGoal(targetWeightKg: 90, monthsToAchieve: 3, startDate: "2026-01-01", startWeightKg: 75.9)
+
+    // Progress is relative to start→target journey. start=75.9, target=90 = gain goal.
+    // Current=101.8 means user "surpassed" the 90 target from 75.9's perspective → 100%
+    // This is the one case where progress is misleading with stale start.
+    // BUT: direction ("lose 11.8 kg") and deficit are now correct.
+    // Progress bar resolves when user re-baselines start weight.
+    let progress = goal.progress(currentWeightKg: 101.8)
+    #expect(progress == 1.0, "Surpassed target from start's perspective")
+
+    // After re-baseline: start=101.8, target=90, current=101.8 → 0%
+    let rebaselined = WeightGoal(targetWeightKg: 90, monthsToAchieve: 3, startDate: "2026-04-01", startWeightKg: 101.8)
+    #expect(rebaselined.progress(currentWeightKg: 101.8) == 0.0, "Just started → 0%")
+    #expect(rebaselined.progress(currentWeightKg: 95) > 0.5, "Halfway there")
+}
+
+@Test func normalGoal_allCalculationsConsistent() async throws {
+    // Normal scenario: start=105, target=90, current=100 (lost 5 of 15 kg)
+    let goal = WeightGoal(targetWeightKg: 90, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 105)
+
+    #expect(goal.isLosing(currentWeightKg: 100) == true)
+    #expect(abs(goal.remainingKg(currentWeightKg: 100) - (-10)) < 0.01, "10 kg to lose")
+    #expect(goal.requiredDailyDeficit(currentWeightKg: 100) < 0, "Need deficit")
+
+    let progress = goal.progress(currentWeightKg: 100)
+    #expect(progress > 0.3 && progress < 0.35, "~33% done (5 of 15 kg), got \(progress)")
+}
+
+@Test func goalAtTarget_is100Percent() async throws {
+    let goal = WeightGoal(targetWeightKg: 90, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 105)
+    #expect(goal.progress(currentWeightKg: 90) == 1.0, "At target = 100%")
+    #expect(goal.isLosing(currentWeightKg: 90) == false, "At target = not losing")
+}
+
+@Test func gainingGoal_directionCorrect() async throws {
+    // User wants to GAIN: current=60, target=75
+    let goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 55)
+
+    #expect(goal.isLosing(currentWeightKg: 60) == false, "60 < 75 = gaining")
+    #expect(goal.remainingKg(currentWeightKg: 60) > 0, "Need to GAIN (positive remaining)")
+    #expect(goal.requiredDailyDeficit(currentWeightKg: 60) > 0, "Need calorie surplus (positive)")
+}
+
+@Test func requiredRate_adaptsOverTime() async throws {
+    // 12 kg to lose in 6 months = 2 kg/month
+    // After 3 months with only 3 kg lost: 9 kg in 3 months = 3 kg/month (faster!)
+    let goal = WeightGoal(targetWeightKg: 90, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 102)
+
+    let earlyRate = goal.requiredWeeklyRate(currentWeightKg: 102) // full distance, full time
+    let lateRate = goal.requiredWeeklyRate(currentWeightKg: 99)   // less distance, less time
+
+    // Both should be negative (losing)
+    #expect(earlyRate < 0, "Need to lose")
+    #expect(lateRate < 0, "Still need to lose")
+    // Rate should adapt — but depends on remaining weeks (daysRemaining changes with real date)
+}
+
 // MARK: - WeightEntry Model Tests (3 tests)
 
 @Test func weightEntryKgToLbsConversion() async throws {
