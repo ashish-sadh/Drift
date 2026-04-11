@@ -416,7 +416,7 @@ struct GoalView: View {
                 VStack(spacing: 3) {
                     Text("Required")
                         .font(.caption2).foregroundStyle(.tertiary)
-                    Text(String(format: "%.2f", unit.convert(fromKg: goal.requiredWeeklyRateKg)))
+                    Text(String(format: "%.2f", unit.convert(fromKg: goal.requiredWeeklyRate(currentWeightKg: currentWeightKg ?? goal.startWeightKg))))
                         .font(.subheadline.weight(.bold).monospacedDigit())
                     Text("\(unit.displayName)/wk")
                         .font(.caption2).foregroundStyle(.tertiary)
@@ -444,14 +444,16 @@ struct GoalView: View {
     // MARK: - Deficit
 
     private func deficitCard(_ goal: WeightGoal) -> some View {
-        let isLosing = goal.totalChangeKg < 0
+        let currentKg = currentWeightKg ?? goal.startWeightKg
+        let losing = goal.isLosing(currentWeightKg: currentKg)
+        let deficit = goal.requiredDailyDeficit(currentWeightKg: currentKg)
 
         // Goal-aware color: green when aligned with goal direction
         func goalColor(_ value: Double) -> Color {
-            if isLosing {
-                return value < 0 ? Theme.deficit : Theme.surplus  // deficit = good for losing
+            if losing {
+                return value < 0 ? Theme.deficit : Theme.surplus
             } else {
-                return value > 0 ? Theme.deficit : Theme.surplus  // surplus = good for gaining
+                return value > 0 ? Theme.deficit : Theme.surplus
             }
         }
 
@@ -461,9 +463,9 @@ struct GoalView: View {
             HStack(spacing: 12) {
                 VStack(spacing: 3) {
                     Text("Target").font(.caption2).foregroundStyle(.tertiary)
-                    Text(String(format: "%+.0f", goal.requiredDailyDeficit))
+                    Text(String(format: "%+.0f", deficit))
                         .font(.subheadline.weight(.bold).monospacedDigit())
-                        .foregroundStyle(goalColor(goal.requiredDailyDeficit))
+                        .foregroundStyle(goalColor(deficit))
                     Text("kcal/day").font(.caption2).foregroundStyle(.tertiary)
                 }
                 .frame(maxWidth: .infinity).card()
@@ -489,7 +491,7 @@ struct GoalView: View {
     private func projectionCard(_ goal: WeightGoal) -> some View {
         let unit = Preferences.weightUnit
 
-        let isLosing = goal.totalChangeKg < 0
+        let losing = goal.isLosing(currentWeightKg: currentWeightKg ?? goal.startWeightKg)
 
         return VStack(alignment: .leading, spacing: 8) {
             Text("Projection").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
@@ -497,7 +499,7 @@ struct GoalView: View {
             if let rate = actualWeeklyRate, let current = currentWeightKg, abs(rate) > 0.01 {
                 let remaining = goal.remainingKg(currentWeightKg: current)
                 // Check if moving in the right direction
-                let movingRight = (isLosing && rate < 0) || (!isLosing && rate > 0)
+                let movingRight = (losing && rate < 0) || (!losing && rate > 0)
 
                 if movingRight {
                     let weeksToGoal = abs(remaining / rate)
@@ -533,7 +535,7 @@ struct GoalView: View {
                             Text("On track to reach your goal \(abs(diff)) days early")
                                 .font(.caption).foregroundStyle(Theme.deficit)
                         } else if diff > 7 {
-                            Text("\(diff) days behind — adjust your \(isLosing ? "deficit" : "surplus") or extend timeline")
+                            Text("\(diff) days behind — adjust your \(losing ? "deficit" : "surplus") or extend timeline")
                                 .font(.caption).foregroundStyle(Theme.surplus)
                         } else {
                             Text("Right on schedule")

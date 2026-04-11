@@ -32,7 +32,8 @@ struct AlgorithmSettingsView: View {
     private var liveCalorieTarget: Int? {
         guard let goal = WeightGoal.load() else { return nil }
         if goal.calorieTargetOverride != nil { return Int(goal.calorieTargetOverride!) }
-        return Int(max(800, TDEEEstimator.shared.cachedOrSync().tdee + goal.requiredDailyDeficit))
+        let currentKg = WeightTrendService.shared.latestWeightKg ?? goal.startWeightKg
+        return Int(max(800, TDEEEstimator.shared.cachedOrSync().tdee + goal.requiredDailyDeficit(currentWeightKg: currentKg)))
     }
 
     private var liveDeficit: Int? {
@@ -119,9 +120,10 @@ struct AlgorithmSettingsView: View {
             // Target + goal context
             if let target = liveCalorieTarget, let goal = WeightGoal.load() {
                 let unit = Preferences.weightUnit
-                let remaining = abs(unit.convert(fromKg: goal.totalChangeKg))
-                let isLosing = goal.totalChangeKg < 0
-                let requiredDeficit = goal.requiredDailyDeficit
+                let cKg = WeightTrendService.shared.latestWeightKg ?? goal.startWeightKg
+                let remaining = abs(unit.convert(fromKg: goal.remainingKg(currentWeightKg: cKg)))
+                let isLosing = goal.isLosing(currentWeightKg: cKg)
+                let requiredDeficit = goal.requiredDailyDeficit(currentWeightKg: cKg)
 
                 HStack(spacing: 4) {
                     Text("Target \(target)")
