@@ -333,72 +333,7 @@ struct GoalView: View {
         }
     }
 
-    // MARK: - Progress
-
-    private func goalProgressCard(_ goal: WeightGoal) -> some View {
-        let progress = currentWeightKg.map { goal.progress(currentWeightKg: $0) } ?? 0
-        let unit = Preferences.weightUnit
-
-        return VStack(spacing: 12) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Goal").font(.caption).foregroundStyle(.secondary)
-                    Text("\(String(format: "%.1f", unit.convert(fromKg: goal.targetWeightKg))) \(unit.displayName)")
-                        .font(.title2.weight(.bold).monospacedDigit())
-                }
-                Spacer()
-                if let days = goal.daysRemaining {
-                    VStack(alignment: .trailing, spacing: 2) {
-                        Text("\(days)").font(.title2.weight(.bold).monospacedDigit())
-                        Text("days left").font(.caption).foregroundStyle(.secondary)
-                    }
-                }
-            }
-
-            // Progress bar
-            VStack(spacing: 4) {
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Theme.cardBackgroundElevated)
-                            .frame(height: 8)
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(Theme.accent)
-                            .frame(width: max(0, geo.size.width * progress), height: 8)
-                    }
-                }
-                .frame(height: 8)
-
-                HStack {
-                    Text("\(String(format: "%.1f", unit.convert(fromKg: goal.startWeightKg)))")
-                        .font(.caption2.monospacedDigit()).foregroundStyle(.tertiary)
-                    Spacer()
-                    Text("\(Int(progress * 100))%")
-                        .font(.caption2.weight(.bold).monospacedDigit()).foregroundStyle(Theme.accent)
-                    Spacer()
-                    Text("\(String(format: "%.1f", unit.convert(fromKg: goal.targetWeightKg)))")
-                        .font(.caption2.monospacedDigit()).foregroundStyle(.tertiary)
-                }
-            }
-
-            if let current = currentWeightKg {
-                let remaining = goal.remainingKg(currentWeightKg: current)
-                Text("\(String(format: "%.1f", abs(unit.convert(fromKg: remaining)))) \(unit.displayName) to go")
-                    .font(.caption).foregroundStyle(.secondary)
-            }
-
-            // Staleness nudge
-            if WeightTrendService.shared.isStale {
-                HStack(spacing: 6) {
-                    Image(systemName: "exclamationmark.triangle.fill").font(.caption2).foregroundStyle(Theme.fatYellow)
-                    Text("Weight not updated recently. Log your current weight for accurate goals.")
-                        .font(.caption2).foregroundStyle(Theme.fatYellow)
-                }
-                .padding(.top, 4)
-            }
-        }
-        .card()
-    }
+    // Goal progress card: now uses shared GoalProgressCard (see Views/Shared/)
 
     // MARK: - Macro Targets
 

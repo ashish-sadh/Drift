@@ -150,12 +150,14 @@ struct WeightGoal: Codable, Sendable {
         let cw = currentWeightKg ?? startWeightKg
         let deficit = requiredDailyDeficit(currentWeightKg: cw)
         let est = TDEEEstimator.shared.cachedOrSync()
-        let target = est.tdee + deficit
+        let rawTarget = est.tdee + deficit
+        let actualTarget = max(1200, rawTarget)
         let deficitStr = deficit < 0
             ? "- \(Int(abs(deficit))) deficit"
             : "+ \(Int(abs(deficit))) surplus"
+        let floorNote = rawTarget < 1200 ? " (floored to 1200 for safety)" : ""
         return (est.source.rawValue,
-                "TDEE \(Int(est.tdee)) \(deficitStr) = \(Int(target)) kcal/day. \(est.confidence == .low ? "Log weight & food for better accuracy." : "")")
+                "\(est.source.rawValue): TDEE \(Int(est.tdee)) \(deficitStr) = \(Int(actualTarget)) kcal/day.\(floorNote) \(est.confidence == .low ? "Log weight & food for better accuracy." : "")")
     }
 
     /// Effective macro targets.
