@@ -4,6 +4,10 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 
 ---
 
+## Cycle · 2026-04-11
+
+- **Ingredient persistence**: Recipes now store full per-ingredient macros as JSON. RecipeItem is Codable. Swipe-to-edit opens recipe builder with pre-populated ingredients. Backward-compatible with legacy string-array format. 3 new tests.
+
 ## Cycle · 2026-04-10
 
 - **Intent classifier eval expansion**: 8→16 test methods, 50+ assertions across all 10 tools + edge cases (empty JSON, markdown wrapping, LLM quirks). Fixed empty tool string bug in parseResponse.

@@ -54,7 +54,7 @@ Execute: find each food → show confirmation UI → log
 - [x] **Salad base templates** — 5 templates seeded with ingredients.
 - [x] **Recent ingredients in picker** — Already implemented.
 - [x] **Category tabs in ingredient picker** — Horizontal chips for browsing.
-- [ ] **Ingredient persistence** — Store per-ingredient macros for recipe rebuilding.
+- [x] **Ingredient persistence** — Store per-ingredient macros for recipe rebuilding.
 
 ---
 

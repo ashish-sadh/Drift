@@ -234,6 +234,46 @@ struct AIChatView: View {
         return parts.map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
     }
 
+    /// Parse freeform food text into recipe items and open the recipe builder.
+    /// Used by both pending-meal flow and single-message "log breakfast 2 eggs and toast".
+    private func buildMealFromText(_ text: String, mealName: String) {
+        let items = splitFoodItems(text)
+        var recipeItems: [QuickAddView.RecipeItem] = []
+        var notFound: [String] = []
+
+        for item in items {
+            let trimmed = item.trimmingCharacters(in: .whitespaces)
+            let (servings, foodName, gramAmount) = AIActionExecutor.extractAmount(from: trimmed)
+            if let match = AIActionExecutor.findFood(query: foodName, servings: servings, gramAmount: gramAmount) {
+                let f = match.food
+                let portionText = gramAmount.map { "\(Int($0))g" } ?? "\(String(format: "%.1f", match.servings)) serving"
+                recipeItems.append(QuickAddView.RecipeItem(
+                    name: f.name, portionText: portionText,
+                    calories: f.calories * match.servings, proteinG: f.proteinG * match.servings,
+                    carbsG: f.carbsG * match.servings, fatG: f.fatG * match.servings,
+                    fiberG: f.fiberG * match.servings,
+                    servingSizeG: f.servingSize))
+            } else {
+                notFound.append(trimmed)
+            }
+        }
+
+        if recipeItems.isEmpty {
+            foodSearchQuery = text
+            showingFoodSearch = true
+            messages.append(ChatMessage(role: .assistant, text: "Searching for \(text)..."))
+        } else {
+            var msg = "Building \(mealName): \(recipeItems.map { "\($0.name) (\(Int($0.calories)) cal)" }.joined(separator: ", "))."
+            if !notFound.isEmpty {
+                msg += " Couldn't find: \(notFound.joined(separator: ", ")) — add them manually."
+            }
+            messages.append(ChatMessage(role: .assistant, text: msg))
+            pendingRecipeItems = recipeItems
+            pendingRecipeName = mealName.capitalized
+            showingRecipeBuilder = true
+        }
+    }
+
     private func resolvePronouns(_ text: String) -> String {
         let pronounPatterns = ["log it", "log that", "log this", "add it", "add that", "add this", "track it", "track that"]
         guard pronounPatterns.contains(where: { text.contains($0) }) else { return text }
@@ -490,47 +530,11 @@ struct AIChatView: View {
            !lower.contains("summary") && !lower.contains("calorie") && lower.count > 2
            && !["yes", "no", "ok", "okay", "sure", "nah", "nope", "yeah", "yep", "thanks", "thank you", "nevermind", "cancel"].contains(lower) {
             pendingMealName = nil
-            // Strip conversational prefixes: "I had 100g rice" → "100g rice"
             var cleaned = lower
             for prefix in ["i had ", "i ate ", "i made ", "we had ", "it was ", "had "] {
                 if cleaned.hasPrefix(prefix) { cleaned = String(cleaned.dropFirst(prefix.count)); break }
             }
-            let items = splitFoodItems(cleaned)
-            var recipeItems: [QuickAddView.RecipeItem] = []
-            var notFound: [String] = []
-
-            for item in items {
-                let trimmed = item.trimmingCharacters(in: .whitespaces)
-                // Parse amount per item: "100 gram of rice" → (food: "rice", gramAmount: 100)
-                let (servings, foodName, gramAmount) = AIActionExecutor.extractAmount(from: trimmed)
-                if let match = AIActionExecutor.findFood(query: foodName, servings: servings, gramAmount: gramAmount) {
-                    let f = match.food
-                    let portionText = gramAmount.map { "\(Int($0))\(gramAmount != nil ? "g" : "")" } ?? "\(String(format: "%.1f", match.servings)) serving"
-                    recipeItems.append(QuickAddView.RecipeItem(
-                        name: f.name, portionText: portionText,
-                        calories: f.calories * match.servings, proteinG: f.proteinG * match.servings,
-                        carbsG: f.carbsG * match.servings, fatG: f.fatG * match.servings,
-                        fiberG: f.fiberG * match.servings,
-                        servingSizeG: f.servingSize))
-                } else {
-                    notFound.append(trimmed)
-                }
-            }
-
-            if recipeItems.isEmpty {
-                foodSearchQuery = cleaned
-                showingFoodSearch = true
-                messages.append(ChatMessage(role: .assistant, text: "Searching for \(cleaned)..."))
-            } else {
-                var msg = "Building \(mealName): \(recipeItems.map { "\($0.name) (\(Int($0.calories)) cal)" }.joined(separator: ", "))."
-                if !notFound.isEmpty {
-                    msg += " Couldn't find: \(notFound.joined(separator: ", ")) — add them manually."
-                }
-                messages.append(ChatMessage(role: .assistant, text: msg))
-                pendingRecipeItems = recipeItems
-                pendingRecipeName = mealName.capitalized
-                showingRecipeBuilder = true
-            }
+            buildMealFromText(cleaned, mealName: mealName)
             return
         }
 
@@ -549,15 +553,27 @@ struct AIChatView: View {
 
         // --- Food intent parsing (both models — instant, no LLM needed) ---
 
-        // Meal logging: "log breakfast/lunch/dinner/snack" → ask what they ate
+        // Meal logging: "log breakfast" → ask, "log breakfast 2 eggs and toast" → build directly
         let mealWords: Set<String> = ["breakfast", "lunch", "dinner", "snack"]
-        if let verb = ["log ", "ate ", "had "].first(where: { lower.hasPrefix($0) }) {
-            let remainder = String(lower.dropFirst(verb.count)).trimmingCharacters(in: .whitespaces)
-            if mealWords.contains(remainder) {
-                pendingMealName = remainder
-                messages.append(ChatMessage(role: .assistant,
-                    text: "What did you have for \(remainder)? List everything — I'll build a meal entry."))
-                return
+        if let verb = ["log ", "ate ", "had ", "log for ", "ate for ", "had for "].first(where: { lower.hasPrefix($0) }) {
+            var remainder = String(lower.dropFirst(verb.count)).trimmingCharacters(in: .whitespaces)
+            if remainder.hasPrefix("for ") { remainder = String(remainder.dropFirst(4)).trimmingCharacters(in: .whitespaces) }
+            if let meal = mealWords.first(where: { remainder.hasPrefix($0) }) {
+                let afterMeal = String(remainder.dropFirst(meal.count)).trimmingCharacters(in: .whitespaces)
+                var foodText = afterMeal
+                for prefix in ["with ", "of ", ": ", "- "] {
+                    if foodText.hasPrefix(prefix) { foodText = String(foodText.dropFirst(prefix.count)); break }
+                }
+                if foodText.isEmpty {
+                    pendingMealName = meal
+                    messages.append(ChatMessage(role: .assistant,
+                        text: "What did you have for \(meal)? List everything — I'll build a meal entry."))
+                    return
+                } else {
+                    // Single-message: "log breakfast 2 eggs and toast" → parse & build recipe directly
+                    buildMealFromText(foodText, mealName: meal)
+                    return
+                }
             }
         }
 

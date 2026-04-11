@@ -250,7 +250,7 @@ enum StaticOverrides {
             }
         }
 
-        // Quick-add raw calories: "log 500 cal"
+        // Quick-add raw calories: "log 500 cal", "log chipotle bowl 800 calories"
         let calPattern = #"(\d+)\s*(?:cal(?:ories?)?|kcal)"#
         if let regex = try? NSRegularExpression(pattern: calPattern),
            let match = regex.firstMatch(in: lower, range: NSRange(lower.startIndex..., in: lower)),
@@ -260,7 +260,16 @@ enum StaticOverrides {
             for (suffix, m) in [("breakfast", "breakfast"), ("lunch", "lunch"), ("dinner", "dinner"), ("snack", "snack")] {
                 if lower.contains(suffix) { meal = m; break }
             }
-            return .handler { FoodService.quickAddCalories(cal, meal: meal) }
+            // Extract food name: remove calorie amount, verbs, meal words, prepositions
+            let fullRange = Range(match.range, in: lower)!
+            var nameText = lower.replacingCharacters(in: fullRange, with: "")
+            for strip in ["log ", "ate ", "had ", "add ", "just ", "for ", "with ",
+                          "breakfast", "lunch", "dinner", "snack"] {
+                nameText = nameText.replacingOccurrences(of: strip, with: "")
+            }
+            nameText = nameText.trimmingCharacters(in: .whitespacesAndNewlines)
+            let foodName = nameText.isEmpty ? nil : nameText.capitalized
+            return .handler { FoodService.quickAddCalories(cal, meal: meal, name: foodName) }
         }
 
         // Add supplement: "add vitamin D", "add creatine 5g"

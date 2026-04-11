@@ -187,8 +187,9 @@ enum FoodService {
     // MARK: - Quick Add Calories
 
     /// Quick-add raw calories: "log 500 cal for lunch". Creates a manual entry.
-    static func quickAddCalories(_ calories: Int, meal: String? = nil) -> String {
+    static func quickAddCalories(_ calories: Int, meal: String? = nil, name: String? = nil) -> String {
         let today = DateFormatters.todayString
+        let foodName = name ?? "Quick Add"
         let mealType = meal ?? {
             let hour = Calendar.current.component(.hour, from: Date())
             switch hour { case ..<11: return "breakfast"; case ..<15: return "lunch"; case ..<21: return "dinner"; default: return "snack" }
@@ -202,10 +203,10 @@ enum FoodService {
                 mealLog = newLog
             }
             guard let mlId = mealLog?.id else { return "Failed to create meal log." }
-            var entry = FoodEntry(mealLogId: mlId, foodName: "Quick Add", servingSizeG: 0, servings: 1,
+            var entry = FoodEntry(mealLogId: mlId, foodName: foodName, servingSizeG: 0, servings: 1,
                                    calories: Double(calories), proteinG: 0, carbsG: 0, fatG: 0)
             try AppDatabase.shared.saveFoodEntry(&entry)
-            return "Logged \(calories) cal for \(mealType)."
+            return "Logged \(foodName) (\(calories) cal) for \(mealType)."
         } catch {
             return "Failed: \(error.localizedDescription)"
         }
