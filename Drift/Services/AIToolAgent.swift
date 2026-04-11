@@ -246,8 +246,17 @@ enum AIToolAgent {
     ) async -> AgentOutput {
         let hour = Calendar.current.component(.hour, from: Date())
         let timeContext = hour < 12 ? "morning" : hour < 17 ? "afternoon" : "evening"
+        // Context-aware tone based on time and progress
+        let toneHint: String
+        if hour >= 20 {
+            toneHint = "It's evening — be summary-oriented and encouraging about tomorrow."
+        } else if hour < 10 {
+            toneHint = "It's early — be motivating and forward-looking."
+        } else {
+            toneHint = "Keep it practical and action-oriented."
+        }
         let system = """
-        You are a friendly health tracker assistant. It's \(timeContext).
+        You are a friendly health tracker assistant. It's \(timeContext). \(toneHint)
         Answer the user's question using ONLY the data below. Lead with your main observation, then give the numbers.
         Be warm and brief (2-3 sentences). Use the actual numbers. No medical advice. No repeating the question.
         Example: "You're doing well today — 1200 of 2000 cal with solid protein at 85g. A chicken dinner would close the gap nicely."
