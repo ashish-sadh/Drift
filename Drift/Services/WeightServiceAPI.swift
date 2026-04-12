@@ -20,6 +20,18 @@ enum WeightServiceAPI {
         }
     }
 
+    // MARK: - Body Composition
+
+    /// Fetch the latest body composition entry.
+    static func latestBodyComposition() -> BodyComposition? {
+        try? AppDatabase.shared.fetchLatestBodyComposition()
+    }
+
+    /// Save a body composition entry.
+    static func saveBodyComposition(_ entry: inout BodyComposition) {
+        try? AppDatabase.shared.saveBodyComposition(&entry)
+    }
+
     // MARK: - Trend
 
     /// Get current weight trend: current weight, weekly rate, direction, changes.

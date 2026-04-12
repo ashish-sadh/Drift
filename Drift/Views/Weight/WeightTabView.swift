@@ -67,33 +67,35 @@ struct WeightTabView: View {
         .sheet(isPresented: $showingAddWeight, onDismiss: {
             viewModel.loadEntries()
         }) {
+            let latestComp = WeightServiceAPI.latestBodyComposition()
             WeightEntryView(
                 unit: viewModel.weightUnit,
-                lastBodyFat: (try? AppDatabase.shared.fetchLatestBodyComposition())?.bodyFatPct,
-                lastBMI: (try? AppDatabase.shared.fetchLatestBodyComposition())?.bmi,
-                lastWater: (try? AppDatabase.shared.fetchLatestBodyComposition())?.waterPct,
+                lastBodyFat: latestComp?.bodyFatPct,
+                lastBMI: latestComp?.bmi,
+                lastWater: latestComp?.waterPct,
                 onSave: { value, date in
                     viewModel.addWeight(value: value, date: date)
                 },
                 onSaveBodyComp: { comp in
                     var entry = comp
-                    try? AppDatabase.shared.saveBodyComposition(&entry)
+                    WeightServiceAPI.saveBodyComposition(&entry)
                     viewModel.loadEntries()
                 }
             )
         }
         .sheet(isPresented: $showingAddBodyComp) {
+            let latestComp = WeightServiceAPI.latestBodyComposition()
             WeightEntryView(
                 unit: viewModel.weightUnit,
-                lastBodyFat: (try? AppDatabase.shared.fetchLatestBodyComposition())?.bodyFatPct,
-                lastBMI: (try? AppDatabase.shared.fetchLatestBodyComposition())?.bmi,
-                lastWater: (try? AppDatabase.shared.fetchLatestBodyComposition())?.waterPct,
+                lastBodyFat: latestComp?.bodyFatPct,
+                lastBMI: latestComp?.bmi,
+                lastWater: latestComp?.waterPct,
                 onSave: { value, date in
                     viewModel.addWeight(value: value, date: date)
                 },
                 onSaveBodyComp: { comp in
                     var entry = comp
-                    try? AppDatabase.shared.saveBodyComposition(&entry)
+                    WeightServiceAPI.saveBodyComposition(&entry)
                     viewModel.loadEntries()
                 }
             )
