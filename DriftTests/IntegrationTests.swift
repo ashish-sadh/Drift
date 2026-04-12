@@ -486,6 +486,31 @@ import Testing
     #expect(neutralColor == "neutral", "No change should be neutral")
 }
 
+@Test func weightUnitRefreshesOnLoadEntries() async throws {
+    let db = try AppDatabase.empty()
+    let vm = await WeightViewModel(database: db)
+
+    // Set preference to kg, add weight in kg
+    Preferences.weightUnit = .kg
+    await vm.loadEntries()
+    #expect(await vm.weightUnit == .kg)
+
+    // Add 70 kg entry
+    await vm.addWeight(value: 70.0)
+    let displayKg = await vm.displayWeight(70.0)
+    #expect(abs(displayKg - 70.0) < 0.01, "Should display 70 kg")
+
+    // Change preference to lbs — loadEntries should pick it up
+    Preferences.weightUnit = .lbs
+    await vm.loadEntries()
+    #expect(await vm.weightUnit == .lbs, "weightUnit should refresh from Preferences on loadEntries()")
+    let displayLbs = await vm.displayWeight(70.0)
+    #expect(abs(displayLbs - 154.32) < 0.1, "Should display ~154.3 lbs after unit switch")
+
+    // Restore default
+    Preferences.weightUnit = .kg
+}
+
 // MARK: - Supplement ViewModel Integration Tests
 
 @Test func supplementAddAndLoad() async throws {

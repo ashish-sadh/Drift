@@ -70,6 +70,8 @@ final class WeightViewModel {
     }
 
     func loadEntries() {
+        // Re-read unit preference on every load (fixes stale unit after Settings toggle)
+        weightUnit = Preferences.weightUnit
         do {
             // Single DB query — filter in memory for the chart
             allEntries = try database.fetchWeightEntries(from: nil)
