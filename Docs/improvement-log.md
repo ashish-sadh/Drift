@@ -4,6 +4,15 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 
 ---
 
+## Cycle · 2026-04-12 (Autopilot session)
+
+- **Product Review #11 (Cycle 199)**: Full competitive analysis — MFP acquired Cal AI, Whoop AI Strength Trainer, Boostcamp muscle viz. Agreed: 80% user-facing work next 20 cycles. PR #2 published.
+- **Coverage sprint — AIToolAgent**: Widened 4 private methods to internal. 27 new tests (14→41 methods). Tests cover executeTool, withTimeout, gatherContext, executeRelevantTools, and edge cases.
+- **Coverage sprint — IntentClassifier**: Widened withTimeout. 8 new tests covering timeout, param parsing, confidence, ClassifyResult enum, system prompt validation.
+- **Coverage sprint — AIRuleEngine**: 6 new tests covering nextAction, caloriesLeft, weeklySummary, dailySummary format, yesterdaySummary format.
+- **Coverage sprint — FoodService**: 22 new tests covering resolvedCalorieTarget, getDailyTotals, getCaloriesLeft, explainCalories, searchFood, findByName, getNutrition, deleteEntry, copyYesterday, topProteinFoods, suggestMeal, and more.
+- **Total**: 886 tests (was 743+). +143 tests this session across 4 critical files.
+
 ## Cycle · 2026-04-12
 
 - **Product Review #1**: Competitive analysis (MFP photo scanning, Whoop behavior insights, MacroFactor adaptive algo, Boostcamp muscle visualization). Promoted Adaptive TDEE to Now, added Behavior Insights section, muscle heatmaps to Next.
