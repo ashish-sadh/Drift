@@ -360,10 +360,10 @@ extension AIChatView {
     }
 
     private func handlePendingWorkout(_ lower: String) -> Bool {
-        guard (pendingWorkoutLog || detectWorkoutFromHistory()),
+        guard (convState.phase == .awaitingExercises || detectWorkoutFromHistory()),
               !["yes", "no", "ok", "okay", "nevermind", "cancel", "thanks"].contains(lower),
               lower.count > 3 else { return false }
-        pendingWorkoutLog = false
+        convState.phase = .idle
         let exercises = AIActionParser.parseWorkoutExercises(lower)
         if !exercises.isEmpty {
             pendingExercises = exercises
@@ -386,7 +386,7 @@ extension AIChatView {
                     createdAt: DateFormatters.iso8601.string(from: Date()))
             }
         } else {
-            pendingWorkoutLog = true
+            convState.phase = .awaitingExercises
             messages.append(ChatMessage(role: .assistant,
                 text: "I couldn't parse that. Try: bench press 3x10 at 135, squats 3x8"))
         }
@@ -424,11 +424,12 @@ extension AIChatView {
     }
 
     private func handlePendingMeal(_ lower: String, originalText: String) -> Bool {
-        let resolvedMealName = pendingMealName ?? detectMealFromHistory()
+        let phaseMealName: String? = if case .awaitingMealItems(let name) = convState.phase { name } else { nil }
+        let resolvedMealName = phaseMealName ?? detectMealFromHistory()
         guard let mealName = resolvedMealName,
               !lower.contains("summary") && !lower.contains("calorie") && lower.count > 2
               && !["yes", "no", "ok", "okay", "sure", "nah", "nope", "yeah", "yep", "thanks", "thank you", "nevermind", "cancel"].contains(lower) else { return false }
-        pendingMealName = nil
+        convState.phase = .idle
         var cleaned = lower
         for prefix in ["i had ", "i ate ", "i made ", "we had ", "it was ", "had "] {
             if cleaned.hasPrefix(prefix) { cleaned = String(cleaned.dropFirst(prefix.count)); break }
@@ -443,7 +444,7 @@ extension AIChatView {
         guard let verb = ["log ", "add ", "track "].first(where: { lower.hasPrefix($0) }) else { return false }
         let remainder = String(lower.dropFirst(verb.count)).trimmingCharacters(in: .whitespaces)
         guard exerciseNouns.contains(remainder) else { return false }
-        pendingWorkoutLog = true
+        convState.phase = .awaitingExercises
         messages.append(ChatMessage(role: .assistant,
             text: "What exercises did you do? List them like:\nbench press 3x10 at 135, squats 3x8"))
         return true
@@ -461,7 +462,7 @@ extension AIChatView {
             if foodText.hasPrefix(prefix) { foodText = String(foodText.dropFirst(prefix.count)); break }
         }
         if foodText.isEmpty {
-            pendingMealName = meal
+            convState.phase = .awaitingMealItems(mealName: meal)
             messages.append(ChatMessage(role: .assistant,
                 text: "What did you have for \(meal)? List everything — I'll build a meal entry."))
         } else {
@@ -535,7 +536,7 @@ extension AIChatView {
     private func handleCheatMeal(_ lower: String) -> Bool {
         let cheatPhrases = ["cheat meal", "cheat day", "ate out", "went off plan", "off track", "binge"]
         guard cheatPhrases.contains(where: { lower.contains($0) }) else { return false }
-        pendingMealName = "cheat meal"
+        convState.phase = .awaitingMealItems(mealName: "cheat meal")
         messages.append(ChatMessage(role: .assistant, text: "No judgment! What did you have? I'll log it for you."))
         return true
     }
@@ -554,8 +555,8 @@ extension AIChatView {
                || lastAssistant.text.contains("What did you order") || lastAssistant.text.contains("Describe it")),
               !lower.contains("summary") && !lower.contains("calorie") && lower.count > 2
               && !["yes", "no", "ok", "okay", "sure", "nah", "nope", "yeah", "yep", "thanks", "thank you"].contains(lower) else { return false }
-        let mealName = pendingMealName ?? "Meal"
-        pendingMealName = nil
+        let mealName: String = if case .awaitingMealItems(let name) = convState.phase { name } else { "Meal" }
+        convState.phase = .idle
         buildMealFromText(originalText, mealName: mealName)
         return true
     }

@@ -14,9 +14,8 @@ struct AIChatView: View {
     @State var foodSearchServings: Double? = nil
     @State var showingWorkout = false
     @State var workoutTemplate: WorkoutTemplate? = nil
+    @State var convState = ConversationState.shared
     @State var pendingExercises: [AIActionParser.WorkoutExercise] = []
-    @State var pendingMealName: String? = nil
-    @State var pendingWorkoutLog = false
     @State var showingRecipeBuilder = false
     @State var pendingRecipeItems: [QuickAddView.RecipeItem] = []
     @State var pendingRecipeName = ""

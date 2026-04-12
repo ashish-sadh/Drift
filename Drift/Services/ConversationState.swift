@@ -44,13 +44,20 @@ final class ConversationState {
 
     var lastWriteAction: UndoableAction?
 
-    // MARK: - Multi-Turn State (migrated from AIChatView @State)
+    // MARK: - Conversation Phase (state machine for multi-turn)
 
-    var pendingMealName: String?
-    var pendingWorkoutLog = false
-    var pendingExercises: [AIActionParser.WorkoutExercise] = []
-    var pendingRecipeItems: [QuickAddView.RecipeItem] = []
-    var pendingRecipeName = ""
+    /// What kind of follow-up input we're expecting from the user.
+    /// Replaces scattered pending* booleans/optionals — only one phase at a time.
+    enum Phase: Equatable {
+        /// Ready for any input
+        case idle
+        /// Asked "What did you have for X?" — expecting food list
+        case awaitingMealItems(mealName: String)
+        /// Asked "What exercises did you do?" — expecting exercise list
+        case awaitingExercises
+    }
+
+    var phase: Phase = .idle
 
     // MARK: - Topic Classification (deterministic, no LLM)
 
@@ -99,11 +106,7 @@ final class ConversationState {
         pendingIntent = nil
         lastTool = nil
         lastParams = [:]
-        pendingMealName = nil
-        pendingWorkoutLog = false
-        pendingExercises = []
-        pendingRecipeItems = []
-        pendingRecipeName = ""
+        phase = .idle
         // Don't reset lastTopic, turnCount, or lastWriteAction — those persist across resets
     }
 
