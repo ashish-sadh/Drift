@@ -58,13 +58,15 @@ struct WorkoutDetailView: View {
                 ForEach(summary.exercises, id: \.self) { ex in
                     if let exSets = grouped[ex] {
                         let workingSets = exSets.filter { !$0.isWarmup }
-                        let exVolume = workingSets.reduce(0.0) { $0 + ($1.weightLbs ?? 0) * Double($1.reps ?? 0) }
+                        let detailUnit = Preferences.weightUnit
+                        let exVolumeLbs = workingSets.reduce(0.0) { $0 + ($1.weightLbs ?? 0) * Double($1.reps ?? 0) }
+                        let exVolume = detailUnit.convertFromLbs(exVolumeLbs)
                         VStack(alignment: .leading, spacing: 6) {
                             HStack {
                                 Text(ex).font(.subheadline.weight(.semibold))
                                 Spacer()
                                 if exVolume > 0 {
-                                    Text("\(Int(exVolume)) lb").font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
+                                    Text("\(Int(exVolume)) \(detailUnit.displayName)").font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
                                 }
                                 Text(muscleGroup(for: ex)).font(.caption2).foregroundStyle(.tertiary)
                             }
@@ -74,12 +76,12 @@ struct WorkoutDetailView: View {
                                         .foregroundStyle(s.isWarmup ? Theme.fatYellow : .primary).frame(width: 20)
                                     Text(s.display).font(.subheadline.monospacedDigit())
                                     Spacer()
-                                    if let rm = s.estimated1RM { Text("1RM: \(Int(rm))").font(.caption2.monospacedDigit()).foregroundStyle(.tertiary) }
+                                    if let rm = s.estimated1RM { Text("1RM: \(Int(detailUnit.convertFromLbs(rm)))").font(.caption2.monospacedDigit()).foregroundStyle(.tertiary) }
                                 }
                                 .contentShape(Rectangle())
                                 .onTapGesture {
                                     editingSet = s
-                                    editSetWeight = s.weightLbs.map { "\(Int($0))" } ?? ""
+                                    editSetWeight = s.weightLbs.map { "\(Int(detailUnit.convertFromLbs($0)))" } ?? ""
                                     editSetReps = s.reps.map { "\($0)" } ?? (s.durationSec.map { "\($0)" } ?? "")
                                 }
                                 .swipeActions(edge: .trailing) {
@@ -141,17 +143,18 @@ struct WorkoutDetailView: View {
             get: { editingSet != nil },
             set: { if !$0 { editingSet = nil } }
         )) {
-            TextField("Weight (lbs)", text: $editSetWeight)
+            TextField("Weight (\(Preferences.weightUnit.displayName))", text: $editSetWeight)
                 .keyboardType(.decimalPad)
             TextField("Reps", text: $editSetReps)
                 .keyboardType(.numberPad)
             Button("Save") {
                 if let s = editingSet, let sid = s.id {
-                    let w = Double(editSetWeight)
+                    let rawW = Double(editSetWeight)
+                    let w = rawW.map { Preferences.weightUnit.convertToLbs($0) }
                     let r = Int(editSetReps)
                     let dur = WorkoutSet.isDurationExercise(s.exerciseName) ? r : nil
                     try? WorkoutService.updateSet(id: sid, weightLbs: w, reps: dur != nil ? nil : r, durationSec: dur)
-                    // Update local state
+                    // Update local state (store in lbs)
                     if let idx = sets.firstIndex(where: { $0.id == sid }) {
                         sets[idx].weightLbs = w
                         if dur != nil { sets[idx].durationSec = dur } else { sets[idx].reps = r }

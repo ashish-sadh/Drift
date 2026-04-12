@@ -26,9 +26,14 @@ import GRDB
 }
 
 @Test func workoutSetDisplay() async throws {
+    let saved = Preferences.weightUnit; defer { Preferences.weightUnit = saved }
+    Preferences.weightUnit = .lbs
     let s1 = WorkoutSet(workoutId: 1, exerciseName: "Bench", setOrder: 1, weightLbs: 135, reps: 10, isWarmup: false)
     #expect(s1.display.contains("135"))
     #expect(s1.display.contains("10"))
+    // Verify kg display
+    Preferences.weightUnit = .kg
+    #expect(s1.display.contains("61")) // 135 lbs ≈ 61 kg
 }
 
 @Test func workoutSet1RM() async throws {
@@ -641,6 +646,8 @@ import GRDB
 }
 
 @Test func workoutSetDisplayFormat() async throws {
+    let saved = Preferences.weightUnit; defer { Preferences.weightUnit = saved }
+    Preferences.weightUnit = .lbs
     let s1 = WorkoutSet(workoutId: 1, exerciseName: "Bench", setOrder: 1, weightLbs: 135, reps: 10, isWarmup: false)
     #expect(s1.display.contains("135") && s1.display.contains("10"))
     let s2 = WorkoutSet(workoutId: 1, exerciseName: "Pull-up", setOrder: 1, weightLbs: nil, reps: 12, isWarmup: false)
@@ -759,9 +766,11 @@ import GRDB
 }
 
 @Test func setWithZeroWeight() async throws {
+    let saved = Preferences.weightUnit; defer { Preferences.weightUnit = saved }
+    Preferences.weightUnit = .lbs
     let s = WorkoutSet(workoutId: 1, exerciseName: "Push-up", setOrder: 1, weightLbs: 0, reps: 20, isWarmup: false)
     #expect(s.estimated1RM == nil, "Zero weight should not compute 1RM")
-    #expect(s.display.contains("0 lb"))
+    #expect(s.display.contains("0 lbs"))
 }
 
 @Test func setWithZeroReps() async throws {

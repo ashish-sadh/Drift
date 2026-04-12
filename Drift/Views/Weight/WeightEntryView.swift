@@ -53,8 +53,8 @@ struct WeightEntryView: View {
                                  placeholder: lastWater.map { String(format: "%.1f", $0) })
 
                         DisclosureGroup("More", isExpanded: $showMore) {
-                            fieldRow(icon: "figure.strengthtraining.traditional", label: "Muscle", text: $muscleMassText, unit: "kg")
-                            fieldRow(icon: "bone", label: "Bone", text: $boneMassText, unit: "kg")
+                            fieldRow(icon: "figure.strengthtraining.traditional", label: "Muscle", text: $muscleMassText, unit: unit.displayName)
+                            fieldRow(icon: "bone", label: "Bone", text: $boneMassText, unit: unit.displayName)
                             fieldRow(icon: "circle.dotted.and.circle", label: "Visceral Fat", text: $visceralFatText)
                         }
                     }
