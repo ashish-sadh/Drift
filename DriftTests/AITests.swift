@@ -364,3 +364,151 @@ import Testing
         #expect(Bool(false), "Expected logFood (first action)")
     }
 }
+
+// MARK: - AIToolAgent Tests
+
+@Test @MainActor func aiToolAgentIsInfoTool() async throws {
+    // Known info tools
+    #expect(AIToolAgent.isInfoTool("food_info") == true)
+    #expect(AIToolAgent.isInfoTool("weight_info") == true)
+    #expect(AIToolAgent.isInfoTool("exercise_info") == true)
+    #expect(AIToolAgent.isInfoTool("sleep_recovery") == true)
+    #expect(AIToolAgent.isInfoTool("supplements") == true)
+    #expect(AIToolAgent.isInfoTool("glucose") == true)
+    #expect(AIToolAgent.isInfoTool("biomarkers") == true)
+    #expect(AIToolAgent.isInfoTool("body_comp") == true)
+    #expect(AIToolAgent.isInfoTool("explain_calories") == true)
+
+    // Action tools should not be info tools
+    #expect(AIToolAgent.isInfoTool("log_food") == false)
+    #expect(AIToolAgent.isInfoTool("log_weight") == false)
+    #expect(AIToolAgent.isInfoTool("start_workout") == false)
+    #expect(AIToolAgent.isInfoTool("mark_supplement") == false)
+    #expect(AIToolAgent.isInfoTool("delete_food") == false)
+    #expect(AIToolAgent.isInfoTool("") == false)
+    #expect(AIToolAgent.isInfoTool("nonexistent_tool") == false)
+}
+
+@Test @MainActor func aiToolAgentInsightPrefixNoData() async throws {
+    // Empty/no-data states should NOT get a prefix
+    #expect(AIToolAgent.addInsightPrefix(to: "No food logged today") == "No food logged today")
+    #expect(AIToolAgent.addInsightPrefix(to: "Nothing logged yet") == "Nothing logged yet")
+    #expect(AIToolAgent.addInsightPrefix(to: "No data available") == "No data available")
+    #expect(AIToolAgent.addInsightPrefix(to: "No weight entries found") == "No weight entries found")
+}
+
+@Test @MainActor func aiToolAgentInsightPrefixNegative() async throws {
+    let over = AIToolAgent.addInsightPrefix(to: "You are 300 cal over target today")
+    #expect(over.hasPrefix("Heads up"))
+    let sleep = AIToolAgent.addInsightPrefix(to: "Poor sleep quality last night")
+    #expect(sleep.hasPrefix("Take it easy"))
+    let recovery = AIToolAgent.addInsightPrefix(to: "Low recovery score today")
+    #expect(recovery.hasPrefix("Take it easy"))
+}
+
+@Test @MainActor func aiToolAgentInsightPrefixPositive() async throws {
+    let track = AIToolAgent.addInsightPrefix(to: "You are on track for your calorie goal")
+    #expect(track.hasPrefix("Nice work!"))
+    let remaining = AIToolAgent.addInsightPrefix(to: "800 calories remaining today")
+    #expect(remaining.hasPrefix("Looking good"))
+    let left = AIToolAgent.addInsightPrefix(to: "500 cal left for dinner")
+    #expect(left.hasPrefix("Looking good"))
+}
+
+@Test @MainActor func aiToolAgentInsightPrefixExercise() async throws {
+    let workout = AIToolAgent.addInsightPrefix(to: "3 workouts this week: push, pull, legs")
+    #expect(workout.hasPrefix("Here's your activity"))
+    let streak = AIToolAgent.addInsightPrefix(to: "5-day workout streak!")
+    #expect(streak.hasPrefix("Here's your activity"))
+}
+
+@Test @MainActor func aiToolAgentInsightPrefixWeight() async throws {
+    let trend = AIToolAgent.addInsightPrefix(to: "Weight trend: losing 0.5 lbs/week")
+    #expect(trend.hasPrefix("Here's the trend"))
+    let gaining = AIToolAgent.addInsightPrefix(to: "You're gaining slightly this week")
+    #expect(gaining.hasPrefix("Here's the trend"))
+}
+
+@Test @MainActor func aiToolAgentInsightPrefixDefault() async throws {
+    let generic = AIToolAgent.addInsightPrefix(to: "Vitamin D: 2000 IU taken")
+    #expect(generic.hasPrefix("Here's what I found"))
+}
+
+@Test @MainActor func aiToolAgentStepMessages() async throws {
+    // Food-related
+    #expect(AIToolAgent.stepMessage(for: "log 2 eggs") == "Logging food...")
+    #expect(AIToolAgent.stepMessage(for: "I ate chicken") == "Logging food...")
+    #expect(AIToolAgent.stepMessage(for: "had some rice") == "Logging food...")
+    #expect(AIToolAgent.stepMessage(for: "add banana to breakfast") == "Logging food...")
+
+    // Workout-related
+    #expect(AIToolAgent.stepMessage(for: "start push day") == "Setting up workout...")
+    #expect(AIToolAgent.stepMessage(for: "begin workout") == "Setting up workout...")
+    #expect(AIToolAgent.stepMessage(for: "chest day today") == "Setting up workout...")
+    #expect(AIToolAgent.stepMessage(for: "legs workout") == "Setting up workout...")
+
+    // Supplement-related
+    #expect(AIToolAgent.stepMessage(for: "took my creatine") == "Updating supplements...")
+    #expect(AIToolAgent.stepMessage(for: "vitamin D done") == "Updating supplements...")
+
+    // Info/query-related
+    #expect(AIToolAgent.stepMessage(for: "how many calories left") == "Checking your data...")
+    #expect(AIToolAgent.stepMessage(for: "show me my weight") == "Checking your data...")
+    #expect(AIToolAgent.stepMessage(for: "what should I eat") == "Checking your data...")
+
+    // Default fallback
+    #expect(AIToolAgent.stepMessage(for: "hello there") == "Looking that up...")
+    #expect(AIToolAgent.stepMessage(for: "thanks") == "Looking that up...")
+}
+
+@Test @MainActor func aiToolAgentFallbackTextPerScreen() async throws {
+    // Each screen should produce a non-empty, screen-specific fallback
+    let screens: [AIScreen] = [.food, .weight, .exercise, .bodyRhythm, .supplements, .glucose, .biomarkers, .bodyComposition, .cycle, .dashboard, .goal]
+
+    for screen in screens {
+        let text = AIToolAgent.fallbackText(for: screen)
+        #expect(!text.isEmpty, "Fallback for \(screen) should not be empty")
+    }
+
+    // Screen-specific content checks
+    #expect(AIToolAgent.fallbackText(for: .food).contains("food") || AIToolAgent.fallbackText(for: .food).contains("calories"))
+    #expect(AIToolAgent.fallbackText(for: .weight).contains("weight"))
+    #expect(AIToolAgent.fallbackText(for: .exercise).contains("workout"))
+    #expect(AIToolAgent.fallbackText(for: .supplements).contains("supplement"))
+    #expect(AIToolAgent.fallbackText(for: .glucose).contains("glucose"))
+    #expect(AIToolAgent.fallbackText(for: .biomarkers).contains("lab") || AIToolAgent.fallbackText(for: .biomarkers).contains("marker"))
+    #expect(AIToolAgent.fallbackText(for: .bodyComposition).contains("body") || AIToolAgent.fallbackText(for: .bodyComposition).contains("composition"))
+    #expect(AIToolAgent.fallbackText(for: .cycle).contains("cycle"))
+}
+
+@Test @MainActor func aiToolAgentHandleTextResponseEmpty() async throws {
+    // Empty/low-quality responses should produce fallback text
+    let empty = AIToolAgent.handleTextResponse("", screen: .food)
+    #expect(empty.text == AIToolAgent.fallbackText(for: .food))
+    #expect(empty.action == nil)
+    #expect(empty.toolsCalled.isEmpty)
+
+    let tooShort = AIToolAgent.handleTextResponse("Hi", screen: .weight)
+    #expect(tooShort.text == AIToolAgent.fallbackText(for: .weight))
+}
+
+@Test @MainActor func aiToolAgentHandleTextResponseGeneric() async throws {
+    let generic = AIToolAgent.handleTextResponse("I'm here to help you with anything you need.", screen: .dashboard)
+    #expect(generic.text == AIToolAgent.fallbackText(for: .dashboard))
+}
+
+@Test @MainActor func aiToolAgentHandleTextResponseValid() async throws {
+    let valid = AIToolAgent.handleTextResponse("You've eaten 1200 of 1800 cal. Protein is at 85g.", screen: .food)
+    #expect(valid.text.contains("1200"))
+    #expect(valid.action == nil)
+}
+
+@Test @MainActor func aiToolAgentHandleTextResponseCleansArtifacts() async throws {
+    let dirty = AIToolAgent.handleTextResponse("Great progress on your weight!<|im_end|> Keep it up.", screen: .weight)
+    #expect(!dirty.text.contains("<|im_end|>"))
+}
+
+@Test @MainActor func aiToolAgentFallbackWeightGoal() async throws {
+    // .goal and .weight should share the same fallback
+    #expect(AIToolAgent.fallbackText(for: .goal) == AIToolAgent.fallbackText(for: .weight))
+}
