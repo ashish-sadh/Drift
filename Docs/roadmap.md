@@ -59,13 +59,14 @@ What's not: UI feels rough and unpolished compared to competitors, AI chat drops
 ## Weight
 
 ### Now
-- **LB/KG unit switching** — Currently broken (P0 bug). Toggle has no effect on displayed values.
+- **LB/KG unit switching** — Currently broken (P0 bug). Toggle has no effect on displayed values. Also audit all view models for stale `Preferences.*` captures.
+- **Adaptive TDEE** — Use actual weight trend data to back-calculate true expenditure and auto-adjust calorie targets. Compare predicted vs actual weight loss, compute delta, adjust TDEE. Pure service with tests. (Promoted from Later — MacroFactor's killer feature, we have the data.)
 - Trend visualization improvements — clearer charts, milestone markers
 
 ### Next
+- Predictive "you'll reach goal by" based on adaptive trend
 - Body recomposition tracking (muscle vs fat trends over time)
 - Goal milestones and celebrations
-- Predictive "you'll reach goal by" based on trend
 
 ## Food
 
@@ -91,6 +92,7 @@ What's not: UI feels rough and unpolished compared to competitors, AI chat drops
 
 ### Next
 - **Exercise presentation** — Images, muscle group icons, exercise instructions. Match Boostcamp quality.
+- **Muscle group heatmaps** — Visualize which muscle groups were hit this week based on workout history. Data exists in exercise DB muscle tags.
 - Training programming across weeks
 - Exercise alternatives/substitutions
 
@@ -114,10 +116,20 @@ What's not: UI feels rough and unpolished compared to competitors, AI chat drops
 ### Benchmark: Whoop
 - Whoop's recovery/strain insights are excellent. Match their insight quality for biomarker trends.
 
+## Behavior Insights
+
+### Now
+- **Hardcoded insight cards (3-5)** — Correlate existing cross-domain data on dashboard: (1) workout frequency vs weight trend, (2) protein target hit rate vs weight trend, (3) sleep duration vs recovery. Simple SQL queries, descriptive stats with thresholds. No ML.
+
+### Next
+- Expanded correlations (glucose spikes after specific foods, supplement adherence vs biomarkers)
+- User-configurable insight tracking ("tell me how X affects Y")
+
 ## Quality & Testing
 
 ### Now
 - Coverage targets: **80%** logic, **50%** services — find and fix gaps
+- **Stale preference audit** — Find all view models that capture `Preferences.*` at init instead of reading dynamically. Fix the pattern, not just the LB/KG instance.
 - AI eval harness: every tool gets 10+ eval queries
 - Integration tests for multi-step flows (parse → resolve → log → confirm)
 - Bug hunting: find bugs before users report them
@@ -148,5 +160,5 @@ What's not: UI feels rough and unpolished compared to competitors, AI chat drops
 - **Phase 3a: Tiered Pipeline** (DONE) — ToolRanker, AIToolAgent, StaticOverrides, LLM normalizer.
 - **Phase 3b: Parity Gaps** (DONE) — All high-impact chat features implemented.
 - **Phase 3c: Polish & Depth** (CURRENT) — UI overhaul, AI reliability, test coverage, food DB.
-- **Phase 4: Input Expansion** (NEXT) — Voice, photo, widgets, Apple Watch.
+- **Phase 4: Input Expansion** (NEXT) — Voice (SpeechRecognizer, highest ROI), photo, widgets, Apple Watch.
 - **Phase 5: Deep Intelligence** (FUTURE) — Fine-tuned models, conversation memory, training programming.
