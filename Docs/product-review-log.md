@@ -616,3 +616,15 @@ The loop continues because `_Override: CONTINUE` in steering notes. The loop is 
 
 Reaffirming Reviews #5 and #6. No roadmap changes. No new recommendations. The same sequence applies:
 **STOP loop → coverage → dashboard → prompt consolidation → state machine**
+
+---
+
+## Review #8 — 2026-04-12 (Cycle 146)
+
+Same day as Reviews #5-7. Competitive landscape unchanged.
+
+**Progress since Review #7 (10 cycles):** WorkoutView (3 calls → WorkoutService), SupplementsTabView (3 calls → SupplementService), FoodTabView (3 remaining calls → FoodService). 9 more DB calls eliminated. **Cumulative: 68 DB calls eliminated from 11 view files.**
+
+**Remaining:** ~16 calls across 12 files, all with 1-2 calls each. These are the long tail — diminishing returns.
+
+**Both personas:** Assessment unchanged for 4th consecutive review. DDD routing is near-complete. The loop should stop. Sequence: STOP → coverage → dashboard → prompt consolidation → state machine.
