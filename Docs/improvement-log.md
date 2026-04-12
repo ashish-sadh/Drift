@@ -17,6 +17,8 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 - **Test coverage push**: 3 new test methods for AIActionExecutor edge cases — trailing quantities, ranges, fractions, natural prefixes, meal hints, weight sanity checks, unit detection, article parsing. 5th-cycle coverage check.
 - **Recipe builder action "with" splitting**: openRecipeBuilder action handler now uses `resolveRecipeItem()` + "with" splitting. All 3 food resolution paths are consistent.
 - **SpellCorrectService tests**: 3 test methods covering hardcoded corrections (chiken→chicken, panner→paneer), passthrough for correct/short/common words, and fuzzy matching. Coverage from 0% → tested.
+- **Fix isLowQuality false positive**: Short follow-up questions like "Would you like to log that?" were incorrectly flagged as low quality and replaced with fallback data. Now allows questions with action words.
+- **Food DB serving size fix**: 55 entries had serving_size=1g (broke gram-based logging). Fixed to real weights. Added bulgur, farro. Fixed Vanilla Cake macros (was 0g fat).
 
 ## Cycle · 2026-04-10
 

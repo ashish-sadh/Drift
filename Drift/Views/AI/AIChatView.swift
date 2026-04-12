@@ -819,10 +819,11 @@ struct AIChatView: View {
                 .padding(.horizontal, 12).padding(.vertical, 8)
                 .background(
                     msg.role == .user
-                        ? Theme.accent.opacity(0.15)
-                        : Color.white.opacity(0.06),
+                        ? Theme.accent.opacity(0.18)
+                        : Color.white.opacity(0.07),
                     in: RoundedRectangle(cornerRadius: 14)
                 )
+                .accessibilityLabel(msg.role == .user ? "You said: \(msg.text)" : "Assistant: \(msg.text)")
 
             if msg.role == .assistant { Spacer() }
         }
