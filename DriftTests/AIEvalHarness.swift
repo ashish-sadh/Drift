@@ -1122,6 +1122,115 @@ final class AIEvalHarness: XCTestCase {
     }
 
     @MainActor
+    func testExtractAmountEdgeCases() {
+        // Trailing quantity: "paneer biryani 300 gram"
+        let (_, trailingName, trailingG) = AIActionExecutor.extractAmount(from: "paneer biryani 300 gram")
+        XCTAssertEqual(trailingName, "paneer biryani")
+        XCTAssertEqual(trailingG, 300)
+
+        // Trailing compact: "chicken 200g"
+        let (_, compactName, compactG) = AIActionExecutor.extractAmount(from: "chicken 200g")
+        XCTAssertEqual(compactName, "chicken")
+        XCTAssertEqual(compactG, 200)
+
+        // Range: "2 to 3 bananas" → take higher
+        let (rangeSrv, rangeName, _) = AIActionExecutor.extractAmount(from: "2 to 3 bananas")
+        XCTAssertEqual(rangeSrv, 3)
+        XCTAssertEqual(rangeName, "bananas")
+
+        // Range with "or": "1 or 2 eggs"
+        let (orSrv, orName, _) = AIActionExecutor.extractAmount(from: "1 or 2 eggs")
+        XCTAssertEqual(orSrv, 2)
+        XCTAssertEqual(orName, "eggs")
+
+        // Trailing count unit: "protein 2 scoop" → treated as trailing quantity
+        let (_, trailCountName, trailCountG) = AIActionExecutor.extractAmount(from: "protein 2 scoop")
+        XCTAssertEqual(trailCountName, "protein")
+        XCTAssertEqual(trailCountG, 2)
+
+        // Word amounts: "some rice", "few eggs", "several rotis"
+        let (someSrv, someName, _) = AIActionExecutor.extractAmount(from: "some rice")
+        XCTAssertEqual(someSrv, 1)
+        XCTAssertEqual(someName, "rice")
+
+        let (fewSrv, _, _) = AIActionExecutor.extractAmount(from: "few rotis")
+        XCTAssertEqual(fewSrv, 3)
+
+        // Fraction: "1/3 avocado"
+        let (fracSrv, fracName, _) = AIActionExecutor.extractAmount(from: "1/3 avocado")
+        XCTAssertNotNil(fracSrv)
+        if let s = fracSrv { XCTAssertEqual(s, 1.0/3.0, accuracy: 0.01) }
+        XCTAssertEqual(fracName, "avocado")
+
+        // No amount: just food name
+        let (nilSrv, plainName, nilG) = AIActionExecutor.extractAmount(from: "chicken tikka masala")
+        XCTAssertNil(nilSrv)
+        XCTAssertEqual(plainName, "chicken tikka masala")
+        XCTAssertNil(nilG)
+
+        // Multi-word amount: "a couple of eggs"
+        let (coupleSrv, coupleName, _) = AIActionExecutor.extractAmount(from: "a couple of eggs")
+        XCTAssertEqual(coupleSrv, 2)
+        XCTAssertEqual(coupleName, "eggs")
+    }
+
+    @MainActor
+    func testParseFoodIntentEdgeCases() {
+        // Natural prefixes
+        XCTAssertNotNil(AIActionExecutor.parseFoodIntent("i'm having pasta"))
+        XCTAssertNotNil(AIActionExecutor.parseFoodIntent("snacked on chips"))
+        XCTAssertNotNil(AIActionExecutor.parseFoodIntent("i made soup"))
+        XCTAssertNotNil(AIActionExecutor.parseFoodIntent("just drank smoothie"))
+
+        // Meal hint extraction
+        let breakfast = AIActionExecutor.parseFoodIntent("log eggs for breakfast")
+        XCTAssertNotNil(breakfast)
+        XCTAssertEqual(breakfast?.mealHint, "breakfast")
+
+        let dinner = AIActionExecutor.parseFoodIntent("had chicken for dinner")
+        XCTAssertNotNil(dinner)
+        XCTAssertEqual(dinner?.mealHint, "dinner")
+
+        // Suffix stripping: "for me", "please", "today"
+        let polite = AIActionExecutor.parseFoodIntent("log rice please")
+        XCTAssertNotNil(polite)
+        XCTAssertEqual(polite?.query, "rice")
+
+        let forMe = AIActionExecutor.parseFoodIntent("log dal for me")
+        XCTAssertNotNil(forMe)
+        XCTAssertEqual(forMe?.query, "dal")
+
+        // Non-food rejection
+        XCTAssertNil(AIActionExecutor.parseFoodIntent("log exercise"))
+        XCTAssertNil(AIActionExecutor.parseFoodIntent("log workout"))
+        XCTAssertNil(AIActionExecutor.parseFoodIntent("log weight"))
+
+        // Empty remainder
+        XCTAssertNil(AIActionExecutor.parseFoodIntent("log "))
+        XCTAssertNil(AIActionExecutor.parseFoodIntent("ate"))
+    }
+
+    @MainActor
+    func testParseWeightIntentEdgeCases() {
+        // Sanity check: too low/high
+        XCTAssertNil(AIActionExecutor.parseWeightIntent("i weigh 10"))
+        XCTAssertNil(AIActionExecutor.parseWeightIntent("i weigh 600"))
+
+        // Valid edge cases
+        XCTAssertNotNil(AIActionExecutor.parseWeightIntent("scale says 200 lbs"))
+        XCTAssertNotNil(AIActionExecutor.parseWeightIntent("i'm at 75 kg"))
+        XCTAssertNotNil(AIActionExecutor.parseWeightIntent("log weight 165"))
+
+        // Unit detection
+        let kg = AIActionExecutor.parseWeightIntent("weight is 80 kg")
+        XCTAssertEqual(kg?.unit, .kg)
+        let lbs = AIActionExecutor.parseWeightIntent("i weigh 180 lbs")
+        XCTAssertEqual(lbs?.unit, .lbs)
+        let pounds = AIActionExecutor.parseWeightIntent("weighed in at 165 pounds")
+        XCTAssertEqual(pounds?.unit, .lbs)
+    }
+
+    @MainActor
     func testArticleAndWithParsing() {
         // "the" article strips cleanly → food name is just "bread"
         let (theServings, theName, _) = AIActionExecutor.extractAmount(from: "the bread")

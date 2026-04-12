@@ -13,6 +13,7 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 - **Animated typing dots**: Chat thinking indicator now uses animated three-dot typing indicator instead of ProgressView spinner. Styled as assistant message bubble for visual consistency.
 - **Fix silent delete failures**: Delete/undo handlers used `try?` which silently swallowed errors — user saw "Deleted..." even when deletion failed. Now uses do/catch with visible error. Removed unreachable duplicate barcode scan block.
 - **Food DB dedup**: 42 duplicate Indian food entries removed (1072→1030). Same-name entries with conflicting macros (e.g. dal makhani 350cal vs 230cal) kept original curated version only.
+- **Meal continuation refactor**: "also add coffee with milk" now splits on "with" and resolves each sub-item. Continuation handler reuses `resolveRecipeItem()` — no more duplicated food resolution logic.
 
 ## Cycle · 2026-04-10
 
