@@ -1,10 +1,8 @@
 const OWNER = 'ashish-sadh';
 const REPO = 'Drift';
 const API = 'https://api.github.com';
-// Set this after deploying your Cloudflare Worker
-const WORKER_URL = localStorage.getItem('drift_worker_url') || '';
-// Set this after registering your GitHub OAuth App
-const CLIENT_ID = localStorage.getItem('drift_client_id') || '';
+const WORKER_URL = 'https://drift-command-center-auth.asheesh-sadh.workers.dev';
+const CLIENT_ID = 'Ov23liSpSMfDtbMAiMdf';
 
 // Auth
 function getToken() { return localStorage.getItem('drift_gh_token'); }
@@ -24,19 +22,22 @@ async function api(path, opts = {}) {
   return resp.json();
 }
 
-// Auth flow — PAT-based (simple, no server needed)
-// Create a token at: https://github.com/settings/tokens/new?scopes=repo&description=Drift+Command+Center
-function promptForToken() {
-  const token = prompt(
-    'Enter your GitHub Personal Access Token.\n\n' +
-    'Create one at: github.com/settings/tokens/new\n' +
-    'Scope needed: repo\n\n' +
-    'The token is stored in your browser only.'
-  );
-  if (token && token.trim()) {
-    setToken(token.trim());
-    location.reload();
+// OAuth flow
+function startOAuth() {
+  const state = Math.random().toString(36).slice(2);
+  localStorage.setItem('drift_oauth_state', state);
+  const redirect = `${window.location.origin}${window.location.pathname.replace(/[^/]*$/, '')}callback.html`;
+  window.location.href = `https://github.com/login/oauth/authorize?client_id=${CLIENT_ID}&redirect_uri=${encodeURIComponent(redirect)}&scope=repo&state=${state}`;
+}
+
+async function exchangeCode(code) {
+  const resp = await fetch(`${WORKER_URL}?code=${code}`);
+  const data = await resp.json();
+  if (data.access_token) {
+    setToken(data.access_token);
+    return data;
   }
+  throw new Error(data.error_description || 'OAuth exchange failed');
 }
 
 async function getUser() {
@@ -123,7 +124,7 @@ function renderMarkdown(md) {
 // UI helpers
 function showAuth() {
   const el = document.getElementById('auth-area');
-  if (el) el.innerHTML = `<button class="btn btn-primary" onclick="promptForToken()">Sign in with GitHub</button>`;
+  if (el) el.innerHTML = `<button class="btn btn-primary" onclick="startOAuth()">Sign in with GitHub</button>`;
 }
 
 async function showUser() {
