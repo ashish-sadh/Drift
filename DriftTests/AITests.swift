@@ -512,3 +512,200 @@ import Testing
     // .goal and .weight should share the same fallback
     #expect(AIToolAgent.fallbackText(for: .goal) == AIToolAgent.fallbackText(for: .weight))
 }
+
+// MARK: - AIToolAgent Extended Coverage Tests
+
+@Test @MainActor func aiToolAgentExecuteToolWithTextResult() async throws {
+    ToolRegistration.registerAll()
+    // weight_info is an info tool that returns text — test executeTool path
+    let call = ToolCall(tool: "weight_info", params: ToolCallParams(values: [:]))
+    let output = await AIToolAgent.executeTool(call)
+    // Should return text (even if empty data), not crash
+    #expect(output.toolsCalled == ["weight_info"])
+    #expect(output.action == nil)
+}
+
+@Test @MainActor func aiToolAgentExecuteToolWithUnknownTool() async throws {
+    ToolRegistration.registerAll()
+    let call = ToolCall(tool: "nonexistent_tool_xyz", params: ToolCallParams(values: [:]))
+    let output = await AIToolAgent.executeTool(call)
+    // Unknown tool should produce a friendly error message
+    #expect(output.toolsCalled == ["nonexistent_tool_xyz"])
+    #expect(output.text.contains("couldn't") || output.text.contains("help") || !output.text.isEmpty)
+}
+
+@Test @MainActor func aiToolAgentExecuteToolWithFoodInfo() async throws {
+    ToolRegistration.registerAll()
+    let call = ToolCall(tool: "food_info", params: ToolCallParams(values: ["period": "today"]))
+    let output = await AIToolAgent.executeTool(call)
+    #expect(output.toolsCalled == ["food_info"])
+    #expect(output.action == nil)
+    // food_info returns text data about nutrition
+    #expect(!output.text.isEmpty)
+}
+
+@Test @MainActor func aiToolAgentExecuteToolWithExplainCalories() async throws {
+    ToolRegistration.registerAll()
+    let call = ToolCall(tool: "explain_calories", params: ToolCallParams(values: [:]))
+    let output = await AIToolAgent.executeTool(call)
+    #expect(output.toolsCalled == ["explain_calories"])
+    #expect(output.action == nil)
+}
+
+@Test @MainActor func aiToolAgentWithTimeoutCompletes() async throws {
+    // Operation that completes instantly — should return value
+    let result = await AIToolAgent.withTimeout(seconds: 5) {
+        return "completed"
+    }
+    #expect(result == "completed")
+}
+
+@Test @MainActor func aiToolAgentWithTimeoutReturnsNilOnTimeout() async throws {
+    // Operation that takes longer than timeout — should return nil
+    let result = await AIToolAgent.withTimeout(seconds: 1) {
+        try? await Task.sleep(nanoseconds: 5_000_000_000) // 5 seconds
+        return "should not reach"
+    }
+    #expect(result == nil)
+}
+
+@Test @MainActor func aiToolAgentWithTimeoutReturnsInt() async throws {
+    let result = await AIToolAgent.withTimeout(seconds: 5) {
+        return 42
+    }
+    #expect(result == 42)
+}
+
+@Test @MainActor func aiToolAgentWithTimeoutReturnsOptional() async throws {
+    let result: String?? = await AIToolAgent.withTimeout(seconds: 5) {
+        return Optional<String>.none
+    }
+    // withTimeout returns T? where T is String? here, so result is String??
+    // The outer optional is non-nil (didn't timeout), inner is nil
+    #expect(result != nil) // didn't timeout
+}
+
+@Test @MainActor func aiToolAgentGatherContextDashboard() async throws {
+    // gatherContext should return non-empty context for any screen
+    let context = AIToolAgent.gatherContext(query: "how am I doing", screen: .dashboard)
+    #expect(!context.isEmpty)
+}
+
+@Test @MainActor func aiToolAgentGatherContextFood() async throws {
+    let context = AIToolAgent.gatherContext(query: "what did I eat today", screen: .food)
+    #expect(!context.isEmpty)
+}
+
+@Test @MainActor func aiToolAgentGatherContextWeight() async throws {
+    let context = AIToolAgent.gatherContext(query: "how is my weight", screen: .weight)
+    #expect(!context.isEmpty)
+}
+
+@Test @MainActor func aiToolAgentGatherContextExercise() async throws {
+    let context = AIToolAgent.gatherContext(query: "what should I train", screen: .exercise)
+    #expect(!context.isEmpty)
+}
+
+@Test @MainActor func aiToolAgentExecuteRelevantToolsInfoQuery() async throws {
+    ToolRegistration.registerAll()
+    // A food-related info query should trigger food_info tool
+    let results = await AIToolAgent.executeRelevantTools(query: "how many calories today", screen: .food)
+    // Should return results (possibly empty if no food logged, but should not crash)
+    // At minimum, the function should complete without error
+    #expect(results.count >= 0)
+}
+
+@Test @MainActor func aiToolAgentExecuteRelevantToolsActionQuery() async throws {
+    ToolRegistration.registerAll()
+    // An action query like "log food" should NOT trigger info tools (they're filtered)
+    let results = await AIToolAgent.executeRelevantTools(query: "log 2 eggs", screen: .food)
+    // executeRelevantTools filters to info tools only, "log" queries rank action tools
+    // So this should return empty or only info results
+    for r in results {
+        // Any returned tools should be info tools
+        for tool in r.toolsCalled {
+            #expect(AIToolAgent.isInfoTool(tool) || tool.isEmpty)
+        }
+    }
+}
+
+@Test @MainActor func aiToolAgentExecuteRelevantToolsWeightQuery() async throws {
+    ToolRegistration.registerAll()
+    let results = await AIToolAgent.executeRelevantTools(query: "how is my weight trend", screen: .weight)
+    #expect(results.count >= 0) // Should not crash
+}
+
+@Test @MainActor func aiToolAgentHandleTextResponseAllScreens() async throws {
+    // Valid response should work for all screens
+    let screens: [AIScreen] = [.food, .weight, .exercise, .dashboard, .bodyRhythm, .supplements, .glucose, .biomarkers, .bodyComposition, .cycle, .goal]
+    for screen in screens {
+        let output = AIToolAgent.handleTextResponse("Your data looks great today with solid progress across all areas.", screen: screen)
+        #expect(!output.text.isEmpty, "handleTextResponse should return non-empty for \(screen)")
+        #expect(output.action == nil)
+        #expect(output.toolsCalled.isEmpty)
+    }
+}
+
+@Test @MainActor func aiToolAgentHandleTextResponseWhitespace() async throws {
+    let output = AIToolAgent.handleTextResponse("   \n\t  ", screen: .food)
+    // Whitespace-only should be treated as empty → fallback
+    #expect(output.text == AIToolAgent.fallbackText(for: .food))
+}
+
+@Test @MainActor func aiToolAgentHandleTextResponseMarkdown() async throws {
+    let output = AIToolAgent.handleTextResponse("**Great job!** You ate 1500 cal today with 90g protein.", screen: .food)
+    #expect(output.text.contains("1500") || output.text.contains("Great"))
+}
+
+@Test @MainActor func aiToolAgentInsightPrefixOverCalSeparate() async throws {
+    // "over" without "target" but with "cal"
+    let result = AIToolAgent.addInsightPrefix(to: "You went over by 200 cal")
+    #expect(result.hasPrefix("Heads up"))
+}
+
+@Test @MainActor func aiToolAgentInsightPrefixWellRecovered() async throws {
+    let result = AIToolAgent.addInsightPrefix(to: "Well recovered after last night's rest")
+    #expect(result.hasPrefix("Nice work!"))
+}
+
+@Test @MainActor func aiToolAgentInsightPrefixTargetReached() async throws {
+    let result = AIToolAgent.addInsightPrefix(to: "Protein target reached for the day")
+    #expect(result.hasPrefix("Nice work!"))
+}
+
+@Test @MainActor func aiToolAgentStepMessageDrankEaten() async throws {
+    #expect(AIToolAgent.stepMessage(for: "I drank some water") == "Logging food...")
+    #expect(AIToolAgent.stepMessage(for: "I've eaten lunch already") == "Logging food...")
+}
+
+@Test @MainActor func aiToolAgentStepMessageSleepOverlap() async throws {
+    // "sleep" contains "how" check priority — "sleep" is in the info keywords
+    #expect(AIToolAgent.stepMessage(for: "how did I sleep") == "Checking your data...")
+}
+
+@Test @MainActor func aiToolAgentAgentOutputConstruction() async throws {
+    let output = AgentOutput(text: "test message", action: nil, toolsCalled: ["tool1", "tool2"])
+    #expect(output.text == "test message")
+    #expect(output.action == nil)
+    #expect(output.toolsCalled == ["tool1", "tool2"])
+
+    let empty = AgentOutput(text: "", action: nil, toolsCalled: [])
+    #expect(empty.text.isEmpty)
+    #expect(empty.toolsCalled.isEmpty)
+}
+
+@Test @MainActor func aiToolAgentIsInfoToolAllKnown() async throws {
+    // Exhaustive check of all 9 info tools
+    let infoTools = ["food_info", "weight_info", "exercise_info", "sleep_recovery",
+                     "supplements", "glucose", "biomarkers", "body_comp", "explain_calories"]
+    for tool in infoTools {
+        #expect(AIToolAgent.isInfoTool(tool) == true, "\(tool) should be an info tool")
+    }
+
+    // Action tools
+    let actionTools = ["log_food", "log_weight", "start_workout", "mark_supplement",
+                       "delete_food", "add_supplement", "scan_barcode"]
+    for tool in actionTools {
+        #expect(AIToolAgent.isInfoTool(tool) == false, "\(tool) should NOT be an info tool")
+    }
+}

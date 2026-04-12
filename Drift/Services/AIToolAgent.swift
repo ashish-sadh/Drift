@@ -164,7 +164,7 @@ enum AIToolAgent {
     // MARK: - Tool-First Execution
 
     /// Execute top relevant info tools in parallel before streaming. Actions skip this.
-    private static func executeRelevantTools(query: String, screen: AIScreen) async -> [AgentOutput] {
+    static func executeRelevantTools(query: String, screen: AIScreen) async -> [AgentOutput] {
         let tools = ToolRanker.rank(query: query, screen: screen, topN: 2)
             .filter { isInfoTool($0.name) }
         guard !tools.isEmpty else { return [] }
@@ -288,7 +288,7 @@ enum AIToolAgent {
 
     // MARK: - Tool Execution
 
-    private static func executeTool(_ toolCall: ToolCall) async -> AgentOutput {
+    static func executeTool(_ toolCall: ToolCall) async -> AgentOutput {
         let result = await ToolRegistry.shared.execute(toolCall)
         switch result {
         case .text(let text):
@@ -324,7 +324,7 @@ enum AIToolAgent {
 
     // MARK: - Context Gathering
 
-    private static func gatherContext(query: String, screen: AIScreen) -> String {
+    static func gatherContext(query: String, screen: AIScreen) -> String {
         guard let steps = AIChainOfThought.plan(query: query, screen: screen) else {
             return AIContextBuilder.buildContext(screen: screen)
         }
@@ -343,7 +343,7 @@ enum AIToolAgent {
     // MARK: - Timeout Helper
 
     /// Run an async operation with a timeout. Returns nil if timed out.
-    private static func withTimeout<T: Sendable>(seconds: Int, operation: @escaping @Sendable () async -> T) async -> T? {
+    static func withTimeout<T: Sendable>(seconds: Int, operation: @escaping @Sendable () async -> T) async -> T? {
         await withTaskGroup(of: T?.self) { group in
             group.addTask { await operation() }
             group.addTask {
