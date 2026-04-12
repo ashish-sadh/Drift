@@ -10,7 +10,7 @@ _Directive:_ **Improve code quality, readability, and maintainability. Read the 
 
 _Focus:_ ALL (can be narrowed: "Views only", "Clean Code only", "Food domain only", etc.)
 
-_Override:_ STOP
+_Override:_ CONTINUE
 
 ---
 
@@ -63,9 +63,12 @@ Find the single worst violation — the one where fixing it most improves readab
 Decide in your head: file, principle, smell, recipe. Do NOT print it.
 
 ### 6. CHANGE
-- Read only the file(s) you need to edit
-- Make ONE focused refactoring
-- Keep the diff under ~150 lines
+- **READ every file you plan to edit BEFORE editing.** Understand types, function signatures, imports, protocol conformances. Then edit. This is non-negotiable — blind edits cause build failures.
+- One **LOGICAL refactoring unit.** This can be:
+  - Extracting a 500-line ViewModel from a view (touches 2+ files, diff may be 300+ lines — that's fine)
+  - Breaking a god class into 3 focused services (touches many files — that's fine)
+  - Renaming a protocol and all its conformers (touches many files — that's fine)
+- The constraint is logical cohesion, not line count. One refactoring = one concept. But it can span many files.
 - If extracting to a new file, put it in the same directory
 
 ### 7. BUILD
@@ -74,6 +77,12 @@ xcodebuild build -project Drift.xcodeproj -scheme Drift -destination 'platform=i
 ```
 
 ### 8. TEST
+**Classify your refactoring:**
+- **Pure move** (extracting to new file, no logic change): BUILD only. Existing tests cover behavior.
+- **Signature change** (renamed methods, changed parameters, new protocols): BUILD + targeted tests (`-only-testing:DriftTests/AffectedTestClass`).
+- **Logic restructuring** (split service, new state management, changed control flow): FULL test suite.
+
+For targeted or full tests:
 ```bash
 pkill -9 -f xcodebuild 2>/dev/null; sleep 2
 xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:DriftTests > /tmp/drift-test.log 2>&1 && echo "TESTS OK" || echo "TESTS FAILED"
@@ -88,7 +97,7 @@ If you extracted a new type, split a service, or moved logic:
 - Skip this step for pure moves (renaming, reordering) where existing tests already cover the behavior
 
 ### 10. GATE
-- **Fail?** Fix the issue. If stuck after 3 attempts: `git checkout -- .`, log the failure, move on.
+- **Fail?** Fix the issue. If stuck after **2 attempts**: `git checkout -- .`, log what went wrong and why, move on. Two failures on the same change means you misunderstand the code — revert rather than dig deeper.
 - **Pass?** Commit:
   ```bash
   git add <specific files> && git commit -m "refactor: description"
@@ -118,18 +127,17 @@ One-line entry to `Docs/code-improvement-log.md`:
 
 ## Rules
 
+- **READ before EDIT.** Before modifying any file, read it. Understand its types, function signatures, imports. The #1 cause of build failures is editing blind — wrong parameter types, missing imports, outdated signatures. This rule is non-negotiable.
 - All tests must pass before committing (pre-existing failures excepted — note in commit)
 - **No behavior changes.** The app must work identically after every commit. This is refactoring only.
 - **No new features.** Spot a bug? Log it in `Docs/failing-queries.md`. Don't fix it here.
-- ONE focused change per cycle. Don't try to refactor an entire file in one pass.
+- One **LOGICAL refactoring unit** per cycle. Multi-file changes are fine when they are part of the same refactoring (e.g., extract ViewModel from View + update all callers + add tests). The constraint is cohesion, not file count or line count.
 - Run `xcodegen generate` if you add new files to the project
 - Redirect ALL command output to `/tmp/` — never flood context
-- **NEVER output summaries, tables, or scorecards between cycles.** No "X cycles done" messages. No progress reports. Just log and loop. The user can read the log.
+- **NEVER output summaries, tables, or scorecards between cycles.** Just log and loop.
 - **NEVER stop to ask the user anything.** Make judgment calls. If ambiguous, pick the safer option.
 - **NEVER wait for user input between cycles.** This loop is autonomous. Just go.
-- Only read files you are about to edit (plus principles at startup)
-- Do NOT publish TestFlight
-- If stuck after 3 attempts on one file, revert, log, move to next target
+- If stuck after 2 attempts on one file, revert, log what went wrong, move to next target
 - Run survey, build, and test commands in background when possible to save context
 
 ## What NOT to do

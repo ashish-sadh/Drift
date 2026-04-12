@@ -1,0 +1,19 @@
+#!/bin/bash
+# Hook: SessionStart
+# Injects cycle state and roadmap reminder on session startup.
+
+COUNTER_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/cycle-counter"
+LAST_REVIEW_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/last-review-cycle"
+
+COUNT=$(cat "$COUNTER_FILE" 2>/dev/null || echo "0")
+LAST_REVIEW=$(cat "$LAST_REVIEW_FILE" 2>/dev/null || echo "0")
+NEXT_REVIEW=$((LAST_REVIEW + 10))
+
+echo "=== Drift Loop State ==="
+echo "Cycle count: $COUNT"
+echo "Last product review: cycle $LAST_REVIEW"
+echo "Next product review due: cycle $NEXT_REVIEW"
+echo "Read Docs/roadmap.md first to understand product direction."
+echo "========================"
+
+exit 0

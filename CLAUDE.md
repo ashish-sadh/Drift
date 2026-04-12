@@ -8,23 +8,76 @@ Drift is an AI-first local health tracker. AI chat is the showstopper — the pr
 ## Two Operating Modes
 
 ### Mode 1: Human-Shepherded (default)
-Human drives feature work. Read `Docs/sprint.md` for current tickets. Build, test, commit per ticket.
+Human drives feature work. Read `Docs/sprint.md` for current tickets. Build, test, commit per ticket. You can publish TestFlight anytime.
 
-### Mode 2: Autonomous Self-Improvement
-Human says "run self-improvement" or "never stop". Read `program.md` and follow it exactly. It has steering notes, startup/recovery, LOOP FOREVER cycle, and logging.
+### Mode 2: Manual Autonomous Loop
+Human says "run self-improvement" or "run code-improvement" in a single claude session. Read the corresponding program and follow it exactly:
+- `program.md` — feature work, AI chat, UI, bugs, food DB
+- `code-improvement.md` — refactoring only, no behavior changes
 
-### Drift Control (Watchdog Management)
-A background watchdog (`scripts/self-improve-watchdog.sh`) may be running, alternating between self-improvement and code-improvement loops. Control it via `~/drift-control.txt`:
+These run in the foreground. Human can Ctrl+C to stop. All hooks apply except TestFlight (human controls publishing).
 
-| User says | You do |
-|-----------|--------|
-| "stop drift control" / "stop the watchdog" / "stop improvement" | `echo "STOP" > ~/drift-control.txt` — kills current session immediately |
-| "pause drift control" / "pause improvement" | `echo "PAUSE" > ~/drift-control.txt` — kills current session, watchdog stays alive |
-| "graceful stop" / "finish and stop" / "drain" | `echo "DRAIN" > ~/drift-control.txt` — watchdog sets _Override: STOP in both programs, lets current cycle finish, then exits |
-| "resume drift control" / "run improvement" / "start improvement" | `echo "RUN" > ~/drift-control.txt` — watchdog sets _Override: CONTINUE in both programs and starts |
-| "drift control status" / "is improvement running?" | `cat ~/drift-control.txt && ps aux \| grep 'claude.*self-improvement\|claude.*code-improvement' \| grep -v grep` |
+### Mode 3: Drift Control (Watchdog-Managed)
+Fully autonomous background operation. The watchdog (`scripts/self-improve-watchdog.sh`) manages everything — starts claude sessions, restarts on failure, alternates between self-improvement and code-improvement, enforces TestFlight publishing every 3 hours with pre-flight checks. Start with "start improvement" or `echo "RUN" > ~/drift-control.txt`.
 
-The watchdog checks this file every 30 minutes (DRAIN polls every 60s for faster exit).
+### Drift Control (Watchdog + Hooks)
+
+A background watchdog (`scripts/self-improve-watchdog.sh`) runs autonomous loops, alternating between self-improvement and code-improvement. Controlled via `~/drift-control.txt`. Hooks in `.claude/settings.json` enforce quality.
+
+#### Control Commands
+
+| User says | You do | What happens |
+|-----------|--------|-------------|
+| "start improvement" / "run improvement" | `echo "RUN" > ~/drift-control.txt && cd /Users/ashishsadh/workspace/Drift && nohup ./scripts/self-improve-watchdog.sh > /dev/null 2>&1 &` | Watchdog starts, sets _Override: CONTINUE in both programs, launches claude session |
+| "stop improvement" / "stop drift control" | `echo "STOP" > ~/drift-control.txt` | Kills current session immediately, watchdog exits |
+| "pause improvement" | `echo "PAUSE" > ~/drift-control.txt` | Kills current session, watchdog stays alive waiting for RUN |
+| "graceful stop" / "drain" / "finish and stop" | `echo "DRAIN" > ~/drift-control.txt` | Sets _Override: STOP in both programs, waits for current cycle to finish (polls every 60s), kills if stale 10min, then exits |
+| "resume" (after pause) | `echo "RUN" > ~/drift-control.txt` | Watchdog resumes, sets overrides back to CONTINUE, starts next session |
+| "status" / "is improvement running?" | `cat ~/drift-control.txt && cat .claude/cycle-counter && ps aux \| grep 'claude.*self-improvement\|claude.*code-improvement' \| grep -v grep` | Shows control state, cycle count, running processes |
+
+The watchdog polls the control file every 30 seconds for fast response.
+
+#### Enforced Hooks (automatic, cannot be skipped)
+
+| Hook | When | What |
+|------|------|------|
+| **Read-before-edit** | Every Edit/Write of .swift files | Blocks editing files not yet Read in the session |
+| **Cycle counter** | Every git commit | Counts cycles. Every 10th: injects product review with two personas |
+| **Coverage gate** | Every 5th commit | Runs full coverage check. If dropped: forces test-writing cycle |
+| **TestFlight check** | Every git commit | If 3+ hours since last publish: injects mandatory publish instructions |
+| **TestFlight guard** | Every xcodebuild archive | Blocks unless authorized by 3-hour hook |
+| **Pre-flight checklist** | Before archive (after guard passes) | Runs: clean build → full tests → AI eval → clean git. Blocks if any fail |
+| **Clean state on stop** | Session ending | Blocks stop if uncommitted changes or unpushed commits |
+| **Session start** | Session beginning | Shows cycle count, last review, next review due |
+
+#### Monitoring
+
+```bash
+# Watchdog events
+tail -f ~/drift-self-improve-logs/watchdog.log
+
+# Current session output
+tail -f ~/drift-self-improve-logs/session_*.log
+
+# Cycle count + review status
+cat .claude/cycle-counter && cat .claude/last-review-cycle
+
+# Last TestFlight publish
+date -r $(cat .claude/last-testflight-publish) 2>/dev/null || echo "Never published"
+
+# Coverage snapshot
+cat .claude/last-coverage-snapshot
+```
+
+#### Lifecycle of a Full Run
+1. `echo "RUN" > ~/drift-control.txt` + start watchdog
+2. Watchdog launches `claude -p "run self-improvement" --dangerously-skip-permissions --model opus --effort max`
+3. Claude reads roadmap, sprint, bugs → picks work → builds, tests, commits, pushes
+4. Hooks fire on each commit: cycle counter, coverage (every 5th), TestFlight (every 3hr)
+5. Every 10th cycle: product review (Product Designer + Principal Engineer personas, web research)
+6. If session dies/stalls: watchdog restarts with next prompt (alternates self-improvement ↔ code-improvement)
+7. `echo "DRAIN" > ~/drift-control.txt` → finishes current cycle, stops cleanly
+8. Everything committed and pushed (enforced by Stop hook)
 
 ## Doc Map
 | Doc | What it is |
@@ -36,7 +89,8 @@ The watchdog checks this file every 30 minutes (DRAIN polls every 60s for faster
 | `Docs/state.md` | Current build, test count, features |
 | `Docs/tools.md` | Service → tool mapping (10 JSON tools) |
 | `Docs/backlog.md` | Long-term tickets (organized by AI gaps) |
-| `Docs/roadmap.md` | Product phases |
+| `Docs/roadmap.md` | **Product roadmap** — unified, domain-sectioned, read every cycle |
+| `Docs/product-review-log.md` | Periodic product + engineering reviews (every 10 cycles) |
 | `Docs/testing.md` | How to run tests, eval harness |
 | `Docs/develop.md` | Dev setup, architecture, adding features |
 | `Docs/human-reported-bugs.md` | User bug reports — fix these first |
@@ -49,7 +103,7 @@ The watchdog checks this file every 30 minutes (DRAIN polls every 60s for faster
 - Build and test after every change
 - All 729+ unit tests (DriftTests) must pass before committing
 - Run LLM eval lite after AI changes; deep eval only when asked
-- Don't publish TestFlight unless the user says "publish"
+- TestFlight is auto-published every 3 hours via hook (`.claude/hooks/testflight-check.sh`). The hook injects publish instructions after a commit when 3+ hours have passed. Follow the instructions when they appear. Never publish more frequently than every 3 hours.
 - No MacroFactor references anywhere
 - Privacy-first: everything local, no cloud, no analytics
 - Run `xcodegen generate` after changing project.yml or adding new files

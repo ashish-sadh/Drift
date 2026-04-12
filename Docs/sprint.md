@@ -64,32 +64,46 @@ Execute: find each food → show confirmation UI → log
 
 ## Permanent Tasks (never remove — always pick from these when nothing else is queued)
 
-### AI Chat & Tool Service Improvement (always ongoing)
-The #1 priority. AI chat is the showstopper — keep making it smarter, faster, more capable.
+**Before picking a task, read `Docs/roadmap.md` → "Now" items in the relevant domain. Work on what advances the current phase.**
 
-- [ ] **Natural meal logging from chat** — Users should type freeform like "log for breakfast 2 eggs and spinach and a bread and coffee with 2% milk with protein powder and creatine" or "log chipotle bowl with 800 calories" and the AI parses everything, asks clarifying questions (portion sizes, cooking method), does macro calculations, and logs it. No manual searching. Chat does the hard work.
+### AI Chat Architecture & Quality (always ongoing)
+Equally important pillar. Prefer architectural improvements over keyword additions.
+
+- [ ] **State machine refactor** — Replace scattered pendingMealName/pendingWorkout state vars with a proper conversation state machine. States: idle → classifying → executing_tool → confirming → logging. Clear transitions, no dangling state.
+- [ ] **Prompt consolidation** — Single source of truth for tool schemas, examples, context injection. Measure token count, compress.
+- [ ] **Multi-turn reliability** — Eliminate bugs where context is lost between turns. Test: 3-turn meal logging, 3-turn workout building, topic switching mid-conversation.
+- [ ] **Natural freeform logging** — "log for breakfast 2 eggs and spinach and bread and coffee with 2% milk with protein powder and creatine" or "log chipotle bowl with 800 calories" → AI parses everything, asks clarifying questions, does macro calculations, logs it.
 - [ ] **Meal planning** — "plan my meals for today" → iterative suggestions based on remaining macros + history.
 - [ ] **Workout split builder** — "build me a PPL split" → multi-turn designing across sessions.
 - [ ] **Navigate to screen** — "show me my weight chart", "go to food tab". Needs navigation tool.
-- [ ] Keep improving intent detection accuracy, tool calling reliability, multi-turn context, response quality. If no obvious gap, stress-test with real queries from `Docs/failing-queries.md` and fix what breaks.
+- [ ] When no obvious gap: stress-test with real queries from `Docs/failing-queries.md` and fix what breaks.
 
-### UI Improvement (always ongoing)
-Find rough edges, polish, beautify. Theme is open — not tied to dark-only. Make it more usable and visually appealing. Feedback consistently says UI can be improved.
+### UI Overhaul (always ongoing)
+Equally important pillar. Bold changes encouraged — a full theme redesign overnight is fine. New card styles, new color palette, new typography — go for it. The only rule: app-wide consistency.
 
-- [ ] **Theme & visual polish** — Improve colors, spacing, typography, card styles. If changing theme, change it across the ENTIRE app — never just one view. Consistency is mandatory.
+- [ ] **Theme overhaul** — Pick a direction and execute across ALL views in one cycle. Dark+accent, light+minimal, glassmorphism — any coherent vision. Touch every view.
+- [ ] **Dashboard redesign** — Better information hierarchy, scannable at a glance, clearer progress indicators.
+- [ ] **Chat UI polish** — Message bubbles, typing indicators, tool execution feedback, streaming UX.
+- [ ] **Food diary UX** — Faster logging flow, better meal grouping, clearer macro display.
 - [ ] **Usability rough edges** — Find confusing flows, missing feedback, awkward transitions. Fix them.
-- [ ] **Layout & information density** — Better use of screen space, clearer hierarchy, scannable data.
-- [ ] UI changes must NOT change existing functionality. Refactoring only on the visual layer.
+- [ ] UI changes must NOT break existing functionality. Visual-layer refactoring only.
+
+### Test Coverage Improvement (always ongoing)
+Ship quality. Coverage is a forcing function for finding bugs and understanding code.
+
+- [ ] **Run coverage-check.sh** — Identify files below 80% (logic) or 50% (services) threshold. Fix them.
+- [ ] **Write tests for uncovered paths** — Focus on error paths, edge cases, empty states, boundary conditions. Not just happy paths.
+- [ ] **AI eval harness expansion** — Add test cases for every new capability. Target: every tool has 10+ eval queries.
+- [ ] **Integration-style tests** — Test multi-step flows (parse → resolve → log → confirm) end-to-end.
 
 ### Bug Hunting (always ongoing)
-Proactively find bugs before users do. Keep improving test coverage and testing strategies.
+Proactively find bugs before users do.
 
 - [ ] **Find and fix bugs** — Run the app mentally through edge cases. Check error paths, empty states, boundary conditions, data corruption scenarios.
-- [ ] **Improve testing** — Find better ways to test. Add tests for uncovered paths. Stress-test AI with weird inputs. Goal: users never have to report bugs — we find them first.
 - [ ] **Regression prevention** — When fixing a bug, add a test that would have caught it.
 
 ### Food Database Enrichment (always ongoing)
-Better the DB, more people will come and log. Accuracy and breadth matter.
+Better the DB, more people will come and log. Benchmark: MyFitnessPal has 14M+ foods.
 
 - [ ] **Correct existing entries** — Find foods with wrong macros, missing data, bad serving sizes. Fix them.
 - [ ] **Add missing foods** — Indian foods, regional dishes, restaurant items, branded products. Cross-reference with USDA/reliable sources.

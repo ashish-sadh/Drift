@@ -64,7 +64,7 @@ start_claude() {
 
     log "Starting claude: \"$prompt\" (log: $CURRENT_LOG)"
     cd "$WORK_DIR"
-    claude -p "$prompt" \
+    DRIFT_AUTONOMOUS=1 claude -p "$prompt" \
         --dangerously-skip-permissions \
         --model opus \
         --effort max \
