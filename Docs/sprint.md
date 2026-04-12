@@ -12,7 +12,7 @@ _(pick from Ready)_
 - [x] **SpeechRecognizer → chat pipeline** — Mic button in chat input bar. SpeechRecognitionService with on-device recognition (requiresOnDeviceRecognition). Streams partial results into text field. Pulse animation while recording. 6 unit tests. Go/no-go at Review #14 after real-device testing.
 
 ### P0: Color & Visual Harmony Pass
-- [ ] **Fix color coordination app-wide** — The dark blue/purple palette with bright ring colors feels disjointed. Research Whoop, Apple Fitness, Strava palettes. Pick 6 decisions: background, cards, accents, ring colors, text hierarchy, status colors. Keep premium, warm, not cold. Apply via `.card()` ViewModifier + Theme constants across ALL views in one cycle. Not iterative.
+- [x] **Fix color coordination app-wide** — Warmer palette: background #0E0E12, cards #1A1B24, accent #8B7CF6. New domain colors (cyclePink, supplementMint). Fixed hardcoded colors in BiomarkersTabView, MoreTabView, DashboardView. Separator softened to 0.06. All via Theme constants.
 
 ### P1: Chat UI Evolution
 - [ ] **Message bubbles** — Replace plain text with user/AI message bubbles. Pure view-layer change.
