@@ -19,6 +19,7 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 - **SpellCorrectService tests**: 3 test methods covering hardcoded corrections (chiken→chicken, panner→paneer), passthrough for correct/short/common words, and fuzzy matching. Coverage from 0% → tested.
 - **Fix isLowQuality false positive**: Short follow-up questions like "Would you like to log that?" were incorrectly flagged as low quality and replaced with fallback data. Now allows questions with action words.
 - **Food DB serving size fix**: 55 entries had serving_size=1g (broke gram-based logging). Fixed to real weights. Added bulgur, farro. Fixed Vanilla Cake macros (was 0g fat).
+- **Chat accessibility + contrast**: VoiceOver labels on message bubbles ("You said:", "Assistant:"). Improved bubble opacity for better readability.
 
 ## Cycle · 2026-04-10
 

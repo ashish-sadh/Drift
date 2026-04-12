@@ -17,29 +17,61 @@ enum SpellCorrectService {
 
     /// Curated corrections (edit distance can't catch these well)
     private static let hardcoded: [String: String] = [
-        "chiken": "chicken", "chickin": "chicken", "chikken": "chicken",
+        // Proteins
+        "chiken": "chicken", "chickin": "chicken", "chikken": "chicken", "chickn": "chicken",
+        "salman": "salmon", "samon": "salmon",
+        "shrimp": "shrimp", "shirmp": "shrimp",
+        "turky": "turkey", "terkey": "turkey",
+        "steak": "steak", "staek": "steak",
+        // Fruits & vegetables
         "bananaa": "banana", "bananna": "banana",
         "brocoli": "broccoli", "brocolli": "broccoli",
         "avacado": "avocado", "avocadao": "avocado",
-        "protien": "protein", "proteen": "protein", "protine": "protein",
-        "breakfest": "breakfast", "brekfast": "breakfast",
-        "sandwhich": "sandwich", "sandwitch": "sandwich",
-        "spagetti": "spaghetti", "spagehtti": "spaghetti",
-        "tomatoe": "tomato", "potatoe": "potato",
-        "yoghurt": "yogurt", "yougurt": "yogurt",
+        "tomatoe": "tomato", "potatoe": "potato", "potatos": "potatoes",
+        "strawbery": "strawberry", "blubery": "blueberry", "bluberry": "blueberry",
+        "rasberry": "raspberry", "raspbery": "raspberry",
+        "spinich": "spinach", "spinnach": "spinach",
+        "lettuse": "lettuce", "letuce": "lettuce",
+        "oinon": "onion", "onin": "onion",
+        "cumcumber": "cucumber", "cucmber": "cucumber",
+        // Dairy
+        "yoghurt": "yogurt", "yougurt": "yogurt", "yogart": "yogurt",
+        "chese": "cheese", "cheeze": "cheese",
+        "buuter": "butter", "buter": "butter",
+        // Grains & staples
         "oatmeel": "oatmeal", "oatemeal": "oatmeal",
-        "panner": "paneer", "panneer": "paneer",
-        "samossa": "samosa", "somosa": "samosa",
-        "chappati": "chapati", "chappathi": "chapati",
-        "biryanni": "biryani", "biriyani": "biryani",
-        "daal": "dal", "dhal": "dal",
+        "spagetti": "spaghetti", "spagehtti": "spaghetti", "spaghetii": "spaghetti",
+        "sandwhich": "sandwich", "sandwitch": "sandwich", "sanwich": "sandwich",
         "piza": "pizza", "pizzza": "pizza",
-        "coffe": "coffee", "cofee": "coffee",
+        "tortila": "tortilla", "tortilia": "tortilla",
+        "quinoa": "quinoa", "quinoah": "quinoa",
+        // Indian foods
+        "panner": "paneer", "panneer": "paneer", "panir": "paneer",
+        "samossa": "samosa", "somosa": "samosa",
+        "chappati": "chapati", "chappathi": "chapati", "chapatti": "chapati",
+        "biryanni": "biryani", "biriyani": "biryani", "bryani": "biryani",
+        "daal": "dal", "dhal": "dal",
+        "nann": "naan", "nan": "naan",
+        "roti": "roti", "rotii": "roti",
+        "idly": "idli", "iddli": "idli",
+        "dosai": "dosa",
+        "gulab": "gulab", "jamun": "jamun",
+        // Beverages
+        "coffe": "coffee", "cofee": "coffee", "coffie": "coffee",
+        "smoothy": "smoothie", "smothie": "smoothie",
+        "expresso": "espresso",
+        // Nutrition terms
+        "protien": "protein", "proteen": "protein", "protine": "protein",
+        "calries": "calories", "calroies": "calories", "caloris": "calories",
+        "carbohidrate": "carbohydrate", "carbohdyrate": "carbohydrate",
+        // Meals
+        "breakfest": "breakfast", "brekfast": "breakfast", "brekfest": "breakfast",
+        // Exercise
         "excercise": "exercise", "exercize": "exercise",
         "benchpress": "bench press",
         "deadlfit": "deadlift", "dedlift": "deadlift",
         "wieght": "weight", "weigth": "weight",
-        "calries": "calories", "calroies": "calories",
+        "squatt": "squat", "sqaut": "squat",
     ]
 
     /// Correct spelling. Checks hardcoded first, then fuzzy-matches against food DB.
