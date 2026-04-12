@@ -203,7 +203,7 @@ enum AIToolAgent {
         "supplements", "glucose", "biomarkers", "body_comp", "explain_calories"
     ]
 
-    private static func isInfoTool(_ name: String) -> Bool {
+    static func isInfoTool(_ name: String) -> Bool {
         infoTools.contains(name)
     }
 
@@ -254,7 +254,7 @@ enum AIToolAgent {
     // MARK: - SmolLM Insight Prefix
 
     /// Add a brief conversational prefix to raw tool data for SmolLM (no LLM presentation available).
-    private static func addInsightPrefix(to data: String) -> String {
+    static func addInsightPrefix(to data: String) -> String {
         let lower = data.lowercased()
         // Empty/no-data states: don't prefix
         if lower.contains("no food logged") || lower.contains("nothing logged") || lower.contains("no data") || lower.contains("no weight") {
@@ -311,7 +311,7 @@ enum AIToolAgent {
 
     // MARK: - Text Response Handling
 
-    private static func handleTextResponse(_ response: String, screen: AIScreen) -> AgentOutput {
+    static func handleTextResponse(_ response: String, screen: AIScreen) -> AgentOutput {
         let cleaned = AIResponseCleaner.clean(response)
         if cleaned.isEmpty || AIResponseCleaner.isLowQuality(cleaned) {
             return AgentOutput(text: fallbackText(for: screen), action: nil, toolsCalled: [])
@@ -361,7 +361,7 @@ enum AIToolAgent {
 
     // MARK: - Step Messages
 
-    private static func stepMessage(for query: String) -> String {
+    static func stepMessage(for query: String) -> String {
         let lower = query.lowercased()
         if ["ate", "had", "log", "add", "drank", "eaten"].contains(where: { lower.contains($0) }) { return "Logging food..." }
         if ["start", "begin", "workout", "chest", "legs"].contains(where: { lower.contains($0) }) { return "Setting up workout..." }
@@ -372,7 +372,7 @@ enum AIToolAgent {
 
     // MARK: - Fallback Text
 
-    private static func fallbackText(for screen: AIScreen) -> String {
+    static func fallbackText(for screen: AIScreen) -> String {
         switch screen {
         case .food: return "I can help you log food, check calories, or suggest meals. Try \"log 2 eggs\" or \"calories left\"."
         case .weight, .goal: return "I can log your weight or show your trend. Try \"I weigh 165\" or \"weight trend\"."
