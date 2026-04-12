@@ -12,8 +12,12 @@ enum WeightServiceAPI {
         let kg = unit.lowercased().hasPrefix("kg") ? value : value / 2.20462
         guard kg > 10 && kg < 300 else { return nil } // Sanity check
         var entry = WeightEntry(date: DateFormatters.todayString, weightKg: kg, source: "manual")
-        try? AppDatabase.shared.saveWeightEntry(&entry)
-        return entry
+        do {
+            try AppDatabase.shared.saveWeightEntry(&entry)
+            return entry
+        } catch {
+            return nil
+        }
     }
 
     // MARK: - Trend

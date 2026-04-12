@@ -388,8 +388,10 @@ struct AIChatView: View {
                     let unit = String(lastAssistant.text[unitRange])
                     if let _ = WeightServiceAPI.logWeight(value: value, unit: unit) {
                         messages.append(ChatMessage(role: .assistant, text: "Logged \(String(format: "%.1f", value)) \(unit)."))
-                        return
+                    } else {
+                        messages.append(ChatMessage(role: .assistant, text: "Couldn't save weight — value out of range or database error."))
                     }
+                    return
                 }
                 // Activity confirmation: "Log Yoga (30 min) for today? Say yes to confirm."
                 let activityPattern = #"Log (.+?)(?:\s*\((\d+) min\))?\s+for today"#
