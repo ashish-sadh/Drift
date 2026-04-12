@@ -321,9 +321,9 @@ struct DonutRing: View {
             guard total > 0 else { return }
 
             let segments: [(Double, Color)] = [
-                (Double(optimal), Color(hex: "34D399")),
-                (Double(sufficient), Color(hex: "EAB308")),
-                (Double(outOfRange), Color(hex: "F97316")),
+                (Double(optimal), Theme.deficit),
+                (Double(sufficient), Theme.fatYellow),
+                (Double(outOfRange), Theme.stepsOrange),
             ]
 
             var startAngle = Angle.degrees(-90)

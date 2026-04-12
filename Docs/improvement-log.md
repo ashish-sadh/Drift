@@ -6,6 +6,8 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 
 ## Cycle · 2026-04-12 (Autopilot session)
 
+- **Voice input prototype**: SpeechRecognitionService + mic button in AIChatView. On-device SFSpeechRecognizer, privacy-first. Streams partial results into chat text field. 6 tests. Go/no-go at next review.
+- **Product Review #13 (Cycle 358)**: 5/6 sprint items delivered. Voice input elevated to P0 (3 reviews deferred). MFP acquired Cal AI + ChatGPT Health + Intent. Color harmony + chat UI evolution next. PR #4.
 - **Product Review #11 (Cycle 199)**: Full competitive analysis — MFP acquired Cal AI, Whoop AI Strength Trainer, Boostcamp muscle viz. Agreed: 80% user-facing work next 20 cycles. PR #2 published.
 - **Coverage sprint — AIToolAgent**: Widened 4 private methods to internal. 27 new tests (14→41 methods). Tests cover executeTool, withTimeout, gatherContext, executeRelevantTools, and edge cases.
 - **Coverage sprint — IntentClassifier**: Widened withTimeout. 8 new tests covering timeout, param parsing, confidence, ClassifyResult enum, system prompt validation.

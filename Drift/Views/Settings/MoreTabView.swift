@@ -25,28 +25,28 @@ struct MoreTabView: View {
                             SleepRecoveryView()
                         }
                         if hasCycleData {
-                            Divider().overlay(Color.white.opacity(0.05))
-                            navRow(icon: "circle.circle", title: "Cycle", subtitle: "Period tracking from Apple Health", color: .pink) {
+                            Divider().overlay(Theme.separator)
+                            navRow(icon: "circle.circle", title: "Cycle", subtitle: "Period tracking from Apple Health", color: Theme.cyclePink) {
                                 CycleView()
                             }
                         }
-                        Divider().overlay(Color.white.opacity(0.05))
-                        navRow(icon: "pill.fill", title: "Supplements", subtitle: "Daily checklist, consistency", color: .mint) {
+                        Divider().overlay(Theme.separator)
+                        navRow(icon: "pill.fill", title: "Supplements", subtitle: "Daily checklist, consistency", color: Theme.supplementMint) {
                             SupplementsTabView()
                         }
-                        Divider().overlay(Color.white.opacity(0.05))
+                        Divider().overlay(Theme.separator)
                         navRow(icon: "figure.stand", title: "Body Composition", subtitle: "DEXA scan data", color: Theme.accent) {
                             DEXAOverviewView()
                         }
-                        Divider().overlay(Color.white.opacity(0.05))
+                        Divider().overlay(Theme.separator)
                         navRow(icon: "waveform.path.ecg", title: "Glucose", subtitle: "CGM glucose tracking", color: Theme.calorieBlue) {
                             GlucoseTabView()
                         }
-                        Divider().overlay(Color.white.opacity(0.05))
+                        Divider().overlay(Theme.separator)
                         navRow(icon: "cross.case.fill", title: "Biomarkers", subtitle: "Blood test results & trends", color: Theme.heartRed) {
                             BiomarkersTabView()
                         }
-                        Divider().overlay(Color.white.opacity(0.05))
+                        Divider().overlay(Theme.separator)
                         navRow(icon: "gear", title: "Settings", subtitle: "Units, Health access, algorithm", color: .secondary) {
                             SettingsView()
                         }
@@ -72,7 +72,7 @@ struct MoreTabView: View {
                         .padding(.vertical, 10)
 
                         if AIModelManager.shared.isModelDownloaded || showingAIRemoved {
-                            Divider().overlay(Color.white.opacity(0.05))
+                            Divider().overlay(Theme.separator)
                             if showingAIRemoved {
                                 HStack(spacing: 8) {
                                     Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.deficit)

@@ -5,19 +5,19 @@ enum Theme {
 
     // MARK: - Surface Colors
 
-    /// Deep dark navy — richer than pure black, feels more premium.
-    static let background = Color(hex: "0C0C14")
-    /// Card surface — visible but not distracting.
-    static let cardBackground = Color(hex: "1A1A2E")
+    /// Near-black with neutral warmth — premium without the blue cast.
+    static let background = Color(hex: "0E0E12")
+    /// Card surface — warm dark gray, clearly distinct from background.
+    static let cardBackground = Color(hex: "1A1B24")
     /// Elevated card surface — modals, popovers, selected states.
-    static let cardBackgroundElevated = Color(hex: "252540")
+    static let cardBackgroundElevated = Color(hex: "242530")
     /// Subtle separator/border color.
-    static let separator = Color.white.opacity(0.08)
+    static let separator = Color.white.opacity(0.06)
 
     // MARK: - Brand & Accent
 
-    /// Primary accent — vibrant blue-indigo. CTAs, nav highlights, active states.
-    static let accent = Color(hex: "7C6AFF")
+    /// Primary accent — warm violet. CTAs, nav highlights, active states.
+    static let accent = Color(hex: "8B7CF6")
     /// Secondary accent — warm coral for variety without clashing.
     static let accentSecondary = Color(hex: "FF6B8A")
 
@@ -43,6 +43,8 @@ enum Theme {
     static let heartRed = Color(hex: "F43F5E")
     static let rhythmTeal = Color(hex: "2DD4BF")
     static let plantGreen = Color(hex: "4ADE80")
+    static let cyclePink = Color(hex: "F472B6")
+    static let supplementMint = Color(hex: "34D399")
 
     // MARK: - Text Colors
 

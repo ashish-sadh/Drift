@@ -9,7 +9,7 @@ _(pick from Ready)_
 ## Ready
 
 ### P0: Voice Input Prototype
-- [ ] **SpeechRecognizer → chat pipeline** — Add mic button to chat. iOS SFSpeechRecognizer → on-device speech-to-text → feed text into existing chat input. Don't build separate speech pipeline — reuse existing AI pipeline. Test with real spoken input (messy, partial sentences, "um", corrections). Branch first, merge when working. Go/no-go at Review #14.
+- [x] **SpeechRecognizer → chat pipeline** — Mic button in chat input bar. SpeechRecognitionService with on-device recognition (requiresOnDeviceRecognition). Streams partial results into text field. Pulse animation while recording. 6 unit tests. Go/no-go at Review #14 after real-device testing.
 
 ### P0: Color & Visual Harmony Pass
 - [ ] **Fix color coordination app-wide** — The dark blue/purple palette with bright ring colors feels disjointed. Research Whoop, Apple Fitness, Strava palettes. Pick 6 decisions: background, cards, accents, ring colors, text hierarchy, status colors. Keep premium, warm, not cold. Apply via `.card()` ViewModifier + Theme constants across ALL views in one cycle. Not iterative.

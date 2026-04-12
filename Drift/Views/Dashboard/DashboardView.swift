@@ -164,10 +164,10 @@ struct DashboardView: View {
                                 Image(systemName: "sparkles").font(.system(size: 10))
                                 Text("beta").font(.system(size: 8, weight: .semibold))
                                 RoundedRectangle(cornerRadius: 7)
-                                    .fill(aiEnabled ? Theme.accent : Color.gray.opacity(0.3))
+                                    .fill(aiEnabled ? Theme.accent : Theme.textTertiary)
                                     .frame(width: 28, height: 16)
                                     .overlay(alignment: aiEnabled ? .trailing : .leading) {
-                                        Circle().fill(.white).frame(width: 12, height: 12)
+                                        Circle().fill(Theme.textPrimary).frame(width: 12, height: 12)
                                             .padding(.horizontal, 2)
                                     }
                                     .animation(.easeInOut(duration: 0.15), value: aiEnabled)
@@ -410,7 +410,7 @@ struct DashboardView: View {
     private var supplementCard: some View {
         HStack(spacing: 10) {
             Image(systemName: "pill.fill")
-                .foregroundStyle(.mint)
+                .foregroundStyle(Theme.supplementMint)
             Text("Supplements")
                 .font(.subheadline.weight(.semibold))
             Spacer()
