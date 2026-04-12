@@ -41,3 +41,9 @@ Track of code quality improvement cycles. Each entry = one refactoring cycle.
 - **CreateTemplateView.swift** — [Principle: DDD] Smell: 1 direct AppDatabase.shared call for template update → routed through WorkoutService.updateTemplate.
 - **WeightInsightsView.swift** — [Principle: DDD] Smell: 1 direct AppDatabase.shared.fetchBodyComposition call → routed through WeightServiceAPI.fetchBodyComposition.
 - **PlantPointsCardView.swift** — [Principle: DDD] Smell: 1 direct FoodService.fetchFoodItemsForPlantPoints already existed but was called inline → verified routing is correct.
+- **BiomarkersTabView, LabReportUploadView, LabReportDetailView, BiomarkerDetailView** — [Principle: DDD] Smell: 10 direct AppDatabase.shared calls across 4 biomarker views → routed through BiomarkerService with 8 new CRUD methods. Zero database imports remain.
+- **GlucoseTabView** — [Principle: DDD] Smell: 2 direct AppDatabase.shared calls (fetchGlucoseReadings, CGMImportService with db param) → routed through GlucoseService with 2 new methods (fetchReadings, importLingoCSV).
+- **DEXAOverviewView, DEXAEntryView** — [Principle: DDD] Smell: 8 direct AppDatabase.shared calls (7 DEXA operations + 1 in entry view) → created new DEXAService with 6 methods. Removed database property from DEXAEntryView init.
+- **MoreTabView** — [Principle: DDD] Smell: food export used AppDatabase.shared for fetchMealLogs/fetchFoodEntries → routed through FoodService. Factory reset left as cross-cutting concern.
+
+**DDD routing complete.** 83+ DB calls eliminated from 18 view files across 7 domain services. Loop ended per product review #10 consensus.
