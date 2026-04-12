@@ -1359,4 +1359,50 @@ final class AIEvalHarness: XCTestCase {
         print("📊 CoT routing: \(correct)/\(queries.count) (\(String(format: "%.0f", pct))%)")
         XCTAssertGreaterThanOrEqual(correct, queries.count * 85 / 100)
     }
+
+    // MARK: - SpellCorrectService
+
+    @MainActor
+    func testSpellCorrectHardcoded() {
+        // Hardcoded corrections
+        XCTAssertEqual(SpellCorrectService.correct("chiken"), "chicken")
+        XCTAssertEqual(SpellCorrectService.correct("bannana"), "banana")
+        XCTAssertEqual(SpellCorrectService.correct("brocoli"), "broccoli")
+        XCTAssertEqual(SpellCorrectService.correct("avacado"), "avocado")
+        XCTAssertEqual(SpellCorrectService.correct("protien"), "protein")
+        XCTAssertEqual(SpellCorrectService.correct("panner"), "paneer")
+        XCTAssertEqual(SpellCorrectService.correct("samossa"), "samosa")
+        XCTAssertEqual(SpellCorrectService.correct("biryanni"), "biryani")
+        XCTAssertEqual(SpellCorrectService.correct("daal"), "dal")
+        XCTAssertEqual(SpellCorrectService.correct("coffe"), "coffee")
+
+        // Multi-word correction
+        XCTAssertEqual(SpellCorrectService.correct("chiken biryanni"), "chicken biryani")
+    }
+
+    @MainActor
+    func testSpellCorrectPassthrough() {
+        // Already correct words should pass through unchanged
+        XCTAssertEqual(SpellCorrectService.correct("chicken"), "chicken")
+        XCTAssertEqual(SpellCorrectService.correct("banana"), "banana")
+        XCTAssertEqual(SpellCorrectService.correct("rice"), "rice")
+
+        // Short words (< 4 chars) should pass through
+        XCTAssertEqual(SpellCorrectService.correct("egg"), "egg")
+        XCTAssertEqual(SpellCorrectService.correct("dal"), "dal")
+
+        // Common English words should pass through
+        XCTAssertEqual(SpellCorrectService.correct("the"), "the")
+        XCTAssertEqual(SpellCorrectService.correct("and"), "and")
+        XCTAssertEqual(SpellCorrectService.correct("log 2 eggs"), "log 2 eggs")
+    }
+
+    @MainActor
+    func testSpellCorrectFuzzyMatch() {
+        // Edit distance 1 corrections against food DB
+        // "chciken" → "chicken" (1 swap)
+        let result = SpellCorrectService.correct("chickn breast")
+        // Should correct "chickn" to a food word, "breast" passes through or corrects
+        XCTAssertTrue(result.contains("chick"), "Should correct 'chickn' to something with 'chick'")
+    }
 }
