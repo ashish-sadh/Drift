@@ -7,6 +7,12 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 ## Cycle · 2026-04-11
 
 - **Ingredient persistence**: Recipes now store full per-ingredient macros as JSON. RecipeItem is Codable. Swipe-to-edit opens recipe builder with pre-populated ingredients. Backward-compatible with legacy string-array format. 3 new tests.
+- **Single-message meal logging**: "log breakfast 2 eggs and toast" parses meal type + items in one step, opens recipe builder directly. Handles "for"/"with" prefixes. Refactored food parsing into `buildMealFromText` helper.
+- **Named calorie entries**: "log chipotle bowl 800 cal" preserves food name instead of "Quick Add". Extracts name by stripping calorie pattern + verbs.
+- **"With" sub-splitting + multi-food recipe builder**: "coffee with 2% milk with protein powder" now splits into 3 individual items. Multi-food intents ("log chicken and rice") now open recipe builder with all items instead of search for first only. Added "the" article support in extractAmount. 3 new tests.
+- **Animated typing dots**: Chat thinking indicator now uses animated three-dot typing indicator instead of ProgressView spinner. Styled as assistant message bubble for visual consistency.
+- **Fix silent delete failures**: Delete/undo handlers used `try?` which silently swallowed errors — user saw "Deleted..." even when deletion failed. Now uses do/catch with visible error. Removed unreachable duplicate barcode scan block.
+- **Food DB dedup**: 42 duplicate Indian food entries removed (1072→1030). Same-name entries with conflicting macros (e.g. dal makhani 350cal vs 230cal) kept original curated version only.
 
 ## Cycle · 2026-04-10
 

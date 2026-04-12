@@ -521,16 +521,13 @@ struct AIChatView: View {
                 var notFound: [String] = []
                 for item in items {
                     let trimmed = item.trimmingCharacters(in: .whitespaces)
-                    let (servings, foodName, gramAmount) = AIActionExecutor.extractAmount(from: trimmed)
-                    if let match = AIActionExecutor.findFood(query: foodName, servings: servings, gramAmount: gramAmount) {
-                        let f = match.food
-                        let portionText = gramAmount.map { "\(Int($0))g" } ?? "\(String(format: "%.1f", match.servings)) serving"
-                        newItems.append(QuickAddView.RecipeItem(
-                            name: f.name, portionText: portionText,
-                            calories: f.calories * match.servings, proteinG: f.proteinG * match.servings,
-                            carbsG: f.carbsG * match.servings, fatG: f.fatG * match.servings,
-                            fiberG: f.fiberG * match.servings,
-                            servingSizeG: f.servingSize))
+                    if let recipe = resolveRecipeItem(trimmed) {
+                        newItems.append(recipe)
+                    } else if trimmed.lowercased().contains(" with ") {
+                        for sub in trimmed.components(separatedBy: " with ").map({ $0.trimmingCharacters(in: .whitespaces) }).filter({ !$0.isEmpty }) {
+                            if let recipe = resolveRecipeItem(sub) { newItems.append(recipe) }
+                            else { notFound.append(sub) }
+                        }
                     } else { notFound.append(trimmed) }
                 }
                 if !newItems.isEmpty {
