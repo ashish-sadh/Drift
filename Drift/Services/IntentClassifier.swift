@@ -124,7 +124,7 @@ enum IntentClassifier {
 
     // MARK: - Timeout Helper
 
-    private static func withTimeout<T: Sendable>(seconds: Int, operation: @Sendable @escaping () async -> T?) async -> T? {
+    static func withTimeout<T: Sendable>(seconds: Int, operation: @Sendable @escaping () async -> T?) async -> T? {
         await withTaskGroup(of: T?.self) { group in
             group.addTask { await operation() }
             group.addTask {

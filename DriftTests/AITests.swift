@@ -86,6 +86,127 @@ import Testing
     }
 }
 
+@Test @MainActor func aiRuleEngineNextAction() async throws {
+    let action = AIRuleEngine.nextAction()
+    // On empty DB: either suggests logging food or returns nil (time-dependent)
+    if let action {
+        #expect(!action.isEmpty)
+    }
+}
+
+@Test @MainActor func aiRuleEngineCaloriesLeft() async throws {
+    let result = AIRuleEngine.caloriesLeft()
+    #expect(!result.isEmpty, "caloriesLeft should always return a non-empty string")
+    // With no food logged, should mention "No food logged" or show remaining
+    #expect(result.contains("cal"), "Should mention calories")
+}
+
+@Test @MainActor func aiRuleEngineWeeklySummary() async throws {
+    let summary = AIRuleEngine.weeklySummary()
+    #expect(!summary.isEmpty, "Weekly summary should not be empty")
+    #expect(summary.contains("This week"), "Should contain weekly header")
+    #expect(summary.contains("Workouts"), "Should mention workout count")
+}
+
+@Test @MainActor func aiRuleEngineDailySummaryContainsFood() async throws {
+    let summary = AIRuleEngine.dailySummary()
+    // Should always mention food status (either logged or "nothing logged")
+    #expect(summary.contains("Food:"), "Daily summary should include food line")
+}
+
+@Test @MainActor func aiRuleEngineYesterdaySummaryFormat() async throws {
+    let summary = AIRuleEngine.yesterdaySummary()
+    // Either "No food was logged yesterday" or formatted summary with cal
+    #expect(summary.contains("yesterday") || summary.contains("Yesterday") || summary.contains("cal"),
+            "Yesterday summary should reference yesterday or contain calorie data")
+}
+
+// MARK: - IntentClassifier Extended Tests
+
+@Test @MainActor func intentClassifierWithTimeoutCompletes() async throws {
+    let result = await IntentClassifier.withTimeout(seconds: 5) {
+        return "done"
+    }
+    #expect(result == "done")
+}
+
+@Test @MainActor func intentClassifierWithTimeoutReturnsNilOnTimeout() async throws {
+    let result = await IntentClassifier.withTimeout(seconds: 1) {
+        try? await Task.sleep(nanoseconds: 5_000_000_000)
+        return "should not reach"
+    }
+    #expect(result == nil)
+}
+
+@Test @MainActor func intentClassifierWithTimeoutNilOperation() async throws {
+    // Operation that returns nil immediately (simulates LLM returning nil)
+    let result: String? = await IntentClassifier.withTimeout(seconds: 5) {
+        return nil
+    }
+    #expect(result == nil)
+}
+
+@Test func intentClassifierParseResponseArrayParams() {
+    // Test array param conversion (items joined with ", ")
+    let response = #"{"tool":"log_food","items":["eggs","toast","coffee"]}"#
+    let intent = IntentClassifier.parseResponse(response)
+    #expect(intent != nil)
+    #expect(intent?.tool == "log_food")
+    #expect(intent?.params["items"] == "eggs, toast, coffee")
+}
+
+@Test func intentClassifierParseResponseNumericValue() {
+    // Test numeric param conversion (Double → String)
+    let response = #"{"tool":"log_weight","value":72.5}"#
+    let intent = IntentClassifier.parseResponse(response)
+    #expect(intent != nil)
+    #expect(intent?.tool == "log_weight")
+    #expect(intent?.params["value"] == "72.5")
+}
+
+@Test func intentClassifierParseResponseConfidenceField() {
+    // Explicit confidence
+    let high = IntentClassifier.parseResponse(#"{"tool":"food_info","query":"cal","confidence":"high"}"#)
+    #expect(high?.confidence == "high")
+
+    let low = IntentClassifier.parseResponse(#"{"tool":"food_info","query":"cal","confidence":"low"}"#)
+    #expect(low?.confidence == "low")
+
+    // Missing confidence defaults to "high"
+    let none = IntentClassifier.parseResponse(#"{"tool":"food_info","query":"cal"}"#)
+    #expect(none?.confidence == "high")
+}
+
+@Test func intentClassifierClassifyResultEnum() {
+    // Test ClassifyResult construction
+    let intent = IntentClassifier.ClassifiedIntent(tool: "food_info", params: ["query": "calories"], confidence: "high")
+    let toolResult = IntentClassifier.ClassifyResult.toolCall(intent)
+    if case .toolCall(let i) = toolResult {
+        #expect(i.tool == "food_info")
+        #expect(i.params["query"] == "calories")
+    } else {
+        #expect(Bool(false), "Expected toolCall")
+    }
+
+    let textResult = IntentClassifier.ClassifyResult.text("What did you eat?")
+    if case .text(let t) = textResult {
+        #expect(t == "What did you eat?")
+    } else {
+        #expect(Bool(false), "Expected text")
+    }
+}
+
+@Test @MainActor func intentClassifierSystemPromptContainsAllTools() {
+    let prompt = IntentClassifier.systemPrompt
+    let expectedTools = ["log_food", "food_info", "log_weight", "weight_info",
+                         "start_workout", "log_activity", "exercise_info",
+                         "sleep_recovery", "mark_supplement", "set_goal",
+                         "delete_food", "body_comp"]
+    for tool in expectedTools {
+        #expect(prompt.contains(tool), "System prompt should contain \(tool)")
+    }
+}
+
 // MARK: - More AIActionParser Tests
 
 @Test func aiParseShowWeight() async throws {
