@@ -32,6 +32,11 @@ enum WeightServiceAPI {
         try? AppDatabase.shared.saveBodyComposition(&entry)
     }
 
+    /// Save a weight entry directly (when caller handles unit conversion).
+    static func saveWeightEntry(_ entry: inout WeightEntry) {
+        try? AppDatabase.shared.saveWeightEntry(&entry)
+    }
+
     // MARK: - Trend
 
     /// Get current weight trend: current weight, weekly rate, direction, changes.
