@@ -88,3 +88,117 @@ Both personas agree on:
 4. **Voice input pulled forward** from Phase 4 to late Phase 3c / early Phase 4
 5. **Muscle group heatmaps → Next** in Exercise section
 6. **Stale preference pattern audit** added to Quality Now section
+
+---
+
+## Review #2 — 2026-04-12 (Cycle 68)
+
+### Progress Since Review #1
+
+Shipped all 3 priority items from Review #1 sequencing in ~5 cycles:
+1. **LB/KG unit switching** — Fixed stale preference pattern in WeightViewModel, extended to all exercise/workout views. DB stays in canonical units, conversion at view boundaries.
+2. **Adaptive TDEE** — EMA-smoothed (alpha=0.2) adaptive estimation from weight trend data. 3-point safety ramp-up. 0.4 dampening factor. Persists in TDEEConfig.
+3. **Behavior insight cards** — 3 insights on dashboard: workout frequency vs weight trend, protein adherence, logging consistency. Minimum data thresholds before showing.
+
+Also fixed: flaky CycleCalculation test (DST edge case with `Date()` vs midnight-normalized dates).
+
+Coverage check reveals **8 files below threshold** — a quality debt that needs attention.
+
+### Product Designer Persona
+_Background: 2yr each at MyFitnessPal, Whoop, MacroFactor, Strong, Boostcamp_
+
+#### Competitive Landscape Update (April 2026)
+
+| App | Moves Since Last Review |
+|-----|------------------------|
+| **MyFitnessPal** | New "Today" tab redesign (streaks, habits, cleaner macro display), GLP-1 medication tracking (dose, timing, injection site, reminders), AI photo meal logging rolled out to all iOS users, dietitian-reviewed "Blue Check" recipe collection |
+| **Boostcamp** | Muscle volume tracking (hit/neglect by group), auto-progression math, free tier still includes core tracking + most programs |
+| **Whoop** | Behavior Insights matured (connect habits→Recovery, 5+ yes/no threshold, 90-day analysis), new Trend Views (weekly/monthly/6-month), major heart rate algorithm overhaul (Feb 2026), Passive MSK for strength strain — auto-estimates musculoskeletal load from wrist motion |
+| **MacroFactor** | Launched **separate** MacroFactor Workouts app, expenditure modifier (step-informed + goal-based), AI food logging improvements, $5.99-11.99/mo pricing |
+| **Strong** | Templates search, measurement widgets, exercise renaming, simple timers. Staying minimal. $4.99/mo. |
+
+#### Drift Strengths (Updated)
+1. **AI chat remains unique.** MFP's ChatGPT integration is cloud-based and limited to recipes/Q&A. Drift logs food, starts workouts, queries cross-domain data — all locally. No competitor matches this.
+2. **Cross-domain in one app.** MacroFactor just *split* into two separate apps (nutrition + workouts). We do food + weight + exercise + sleep + supplements + glucose + biomarkers + body comp + cycle tracking in one. That's our moat.
+3. **Privacy.** MFP sends photos to cloud AI. Whoop uploads labs. MacroFactor requires an account. Drift: zero cloud. In post-DOGE surveillance anxiety, this matters more than ever.
+4. **Adaptive TDEE shipped.** We now match MacroFactor's marquee feature. Our implementation uses EMA smoothing on actual weight trend data — the same algorithmic approach, running entirely on-device.
+5. **Behavior insights shipped.** Basic v1 matches Whoop's concept — correlating behaviors with outcomes.
+
+#### Drift Gaps (Updated)
+1. **UI polish — now the #1 gap.** MFP redesigned their Today tab with streaks, habits, and cleaner layout. Our dashboard works but looks dated by comparison. This is the most visible gap to new users.
+2. **Test coverage debt.** 8 files below threshold. AIToolAgent at 0%, IntentClassifier at 36% — these are core AI paths. Shipping features without coverage is accumulating risk.
+3. **Food DB breadth.** Still ~1004 vs 14M+. MFP added AI photo logging which further leverages their massive DB. Our AI chat compensates (flexible parsing) but the long tail is missing.
+4. **Behavior insights depth.** Whoop's implementation is more sophisticated: 90-day analysis, 5+ data point threshold, calendar visualization of behavior patterns. Our v1 is simpler — 14-day window, 3 hardcoded insights.
+5. **Photo food logging.** Now shipping on MFP for all iOS users. Becoming table stakes. We still have no photo input.
+6. **GLP-1/medication tracking.** New category MFP is pursuing. Niche but growing market (40M+ Americans on GLP-1s).
+
+#### New Ideas
+1. **Dashboard redesign inspired by MFP's Today tab.** Streaks, progress rings, better hierarchy. Scannable at a glance. This is the highest-impact visual change we can make.
+2. **Behavior insights v2** — Add sleep duration vs recovery correlation (our 4th insight). Extend window from 14→30 days. Add streak visualization like Whoop's calendar view.
+3. **Medication/supplement schedule** — We already track supplements. Adding dose timing, reminders, and adherence streaks would compete with MFP's GLP-1 feature while leveraging existing supplement infrastructure.
+4. **Voice input** — iOS SpeechRecognizer → pipe to AI chat. Higher ROI than photo since it leverages our existing pipeline. Still the best Phase 4 pull-forward candidate.
+
+#### Proposed Roadmap Changes
+- Mark **LB/KG unit switching** and **Adaptive TDEE** as DONE in roadmap
+- Mark **Behavior Insights v1** as DONE, add v2 (sleep correlation, 30-day window, streaks) to Next
+- **Elevate UI/Dashboard work** — this is now the highest priority gap. Competitors are redesigning.
+- **Add coverage recovery** as explicit Quality Now item — 8 files below threshold is unacceptable for core AI code
+- Add **medication/supplement scheduling** to Later (monitoring MFP's GLP-1 play)
+
+---
+
+### Principal Engineer Persona
+_Background: 10yr each at Amazon and Google_
+
+#### Assessment
+
+**Execution since Review #1: excellent.** Shipped 3 major features in ~5 cycles. The adaptive TDEE implementation is clean — EMA smoothing, safety ramp-up, dampening factor. The behavior insights are appropriately scoped. LB/KG fix addressed the root pattern, not just the symptom.
+
+**Coverage debt is the top technical concern.** 8 files below threshold:
+
+| File | Coverage | Target | Risk |
+|------|----------|--------|------|
+| AIToolAgent | 0% | 50% | **Critical** — orchestrates entire AI pipeline |
+| SupplementService | 10.20% | 50% | Medium — simple CRUD |
+| ExerciseService | 15.33% | 50% | Medium — workout operations |
+| AIRuleEngine | 25.37% | 50% | High — core AI routing |
+| FoodService | 30.03% | 50% | High — primary logging path |
+| IntentClassifier | 36.00% | 80% | **Critical** — AI entry point |
+| AIResponseCleaner | 72.68% | 80% | Low — close to target |
+| CycleCalculations | 76.60% | 80% | Low — close to target |
+
+AIToolAgent at 0% and IntentClassifier at 36% are concerning. These are the brain of the AI pipeline. Any refactor (like the state machine) without test coverage is playing with fire.
+
+**Agree: Dashboard/UI redesign → top priority.** But scope it carefully. A "theme overhaul touching every view" in one cycle is risky without snapshot tests. Recommendation: start with dashboard-only redesign (highest user impact), then propagate the design language outward. Ship → get TestFlight feedback → iterate.
+
+**Push back: Behavior insights v2 now.** The v1 shipped and works. Expanding to 30-day windows and calendar visualizations is feature creep when we have 8 files below coverage threshold and zero UI polish shipped. The v1 insights are fine. Revisit after coverage and UI are addressed.
+
+**Push back: Medication scheduling.** MFP has millions of GLP-1 users — it's a scale play. We have one beta tester. Don't chase competitor features for markets we're not in. Our supplement tracking is sufficient.
+
+**Agree: Voice input remains the best Phase 4 candidate.** SpeechRecognizer pipes directly into existing chat. Low architectural cost, high usability gain. But it's Phase 4, not 3c.
+
+#### Sequencing Recommendation
+1. **Coverage recovery** — Write tests for AIToolAgent, IntentClassifier, FoodService, AIRuleEngine. This unblocks safe refactoring.
+2. **Dashboard redesign** — New information hierarchy, progress indicators, cleaner layout. One view, done well.
+3. **State machine refactor** — Only after AIToolAgent/IntentClassifier have coverage. This is the most impactful AI architecture improvement.
+4. **Chat UI polish** — Typing indicators, message bubbles, streaming UX. Visual layer only.
+5. **Food DB enrichment** — Ongoing background task, not a blocking priority.
+
+#### Technical Notes
+- `state.md` numbers are stale (Build 87, 729 tests). Should be updated to reflect actual counts.
+- The `Preferences.*` stale capture audit should continue — WeightViewModel was fixed but other view models likely have the same pattern.
+- Consider adding a `@Preference` property wrapper that auto-refreshes from UserDefaults — would eliminate the entire class of stale preference bugs.
+
+---
+
+### Consensus & Roadmap Updates
+
+Both personas agree:
+1. **Mark LB/KG, Adaptive TDEE, Behavior Insights v1 as DONE** in roadmap
+2. **Coverage recovery is the #1 technical priority** — 8 files below threshold, 2 critical (AIToolAgent 0%, IntentClassifier 36%)
+3. **Dashboard redesign is the #1 product priority** — competitors are redesigning, this is the most visible gap
+4. **Sequence: coverage → dashboard → state machine → chat UI** — tests first, then safe to refactor
+5. **Behavior insights v2 deferred** — v1 is sufficient, revisit after coverage and UI
+6. **Medication scheduling → Later** — monitoring MFP but not chasing their market
+7. **Voice input stays Phase 4** — confirmed as best input expansion candidate
+8. **Update state.md** with current test count, build number

@@ -87,11 +87,11 @@ import Testing
 
 @Test func cycleAverageLengthVaryingCycles() async throws {
     let cal = Calendar.current
-    let now = Date()
+    let today = cal.startOfDay(for: Date())  // midnight — avoids DST edge cases
     // 3 periods: 28 days apart, then 30 days apart
-    let p1Start = cal.date(byAdding: .day, value: -63, to: now)!
-    let p2Start = cal.date(byAdding: .day, value: -35, to: now)! // 28 days gap
-    let p3Start = cal.date(byAdding: .day, value: -5, to: now)!  // 30 days gap
+    let p1Start = cal.date(byAdding: .day, value: -63, to: today)!
+    let p2Start = cal.date(byAdding: .day, value: -35, to: today)! // 28 days gap
+    let p3Start = cal.date(byAdding: .day, value: -5, to: today)!  // 30 days gap
 
     let entries = [p1Start, p2Start, p3Start].flatMap { start in
         (0..<5).map { day in

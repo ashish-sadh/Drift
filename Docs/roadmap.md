@@ -59,8 +59,8 @@ What's not: UI feels rough and unpolished compared to competitors, AI chat drops
 ## Weight
 
 ### Now
-- **LB/KG unit switching** — Currently broken (P0 bug). Toggle has no effect on displayed values. Also audit all view models for stale `Preferences.*` captures.
-- **Adaptive TDEE** — Use actual weight trend data to back-calculate true expenditure and auto-adjust calorie targets. Compare predicted vs actual weight loss, compute delta, adjust TDEE. Pure service with tests. (Promoted from Later — MacroFactor's killer feature, we have the data.)
+- ~~**LB/KG unit switching**~~ ✅ DONE — Fixed stale preference pattern, extended to all exercise/workout views. DB in canonical units, conversion at view boundaries.
+- ~~**Adaptive TDEE**~~ ✅ DONE — EMA-smoothed adaptive estimation from weight trend data. 3-point ramp-up, 0.4 dampening. Persists in TDEEConfig.
 - Trend visualization improvements — clearer charts, milestone markers
 
 ### Next
@@ -119,15 +119,17 @@ What's not: UI feels rough and unpolished compared to competitors, AI chat drops
 ## Behavior Insights
 
 ### Now
-- **Hardcoded insight cards (3-5)** — Correlate existing cross-domain data on dashboard: (1) workout frequency vs weight trend, (2) protein target hit rate vs weight trend, (3) sleep duration vs recovery. Simple SQL queries, descriptive stats with thresholds. No ML.
+- ~~**Hardcoded insight cards (3-5)**~~ ✅ DONE — 3 insights on dashboard: workout frequency vs weight, protein adherence, logging consistency. Minimum data thresholds.
 
 ### Next
+- **Behavior insights v2** — Add sleep duration vs recovery correlation (4th insight), extend window from 14→30 days
 - Expanded correlations (glucose spikes after specific foods, supplement adherence vs biomarkers)
 - User-configurable insight tracking ("tell me how X affects Y")
 
 ## Quality & Testing
 
 ### Now
+- **Coverage recovery (P0)** — 8 files below threshold. Critical: AIToolAgent 0%, IntentClassifier 36%, AIRuleEngine 25%, FoodService 30%. Write tests before any AI refactoring.
 - Coverage targets: **80%** logic, **50%** services — find and fix gaps
 - **Stale preference audit** — Find all view models that capture `Preferences.*` at init instead of reading dynamically. Fix the pattern, not just the LB/KG instance.
 - AI eval harness: every tool gets 10+ eval queries
