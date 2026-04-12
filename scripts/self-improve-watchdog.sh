@@ -11,12 +11,19 @@
 
 set -euo pipefail
 
+# Kill any existing watchdog (prevent duplicates)
+EXISTING=$(pgrep -f "self-improve-watchdog.sh" | grep -v $$ || true)
+if [ -n "$EXISTING" ]; then
+    echo "$EXISTING" | xargs kill 2>/dev/null || true
+    sleep 1
+fi
+
 WORK_DIR="/Users/ashishsadh/workspace/Drift"
 CONTROL_FILE="$HOME/drift-control.txt"
 LOG_DIR="$HOME/drift-self-improve-logs"
 WATCHDOG_LOG="$LOG_DIR/watchdog.log"
 PID_FILE="$LOG_DIR/claude.pid"
-CHECK_INTERVAL=1800  # 30 minutes
+CHECK_INTERVAL=900  # 15 minutes
 STALE_THRESHOLD=1500 # 25 minutes (in seconds)
 KILL_WAIT=10
 
