@@ -19,6 +19,19 @@ function headers() {
 async function api(path, opts = {}) {
   const resp = await fetch(`${API}${path}`, { headers: headers(), ...opts });
   if (resp.status === 401) { clearToken(); showAuth(); throw new Error('Unauthorized'); }
+  if (!resp.ok) {
+    const err = await resp.json().catch(() => ({}));
+    throw new Error(err.message || `API error ${resp.status}`);
+  }
+  return resp.json();
+}
+
+// Public API call (no auth needed for public repos)
+async function publicApi(path) {
+  const resp = await fetch(`${API}${path}`, {
+    headers: { 'Accept': 'application/vnd.github.v3+json' }
+  });
+  if (!resp.ok) throw new Error(`API error ${resp.status}`);
   return resp.json();
 }
 
@@ -45,22 +58,22 @@ async function getUser() {
   catch { return null; }
 }
 
-// Reports
+// Reports (use public API — no auth needed for public repos)
 async function listReports() {
-  const contents = await api(`/repos/${OWNER}/${REPO}/contents/Docs/reports`);
+  const contents = await publicApi(`/repos/${OWNER}/${REPO}/contents/Docs/reports`);
   return contents
     .filter(f => f.name.endsWith('.md'))
     .sort((a, b) => b.name.localeCompare(a.name));
 }
 
 async function getReportContent(path) {
-  const data = await api(`/repos/${OWNER}/${REPO}/contents/${path}`);
+  const data = await publicApi(`/repos/${OWNER}/${REPO}/contents/${path}`);
   return atob(data.content);
 }
 
 async function getMetrics() {
   try {
-    const data = await api(`/repos/${OWNER}/${REPO}/contents/command-center/metrics.json`);
+    const data = await publicApi(`/repos/${OWNER}/${REPO}/contents/command-center/metrics.json`);
     return JSON.parse(atob(data.content));
   } catch {
     return null;
@@ -150,17 +163,25 @@ function showAuth() {
 }
 
 async function showUser() {
-  const user = await getUser();
   const el = document.getElementById('auth-area');
   if (!el) return;
-  if (user) {
-    el.innerHTML = `
-      <div class="user-info">
-        <img src="${user.avatar_url}" alt="${user.login}">
-        <span>${user.login}</span>
-        <button class="btn" onclick="clearToken();location.reload()">Sign out</button>
-      </div>`;
-  } else {
+  if (!getToken()) { showAuth(); return; }
+  try {
+    const user = await getUser();
+    if (user && user.login) {
+      el.innerHTML = `
+        <div class="user-info">
+          <img src="${user.avatar_url}" alt="${user.login}">
+          <span>${user.login}</span>
+          <button class="btn" onclick="clearToken();location.reload()">Sign out</button>
+        </div>`;
+    } else {
+      // Token exists but user fetch failed — token may be bad
+      clearToken();
+      showAuth();
+    }
+  } catch {
+    clearToken();
     showAuth();
   }
 }
