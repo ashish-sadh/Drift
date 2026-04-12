@@ -88,6 +88,16 @@ enum FoodService {
         try? AppDatabase.shared.saveFavorite(&fav)
     }
 
+    /// Fetch a cached barcode product.
+    static func fetchCachedBarcode(_ barcode: String) -> BarcodeCache? {
+        try? AppDatabase.shared.fetchCachedBarcode(barcode)
+    }
+
+    /// Cache a barcode product for future lookups.
+    static func cacheBarcodeProduct(_ cache: BarcodeCache) {
+        try? AppDatabase.shared.cacheBarcodeProduct(cache)
+    }
+
     /// Fetch a food by its database ID.
     static func fetchFoodById(_ id: Int64) -> Food? {
         try? AppDatabase.shared.reader.read { db in try Food.fetchOne(db, id: id) }

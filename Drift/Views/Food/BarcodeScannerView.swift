@@ -239,7 +239,7 @@ struct BarcodeLookupView: View {
             fiberG: Double(editFiber) ?? 0
         )
         // Save to food DB so it shows up in future searches
-        try? AppDatabase.shared.saveScannedFood(&food)
+        _ = FoodService.saveScannedFood(&food)
         viewModel.logFood(food, servings: 1, mealType: viewModel.autoMealType)
         dismiss()
     }
@@ -322,7 +322,7 @@ struct BarcodeLookupView: View {
         isLooking = true; error = nil
         Task {
             // Check local cache first
-            if let cached = try? AppDatabase.shared.fetchCachedBarcode(barcode) {
+            if let cached = FoodService.fetchCachedBarcode(barcode) {
                 Log.foodLog.info("Barcode cache hit: \(cached.name)")
                 let p = OpenFoodFactsService.Product(
                     barcode: cached.barcode, name: cached.name, brand: cached.brand,
@@ -345,7 +345,7 @@ struct BarcodeLookupView: View {
                 product = p
                 amount = "1"; selectedUnitIndex = 0
                 // Cache locally for next time
-                try? AppDatabase.shared.cacheBarcodeProduct(BarcodeCache(from: p))
+                FoodService.cacheBarcodeProduct(BarcodeCache(from: p))
                 Log.foodLog.info("Barcode cached: \(p.name)")
             } catch {
                 self.error = error.localizedDescription
@@ -372,7 +372,7 @@ struct BarcodeLookupView: View {
                         fiberG: p.fiberG * servingG / 100,
                         ingredients: ingredientsJson,
                         novaGroup: p.novaGroup)
-        try? AppDatabase.shared.saveScannedFood(&food)
+        _ = FoodService.saveScannedFood(&food)
         // Calculate servings multiplier from amount + unit
         let units = FoodUnit.smartUnits(for: food)
         let safeIndex = min(selectedUnitIndex, max(units.count - 1, 0))
