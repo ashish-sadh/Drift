@@ -15838,5 +15838,105 @@
     "fat_g": 1.5,
     "fiber_g": 5,
     "serving_unit": "g"
+  },
+  {
+    "name": "Venison (cooked)",
+    "calories": 158,
+    "protein_g": 30,
+    "carbs_g": 0,
+    "fat_g": 3.2,
+    "fiber_g": 0,
+    "serving_size": 100,
+    "serving_unit": "g",
+    "category": "Protein"
+  },
+  {
+    "name": "Anchovies (canned)",
+    "calories": 210,
+    "protein_g": 29,
+    "carbs_g": 0,
+    "fat_g": 10,
+    "fiber_g": 0,
+    "serving_size": 100,
+    "serving_unit": "g",
+    "category": "Seafood"
+  },
+  {
+    "name": "Clams (steamed)",
+    "calories": 148,
+    "protein_g": 26,
+    "carbs_g": 5,
+    "fat_g": 2,
+    "fiber_g": 0,
+    "serving_size": 100,
+    "serving_unit": "g",
+    "category": "Seafood"
+  },
+  {
+    "name": "Lo Mein",
+    "calories": 310,
+    "protein_g": 12,
+    "carbs_g": 42,
+    "fat_g": 10,
+    "fiber_g": 2,
+    "serving_size": 250,
+    "serving_unit": "g",
+    "category": "Asian"
+  },
+  {
+    "name": "California Roll (6 pcs)",
+    "calories": 255,
+    "protein_g": 9,
+    "carbs_g": 38,
+    "fat_g": 7,
+    "fiber_g": 2,
+    "serving_size": 180,
+    "serving_unit": "g",
+    "category": "Asian"
+  },
+  {
+    "name": "Kebab (chicken)",
+    "calories": 165,
+    "protein_g": 25,
+    "carbs_g": 3,
+    "fat_g": 6,
+    "fiber_g": 0,
+    "serving_size": 100,
+    "serving_unit": "g",
+    "category": "Protein"
+  },
+  {
+    "name": "Crepe (plain)",
+    "calories": 112,
+    "protein_g": 4,
+    "carbs_g": 16,
+    "fat_g": 4,
+    "fiber_g": 0.5,
+    "serving_size": 60,
+    "serving_unit": "g",
+    "category": "Breakfast"
+  },
+  {
+    "name": "Scone (plain)",
+    "calories": 362,
+    "protein_g": 6,
+    "carbs_g": 44,
+    "fat_g": 18,
+    "fiber_g": 1,
+    "serving_size": 85,
+    "serving_unit": "g",
+    "category": "Bakery"
+  },
+  {
+    "name": "Gajar Halwa (carrot halwa)",
+    "calories": 300,
+    "protein_g": 5,
+    "carbs_g": 42,
+    "fat_g": 14,
+    "fiber_g": 2,
+    "serving_size": 150,
+    "serving_unit": "g",
+    "ingredients": "carrot, ghee, milk, sugar, cashew, cardamom",
+    "category": "Indian Sweets"
   }
 ]
