@@ -30,6 +30,10 @@ final class TDEEEstimator {
         var heightCm: Double?
         var sex: Sex?
 
+        // Adaptive TDEE — smoothed from weight trend + food intake
+        var adaptiveTDEE: Double?
+        var adaptiveDataPoints: Int = 0
+
         static let `default` = TDEEConfig(
             activityMultiplier: 29,
             appleHealthTrust: 1.0,
@@ -85,6 +89,7 @@ final class TDEEEstimator {
         let confidence: Confidence
         let timestamp: Date
         let activeSources: [String] // which sources contributed
+        var adaptiveTDEE: Double?   // smoothed from weight trend + food logs (nil = insufficient data)
 
         enum Source: String, Codable, Sendable {
             case appleHealth = "Apple Health"
@@ -192,7 +197,7 @@ final class TDEEEstimator {
             bestSource = sources.count >= 3 ? .blended : .appleHealth
         }
 
-        // Weight trend correction (0.3 dampening)
+        // Weight trend correction (0.3 dampening) + adaptive update
         let trendTDEE = fetchWeightTrendTDEE()
         let consistency = foodLoggingConsistency()
         if let trend = trendTDEE, consistency >= config.loggingConsistencyThreshold {
@@ -201,15 +206,28 @@ final class TDEEEstimator {
             bestSource = .blended
         }
 
+        // Adaptive TDEE: persist observed TDEE, use when mature (3+ data points)
+        updateAdaptive(observedTDEE: trendTDEE)
+        let adaptiveConfig = Self.loadConfig() // re-read after update
+        var adaptiveValue: Double? = nil
+        if let adaptive = Self.adaptiveEstimate(from: adaptiveConfig) {
+            // Apply adaptive correction (0.4 dampening — stronger than single-point trend)
+            let adaptivePull = (adaptive - tdee) * 0.4
+            tdee += adaptivePull
+            if !sources.contains("Weight Trend") { sources.append("Adaptive") }
+            bestSource = .blended
+            adaptiveValue = adaptive
+        }
+
         // Step 3: Final
         tdee = max(1200, tdee + config.manualAdjustment)
 
         let confidence: Estimate.Confidence = sources.count >= 3 ? .high : sources.count >= 2 ? .medium : .low
         let estimate = Estimate(tdee: tdee, source: bestSource, confidence: confidence,
-                                timestamp: Date(), activeSources: sources)
+                                timestamp: Date(), activeSources: sources, adaptiveTDEE: adaptiveValue)
         current = estimate
         cache(estimate)
-        Log.app.info("TDEE: \(Int(tdee)) kcal (\(sources.joined(separator: "+")))")
+        Log.app.info("TDEE: \(Int(tdee)) kcal (\(sources.joined(separator: "+")))\(adaptiveValue.map { " [adaptive: \(Int($0))]" } ?? "")")
     }
 
     // MARK: - Sync path (no Apple Health)
@@ -243,12 +261,21 @@ final class TDEEEstimator {
             bestSource = .blended
         }
 
+        // Step 2c: Adaptive correction (persistent, from accumulated observations)
+        var adaptiveValue: Double? = nil
+        if let adaptive = Self.adaptiveEstimate(from: config) {
+            tdee += (adaptive - tdee) * 0.4
+            if !sources.contains("Weight Trend") { sources.append("Adaptive") }
+            bestSource = .blended
+            adaptiveValue = adaptive
+        }
+
         // Step 3: Final
         tdee = max(1200, tdee + config.manualAdjustment)
 
         let confidence: Estimate.Confidence = sources.count >= 2 ? .medium : .low
         let est = Estimate(tdee: tdee, source: bestSource, confidence: confidence,
-                           timestamp: Date(), activeSources: sources)
+                           timestamp: Date(), activeSources: sources, adaptiveTDEE: adaptiveValue)
         current = est; return est
     }
 
@@ -306,6 +333,32 @@ final class TDEEEstimator {
 
         let tdee = avgIntake - deficit
         return tdee > 800 ? tdee : nil
+    }
+
+    // MARK: - Adaptive TDEE Update
+
+    /// Smooths observed TDEE (from weight trend + food intake) into a persistent estimate.
+    /// Uses EMA with alpha=0.2 (half-life ~3 refreshes). Requires 3+ data points to be used.
+    private func updateAdaptive(observedTDEE: Double?) {
+        guard let observed = observedTDEE else { return }
+        var config = Self.loadConfig()
+
+        if let current = config.adaptiveTDEE {
+            // EMA: smooth toward observed value
+            let alpha = 0.2
+            config.adaptiveTDEE = current * (1 - alpha) + observed * alpha
+        } else {
+            // First data point — seed the adaptive estimate
+            config.adaptiveTDEE = observed
+        }
+        config.adaptiveDataPoints += 1
+        Self.saveConfig(config)
+    }
+
+    /// Returns adaptive TDEE if sufficient data (3+ data points).
+    nonisolated static func adaptiveEstimate(from config: TDEEConfig) -> Double? {
+        guard config.adaptiveDataPoints >= 3, let adaptive = config.adaptiveTDEE else { return nil }
+        return adaptive
     }
 
     // MARK: - Food Logging Consistency
