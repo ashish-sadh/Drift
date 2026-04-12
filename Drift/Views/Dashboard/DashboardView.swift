@@ -37,19 +37,25 @@ struct DashboardView: View {
                         Image(systemName: "lock.shield.fill")
                             .font(.system(size: 11))
                             .foregroundStyle(Theme.deficit)
-                        Text("All data & AI models stay on your device. Nothing leaves your phone.")
+                        Text("All data stays on your device.")
                             .font(.system(size: 11))
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 4)
 
-                    // Weight + Trend tile — tap to log, long-press for history
+                    // ── Today ──
+                    // Nutrition hero (macro rings) → Food tab
+                    Button { selectedTab = 2 } label: { calorieBalanceCard }.buttonStyle(.plain)
+
+                    // ── Body ──
+                    sectionHeader("Body")
+
+                    // Weight + Trend tile — tap to log
                     Button {
                         showingWeightEntry = true
                     } label: {
                         HStack(spacing: 12) {
-                            // Left column: Weight
                             VStack(alignment: .leading, spacing: 2) {
                                 Label("Weight", systemImage: "scalemass").font(.caption).foregroundStyle(.secondary)
                                 if let w = viewModel.latestWeight ?? viewModel.trendWeight {
@@ -73,7 +79,6 @@ struct DashboardView: View {
                                 "Weight: \(String(format: "%.1f", Preferences.weightUnit.convert(fromKg: $0))) \(Preferences.weightUnit.displayName)"
                             } ?? "Weight: no data")
 
-                            // Right column: Trend only (deficit moved to TDEE card)
                             VStack(alignment: .leading, spacing: 2) {
                                 Label("Trend", systemImage: "chart.line.downtrend.xyaxis").font(.caption).foregroundStyle(.secondary)
                                 if let rate = viewModel.weeklyRate {
@@ -106,8 +111,8 @@ struct DashboardView: View {
                     // TDEE → Algorithm settings
                     NavigationLink { AlgorithmSettingsView() } label: { tdeeCard }.tint(.primary)
 
-                    // Nutrition → Food tab
-                    Button { selectedTab = 2 } label: { calorieBalanceCard }.buttonStyle(.plain)
+                    // ── Activity ──
+                    sectionHeader("Activity")
 
                     // Active/Steps → Exercise tab
                     Button { selectedTab = 3 } label: { healthRow }.buttonStyle(.plain)
@@ -117,7 +122,10 @@ struct DashboardView: View {
                         Button { selectedTab = 3 } label: { workoutCard }.buttonStyle(.plain)
                     }
 
-                    // Body Rhythm → SleepRecoveryView (always visible)
+                    // ── Recovery ──
+                    sectionHeader("Recovery")
+
+                    // Body Rhythm → SleepRecoveryView
                     NavigationLink { SleepRecoveryView() } label: { sleepRecoveryCard }
 
                     // Supplements — show if any configured
@@ -127,6 +135,7 @@ struct DashboardView: View {
 
                     // Behavior Insights
                     if !viewModel.behaviorInsights.isEmpty {
+                        sectionHeader("Insights")
                         insightsCard
                     }
                 }
@@ -209,10 +218,17 @@ struct DashboardView: View {
         }
     }
 
-    // TDEE card, calorie balance card, macro chips, and helpers in DashboardView+Cards.swift
+    // MARK: - Section Header
 
-
-    // TDEE card, calorie balance card, macro chips, and helpers in DashboardView+Cards.swift
+    private func sectionHeader(_ title: String) -> some View {
+        Text(title)
+            .font(.caption.weight(.semibold))
+            .foregroundStyle(Theme.textTertiary)
+            .textCase(.uppercase)
+            .tracking(0.8)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.top, 4)
+    }
 
     // MARK: - Apple Health Workouts
 

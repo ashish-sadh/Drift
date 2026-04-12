@@ -154,12 +154,7 @@ extension DashboardView {
         VStack(spacing: 10) {
             if hasLoggedFood {
                 if let targets = WeightGoal.load()?.macroTargets(currentWeightKg: viewModel.trendWeight) {
-                    // With goal: progress bar + remaining
-                    let eaten = Int(viewModel.todayNutrition.calories)
-                    let target = Int(targets.calorieTarget)
-                    let remaining = target - eaten
-                    let progress = min(Double(eaten) / Double(target), 1.5)
-
+                    // With goal: macro rings + legend
                     HStack {
                         Text("Nutrition")
                             .font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
@@ -167,36 +162,26 @@ extension DashboardView {
                         Text("Today").font(.caption).foregroundStyle(.tertiary)
                     }
 
-                    // Progress bar
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(Theme.cardBackgroundElevated)
-                                .frame(height: 8)
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(remaining >= 0 ? Theme.calorieBlue : Theme.surplus)
-                                .frame(width: max(0, geo.size.width * progress), height: 8)
-                        }
-                    }
-                    .frame(height: 8)
+                    // Macro rings hero
+                    MacroRingsView(
+                        calories: viewModel.todayNutrition.calories,
+                        calorieTarget: targets.calorieTarget,
+                        protein: viewModel.todayNutrition.proteinG,
+                        proteinTarget: targets.proteinG,
+                        carbs: viewModel.todayNutrition.carbsG,
+                        carbsTarget: targets.carbsG,
+                        fat: viewModel.todayNutrition.fatG,
+                        fatTarget: targets.fatG
+                    )
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 4)
 
-                    HStack {
-                        Text("\(eaten)")
-                            .font(.subheadline.weight(.bold).monospacedDigit())
-                            .foregroundStyle(Theme.calorieBlue)
-                        Text("/ \(target) kcal")
-                            .font(.caption.monospacedDigit())
-                            .foregroundStyle(.tertiary)
-                        Spacer()
-                        Text(remaining >= 0 ? "\(remaining) left" : "\(abs(remaining)) over")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(remaining >= 0 ? Theme.deficit : Theme.surplus)
-                    }
-
-                    HStack(spacing: 6) {
-                        macroChipWithTarget("P", value: viewModel.todayNutrition.proteinG, target: targets.proteinG, color: Theme.proteinRed)
-                        macroChipWithTarget("C", value: viewModel.todayNutrition.carbsG, target: targets.carbsG, color: Theme.carbsGreen)
-                        macroChipWithTarget("F", value: viewModel.todayNutrition.fatG, target: targets.fatG, color: Theme.fatYellow)
+                    // Ring legend
+                    HStack(spacing: 12) {
+                        macroLegend("Cal", value: viewModel.todayNutrition.calories, target: targets.calorieTarget, color: Theme.calorieBlue, unit: "")
+                        macroLegend("Pro", value: viewModel.todayNutrition.proteinG, target: targets.proteinG, color: Theme.proteinRed, unit: "g")
+                        macroLegend("Carb", value: viewModel.todayNutrition.carbsG, target: targets.carbsG, color: Theme.carbsGreen, unit: "g")
+                        macroLegend("Fat", value: viewModel.todayNutrition.fatG, target: targets.fatG, color: Theme.fatYellow, unit: "g")
                     }
                 } else {
                     // No goal: just show eaten + macros
@@ -238,6 +223,19 @@ extension DashboardView {
             }
         }
         .card()
+    }
+
+    private func macroLegend(_ label: String, value: Double, target: Double, color: Color, unit: String) -> some View {
+        VStack(spacing: 2) {
+            Circle().fill(color).frame(width: 6, height: 6)
+            Text("\(Int(value))\(unit)")
+                .font(.caption2.weight(.bold).monospacedDigit())
+                .foregroundStyle(value >= target ? color : .primary)
+            Text(label)
+                .font(.system(size: 9, weight: .medium))
+                .foregroundStyle(.tertiary)
+        }
+        .frame(maxWidth: .infinity)
     }
 
     func macroChip(_ label: String, value: Double, color: Color) -> some View {
