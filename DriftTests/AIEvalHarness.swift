@@ -1405,4 +1405,64 @@ final class AIEvalHarness: XCTestCase {
         // Should correct "chickn" to a food word, "breast" passes through or corrects
         XCTAssertTrue(result.contains("chick"), "Should correct 'chickn' to something with 'chick'")
     }
+
+    // MARK: - findFood Coverage Tests
+
+    func testFindFoodGramAmount() {
+        // gramAmount path: "200g chicken" → servings = 200 / servingSize
+        let match = AIActionExecutor.findFood(query: "chicken", servings: nil, gramAmount: 200)
+        XCTAssertNotNil(match, "Should find chicken")
+        if let m = match {
+            XCTAssertTrue(m.servings > 0, "Gram-based servings should be > 0")
+            // 200g / servingSize should give a specific servings count
+            let expectedServings = 200.0 / m.food.servingSize
+            XCTAssertEqual(m.servings, expectedServings, accuracy: 0.01, "Servings should be 200/servingSize")
+        }
+    }
+
+    func testFindFoodSpellCorrection() {
+        // Spell correction fallback: "bannana" → "banana"
+        let match = AIActionExecutor.findFood(query: "bannana", servings: nil)
+        XCTAssertNotNil(match, "Should find banana via spell correction")
+        if let m = match {
+            XCTAssertTrue(m.food.name.lowercased().contains("banana"), "Should match banana")
+        }
+    }
+
+    func testFindFoodQualifierStripping() {
+        // Qualifier stripping: "bowl of rice" → "rice"
+        let bowl = AIActionExecutor.findFood(query: "bowl of rice", servings: nil)
+        XCTAssertNotNil(bowl, "Should find rice via qualifier stripping 'bowl of'")
+
+        let sliceOf = AIActionExecutor.findFood(query: "slice of pizza", servings: nil)
+        XCTAssertNotNil(sliceOf, "Should find pizza via qualifier stripping 'slice of'")
+
+        let cupOf = AIActionExecutor.findFood(query: "cup of oatmeal", servings: nil)
+        XCTAssertNotNil(cupOf, "Should find oatmeal via qualifier stripping 'cup of'")
+    }
+
+    func testFindFoodFirstWordFallback() {
+        // First word fallback: "chicken supreme deluxe" → "chicken"
+        let match = AIActionExecutor.findFood(query: "chicken supreme deluxe", servings: nil)
+        XCTAssertNotNil(match, "Should find chicken via first word fallback")
+    }
+
+    func testFindFoodSingularization() {
+        // Singular-first search: "bananas" → "banana"
+        let match = AIActionExecutor.findFood(query: "bananas", servings: nil)
+        XCTAssertNotNil(match, "Should find banana from plural")
+        if let m = match {
+            XCTAssertTrue(m.food.name.lowercased().contains("banana"), "Should match banana")
+        }
+    }
+
+    func testNutritionEstimationPrompt() {
+        // Cover nutritionEstimationPrompt
+        let prompt = AIActionExecutor.nutritionEstimationPrompt(food: "samosa", servings: 2)
+        XCTAssertTrue(prompt.contains("samosa"), "Prompt should contain food name")
+        XCTAssertTrue(prompt.contains("2.0"), "Prompt should contain servings")
+
+        let promptDefault = AIActionExecutor.nutritionEstimationPrompt(food: "biryani", servings: nil)
+        XCTAssertTrue(promptDefault.contains("1 serving"), "Default should be 1 serving")
+    }
 }

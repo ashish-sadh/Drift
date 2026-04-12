@@ -8,6 +8,10 @@ _(pick from Ready)_
 
 ## Ready
 
+### P0: Unit Switching (LB/KG) Broken + Missing Units
+- [ ] **LB/KG setting doesn't update UI** — Toggling between LB and KG in settings has no effect on displayed values. All weight-related views (dashboard, weight history, food macros, etc.) must respect the unit preference and convert/display accordingly. Add tests to catch unit preference regressions.
+- [ ] **Support all unit options across the app** — Body weight entry only accepts KG, should also accept LB. Audit every place units appear (body weight, food weight, exercise weight) and ensure users can input/view in their preferred unit system.
+
 ### P0: LLM-Driven Intent + Tool Calling (CORE REDESIGN)
 
 **Goal:** Replace ~1500 lines of hardcoded string matching with LLM-driven intent detection. The 2B model (Gemma 4) should decide intent and call tools via JSON — not keyword scoring.

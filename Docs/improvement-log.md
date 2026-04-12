@@ -20,6 +20,10 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 - **Fix isLowQuality false positive**: Short follow-up questions like "Would you like to log that?" were incorrectly flagged as low quality and replaced with fallback data. Now allows questions with action words.
 - **Food DB serving size fix**: 55 entries had serving_size=1g (broke gram-based logging). Fixed to real weights. Added bulgur, farro. Fixed Vanilla Cake macros (was 0g fat).
 - **Chat accessibility + contrast**: VoiceOver labels on message bubbles ("You said:", "Assistant:"). Improved bubble opacity for better readability.
+- **Spell correction expanded**: ~40 new misspelling corrections for fruits, dairy, Indian foods, beverages, exercise terms. Organized by category.
+- **Fix silent save failures + multi-turn upgrade**: Weight logging and workout save used `try?` which silently swallowed errors. Now uses do/catch with visible error. Multi-turn "What did you eat?" handler now uses `buildMealFromText` — handles multi-item responses ("pizza and salad"), "with" sub-splitting, and opens recipe builder with macros.
+- **WeightServiceAPI.logWeight bug**: Returned the entry even when the DB save failed (try? swallowed error). Callers thought save succeeded. Now returns nil on failure. Added error feedback in chat confirmation handler.
+- **Food DB enrichment**: 9 new foods (1032→1041). Venison, anchovies, clams, lo mein, California roll, kebab, crepe, scone, gajar halwa.
 
 ## Cycle · 2026-04-10
 
