@@ -73,6 +73,21 @@ enum FoodService {
         }
     }
 
+    /// Fetch recently used foods.
+    static func fetchRecentFoods(limit: Int = 10) -> [Food] {
+        (try? AppDatabase.shared.fetchRecentFoods(limit: limit)) ?? []
+    }
+
+    /// Fetch foods by category.
+    static func fetchFoodsByCategory(_ category: String) -> [Food] {
+        (try? AppDatabase.shared.fetchFoodsByCategory(category)) ?? []
+    }
+
+    /// Save a recipe/favorite.
+    static func saveRecipe(_ fav: inout SavedFood) {
+        try? AppDatabase.shared.saveFavorite(&fav)
+    }
+
     /// Fetch a food by its database ID.
     static func fetchFoodById(_ id: Int64) -> Food? {
         try? AppDatabase.shared.reader.read { db in try Food.fetchOne(db, id: id) }

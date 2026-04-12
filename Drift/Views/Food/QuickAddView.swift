@@ -13,7 +13,6 @@ struct QuickAddView: View {
     @State private var editingIndex: Int?
     @State private var recipeLogTime = Date()
     @State private var recipeServings = "1"
-    private let db = AppDatabase.shared
 
     struct RecipeItem: Identifiable, Codable {
         var id = UUID()
@@ -199,7 +198,7 @@ struct QuickAddView: View {
         var fav = SavedFood(name: name, calories: perServingCal, proteinG: perServingP,
                                carbsG: perServingC, fatG: perServingF, fiberG: perServingFb,
                                isRecipe: items.count > 1, ingredients: ingredientsJson)
-        try? db.saveFavorite(&fav)
+        FoodService.saveRecipe(&fav)
         let totalServing = items.reduce(0.0) { $0 + $1.servingSizeG }
         let loggedAtStr = ISO8601DateFormatter().string(from: recipeLogTime)
         // Log with per-serving macros × servings
@@ -252,7 +251,7 @@ private struct IngredientPickerView: View {
                         .textFieldStyle(.plain).autocorrectionDisabled()
                         .focused($searchFocused)
                         .onChange(of: query) { _, q in
-                            results = q.isEmpty ? [] : ((try? AppDatabase.shared.searchFoodsRanked(query: q)) ?? [])
+                            results = q.isEmpty ? [] : FoodService.searchFood(query: q)
                         }
                     if !query.isEmpty {
                         Button { query = ""; results = [] } label: {
@@ -273,11 +272,11 @@ private struct IngredientPickerView: View {
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Done") { dismiss() } } }
             .sheet(isPresented: $showingManual) { manualIngredientSheet }
             .onAppear {
-                recentIngredients = (try? AppDatabase.shared.fetchRecentFoods(limit: 5)) ?? []
+                recentIngredients = FoodService.fetchRecentFoods(limit: 5)
                 if let item = editingItem {
                     // Edit mode: pre-fill search and auto-select the food
                     query = item.name
-                    results = (try? AppDatabase.shared.searchFoodsRanked(query: item.name)) ?? []
+                    results = FoodService.searchFood(query: item.name)
                     if let food = results.first, food.name.lowercased() == item.name.lowercased() {
                         selectedFood = food
                         // Calculate amount from stored serving size
@@ -331,7 +330,7 @@ private struct IngredientPickerView: View {
                             ForEach(categories, id: \.self) { cat in
                                 Button {
                                     selectedCategory = cat
-                                    results = (try? AppDatabase.shared.fetchFoodsByCategory(cat)) ?? []
+                                    results = FoodService.fetchFoodsByCategory(cat)
                                 } label: {
                                     Text(cat == "Grains & Cereals" ? "Grains" : cat)
                                         .font(.caption.weight(selectedCategory == cat ? .semibold : .medium))

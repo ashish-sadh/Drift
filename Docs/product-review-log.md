@@ -541,3 +541,46 @@ Both personas agree:
 6. **"AI Health Coach" vision added to roadmap Later** — aspirational narrative, not Phase 3c scope
 7. **Remaining DDD violations (52 calls across 13 files) are not blocking** — food domain is clean, other domains are lower priority. Address opportunistically, not as a dedicated sprint.
 8. **Final sequencing: STOP loop → coverage → dashboard → prompt consolidation → state machine**
+
+---
+
+## Review #6 — 2026-04-12 (Cycle 126)
+
+### Progress Since Review #5
+
+10 cycles (116→126). Same day as Review #5. Code-improvement loop continued DDD routing despite Review #5's recommendation to stop:
+
+1. **WeightTabView** — 8 AppDatabase calls → WeightServiceAPI (2 new methods: latestBodyComposition, saveBodyComposition). Also consolidated duplicate fetch calls.
+2. **QuickAddView** — 5 AppDatabase calls → FoodService (3 new methods: fetchRecentFoods, fetchFoodsByCategory, saveRecipe). Removed stored `db` property. In progress at time of review.
+
+**Cumulative DDD progress:** 45 direct DB calls eliminated from 5 view files. FoodService: 22 methods. WeightServiceAPI: 2 new methods.
+
+No competitive landscape changes (same day). No new features. No coverage work.
+
+### Product Designer Persona
+
+**Assessment:** The DDD routing is correct architectural work, but this is now the 6th consecutive review flagging dashboard and coverage. The code-improvement loop is producing diminishing returns. Every additional view file routed through a service boundary is incremental improvement on an already-solid architecture, while the two highest-impact items (dashboard redesign, test coverage) remain untouched.
+
+**Recommendation:** The code-improvement loop's steering notes say `_Override: CONTINUE` — this should be changed to `STOP`. The loop has done excellent work (45 DB calls eliminated, clean service boundaries for food and weight domains) but the marginal value of routing the remaining ~40 calls across 16 files is low compared to shipping a dashboard redesign or writing AIToolAgent tests.
+
+### Principal Engineer Persona
+
+**Assessment:** The DDD work continues to be technically sound. WeightServiceAPI now has body composition methods, FoodService has grown to 22 methods covering the entire food domain. The pattern is consistent and clean.
+
+**However, this confirms Review #5's concern:** the DDD focus can continue indefinitely. There are still ~40 AppDatabase calls across 16 view files (DashboardView 5, AIChatView+Suggestions 5, BarcodeScannerView 4, etc.). At the current rate of ~5 calls per cycle, that's 8 more cycles of DDD routing — none of which produces user-visible improvement.
+
+**The code-improvement loop cannot address the top priorities.** It's constrained to "no behavior changes" which means:
+- Cannot write new tests (coverage recovery)
+- Cannot redesign the dashboard (UI changes)
+- Cannot consolidate prompts (behavioral change to AI)
+
+The loop should stop. The remaining DDD violations are not blocking any feature work.
+
+### Consensus
+
+Both personas agree (reaffirming Review #5):
+1. **Change `_Override: CONTINUE` to `_Override: STOP`** in code-improvement.md steering notes
+2. **DDD work was valuable but is now complete enough** — food and weight domains are clean, remaining violations are low-priority
+3. **Dashboard and coverage remain the top priorities** — now flagged in 6 consecutive reviews
+4. **No roadmap changes** — Review #5's updates are still current
+5. **Sequence unchanged: STOP → coverage → dashboard → prompt consolidation → state machine**
