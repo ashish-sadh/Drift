@@ -15,6 +15,7 @@ struct AIChatView: View {
     @State var showingWorkout = false
     @State var workoutTemplate: WorkoutTemplate? = nil
     @State var convState = ConversationState.shared
+    @State var speechService = SpeechRecognitionService.shared
     @State var pendingExercises: [AIActionParser.WorkoutExercise] = []
     @State var showingRecipeBuilder = false
     @State var pendingRecipeItems: [QuickAddView.RecipeItem] = []
@@ -114,10 +115,23 @@ struct AIChatView: View {
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.accent.opacity(0.6))
 
-                TextField("Ask anything...", text: $inputText, axis: .vertical)
+                TextField(speechService.isRecording ? "Listening..." : "Ask anything...", text: $inputText, axis: .vertical)
                     .textFieldStyle(.plain).font(.subheadline)
                     .lineLimit(1...3).focused($inputFocused)
                     .onSubmit { sendMessage() }
+
+                // Mic button — voice input via on-device speech recognition
+                Button {
+                    speechService.toggleRecording { transcript in
+                        inputText = transcript
+                    }
+                } label: {
+                    Image(systemName: speechService.isRecording ? "mic.fill" : "mic")
+                        .font(.system(size: 16))
+                        .foregroundStyle(speechService.isRecording ? .red : Color.gray.opacity(0.6))
+                        .symbolEffect(.pulse, isActive: speechService.isRecording)
+                }
+                .disabled(isGenerating)
 
                 Button { sendMessage() } label: {
                     Image(systemName: "arrow.up.circle.fill").font(.title2)

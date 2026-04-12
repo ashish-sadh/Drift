@@ -10,6 +10,10 @@
 	<string>Drift does not write to Apple Health. This permission is not requested.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Drift uses the camera to scan food barcodes for nutrition lookup.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Drift needs microphone access for voice input in AI chat. Audio is processed on-device and never leaves your phone.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Drift uses speech recognition to let you log food, exercise, and health data by voice. All recognition happens on your device.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>
