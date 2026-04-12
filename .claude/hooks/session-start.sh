@@ -2,8 +2,8 @@
 # Hook: SessionStart
 # Injects cycle state and roadmap reminder on session startup.
 
-COUNTER_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/cycle-counter"
-LAST_REVIEW_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/last-review-cycle"
+COUNTER_FILE="$HOME/drift-state/cycle-counter"
+LAST_REVIEW_FILE="$HOME/drift-state/last-review-cycle"
 
 COUNT=$(cat "$COUNTER_FILE" 2>/dev/null || echo "0")
 LAST_REVIEW=$(cat "$LAST_REVIEW_FILE" 2>/dev/null || echo "0")

@@ -4,8 +4,8 @@
 
 set -e
 
-COUNTER_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/cycle-counter"
-LAST_REVIEW_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/last-review-cycle"
+COUNTER_FILE="$HOME/drift-state/cycle-counter"
+LAST_REVIEW_FILE="$HOME/drift-state/last-review-cycle"
 
 # Initialize or read counter
 COUNT=$(cat "$COUNTER_FILE" 2>/dev/null || echo "0")
@@ -22,7 +22,7 @@ if [ "$SINCE_REVIEW" -ge 10 ]; then
 {
   "hookSpecificOutput": {
     "hookEventName": "PostToolUse",
-    "additionalContext": "PRODUCT REVIEW REQUIRED (cycle $COUNT, last review at cycle $LAST_REVIEW). Pause feature work now.\n\n1. PRODUCT DESIGNER persona (2yr each at MyFitnessPal, Whoop, MacroFactor, Strong, Boostcamp):\n   - Read Docs/roadmap.md, Docs/state.md, git log --oneline -20\n   - Web search: what are Boostcamp, MyFitnessPal, Whoop, Strong, MacroFactor doing now?\n   - Write review: strengths, gaps vs competitors, new ideas, proposed roadmap changes\n\n2. PRINCIPAL ENGINEER persona (10yr each Amazon, Google):\n   - Review proposals for technical sustainability and sequencing\n   - Push back on scope creep, ground in current stack (SwiftUI, GRDB, on-device LLM)\n   - Ensure architecture supports ambition without over-engineering\n\n3. Both agree → update Docs/roadmap.md, log to Docs/product-review-log.md with today's date\n4. Update .claude/last-review-cycle with current cycle number\n5. Resume the loop"
+    "additionalContext": "PRODUCT REVIEW REQUIRED (cycle $COUNT, last review at cycle $LAST_REVIEW). Pause feature work now.\n\n1. PRODUCT DESIGNER persona (2yr each at MyFitnessPal, Whoop, MacroFactor, Strong, Boostcamp):\n   - Read Docs/roadmap.md, Docs/state.md, git log --oneline -20\n   - Web search: what are Boostcamp, MyFitnessPal, Whoop, Strong, MacroFactor doing now?\n   - Write review: strengths, gaps vs competitors, new ideas, proposed roadmap changes\n\n2. PRINCIPAL ENGINEER persona (10yr each Amazon, Google):\n   - Review proposals for technical sustainability and sequencing\n   - Push back on scope creep, ground in current stack (SwiftUI, GRDB, on-device LLM)\n   - Ensure architecture supports ambition without over-engineering\n\n3. Both agree → update Docs/roadmap.md, log to Docs/product-review-log.md with today's date\n4. Update ~/drift-state/last-review-cycle with current cycle number\n5. Resume the loop"
   }
 }
 ENDJSON

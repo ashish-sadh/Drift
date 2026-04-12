@@ -5,8 +5,8 @@
 
 set -e
 
-COUNTER_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/cycle-counter"
-LAST_COVERAGE_FILE="${CLAUDE_PROJECT_DIR:-.}/.claude/last-coverage-snapshot"
+COUNTER_FILE="$HOME/drift-state/cycle-counter"
+LAST_COVERAGE_FILE="$HOME/drift-state/last-coverage-snapshot"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
 COUNT=$(cat "$COUNTER_FILE" 2>/dev/null || echo "0")

@@ -60,13 +60,13 @@ tail -f ~/drift-self-improve-logs/watchdog.log
 tail -f ~/drift-self-improve-logs/session_*.log
 
 # Cycle count + review status
-cat .claude/cycle-counter && cat .claude/last-review-cycle
+cat ~/drift-state/cycle-counter && cat ~/drift-state/last-review-cycle
 
 # Last TestFlight publish
-date -r $(cat .claude/last-testflight-publish) 2>/dev/null || echo "Never published"
+date -r $(cat ~/drift-state/last-testflight-publish) 2>/dev/null || echo "Never published"
 
 # Coverage snapshot
-cat .claude/last-coverage-snapshot
+cat ~/drift-state/last-coverage-snapshot
 ```
 
 #### Lifecycle of a Full Run

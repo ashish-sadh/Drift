@@ -23,7 +23,7 @@ if [ "${DRIFT_AUTONOMOUS:-0}" != "1" ]; then
 fi
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
-FLAG_FILE="$PROJECT_DIR/.claude/testflight-publish-authorized"
+FLAG_FILE="$HOME/drift-state/testflight-publish-authorized"
 
 # Gate 1: Authorization check (autonomous only)
 if [ ! -f "$FLAG_FILE" ]; then

@@ -90,7 +90,7 @@ echo "===========================" >&2
 if [ -n "$FAILURES" ]; then
   echo -e "BLOCKED: Pre-flight checks failed. Fix these before publishing to TestFlight:\n${FAILURES}\n\nDo NOT skip pre-flight. Fix the issues, then retry the archive." >&2
   # Remove the authorization flag so it has to go through the cycle again
-  rm -f "$PROJECT_DIR/.claude/testflight-publish-authorized"
+  rm -f "$HOME/drift-state/testflight-publish-authorized"
   exit 2
 fi
 
