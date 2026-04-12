@@ -339,3 +339,83 @@ Both personas agree:
 7. **Live Activities → Phase 4** — architectural complexity doesn't fit Phase 3c
 8. **Food DB: add common foods** over algorithmic improvements — the gap is data, not search quality
 9. **Sequence: finish current extraction → coverage → dashboard → prompt consolidation → state machine → chat UI**
+
+---
+
+## Review #4 — 2026-04-12 (Cycle 105)
+
+### Progress Since Review #3
+
+Only 12 cycles since Review #3 (same day). Two code-improvement cycles completed:
+1. **AIChatView.swift** — Extracted 476-line sendMessage() god function into AIChatView+MessageHandling.swift with 13 focused handler methods. File went from 836→214 lines. Committed.
+2. **GoalView.swift** — Extracting profile card (155 lines of complex form bindings) to GoalView+Profile.swift. In progress.
+
+**Critical observation:** Review #3 explicitly recommended "shift code-improvement focus from file decomposition to test coverage, DDD violations, and architectural patterns." The loop continued doing file decomposition anyway. This is because the code-improvement program's survey step ("pick the largest un-recently-touched file") naturally biases toward decomposition. The steering notes need to be updated to redirect this behavior.
+
+No new features shipped. No competitive landscape changes (same day as Review #3).
+
+### Product Designer Persona
+_Background: 2yr each at MyFitnessPal, Whoop, MacroFactor, Strong, Boostcamp_
+
+#### Assessment
+
+Competitive landscape unchanged since Review #3 (same day). Key competitive facts remain:
+- MFP acquired Cal AI, rolled out photo scanning to all Premium+ users
+- Whoop added women's health biomarker panels
+- MacroFactor split into two apps
+- Strong added muscle heat map
+
+**The product gap assessment from Review #3 stands unchanged.** Dashboard redesign remains the #1 product priority, flagged in 4 consecutive reviews now.
+
+#### Observation: Code Quality vs User-Facing Progress
+
+15 code-improvement cycles have now reorganized ~3,500+ lines. The codebase is cleaner. But from a user's perspective, zero visual changes have shipped since behavior insight cards (cycle ~68). The app looks identical to what it looked like 37 cycles ago.
+
+This is the risk of extended code-improvement runs: invisible progress. The code is better *for developers*, but users see no difference. At some point, the next TestFlight update needs to show *something* visually new.
+
+**Recommendation:** After finishing the current GoalView extraction, the code-improvement loop should end. Switch to the self-improvement program to tackle coverage recovery and dashboard redesign — work that produces both technical and visible progress.
+
+### Principal Engineer Persona
+_Background: 10yr each at Amazon and Google_
+
+#### Assessment
+
+**The code-improvement loop has reached its natural endpoint for file decomposition.**
+
+File size survey after 15 refactoring cycles:
+- Largest file: FoodTabView at 768 lines (already refactored twice)
+- Next: ActiveWorkoutView 763, FoodSearchView 728
+- Most files in the 500-650 range — healthy for SwiftUI views with charts and forms
+
+Further file splits would be splitting 600-line files into 300+300 — marginal gains with increased navigation cost. The loop's directive was "find the worst violation, fix it, biggest wins first." The biggest wins from decomposition are done.
+
+**The unfixed architectural issues are more urgent than further decomposition:**
+1. **AIToolAgent: 0% test coverage** — flagged in Reviews #2, #3, and #4. This is the AI pipeline orchestrator. Zero tests for 4 reviews running. Unacceptable.
+2. **State machine refactor** — AIChatView+MessageHandling now has 13 handler methods with complex state transitions (pendingMealName, pendingWorkoutLog, etc.). The extraction made the handlers visible, but the underlying state management is still scattered @State vars. This is the next high-impact refactoring, but it requires test coverage first.
+3. **Dashboard redesign** — 4 reviews saying "do it." The code is ready (DashboardView was decomposed to 373 lines in cycle 9). The blocker isn't code quality — it's that the code-improvement loop can't do UI work (refactoring only, no behavior changes).
+
+#### Recommendation: Update Code-Improvement Steering Notes
+
+The code-improvement loop's `_Focus:_` directive should be changed from `ALL` to something like `"DDD violations and design patterns only — no more file splitting"`. Or better: set `_Override: STOP` and switch to the self-improvement program for the next phase of work.
+
+#### Updated Sequencing (Refined)
+
+1. **Finish GoalView+Profile extraction** (~this cycle)
+2. **STOP code-improvement loop** — switch to self-improvement program
+3. **Coverage recovery sprint** — AIToolAgent, IntentClassifier, FoodService, AIRuleEngine (~4-6 cycles in self-improvement mode)
+4. **Dashboard redesign** — New hierarchy, better cards (~2-3 cycles)
+5. **Prompt consolidation** (~1-2 cycles)
+6. **State machine refactor** (~2-3 cycles, now safe with test coverage)
+
+---
+
+### Consensus & Roadmap Updates
+
+Both personas agree:
+1. **Code-improvement loop has reached diminishing returns on decomposition** — 15 cycles, ~3,500 lines reorganized, file sizes now healthy
+2. **Stop code-improvement loop after GoalView extraction** — switch to self-improvement program for coverage + features
+3. **Dashboard redesign is now 4-reviews overdue** — this MUST be in the next batch of work
+4. **AIToolAgent at 0% coverage is now 4-reviews flagged** — the single most critical technical debt
+5. **Update code-improvement steering notes** to prevent future decomposition-only drift
+6. **No roadmap changes needed** — Review #3's updates are still current (same day)
+7. **Next self-improvement sequence: coverage → dashboard → prompt consolidation → state machine**

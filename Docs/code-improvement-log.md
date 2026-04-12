@@ -22,3 +22,8 @@ Track of code quality improvement cycles. Each entry = one refactoring cycle.
 ## 2026-04-09
 
 - **FoodTabView.swift** — [Principle: SwiftUI] Smell: 1011 lines, 9 edit* @State vars → extracted EditFoodEntrySheet (250 lines) as self-contained view. File reduced to 765 lines.
+
+## 2026-04-12
+
+- **AIChatView.swift** — [Principle: Clean Code] Smell: 476-line sendMessage() god function → extracted to AIChatView+MessageHandling.swift with 13 focused handler methods. File reduced from 836 to 214 lines.
+- **GoalView.swift** — [Principle: SwiftUI] Smell: 600-line view with complex profile form bindings inline → extracted profile card, fields, save logic (233 lines) to GoalView+Profile.swift. File reduced to 385 lines.

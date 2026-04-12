@@ -8,7 +8,7 @@ Autonomous loop for code quality. Principle-driven, not prescriptive. Follow thi
 
 _Directive:_ **Improve code quality, readability, and maintainability. Read the principle files, find the worst violation in the codebase, fix it. No behavior changes — refactoring only. Biggest wins first.**
 
-_Focus:_ ALL (can be narrowed: "Views only", "Clean Code only", "Food domain only", etc.)
+_Focus:_ DDD violations and design patterns only — NO more file splitting. File decomposition is done (15 cycles, 3500+ lines reorganized). Focus on: business logic in views, dependency injection, protocol abstractions, testability improvements.
 
 _Override:_ CONTINUE
 

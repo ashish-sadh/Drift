@@ -130,6 +130,7 @@
 		C4B459EA365A74DF9ED1330A /* SavedFood.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B9BADD02A9760A82C60DE4E /* SavedFood.swift */; };
 		C6533AEBED5F6D1F5387F98A /* RobustnessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 647116F9E4F78CE702CB870C /* RobustnessTests.swift */; };
 		C78684F2133F07AAAC383EDB /* GoalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3258B6E91169170587AAB02B /* GoalView.swift */; };
+		C7DCB089BF4DCF1916C4B0E5 /* GoalView+Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B8EAC57A3A10193855A81F /* GoalView+Profile.swift */; };
 		CC5B581BFDDE48FB00D4E442 /* StaticOverrides.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F915E1ECAEF188959934E07 /* StaticOverrides.swift */; };
 		CF5BB4A5266F949DA9DEE006 /* LabReportUploadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D747073BCD9310AB76B496 /* LabReportUploadView.swift */; };
 		D02CC9A4CB338DCF9AF743EC /* ConversationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4B60275240AEDD1A676B282 /* ConversationState.swift */; };
@@ -355,6 +356,7 @@
 		EE0664FF9B8E28C6F853B820 /* ExerciseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExerciseService.swift; sourceTree = "<group>"; };
 		EE2D9672D96D6738FA36D4F2 /* AlgorithmSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlgorithmSettingsView.swift; sourceTree = "<group>"; };
 		F237A2E1C7747DBE102B665C /* WeightEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightEntry.swift; sourceTree = "<group>"; };
+		F2B8EAC57A3A10193855A81F /* GoalView+Profile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GoalView+Profile.swift"; sourceTree = "<group>"; };
 		F30EC2EF2E12E44F63B37582 /* EditFoodEntrySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditFoodEntrySheet.swift; sourceTree = "<group>"; };
 		F36D548F9FA62D8D7E53B1C7 /* BiomarkerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomarkerService.swift; sourceTree = "<group>"; };
 		F3E0BC3660040DBB4942437D /* SupplementLog.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementLog.swift; sourceTree = "<group>"; };
@@ -726,6 +728,7 @@
 				EE2D9672D96D6738FA36D4F2 /* AlgorithmSettingsView.swift */,
 				6E7AB5CF548B4E61C45C1485 /* GoalSetupView.swift */,
 				3258B6E91169170587AAB02B /* GoalView.swift */,
+				F2B8EAC57A3A10193855A81F /* GoalView+Profile.swift */,
 				5F6D2AA89F46A33EAE39DEAC /* MoreTabView.swift */,
 			);
 			path = Settings;
@@ -948,6 +951,7 @@
 				24D454E75E424F7ACA736A91 /* GlucoseTabView.swift in Sources */,
 				7888BCE3E091DCE6F3CD5AA2 /* GoalProgressCard.swift in Sources */,
 				9B11BE8782BE0D44DD4D4816 /* GoalSetupView.swift in Sources */,
+				C7DCB089BF4DCF1916C4B0E5 /* GoalView+Profile.swift in Sources */,
 				C78684F2133F07AAAC383EDB /* GoalView.swift in Sources */,
 				BED961B980821487CA56AD51 /* HealthKitService+Cycle.swift in Sources */,
 				51D36C1D00F25F64F54D70BF /* HealthKitService+Sleep.swift in Sources */,
