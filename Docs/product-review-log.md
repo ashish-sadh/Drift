@@ -4,6 +4,24 @@ Periodic product + engineering reviews. Every 10 cycles of the self-improvement 
 
 ---
 
+## Review #11 — 2026-04-12 (Cycle 199)
+
+### Summary
+29 cycles since last review. Major milestone: DDD routing complete (83+ DB calls eliminated). AIToolAgent coverage 0%→20%. TestFlight build 103. Zero open bugs. Autopilot consolidated into single loop.
+
+### Key Concern
+29 cycles of infrastructure with zero user-visible improvements. Must rebalance to 80% user-facing work.
+
+### Agreed Direction (Cycles 199–219)
+1. Coverage sprint (P0) — AIToolAgent/IntentClassifier/AIRuleEngine to 50%
+2. UI theme overhaul (P0) — One bold cycle, all views
+3. State machine refactor (P1) — After coverage gate met
+4. Food DB enrichment (P1) — 50 most-wanted foods
+5. Dashboard redesign (P1) — Macro rings, hierarchy
+6. Behavior insights v2 (P2) — Sleep/recovery, chat UI polish, multi-turn
+
+---
+
 ## Review #1 — 2026-04-12 (Cycle 10)
 
 ### Product Designer Persona
