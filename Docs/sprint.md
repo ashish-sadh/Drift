@@ -8,6 +8,9 @@ _(pick from Ready)_
 
 ## Ready
 
+### P1: Color & Visual Harmony Pass
+- [ ] **Fix color coordination app-wide** — The current dark blue/purple palette with bright ring colors feels disjointed. Research color theory for health/fitness apps (look at Whoop, Apple Fitness, Strava). Pick a cohesive palette: background, cards, accents, ring colors, text hierarchy. Keep it simple, warm, premium — not boxy or cold. Apply across ALL views in one cycle (dashboard, food, weight, exercise, chat, settings). The rings are good but the blue-grey cards and neon accents clash. Do this properly with a color system, not piecemeal.
+
 ### P0: Revert Adaptive TDEE — Dangerous Calorie Drop
 - [x] **Adaptive TDEE dropped calories from 1960→1400** — Reverted entirely. The formula `observedTDEE = avgIntake - deficit` depends on accurate food logging (most people under-log) and crashes on early-diet water loss. Original TDEE (base + Mifflin + Apple Health + weight trend) is accurate and stable. Adaptive TDEE v2 (weight-trend-only, no food log dependency) moved to backlog for Phase 5.
 

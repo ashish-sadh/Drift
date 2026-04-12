@@ -53,7 +53,10 @@ LOOP FOREVER — do NOT stop between tickets:
 12. **Every 20th cycle: PRODUCT REVIEW.** (Hooks inject this reminder automatically.) Steps:
     - Read persona files: `Docs/personas/product-designer.md`, `Docs/personas/principal-engineer.md`
     - Read feedback from open report PRs IF ANY exist: `gh pr list --label report --state open`, then read comments. If no feedback, keep going — NEVER wait for human input.
-    - Read open bug issues: `gh issue list --state open`
+    - Read open bug issues: `gh issue list --state open`. For issues with screenshots, download and analyze them:
+      1. `gh issue view {N} --json body` to get image URLs
+      2. Download: `curl -sL -o /tmp/issue-{N}.jpg {image_url}`
+      3. Read the image to understand the visual bug
     - **Product Designer persona** — read their persona file first, then:
       - Read `Docs/roadmap.md`, `Docs/state.md`, `git log --oneline -20`
       - Web search: what are Boostcamp, MyFitnessPal, Whoop, Strong, MacroFactor doing now?
