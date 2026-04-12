@@ -59,13 +59,6 @@ enum StaticOverrides {
         // They route through AIToolAgent → tool execution → LLM streaming presentation
         // for natural conversational responses. Only COMMANDS stay in StaticOverrides.
 
-        // Barcode scan: "scan barcode", "scan food"
-        let scanPatterns = ["scan barcode", "scan food", "scan a barcode", "barcode",
-                             "scan something", "scan a food", "scan it"]
-        if scanPatterns.contains(where: { lower == $0 || lower.hasPrefix($0) }) {
-            return .uiAction(.navigate(tab: 0), "Opening barcode scanner...")
-        }
-
         // Meal suggestions, general status, weight progress → routed through AIToolAgent for LLM presentation
 
         // Undo: "undo", "undo that", "undo last" — same as "delete last entry"
@@ -76,8 +69,12 @@ enum StaticOverrides {
                       let last = entries.first, let id = last.id else {
                     return "Nothing to undo."
                 }
-                try? AppDatabase.shared.deleteFoodEntry(id: id)
-                return "Undone: removed \(last.foodName) (\(Int(last.calories * last.servings)) cal)."
+                do {
+                    try AppDatabase.shared.deleteFoodEntry(id: id)
+                    return "Undone: removed \(last.foodName) (\(Int(last.calories * last.servings)) cal)."
+                } catch {
+                    return "Couldn't undo — try again."
+                }
             }
         }
 
@@ -107,8 +104,12 @@ enum StaticOverrides {
                           let last = entries.first, let id = last.id else {
                         return "No food entries today to delete."
                     }
-                    try? AppDatabase.shared.deleteFoodEntry(id: id)
-                    return "Deleted \(last.foodName) (\(Int(last.calories * last.servings)) cal)."
+                    do {
+                        try AppDatabase.shared.deleteFoodEntry(id: id)
+                        return "Deleted \(last.foodName) (\(Int(last.calories * last.servings)) cal)."
+                    } catch {
+                        return "Couldn't delete \(last.foodName) — try again."
+                    }
                 }
             }
             // Delete by name: "remove the rice", "delete chicken"
@@ -122,8 +123,12 @@ enum StaticOverrides {
                     }
                     if let match = entries.first(where: { $0.foodName.lowercased().contains(cleanTarget) }),
                        let id = match.id {
-                        try? AppDatabase.shared.deleteFoodEntry(id: id)
-                        return "Deleted \(match.foodName) (\(Int(match.calories * match.servings)) cal)."
+                        do {
+                            try AppDatabase.shared.deleteFoodEntry(id: id)
+                            return "Deleted \(match.foodName) (\(Int(match.calories * match.servings)) cal)."
+                        } catch {
+                            return "Couldn't delete \(match.foodName) — try again."
+                        }
                     }
                     return "Couldn't find '\(cleanTarget)' in today's food log."
                 }
