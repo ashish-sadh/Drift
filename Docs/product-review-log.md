@@ -4,16 +4,32 @@ Periodic product + engineering reviews. Every 10 cycles of the self-improvement 
 
 ---
 
-## Review #31 — 2026-04-13 (Cycle 1120)
+## Review #32 — 2026-04-13 (Cycle 1120)
 
 ### Summary
-All P0/P1 sprint items shipped (4/4): supplement/sleep, glucose/biomarker confirmation cards, exercise muscle group icons, state.md + TestFlight builds 108 & 109. 8 confirmation card types now cover every chat action. IntentClassifier coverage refactored for testability. Sprint: IntentClassifier to 80% (P0), food search prefix matching (P1), muscle group heatmap (P1), food DB search miss analysis (P2).
+TestFlight build 109 published. IntentClassifier refactored for testability (extracting pure functions from LLM-dependent code). Sprint: IntentClassifier to 80% (P0), food search prefix matching (P1), muscle group heatmap (P1), food DB search miss analysis (P2).
 
 ### Key Achievement
-Confirmation card architecture complete — 8 card types across all health domains. Every major chat action has structured visual feedback.
+IntentClassifier coverage approach reversed — extracting deterministic wrappers makes 80%+ achievable without LLM mocking.
 
 ### Key Concern
 Food search quality is highest-friction user moment. Prefix matching missing. Food DB at 1,500 vs MFP's 14M.
+
+### Sprint Plan (next 20 cycles)
+P0: IntentClassifier to 80%+. P1: Food search prefix matching. P1: Muscle group heatmap. P2: Food DB search miss analysis.
+
+---
+
+## Review #31 — 2026-04-13 (Cycle 1088)
+
+### Summary
+All five sprint items from Review #30 shipped — 100% completion. 8 confirmation card types cover every chat action (food, weight, workout, navigation, supplement, sleep, glucose, biomarker). Muscle group icons on workout cards. Bug fixes. 19 new tests.
+
+### Key Achievement
+Confirmation card architecture complete — every major chat action has structured visual feedback.
+
+### Key Concern
+Food DB search miss telemetry is a blind spot. Can't improve what we can't measure.
 
 ### Sprint Plan (next 20 cycles)
 P0: IntentClassifier to 80%+. P1: Food search prefix matching. P1: Muscle group heatmap. P2: Food DB search miss analysis.
