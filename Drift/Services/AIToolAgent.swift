@@ -68,6 +68,7 @@ enum AIToolAgent {
                     // Strip parentheses from tool name (LLM quirk: "food_info()" → "food_info")
                     let toolName = intent.tool.replacingOccurrences(of: "()", with: "")
                     let call = ToolCall(tool: toolName, params: ToolCallParams(values: intent.params))
+                    onStep(toolStepMessage(for: toolName))
                     if isInfoTool(toolName) {
                         let toolResult = await ToolRegistry.shared.execute(call)
                         if case .text(let data) = toolResult, !data.isEmpty {
@@ -370,10 +371,31 @@ enum AIToolAgent {
     static func stepMessage(for query: String) -> String {
         let lower = query.lowercased()
         if ["ate", "had", "log", "add", "drank", "eaten"].contains(where: { lower.contains($0) }) { return "Logging food..." }
-        if ["start", "begin", "workout", "chest", "legs"].contains(where: { lower.contains($0) }) { return "Setting up workout..." }
-        if ["took", "supplement", "vitamin"].contains(where: { lower.contains($0) }) { return "Updating supplements..." }
+        if ["start", "begin", "workout", "chest", "legs", "push", "pull"].contains(where: { lower.contains($0) }) { return "Setting up workout..." }
+        if ["took", "supplement", "vitamin", "creatine"].contains(where: { lower.contains($0) }) { return "Updating supplements..." }
+        if lower.contains("glucose") || lower.contains("blood sugar") || lower.contains("spike") { return "Checking glucose..." }
+        if lower.contains("plan") && lower.contains("meal") { return "Planning meals..." }
         if ["how", "what", "show", "calories", "weight", "sleep"].contains(where: { lower.contains($0) }) { return "Checking your data..." }
         return "Looking that up..."
+    }
+
+    /// Tool-specific step message for when a classified tool is about to execute.
+    static func toolStepMessage(for toolName: String) -> String {
+        switch toolName {
+        case "log_food": return "Looking up food..."
+        case "food_info": return "Checking nutrition..."
+        case "log_weight", "weight_info", "set_goal": return "Checking weight data..."
+        case "start_workout", "exercise_info", "log_activity": return "Checking workout history..."
+        case "sleep_recovery": return "Checking recovery..."
+        case "supplements", "mark_supplement", "add_supplement": return "Checking supplements..."
+        case "glucose": return "Checking glucose data..."
+        case "biomarkers": return "Checking lab results..."
+        case "body_comp", "log_body_comp": return "Checking body composition..."
+        case "copy_yesterday": return "Copying yesterday's food..."
+        case "delete_food": return "Removing food entry..."
+        case "explain_calories": return "Calculating your calories..."
+        default: return "Processing..."
+        }
     }
 
     // MARK: - Fallback Text
