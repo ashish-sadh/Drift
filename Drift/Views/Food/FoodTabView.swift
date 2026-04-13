@@ -43,6 +43,15 @@ struct FoodTabView: View {
         }
     }
 
+    /// Entries grouped by meal type, ordered breakfast → lunch → dinner → snack.
+    private var groupedEntries: [(meal: MealType, entries: [FoodEntry])] {
+        let order: [MealType] = [.breakfast, .lunch, .dinner, .snack]
+        return order.compactMap { meal in
+            let entries = sortedEntries.filter { ($0.mealType ?? "snack") == meal.rawValue }
+            return entries.isEmpty ? nil : (meal: meal, entries: entries)
+        }
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -425,15 +434,57 @@ struct FoodTabView: View {
 
                 Divider().padding(.vertical, 2)
 
-                ForEach(Array(sortedEntries.enumerated()), id: \.element.id) { index, entry in
-                    entryRow(entry)
-                    if index < sortedEntries.count - 1 {
-                        Divider().padding(.leading, 0)
+                let groups = groupedEntries
+                if groups.count > 1 {
+                    // Grouped by meal type
+                    ForEach(Array(groups.enumerated()), id: \.element.meal) { gi, group in
+                        mealSection(group.meal, entries: group.entries)
+                        if gi < groups.count - 1 {
+                            Divider().padding(.vertical, 4)
+                        }
+                    }
+                } else {
+                    // Single meal or no meal types — flat list
+                    ForEach(Array(sortedEntries.enumerated()), id: \.element.id) { index, entry in
+                        entryRow(entry)
+                        if index < sortedEntries.count - 1 {
+                            Divider().padding(.leading, 0)
+                        }
                     }
                 }
             }
         }
         .card()
+    }
+
+    private func mealSection(_ meal: MealType, entries: [FoodEntry]) -> some View {
+        let totalCal = entries.reduce(0.0) { $0 + $1.totalCalories }
+        let totalProt = entries.reduce(0.0) { $0 + $1.totalProtein }
+
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: 6) {
+                Image(systemName: meal.icon)
+                    .font(.caption).foregroundStyle(Theme.accent)
+                Text(meal.displayName)
+                    .font(.caption.weight(.semibold))
+                Spacer()
+                Text("\(Int(totalCal)) cal")
+                    .font(.caption.weight(.medium).monospacedDigit())
+                    .foregroundStyle(.secondary)
+                Text("\u{00B7}").font(.caption2).foregroundStyle(.quaternary)
+                Text("\(Int(totalProt))g P")
+                    .font(.caption2.monospacedDigit())
+                    .foregroundStyle(.tertiary)
+            }
+            .padding(.bottom, 6)
+
+            ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
+                entryRow(entry)
+                if index < entries.count - 1 {
+                    Divider().padding(.leading, 0)
+                }
+            }
+        }
     }
 
     private func entryRow(_ entry: FoodEntry) -> some View {
