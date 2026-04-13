@@ -4,6 +4,29 @@ Periodic product + engineering reviews. Every 10 cycles of the self-improvement 
 
 ---
 
+## Review #16 — 2026-04-12 (Cycle 535)
+
+### Summary
+85 cycles since last review. 1.5/7 sprint items shipped (21%): Food DB to 1,500 (P0), voice crash fix. Meal planning dialogue 90% built but not committed. Sprint velocity dropped due to meal planning complexity — 7 distinct behaviors in one feature.
+
+### Key Achievement
+Food DB hit 1,500 target. Meal planning dialogue implementation complete (state machine phase, iterative suggestions, smart pills, topic switch detection).
+
+### Key Concern
+21% sprint completion is worst rate yet. Complex features need to be broken into phases ("basic flow" + "polish"). P1/P2 items consistently displaced.
+
+### Competitive Alert
+MFP acquired Cal AI (photo scanning + body comp). MacroFactor launched Workouts companion app. Whoop overhauled heart-rate algorithm and added women's health biomarker panels. Market consolidating toward AI + all-in-one.
+
+### Agreed Direction (Cycles 535–555)
+1. Ship meal planning (P0) — validate and commit
+2. Chat streaming text animation (P0) — biggest remaining polish gap
+3. Richer chat confirmation cards (P1) — workout/weight structured cards
+4. Food search quality (P1) — aliases, partial matches, spelling
+5. Voice real-device validation (P2) — systematic testing
+
+---
+
 ## Review #15 — 2026-04-12 (Cycle 450)
 
 ### Summary

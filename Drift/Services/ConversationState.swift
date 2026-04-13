@@ -55,6 +55,8 @@ final class ConversationState {
         case awaitingMealItems(mealName: String)
         /// Asked "What exercises did you do?" — expecting exercise list
         case awaitingExercises
+        /// Iterative meal planning: suggesting foods to fill remaining macros
+        case planningMeals(mealName: String, iteration: Int)
     }
 
     var phase: Phase = .idle
@@ -73,8 +75,9 @@ final class ConversationState {
         // Food
         if words.contains("ate") || words.contains("had") || words.contains("log") || words.contains("calories")
             || words.contains("protein") || words.contains("carbs") || words.contains("fat")
-            || words.contains("food") || words.contains("meal") || words.contains("eat")
-            || lower.contains("breakfast") || lower.contains("lunch") || lower.contains("dinner") { return .food }
+            || words.contains("food") || words.contains("meal") || words.contains("meals") || words.contains("eat")
+            || lower.contains("breakfast") || lower.contains("lunch") || lower.contains("dinner")
+            || lower.contains("plan my") || lower.contains("suggest meal") { return .food }
 
         // Weight
         if words.contains("weigh") || words.contains("weight") || words.contains("trend")

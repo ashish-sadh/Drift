@@ -21,12 +21,12 @@ What's not: Color palette feels disjointed (dark blue/purple + bright rings), no
 ## AI Chat
 
 ### Now
-- **Voice input (P0)** — iOS SpeechRecognizer → on-device speech-to-text → chat input. Prototype: mic button → speech → existing pipeline. Test with real spoken input (messy, partial sentences). Go/no-go at Review #14. **3 reviews deferred — no more.**
+- ~~**Voice input (P0)**~~ SHIPPED — Mic button, on-device SpeechRecognizer, streams into chat. Real-device crash fixed (audio engine prepare). Needs systematic ambient noise/accent testing.
 - ~~**Prompt consolidation (P1)**~~ DONE — Dead code removed, token budget safety added.
 - ~~**State machine refactor**~~ DONE — ConversationState.Phase enum (idle/awaitingMealItems/awaitingExercises) replaces 5 scattered pending vars.
 - ~~**Multi-turn reliability**~~ DONE — Topic switch detection, stale state cleanup. Context preservation across turns.
 - ~~**Natural freeform logging**~~ DONE — AI parses, splits "with" items, resolves each, opens recipe builder.
-- **Meal planning dialogue (P2)** — "plan my meals today" → iterative suggestions based on remaining macros + history. Needs `awaitingMealPlan` phase in state machine.
+- **Meal planning dialogue (P0)** — "plan my meals today" → iterative suggestions based on remaining macros + history. `planningMeals` phase in state machine. Implementation complete, awaiting final validation.
 
 ### Next
 - Workout split builder — "build me a PPL split" → multi-turn designing
@@ -76,8 +76,8 @@ What's not: Color palette feels disjointed (dark blue/purple + bright rings), no
 ## Food
 
 ### Now
-- **DB enrichment** — Correct serving sizes, add missing foods. Indian, regional, restaurant items. Cross-reference with USDA.
-- **Search quality** — Better aliases, spelling corrections, partial matches. "paneer" finds all paneer dishes.
+- ~~**DB enrichment to 1,500**~~ DONE — 1,500+ foods. Chinese, Middle Eastern, American classics, sandwiches, soups, healthy options. Manual enrichment paused — next investment should be USDA API or search quality.
+- **Search quality (P1)** — Better aliases, spelling corrections, partial matches. "paneer" finds all paneer dishes. Higher ROI than adding more foods.
 - Ingredient persistence for recipe rebuilding
 
 ### Next
@@ -86,7 +86,7 @@ What's not: Color palette feels disjointed (dark blue/purple + bright rings), no
 - Barcode coverage expansion
 
 ### Benchmark: MyFitnessPal
-- MFP has 14M+ foods. We have ~1000. Close the gap on common foods first.
+- MFP has 14M+ foods (acquired Cal AI Mar 2026). We have 1,500. Close gap via USDA API, not manual entry.
 - MFP logging is ~3 taps. Match or beat this with AI chat.
 
 ## Exercise

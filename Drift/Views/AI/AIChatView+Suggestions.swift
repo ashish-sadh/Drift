@@ -24,6 +24,11 @@ extension AIChatView {
     }
 
     var smartSuggestions: [String] {
+        // During meal planning, show planning-specific pills
+        if case .planningMeals = convState.phase {
+            return ["1", "2", "3", "More options", "Done planning"]
+        }
+
         var pills: [String] = []
         let totals = FoodService.getDailyTotals()
         let hour = Calendar.current.component(.hour, from: Date())
@@ -58,6 +63,9 @@ extension AIChatView {
                 pills.append("Start \(first.name)")
             }
         case .food:
+            if totals.eaten > 0 && totals.remaining > 200 {
+                pills.append("Plan my meals")
+            }
             if totals.proteinG < 80 && hour > 14 {
                 pills.append("How's my protein?")
             }

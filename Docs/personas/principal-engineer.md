@@ -66,6 +66,11 @@
 - ViewModel extraction was correctly deferred — it wasn't needed for bubbles/feedback. Do it when meal planning adds new state phases.
 - Product review hook fired every cycle once triggered. The hook checks `cycle > last-review + 20` but the counter increments per tool call, not per commit. Need to update last-review-cycle promptly.
 
+### What I Learned — Review #16 (Cycle 535, 2026-04-12)
+- Extensions pattern (`+MessageHandling`, `+Suggestions`) absorbed meal planning code cleanly without ViewModel extraction. Defer refactoring until it actually blocks.
+- Voice crash (`AVAudioEngine.prepare()` required before `inputNode.outputFormat`) only surfaces on real hardware. Simulator stubs audio. Real-device testing is non-negotiable for hardware features.
+- Meal planning is 7 distinct behaviors (state phase, suggestion loop, number selection, pagination, topic switch, food search fallback, smart pills). Break complex features into independently shippable pieces.
+
 ## Preferences & Approach
 - Prefer boring, proven solutions over clever abstractions
 - Prefer fixing patterns over fixing instances (fix the stale-preference pattern, not just one ViewModel)

@@ -1089,3 +1089,64 @@ import Testing
     #expect(state.classifyTopic("body fat percentage") == .bodyComp)
     #expect(state.classifyTopic("hello there") == .unknown)
 }
+
+// MARK: - Meal Planning Phase Tests
+
+@MainActor @Test func mealPlanningPhaseTransitions() async throws {
+    let state = ConversationState.shared
+    state.phase = .idle
+
+    // Enter planning phase
+    state.phase = .planningMeals(mealName: "dinner", iteration: 0)
+    if case .planningMeals(let meal, let iter) = state.phase {
+        #expect(meal == "dinner")
+        #expect(iter == 0)
+    } else {
+        #expect(Bool(false), "Expected planningMeals phase")
+    }
+
+    // Increment iteration
+    state.phase = .planningMeals(mealName: "dinner", iteration: 1)
+    if case .planningMeals(_, let iter) = state.phase {
+        #expect(iter == 1)
+    } else {
+        #expect(Bool(false), "Expected planningMeals phase with iteration 1")
+    }
+
+    // Reset to idle
+    state.phase = .idle
+    #expect(state.phase == .idle)
+
+    // Clean up
+    state.reset()
+}
+
+@MainActor @Test func mealPlanningPhaseEquality() async throws {
+    let a = ConversationState.Phase.planningMeals(mealName: "lunch", iteration: 0)
+    let b = ConversationState.Phase.planningMeals(mealName: "lunch", iteration: 0)
+    let c = ConversationState.Phase.planningMeals(mealName: "dinner", iteration: 0)
+    let d = ConversationState.Phase.planningMeals(mealName: "lunch", iteration: 1)
+    #expect(a == b)
+    #expect(a != c)
+    #expect(a != d)
+    #expect(a != ConversationState.Phase.idle)
+}
+
+@MainActor @Test func mealPlanningTopicClassification() async throws {
+    let state = ConversationState.shared
+    // "plan my meals" / "what should I eat" should classify as food
+    #expect(state.classifyTopic("plan my meals today") == .food)
+    #expect(state.classifyTopic("what should I eat") == .food)
+    #expect(state.classifyTopic("suggest meals for dinner") == .food)
+}
+
+@MainActor @Test func mealPlanningPhaseDoesNotBlockTopicSwitch() async throws {
+    let state = ConversationState.shared
+    state.phase = .planningMeals(mealName: "lunch", iteration: 0)
+
+    // Topic classification still works during planning
+    #expect(state.classifyTopic("how much do I weigh") == .weight)
+    #expect(state.classifyTopic("how did I sleep") == .sleep)
+
+    state.reset()
+}

@@ -211,6 +211,9 @@ extension AIChatView {
         // Pending workout log: user listing exercises after "What exercises did you do?"
         if handlePendingWorkout(lower) { return }
 
+        // Meal planning: user responding during iterative meal plan session
+        if handlePendingMealPlan(lower) { return }
+
         // Meal continuation: "also add broccoli", "and some yogurt" after recipe was built
         if handleMealContinuation(lower) { return }
 
@@ -219,6 +222,11 @@ extension AIChatView {
 
         // Workout logging trigger: "log exercise", "log workout", "add exercise"
         if handleWorkoutLoggingTrigger(lower) { return }
+
+        // --- Meal planning trigger ---
+
+        // "plan my meals", "what should I eat today" → iterative suggestions
+        if handleMealPlanningTrigger(lower) { return }
 
         // --- Food intent parsing (both models — instant, no LLM needed) ---
 
@@ -566,6 +574,143 @@ extension AIChatView {
         let display = String(format: "%.1f", weightIntent.weightValue)
         messages.append(ChatMessage(role: .assistant, text: "Logged \(display) \(weightIntent.unit.displayName) for today."))
         return true
+    }
+
+    // MARK: - Meal Planning
+
+    private func handleMealPlanningTrigger(_ lower: String) -> Bool {
+        let planPhrases = ["plan my meals", "plan meals", "meal plan", "plan my day",
+                           "what should i eat today", "what should i eat", "plan my food",
+                           "help me plan", "suggest meals", "what to eat today"]
+        guard planPhrases.contains(where: { lower.contains($0) }) else { return false }
+
+        let hour = Calendar.current.component(.hour, from: Date())
+        let mealName = hour < 11 ? "breakfast" : hour < 15 ? "lunch" : "dinner"
+
+        let totals = FoodService.getDailyTotals()
+        let suggestions = FoodService.suggestMeal(caloriesLeft: max(0, totals.remaining))
+
+        if totals.remaining <= 50 {
+            messages.append(ChatMessage(role: .assistant,
+                text: "You've hit your calorie target for today (\(totals.eaten)/\(totals.target) cal). Nice work!"))
+            return true
+        }
+
+        var msg = "You have \(totals.remaining) cal remaining today"
+        if let goal = WeightGoal.load(),
+           let targets = goal.macroTargets(currentWeightKg: WeightTrendService.shared.latestWeightKg) {
+            let protLeft = max(0, Int(targets.proteinG) - totals.proteinG)
+            if protLeft > 10 { msg += " and still need \(protLeft)g protein" }
+        }
+        msg += ".\n\n"
+
+        if suggestions.isEmpty {
+            msg += "I don't have enough history to suggest foods yet. Try logging a few meals first, and I'll learn your preferences."
+        } else {
+            msg += "Here are some ideas for \(mealName):\n"
+            for (i, food) in suggestions.enumerated() {
+                msg += "\(i + 1). **\(food.name)** — \(Int(food.calories)) cal, \(Int(food.proteinG))g protein (\(food.servingUnit))\n"
+            }
+            msg += "\nSay a number to log it, \"more\" for different options, or \"done\" to finish planning."
+        }
+
+        convState.phase = .planningMeals(mealName: mealName, iteration: 0)
+        messages.append(ChatMessage(role: .assistant, text: msg))
+        return true
+    }
+
+    private func handlePendingMealPlan(_ lower: String) -> Bool {
+        guard case .planningMeals(let mealName, let iteration) = convState.phase else { return false }
+
+        // Exit commands
+        if ["done", "stop", "cancel", "nevermind", "no thanks", "nope", "that's all", "thanks"].contains(lower) {
+            convState.phase = .idle
+            let totals = FoodService.getDailyTotals()
+            messages.append(ChatMessage(role: .assistant,
+                text: "Got it! You have \(max(0, totals.remaining)) cal remaining. Say \"plan my meals\" anytime to pick back up."))
+            return true
+        }
+
+        // Detect topic switches
+        let topicSwitchWords: Set<String> = ["weight", "weigh", "trend", "sleep", "workout", "exercise",
+                                              "supplement", "glucose", "biomarker", "tdee", "bmr"]
+        let words = Set(lower.split(separator: " ").map(String.init))
+        if !words.isDisjoint(with: topicSwitchWords) {
+            convState.phase = .idle
+            return false
+        }
+
+        let totals = FoodService.getDailyTotals()
+
+        // Number selection: "1", "2", "3" → log that suggestion
+        if let num = Int(lower), num >= 1 && num <= 3 {
+            let suggestions = FoodService.suggestMeal(caloriesLeft: max(0, totals.remaining))
+            if num <= suggestions.count {
+                let food = suggestions[num - 1]
+                foodSearchQuery = food.name
+                foodSearchServings = 1.0
+                let card = FoodCardData(
+                    name: food.name, calories: Int(food.calories),
+                    proteinG: Int(food.proteinG), carbsG: Int(food.carbsG),
+                    fatG: Int(food.fatG), servingText: food.servingUnit)
+                messages.append(ChatMessage(role: .assistant, text: "Opening to confirm...", foodCard: card))
+                showingFoodSearch = true
+                // Stay in planning mode for next meal
+                convState.phase = .planningMeals(mealName: mealName, iteration: iteration + 1)
+                return true
+            }
+        }
+
+        // "more" / "other options" / "something else" → show different suggestions
+        if lower == "more" || lower.contains("other") || lower.contains("something else") || lower.contains("different") {
+            if iteration >= 3 {
+                convState.phase = .idle
+                messages.append(ChatMessage(role: .assistant,
+                    text: "I've shown all the options I have. Try \"log [food]\" to search for something specific."))
+                return true
+            }
+            let suggestions = FoodService.topProteinFoods(limit: 3)
+            if suggestions.isEmpty {
+                convState.phase = .idle
+                messages.append(ChatMessage(role: .assistant,
+                    text: "I'm out of suggestions. Try \"log [food]\" to search for something specific."))
+                return true
+            }
+            let remaining = max(0, totals.remaining)
+            var msg = "\(remaining) cal left. How about:\n"
+            for (i, food) in suggestions.enumerated() {
+                msg += "\(i + 1). **\(food.name)** — \(Int(food.calories)) cal, \(Int(food.proteinG))g protein\n"
+            }
+            msg += "\nSay a number to log it, \"more\" for others, or \"done\" to stop."
+            convState.phase = .planningMeals(mealName: mealName, iteration: iteration + 1)
+            messages.append(ChatMessage(role: .assistant, text: msg))
+            return true
+        }
+
+        // Treat anything else as a food to log directly (e.g., user types "chicken breast")
+        if lower.count > 2 {
+            if let intent = AIActionExecutor.parseFoodIntent(lower) {
+                foodSearchQuery = intent.query
+                foodSearchServings = intent.servings
+                if let match = AIActionExecutor.findFood(query: intent.query, servings: intent.servings, gramAmount: intent.gramAmount) {
+                    let f = match.food
+                    let s = match.servings
+                    let servingText = intent.gramAmount.map { "\(Int($0))g" } ?? "\(String(format: "%.1f", s)) serving"
+                    let card = FoodCardData(
+                        name: f.name, calories: Int(f.calories * s),
+                        proteinG: Int(f.proteinG * s), carbsG: Int(f.carbsG * s),
+                        fatG: Int(f.fatG * s), servingText: servingText)
+                    messages.append(ChatMessage(role: .assistant, text: "Opening to confirm...", foodCard: card))
+                } else {
+                    messages.append(ChatMessage(role: .assistant, text: "Searching for \(intent.query)..."))
+                }
+                showingFoodSearch = true
+                convState.phase = .planningMeals(mealName: mealName, iteration: iteration + 1)
+                return true
+            }
+        }
+
+        return false
     }
 
     private func handleCheatMeal(_ lower: String) -> Bool {

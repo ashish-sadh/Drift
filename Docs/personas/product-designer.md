@@ -61,6 +61,11 @@
 - 50% sprint completion (4/8) is better than 33% but the P1/P2 slip pattern persists. Scope sprints tighter — 5 items max.
 - MFP making barcode scanning paid-only is an opportunity signal. Free on-device barcode scanning could be a differentiator, but not until chat-first features are complete.
 
+### What I Learned — Review #16 (Cycle 535, 2026-04-12)
+- Sprint velocity dropped to 21% (1.5/7) when a complex feature (meal planning) wasn't broken into phases. Scope sprints to 5 items max and split complex features into "basic flow" + "polish."
+- MFP acquired Cal AI (photo scanning + body comp from photos) and integrated with ChatGPT Health. They're building a cloud AI moat. Our counter: on-device privacy + chat quality + all-in-one experience.
+- Meal planning dialogue ("plan my meals today") is exactly the kind of sticky daily-use feature that differentiates. Iterative meal-by-meal based on remaining macros — no competitor does this on-device.
+
 ## Preferences & Style
 - Prefer opinionated design over configurability — make good defaults, don't add settings
 - Prefer chat-first interactions — every feature should be reachable from conversation
