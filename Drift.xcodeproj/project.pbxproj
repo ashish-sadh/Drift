@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		07703998EC9E02AD418576E8 /* TypingDotsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2771DB577C8DC7CD66E79ED /* TypingDotsView.swift */; };
 		0884D534B3ADDE47643801F8 /* WeightTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96402659F73046846B409D5 /* WeightTabView.swift */; };
+		0E9D1FE15EFC96D35A4D6CBC /* ConfirmationCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BFC0D10ECB1BBDADD1D1CCB /* ConfirmationCardTests.swift */; };
 		11AFD9A7915929FB480CFE99 /* CycleCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6C02FCD909BDE67D229EC1 /* CycleCalculationTests.swift */; };
 		12608375BDCD57D211C64849 /* WeightLogListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E78D132A90B0FDC35353646 /* WeightLogListView.swift */; };
 		12D17153112FD530712D6FC6 /* AIContextBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB907D183F2E9999A4BC3915 /* AIContextBuilder.swift */; };
@@ -213,6 +214,7 @@
 		059465804E239D09C0E9C1D4 /* biomarkers.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = biomarkers.json; sourceTree = "<group>"; };
 		059967E59D60ABA83A272572 /* LLMToolCallingEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMToolCallingEval.swift; sourceTree = "<group>"; };
 		08E33CA6BE80D735A37ED745 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		0BFC0D10ECB1BBDADD1D1CCB /* ConfirmationCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConfirmationCardTests.swift; sourceTree = "<group>"; };
 		0D45209A3DCC7F6659E6E367 /* CSVParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVParser.swift; sourceTree = "<group>"; };
 		0F915E1ECAEF188959934E07 /* StaticOverrides.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StaticOverrides.swift; sourceTree = "<group>"; };
 		0F9EB82B9906D11C092B3111 /* BodyComposition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyComposition.swift; sourceTree = "<group>"; };
@@ -475,6 +477,7 @@
 			children = (
 				BADD153523D188C4ED89B55D /* AIEvalHarness.swift */,
 				19E7517E5B4779CBBE1C7284 /* AITests.swift */,
+				0BFC0D10ECB1BBDADD1D1CCB /* ConfirmationCardTests.swift */,
 				6D6B07DD56345F8A5F5448BC /* CSVParserTests.swift */,
 				6B6C02FCD909BDE67D229EC1 /* CycleCalculationTests.swift */,
 				32AC5A6130E7655FFC74502F /* DatabaseEdgeCaseTests.swift */,
@@ -1055,6 +1058,7 @@
 				940612EB003CCC2F1FF36DD1 /* AIEvalHarness.swift in Sources */,
 				2DDEA9907FA6338488A8E1CD /* AITests.swift in Sources */,
 				8A8CF11C6A7AF26DCABECF6A /* CSVParserTests.swift in Sources */,
+				0E9D1FE15EFC96D35A4D6CBC /* ConfirmationCardTests.swift in Sources */,
 				11AFD9A7915929FB480CFE99 /* CycleCalculationTests.swift in Sources */,
 				4B409391B107757F169355AE /* DatabaseEdgeCaseTests.swift in Sources */,
 				310C2BA2AF1BB8CC25FCC976 /* DriftTests.swift in Sources */,
