@@ -4,7 +4,7 @@
 AI-first local health tracker. AI chat is the primary interface — every data entry doable through conversation. Traditional UI for visual analytics and fallback. No cloud, no accounts. Published on TestFlight as "Drift Fitness" (bundle: com.drift.health).
 
 ## Numbers
-- **Version:** 0.1.0, Build 106
+- **Version:** 0.1.0, Build 108
 - **Tests:** 981 (19 test files, 300+ methods)
 - **AI Eval:** 380+ scenarios in eval harness + LLM eval
 - **Foods:** 1500 (Indian, Mexican, Asian, Thai, Japanese, Korean, Mediterranean, Chinese, Middle Eastern, American classics)
@@ -12,6 +12,7 @@ AI-first local health tracker. AI chat is the primary interface — every data e
 - **Biomarkers:** 65 across 9 categories
 - **AI Tools:** 20 registered tools
 - **AI Chat Features:** 25+ (see `Docs/ai-parity.md`)
+- **Confirmation Cards:** 8 types (food, weight, workout, navigation, supplement, sleep, glucose, biomarker)
 
 ## Tech Stack
 - SwiftUI + MVVM, iOS 17+, Swift 6
@@ -56,6 +57,7 @@ Phase 4: LLM fallback with context (~10-20s)                  → conversation
 - Meta: TDEE/BMR, daily/weekly/yesterday summary, calories left, copy yesterday, topic continuation
 - Multi-turn: meal continuation ("also add X"), meal planning iteration, history-based context, pronoun resolution
 - Input: voice (on-device SpeechRecognizer), text, smart suggestion pills
+- Confirmation cards: food (macros), weight (trend), workout (muscle groups), navigation, supplement (taken/remaining), sleep (HRV/recovery), glucose (avg/spikes/zone), biomarker (out-of-range)
 - Plant points: ingredient-based counting (57 composite dishes), spice blend expansion, barcode ingredients
 
 ## Tab Structure
