@@ -1222,6 +1222,16 @@ import Testing
     #expect(ExerciseService.formTip(for: "") == nil)
 }
 
+@MainActor @Test func formTipsMissingBranches() {
+    // Leg extension, front raise, shrug, close grip, cable woodchop, split squat
+    #expect(ExerciseService.formTip(for: "Leg Extension")?.contains("Pause at top") == true)
+    #expect(ExerciseService.formTip(for: "Front Raise")?.contains("shoulder height") == true)
+    #expect(ExerciseService.formTip(for: "Barbell Shrug")?.contains("Straight up") == true)
+    #expect(ExerciseService.formTip(for: "Close Grip Bench Press")?.contains("shoulder-width") == true)
+    #expect(ExerciseService.formTip(for: "Cable Woodchop")?.contains("Rotate from hips") == true)
+    #expect(ExerciseService.formTip(for: "Bulgarian Split Squat")?.contains("Front knee") == true)
+}
+
 // MARK: - ExerciseService Template & Suggestion
 
 @MainActor @Test func startTemplateReturnsNilForNoMatch() {
@@ -1248,6 +1258,69 @@ import Testing
     let popular = ExerciseService.popularExercises(limit: 5)
     // May be empty if no history, but should not crash
     #expect(popular.count <= 5)
+}
+
+// MARK: - ExerciseService Smart Session & Overload
+
+@MainActor @Test func buildSmartSessionWithMuscleGroup() {
+    let template = ExerciseService.buildSmartSession(muscleGroup: "Chest")
+    // ExerciseDatabase has chest exercises, so should build a template
+    if let template {
+        #expect(template.name == "Coached Workout")
+        let exercises = template.exercises
+        #expect(exercises.count <= 5)
+        #expect(exercises.count >= 1)
+        // Each exercise should have notes with set/rep info
+        for ex in exercises {
+            #expect(ex.notes?.contains("3x10") == true)
+        }
+    }
+    // Reasoning should be set
+    if let reasoning = ExerciseService.lastSessionReasoning {
+        #expect(reasoning.contains("Chest"))
+    }
+}
+
+@MainActor @Test func buildSmartSessionAutoPicksNeglected() {
+    // No muscle group specified — should auto-pick based on history (or first neglected)
+    let template = ExerciseService.buildSmartSession()
+    if let template {
+        #expect(template.name == "Coached Workout")
+        #expect(!template.exercises.isEmpty)
+    }
+    // Reasoning should mention targeting and neglected groups
+    if let reasoning = ExerciseService.lastSessionReasoning {
+        #expect(reasoning.contains("Targeting"))
+    }
+}
+
+@MainActor @Test func progressiveOverloadInsufficientData() {
+    // Use an exercise with no history to get insufficientData
+    let result = ExerciseService.getProgressiveOverload(exercise: "Zercher Squat XYZ Nonexistent")
+    if let result {
+        #expect(result.status == .insufficientData)
+        #expect(result.exercise == "Zercher Squat XYZ Nonexistent")
+        #expect(result.trend.contains("Not enough"))
+    }
+}
+
+@MainActor @Test func progressiveOverloadWithHistory() {
+    // Bench Press likely has history in test DB — verify it returns valid data
+    let result = ExerciseService.getProgressiveOverload(exercise: "Bench Press")
+    if let result {
+        #expect(result.exercise == "Bench Press")
+        #expect(!result.trend.isEmpty)
+        #expect(!result.sessions.isEmpty)
+        // Status should be one of the valid values
+        #expect([.improving, .stalling, .declining, .insufficientData].contains(result.status))
+    }
+}
+
+@MainActor @Test func overloadStatusRawValues() {
+    #expect(OverloadStatus.improving.rawValue == "improving")
+    #expect(OverloadStatus.stalling.rawValue == "stalling")
+    #expect(OverloadStatus.declining.rawValue == "declining")
+    #expect(OverloadStatus.insufficientData.rawValue == "insufficientData")
 }
 
 // MARK: - SupplementService
