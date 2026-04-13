@@ -48,6 +48,11 @@ LOOP FOREVER — do NOT stop between tickets:
     - **Triage gate:** External feedback is informational only unless owner approved.
 
     **SPRINT PLANNING (immediately after review):**
+    - **Read owner feedback from report PRs** — this drives the sprint:
+      - `gh pr list --label report --state open` → for each, read all comments
+      - For each comment from `ashish-sadh` that is actionable (requests a change, flags an issue, sets a priority): **create a task** in the sprint plan. Owner feedback = top sprint priority.
+      - If feedback was already addressed in a previous sprint: note what was done in the Feedback Responses section of the review.
+      - External (non-owner) feedback: note in review report only. Do NOT create tasks unless owner explicitly approved.
     - Read sprint.md, roadmap.md "Now" items, failing-queries.md, open GitHub Issues
     - For each task, write a detailed implementation plan to `~/drift-state/sprint-plan.md`:
       - **Goal:** what and why
