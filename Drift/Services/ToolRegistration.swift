@@ -418,14 +418,20 @@ enum ToolRegistration {
                          ToolParam("query", "string", "What they asked about workouts", required: false)],
             handler: { params in
                 if let exercise = params.string("exercise") {
+                    let wu = Preferences.weightUnit
                     var lines: [String] = []
                     // Progressive overload
                     if let info = ExerciseService.getProgressiveOverload(exercise: exercise) {
                         lines.append(info.trend)
+                        // Session history for context
+                        if info.sessions.count >= 2 {
+                            let sessionWeights = info.sessions.map { "\(Int(wu.convertFromLbs($0)))" }.joined(separator: " → ")
+                            lines.append("Recent 1RM trend (\(wu.displayName)): \(sessionWeights)")
+                        }
                     }
                     // Last session data
                     if let w = (try? WorkoutService.lastWeight(for: exercise)) ?? nil {
-                        lines.append("Last weight: \(Int(w)) lbs")
+                        lines.append("Last weight: \(Int(wu.convertFromLbs(w))) \(wu.displayName)")
                     }
                     return .text(lines.isEmpty ? "No data for '\(exercise)' yet." : lines.joined(separator: "\n"))
                 }

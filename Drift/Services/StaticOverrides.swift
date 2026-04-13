@@ -155,7 +155,30 @@ enum StaticOverrides {
             return .response("No judgment! What did you have? I'll log it for you.")
         }
 
-        // Sugar/carbs, weekly comparison, workout suggestions → food_info/exercise_info tools
+        // Exercise progress query: "how's my bench?", "bench progress", "squat progress"
+        let progressPattern = #"(?:how(?:'s| is) my |progress (?:on |for )?|how am i doing (?:on |with ))(.+?)(?:\?|$)"#
+        if let progressRegex = try? NSRegularExpression(pattern: progressPattern),
+           let progressMatch = progressRegex.firstMatch(in: lower, range: NSRange(lower.startIndex..., in: lower)),
+           let nameRange = Range(progressMatch.range(at: 1), in: lower) {
+            let exerciseQuery = String(lower[nameRange]).trimmingCharacters(in: .whitespaces)
+            if !exerciseQuery.isEmpty, let resolved = ExerciseService.resolveExerciseName(exerciseQuery) {
+                return .handler {
+                    let wu = Preferences.weightUnit
+                    var lines: [String] = []
+                    if let info = ExerciseService.getProgressiveOverload(exercise: resolved) {
+                        lines.append(info.trend)
+                        if info.sessions.count >= 2 {
+                            let weights = info.sessions.map { "\(Int(wu.convertFromLbs($0)))" }.joined(separator: " → ")
+                            lines.append("Recent 1RM trend (\(wu.displayName)): \(weights)")
+                        }
+                    }
+                    if let w = (try? WorkoutService.lastWeight(for: resolved)) ?? nil {
+                        lines.append("Last weight: \(Int(wu.convertFromLbs(w))) \(wu.displayName)")
+                    }
+                    return lines.isEmpty ? "No data for '\(resolved)' yet." : lines.joined(separator: "\n")
+                }
+            }
+        }
 
         // Body comp entry
         let bfPattern = #"(?:body fat|bf|body fat %|bodyfat)\s*(?:is\s+)?(\d+\.?\d*)"#

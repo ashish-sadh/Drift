@@ -186,6 +186,17 @@ enum ExerciseService {
 
     // MARK: - Exercise Lookup
 
+    /// Resolve a short/informal exercise name to its canonical DB name.
+    /// Prefers exercises the user has actually done over generic matches.
+    static func resolveExerciseName(_ query: String) -> String? {
+        let results = ExerciseDatabase.search(query: query)
+        guard !results.isEmpty else { return nil }
+        // Prefer exercises the user has history with
+        let userExercises = Set((try? WorkoutService.recentExerciseNames(limit: 200)) ?? [])
+        if let used = results.first(where: { userExercises.contains($0.name) }) { return used.name }
+        return results.first?.name
+    }
+
     /// Exercises for a muscle group, sorted by user history (popular first).
     static func exercisesByMuscle(group: String) -> [ExerciseDatabase.ExerciseInfo] {
         let userExercises = Set((try? WorkoutService.recentExerciseNames(limit: 100)) ?? [])

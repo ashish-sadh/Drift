@@ -1394,6 +1394,24 @@ import Testing
     #expect(OverloadStatus.insufficientData.rawValue == "insufficientData")
 }
 
+@MainActor @Test func resolveExerciseNameKnown() {
+    // "bench" should resolve to some bench press variant
+    let result = ExerciseService.resolveExerciseName("bench")
+    #expect(result != nil)
+    #expect(result!.lowercased().contains("bench"))
+}
+
+@MainActor @Test func resolveExerciseNameUnknown() {
+    let result = ExerciseService.resolveExerciseName("xyznonexistent12345")
+    #expect(result == nil)
+}
+
+@MainActor @Test func resolveExerciseNameSquat() {
+    let result = ExerciseService.resolveExerciseName("squat")
+    #expect(result != nil)
+    #expect(result!.lowercased().contains("squat"))
+}
+
 // MARK: - SupplementService
 
 @MainActor @Test func supplementGetStatus() {

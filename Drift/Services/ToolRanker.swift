@@ -431,7 +431,9 @@ enum ToolRanker {
                        ("lift", 1.5), ("what should i train", 4), ("workout history", 3),
                        ("suggest workout", 3), ("how many workout", 3), ("recovery", 1.5),
                        ("workout count", 3.5), ("workouts this week", 3.5),
-                       ("how often did i train", 4), ("how many times did i work", 4)],
+                       ("how often did i train", 4), ("how many times did i work", 4),
+                       ("progress", 2), ("bench", 2.5), ("squat", 2.5), ("deadlift", 2.5),
+                       ("overload", 2.5), ("how's my", 2), ("stalling", 2.5)],
             logBoost: -1, queryBoost: 2,
             screens: [.exercise: 0.5],
             antiKeywords: ["start", "begin", "let's"]
