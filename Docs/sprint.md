@@ -8,18 +8,6 @@ _(pick from Ready)_
 
 ## Ready
 
-### P0: Finish Supplement/Sleep Confirmation Cards
-- [ ] **Test and commit supplement/sleep cards** — UI, data structs, and tool wiring done. Run tests, fix issues, commit.
-
-### P0: Glucose + Biomarker Confirmation Cards
-- [ ] **Extend card pattern to glucose and biomarkers** — Same attachToolCards pattern. Glucose: readings, spikes, fasting. Biomarkers: out-of-range markers.
-
-### P1: Exercise Visual Polish
-- [ ] **Muscle group icons on workout cards** — Text-only is weakest vertical vs competition. Add SF Symbol muscle indicators.
-
-### P1: State.md + TestFlight Build 108
-- [ ] **Update state.md** — Build number, test count, card types are stale. Publish fresh TestFlight.
-
 ### P2: Food DB Quality
 - [ ] **Search miss analysis + targeted additions** — Identify most-searched missing foods. Cross-reference with USDA. Every "not found" = user opens competitor.
 
@@ -80,6 +68,12 @@ Autonomous refactoring. Run `code-improvement.md`. Principles in `Docs/principle
 - [ ] **DDD violations** — Direct DB calls in views, business logic in UI layer.
 
 ## Done (this sprint)
+- [x] P0: Supplement/Sleep Confirmation Cards — Status card with taken/remaining, sleep card with HRV/recovery/readiness.
+- [x] P0: Glucose + Biomarker Confirmation Cards — Glucose avg/range/spikes/zone, biomarker optimal/out-of-range.
+- [x] P1: AIChatView ViewModel Extraction — Separated state+logic from rendering. @Observable class + extensions.
+- [x] P1: Exercise Visual Polish — Muscle group SF Symbol chips on workout cards.
+- [x] P1: State.md Update — Build 108, 8 card types documented.
+- [x] P0: Bug Hunting — Misleading checkmark on unconfirmed workout card, force unwrap crash.
 - [x] P0: Rich Confirmation Cards — Navigation cards (new), activity preview cards (new). All chat actions now have structured visual feedback.
 - [x] P0: Workout Split Builder — "build me a PPL split" multi-turn dialogue. 4 split types, template saving. 15 tests.
 - [x] Voice Input UX Overhaul — fixed eaten-words bug (partial vs final transcription). Build 107.
