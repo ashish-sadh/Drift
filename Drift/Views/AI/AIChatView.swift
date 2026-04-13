@@ -34,6 +34,8 @@ struct AIChatView: View {
         let role: Role
         var text: String
         var foodCard: FoodCardData?
+        var weightCard: WeightCardData?
+        var workoutCard: WorkoutCardData?
         let createdAt = Date()
         enum Role { case user, assistant }
     }
@@ -45,6 +47,18 @@ struct AIChatView: View {
         let carbsG: Int
         let fatG: Int
         let servingText: String
+    }
+
+    struct WeightCardData {
+        let value: Double
+        let unit: String
+        let trend: String?     // e.g. "↓ 0.3 lbs this week"
+    }
+
+    struct WorkoutCardData {
+        let name: String
+        let durationMin: Int?
+        let exerciseCount: Int?
     }
 
     var isGenerating: Bool { generatingState != .idle }
@@ -307,6 +321,12 @@ struct AIChatView: View {
                 if let card = msg.foodCard {
                     foodConfirmationCard(card)
                 }
+                if let card = msg.weightCard {
+                    weightConfirmationCard(card)
+                }
+                if let card = msg.workoutCard {
+                    workoutConfirmationCard(card)
+                }
             }
             .accessibilityLabel(msg.role == .user ? "You said: \(msg.text)" : "Assistant: \(msg.text)")
 
@@ -371,6 +391,64 @@ struct AIChatView: View {
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(Theme.calorieBlue.opacity(0.2), lineWidth: 0.5)
+        )
+    }
+
+    // MARK: - Weight Confirmation Card
+
+    private func weightConfirmationCard(_ card: WeightCardData) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "scalemass.fill")
+                .font(.title3).foregroundStyle(Theme.accent)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("\(String(format: "%.1f", card.value)) \(card.unit)")
+                    .font(.subheadline.weight(.bold).monospacedDigit())
+                if let trend = card.trend {
+                    Text(trend)
+                        .font(.caption2).foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(.green).font(.title3)
+        }
+        .padding(10)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Theme.accent.opacity(0.2), lineWidth: 0.5)
+        )
+    }
+
+    // MARK: - Workout Confirmation Card
+
+    private func workoutConfirmationCard(_ card: WorkoutCardData) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "figure.run")
+                .font(.title3).foregroundStyle(Theme.accentSecondary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(card.name)
+                    .font(.subheadline.weight(.bold))
+                HStack(spacing: 8) {
+                    if let mins = card.durationMin {
+                        Label("\(mins) min", systemImage: "clock")
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }
+                    if let count = card.exerciseCount {
+                        Label("\(count) exercises", systemImage: "list.bullet")
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }
+                }
+            }
+            Spacer()
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(.green).font(.title3)
+        }
+        .padding(10)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Theme.accentSecondary.opacity(0.2), lineWidth: 0.5)
         )
     }
 }

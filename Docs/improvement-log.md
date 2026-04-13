@@ -4,6 +4,12 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 
 ---
 
+## Cycle · 2026-04-12 (Autopilot session, continued)
+
+- **Chat typewriter animation**: Instant AI responses (Tier 0/1/2) now reveal text character-by-character. Streamed LLM responses unaffected. Uses creation timestamp to distinguish new vs existing messages.
+- **Meal planning dialogue**: "plan my meals today" → iterative suggestions based on remaining calories/protein. planningMeals state phase, number selection, "more" pagination, topic switch detection, smart pills. 4 tests.
+- **Product Review #16 (Cycle 535)**: Food DB to 1,500 shipped, meal planning built. 21% sprint velocity due to meal planning complexity. MFP acquired Cal AI, MacroFactor launched Workouts app. PR #9.
+
 ## Cycle · 2026-04-12 (Autopilot session)
 
 - **Voice input prototype**: SpeechRecognitionService + mic button in AIChatView. On-device SFSpeechRecognizer, privacy-first. Streams partial results into chat text field. 6 tests. Go/no-go at next review.

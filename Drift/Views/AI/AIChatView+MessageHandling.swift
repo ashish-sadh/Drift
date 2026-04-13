@@ -277,7 +277,8 @@ extension AIChatView {
            let value = Double(String(lastAssistant.text[valRange])) {
             let unit = String(lastAssistant.text[unitRange])
             if let _ = WeightServiceAPI.logWeight(value: value, unit: unit) {
-                messages.append(ChatMessage(role: .assistant, text: "Logged \(String(format: "%.1f", value)) \(unit)."))
+                let card = WeightCardData(value: value, unit: unit, trend: nil)
+                messages.append(ChatMessage(role: .assistant, text: "Logged \(String(format: "%.1f", value)) \(unit).", weightCard: card))
             } else {
                 messages.append(ChatMessage(role: .assistant, text: "Couldn't save weight — value out of range or database error."))
             }
@@ -300,7 +301,8 @@ extension AIChatView {
             do {
                 try WorkoutService.saveWorkout(&workout)
                 let durText = durationSec.map { " (\($0 / 60) min)" } ?? ""
-                messages.append(ChatMessage(role: .assistant, text: "Logged \(name)\(durText) for today."))
+                let card = WorkoutCardData(name: name, durationMin: durationSec.map { $0 / 60 }, exerciseCount: nil)
+                messages.append(ChatMessage(role: .assistant, text: "Logged \(name)\(durText) for today.", workoutCard: card))
             } catch {
                 messages.append(ChatMessage(role: .assistant, text: "Couldn't save workout — \(error.localizedDescription)"))
             }
@@ -572,7 +574,14 @@ extension AIChatView {
         var entry = WeightEntry(date: DateFormatters.todayString, weightKg: kg, source: "manual")
         WeightServiceAPI.saveWeightEntry(&entry)
         let display = String(format: "%.1f", weightIntent.weightValue)
-        messages.append(ChatMessage(role: .assistant, text: "Logged \(display) \(weightIntent.unit.displayName) for today."))
+        let trend: String? = {
+            guard let rate = WeightTrendService.shared.weeklyRate else { return nil }
+            let unitRate = weightIntent.unit == .kg ? rate : rate * 2.20462
+            let arrow = unitRate < -0.05 ? "↓" : unitRate > 0.05 ? "↑" : "→"
+            return "\(arrow) \(String(format: "%.1f", abs(unitRate))) \(weightIntent.unit.displayName)/week"
+        }()
+        let card = WeightCardData(value: weightIntent.weightValue, unit: weightIntent.unit.displayName, trend: trend)
+        messages.append(ChatMessage(role: .assistant, text: "Logged \(display) \(weightIntent.unit.displayName) for today.", weightCard: card))
         return true
     }
 
