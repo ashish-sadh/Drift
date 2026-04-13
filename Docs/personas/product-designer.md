@@ -98,6 +98,11 @@
 - Sprint completion was 1/5 — but that one P0 was the most impactful infrastructure change since launch. Sometimes one high-impact item is better than five small ones. Still, sprint sizing needs to be honest: if a P0 takes a full sprint, don't plan four P1s alongside it.
 - WHOOP's AI Coach now has conversation memory and contextual guidance. Our proactive alerts serve a similar user need (the app watching out for you) without the privacy cost. Extend the alert pattern to workout consistency and logging gaps.
 
+### What I Learned — Review #23 (Cycle 785, 2026-04-12)
+- Proactive alerts are now the defining UX pattern. Six behavioral signals on the dashboard change Drift from "open and log" to "open and learn." This is the health coach identity.
+- Chat navigation is the last major parity gap in the AI-first story. Every action users take by tapping tabs should be reachable by saying it in chat. Implementation is half-done — finish it.
+- Sprint velocity pattern is persistent: 1/6 shipped. Scope to 4 items max. One large P0 is a full sprint.
+
 ## Preferences & Style
 - Prefer opinionated design over configurability — make good defaults, don't add settings
 - Prefer chat-first interactions — every feature should be reachable from conversation

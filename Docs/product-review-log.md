@@ -4,6 +4,22 @@ Periodic product + engineering reviews. Every 10 cycles of the self-improvement 
 
 ---
 
+## Review #23 — 2026-04-12 (Cycle 785)
+
+### Summary
+26 cycles since last review. 1/6 sprint items shipped: proactive workout consistency + logging gap alerts (6 alert types, 948 tests). Chat navigation ("show me my weight chart" switches tabs) is in active development — architecture done, wiring up. TestFlight build 106 published.
+
+### Key Achievement
+Proactive alerts now cover 6 behavioral patterns on the dashboard — workout gaps, logging gaps, protein streaks, supplement adherence. The app transitions from passive data logger to proactive health coach.
+
+### Key Concern
+Sprint velocity remains at ~17% (1/6). Persistent pattern across Reviews #20, #22, #23. Sprint scope reduced to 4 items max for next cycle.
+
+### Competitive Alert
+Privacy-first, on-device AI coaching remains differentiated. MFP and Whoop add cloud AI features requiring data off-device. Our moat: proactive cross-domain coaching without sending user data anywhere.
+
+---
+
 ## Review #22 — 2026-04-12 (Cycle 739)
 
 ### Summary

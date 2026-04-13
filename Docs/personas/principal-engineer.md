@@ -102,6 +102,11 @@
 - DEMO_KEY has lower rate limits than a registered USDA key. Low-urgency for TestFlight but should be addressed before App Store launch.
 - Swift 6 strict concurrency caught the mutable static state in USDAFoodService immediately. `@MainActor` isolation was the right fix since search is always called from MainActor contexts.
 
+### What I Learned — Review #23 (Cycle 785, 2026-04-12)
+- Chat navigation uses NotificationCenter for tab switching — pragmatic over Observable coordinator or binding threading. One-way signals between overlay components are a good fit for notifications.
+- Added `openBarcodeScanner` to ToolAction to fix a pre-existing hack (barcode used `.navigate(tab: 0)` as placeholder). Compiler exhaustive switch catches all callsites. Clean separation of concerns.
+- Static overrides + LLM tool is the right layered approach for navigation: deterministic for common phrases, LLM for natural language variations. Same tier pattern as food logging.
+
 ## Preferences & Approach
 - Prefer boring, proven solutions over clever abstractions
 - Prefer fixing patterns over fixing instances (fix the stale-preference pattern, not just one ViewModel)

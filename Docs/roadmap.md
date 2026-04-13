@@ -31,8 +31,12 @@ What's not: Color palette feels disjointed (dark blue/purple + bright rings), no
 - ~~**AI pipeline bug fixes (P0)**~~ DONE — 3 P0 bugs fixed: integer servings, calcium/calorie regex, undo action tracking.
 - ~~**Proactive insight alerts (P0)**~~ DONE — Protein streak alert + supplement gap alert on dashboard.
 
+### Now
+- **Chat navigation (P0)** — "Show me my weight chart" switches tabs. In progress. Static overrides + LLM tool.
+- **Wire USDA into AI chat (P1)** — Chat uses searchWithFallback when local food not found. API exists, needs chat integration.
+
 ### Next
-- **USDA API Phase 1** — Design doc written. Implement: cache table + fetch on miss. Unlocks food DB scale without manual entry.
+- ~~**USDA API Phase 1**~~ DONE — Opt-in toggle, rate limiting, searchWithFallback, privacy notice. Behind toggle (default OFF).
 - Workout split builder — "build me a PPL split" → multi-turn designing
 - Photo food logging (Core ML classifier → DB match → chat confirmation) — deferred until on-device accuracy improves for Indian/mixed dishes
 
