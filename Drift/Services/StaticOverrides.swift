@@ -384,6 +384,11 @@ enum StaticOverrides {
                     consumed = 2
                 }
             }
+            // "twelve hundred" = 1200, "fifteen hundred" = 1500
+            else if let o = ones[w], o >= 10, i + 1 < words.count, words[i + 1].lowercased() == "hundred" {
+                num = o * 100
+                consumed = 2
+            }
             // "seventy five" = 75
             else if let t = tens[w] {
                 num = t
