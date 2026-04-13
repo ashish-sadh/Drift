@@ -28,6 +28,12 @@ enum ToolRegistration {
                     return .invalid(reason: "What did you have for \(meal)?")
                 }
 
+                // Meal words aren't foods — ask follow-up instead of searching
+                let mealWords: Set<String> = ["breakfast", "lunch", "dinner", "snack", "meal", "food", "brunch"]
+                if mealWords.contains(rawName.lowercased()) {
+                    return .invalid(reason: "What did you have for \(rawName.lowercased())?")
+                }
+
                 var name = rawName
                 var gramAmount: Double? = nil
                 var servings = params.double("amount")

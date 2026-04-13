@@ -457,8 +457,15 @@ extension AIChatView {
     private func handleWorkoutLoggingTrigger(_ lower: String) -> Bool {
         let exerciseNouns: Set<String> = ["exercise", "workout", "a workout", "my workout",
                                            "training", "exercises", "an exercise"]
-        guard let verb = ["log ", "add ", "track "].first(where: { lower.hasPrefix($0) }) else { return false }
-        let remainder = String(lower.dropFirst(verb.count)).trimmingCharacters(in: .whitespaces)
+        // Strip conversational prefixes: "can you log workout" → "log workout"
+        var stripped = lower
+        for prefix in ["can you ", "could you ", "please ", "can i ", "i want to ", "i'd like to ", "let me ", "help me "] {
+            if stripped.hasPrefix(prefix) { stripped = String(stripped.dropFirst(prefix.count)); break }
+        }
+        if stripped.hasSuffix(" please") { stripped = String(stripped.dropLast(7)) }
+        stripped = stripped.trimmingCharacters(in: .whitespaces)
+        guard let verb = ["log ", "add ", "track "].first(where: { stripped.hasPrefix($0) }) else { return false }
+        let remainder = String(stripped.dropFirst(verb.count)).trimmingCharacters(in: .whitespaces)
         guard exerciseNouns.contains(remainder) else { return false }
         convState.phase = .awaitingExercises
         messages.append(ChatMessage(role: .assistant,
@@ -468,8 +475,16 @@ extension AIChatView {
 
     private func handleMealLogging(_ lower: String) -> Bool {
         let mealWords: Set<String> = ["breakfast", "lunch", "dinner", "snack"]
-        guard let verb = ["log ", "ate ", "had ", "log for ", "ate for ", "had for "].first(where: { lower.hasPrefix($0) }) else { return false }
-        var remainder = String(lower.dropFirst(verb.count)).trimmingCharacters(in: .whitespaces)
+        // Strip conversational prefixes: "can you log lunch" → "log lunch"
+        var stripped = lower
+        for prefix in ["can you ", "could you ", "please ", "can i ", "i want to ", "i'd like to ", "let me ", "help me "] {
+            if stripped.hasPrefix(prefix) { stripped = String(stripped.dropFirst(prefix.count)); break }
+        }
+        // Strip trailing "please": "log lunch please" → "log lunch"
+        if stripped.hasSuffix(" please") { stripped = String(stripped.dropLast(7)) }
+        stripped = stripped.trimmingCharacters(in: .whitespaces)
+        guard let verb = ["log ", "ate ", "had ", "log for ", "ate for ", "had for "].first(where: { stripped.hasPrefix($0) }) else { return false }
+        var remainder = String(stripped.dropFirst(verb.count)).trimmingCharacters(in: .whitespaces)
         if remainder.hasPrefix("for ") { remainder = String(remainder.dropFirst(4)).trimmingCharacters(in: .whitespaces) }
         guard let meal = mealWords.first(where: { remainder.hasPrefix($0) }) else { return false }
         let afterMeal = String(remainder.dropFirst(meal.count)).trimmingCharacters(in: .whitespaces)
