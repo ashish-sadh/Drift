@@ -831,6 +831,50 @@ import Testing
     }
 }
 
+// MARK: - AIToolAgent toolStepMessage
+
+@Test @MainActor func aiToolAgentToolStepMessageFood() async throws {
+    #expect(AIToolAgent.toolStepMessage(for: "log_food") == "Looking up food...")
+    #expect(AIToolAgent.toolStepMessage(for: "food_info") == "Checking nutrition...")
+    #expect(AIToolAgent.toolStepMessage(for: "copy_yesterday") == "Copying yesterday's food...")
+    #expect(AIToolAgent.toolStepMessage(for: "delete_food") == "Removing food entry...")
+    #expect(AIToolAgent.toolStepMessage(for: "explain_calories") == "Calculating your calories...")
+}
+
+@Test @MainActor func aiToolAgentToolStepMessageWeight() async throws {
+    #expect(AIToolAgent.toolStepMessage(for: "log_weight") == "Checking weight data...")
+    #expect(AIToolAgent.toolStepMessage(for: "weight_info") == "Checking weight data...")
+    #expect(AIToolAgent.toolStepMessage(for: "set_goal") == "Checking weight data...")
+}
+
+@Test @MainActor func aiToolAgentToolStepMessageExercise() async throws {
+    #expect(AIToolAgent.toolStepMessage(for: "start_workout") == "Checking workout history...")
+    #expect(AIToolAgent.toolStepMessage(for: "exercise_info") == "Checking workout history...")
+    #expect(AIToolAgent.toolStepMessage(for: "log_activity") == "Checking workout history...")
+}
+
+@Test @MainActor func aiToolAgentToolStepMessageOther() async throws {
+    #expect(AIToolAgent.toolStepMessage(for: "sleep_recovery") == "Checking recovery...")
+    #expect(AIToolAgent.toolStepMessage(for: "supplements") == "Checking supplements...")
+    #expect(AIToolAgent.toolStepMessage(for: "mark_supplement") == "Checking supplements...")
+    #expect(AIToolAgent.toolStepMessage(for: "add_supplement") == "Checking supplements...")
+    #expect(AIToolAgent.toolStepMessage(for: "glucose") == "Checking glucose data...")
+    #expect(AIToolAgent.toolStepMessage(for: "biomarkers") == "Checking lab results...")
+    #expect(AIToolAgent.toolStepMessage(for: "body_comp") == "Checking body composition...")
+    #expect(AIToolAgent.toolStepMessage(for: "log_body_comp") == "Checking body composition...")
+    #expect(AIToolAgent.toolStepMessage(for: "unknown_tool") == "Processing...")
+}
+
+@Test @MainActor func aiToolAgentStepMessageGlucose() async throws {
+    #expect(AIToolAgent.stepMessage(for: "check my glucose levels") == "Checking glucose...")
+    #expect(AIToolAgent.stepMessage(for: "any blood sugar spikes") == "Checking glucose...")
+    #expect(AIToolAgent.stepMessage(for: "spike after lunch") == "Checking glucose...")
+}
+
+@Test @MainActor func aiToolAgentStepMessageMealPlan() async throws {
+    #expect(AIToolAgent.stepMessage(for: "plan my meals for today") == "Planning meals...")
+}
+
 // MARK: - FoodService Tests
 
 @Test @MainActor func foodServiceResolvedCalorieTarget() async throws {
