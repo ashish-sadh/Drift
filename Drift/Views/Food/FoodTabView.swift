@@ -608,6 +608,25 @@ struct FoodTabView: View {
                     }
                 }
             }
+            // Move to different meal group
+            if let id = entry.id {
+                let currentMeal = MealType(rawValue: entry.mealType ?? "") ?? .snack
+                let otherMeals = MealType.allCases.filter { $0 != currentMeal }
+                if !otherMeals.isEmpty {
+                    Menu {
+                        ForEach(otherMeals, id: \.self) { meal in
+                            Button {
+                                viewModel.updateEntryMealType(id: id, mealType: meal)
+                                reload()
+                            } label: {
+                                Label(meal.displayName, systemImage: meal.icon)
+                            }
+                        }
+                    } label: {
+                        Label("Move to...", systemImage: "arrow.right.circle")
+                    }
+                }
+            }
             if let id = entry.id {
                 Button(role: .destructive) {
                     viewModel.deleteEntry(id: id)
@@ -711,15 +730,21 @@ struct FoodTabView: View {
     }
 
     /// Swap timestamps of two entries to reorder them.
-    private func swapEntryTimestamps(_ indexA: Int, _ indexB: Int) {
+    /// When entries cross meal group boundaries, the moved entry adopts the target's meal type.
+    private func swapEntryTimestamps(_ movedIndex: Int, _ targetIndex: Int) {
         let entries = sortedEntries
-        guard indexA >= 0, indexA < entries.count, indexB >= 0, indexB < entries.count,
-              let idA = entries[indexA].id, let idB = entries[indexB].id else { return }
-        let timeA = entries[indexA].loggedAt
-        let timeB = entries[indexB].loggedAt
-        // Swap: A gets B's time, B gets A's time
-        viewModel.updateEntryLoggedAt(id: idA, loggedAt: timeB)
-        viewModel.updateEntryLoggedAt(id: idB, loggedAt: timeA)
+        guard movedIndex >= 0, movedIndex < entries.count, targetIndex >= 0, targetIndex < entries.count,
+              let movedId = entries[movedIndex].id, let targetId = entries[targetIndex].id else { return }
+        let timeMoved = entries[movedIndex].loggedAt
+        let timeTarget = entries[targetIndex].loggedAt
+        viewModel.updateEntryLoggedAt(id: movedId, loggedAt: timeTarget)
+        viewModel.updateEntryLoggedAt(id: targetId, loggedAt: timeMoved)
+        // Cross meal group boundary: reassign moved entry's meal type
+        let movedMeal = entries[movedIndex].mealType ?? "snack"
+        let targetMeal = entries[targetIndex].mealType ?? "snack"
+        if movedMeal != targetMeal, let mealType = MealType(rawValue: targetMeal) {
+            viewModel.updateEntryMealType(id: movedId, mealType: mealType)
+        }
         reload()
     }
 

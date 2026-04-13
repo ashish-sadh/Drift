@@ -288,6 +288,14 @@ final class FoodLogViewModel {
         }
     }
 
+    func updateEntryMealType(id: Int64, mealType: MealType) {
+        do {
+            try database.updateFoodEntryMealType(id: id, mealType: mealType.rawValue)
+        } catch {
+            Log.foodLog.error("Failed to update meal type: \(error.localizedDescription)")
+        }
+    }
+
     func updateEntryServings(id: Int64, servings: Double) {
         do {
             try database.updateFoodEntryServings(id: id, servings: servings)

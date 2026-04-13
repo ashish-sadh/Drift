@@ -2388,6 +2388,40 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     #expect(fetched[1].foodName == "Lunch", "Lunch should now be at 8:00 (second in DESC)")
 }
 
+@Test func updateFoodEntryMealTypeCrossesGroupBoundary() async throws {
+    let db = try AppDatabase.empty()
+    let date = "2026-04-09"
+    var ml = MealLog(date: date, mealType: "lunch")
+    try db.saveMealLog(&ml)
+    var entry = FoodEntry(mealLogId: ml.id!, foodName: "Eggs", servingSizeG: 100, calories: 150,
+                          mealType: "lunch")
+    try db.saveFoodEntry(&entry)
+
+    // Move from lunch to breakfast
+    try db.updateFoodEntryMealType(id: entry.id!, mealType: "breakfast")
+    let fetched = try db.fetchFoodEntries(for: date)
+    #expect(fetched.first?.mealType == "breakfast")
+}
+
+@Test func updateFoodEntryMealTypeDoesNotAffectOtherEntries() async throws {
+    let db = try AppDatabase.empty()
+    let date = "2026-04-09"
+    var ml = MealLog(date: date, mealType: "lunch")
+    try db.saveMealLog(&ml)
+    var e1 = FoodEntry(mealLogId: ml.id!, foodName: "Rice", servingSizeG: 150, calories: 200, mealType: "lunch")
+    var e2 = FoodEntry(mealLogId: ml.id!, foodName: "Dal", servingSizeG: 150, calories: 180, mealType: "lunch")
+    try db.saveFoodEntry(&e1)
+    try db.saveFoodEntry(&e2)
+
+    // Move only first entry to dinner
+    try db.updateFoodEntryMealType(id: e1.id!, mealType: "dinner")
+    let fetched = try db.fetchFoodEntries(for: date)
+    let rice = fetched.first(where: { $0.foodName == "Rice" })
+    let dal = fetched.first(where: { $0.foodName == "Dal" })
+    #expect(rice?.mealType == "dinner")
+    #expect(dal?.mealType == "lunch")
+}
+
 @Test func updateFoodEntryName() async throws {
     let db = try AppDatabase.empty()
     let date = "2026-04-09"
