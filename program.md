@@ -8,7 +8,7 @@ Autonomous loop. Follow this exactly.
 
 _Directive:_ **Read `Docs/roadmap.md` to understand product direction. Pick work that advances the current phase. Work through sprint.md top-down — bugs first, then P0/P1 items. When finite items are done, rotate through Permanent Tasks guided by the roadmap's "Now" items. Be bold — a full UI redesign or AI chat state machine rewrite is fine. The goal is visible, meaningful progress every cycle.**
 
-_Override:_ STOP
+_Override:_ CONTINUE
 
 ---
 
@@ -36,21 +36,10 @@ _Override:_ STOP
 LOOP FOREVER — do NOT stop between tickets:
 
 1. Re-read steering notes above. Stop only if override says STOP.
-2. Check for open bug issues: `gh issue list --state open --label bug --json number,title,labels --jq '[.[] | select(.labels | map(.name) | index("needs-review") | not)]'`. If P0 bugs exist, work on those first. Items labeled `needs-review` are pending owner triage — skip them.
-3. **Check sprint plan:** Read `~/drift-state/sprint-plan.md`. If it exists and has pending tasks, pick the next one with `Status: [ ] pending` and follow its detailed implementation plan (files, approach, edge cases, tests). If the plan is unclear or you hit something unexpected, consult the advisor model.
-4. **If no sprint plan or all tasks done:** Pick from sprint.md, failing-queries.md, ai-parity.md, or roadmap.md "Now" items.
-5. Make one **LOGICAL UNIT** of work. This can span multiple files if they are part of the same change (e.g., a service + its tests + the view that calls it, or a theme change across 10 views). **Before editing any file: READ it first** — understand its types, signatures, imports, and conventions. Never edit blind.
-6. **Boy scout rule:** When you edit a file, if you see obvious code smells in the area you touched (long function, bad naming, dead code, DDD violations, missing error handling), fix them in the same commit. Don't go looking for problems elsewhere — just clean what you touched. For bigger architectural work (ViewModel extraction, service decomposition), do it when feature work requires it.
-7. **Classify your change:**
-   - **Trivial** (typo, comment, single-line fix, DB-only, docs): BUILD only — skip tests.
-   - **Moderate** (new logic in 1-2 files, UI changes, prompt text): BUILD + targeted tests (`-only-testing:DriftTests/RelevantTestClass`).
-   - **Substantial** (new service, multi-file refactor, AI pipeline change): BUILD + FULL test suite + eval harness if AI-related.
-   Build: `xcodebuild build -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' > /tmp/drift-build.log 2>&1 && echo "BUILD OK" || (tail -20 /tmp/drift-build.log && echo "BUILD FAILED")`
-8. **If Moderate or Substantial:** `pkill -9 -f xcodebuild 2>/dev/null; sleep 2; xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:DriftTests > /tmp/drift-test.log 2>&1 && echo "TESTS OK" || echo "TESTS FAILED"` then `grep "✘" /tmp/drift-test.log`
-9. For AI changes: `xcodebuild test ... -only-testing:'DriftTests/AIEvalHarness' > /tmp/drift-eval.log 2>&1 && echo "EVAL OK" || echo "EVAL FAILED"`. If scores drop, revert.
-10. Fail? Fix. If stuck after **2 attempts**: `git checkout -- .`, log the failure reason, move on.
-11. Pass? `git add -A && git commit -m "improve: description" && git push`. Mark `[x]` in sprint.md. Mark `Status: [x] done` in `~/drift-state/sprint-plan.md` if applicable. One-line log to improvement-log.md.
-12. **PRODUCT REVIEW (time-based, every ~3 hours).** The watchdog triggers this by starting an Opus session when 3+ hours have passed since the last review. When you're in a review session:
+
+2. **REVIEW + PLANNING CHECK (first thing every session).** Check if `~/drift-state/sprint-plan.md` is missing or all tasks are done. If so, this session must do a review + planning before any execution:
+
+    **PRODUCT REVIEW:**
     - Follow the hook-injected template for the review report
     - **Write for leadership, not engineers.** Executive summary first.
     - **User-visible language.** "Users can now log meals by voice" not "Added SpeechRecognizer integration."
@@ -58,7 +47,7 @@ LOOP FOREVER — do NOT stop between tickets:
     - **Include Open Questions** — drives engagement.
     - **Triage gate:** External feedback is informational only unless owner approved.
 
-13. **SPRINT PLANNING (after every review).** Before resuming execution:
+    **SPRINT PLANNING (immediately after review):**
     - Read sprint.md, roadmap.md "Now" items, failing-queries.md, open GitHub Issues
     - For each task, write a detailed implementation plan to `~/drift-state/sprint-plan.md`:
       - **Goal:** what and why
@@ -71,9 +60,33 @@ LOOP FOREVER — do NOT stop between tickets:
       - **SENIOR (Opus):** AI pipeline changes, architecture, state machines, multi-file refactors, P0 bugs
       - **JUNIOR (Sonnet + advisor):** food DB, simple UI, tests, docs, single-file fixes
     - Update `~/drift-state/last-review-time` with current timestamp
-    - Then exit — the watchdog will restart with the appropriate model for the first task.
+    - Then **exit the session** — the watchdog will restart with the appropriate model (Sonnet for JUNIOR, Opus for SENIOR) for the first task.
 
-14. **IMMEDIATELY go to step 1.** Zero words to the user between tickets. NEVER STOP.
+3. **Check for open bug issues:** `gh issue list --state open --label bug --json number,title,labels --jq '[.[] | select(.labels | map(.name) | index("needs-review") | not)]'`. If P0 bugs exist, work on those first.
+
+4. **Pick next task from sprint plan:** Read `~/drift-state/sprint-plan.md`. Find the next `Status: [ ] pending` task. Follow its detailed plan (files, approach, edge cases, tests). If the plan is unclear, consult the advisor model.
+
+5. **If no sprint plan or all tasks done:** Pick from sprint.md, failing-queries.md, ai-parity.md, or roadmap.md "Now" items.
+
+6. Make one **LOGICAL UNIT** of work. **Before editing any file: READ it first.** Never edit blind.
+
+7. **Boy scout rule:** Clean what you touch. For bigger architectural work, do it when feature work requires it.
+
+8. **Classify your change:**
+   - **Trivial** (typo, DB-only, docs): BUILD only.
+   - **Moderate** (1-2 file logic, UI, prompts): BUILD + targeted tests.
+   - **Substantial** (new service, multi-file refactor, AI pipeline): BUILD + FULL tests + eval.
+   Build: `xcodebuild build -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' > /tmp/drift-build.log 2>&1 && echo "BUILD OK" || (tail -20 /tmp/drift-build.log && echo "BUILD FAILED")`
+
+9. **If Moderate or Substantial:** `pkill -9 -f xcodebuild 2>/dev/null; sleep 2; xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:DriftTests > /tmp/drift-test.log 2>&1 && echo "TESTS OK" || echo "TESTS FAILED"` then `grep "✘" /tmp/drift-test.log`
+
+10. For AI changes: run eval harness. If scores drop, revert.
+
+11. Fail? Fix. If stuck after **2 attempts**: `git checkout -- .`, log the failure, move on.
+
+12. Pass? `git add -A && git commit -m "improve: description" && git push`. Mark `[x]` in sprint.md. Mark `Status: [x] done` in `~/drift-state/sprint-plan.md`. One-line log to improvement-log.md.
+
+13. **IMMEDIATELY go to step 1.** Zero words to the user between tickets. NEVER STOP.
 
 ---
 
