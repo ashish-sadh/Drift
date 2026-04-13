@@ -57,7 +57,7 @@ struct AIChatView: View {
                         ForEach(messages) { msg in
                             messageBubble(msg).id(msg.id)
                         }
-                        if case .thinking = generatingState {
+                        if isGenerating {
                             thinkingIndicator
                         }
                     }
@@ -186,9 +186,13 @@ struct AIChatView: View {
     // MARK: - Thinking Indicator
 
     private var thinkingIndicator: some View {
-        HStack(alignment: .top, spacing: 8) {
+        HStack(alignment: .bottom, spacing: 6) {
             Image(systemName: "sparkles").font(.system(size: 10))
-                .foregroundStyle(Theme.accent).padding(.top, 4)
+                .foregroundStyle(Theme.accent)
+                .frame(width: 20, height: 20)
+                .background(Theme.accent.opacity(0.12), in: Circle())
+                .padding(.bottom, 2)
+
             VStack(alignment: .leading, spacing: 4) {
                 TypingDotsView()
                 switch generatingState {
@@ -200,10 +204,14 @@ struct AIChatView: View {
                     EmptyView()
                 }
             }
-            Spacer()
+            .padding(.horizontal, 14).padding(.vertical, 10)
+            .background(Theme.cardBackground, in: UnevenRoundedRectangle(
+                topLeadingRadius: 16, bottomLeadingRadius: 4,
+                bottomTrailingRadius: 16, topTrailingRadius: 16
+            ))
+
+            Spacer(minLength: 60)
         }
-        .padding(.horizontal, 12).padding(.vertical, 6)
-        .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 14))
         .padding(.horizontal, 10)
         .transition(.opacity)
     }
@@ -214,24 +222,49 @@ struct AIChatView: View {
     // MARK: - Message Bubble
 
     private func messageBubble(_ msg: ChatMessage) -> some View {
-        HStack(alignment: .top, spacing: 8) {
-            if msg.role == .user { Spacer() }
+        HStack(alignment: .bottom, spacing: 6) {
+            if msg.role == .user {
+                Spacer(minLength: 60)
+            }
 
             if msg.role == .assistant {
                 Image(systemName: "sparkles").font(.system(size: 10))
-                    .foregroundStyle(Theme.accent).padding(.top, 4)
+                    .foregroundStyle(Theme.accent)
+                    .frame(width: 20, height: 20)
+                    .background(Theme.accent.opacity(0.12), in: Circle())
+                    .padding(.bottom, 2)
             }
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: msg.role == .user ? .trailing : .leading, spacing: 6) {
                 if !msg.text.isEmpty {
                     Text(msg.text)
                         .font(.subheadline)
-                        .padding(.horizontal, 12).padding(.vertical, 8)
+                        .foregroundStyle(msg.role == .user ? .white : Theme.textPrimary)
+                        .padding(.horizontal, 14).padding(.vertical, 10)
                         .background(
                             msg.role == .user
-                                ? Theme.accent.opacity(0.18)
-                                : Color.white.opacity(0.07),
-                            in: RoundedRectangle(cornerRadius: 14)
+                                ? AnyShapeStyle(Theme.accent.opacity(0.25))
+                                : AnyShapeStyle(Theme.cardBackground),
+                            in: UnevenRoundedRectangle(
+                                topLeadingRadius: 16,
+                                bottomLeadingRadius: msg.role == .user ? 16 : 4,
+                                bottomTrailingRadius: msg.role == .user ? 4 : 16,
+                                topTrailingRadius: 16
+                            )
+                        )
+                        .overlay(
+                            UnevenRoundedRectangle(
+                                topLeadingRadius: 16,
+                                bottomLeadingRadius: msg.role == .user ? 16 : 4,
+                                bottomTrailingRadius: msg.role == .user ? 4 : 16,
+                                topTrailingRadius: 16
+                            )
+                            .strokeBorder(
+                                msg.role == .user
+                                    ? Theme.accent.opacity(0.15)
+                                    : Theme.separator,
+                                lineWidth: 0.5
+                            )
                         )
                 }
 
@@ -241,7 +274,9 @@ struct AIChatView: View {
             }
             .accessibilityLabel(msg.role == .user ? "You said: \(msg.text)" : "Assistant: \(msg.text)")
 
-            if msg.role == .assistant { Spacer() }
+            if msg.role == .assistant {
+                Spacer(minLength: 60)
+            }
         }
         .padding(.horizontal, 10)
     }
