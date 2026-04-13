@@ -53,7 +53,7 @@ The self-improvement loop picks from the **Gap** section to close parity.
 - [x] **Add supplement to stack** — "add vitamin D", "add creatine 5g". add_supplement tool in ToolRegistration.
 
 ### P2 — Multi-Turn Intelligence (Gemma 4 Only)
-- [ ] **Meal planning** — "plan my meals for today" → iterative suggestions based on remaining macros + history.
+- [x] **Meal planning** — "plan my meals for today" → iterative suggestions based on remaining macros + history. planningMeals state phase.
 - [ ] **Workout split builder** — "build me a PPL split" → multi-turn designing across sessions.
 - [x] **Cross-domain analysis** — "why am I not losing weight?" → combines food + weight + exercise data. StaticOverrides handler.
 - [x] **Weekly comparison** — "compare this week to last" → week-over-week calorie average comparison.

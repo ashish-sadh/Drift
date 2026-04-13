@@ -28,8 +28,8 @@ What's not: Color palette feels disjointed (dark blue/purple + bright rings), no
 - ~~**Natural freeform logging**~~ DONE — AI parses, splits "with" items, resolves each, opens recipe builder.
 - ~~**Meal planning dialogue (P0)**~~ DONE — "plan my meals today" → iterative suggestions based on remaining macros + history. `planningMeals` phase in state machine.
 - ~~**Workout intelligence in chat (P0)**~~ DONE — "How's my bench?" returns trend, last weight, unit-respecting display.
-- **AI pipeline bug fixes (P0)** — 3 confirmed silent data-accuracy bugs: integer servings dropped, calcium→calorie regex, undo cross-domain. Fix before next feature.
-- **Proactive insight alerts (P0)** — Protein adherence and supplement streak nudges. Extend overload alert pattern to nutrition/recovery.
+- ~~**AI pipeline bug fixes (P0)**~~ DONE — 3 P0 bugs fixed: integer servings, calcium/calorie regex, undo action tracking.
+- ~~**Proactive insight alerts (P0)**~~ DONE — Protein streak alert + supplement gap alert on dashboard.
 
 ### Next
 - **USDA API Phase 1** — Design doc written. Implement: cache table + fetch on miss. Unlocks food DB scale without manual entry.
