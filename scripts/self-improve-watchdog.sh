@@ -65,20 +65,47 @@ kill_claude() {
 }
 
 start_claude() {
-    CURRENT_LOG="$LOG_DIR/session_autopilot_$(date +%s).log"
+    # Determine model: Opus for reviews/planning + senior tasks, Sonnet for junior tasks
+    local MODEL="sonnet"
+    local SESSION_TYPE="junior"
 
-    log "Starting autopilot (log: $CURRENT_LOG)"
+    # Check if review is due (time-based: every 3 hours)
+    local LAST_REVIEW_TIME=$(cat "$HOME/drift-state/last-review-time" 2>/dev/null || echo "0")
+    local NOW=$(date +%s)
+    local HOURS_SINCE=$(( (NOW - LAST_REVIEW_TIME) / 3600 ))
+
+    if [[ "$HOURS_SINCE" -ge 3 ]]; then
+        MODEL="opus"
+        SESSION_TYPE="review+planning"
+        log "Review due (${HOURS_SINCE}h since last) — using Opus"
+    else
+        # Check sprint plan for next task type
+        local NEXT_LINE=$(grep -B1 'Status: \[ \] pending' "$HOME/drift-state/sprint-plan.md" 2>/dev/null | grep -i "SENIOR\|JUNIOR" | head -1)
+        if echo "$NEXT_LINE" | grep -qi "SENIOR"; then
+            MODEL="opus"
+            SESSION_TYPE="senior"
+            log "Next task is SENIOR — using Opus"
+        else
+            MODEL="sonnet"
+            SESSION_TYPE="junior"
+            log "Next task is JUNIOR — using Sonnet + Opus advisor"
+        fi
+    fi
+
+    CURRENT_LOG="$LOG_DIR/session_${SESSION_TYPE}_$(date +%s).log"
+
+    log "Starting autopilot ($SESSION_TYPE, model=$MODEL, log: $CURRENT_LOG)"
     cd "$WORK_DIR"
     DRIFT_AUTONOMOUS=1 claude -p "$PROMPT" \
         --dangerously-skip-permissions \
-        --model opus \
+        --model "$MODEL" \
         --effort max \
         --output-format stream-json \
         --verbose \
         > "$CURRENT_LOG" 2>&1 &
     CLAUDE_PID=$!
     echo "$CLAUDE_PID" > "$PID_FILE"
-    log "Autopilot started with PID $CLAUDE_PID"
+    log "Autopilot started with PID $CLAUDE_PID (model=$MODEL)"
 }
 
 is_claude_alive() {

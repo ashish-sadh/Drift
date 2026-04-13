@@ -1486,13 +1486,13 @@ import Testing
 
 // MARK: - Online Food Search Preference Tests
 
-@Test func onlineFoodSearchDefaultOff() async throws {
-    // Fresh UserDefaults should default to OFF (privacy-first)
+@Test func onlineFoodSearchDefaultOn() async throws {
+    // Fresh UserDefaults should default to ON
     let key = "drift_online_food_search"
     let original = UserDefaults.standard.object(forKey: key)
     defer { if let orig = original { UserDefaults.standard.set(orig, forKey: key) } else { UserDefaults.standard.removeObject(forKey: key) } }
     UserDefaults.standard.removeObject(forKey: key)
-    #expect(!Preferences.onlineFoodSearchEnabled, "Online food search should default to OFF")
+    #expect(Preferences.onlineFoodSearchEnabled, "Online food search should default to ON")
 }
 
 @Test func onlineFoodSearchToggle() async throws {

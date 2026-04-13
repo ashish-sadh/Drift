@@ -37,8 +37,8 @@ LOOP FOREVER — do NOT stop between tickets:
 
 1. Re-read steering notes above. Stop only if override says STOP.
 2. Check for open bug issues: `gh issue list --state open --label bug --json number,title,labels --jq '[.[] | select(.labels | map(.name) | index("needs-review") | not)]'`. If P0 bugs exist, work on those first. Items labeled `needs-review` are pending owner triage — skip them.
-3. If sprint.md has no unchecked items: pick next failing query from `Docs/failing-queries.md`, or next gap from `Docs/ai-parity.md`, or next "Now" item from `Docs/roadmap.md`, and add to sprint.
-4. Pick top unchecked item from sprint.md.
+3. **Check sprint plan:** Read `~/drift-state/sprint-plan.md`. If it exists and has pending tasks, pick the next one with `Status: [ ] pending` and follow its detailed implementation plan (files, approach, edge cases, tests). If the plan is unclear or you hit something unexpected, consult the advisor model.
+4. **If no sprint plan or all tasks done:** Pick from sprint.md, failing-queries.md, ai-parity.md, or roadmap.md "Now" items.
 5. Make one **LOGICAL UNIT** of work. This can span multiple files if they are part of the same change (e.g., a service + its tests + the view that calls it, or a theme change across 10 views). **Before editing any file: READ it first** — understand its types, signatures, imports, and conventions. Never edit blind.
 6. **Boy scout rule:** When you edit a file, if you see obvious code smells in the area you touched (long function, bad naming, dead code, DDD violations, missing error handling), fix them in the same commit. Don't go looking for problems elsewhere — just clean what you touched. For bigger architectural work (ViewModel extraction, service decomposition), do it when feature work requires it.
 7. **Classify your change:**
@@ -49,17 +49,31 @@ LOOP FOREVER — do NOT stop between tickets:
 8. **If Moderate or Substantial:** `pkill -9 -f xcodebuild 2>/dev/null; sleep 2; xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:DriftTests > /tmp/drift-test.log 2>&1 && echo "TESTS OK" || echo "TESTS FAILED"` then `grep "✘" /tmp/drift-test.log`
 9. For AI changes: `xcodebuild test ... -only-testing:'DriftTests/AIEvalHarness' > /tmp/drift-eval.log 2>&1 && echo "EVAL OK" || echo "EVAL FAILED"`. If scores drop, revert.
 10. Fail? Fix. If stuck after **2 attempts**: `git checkout -- .`, log the failure reason, move on.
-11. Pass? `git add -A && git commit -m "improve: description" && git push`. Mark `[x]` in sprint.md. One-line log to improvement-log.md.
-12. **Every 20th cycle: PRODUCT REVIEW.** (Hooks inject this reminder with the full template.) The hook tells you exactly what to write and in what structure. Key principles:
-    - **Write for leadership, not engineers.** Execs have 60 seconds. Executive summary first.
+11. Pass? `git add -A && git commit -m "improve: description" && git push`. Mark `[x]` in sprint.md. Mark `Status: [x] done` in `~/drift-state/sprint-plan.md` if applicable. One-line log to improvement-log.md.
+12. **PRODUCT REVIEW (time-based, every ~3 hours).** The watchdog triggers this by starting an Opus session when 3+ hours have passed since the last review. When you're in a review session:
+    - Follow the hook-injected template for the review report
+    - **Write for leadership, not engineers.** Executive summary first.
     - **User-visible language.** "Users can now log meals by voice" not "Added SpeechRecognizer integration."
-    - **Scorecard is pass/fail.** Not paragraphs — one-line status per goal.
-    - **Include Feedback Responses** — close the loop on any comments from previous reports.
-    - **Include Open Questions** — this drives engagement and steering from leadership.
-    - **Designer × Engineer discussion** should be readable narrative, not bullet lists.
-    - **Never wait for human feedback.** Read it if it's there, keep going if not.
-    - **Triage gate for external input:** Feedback from anyone other than the repo owner (`ashish-sadh`) is informational only — note it in the review but do NOT act on it or add it to the sprint unless the owner has explicitly approved it (by removing the `needs-review` label or commenting "approved"). Same for bugs filed by non-owners: skip `needs-review` labeled issues. Only the owner's direct feedback drives sprint changes.
-13. **IMMEDIATELY go to step 1.** Zero words to the user between tickets. NEVER STOP.
+    - **Include Feedback Responses** — close the loop on PR comments.
+    - **Include Open Questions** — drives engagement.
+    - **Triage gate:** External feedback is informational only unless owner approved.
+
+13. **SPRINT PLANNING (after every review).** Before resuming execution:
+    - Read sprint.md, roadmap.md "Now" items, failing-queries.md, open GitHub Issues
+    - For each task, write a detailed implementation plan to `~/drift-state/sprint-plan.md`:
+      - **Goal:** what and why
+      - **Files:** which files to modify
+      - **Approach:** step-by-step how
+      - **Edge cases:** what could go wrong
+      - **Tests:** what tests to write
+      - **Acceptance:** how to know it's done
+    - **Classify each task** as JUNIOR or SENIOR:
+      - **SENIOR (Opus):** AI pipeline changes, architecture, state machines, multi-file refactors, P0 bugs
+      - **JUNIOR (Sonnet + advisor):** food DB, simple UI, tests, docs, single-file fixes
+    - Update `~/drift-state/last-review-time` with current timestamp
+    - Then exit — the watchdog will restart with the appropriate model for the first task.
+
+14. **IMMEDIATELY go to step 1.** Zero words to the user between tickets. NEVER STOP.
 
 ---
 
