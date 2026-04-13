@@ -477,6 +477,31 @@ struct FoodTabView: View {
                     .foregroundStyle(.tertiary)
             }
             .padding(.bottom, 6)
+            .contextMenu {
+                Button {
+                    for entry in entries {
+                        viewModel.quickAdd(name: entry.foodName, calories: entry.totalCalories,
+                                           proteinG: entry.totalProtein, carbsG: entry.totalCarbs,
+                                           fatG: entry.totalFat, fiberG: entry.totalFiber,
+                                           mealType: viewModel.autoMealType,
+                                           servingSizeG: entry.servingSizeG)
+                    }
+                    reload()
+                } label: {
+                    Label("Log All Again", systemImage: "arrow.counterclockwise")
+                }
+                if !viewModel.isToday {
+                    Button {
+                        for entry in entries {
+                            viewModel.copyEntryToToday(entry)
+                        }
+                        copiedToTodayName = "\(entries.count) \(meal.displayName.lowercased()) items"
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copiedToTodayName = nil }
+                    } label: {
+                        Label("Copy All to Today", systemImage: "doc.on.doc")
+                    }
+                }
+            }
 
             ForEach(Array(entries.enumerated()), id: \.element.id) { index, entry in
                 entryRow(entry)
