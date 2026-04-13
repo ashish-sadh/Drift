@@ -107,7 +107,7 @@ What's not: Color palette feels disjointed (dark blue/purple + bright rings), no
 - ~~**Hardcoded unit audit (P0)**~~ DONE — 7 files fixed. All weight display paths now use Preferences.weightUnit.
 
 ### Now
-- **Muscle group heatmaps (P0)** — Visualize which muscle groups were hit this week. Data exists in exercise DB muscle tags. Deferred 3 sprints — ships this sprint.
+- **Muscle group heatmaps (P0)** — Weekly set counts per group now showing. Next: opacity/fill intensity tying volume to visual weight.
 - **Exercise instructions via chat** — "How do I do a deadlift?" → form tips + muscles targeted from existing exercise DB.
 
 ### Next

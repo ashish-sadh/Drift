@@ -157,6 +157,11 @@
 - Push notifications are the difference between "health tracker" and "health coach." Passive dashboard alerts are invisible to users who don't open the app. Three timely nudges (protein, supplements, workouts) on-device and free is a genuine competitive differentiator.
 - Exercise remains the weakest visual vertical. Boostcamp and MacroFactor users see diagrams and videos; Drift users see text. The heatmap is step one — not the destination.
 
+### What I Learned — Review #35 (Cycle 1289, 2026-04-13)
+- Muscle Recovery card set counts are a good start but the card still feels passive. Real heatmap = intensity through opacity or fill, not just a number. Volume should be *visible*, not just readable.
+- Whoop's Behavior Trends (habits → Recovery correlation after 5+ entries) is the cross-domain intelligence pattern we should aspire to. We have the data — hardcoded insights are the current ceiling.
+- Push notifications cannot slip again. "3 days low protein" as a notification vs. a dashboard card is the difference between a tool and a coach. This is the #1 product gap right now.
+
 ## Preferences & Style
 - Prefer opinionated design over configurability — make good defaults, don't add settings
 - Prefer chat-first interactions — every feature should be reachable from conversation

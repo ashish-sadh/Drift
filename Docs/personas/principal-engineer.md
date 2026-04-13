@@ -161,6 +161,11 @@
 - AIChatView.sendMessage at 491 lines is past the maintainability threshold. Every AI feature added now makes it worse. One decomposition cycle now prevents three times the work later.
 - Push notifications via local UserNotifications framework (no cloud) is architecturally clean. Risk is permission UX — prompt timing matters. One wrong prompt = permission denied forever.
 
+### What I Learned — Review #35 (Cycle 1289, 2026-04-13)
+- Review hook double-firing is a confirmed design flaw: commit-based counter counts review commits toward the next trigger. Pre-writing the counter is the mitigation. Long-term fix: filter to only `.swift` file commits, or switch to time-based cadence.
+- BodyMapView set count enhancement was ~20 lines, single file, zero architectural risk. Small UI data wins like this are ideal autopilot work — low risk, visible user value.
+- For muscle heatmap intensity, `volumeIntensity(for:)` as a computed property (sets/week normalized 0–1 against max across groups) keeps data logic in the view since it's presentation-only. No service layer needed.
+
 ## Preferences & Approach
 - Prefer boring, proven solutions over clever abstractions
 - Prefer fixing patterns over fixing instances (fix the stale-preference pattern, not just one ViewModel)

@@ -4,6 +4,22 @@ Periodic product + engineering reviews. Every 10 cycles of the self-improvement 
 
 ---
 
+## Review #35 — 2026-04-13 (Cycle 1289)
+
+### Summary
+Weekly set counts per muscle group shipped (BodyMapView enhancement). IntentClassifier stays at 99%. Push notifications and sendMessage decomposition are the next P0/P1 items. Review hook double-fired due to commit-based counter — pre-writing the counter is the mitigation.
+
+### Key Achievement
+Muscle Recovery card now shows weekly volume (set counts) per group — first step of the full heatmap. Tests at 981, all passing.
+
+### Key Concern
+Push notifications still not started — this is the item that moves Drift from "health tracker" to "health coach." Cannot defer again.
+
+### Sprint Plan (next 20 cycles)
+P0: Push notifications (protein/supplement/workout). P0: Muscle heatmap intensity visuals (opacity/fill by volume). P1: sendMessage decomposition. P1: Food search miss telemetry. P2: Exercise instructions via chat.
+
+---
+
 ## Review #34 — 2026-04-13 (Cycle 1248)
 
 ### Summary

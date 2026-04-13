@@ -7,6 +7,7 @@ struct BodyMapView: View {
     @State private var daysSince: [String: Int] = [:]
     @State private var lastTrainedDate: [String: String] = [:] // group → "Mar 29"
     @State private var recentExercises: [String: [String]] = [:] // group → exercise names
+    @State private var weeklySetCounts: [String: Int] = [:]
     @State private var selectedGroup: String?
 
     enum MuscleStatus: Sendable {
@@ -40,6 +41,10 @@ struct BodyMapView: View {
                                     .font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
                             } else {
                                 Text("\u{2014}").font(.caption2).foregroundStyle(.quaternary)
+                            }
+                            if let count = weeklySetCounts[group], count > 0 {
+                                Text("\(count) sets")
+                                    .font(.caption2.monospacedDigit()).foregroundStyle(.tertiary)
                             }
                         }
                         .frame(maxWidth: .infinity).padding(.vertical, 8)
@@ -162,6 +167,7 @@ struct BodyMapView: View {
 
         var lastWorked: [String: Date] = [:]
         var exercisesByGroup: [String: [String]] = [:]
+        var setCounts: [String: Int] = [:]
 
         for w in workouts {
             guard let wDate = DateFormatters.dateOnly.date(from: String(w.date.prefix(10))),
@@ -183,9 +189,12 @@ struct BodyMapView: View {
                     groupExercises.append(s.exerciseName)
                 }
                 exercisesByGroup[group] = groupExercises
+                // Count sets in the past 7 days for weekly volume display
+                if daysDiff <= 7 { setCounts[group, default: 0] += 1 }
             }
         }
 
+        weeklySetCounts = setCounts
         recentExercises = exercisesByGroup
 
         let dateFmt = DateFormatter()
