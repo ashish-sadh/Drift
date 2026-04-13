@@ -136,27 +136,60 @@ struct AIChatView: View {
                     .lineLimit(1...3).focused($inputFocused)
                     .onSubmit { sendMessage() }
 
-                // Mic button — voice input via on-device speech recognition
-                Button {
-                    speechService.toggleRecording { transcript in
-                        inputText = transcript
+                if speechService.isRecording {
+                    // While recording: stop button to edit, send button to send
+                    Button {
+                        speechService.forceStop()
+                        // Text stays in inputText for editing
+                    } label: {
+                        Image(systemName: "stop.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.red)
                     }
-                } label: {
-                    Image(systemName: speechService.isRecording ? "mic.fill" : "mic")
-                        .font(.system(size: 16))
-                        .foregroundStyle(speechService.isRecording ? .red : Color.gray.opacity(0.6))
-                        .symbolEffect(.pulse, isActive: speechService.isRecording)
-                }
-                .disabled(isGenerating)
 
-                Button { sendMessage() } label: {
-                    Image(systemName: "arrow.up.circle.fill").font(.title2)
-                        .foregroundStyle(inputText.isEmpty ? Color.gray.opacity(0.5) : Theme.accent)
+                    Button {
+                        speechService.gracefulStop()
+                    } label: {
+                        Image(systemName: "arrow.up.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(Theme.accent)
+                    }
+                } else {
+                    // Idle: mic button + send button
+                    Button {
+                        speechService.toggleRecording(
+                            onTranscript: { [self] text in
+                                inputText = text
+                            },
+                            onDone: { [self] finalText in
+                                inputText = finalText
+                                sendMessage()
+                            }
+                        )
+                    } label: {
+                        Image(systemName: "mic")
+                            .font(.system(size: 18))
+                            .foregroundStyle(Color.gray.opacity(0.6))
+                    }
+                    .disabled(isGenerating)
+
+                    Button { sendMessage() } label: {
+                        Image(systemName: "arrow.up.circle.fill").font(.title2)
+                            .foregroundStyle(inputText.isEmpty ? Color.gray.opacity(0.5) : Theme.accent)
+                    }
+                    .disabled(inputText.isEmpty || isGenerating)
                 }
-                .disabled(inputText.isEmpty || isGenerating)
             }
             .padding(.horizontal, 12).padding(.vertical, 10)
-            .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 20))
+            .background(
+                RoundedRectangle(cornerRadius: 20)
+                    .fill(Color.white.opacity(0.05))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 20)
+                            .stroke(speechService.isRecording ? Color.red.opacity(0.6) : Color.clear, lineWidth: 1.5)
+                    )
+            )
+            .animation(.easeInOut(duration: 0.3), value: speechService.isRecording)
             .padding(.horizontal, 8).padding(.bottom, 4)
         }
         .sheet(isPresented: $showingFoodSearch) {
