@@ -154,3 +154,111 @@ import Testing
 @Test func cyclePhaseDay20IsLuteal() async throws {
     #expect(CycleCalculations.currentPhase(cycleDay: 20, cycleLength: 28) == "Luteal phase")
 }
+
+// MARK: - dominantFlowDisplay Tests
+
+@Test func cycleDominantFlowDisplayLight() async throws {
+    let cal = Calendar.current
+    let entries = [
+        HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: -2, to: Date())!, flow: 2),
+        HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: -1, to: Date())!, flow: 2),
+    ]
+    let periods = CycleCalculations.groupIntoPeriods(entries)
+    #expect(periods[0].dominantFlowDisplay == "Light")
+}
+
+@Test func cycleDominantFlowDisplayMedium() async throws {
+    let cal = Calendar.current
+    let entries = [
+        HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: -2, to: Date())!, flow: 2),
+        HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: -1, to: Date())!, flow: 3),
+    ]
+    let periods = CycleCalculations.groupIntoPeriods(entries)
+    #expect(periods[0].dominantFlowDisplay == "Medium")
+}
+
+@Test func cycleDominantFlowDisplayHeavy() async throws {
+    let cal = Calendar.current
+    let entries = [
+        HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: -2, to: Date())!, flow: 4),
+        HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: -1, to: Date())!, flow: 3),
+    ]
+    let periods = CycleCalculations.groupIntoPeriods(entries)
+    #expect(periods[0].dominantFlowDisplay == "Heavy")
+}
+
+@Test func cycleDominantFlowDisplayUnspecified() async throws {
+    let cal = Calendar.current
+    let entries = [
+        HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: -1, to: Date())!, flow: 1),
+    ]
+    let periods = CycleCalculations.groupIntoPeriods(entries)
+    #expect(periods[0].dominantFlowDisplay == "Unspecified")
+}
+
+// MARK: - cycleLengthsWithDates Tests
+
+@Test func cycleLengthsWithDatesBasic() async throws {
+    let cal = Calendar.current
+    let today = cal.startOfDay(for: Date())
+    let p1Start = cal.date(byAdding: .day, value: -56, to: today)!
+    let p2Start = cal.date(byAdding: .day, value: -28, to: today)!
+
+    let entries = [p1Start, p2Start].flatMap { start in
+        (0..<4).map { day in
+            HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: day, to: start)!, flow: 2)
+        }
+    }
+    let periods = CycleCalculations.groupIntoPeriods(entries)
+    let lengths = CycleCalculations.cycleLengthsWithDates(periods: periods)
+    #expect(lengths.count == 1)
+    #expect(lengths[0].length == 28)
+    #expect(lengths[0].label == DateFormatters.shortDisplay.string(from: p1Start))
+}
+
+@Test func cycleLengthsWithDatesSinglePeriodEmpty() async throws {
+    let entries = [
+        HealthKitService.CycleEntry(date: Date(), flow: 2),
+    ]
+    let periods = CycleCalculations.groupIntoPeriods(entries)
+    let lengths = CycleCalculations.cycleLengthsWithDates(periods: periods)
+    #expect(lengths.isEmpty, "Single period should produce no lengths")
+}
+
+@Test func cycleLengthsWithDatesThreePeriods() async throws {
+    let cal = Calendar.current
+    let today = cal.startOfDay(for: Date())
+    let p1 = cal.date(byAdding: .day, value: -65, to: today)!
+    let p2 = cal.date(byAdding: .day, value: -35, to: today)!
+    let p3 = cal.date(byAdding: .day, value: -5, to: today)!
+
+    let entries = [p1, p2, p3].flatMap { start in
+        (0..<3).map { day in
+            HealthKitService.CycleEntry(date: cal.date(byAdding: .day, value: day, to: start)!, flow: 3)
+        }
+    }
+    let periods = CycleCalculations.groupIntoPeriods(entries)
+    let lengths = CycleCalculations.cycleLengthsWithDates(periods: periods)
+    #expect(lengths.count == 2)
+    #expect(lengths[0].length == 30)
+    #expect(lengths[1].length == 30)
+}
+
+// MARK: - currentPhaseId Tests
+
+@Test func cyclePhaseIdPeriod() async throws {
+    #expect(CycleCalculations.currentPhaseId(cycleDay: 3, cycleLength: 28) == "period")
+    #expect(CycleCalculations.currentPhaseId(cycleDay: 5, cycleLength: 28) == "period")
+}
+
+@Test func cyclePhaseIdFollicular() async throws {
+    #expect(CycleCalculations.currentPhaseId(cycleDay: 8, cycleLength: 28) == "follicular")
+}
+
+@Test func cyclePhaseIdOvulation() async throws {
+    #expect(CycleCalculations.currentPhaseId(cycleDay: 14, cycleLength: 28) == "ovulation")
+}
+
+@Test func cyclePhaseIdLuteal() async throws {
+    #expect(CycleCalculations.currentPhaseId(cycleDay: 20, cycleLength: 28) == "luteal")
+}
