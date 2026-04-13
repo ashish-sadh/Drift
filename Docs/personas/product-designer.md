@@ -137,6 +137,11 @@
 - The ViewModel extraction was necessary but invisible to users. Next sprint must be 100% user-visible — card extensions, exercise visual polish, fresh TestFlight build.
 - MFP's Premium AI tools (meal scan, voice log) are behind paywall. Our free on-device voice + AI chat remains a differentiator worth marketing.
 
+### What I Learned — Review #31 (Cycle 1088, 2026-04-13)
+- 100% sprint completion for the third time. Eight card types now cover every health domain — the "chat feels like a real health app" moment. The card pattern is proven and extensible; hold at 8, focus on polish.
+- Food DB search miss telemetry is a critical blind spot. We can't improve what we can't measure. A lightweight local table for zero-result queries would make food additions data-driven instead of guesswork.
+- MFP's Winter 2026 release (photo-to-log, Instacart partnership, Cal AI integration) is all behind Premium+ paywall ($20/mo). WHOOP's AI Strength Trainer requires $30/mo. Our entire feature set is free and private — that's the marketing story.
+
 ## Preferences & Style
 - Prefer opinionated design over configurability — make good defaults, don't add settings
 - Prefer chat-first interactions — every feature should be reachable from conversation
