@@ -97,7 +97,21 @@ enum ToolRegistration {
                     return .transform(ToolCallParams(values: enriched))
                 }
 
-                // --- Route 4: Not in DB → pass through for search ---
+                // --- Route 4: Not in local DB → try USDA/OpenFoodFacts if enabled ---
+                let onlineResults = await FoodService.searchWithFallback(query: name, localThreshold: 1)
+                if let best = onlineResults.first {
+                    var enriched: [String: String] = ["name": best.name]
+                    let resolvedServings: Double
+                    if let grams = gramAmount, best.servingSize > 0 {
+                        resolvedServings = grams / best.servingSize
+                    } else {
+                        resolvedServings = servings ?? 1
+                    }
+                    enriched["amount"] = "\(resolvedServings)"
+                    return .transform(ToolCallParams(values: enriched))
+                }
+
+                // --- Route 5: Not found anywhere → pass through for search ---
                 var enriched: [String: String] = ["name": name]
                 if let s = servings { enriched["amount"] = "\(s)" }
                 return .transform(ToolCallParams(values: enriched))
@@ -147,6 +161,13 @@ enum ToolRegistration {
                     // Also try the raw query as food name
                     if let result = FoodService.getNutrition(name: query) {
                         return .text("\(result.perServing) Say 'log \(result.food.name.lowercased())' to add it.")
+                    }
+                    // Try USDA/OpenFoodFacts if enabled and not found locally
+                    let lookupQuery = foodName.isEmpty ? query : foodName
+                    let onlineResults = await FoodService.searchWithFallback(query: lookupQuery, localThreshold: 1)
+                    if let best = onlineResults.first {
+                        let desc = "\(best.name) (per \(Int(best.servingSize))\(best.servingUnit)): \(Int(best.calories)) cal, \(Int(best.proteinG))g protein, \(Int(best.carbsG))g carbs, \(Int(best.fatG))g fat"
+                        return .text("\(desc) Say 'log \(best.name.lowercased())' to add it.")
                     }
                 }
 

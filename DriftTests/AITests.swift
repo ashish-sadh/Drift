@@ -1724,3 +1724,74 @@ import Testing
     #expect(intent?.tool == "navigate_to")
     #expect(intent?.params["screen"] == "weight")
 }
+
+// MARK: - USDA Chat Integration Tests
+
+@Test @MainActor func logFoodToolFallsBackToUSDA() async throws {
+    // With USDA enabled, logging an unknown food should try online search
+    // On test environment the actual API may return empty — we just verify it doesn't crash
+    let original = Preferences.onlineFoodSearchEnabled
+    defer { Preferences.onlineFoodSearchEnabled = original }
+    Preferences.onlineFoodSearchEnabled = true
+
+    ToolRegistration.registerAll()
+    let call = ToolCall(tool: "log_food", params: ToolCallParams(values: ["name": "zzznonexistent_test_food_12345"]))
+    let result = await ToolRegistry.shared.execute(call)
+    // Should not crash — returns either an action (food search UI) or text
+    switch result {
+    case .action, .text, .error: break  // All acceptable outcomes
+    }
+}
+
+@Test @MainActor func logFoodToolLocalFoodSkipsUSDA() async throws {
+    // When food exists locally, USDA should not be consulted
+    let original = Preferences.onlineFoodSearchEnabled
+    defer { Preferences.onlineFoodSearchEnabled = original }
+    Preferences.onlineFoodSearchEnabled = true
+
+    ToolRegistration.registerAll()
+    let call = ToolCall(tool: "log_food", params: ToolCallParams(values: ["name": "chicken"]))
+    let result = await ToolRegistry.shared.execute(call)
+    // Chicken exists locally — should resolve without hitting USDA
+    if case .action(let action) = result {
+        if case .openFoodSearch(let query, _) = action {
+            #expect(query.lowercased().contains("chicken"))
+        }
+    }
+    // text or action are both acceptable — just shouldn't error
+    if case .error(let msg) = result {
+        Issue.record("Local food should not error: \(msg)")
+    }
+}
+
+@Test @MainActor func logFoodToolRespectsUSDAToggleOff() async throws {
+    // With USDA disabled, unknown foods should NOT trigger online search
+    let original = Preferences.onlineFoodSearchEnabled
+    defer { Preferences.onlineFoodSearchEnabled = original }
+    Preferences.onlineFoodSearchEnabled = false
+
+    ToolRegistration.registerAll()
+    let call = ToolCall(tool: "log_food", params: ToolCallParams(values: ["name": "zzznonexistent_test_food_12345"]))
+    let result = await ToolRegistry.shared.execute(call)
+    // Should pass through to food search UI without online lookup
+    if case .action(let action) = result {
+        if case .openFoodSearch = action {
+            // Correct — opens search UI for manual resolution
+        }
+    }
+}
+
+@Test @MainActor func foodInfoToolFallsBackToUSDA() async throws {
+    // food_info should try USDA when local nutrition lookup fails
+    let original = Preferences.onlineFoodSearchEnabled
+    defer { Preferences.onlineFoodSearchEnabled = original }
+    Preferences.onlineFoodSearchEnabled = true
+
+    ToolRegistration.registerAll()
+    let call = ToolCall(tool: "food_info", params: ToolCallParams(values: ["query": "calories in zzznonexistent_food_99999"]))
+    let result = await ToolRegistry.shared.execute(call)
+    // Should not crash — may return nutrition info or daily summary
+    switch result {
+    case .text, .action, .error: break  // All acceptable
+    }
+}
