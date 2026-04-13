@@ -21,7 +21,7 @@ Real queries that don't work well. Fix systematically, then move to Fixed.
 - [x] **Second meal item after recipe builder** — "Log dinner" → "rice and dal" → recipe opens. Then "also add broccoli" doesn't continue the meal. FIXED: meal continuation handler prepends to pendingRecipeItems.
 - [x] **"what about protein?" after food chat** — Normalizer needs to resolve from history. 2B model may not reliably infer. FIXED: topic continuation in StaticOverrides.
 - [x] **"and yesterday?" after today's data** — FIXED: Added to StaticOverrides as topic continuation pattern.
-- [ ] **"plan my meals for today"** — Should be iterative: suggest breakfast → confirm → suggest lunch. Currently single response.
+- [x] **"plan my meals for today"** — FIXED: planningMeals state phase with iterative suggestions, number selection, "more" for pagination, topic switch detection.
 
 ### Exercise
 - [x] **"Tell me my workout history"** — FIXED: exercise_info now shows recent workouts from HealthKit.
