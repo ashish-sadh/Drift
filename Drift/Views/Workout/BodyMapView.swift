@@ -48,7 +48,7 @@ struct BodyMapView: View {
                             }
                         }
                         .frame(maxWidth: .infinity).padding(.vertical, 8)
-                        .background(status.color.opacity(0.1), in: RoundedRectangle(cornerRadius: 8))
+                        .background(status.color.opacity(0.08 + volumeIntensity(for: group) * 0.22), in: RoundedRectangle(cornerRadius: 8))
                         .overlay {
                             if selectedGroup == group {
                                 RoundedRectangle(cornerRadius: 8).strokeBorder(status.color, lineWidth: 1.5)
@@ -142,6 +142,15 @@ struct BodyMapView: View {
         case "Legs": return ["Squat", "Romanian Deadlift", "Leg Press"]
         default: return []
         }
+    }
+
+    // MARK: - Volume Intensity
+
+    /// Normalizes weekly set count for this group against the max across all groups (0.0–1.0).
+    private func volumeIntensity(for group: String) -> Double {
+        let maxSets = weeklySetCounts.values.max() ?? 1
+        guard maxSets > 0, let count = weeklySetCounts[group] else { return 0 }
+        return Double(count) / Double(maxSets)
     }
 
     // MARK: - Icons
