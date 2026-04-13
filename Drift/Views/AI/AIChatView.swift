@@ -34,6 +34,7 @@ struct AIChatView: View {
         let role: Role
         var text: String
         var foodCard: FoodCardData?
+        let createdAt = Date()
         enum Role { case user, assistant }
     }
 
@@ -219,6 +220,32 @@ struct AIChatView: View {
     // Message handling, conversation history, and intent parsing in AIChatView+MessageHandling.swift
     // Smart suggestions, page insight, and fallback responses in AIChatView+Suggestions.swift
 
+    // MARK: - Typewriter Text
+
+    /// Reveals text character-by-character for non-streamed assistant messages.
+    /// Streamed messages already animate via token callbacks — this handles instant responses.
+    private struct TypewriterText: View {
+        let text: String
+        @State private var revealed: Int = 0
+        @State private var done = false
+
+        var body: some View {
+            Text(done ? text : String(text.prefix(revealed)))
+                .onAppear {
+                    guard !text.isEmpty, !done else { return }
+                    let total = text.count
+                    let charsPerTick = max(1, total / 40)
+                    Task {
+                        while revealed < total {
+                            try? await Task.sleep(for: .milliseconds(18))
+                            revealed = min(revealed + charsPerTick, total)
+                        }
+                        done = true
+                    }
+                }
+        }
+    }
+
     // MARK: - Message Bubble
 
     private func messageBubble(_ msg: ChatMessage) -> some View {
@@ -237,7 +264,16 @@ struct AIChatView: View {
 
             VStack(alignment: msg.role == .user ? .trailing : .leading, spacing: 6) {
                 if !msg.text.isEmpty {
-                    Text(msg.text)
+                    let isNewInstant = msg.role == .assistant
+                        && msg.id != streamingMessageId
+                        && Date().timeIntervalSince(msg.createdAt) < 1.0
+                    Group {
+                        if isNewInstant {
+                            TypewriterText(text: msg.text)
+                        } else {
+                            Text(msg.text)
+                        }
+                    }
                         .font(.subheadline)
                         .foregroundStyle(msg.role == .user ? .white : Theme.textPrimary)
                         .padding(.horizontal, 14).padding(.vertical, 10)
