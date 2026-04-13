@@ -587,15 +587,16 @@ extension AIChatView {
         let durPattern = #"(?:for\s+)?(\d+)\s*(?:min(?:ute)?s?)"#
         if let durRegex = try? NSRegularExpression(pattern: durPattern),
            let durMatch = durRegex.firstMatch(in: activity, range: NSRange(activity.startIndex..., in: activity)),
-           let numRange = Range(durMatch.range(at: 1), in: activity) {
+           let numRange = Range(durMatch.range(at: 1), in: activity),
+           let fullRange = Range(durMatch.range, in: activity) {
             durationMin = Int(String(activity[numRange]))
-            activity = activity.replacingCharacters(in: Range(durMatch.range, in: activity)!, with: "")
+            activity = activity.replacingCharacters(in: fullRange, with: "")
                 .trimmingCharacters(in: .whitespaces)
         }
         guard !activity.isEmpty && activity.count > 2 else { return false }
         let name = activity.capitalized
         let durText = durationMin.map { " (\($0) min)" } ?? ""
-        let card = WorkoutCardData(name: name, durationMin: durationMin, exerciseCount: nil)
+        let card = WorkoutCardData(name: name, durationMin: durationMin, exerciseCount: nil, confirmed: false)
         messages.append(ChatMessage(role: .assistant, text: "Log \(name)\(durText) for today? Say yes to confirm.", workoutCard: card))
         return true
     }

@@ -61,6 +61,7 @@ struct AIChatView: View {
         let name: String
         let durationMin: Int?
         let exerciseCount: Int?
+        var confirmed: Bool = true
     }
 
     struct NavigationCardData {
@@ -485,8 +486,13 @@ struct AIChatView: View {
                 }
             }
             Spacer()
-            Image(systemName: "checkmark.circle.fill")
-                .foregroundStyle(.green).font(.title3)
+            if card.confirmed {
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green).font(.title3)
+            } else {
+                Image(systemName: "questionmark.circle")
+                    .foregroundStyle(Theme.accentSecondary.opacity(0.5)).font(.title3)
+            }
         }
         .padding(10)
         .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 12))
