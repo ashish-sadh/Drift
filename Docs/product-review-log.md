@@ -4,6 +4,30 @@ Periodic product + engineering reviews. Every 10 cycles of the self-improvement 
 
 ---
 
+## Review #19 — 2026-04-12 (Cycle 670)
+
+### Summary
+20 cycles since last review. 2/7 sprint items shipped (both P0s): hardcoded unit audit (7 files fixed) and progressive overload alerts in workout history. P1/P2 items deferred. 936 tests, zero open bugs.
+
+### Key Achievement
+Exercise vertical improved with proactive overload coaching. Stale preference pattern permanently closed — all weight display paths now respect user preference.
+
+### Key Concern
+P1 items keep slipping across sprints. AI chat workout intelligence and USDA design doc need to be elevated to P0.
+
+### Competitive Alert
+No major competitor moves this sprint. MacroFactor Workouts continues to be the exercise benchmark.
+
+### Agreed Direction (Cycles 670–690)
+1. AI chat workout intelligence — "how's my bench?" (P0)
+2. USDA API design document (P0)
+3. Proactive insight alerts — protein, supplements (P1)
+4. Systematic bug hunting (P1)
+5. Exercise presentation — muscle group icons (P2)
+6. Coverage maintenance (P2)
+
+---
+
 ## Review #18 — 2026-04-12 (Cycle 650)
 
 ### Summary

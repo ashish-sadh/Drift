@@ -81,6 +81,11 @@
 - Workout unit hardcoding was another instance of the stale preference pattern from Review #12. Recommend one final audit: grep for hardcoded "lb" or "lbs" across all views.
 - USDA API would be the first external network call in the app. Needs careful design: offline-first cache, rate limiting, privacy implications (search queries leave the device). Architecturally significant — design doc before code.
 
+### What I Learned — Review #19 (Cycle 670, 2026-04-12)
+- Hardcoded unit audit found 7 instances across views and services — the stale preference pattern is now permanently closed. All weight display paths go through `Preferences.weightUnit.convertFromLbs()`.
+- Progressive overload implementation reuses existing service cleanly. Potential concern: 20+ DB queries on tab load for users with many exercises. SQLite is fast enough now but worth monitoring.
+- AI chat workout intelligence is ideal next task — connects existing service to chat pipeline, no new infrastructure needed.
+
 ## Preferences & Approach
 - Prefer boring, proven solutions over clever abstractions
 - Prefer fixing patterns over fixing instances (fix the stale-preference pattern, not just one ViewModel)

@@ -9,16 +9,19 @@ _(pick from Ready)_
 ## Ready
 
 ### P0: Progressive Overload Alerts
-- [ ] **Overload alerts in workout history** — "You've been at 135 lbs for 3 weeks — try 140." Trend visualization for each exercise. Weakest vertical vs MacroFactor/Strong.
+- [x] **Overload alerts in workout history** — Stalling/declining exercises shown with weight suggestions. Checks last 10 workouts' exercises.
 
 ### P0: Hardcoded Unit Audit
-- [ ] **Grep "lb"/"lbs" across all views** — Fix remaining instances of stale preference pattern. One pass to close this out.
+- [x] **Grep "lb"/"lbs" across all views** — Fixed 7 files. All now use Preferences.weightUnit.
 
-### P1: AI Chat Workout Intelligence
+### P0: AI Chat Workout Intelligence
 - [ ] **"How's my bench progress?"** — Show trend data in chat. Leverage existing progressive overload service. Low effort, high value.
 
-### P1: USDA API Design Document
+### P0: USDA API Design Document
 - [ ] **Design the integration** — Caching, offline-first, privacy (search queries leave device). First external network call — design before code.
+
+### P1: Proactive Insight Alerts
+- [ ] **Extend overload alert pattern** — Protein adherence alerts, supplement streak nudges. Proactive intelligence across domains.
 
 ### P1: Systematic Bug Hunting
 - [ ] **Run analysis every 5 cycles** — Meal hint bug was found via systematic analysis. Keep this cadence.

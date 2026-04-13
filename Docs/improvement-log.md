@@ -4,6 +4,12 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 
 ---
 
+## Cycle · 2026-04-12 (Autopilot session, sprint post-review #18)
+
+- **Hardcoded unit audit (P0)**: Grep'd all .swift files for "lb"/"lbs". Fixed 7 files (6 views + 1 service) to use Preferences.weightUnit.convertFromLbs() instead of hardcoded lb. Closes stale preference pattern permanently.
+
+---
+
 ## Cycle · 2026-04-12 (Autopilot session, sprint post-review #17)
 
 - **Food diary inline editing**: DB food entries now allow macro override. "Edit macros" toggle pre-fills with computed values from servings, saves via updateFoodEntryMacros.

@@ -76,6 +76,11 @@
 - Exercise is our weakest vertical — MacroFactor launched Workouts with progressive overload automation and Jeff Nippard videos. We can't compete on content volume, but AI-powered workout intelligence (progressive overload alerts, form tips in chat) is our angle.
 - Food DB gap (1,500 vs MFP's 20M) is less concerning with chat-first logging — users type "chicken biryani 300g" and it works. USDA API integration is the right next investment, not manual enrichment.
 
+### What I Learned — Review #19 (Cycle 670, 2026-04-12)
+- Progressive overload alerts are the pattern I want replicated: proactive intelligence that tells users when something needs attention, not just displays data. Extend to protein adherence, supplement streaks, workout consistency.
+- AI-powered workout intelligence in chat is more aligned with our AI-first identity than static exercise images. "How's my bench?" is a natural user behavior.
+- Two P0s in 20 cycles is modest but high-quality. P1 items keep slipping — keep sprint scope tight.
+
 ## Preferences & Style
 - Prefer opinionated design over configurability — make good defaults, don't add settings
 - Prefer chat-first interactions — every feature should be reachable from conversation

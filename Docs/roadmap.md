@@ -29,6 +29,7 @@ What's not: Color palette feels disjointed (dark blue/purple + bright rings), no
 - **Meal planning dialogue (P0)** — "plan my meals today" → iterative suggestions based on remaining macros + history. `planningMeals` phase in state machine. Implementation complete, awaiting final validation.
 
 ### Next
+- **Workout intelligence in chat (P0)** — "How's my bench progress?" → trend data from progressive overload service. Connect existing service to chat pipeline.
 - Workout split builder — "build me a PPL split" → multi-turn designing
 - Photo food logging (Core ML classifier → DB match → chat confirmation) — deferred until on-device accuracy improves for Indian/mixed dishes
 
@@ -94,8 +95,8 @@ What's not: Color palette feels disjointed (dark blue/purple + bright rings), no
 
 ### Now
 - ~~Workout history polish~~ DONE — Weight unit preference respected in history cards.
-- **Progressive overload alerts (P0)** — "You've been at 135 lbs for 3 weeks — try 140." Trend visualization in workout history.
-- **Hardcoded unit audit (P0)** — grep "lb"/"lbs" across all views, fix remaining instances of stale preference pattern.
+- ~~**Progressive overload alerts (P0)**~~ DONE — Stalling/declining exercises shown with weight suggestions in workout tab.
+- ~~**Hardcoded unit audit (P0)**~~ DONE — 7 files fixed. All weight display paths now use Preferences.weightUnit.
 
 ### Next
 - **Exercise presentation** — Images, muscle group icons, exercise instructions. Match Boostcamp quality.
