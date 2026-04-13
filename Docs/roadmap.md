@@ -87,7 +87,7 @@ What's not: Color palette feels disjointed (dark blue/purple + bright rings), no
 
 ### Now
 - ~~**DB enrichment to 1,500**~~ DONE — 1,500+ foods. Chinese, Middle Eastern, American classics, sandwiches, soups, healthy options. Manual enrichment paused — next investment should be USDA API or search quality.
-- ~~**Search quality (P1)**~~ PARTIALLY DONE — Synonym expansion (40+ regional/colloquial terms), spell correction hardened. Remaining: prefix matching for incomplete typing ("chick" → "chicken").
+- ~~**Search quality (P1)**~~ DONE — Synonym expansion (40+ regional/colloquial terms), spell correction hardened. Prefix matching works via substring SQL (`%word%` matches "chick" → "chicken"). 3 verification tests added.
 - Ingredient persistence for recipe rebuilding
 
 ### Next

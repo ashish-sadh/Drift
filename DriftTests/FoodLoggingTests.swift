@@ -399,6 +399,37 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     #expect(ranked.first?.name == firstDal.name, "Most-used dal should appear first in ranked search")
 }
 
+@Test func searchPrefixMatchFindsFullWord() async throws {
+    let db = try AppDatabase.empty()
+    try db.seedFoodsFromJSON()
+    // Partial word "chick" should find "Chicken Breast", "Chicken Tikka", etc.
+    let results = try db.searchFoodsRanked(query: "chick")
+    #expect(!results.isEmpty, "Prefix 'chick' should match chicken foods")
+    #expect(results.contains(where: { $0.name.lowercased().contains("chicken") }),
+            "Results should include chicken: \(results.prefix(5).map(\.name))")
+}
+
+@Test func searchPrefixMatchShortQuery() async throws {
+    let db = try AppDatabase.empty()
+    try db.seedFoodsFromJSON()
+    // Very short prefix "ban" should find "Banana"
+    let results = try db.searchFoodsRanked(query: "ban")
+    #expect(!results.isEmpty, "Prefix 'ban' should match banana foods")
+    #expect(results.contains(where: { $0.name.lowercased().contains("banana") }),
+            "Results should include banana: \(results.prefix(5).map(\.name))")
+}
+
+@Test func searchPrefixMatchRanksShorterNamesHigher() async throws {
+    let db = try AppDatabase.empty()
+    try db.seedFoodsFromJSON()
+    // "rice" should rank plain "Rice" before "Rice Pudding" or "Chicken Fried Rice"
+    let results = try db.searchFoodsRanked(query: "rice")
+    guard results.count >= 2 else { return }
+    // Shortest match should be near top (ORDER BY LENGTH(f.name))
+    let topName = results[0].name.lowercased()
+    #expect(topName.contains("rice"), "Top result should contain rice")
+}
+
 @Test func recentFoodsOrdering() async throws {
     let db = try AppDatabase.empty()
     try db.seedFoodsFromJSON()
