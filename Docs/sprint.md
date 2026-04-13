@@ -15,15 +15,20 @@ _(pick from Ready)_
 - [x] **Fix color coordination app-wide** — Warmer palette: background #0E0E12, cards #1A1B24, accent #8B7CF6. New domain colors (cyclePink, supplementMint). Fixed hardcoded colors in BiomarkersTabView, MoreTabView, DashboardView. Separator softened to 0.06. All via Theme constants.
 
 ### P1: Chat UI Evolution
-- [ ] **Message bubbles** — Replace plain text with user/AI message bubbles. Pure view-layer change.
-- [ ] **Typing indicator** — Animated dots during AI thinking/classification phase.
-- [ ] **Tool execution feedback** — Show "Looking up food...", "Checking workout history..." during Tier 2-3 execution. Needs state machine integration.
+- [x] **Message bubbles** — Replace plain text with user/AI message bubbles. Pure view-layer change.
+- [x] **Typing indicator** — Animated dots during AI thinking/classification phase.
+- [x] **Tool execution feedback** — Show "Looking up food...", "Checking workout history..." during Tier 2-3 execution. Needs state machine integration.
+- [x] **Typewriter text animation** — Instant AI responses reveal character-by-character.
+- [x] **Structured confirmation cards** — Weight and workout logged confirmations as rich cards.
 
 ### P1: Food DB Enrichment to 1,500
-- [ ] **Add ~300 foods** — Focus on most-searched-but-not-found. Indian restaurant meals, fast food combos, common branded items. Cross-reference USDA. JSON-only, zero code risk.
+- [x] **Add ~300 foods** — Chinese, Middle Eastern, American classics, sandwiches, soups, healthy options.
+
+### P1: Food Search Quality
+- [x] **Synonym expansion** — "curd" → yogurt, "aloo" → potato, regional/colloquial terms.
 
 ### P2: Meal Planning Dialogue
-- [ ] **"Plan my meals for today"** — Iterative suggestion flow: suggest breakfast → confirm → suggest lunch. Needs `awaitingMealPlan` phase in ConversationState. Top failing query.
+- [x] **"Plan my meals for today"** — Iterative suggestion flow with planningMeals state phase, number selection, smart pills.
 
 ### P2: AIChatView ViewModel Extraction
 - [ ] **Extract logic from AIChatView (400+ lines)** — Do alongside chat UI work (bubbles, typing indicators). Move business logic to AIChatViewModel. Not standalone refactoring.
