@@ -4,6 +4,22 @@ Periodic product + engineering reviews. Every 10 cycles of the self-improvement 
 
 ---
 
+## Review #30 — 2026-04-13 (Cycle 1038)
+
+### Summary
+ViewModel extraction shipped (P1), supplement/sleep confirmation cards in progress (P1). 2/4 sprint items completed or in progress. MacroFactor launched Workouts app with Live Activities and AI recipe photos. Sprint: finish supplement/sleep cards (P0), glucose/biomarker cards (P0), exercise visual polish (P1), state.md update + TestFlight build 108 (P1), food DB search analysis (P2).
+
+### Key Achievement
+ViewModel extraction separated state+logic from rendering, enabling faster iteration on new card types. Supplement and sleep card UI complete, wiring done.
+
+### Key Concern
+Exercise vertical is weakest vs competition (text-only while MacroFactor has auto-progression and videos). Need visual polish before next review.
+
+### Sprint Plan (next 20 cycles)
+P0: Finish supplement/sleep cards. P0: Glucose + biomarker cards. P1: Exercise visual polish. P1: State.md + TestFlight 108. P2: Food DB search miss analysis.
+
+---
+
 ## Review #29 — 2026-04-13 (Cycle 983)
 
 ### Summary

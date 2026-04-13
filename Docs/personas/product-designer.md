@@ -132,6 +132,11 @@
 - The all-in-one market positioning is being externally validated. Industry roundups in 2026 call out that "most serious fitness people run three apps that don't talk to each other." That's our pitch — but polish must match.
 - P1/P2 slip pattern persists (1/4 items shipped). Sprint scope of 4 items is right, but we need to protect P1 time by finishing P0s faster.
 
+### What I Learned — Review #30 (Cycle 1038, 2026-04-13)
+- MacroFactor launched Workouts app with auto-progression, cardio, Apple Health write, and AI recipe photo logging at $72/year. They're becoming a serious all-in-one competitor. Our edge: free, on-device, privacy-first.
+- The ViewModel extraction was necessary but invisible to users. Next sprint must be 100% user-visible — card extensions, exercise visual polish, fresh TestFlight build.
+- MFP's Premium AI tools (meal scan, voice log) are behind paywall. Our free on-device voice + AI chat remains a differentiator worth marketing.
+
 ## Preferences & Style
 - Prefer opinionated design over configurability — make good defaults, don't add settings
 - Prefer chat-first interactions — every feature should be reachable from conversation

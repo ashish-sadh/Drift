@@ -136,6 +136,11 @@
 - Pre-existing SpeechRecognition test failure (method rename not caught in test target) is a process gap. Test target should be built even when tests aren't run, to catch compile errors.
 - Cost at $0.06/cycle with 94% cache read ratio shows prompt caching is working optimally for iterative development patterns.
 
+### What I Learned — Review #30 (Cycle 1038, 2026-04-13)
+- ViewModel extraction went cleanly. `[weak self]` in closures was the only surprise from struct→class migration. 981 tests still passing.
+- `attachToolCards` pattern (check toolsCalled, fetch current service data) keeps the tool pipeline unchanged while adding card creation at the consumption point. Scales to glucose/biomarkers trivially.
+- 6 optional card fields on ChatMessage is approaching the threshold. If we add 3 more, consider a `ConfirmationCard` enum with associated values. Not urgent yet.
+
 ## Preferences & Approach
 - Prefer boring, proven solutions over clever abstractions
 - Prefer fixing patterns over fixing instances (fix the stale-preference pattern, not just one ViewModel)

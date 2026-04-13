@@ -8,17 +8,20 @@ _(pick from Ready)_
 
 ## Ready
 
-### P0: Bug Hunting on Recent Features
-- [x] **Systematic analysis of workout split builder + voice UX + confirmation cards** — Ran analysis agent. Fixed: misleading checkmark on unconfirmed workout card, force unwrap in duration regex. Fixed pre-existing SpeechRecognition test compile error. Most flagged issues were false positives (code already guarded).
+### P0: Finish Supplement/Sleep Confirmation Cards
+- [ ] **Test and commit supplement/sleep cards** — UI, data structs, and tool wiring done. Run tests, fix issues, commit.
 
-### P1: AIChatView ViewModel Extraction
-- [ ] **Extract ViewModel from AIChatView** — File has 4 card types, voice state, conversation state. Extract before adding more card types.
+### P0: Glucose + Biomarker Confirmation Cards
+- [ ] **Extend card pattern to glucose and biomarkers** — Same attachToolCards pattern. Glucose: readings, spikes, fasting. Biomarkers: out-of-range markers.
 
-### P1: Supplement/Sleep Confirmation Cards
-- [ ] **Extend card pattern to remaining actions** — Supplement logging, sleep queries, glucose readings should show structured cards. Do after ViewModel extraction.
+### P1: Exercise Visual Polish
+- [ ] **Muscle group icons on workout cards** — Text-only is weakest vertical vs competition. Add SF Symbol muscle indicators.
+
+### P1: State.md + TestFlight Build 108
+- [ ] **Update state.md** — Build number, test count, card types are stale. Publish fresh TestFlight.
 
 ### P2: Food DB Quality
-- [ ] **Search miss analysis + targeted additions** — Identify most-searched missing foods. Cross-reference with USDA. Every "not found" = user opens MFP.
+- [ ] **Search miss analysis + targeted additions** — Identify most-searched missing foods. Cross-reference with USDA. Every "not found" = user opens competitor.
 
 ---
 
