@@ -483,6 +483,21 @@ struct WorkoutView: View {
                 Label("\(Int(wu.convertFromLbs(s.totalVolume))) \(wu.displayName)", systemImage: "scalemass").font(.caption).foregroundStyle(.secondary)
                 Label("\(s.exercises.count) exercises", systemImage: "dumbbell").font(.caption).foregroundStyle(.secondary)
             }
+            // Muscle group chips
+            let bodyParts = Array(Set(s.exercises.map { ExerciseDatabase.bodyPart(for: $0) })).sorted()
+            if !bodyParts.isEmpty {
+                HStack(spacing: 4) {
+                    ForEach(bodyParts.prefix(4), id: \.self) { part in
+                        HStack(spacing: 2) {
+                            Image(systemName: muscleIcon(part)).font(.system(size: 8))
+                            Text(part).font(.system(size: 9))
+                        }
+                        .padding(.horizontal, 6).padding(.vertical, 2)
+                        .background(Theme.accent.opacity(0.1), in: Capsule())
+                        .foregroundStyle(Theme.accent)
+                    }
+                }
+            }
             if let notes = s.workout.notes, !notes.isEmpty {
                 Text(notes).font(.caption2).foregroundStyle(.tertiary).lineLimit(1)
             }
@@ -496,6 +511,18 @@ struct WorkoutView: View {
         }.card()
     }
 
+    private func muscleIcon(_ bodyPart: String) -> String {
+        switch bodyPart.lowercased() {
+        case "chest": return "figure.strengthtraining.traditional"
+        case "back": return "figure.rowing"
+        case "legs": return "figure.run"
+        case "shoulders": return "figure.boxing"
+        case "arms": return "figure.cooldown"
+        case "core": return "figure.core.training"
+        case "full body": return "figure.cross.training"
+        default: return "figure.mixed.cardio"
+        }
+    }
     private func abbreviate(_ n: String) -> String { n.count <= 25 ? n : String(n.prefix(22)) + "..." }
     private func formatDate(_ d: String) -> String {
         let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; guard let date = f.date(from: String(d.prefix(10))) else { return d }
