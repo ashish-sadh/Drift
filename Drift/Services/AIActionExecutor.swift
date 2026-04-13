@@ -141,10 +141,12 @@ enum AIActionExecutor {
 
         guard parts.count > 1 else { return nil } // Single item — use parseFoodIntent instead
 
-        return parts.map { part in
+        let intents = parts.compactMap { part -> FoodIntent? in
             let (amount, food, grams) = extractAmount(from: part)
+            guard !food.isEmpty else { return nil }
             return FoodIntent(query: food, servings: amount, gramAmount: grams)
         }
+        return intents.count > 1 ? intents : nil
     }
 
     // MARK: - Food Search + AI Fallback

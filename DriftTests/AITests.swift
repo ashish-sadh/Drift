@@ -320,6 +320,14 @@ import Testing
     #expect(intents == nil)
 }
 
+@Test func aiMultiFoodEmptyQueryFiltered() async throws {
+    // Purely numeric parts should be filtered out, not produce empty food queries
+    // "log 2 and rice" → "2" part has empty food name after extractAmount
+    let intents = AIActionExecutor.parseMultiFoodIntent("log 2 and rice")
+    // Should return nil (only 1 valid intent after filtering empty queries)
+    #expect(intents == nil)
+}
+
 // MARK: - Chain-of-Thought Tests
 
 @Test @MainActor func aiChainOfThoughtWeightQuery() async throws {
