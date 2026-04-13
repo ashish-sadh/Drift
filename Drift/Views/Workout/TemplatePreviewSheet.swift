@@ -50,7 +50,7 @@ struct TemplatePreviewSheet: View {
                                             Text("\(ex.sets) sets").font(.caption2).foregroundStyle(.tertiary)
                                             if let lastW = try? WorkoutService.lastWeight(for: ex.name) {
                                                 Text("\u{00B7}").font(.caption2).foregroundStyle(.quaternary)
-                                                Text("\(Int(lastW)) lb").font(.caption2.monospacedDigit()).foregroundStyle(.tertiary)
+                                                Text("\(Int(Preferences.weightUnit.convertFromLbs(lastW))) \(Preferences.weightUnit.displayName)").font(.caption2.monospacedDigit()).foregroundStyle(.tertiary)
                                             }
                                             if let notes = ex.notes {
                                                 Text("\u{00B7}").font(.caption2).foregroundStyle(.quaternary)

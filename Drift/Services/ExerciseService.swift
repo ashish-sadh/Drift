@@ -170,10 +170,12 @@ enum ExerciseService {
         let trend: String
         if change > 5 {
             status = .improving
-            trend = "Improving: +\(Int(change)) lb estimated 1RM over \(recent.count) sessions"
+            let wu = Preferences.weightUnit
+            trend = "Improving: +\(Int(wu.convertFromLbs(change))) \(wu.displayName) estimated 1RM over \(recent.count) sessions"
         } else if change < -5 {
             status = .declining
-            trend = "Declining: \(Int(change)) lb estimated 1RM over \(recent.count) sessions"
+            let wu = Preferences.weightUnit
+            trend = "Declining: \(Int(wu.convertFromLbs(change))) \(wu.displayName) estimated 1RM over \(recent.count) sessions"
         } else {
             status = .stalling
             trend = "Stalling: 1RM roughly the same for \(recent.count) sessions. Try adding weight or reps."

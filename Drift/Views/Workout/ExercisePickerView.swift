@@ -133,7 +133,7 @@ struct ExercisePickerView: View {
                     Text(name).font(.subheadline)
                     Spacer()
                     if let lastW = try? WorkoutService.lastWeight(for: name) {
-                        Text("\(Int(lastW)) lb").font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
+                        Text("\(Int(Preferences.weightUnit.convertFromLbs(lastW))) \(Preferences.weightUnit.displayName)").font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
                     }
                     Text(bodyPart).font(.caption2).foregroundStyle(.tertiary)
                 }

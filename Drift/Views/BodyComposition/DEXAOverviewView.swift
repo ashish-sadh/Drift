@@ -521,9 +521,9 @@ struct DEXAEntryView: View {
                 }
                 Section("Body Composition") {
                     field("Body Fat %", value: $bodyFatPct, unit: "%")
-                    field("Fat Mass", value: $fatMassLbs, unit: "lbs")
-                    field("Lean Mass", value: $leanMassLbs, unit: "lbs")
-                    field("Visceral Fat", value: $visceralFatLbs, unit: "lbs")
+                    field("Fat Mass", value: $fatMassLbs, unit: Preferences.weightUnit.displayName)
+                    field("Lean Mass", value: $leanMassLbs, unit: Preferences.weightUnit.displayName)
+                    field("Visceral Fat", value: $visceralFatLbs, unit: Preferences.weightUnit.displayName)
                 }
                 Section("Bone") {
                     field("Bone Density", value: $boneDensity, unit: "g/cm2")

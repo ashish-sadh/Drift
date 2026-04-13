@@ -21,7 +21,8 @@ struct WorkoutDetailView: View {
     private var shareText: String {
         var t = "💪 \(summary.workout.name)\n📅 \(formatDate(summary.workout.date))\n"
         if !summary.workout.durationDisplay.isEmpty { t += "⏱ \(summary.workout.durationDisplay)  " }
-        t += "🏋️ \(Int(summary.totalVolume)) lb\n"
+        let wu = Preferences.weightUnit
+        t += "🏋️ \(Int(wu.convertFromLbs(summary.totalVolume))) \(wu.displayName)\n"
         if let notes = summary.workout.notes, !notes.isEmpty { t += "📝 \(notes)\n" }
         t += "\n"
         let grouped = Dictionary(grouping: sets) { $0.exerciseName }
@@ -46,7 +47,7 @@ struct WorkoutDetailView: View {
                     Text(formatDate(summary.workout.date)).font(.caption).foregroundStyle(.secondary)
                     HStack(spacing: 12) {
                         if !summary.workout.durationDisplay.isEmpty { Label(summary.workout.durationDisplay, systemImage: "clock") }
-                        Label("\(Int(summary.totalVolume)) lb", systemImage: "scalemass")
+                        Label("\(Int(Preferences.weightUnit.convertFromLbs(summary.totalVolume))) \(Preferences.weightUnit.displayName)", systemImage: "scalemass")
                         Label("\(summary.totalSets) sets", systemImage: "number")
                     }.font(.caption).foregroundStyle(.secondary)
                     if let notes = summary.workout.notes, !notes.isEmpty {

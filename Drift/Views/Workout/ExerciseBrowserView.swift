@@ -136,7 +136,7 @@ struct ExerciseDetailView: View {
                     if let pr {
                         HStack(spacing: 4) {
                             Image(systemName: "trophy.fill").font(.caption).foregroundStyle(Theme.fatYellow)
-                            Text("PR: \(Int(pr)) lb (est. 1RM)")
+                            Text("PR: \(Int(Preferences.weightUnit.convertFromLbs(pr))) \(Preferences.weightUnit.displayName) (est. 1RM)")
                                 .font(.caption.weight(.semibold)).foregroundStyle(Theme.fatYellow)
                         }
                     }
