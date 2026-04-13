@@ -324,6 +324,12 @@ struct AIChatView: View {
                 if let card = msg.sleepCard {
                     sleepConfirmationCard(card)
                 }
+                if let card = msg.glucoseCard {
+                    glucoseConfirmationCard(card)
+                }
+                if let card = msg.biomarkerCard {
+                    biomarkerConfirmationCard(card)
+                }
             }
             .accessibilityLabel(msg.role == .user ? "You said: \(msg.text)" : "Assistant: \(msg.text)")
 
@@ -601,5 +607,113 @@ struct AIChatView: View {
         if readiness.contains("Moderate") { return .orange }
         if readiness.contains("Low") { return .red }
         return .secondary
+    }
+
+    // MARK: - Glucose Confirmation Card
+
+    private func glucoseConfirmationCard(_ card: AIChatViewModel.GlucoseCardData) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "drop.fill")
+                    .font(.caption).foregroundStyle(.orange)
+                Text("Glucose")
+                    .font(.caption.weight(.semibold))
+                Spacer()
+                Text("\(card.readingCount) readings")
+                    .font(.caption2).foregroundStyle(.tertiary)
+            }
+
+            HStack(spacing: 0) {
+                VStack(spacing: 2) {
+                    Text("\(card.avgMgdl)")
+                        .font(.subheadline.weight(.bold).monospacedDigit())
+                        .foregroundStyle(.orange)
+                    Text("avg mg/dL").font(.system(size: 9)).foregroundStyle(.tertiary)
+                }
+                .frame(maxWidth: .infinity)
+
+                VStack(spacing: 2) {
+                    Text("\(card.minMgdl)–\(card.maxMgdl)")
+                        .font(.caption.weight(.bold).monospacedDigit())
+                        .foregroundStyle(Theme.textPrimary)
+                    Text("range").font(.system(size: 9)).foregroundStyle(.tertiary)
+                }
+                .frame(maxWidth: .infinity)
+
+                VStack(spacing: 2) {
+                    Text("\(card.inZonePct)%")
+                        .font(.caption.weight(.bold).monospacedDigit())
+                        .foregroundStyle(card.inZonePct >= 70 ? .green : .orange)
+                    Text("in zone").font(.system(size: 9)).foregroundStyle(.tertiary)
+                }
+                .frame(maxWidth: .infinity)
+
+                VStack(spacing: 2) {
+                    Text("\(card.spikeCount)")
+                        .font(.caption.weight(.bold).monospacedDigit())
+                        .foregroundStyle(card.spikeCount == 0 ? .green : .red)
+                    Text("spikes").font(.system(size: 9)).foregroundStyle(.tertiary)
+                }
+                .frame(maxWidth: .infinity)
+            }
+        }
+        .padding(10)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Color.orange.opacity(0.2), lineWidth: 0.5)
+        )
+    }
+
+    // MARK: - Biomarker Confirmation Card
+
+    private func biomarkerConfirmationCard(_ card: AIChatViewModel.BiomarkerCardData) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "testtube.2")
+                    .font(.caption).foregroundStyle(.cyan)
+                Text("Biomarkers")
+                    .font(.caption.weight(.semibold))
+                Spacer()
+                Text("\(card.optimalCount)/\(card.totalCount) optimal")
+                    .font(.caption2.weight(.medium))
+                    .foregroundStyle(card.outOfRange.isEmpty ? .green : .orange)
+            }
+
+            if card.outOfRange.isEmpty {
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.caption).foregroundStyle(.green)
+                    Text("All markers in optimal range")
+                        .font(.caption2).foregroundStyle(.secondary)
+                }
+            } else {
+                VStack(alignment: .leading, spacing: 4) {
+                    ForEach(card.outOfRange.prefix(4), id: \.name) { marker in
+                        HStack(spacing: 6) {
+                            Circle()
+                                .fill(marker.status.contains("high") || marker.status.contains("High") ? .red : .orange)
+                                .frame(width: 5, height: 5)
+                            Text(marker.name)
+                                .font(.caption2.weight(.medium))
+                            Spacer()
+                            Text(marker.value)
+                                .font(.caption2.monospacedDigit())
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    if card.outOfRange.count > 4 {
+                        Text("+\(card.outOfRange.count - 4) more")
+                            .font(.caption2).foregroundStyle(.tertiary)
+                    }
+                }
+            }
+        }
+        .padding(10)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Color.cyan.opacity(0.2), lineWidth: 0.5)
+        )
     }
 }

@@ -1113,5 +1113,54 @@ extension AIChatViewModel {
                 )
             }
         }
+
+        // Glucose card
+        if tools.contains("glucose") {
+            let today = DateFormatters.todayString
+            if let readings = try? AppDatabase.shared.fetchGlucoseReadings(from: today, to: today),
+               !readings.isEmpty {
+                let values = readings.map(\.glucoseMgdl)
+                let avg = values.reduce(0, +) / Double(values.count)
+                let inZone = values.filter { $0 >= 70 && $0 <= 140 }.count
+                let spikes = values.filter { $0 > 140 }
+                message.glucoseCard = GlucoseCardData(
+                    avgMgdl: Int(avg),
+                    minMgdl: Int(values.min() ?? 0),
+                    maxMgdl: Int(values.max() ?? 0),
+                    inZonePct: Int(Double(inZone) / Double(values.count) * 100),
+                    readingCount: readings.count,
+                    spikeCount: spikes.count,
+                    peakMgdl: spikes.isEmpty ? nil : Int(spikes.max() ?? 0)
+                )
+            }
+        }
+
+        // Biomarker card
+        if tools.contains("biomarkers") {
+            if let results = try? AppDatabase.shared.fetchLatestBiomarkerResults(),
+               !results.isEmpty {
+                var outOfRange: [BiomarkerCardData.OutOfRangeMarker] = []
+                var optimal = 0
+                for r in results {
+                    if let def = BiomarkerKnowledgeBase.byId[r.biomarkerId] {
+                        let status = def.status(for: r.normalizedValue)
+                        if status != .optimal {
+                            outOfRange.append(.init(
+                                name: def.name,
+                                value: "\(String(format: "%.1f", r.normalizedValue)) \(def.unit)",
+                                status: "\(status)"
+                            ))
+                        } else {
+                            optimal += 1
+                        }
+                    }
+                }
+                message.biomarkerCard = BiomarkerCardData(
+                    totalCount: results.count,
+                    optimalCount: optimal,
+                    outOfRange: outOfRange
+                )
+            }
+        }
     }
 }

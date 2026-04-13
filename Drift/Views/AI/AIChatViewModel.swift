@@ -44,6 +44,8 @@ final class AIChatViewModel {
         var navigationCard: NavigationCardData?
         var supplementCard: SupplementCardData?
         var sleepCard: SleepCardData?
+        var glucoseCard: GlucoseCardData?
+        var biomarkerCard: BiomarkerCardData?
         let createdAt = Date()
         enum Role { case user, assistant }
     }
@@ -91,5 +93,27 @@ final class AIChatViewModel {
         let hrvMs: Int?
         let restingHR: Int?
         let readiness: String?
+    }
+
+    struct GlucoseCardData {
+        let avgMgdl: Int
+        let minMgdl: Int
+        let maxMgdl: Int
+        let inZonePct: Int
+        let readingCount: Int
+        let spikeCount: Int
+        let peakMgdl: Int?
+    }
+
+    struct BiomarkerCardData {
+        let totalCount: Int
+        let optimalCount: Int
+        let outOfRange: [OutOfRangeMarker]
+
+        struct OutOfRangeMarker {
+            let name: String
+            let value: String
+            let status: String
+        }
     }
 }
