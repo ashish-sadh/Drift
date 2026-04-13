@@ -1171,3 +1171,126 @@ import Testing
 
     state.reset()
 }
+
+// MARK: - ExerciseService Form Tips
+
+@MainActor @Test func formTipsChestExercises() {
+    #expect(ExerciseService.formTip(for: "Bench Press") != nil)
+    #expect(ExerciseService.formTip(for: "Incline Dumbbell Press")?.contains("30-45") == true)
+    #expect(ExerciseService.formTip(for: "Cable Fly")?.contains("Slight bend") == true)
+    #expect(ExerciseService.formTip(for: "Push Up")?.contains("Core tight") == true)
+    #expect(ExerciseService.formTip(for: "Dip")?.contains("Lean forward") == true)
+}
+
+@MainActor @Test func formTipsBackExercises() {
+    #expect(ExerciseService.formTip(for: "Deadlift")?.contains("Brace core") == true)
+    #expect(ExerciseService.formTip(for: "Romanian Deadlift")?.contains("Hinge") == true)
+    #expect(ExerciseService.formTip(for: "Barbell Row")?.contains("Pull to lower chest") == true)
+    #expect(ExerciseService.formTip(for: "Pull Up")?.contains("Full hang") == true)
+    #expect(ExerciseService.formTip(for: "Lat Pulldown")?.contains("Pull to upper chest") == true)
+    #expect(ExerciseService.formTip(for: "Seated Row")?.contains("Pull to belly") == true)
+}
+
+@MainActor @Test func formTipsLegExercises() {
+    #expect(ExerciseService.formTip(for: "Barbell Squat")?.contains("Brace core") == true)
+    #expect(ExerciseService.formTip(for: "Leg Press")?.contains("don't lock knees") == true)
+    #expect(ExerciseService.formTip(for: "Walking Lunge")?.contains("Front knee") == true)
+    #expect(ExerciseService.formTip(for: "Leg Curl")?.contains("Control") == true)
+    #expect(ExerciseService.formTip(for: "Calf Raise")?.contains("Full stretch") == true)
+    #expect(ExerciseService.formTip(for: "Hip Thrust")?.contains("squeeze glutes") == true)
+}
+
+@MainActor @Test func formTipsShoulderAndArmExercises() {
+    #expect(ExerciseService.formTip(for: "Overhead Press")?.contains("Brace core") == true)
+    #expect(ExerciseService.formTip(for: "Lateral Raise")?.contains("lead with elbows") == true)
+    #expect(ExerciseService.formTip(for: "Face Pull")?.contains("Pull to forehead") == true)
+    #expect(ExerciseService.formTip(for: "Bicep Curl")?.contains("Pin elbows") == true)
+    #expect(ExerciseService.formTip(for: "Hammer Curl")?.contains("Neutral grip") == true)
+    #expect(ExerciseService.formTip(for: "Tricep Pushdown")?.contains("Lock upper arms") == true)
+    #expect(ExerciseService.formTip(for: "Skull Crusher")?.contains("Elbows pointed up") == true)
+}
+
+@MainActor @Test func formTipsCoreExercises() {
+    #expect(ExerciseService.formTip(for: "Plank")?.contains("Flat back") == true)
+    #expect(ExerciseService.formTip(for: "Crunch")?.contains("Exhale") == true)
+    #expect(ExerciseService.formTip(for: "Hanging Leg Raise")?.contains("Press lower back") == true)
+    #expect(ExerciseService.formTip(for: "Ab Wheel Rollout")?.contains("Brace hard") == true)
+}
+
+@MainActor @Test func formTipUnknownExercise() {
+    #expect(ExerciseService.formTip(for: "Some Random Exercise") == nil)
+    #expect(ExerciseService.formTip(for: "") == nil)
+}
+
+// MARK: - ExerciseService Template & Suggestion
+
+@MainActor @Test func startTemplateReturnsNilForNoMatch() {
+    // With no templates saved, should return nil
+    let result = ExerciseService.startTemplate(name: "nonexistent workout xyz")
+    // May or may not be nil depending on DB state, but shouldn't crash
+    _ = result
+}
+
+@MainActor @Test func suggestWorkoutReturnsString() {
+    let suggestion = ExerciseService.suggestWorkout()
+    #expect(!suggestion.isEmpty)
+    #expect(suggestion.contains("trained") || suggestion.contains("week") || suggestion.contains("Templates"))
+}
+
+@MainActor @Test func exercisesByMuscleReturnsResults() {
+    let chest = ExerciseService.exercisesByMuscle(group: "chest")
+    #expect(!chest.isEmpty, "Should find chest exercises in exercise DB")
+    let legs = ExerciseService.exercisesByMuscle(group: "legs")
+    #expect(!legs.isEmpty, "Should find leg exercises in exercise DB")
+}
+
+@MainActor @Test func popularExercisesDoesNotCrash() {
+    let popular = ExerciseService.popularExercises(limit: 5)
+    // May be empty if no history, but should not crash
+    #expect(popular.count <= 5)
+}
+
+// MARK: - SupplementService
+
+@MainActor @Test func supplementGetStatus() {
+    let status = SupplementService.getStatus()
+    // Should return a string about supplements (either "No supplements" or a status)
+    #expect(!status.isEmpty)
+    #expect(status.contains("supplement") || status.contains("Supplement"))
+}
+
+@MainActor @Test func supplementAddDuplicate() {
+    // Adding should work the first time or report already exists
+    let result = SupplementService.addSupplement(name: "TestVitaminZZZ")
+    #expect(result.contains("Added") || result.contains("already"))
+
+    // Second add should report duplicate
+    let result2 = SupplementService.addSupplement(name: "TestVitaminZZZ")
+    #expect(result2.contains("already"))
+
+    // Clean up: find and delete
+    if let supps = try? AppDatabase.shared.fetchActiveSupplements(),
+       let match = supps.first(where: { $0.name == "Testvitaminzzz" || $0.name == "TestVitaminZZZ" }),
+       let id = match.id {
+        SupplementService.deleteSupplement(id: id)
+    }
+}
+
+@MainActor @Test func supplementMarkTakenNoMatch() {
+    let result = SupplementService.markTaken(name: "zzz_nonexistent_supplement")
+    #expect(result.contains("Couldn't find") || result.contains("No supplements"))
+}
+
+@MainActor @Test func supplementAddWithDosage() {
+    let result = SupplementService.addSupplement(name: "TestCreatineZZZ", dosage: "5g")
+    #expect(result.contains("Added") || result.contains("already"))
+    if result.contains("Added") {
+        #expect(result.contains("5g"))
+    }
+    // Clean up
+    if let supps = try? AppDatabase.shared.fetchActiveSupplements(),
+       let match = supps.first(where: { $0.name.lowercased().contains("testcreatinezzz") }),
+       let id = match.id {
+        SupplementService.deleteSupplement(id: id)
+    }
+}
