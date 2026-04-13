@@ -12,7 +12,7 @@ _(pick from Ready)_
 - [x] **Workout consistency + logging gap alerts** — No workouts in 5+ days → alert. No food logging in 2+ days → alert. 6 alert types total. 948 tests.
 
 ### P1: Navigate to Screen from Chat
-- [ ] **"Show me my weight chart" switches tabs** — Navigation tool that routes chat commands to specific screens. Biggest remaining AI parity gap.
+- [x] **"Show me my weight chart" switches tabs** — Static overrides + LLM tool + tab switching. Chat collapses on navigate. 16 tests. 962 total.
 
 ### P1: Wire USDA into AI Chat Food Logging
 - [ ] **Chat uses searchWithFallback when food not found** — When user says "log quinoa" and it's not local, use FoodService.searchWithFallback() if toggle is on.

@@ -32,7 +32,7 @@ What's not: Color palette feels disjointed (dark blue/purple + bright rings), no
 - ~~**Proactive insight alerts (P0)**~~ DONE — Protein streak alert + supplement gap alert on dashboard.
 
 ### Now
-- **Chat navigation (P0)** — "Show me my weight chart" switches tabs. In progress. Static overrides + LLM tool.
+- ~~**Chat navigation (P0)**~~ DONE — "Show me my weight chart" switches tabs. Static overrides + LLM tool. Chat collapses on navigate.
 - **Wire USDA into AI chat (P1)** — Chat uses searchWithFallback when local food not found. API exists, needs chat integration.
 
 ### Next

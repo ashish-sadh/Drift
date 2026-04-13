@@ -4,6 +4,22 @@ Periodic product + engineering reviews. Every 10 cycles of the self-improvement 
 
 ---
 
+## Review #24 — 2026-04-12 (Cycle 806)
+
+### Summary
+21 cycles since last review. Chat navigation shipped — "show me my weight chart" switches tabs via AI chat. Static overrides for common phrases, LLM tool for natural variations. Chat panel collapses on navigation. 962 tests (+16). 1/4 sprint items shipped (P0).
+
+### Key Achievement
+Every major app screen is now navigable through AI chat. The AI-first promise is complete: users can log, query, plan, and navigate entirely through conversation.
+
+### Key Concern
+Sprint velocity continues at 1/4. Items 2-4 not started. Tight 4-item scope is correct but execution needs to start on P1s earlier.
+
+### Competitive Alert
+No competitor offers on-device AI chat navigation. MFP/Whoop/Strong all require manual tab tapping. Our conversational AI moat deepens with each feature that bypasses traditional UI.
+
+---
+
 ## Review #23 — 2026-04-12 (Cycle 785)
 
 ### Summary

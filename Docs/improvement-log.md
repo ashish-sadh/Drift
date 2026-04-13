@@ -4,6 +4,8 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 
 ---
 
+**Cycle 806** — feat: chat navigation — "show me my weight chart" switches tabs. Static overrides + LLM navigate_to tool. 16 tests. 962 total.
+
 ## Cycle · 2026-04-12 (Autopilot session, sprint post-review #18)
 
 - **Muscle group icons (P2)**: Workout history cards now show body part chips (Chest, Back, Legs, etc.) with SF Symbol icons. Visual polish toward Boostcamp parity.

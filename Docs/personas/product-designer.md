@@ -103,6 +103,10 @@
 - Chat navigation is the last major parity gap in the AI-first story. Every action users take by tapping tabs should be reachable by saying it in chat. Implementation is half-done — finish it.
 - Sprint velocity pattern is persistent: 1/6 shipped. Scope to 4 items max. One large P0 is a full sprint.
 
+### What I Learned — Review #24 (Cycle 806, 2026-04-12)
+- Chat navigation shipped and closes the AI-first loop. Every major app action is now conversational. This is what "AI-first" means — not just logging through chat, but navigating, querying, and controlling the entire app through conversation.
+- The layered approach (static overrides for speed, LLM tool for flexibility) is the pattern to replicate for future AI features. Users get instant response for common phrases and intelligent handling for edge cases.
+
 ## Preferences & Style
 - Prefer opinionated design over configurability — make good defaults, don't add settings
 - Prefer chat-first interactions — every feature should be reachable from conversation

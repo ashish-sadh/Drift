@@ -107,6 +107,10 @@
 - Added `openBarcodeScanner` to ToolAction to fix a pre-existing hack (barcode used `.navigate(tab: 0)` as placeholder). Compiler exhaustive switch catches all callsites. Clean separation of concerns.
 - Static overrides + LLM tool is the right layered approach for navigation: deterministic for common phrases, LLM for natural language variations. Same tier pattern as food logging.
 
+### What I Learned — Review #24 (Cycle 806, 2026-04-12)
+- NotificationCenter for cross-overlay tab switching validated in practice. The navigate notification fires from AIChatView, ContentView updates selectedTab, FloatingAIAssistant collapses. Three components, zero shared state, one notification.
+- ToolAction enum growing (6 cases) is manageable because Swift compiler enforces exhaustive switches. No missed callsites. The enum is the right abstraction for UI actions triggered by AI tools.
+
 ## Preferences & Approach
 - Prefer boring, proven solutions over clever abstractions
 - Prefer fixing patterns over fixing instances (fix the stale-preference pattern, not just one ViewModel)
