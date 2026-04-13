@@ -141,6 +141,11 @@
 - `attachToolCards` pattern (check toolsCalled, fetch current service data) keeps the tool pipeline unchanged while adding card creation at the consumption point. Scales to glucose/biomarkers trivially.
 - 6 optional card fields on ChatMessage is approaching the threshold. If we add 3 more, consider a `ConfirmationCard` enum with associated values. Not urgent yet.
 
+### What I Learned — Review #31 (Cycle 1088, 2026-04-13)
+- `attachToolCards` pattern scaled cleanly from 4→8 card types without touching tool pipeline. Architecture is sound. Next threshold: if we exceed 10 card types, migrate to `ConfirmationCard` enum with associated values.
+- 981 tests with 19 new card-specific tests. Coverage on new code is solid. The boy scout rule + coverage gate workflow is maintaining quality without dedicated coverage sprints.
+- Food search pipeline (SpellCorrectService + ranked search + synonym expansion + USDA fallback) is well-layered but has no telemetry on search misses. Adding a `search_miss` table is the lowest-risk, highest-value infrastructure investment for food DB quality.
+
 ## Preferences & Approach
 - Prefer boring, proven solutions over clever abstractions
 - Prefer fixing patterns over fixing instances (fix the stale-preference pattern, not just one ViewModel)
