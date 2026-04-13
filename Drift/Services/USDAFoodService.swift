@@ -2,7 +2,9 @@ import Foundation
 
 /// Fetches nutrition data from USDA FoodData Central.
 /// Free API, no key required for basic access (~300K foods).
+/// Rate limited: max 1 request/sec, max 50 per session.
 /// https://fdc.nal.usda.gov/api-guide.html
+@MainActor
 enum USDAFoodService {
 
     struct FoodItem: Sendable {
@@ -15,7 +17,23 @@ enum USDAFoodService {
         let servingSizeG: Double
     }
 
+    private static let maxRequestsPerSession = 50
+    private static var sessionRequestCount = 0
+    private static var lastRequestTime: Date?
+
     static func search(query: String, limit: Int = 8) async throws -> [FoodItem] {
+        // Rate limiting: max 50 requests per session
+        guard sessionRequestCount < maxRequestsPerSession else { return [] }
+
+        // Throttle: minimum 1 second between requests
+        if let last = lastRequestTime {
+            let elapsed = Date().timeIntervalSince(last)
+            if elapsed < 1.0 {
+                try await Task.sleep(for: .milliseconds(Int((1.0 - elapsed) * 1000)))
+            }
+        }
+        sessionRequestCount += 1
+        lastRequestTime = Date()
         let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
         let urlString = "https://api.nal.usda.gov/fdc/v1/foods/search?query=\(encoded)&pageSize=\(limit)&dataType=Foundation,SR%20Legacy&api_key=DEMO_KEY"
         guard let url = URL(string: urlString) else { return [] }

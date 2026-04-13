@@ -70,4 +70,13 @@ enum Preferences {
         get { UserDefaults.standard.bool(forKey: aiEnabledKey) }
         set { UserDefaults.standard.set(newValue, forKey: aiEnabledKey) }
     }
+
+    private static let onlineFoodSearchKey = "drift_online_food_search"
+
+    /// When enabled, food search queries are sent to USDA and Open Food Facts APIs
+    /// when local results are insufficient. Default: OFF (privacy-first).
+    static var onlineFoodSearchEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: onlineFoodSearchKey) }
+        set { UserDefaults.standard.set(newValue, forKey: onlineFoodSearchKey) }
+    }
 }

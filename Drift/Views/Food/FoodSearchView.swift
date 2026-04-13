@@ -45,9 +45,9 @@ struct FoodSearchView: View {
                             results = localResults
                             matchingRecipes = q.isEmpty ? [] : FoodService.searchRecipes(query: q)
                             onlineResults = []
-                            // Smart trigger: search online when local results are insufficient
+                            // Smart trigger: search online when local results are insufficient (opt-in only)
                             onlineSearchTask?.cancel()
-                            if q.count >= 3 && results.count < 5 {
+                            if Preferences.onlineFoodSearchEnabled && q.count >= 3 && results.count < 5 {
                                 onlineSearchTask = Task {
                                     try? await Task.sleep(for: .milliseconds(500))
                                     guard !Task.isCancelled else { return }

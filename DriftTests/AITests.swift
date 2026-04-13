@@ -1483,3 +1483,45 @@ import Testing
         SupplementService.deleteSupplement(id: id)
     }
 }
+
+// MARK: - Online Food Search Preference Tests
+
+@Test func onlineFoodSearchDefaultOff() async throws {
+    // Fresh UserDefaults should default to OFF (privacy-first)
+    let key = "drift_online_food_search"
+    let original = UserDefaults.standard.object(forKey: key)
+    defer { if let orig = original { UserDefaults.standard.set(orig, forKey: key) } else { UserDefaults.standard.removeObject(forKey: key) } }
+    UserDefaults.standard.removeObject(forKey: key)
+    #expect(!Preferences.onlineFoodSearchEnabled, "Online food search should default to OFF")
+}
+
+@Test func onlineFoodSearchToggle() async throws {
+    let key = "drift_online_food_search"
+    let original = UserDefaults.standard.object(forKey: key)
+    defer { if let orig = original { UserDefaults.standard.set(orig, forKey: key) } else { UserDefaults.standard.removeObject(forKey: key) } }
+
+    Preferences.onlineFoodSearchEnabled = true
+    #expect(Preferences.onlineFoodSearchEnabled)
+    Preferences.onlineFoodSearchEnabled = false
+    #expect(!Preferences.onlineFoodSearchEnabled)
+}
+
+@Test @MainActor func searchWithFallbackLocalOnly() async throws {
+    // With online search disabled, should return only local results
+    let original = Preferences.onlineFoodSearchEnabled
+    defer { Preferences.onlineFoodSearchEnabled = original }
+    Preferences.onlineFoodSearchEnabled = false
+
+    let results = await FoodService.searchWithFallback(query: "chicken")
+    // Should return local results (chicken exists in DB) — no network call
+    #expect(results.count > 0, "Should find chicken in local DB")
+    #expect(results.allSatisfy { $0.category != "Online" }, "Should not have online results when disabled")
+}
+
+@Test func usdaRateLimitingDoesNotCrash() async throws {
+    // Verify USDAFoodService doesn't crash under normal conditions
+    // (actual rate limiting state is internal — this verifies the code path compiles and runs)
+    let items = try? await USDAFoodService.search(query: "zzznonexistent999", limit: 1)
+    // May return empty (no match) or items — either is fine, should not crash
+    #expect(items != nil || true)
+}

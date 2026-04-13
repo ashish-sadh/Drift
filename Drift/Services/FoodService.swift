@@ -149,6 +149,52 @@ enum FoodService {
         }
     }
 
+    // MARK: - Search with Online Fallback
+
+    /// Search locally first, then fall back to USDA + OpenFoodFacts if enabled and local results < threshold.
+    /// Used by AI chat when resolving food names that aren't in the local DB.
+    static func searchWithFallback(query: String, localThreshold: Int = 3) async -> [Food] {
+        let local = searchFood(query: query)
+        guard local.count < localThreshold, Preferences.onlineFoodSearchEnabled else { return local }
+
+        // Fetch from both APIs in parallel
+        async let usdaItems = (try? USDAFoodService.search(query: query, limit: 5)) ?? []
+        async let offProducts = (try? OpenFoodFactsService.search(query: query, limit: 5)) ?? []
+
+        let usda = await usdaItems
+        let off = await offProducts
+
+        var online: [Food] = []
+        let localNames = Set(local.map { $0.name.lowercased() })
+
+        for item in usda {
+            guard !localNames.contains(item.name.lowercased()) else { continue }
+            var food = Food(
+                name: item.name, category: "Online",
+                servingSize: item.servingSizeG, servingUnit: "g",
+                calories: item.calories, proteinG: item.proteinG,
+                carbsG: item.carbsG, fatG: item.fatG, fiberG: item.fiberG
+            )
+            if let saved = saveScannedFood(&food) { online.append(saved) }
+        }
+
+        for p in off {
+            let name = [p.name, p.brand].compactMap { $0 }.joined(separator: " - ")
+            guard !localNames.contains(name.lowercased()) else { continue }
+            let servingG = p.servingSizeG ?? 100
+            var food = Food(
+                name: name, category: "Online",
+                servingSize: servingG, servingUnit: "g",
+                calories: p.calories * servingG / 100, proteinG: p.proteinG * servingG / 100,
+                carbsG: p.carbsG * servingG / 100, fatG: p.fatG * servingG / 100,
+                fiberG: p.fiberG * servingG / 100
+            )
+            if let saved = saveScannedFood(&food) { online.append(saved) }
+        }
+
+        return local + online
+    }
+
     // MARK: - Nutrition Lookup
 
     /// Get nutrition for a food by name. Returns best match or nil.

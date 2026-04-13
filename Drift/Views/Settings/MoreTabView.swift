@@ -122,7 +122,7 @@ struct MoreTabView: View {
                             Text("Your data stays on your device")
                                 .font(.caption.weight(.medium))
                         }
-                        Text("Drift stores all data locally on your iPhone and Apple Health. No accounts, no cloud, no tracking. Barcode lookups use Open Food Facts (open-source) and only send the barcode number.")
+                        Text("Drift stores all data locally on your iPhone and Apple Health. No accounts, no cloud, no tracking. Barcode lookups send only the barcode number. Online food search (opt-in) sends food search terms to USDA and Open Food Facts — no personal data.")
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
                             .multilineTextAlignment(.center)
@@ -310,6 +310,31 @@ struct SettingsView: View {
                             Text("Export Food Logs (CSV)")
                             Spacer()
                         }
+                    }
+                }
+                .card()
+
+                // Online Food Search
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "globe")
+                            .foregroundStyle(Theme.accent).frame(width: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Online Food Search").font(.subheadline.weight(.medium))
+                            Text("Search USDA & Open Food Facts when local results are limited")
+                                .font(.caption2).foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        Toggle("", isOn: Binding(
+                            get: { Preferences.onlineFoodSearchEnabled },
+                            set: { Preferences.onlineFoodSearchEnabled = $0 }
+                        ))
+                        .labelsHidden().tint(Theme.accent)
+                    }
+                    if Preferences.onlineFoodSearchEnabled {
+                        Text("Only food search terms are sent — no personal data, no tracking.")
+                            .font(.caption2).foregroundStyle(.tertiary)
+                            .padding(.leading, 36)
                     }
                 }
                 .card()
