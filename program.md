@@ -105,7 +105,7 @@ LOOP FOREVER — do NOT stop between tickets:
 - All tests must pass before committing substantial changes (trivial: build-only is acceptable)
 - Run eval harness after every AI change — if scores drop, revert
 - If stuck after 2 attempts, revert, log failure reason, move to next item
-- TestFlight publishes automatically every 3 hours via hook. Follow the instructions when they appear.
+- **TestFlight publishing is MANDATORY.** The hook injects publish instructions after commits. When you see "TESTFLIGHT PUBLISH REQUIRED" — do it immediately. Do NOT skip it. Do NOT say "Autopilot mode exempts it." This applies to ALL autonomous sessions (Opus and Sonnet).
 - POC work on branches, not main
 - No MacroFactor references in code/UI. Privacy-first. No cloud.
 

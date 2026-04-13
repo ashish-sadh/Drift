@@ -11,7 +11,7 @@ Drift is an AI-first local health tracker. AI chat is the showstopper — the pr
 Human drives feature work. Read `Docs/sprint.md` for current tickets. Build, test, commit per ticket. You can publish TestFlight anytime. All hooks apply except TestFlight auto-publish.
 
 ### Mode 2: Autopilot
-Human says "run autopilot" in a session. Reads `program.md` and loops forever — features, bugs, UI, AI, tests, food DB, code quality (boy scout rule). Runs in foreground, Ctrl+C to stop. No watchdog, no auto-restart. All hooks apply except TestFlight auto-publish and daily exec reports.
+Human says "run autopilot" in a session. Reads `program.md` and loops forever — features, bugs, UI, AI, tests, food DB, code quality (boy scout rule). Runs in foreground, Ctrl+C to stop. No watchdog, no auto-restart.
 
 ### Mode 3: Drift Control (Watchdog-Managed)
 Fully autonomous background operation. The watchdog (`scripts/self-improve-watchdog.sh`) launches Autopilot, restarts on crash/stall, enforces TestFlight every 3h with pre-flight, generates daily exec report PRs, runs product reviews every 20 cycles. Start with "start drift control".
