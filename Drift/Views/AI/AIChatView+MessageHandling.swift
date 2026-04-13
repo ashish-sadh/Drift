@@ -528,6 +528,7 @@ extension AIChatView {
         guard let intent = AIActionExecutor.parseFoodIntent(resolved) else { return false }
         foodSearchQuery = intent.query
         foodSearchServings = intent.servings
+        foodSearchMealType = intent.mealHint.flatMap { MealType(rawValue: $0) }
         if let match = AIActionExecutor.findFood(query: intent.query, servings: intent.servings, gramAmount: intent.gramAmount) {
             let f = match.food
             let s = match.servings
@@ -658,6 +659,7 @@ extension AIChatView {
                 let food = suggestions[num - 1]
                 foodSearchQuery = food.name
                 foodSearchServings = 1.0
+                foodSearchMealType = MealType(rawValue: mealName)
                 let card = FoodCardData(
                     name: food.name, calories: Int(food.calories),
                     proteinG: Int(food.proteinG), carbsG: Int(food.carbsG),
@@ -706,6 +708,7 @@ extension AIChatView {
             if let intent = AIActionExecutor.parseFoodIntent(lower) {
                 foodSearchQuery = intent.query
                 foodSearchServings = intent.servings
+                foodSearchMealType = MealType(rawValue: mealName)
                 if let match = AIActionExecutor.findFood(query: intent.query, servings: intent.servings, gramAmount: intent.gramAmount) {
                     let f = match.food
                     let s = match.servings

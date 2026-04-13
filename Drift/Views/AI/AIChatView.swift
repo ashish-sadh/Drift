@@ -12,6 +12,7 @@ struct AIChatView: View {
     @State var showingFoodSearch = false
     @State var foodSearchQuery = ""
     @State var foodSearchServings: Double? = nil
+    @State var foodSearchMealType: MealType? = nil
     @State var showingWorkout = false
     @State var workoutTemplate: WorkoutTemplate? = nil
     @State var convState = ConversationState.shared
@@ -160,7 +161,7 @@ struct AIChatView: View {
         }
         .sheet(isPresented: $showingFoodSearch) {
             NavigationStack {
-                FoodSearchView(viewModel: FoodLogViewModel(), initialQuery: foodSearchQuery, initialServings: foodSearchServings)
+                FoodSearchView(viewModel: FoodLogViewModel(), initialQuery: foodSearchQuery, initialServings: foodSearchServings, initialMealType: foodSearchMealType)
             }
         }
         .sheet(isPresented: $showingWorkout) {

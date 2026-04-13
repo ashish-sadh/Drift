@@ -4,6 +4,7 @@ struct FoodSearchView: View {
     @Bindable var viewModel: FoodLogViewModel
     var initialQuery: String = ""
     var initialServings: Double? = nil
+    var initialMealType: MealType? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var selectedFood: Food?
     @State private var amount = "1"
@@ -23,6 +24,8 @@ struct FoodSearchView: View {
     @State private var isSearchingOnline = false
     @State private var onlineSearchTask: Task<Void, Never>?
     @FocusState private var searchFocused: Bool
+
+    private var effectiveMealType: MealType { initialMealType ?? viewModel.autoMealType }
 
     var body: some View {
         NavigationStack {
@@ -211,7 +214,8 @@ struct FoodSearchView: View {
             }.buttonStyle(.plain)
 
             Button {
-                viewModel.quickLogFood(food)
+                let lastUsed = viewModel.recentEntries.first(where: { $0.name == food.name })?.lastServings ?? 1
+                viewModel.logFood(food, servings: lastUsed, mealType: effectiveMealType)
                 viewModel.loadSuggestions()
                 loggedCount += 1
                 dismiss()
@@ -273,7 +277,7 @@ struct FoodSearchView: View {
                     viewModel.quickAdd(name: entry.name, calories: entry.calories,
                                        proteinG: entry.proteinG, carbsG: entry.carbsG,
                                        fatG: entry.fatG, fiberG: 0,
-                                       mealType: viewModel.autoMealType)
+                                       mealType: effectiveMealType)
                 }
                 viewModel.loadSuggestions()
                 loggedCount += 1
@@ -349,7 +353,7 @@ struct FoodSearchView: View {
                             viewModel.quickAdd(name: recipe.name, calories: recipe.calories,
                                                proteinG: recipe.proteinG, carbsG: recipe.carbsG,
                                                fatG: recipe.fatG, fiberG: recipe.fiberG,
-                                               mealType: viewModel.autoMealType)
+                                               mealType: effectiveMealType)
                             viewModel.loadSuggestions()
                             loggedCount += 1
                         } label: {

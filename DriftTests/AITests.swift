@@ -328,6 +328,25 @@ import Testing
     #expect(intents == nil)
 }
 
+// MARK: - Meal Hint Extraction
+
+@Test func aiFoodIntentMealHintAllMeals() async throws {
+    let lunch = AIActionExecutor.parseFoodIntent("log eggs for lunch")
+    #expect(lunch?.mealHint == "lunch")
+    #expect(lunch?.query == "eggs")
+
+    let snack = AIActionExecutor.parseFoodIntent("had chips for snack")
+    #expect(snack?.mealHint == "snack")
+
+    // No meal hint — should be nil
+    let plain = AIActionExecutor.parseFoodIntent("log banana")
+    #expect(plain?.mealHint == nil)
+
+    // Multi-food also strips meal suffix
+    let multi = AIActionExecutor.parseMultiFoodIntent("log rice and dal for dinner")
+    #expect(multi != nil, "Multi-food should parse after stripping meal suffix")
+}
+
 // MARK: - Chain-of-Thought Tests
 
 @Test @MainActor func aiChainOfThoughtWeightQuery() async throws {
