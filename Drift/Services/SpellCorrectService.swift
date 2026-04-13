@@ -74,6 +74,65 @@ enum SpellCorrectService {
         "squatt": "squat", "sqaut": "squat",
     ]
 
+    // MARK: - Synonym Expansion
+
+    /// Regional and colloquial synonyms → canonical food DB terms.
+    /// Maps alternate names to what appears in the food database.
+    private static let synonyms: [String: String] = [
+        // Indian / Hindi
+        "aloo": "potato", "alu": "potato", "batata": "potato",
+        "gobi": "cauliflower", "gobhi": "cauliflower",
+        "palak": "spinach", "saag": "spinach",
+        "curd": "yogurt", "dahi": "yogurt", "raita": "yogurt",
+        "atta": "wheat flour", "maida": "refined flour",
+        "ghee": "ghee", "makhan": "butter",
+        "jeera": "cumin", "haldi": "turmeric",
+        "mirch": "chili", "mirchi": "chili",
+        "baigan": "eggplant", "baingan": "eggplant", "brinjal": "eggplant",
+        "bhindi": "okra", "ladyfinger": "okra",
+        "rajma": "kidney beans", "chana": "chickpeas", "chole": "chickpeas",
+        "moong": "mung", "masoor": "lentil", "urad": "black gram",
+        "poha": "flattened rice", "upma": "semolina",
+        "paratha": "paratha", "puri": "puri", "kulcha": "kulcha",
+        "lassi": "lassi", "chaas": "buttermilk", "nimbu pani": "lemon water",
+        // Common abbreviations
+        "pb": "peanut butter", "oj": "orange juice", "evoo": "olive oil",
+        "pb&j": "peanut butter jelly", "pbj": "peanut butter jelly",
+        // American / colloquial
+        "fries": "french fries", "tots": "tater tots",
+        "za": "pizza", "avo": "avocado",
+        "oats": "oatmeal", "granola": "granola",
+        // British English
+        "aubergine": "eggplant", "courgette": "zucchini",
+        "rocket": "arugula", "coriander": "cilantro",
+        "chips": "french fries", "crisps": "potato chips",
+        "mince": "ground beef", "prawns": "shrimp",
+    ]
+
+    /// Expand query with synonyms. Returns expanded query if any word has a synonym.
+    static func expandSynonyms(_ text: String) -> String {
+        let words = text.lowercased().split(separator: " ").map(String.init)
+        var expanded = words
+        var changed = false
+
+        for (i, word) in words.enumerated() {
+            if let syn = synonyms[word], syn != word {
+                expanded[i] = syn
+                changed = true
+            }
+        }
+
+        // Also try multi-word synonyms (e.g., "nimbu pani")
+        let lower = text.lowercased()
+        for (key, value) in synonyms where key.contains(" ") {
+            if lower.contains(key) {
+                return lower.replacingOccurrences(of: key, with: value)
+            }
+        }
+
+        return changed ? expanded.joined(separator: " ") : text
+    }
+
     /// Correct spelling. Checks hardcoded first, then fuzzy-matches against food DB.
     static func correct(_ text: String) -> String {
         let words = text.components(separatedBy: " ")

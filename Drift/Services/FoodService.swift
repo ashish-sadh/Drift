@@ -13,6 +13,17 @@ enum FoodService {
         let corrected = SpellCorrectService.correct(query)
         var results = (try? AppDatabase.shared.searchFoodsRanked(query: corrected)) ?? []
 
+        // Synonym expansion: if "curd" → "yogurt", merge those results too
+        let expanded = SpellCorrectService.expandSynonyms(corrected)
+        if expanded != corrected {
+            let extraResults = (try? AppDatabase.shared.searchFoodsRanked(query: expanded)) ?? []
+            let existingIds = Set(results.compactMap(\.id))
+            results.append(contentsOf: extraResults.filter { food in
+                guard let id = food.id else { return true }
+                return !existingIds.contains(id)
+            })
+        }
+
         // Time-of-day boost: re-rank top results based on meal type
         let hour = Calendar.current.component(.hour, from: Date())
         let boostKeywords: [String]

@@ -896,6 +896,27 @@ import Testing
     #expect(!results.isEmpty, "SpellCorrect should fix chiken → chicken")
 }
 
+@Test func synonymExpansionBasic() {
+    // Single-word synonyms
+    #expect(SpellCorrectService.expandSynonyms("curd") == "yogurt")
+    #expect(SpellCorrectService.expandSynonyms("aloo") == "potato")
+    #expect(SpellCorrectService.expandSynonyms("gobi") == "cauliflower")
+    #expect(SpellCorrectService.expandSynonyms("palak") == "spinach")
+    #expect(SpellCorrectService.expandSynonyms("aubergine") == "eggplant")
+    // Compound queries
+    #expect(SpellCorrectService.expandSynonyms("aloo gobi") == "potato cauliflower")
+    // No-op for already correct terms
+    #expect(SpellCorrectService.expandSynonyms("chicken") == "chicken")
+    #expect(SpellCorrectService.expandSynonyms("rice") == "rice")
+}
+
+@Test @MainActor func synonymSearchFindsFood() async throws {
+    // "curd" should find yogurt items via synonym expansion
+    let results = FoodService.searchFood(query: "curd")
+    let hasYogurt = results.contains(where: { $0.name.lowercased().contains("yogurt") })
+    #expect(hasYogurt, "Synonym 'curd' should find yogurt foods")
+}
+
 @Test @MainActor func foodServiceFindByName() async throws {
     let found = FoodService.findByName("banana")
     #expect(found != nil, "banana should be in DB")
