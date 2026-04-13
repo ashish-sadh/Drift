@@ -42,6 +42,8 @@ final class AIChatViewModel {
         var weightCard: WeightCardData?
         var workoutCard: WorkoutCardData?
         var navigationCard: NavigationCardData?
+        var supplementCard: SupplementCardData?
+        var sleepCard: SleepCardData?
         let createdAt = Date()
         enum Role { case user, assistant }
     }
@@ -72,5 +74,22 @@ final class AIChatViewModel {
         let destination: String
         let icon: String
         let tab: Int
+    }
+
+    struct SupplementCardData {
+        let taken: Int
+        let total: Int
+        let remaining: [String]
+        let action: String?  // e.g. "Marked Creatine as taken"
+    }
+
+    struct SleepCardData {
+        let sleepHours: Double?
+        let remHours: Double?
+        let deepHours: Double?
+        let recoveryScore: Int?
+        let hrvMs: Int?
+        let restingHR: Int?
+        let readiness: String?
     }
 }

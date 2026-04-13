@@ -318,6 +318,12 @@ struct AIChatView: View {
                 if let card = msg.navigationCard {
                     navigationConfirmationCard(card)
                 }
+                if let card = msg.supplementCard {
+                    supplementConfirmationCard(card)
+                }
+                if let card = msg.sleepCard {
+                    sleepConfirmationCard(card)
+                }
             }
             .accessibilityLabel(msg.role == .user ? "You said: \(msg.text)" : "Assistant: \(msg.text)")
 
@@ -466,5 +472,134 @@ struct AIChatView: View {
             RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(Theme.accent.opacity(0.2), lineWidth: 0.5)
         )
+    }
+
+    // MARK: - Supplement Confirmation Card
+
+    private func supplementConfirmationCard(_ card: AIChatViewModel.SupplementCardData) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "pills.fill")
+                    .font(.caption).foregroundStyle(Theme.accent)
+                if let action = card.action {
+                    Text(action)
+                        .font(.caption.weight(.semibold))
+                        .lineLimit(1)
+                } else {
+                    Text("Supplements")
+                        .font(.caption.weight(.semibold))
+                }
+                Spacer()
+                Text("\(card.taken)/\(card.total)")
+                    .font(.caption2.weight(.bold).monospacedDigit())
+                    .foregroundStyle(card.taken == card.total ? .green : Theme.accent)
+            }
+
+            if !card.remaining.isEmpty {
+                HStack(spacing: 4) {
+                    Image(systemName: "circle")
+                        .font(.system(size: 6)).foregroundStyle(.tertiary)
+                    Text("Need: \(card.remaining.joined(separator: ", "))")
+                        .font(.caption2).foregroundStyle(.secondary)
+                        .lineLimit(2)
+                }
+            } else {
+                HStack(spacing: 4) {
+                    Image(systemName: "checkmark.circle.fill")
+                        .font(.caption).foregroundStyle(.green)
+                    Text("All done for today")
+                        .font(.caption2).foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(10)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Theme.accent.opacity(0.2), lineWidth: 0.5)
+        )
+    }
+
+    // MARK: - Sleep & Recovery Card
+
+    private func sleepConfirmationCard(_ card: AIChatViewModel.SleepCardData) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "moon.fill")
+                    .font(.caption).foregroundStyle(.indigo)
+                Text("Sleep & Recovery")
+                    .font(.caption.weight(.semibold))
+                Spacer()
+                if let readiness = card.readiness {
+                    Text(readiness)
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(readinessColor(readiness))
+                }
+            }
+
+            HStack(spacing: 0) {
+                if let hours = card.sleepHours {
+                    VStack(spacing: 2) {
+                        Text(String(format: "%.1f", hours))
+                            .font(.subheadline.weight(.bold).monospacedDigit())
+                            .foregroundStyle(.indigo)
+                        Text("hours").font(.system(size: 9)).foregroundStyle(.tertiary)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+
+                if let score = card.recoveryScore, score > 0 {
+                    VStack(spacing: 2) {
+                        Text("\(score)")
+                            .font(.subheadline.weight(.bold).monospacedDigit())
+                            .foregroundStyle(score >= 70 ? .green : score >= 40 ? .orange : .red)
+                        Text("recovery").font(.system(size: 9)).foregroundStyle(.tertiary)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+
+                if let hrv = card.hrvMs, hrv > 0 {
+                    VStack(spacing: 2) {
+                        Text("\(hrv)")
+                            .font(.subheadline.weight(.bold).monospacedDigit())
+                            .foregroundStyle(Theme.accent)
+                        Text("HRV ms").font(.system(size: 9)).foregroundStyle(.tertiary)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+
+                if let rhr = card.restingHR, rhr > 0 {
+                    VStack(spacing: 2) {
+                        Text("\(rhr)")
+                            .font(.subheadline.weight(.bold).monospacedDigit())
+                            .foregroundStyle(Theme.proteinRed)
+                        Text("RHR").font(.system(size: 9)).foregroundStyle(.tertiary)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+
+            if let rem = card.remHours, let deep = card.deepHours {
+                HStack(spacing: 12) {
+                    Label(String(format: "%.1fh REM", rem), systemImage: "brain.head.profile")
+                        .font(.caption2).foregroundStyle(.secondary)
+                    Label(String(format: "%.1fh deep", deep), systemImage: "bed.double.fill")
+                        .font(.caption2).foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(10)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Color.indigo.opacity(0.2), lineWidth: 0.5)
+        )
+    }
+
+    private func readinessColor(_ readiness: String) -> Color {
+        if readiness.contains("Good") { return .green }
+        if readiness.contains("Moderate") { return .orange }
+        if readiness.contains("Low") { return .red }
+        return .secondary
     }
 }

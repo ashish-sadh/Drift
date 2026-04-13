@@ -1015,6 +1015,7 @@ extension AIChatViewModel {
                     messages.remove(at: idx)
                 } else {
                     messages[idx].text = output.text
+                    attachToolCards(to: &messages[idx], toolsCalled: output.toolsCalled)
                 }
             }
             streamingMessageId = nil
@@ -1062,6 +1063,54 @@ extension AIChatViewModel {
                     messages.append(ChatMessage(role: .assistant, text: "Opening \(label)...", navigationCard: card))
                     NotificationCenter.default.post(name: .navigateToTab, object: nil, userInfo: ["tab": tab])
                 }
+            }
+        }
+    }
+
+    // MARK: - Tool Card Attachment
+
+    /// After LLM tool execution, attach structured cards based on which tools ran.
+    private func attachToolCards(to message: inout ChatMessage, toolsCalled: [String]) {
+        let tools = Set(toolsCalled)
+
+        // Supplement card — for status, mark, or add
+        if !tools.isDisjoint(with: ["supplements", "mark_supplement", "add_supplement"]) {
+            let today = DateFormatters.todayString
+            let supplements = (try? AppDatabase.shared.fetchActiveSupplements()) ?? []
+            let logs = (try? AppDatabase.shared.fetchSupplementLogs(for: today)) ?? []
+            let takenIds = Set(logs.filter(\.taken).compactMap(\.supplementId))
+            let remaining = supplements.filter { !takenIds.contains($0.id ?? 0) }.map(\.name)
+
+            let action: String? = tools.contains("mark_supplement") || tools.contains("add_supplement")
+                ? message.text.components(separatedBy: "\n").first
+                : nil
+
+            message.supplementCard = SupplementCardData(
+                taken: takenIds.count,
+                total: supplements.count,
+                remaining: remaining,
+                action: action
+            )
+        }
+
+        // Sleep & recovery card
+        if tools.contains("sleep_recovery") {
+            if let data = AIDataCache.shared.sleep {
+                let readiness: String? = {
+                    if data.recoveryScore >= 70 { return "Good to train" }
+                    if data.recoveryScore >= 40 { return "Moderate" }
+                    if data.recoveryScore > 0 { return "Low recovery" }
+                    return nil
+                }()
+                message.sleepCard = SleepCardData(
+                    sleepHours: data.sleepHours > 0 ? data.sleepHours : nil,
+                    remHours: data.sleepDetail?.remHours,
+                    deepHours: data.sleepDetail?.deepHours,
+                    recoveryScore: data.recoveryScore > 0 ? data.recoveryScore : nil,
+                    hrvMs: data.hrvMs > 0 ? Int(data.hrvMs) : nil,
+                    restingHR: data.restingHR > 0 ? Int(data.restingHR) : nil,
+                    readiness: readiness
+                )
             }
         }
     }
