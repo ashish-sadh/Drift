@@ -115,6 +115,21 @@ final class AIEvalHarness: XCTestCase {
     }
 
     @MainActor
+    func testInlineMacrosCarbFatNotGreedy() {
+        // "400 cal" should NOT be parsed as 400 carbs (the "c" in "cal" was matching carb regex)
+        let result = StaticOverrides.match("log 400 cal 30g protein lunch")
+        XCTAssertNotNil(result, "Should match as inline macros")
+
+        // With explicit carbs and fat: "log 400 cal 30g protein 50 carbs 20 fat"
+        let result2 = StaticOverrides.match("log 400 cal 30g protein 50 carbs 20 fat")
+        XCTAssertNotNil(result2, "Should match with explicit carbs and fat")
+
+        // "30 for lunch" should NOT parse 30 as fat (the "f" in "for" was matching fat regex)
+        let result3 = StaticOverrides.match("log 400 cal 30g protein for lunch")
+        XCTAssertNotNil(result3, "Should match even with 'for' in input")
+    }
+
+    @MainActor
     func testStaticOverridesFalseNegatives() {
         // These should NOT be caught by StaticOverrides (should fall through to pipeline)
         let passThrough = [

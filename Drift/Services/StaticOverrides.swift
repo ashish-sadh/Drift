@@ -221,11 +221,11 @@ enum StaticOverrides {
             // Extract optional carbs and fat
             var carbs = 0.0
             var fat = 0.0
-            let carbPat = #"(\d+)\s*(?:g\s*)?(?:c(?:arbs?)?)"#
+            let carbPat = #"(\d+)\s*(?:g\s*)?carbs?"#
             if let cRegex = try? NSRegularExpression(pattern: carbPat),
                let cMatch = cRegex.firstMatch(in: lower, range: NSRange(lower.startIndex..., in: lower)),
                let cRange = Range(cMatch.range(at: 1), in: lower) { carbs = Double(String(lower[cRange])) ?? 0 }
-            let fatPat = #"(\d+)\s*(?:g\s*)?(?:f(?:at)?)"#
+            let fatPat = #"(\d+)\s*(?:g\s*)?fat"#
             if let fRegex = try? NSRegularExpression(pattern: fatPat),
                let fMatch = fRegex.firstMatch(in: lower, range: NSRange(lower.startIndex..., in: lower)),
                let fRange = Range(fMatch.range(at: 1), in: lower) { fat = Double(String(lower[fRange])) ?? 0 }
