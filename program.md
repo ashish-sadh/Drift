@@ -31,18 +31,7 @@ You are the Product Designer + Principal Engineer. This is a replanning session.
      - Deferred → "Noted — adding to backlog. Will revisit in Review #N."
    - Create sprint-task Issues from actionable feedback
 3. **Read open bugs:** `gh issue list --state open --label bug`
-4. **Design docs:**
-   - `gh issue list --state open --label design-doc` → for each pending request (no PR yet):
-     - `git checkout -b design/SHORT-NAME`
-     - Write doc in `Docs/designs/SHORT-NAME.md` with sections: Problem, Proposal, UX Flow, Technical Approach, Edge Cases, Open Questions
-     - Commit, push, `gh pr create --label design-doc --body "Design doc for #N"`, reference the original Issue
-     - `git checkout main`
-   - `gh pr list --label design-doc --state open` → for each open design-doc PR:
-     - Respond to comments, revise doc if needed
-     - If approved (`approved` label): create implementation Issues, merge PR, close original Issue
-   - **Create SENIOR sprint-task Issues for ongoing design reviews:**
-     - For each open design-doc PR that needs review/revision: `gh issue create --label sprint-task --label SENIOR --title "Design Review: [doc title]" --body "Steward design doc PR #N. Respond to feedback, revise, seek approval. Close this when PR is approved+merged or closed."`
-     - This makes design reviews visible on the sprint dashboard and picked up by senior sessions
+4. **Design docs:** Review open design-doc Issues and PRs (senior handles these directly during execution, no separate sprint-task needed)
 5. **Feature requests** — capture ideas the PE/Product Designer personas generate during review:
    - Create Issues for promising features: `gh issue create --label feature-request --title "Feature: ..." --body "Problem: ...\nProposal: ...\nPriority rationale: ..."`
    - Only create for ideas worth exploring — not every thought, just the ones that advance the roadmap
@@ -78,16 +67,18 @@ You are the senior engineer AND the PE (Principal Engineer). Execute complex tas
 1. Re-read steering notes. Stop if override says STOP.
 2. **P0 bugs first:** `gh issue list --state open --label P0` → fix these before anything else
 3. **P0 feature requests:** `gh issue list --state open --label feature-request --label P0` → create sprint-task Issue (SENIOR) for it immediately, add to current sprint
-4. **Pick next SENIOR sprint-task:** `gh issue list --state open --label sprint-task --label SENIOR` → read the spec → execute
-   - This includes "Design Review: ..." tasks created during planning — treat them like any other SENIOR task
-   - For design reviews: respond to PR feedback, revise doc, seek approval. Close the sprint-task when PR is approved+merged or closed.
-5. **Mark in-progress:** `gh issue edit {N} --add-label in-progress` (shows on Command Center dashboard)
-6. **Before editing any file: READ it first.** Understand types, signatures, imports. Never edit blind.
-7. **Boy scout rule:** Clean what you touch. Read `Docs/principles/` for guidance.
-8. Build → test → commit → push
-9. **Close the Issue with a comment:** what was fixed + commit hash. Remove label: `gh issue edit {N} --remove-label in-progress`. Never close silently.
-10. **Can create max 3 new Issues per session** (SENIOR or JUNIOR) when discovering work.
-11. Repeat until no SENIOR/P0 issues left → exit. Watchdog restarts with Sonnet.
+4. **Design docs:** `gh issue list --state open --label design-doc` → for each:
+   - If no PR exists yet: write the doc using `Docs/designs/TEMPLATE.md` as the format, branch `design/SHORT-NAME`, create PR with `--label design-doc`, reference the original Issue
+   - If PR exists with unresolved comments: respond to feedback, revise doc, push
+   - If PR has `approved` label: create implementation Issues, merge PR, close original Issue
+5. **Pick next SENIOR sprint-task:** `gh issue list --state open --label sprint-task --label SENIOR` → read the spec → execute
+6. **Mark in-progress:** `gh issue edit {N} --add-label in-progress` (shows on Command Center dashboard)
+7. **Before editing any file: READ it first.** Understand types, signatures, imports. Never edit blind.
+8. **Boy scout rule:** Clean what you touch. Read `Docs/principles/` for guidance.
+9. Build → test → commit → push
+10. **Close the Issue with a comment:** what was fixed + commit hash. Remove label: `gh issue edit {N} --remove-label in-progress`. Never close silently.
+11. **Can create max 3 new Issues per session** (SENIOR or JUNIOR) when discovering work.
+12. Repeat until no SENIOR/P0/design-doc issues left → exit. Watchdog restarts with Sonnet.
 
 ---
 
