@@ -163,132 +163,101 @@ extension AIChatViewModel {
 
     func sendMessage() {
         var text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
-        // Cap input length to preserve context budget
         if text.count > 300 { text = String(text.prefix(300)) }
         guard !text.isEmpty, !isGenerating else { return }
         inputText = ""
-
         messages.append(ChatMessage(role: .user, text: text))
 
         let lower = text.lowercased()
 
-        // --- Static overrides (both models): greetings, thanks, help, emoji, rule engine ---
-        if let staticResult = StaticOverrides.match(lower) {
-            switch staticResult {
-            case .response(let text):
-                messages.append(ChatMessage(role: .assistant, text: text))
-                return
-            case .handler(let fn):
-                messages.append(ChatMessage(role: .assistant, text: fn()))
-                return
-            case .uiAction(let action, let msg):
-                switch action {
-                case .navigate(let tab):
-                    let (label, icon) = Self.tabMeta(tab)
-                    let card = NavigationCardData(destination: label, icon: icon, tab: tab)
-                    messages.append(ChatMessage(role: .assistant, text: msg ?? "Opening \(label)...", navigationCard: card))
-                    NotificationCenter.default.post(name: .navigateToTab, object: nil, userInfo: ["tab": tab])
-                case .openBarcodeScanner:
-                    if let msg { messages.append(ChatMessage(role: .assistant, text: msg)) }
-                    showingBarcodeScanner = true
-                default:
-                    if let msg { messages.append(ChatMessage(role: .assistant, text: msg)) }
-                }
-                return
-            case .toolCall(let call):
-                Task {
-                    let result = await ToolRegistry.shared.execute(call)
-                    if case .text(let text) = result {
-                        messages.append(ChatMessage(role: .assistant, text: text))
-                    }
-                }
-                return
-            }
-        }
-
-        // "done"/"start" with pending workout → open it
-        if lower == "done" || lower == "start" || lower == "let's go" || lower == "ready" || lower == "begin" {
-            if workoutTemplate != nil {
-                messages.append(ChatMessage(role: .assistant, text: "Starting workout!"))
-                pendingExercises = []
-                showingWorkout = true
-                return
-            }
-        }
-
-        // "yes" after confirmation → log the pending item
+        // Phase 1: Static overrides (greetings, help, rule engine)
+        if dispatchStaticOverride(lower) { return }
+        // Phase 2: Workout quick-start ("done", "start", "ready")
+        if handleWorkoutQuickStart(lower) { return }
+        // Phase 3: Confirmation ("yes" after weight/activity prompt)
         if handleConfirmation(lower) { return }
-
-        // --- View-state handlers (both models, need UI state) ---
-
-        // Delete/remove food: "remove the rice", "delete last entry", "undo"
+        // Phase 4: View-state handlers (delete, smart workout, template)
         if handleDeleteFood(lower) { return }
-
-        // "Start smart workout" / "surprise me" — build AI session from history
         if handleSmartWorkout(lower) { return }
-
-        // Direct template start: "start push day", "start legs", "let's do chest day"
         if handleTemplateStart(lower) { return }
-
-        // --- Multi-turn handlers (both models — BEFORE food parsers) ---
-
-        // Pending workout log: user listing exercises after "What exercises did you do?"
-        if handlePendingWorkout(lower) { return }
-
-        // Workout split builder: user responding during split design session
-        if handlePendingWorkoutSplit(lower) { return }
-
-        // Meal planning: user responding during iterative meal plan session
-        if handlePendingMealPlan(lower) { return }
-
-        // Meal continuation: "also add broccoli", "and some yogurt" after recipe was built
-        if handleMealContinuation(lower) { return }
-
-        // Pending meal: user listing food after "What did you have for lunch?"
-        if handlePendingMeal(lower, originalText: text) { return }
-
-        // Workout logging trigger: "log exercise", "log workout", "add exercise"
-        if handleWorkoutLoggingTrigger(lower) { return }
-
-        // --- Planning triggers ---
-
-        // "build me a PPL split", "design a workout split" → iterative workout design
+        // Phase 5: Multi-turn conversation state
+        if handleMultiTurnState(lower, originalText: text) { return }
+        // Phase 6: Planning triggers (split builder, meal planning)
         if handleWorkoutSplitTrigger(lower) { return }
-
-        // "plan my meals", "what should I eat today" → iterative suggestions
         if handleMealPlanningTrigger(lower) { return }
-
-        // --- Food intent parsing (both models — instant, no LLM needed) ---
-
-        // Meal logging: "log breakfast" → ask, "log breakfast 2 eggs and toast" → build directly
-        if handleMealLogging(lower) { return }
-
-        // Resolve pronouns from conversation context: "log it", "log that", "add this"
-        let resolved = resolvePronouns(lower)
-
-        // Multi-food intent: "log chicken and rice" → recipe builder with all items
-        if handleMultiFoodIntent(resolved) { return }
-
-        // Single food intent: "log 2 eggs", "ate avocado", "log 3 bananas"
-        if handleSingleFoodIntent(resolved) { return }
-
-        // Activity logging: "I did yoga", "went running for 30 min"
-        if handleActivityLogging(lower) { return }
-
-        // Weight intent: "I weigh 165", "weight is 75.2 kg"
-        if handleWeightIntent(lower) { return }
-
-        // Cheat meal — sets multi-turn state
-        if handleCheatMeal(lower) { return }
-
-        // Correction: "actually 3" after a food log
-        if handleCorrection(lower) { return }
-
-        // Multi-turn: AI asked "What did you eat?" and user replies with food name(s)
-        if handleEatQuestion(lower, originalText: text) { return }
-
-        // --- Unified AI pipeline (both models) ---
+        // Phase 7: Food & activity intent parsing
+        if handleFoodIntentParsing(lower, originalText: text) { return }
+        // Phase 8: AI pipeline fallback
         handleAIPipeline(text)
+    }
+
+    // MARK: - Phase Handlers
+
+    /// Phase 1: Dispatch static override results (greetings, thanks, help, emoji, rule engine).
+    private func dispatchStaticOverride(_ lower: String) -> Bool {
+        guard let staticResult = StaticOverrides.match(lower) else { return false }
+        switch staticResult {
+        case .response(let text):
+            messages.append(ChatMessage(role: .assistant, text: text))
+        case .handler(let fn):
+            messages.append(ChatMessage(role: .assistant, text: fn()))
+        case .uiAction(let action, let msg):
+            switch action {
+            case .navigate(let tab):
+                let (label, icon) = Self.tabMeta(tab)
+                let card = NavigationCardData(destination: label, icon: icon, tab: tab)
+                messages.append(ChatMessage(role: .assistant, text: msg ?? "Opening \(label)...", navigationCard: card))
+                NotificationCenter.default.post(name: .navigateToTab, object: nil, userInfo: ["tab": tab])
+            case .openBarcodeScanner:
+                if let msg { messages.append(ChatMessage(role: .assistant, text: msg)) }
+                showingBarcodeScanner = true
+            default:
+                if let msg { messages.append(ChatMessage(role: .assistant, text: msg)) }
+            }
+        case .toolCall(let call):
+            Task {
+                let result = await ToolRegistry.shared.execute(call)
+                if case .text(let text) = result {
+                    messages.append(ChatMessage(role: .assistant, text: text))
+                }
+            }
+        }
+        return true
+    }
+
+    /// Phase 2: "done"/"start"/"ready" with a pending workout template → open it.
+    private func handleWorkoutQuickStart(_ lower: String) -> Bool {
+        guard lower == "done" || lower == "start" || lower == "let's go" || lower == "ready" || lower == "begin" else { return false }
+        guard workoutTemplate != nil else { return false }
+        messages.append(ChatMessage(role: .assistant, text: "Starting workout!"))
+        pendingExercises = []
+        showingWorkout = true
+        return true
+    }
+
+    /// Phase 5: Multi-turn conversation handlers — resume pending workout, split, meal plan, or meal.
+    private func handleMultiTurnState(_ lower: String, originalText: String) -> Bool {
+        if handlePendingWorkout(lower) { return true }
+        if handlePendingWorkoutSplit(lower) { return true }
+        if handlePendingMealPlan(lower) { return true }
+        if handleMealContinuation(lower) { return true }
+        if handlePendingMeal(lower, originalText: originalText) { return true }
+        if handleWorkoutLoggingTrigger(lower) { return true }
+        return false
+    }
+
+    /// Phase 7: Food & activity intent parsing — meal logging, pronoun resolution, multi/single food, activity, weight, corrections.
+    private func handleFoodIntentParsing(_ lower: String, originalText: String) -> Bool {
+        if handleMealLogging(lower) { return true }
+        let resolved = resolvePronouns(lower)
+        if handleMultiFoodIntent(resolved) { return true }
+        if handleSingleFoodIntent(resolved) { return true }
+        if handleActivityLogging(lower) { return true }
+        if handleWeightIntent(lower) { return true }
+        if handleCheatMeal(lower) { return true }
+        if handleCorrection(lower) { return true }
+        if handleEatQuestion(lower, originalText: originalText) { return true }
+        return false
     }
 
     // MARK: - Intent Handlers
