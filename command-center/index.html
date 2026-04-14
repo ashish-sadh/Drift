@@ -18,8 +18,9 @@
 
   <div class="content">
     <div class="tabs">
-      <div class="tab" data-tab="reports">Reports</div>
       <div class="tab active" data-tab="bugs">Bugs</div>
+      <div class="tab" data-tab="sprint">Sprint</div>
+      <div class="tab" data-tab="reports">Reports</div>
       <div class="tab" data-tab="releases">Releases</div>
       <div class="tab" data-tab="feedback">Feedback</div>
       <div class="tab" data-tab="sprint">Sprint</div>
@@ -28,11 +29,13 @@
       <div class="tab" data-tab="admin" id="admin-tab" style="display:none">Admin</div>
     </div>
 
-    <div id="tab-reports" style="display:none">
-      <!-- Current Sprint -->
-      <div id="sprint-section" style="margin-bottom:24px;"></div>
+    <div id="tab-sprint" style="display:none">
+      <div id="sprint-section">
+        <div class="loading"><span class="spinner"></span> Loading sprint...</div>
+      </div>
+    </div>
 
-      <h3 style="color:var(--text-muted);font-size:13px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Reports</h3>
+    <div id="tab-reports" style="display:none">
       <div class="loading" id="reports-loading"><span class="spinner"></span> Loading reports...</div>
       <ul class="report-list" id="report-list"></ul>
     </div>
@@ -918,7 +921,6 @@
     showUser();
     loadMetrics();
     loadIssues(); loadFixedBugs();  // Bugs tab is default
-    loadSprint();
     loadReports();
 
     // Admin tab loader
