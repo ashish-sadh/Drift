@@ -22,7 +22,7 @@
       <div class="tab" data-tab="sprint">Sprint</div>
       <div class="tab" data-tab="reports">Reports</div>
       <div class="tab" data-tab="releases">Releases</div>
-      <div class="tab" data-tab="feedback">Feedback</div>
+      <div class="tab" data-tab="feedback">Feedback Trail</div>
       <div class="tab" data-tab="sprint">Sprint</div>
       <div class="tab" data-tab="designs" id="designs-tab" style="display:none">Designs</div>
       <div class="tab" data-tab="review" id="review-tab" style="display:none">Review</div>
@@ -578,17 +578,23 @@
         }
 
         allComments.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
-        el.innerHTML = allComments.map(c => `
-          <div class="feedback-item">
+        el.innerHTML = renderWithShowMore(allComments, c => {
+          // Find the report file for this PR
+          const prBranch = c.prTitle?.replace('Product Review — ', 'review-').replace('Exec Report — ', 'exec-').replace(/ /g, '-').replace(/[()]/g, '');
+          const reportFile = c.prTitle?.includes('Cycle') ? `review-cycle-${c.prTitle.match(/Cycle (\d+)/)?.[1]}.md` : c.prTitle?.includes('Exec') ? `exec-${c.prTitle.match(/\d{4}-\d{2}-\d{2}/)?.[0]}.md` : null;
+          const reportLink = reportFile ? `report.html?file=${encodeURIComponent(reportFile)}` : `https://github.com/${OWNER}/${REPO}/pull/${c.prNumber}`;
+
+          return `<div class="feedback-item">
             <div class="comment-author">
               <img src="${c.user.avatar_url}" alt="${c.user.login}">
               <strong>${c.user.login}</strong>
               <time>${new Date(c.created_at).toLocaleDateString()}</time>
-              <span style="color:var(--text-muted)">on ${c.prTitle}</span>
+              <a href="${reportLink}" style="color:var(--accent);font-size:13px;">on ${escapeHtml(c.prTitle || 'report')}</a>
             </div>
             ${c.path ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">Line ${c.line || c.position} of ${c.path}</div>` : ''}
             <div class="comment-body">${renderMarkdown(c.body)}</div>
-          </div>
+          </div>`;
+        }, 5, 'feedback')
         `).join('');
       } catch (e) {
         el.innerHTML = `<div class="empty">Failed to load feedback: ${e.message}</div>`;
