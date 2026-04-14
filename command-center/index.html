@@ -12,6 +12,12 @@
     <div id="auth-area"></div>
   </div>
 
+  <!-- Sign-in prompt (shown when not authenticated) -->
+  <div id="signin-prompt" style="display:none;background:linear-gradient(135deg, rgba(88,166,255,0.1), rgba(88,166,255,0.03));border-bottom:1px solid rgba(88,166,255,0.2);padding:16px 24px;text-align:center;">
+    <p style="margin:0 0 10px;font-size:15px;">Sign in with GitHub to file bugs, view reports, and give feedback</p>
+    <button class="btn btn-primary" onclick="startOAuth()">Sign in with GitHub</button>
+  </div>
+
   <div class="metrics" id="metrics">
     <div class="loading"><span class="spinner"></span> Loading metrics...</div>
   </div>
@@ -23,7 +29,6 @@
       <div class="tab" data-tab="reports">Reports</div>
       <div class="tab" data-tab="releases">Releases</div>
       <div class="tab" data-tab="feedback">Feedback Trail</div>
-      <div class="tab" data-tab="sprint">Sprint</div>
       <div class="tab" data-tab="designs" id="designs-tab" style="display:none">Designs</div>
       <div class="tab" data-tab="review" id="review-tab" style="display:none">Review</div>
       <div class="tab" data-tab="admin" id="admin-tab" style="display:none">Admin</div>
@@ -886,11 +891,17 @@
       });
     }
 
+    // Show sign-in prompt if not authenticated
+    if (!getToken()) {
+      document.getElementById('signin-prompt').style.display = 'block';
+      document.getElementById('metrics').innerHTML = '';
+    }
+
     // Determine which tab is active and load its data
     const activeTab = document.querySelector('.tab.active')?.dataset.tab || 'bugs';
 
     showUser();
-    loadMetrics();
+    if (getToken()) loadMetrics();
     if (activeTab === 'bugs') { loadIssues(); loadFixedBugs(); }
     if (activeTab === 'reports') { loadReports(); loadSprint(); }
     if (activeTab === 'sprint') loadSprint();
