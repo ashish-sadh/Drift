@@ -55,7 +55,7 @@ async function handleBugReport(request, env) {
     return json({ error: 'Invalid JSON' }, 400);
   }
 
-  const { title, description } = body;
+  const { title, description, priority, submitter } = body;
   if (!title || title.trim().length < 3) {
     return json({ error: 'Title is required (min 3 chars)' }, 400);
   }
@@ -65,7 +65,13 @@ async function handleBugReport(request, env) {
     return json({ error: 'Bug reporting not configured' }, 500);
   }
 
-  const issueBody = `${description || 'No description provided.'}\n\n---\n*Filed anonymously via Drift Command Center*\n*IP: ${ip.slice(0, 8)}...*`;
+  const who = submitter && submitter !== 'anonymous' ? `@${submitter}` : `anonymous (IP: ${ip.slice(0, 8)}...)`;
+  let issueBody = `${description || 'No description provided.'}`;
+  if (priority) issueBody += `\n\n**Priority:** ${priority}`;
+  issueBody += `\n\n---\n*Filed via Drift Command Center by ${who}*`;
+
+  const labels = ['bug', 'needs-review'];
+  if (priority && ['P0', 'P1', 'P2'].includes(priority)) labels.push(priority);
 
   const ghResp = await fetch('https://api.github.com/repos/ashish-sadh/Drift/issues', {
     method: 'POST',
@@ -78,7 +84,7 @@ async function handleBugReport(request, env) {
     body: JSON.stringify({
       title: `Bug: ${title.trim()}`,
       body: issueBody,
-      labels: ['bug', 'needs-review'],
+      labels,
     }),
   });
 

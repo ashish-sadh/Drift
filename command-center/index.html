@@ -266,14 +266,14 @@
 
       if (!title) { alert('Title is required'); return; }
 
-      // Anonymous submission via Cloudflare Worker if not signed in
-      if (!getToken()) {
+      // Non-admin users (signed in or not) submit via Cloudflare Worker to avoid label permission issues
+      if (!isOwner()) {
         btn.textContent = 'Submitting...'; btn.disabled = true;
         try {
           const resp = await fetch(`${WORKER_URL}/bug`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, description: body || '' })
+            body: JSON.stringify({ title, description: body || '', priority: priority || '', submitter: currentUser?.login || 'anonymous' })
           });
           const data = await resp.json();
           if (data.success) {
@@ -281,7 +281,7 @@
             document.getElementById('bug-title').value = '';
             document.getElementById('bug-body').value = '';
           } else {
-            result.innerHTML = `<span style="color:var(--red)">${data.error}</span>`;
+            result.innerHTML = `<span style="color:var(--red)">${data.error || 'Submission failed'}</span>`;
           }
         } catch (e) {
           result.innerHTML = `<span style="color:var(--red)">Failed: ${e.message}</span>`;
