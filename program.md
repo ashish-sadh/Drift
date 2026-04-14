@@ -32,19 +32,27 @@ You are the Product Designer + Principal Engineer. This is a replanning session.
    - Create sprint-task Issues from actionable feedback
 3. **Read open bugs:** `gh issue list --state open --label bug`
 4. **Design docs:**
-   - `gh issue list --state open --label design-doc` → write docs for new requests
+   - `gh issue list --state open --label design-doc` → for each pending request:
+     - `git checkout -b design/SHORT-NAME`
+     - Write doc in `Docs/designs/SHORT-NAME.md` with sections: Problem, Proposal, UX Flow, Technical Approach, Edge Cases, Open Questions
+     - Commit, push, `gh pr create --label design-doc --body "Design doc for #N"`, reference the original Issue
+     - `git checkout main`
    - `gh pr list --label design-doc --state open` → respond to comments, revise
-   - `gh pr list --label design-doc --label approved` → create implementation Issues, merge PR
-5. **Assess current state deeply:**
+   - `gh pr list --label design-doc --label approved` → create implementation Issues from the design, merge PR, close original Issue
+5. **Feature requests** — capture ideas the PE/Product Designer personas generate during review:
+   - `gh issue create --label feature-request --title "Feature: ..." --body "Problem: ...\nProposal: ...\nPriority rationale: ..."`
+   - Only create for ideas worth exploring — not every thought, just the ones that advance the roadmap
+   - These show up on Command Center's Feature Requests tab for human review
+6. **Assess current state deeply:**
    - Read `Docs/roadmap.md`, `Docs/state.md`, `Docs/ai-parity.md`, `Docs/failing-queries.md`
    - `git log --oneline -40` (more history since longer sprint)
    - Review closed issues since last planning: `gh issue list --state closed --label sprint-task --json number,title,closedAt --jq '.[] | select(.closedAt > "LAST_PLAN_DATE")'`
    - Check test count, coverage snapshot, eval results
-6. **Product review:**
+7. **Product review:**
    - Web search competitors (Boostcamp, MFP, Whoop, Strong, MacroFactor)
    - Write review report (exec summary, scorecard, what shipped, competitive position, designer + engineer discussion)
    - Open review PR with `report` label
-7. **Create sprint-task Issues (target 8-12 issues for 6h sprint):**
+8. **Create sprint-task Issues (target 8-12 issues for 6h sprint):**
    - For each task: `gh issue create --label sprint-task --label SENIOR/JUNIOR`
    - Include in body: Goal, Files (list specific files to modify), Approach (step-by-step), Edge cases, Tests (specific test cases to write), Acceptance criteria
    - Break large features into multiple Issues — prefer 3 small Issues over 1 big one
@@ -52,10 +60,10 @@ You are the Product Designer + Principal Engineer. This is a replanning session.
    - **SENIOR:** AI pipeline, architecture, multi-file refactors, P0 bugs, design doc implementation
    - **JUNIOR:** Food DB, single-file UI, tests, docs, simple fixes, well-specified work
    - Prioritize: P0 bugs > admin feedback > roadmap "Now" items > parity gaps > polish
-8. **Update personas** — append "What I learned this review"
-9. **Update roadmap** — apply agreed changes
-10. **Close the planning Issue** — if the prompt says "close Issue #N", run: `gh issue close N --comment "Sprint planning complete. Created X sprint-task issues. Review PR: #Y."` and `gh issue edit N --remove-label in-progress`
-11. **Exit** — watchdog restarts with appropriate model for first task
+9. **Update personas** — append "What I learned this review"
+10. **Update roadmap** — apply agreed changes
+11. **Close the planning Issue** — if the prompt says "close Issue #N", run: `gh issue close N --comment "Sprint planning complete. Created X sprint-task issues. Review PR: #Y."` and `gh issue edit N --remove-label in-progress`
+12. **Exit** — watchdog restarts with appropriate model for first task
 
 ---
 
