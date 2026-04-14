@@ -36,7 +36,7 @@ Created: 2026-04-13
 ## Task 2: Food search miss analysis + targeted additions
 **Priority:** P1
 **Classification:** JUNIOR (Sonnet + advisor)
-**Status:** [ ] pending
+**Status:** [x] done — 20 high-value foods added (protein snacks, supplements, fitness staples). DB at 1,520.
 
 **Goal:** Identify the most-searched missing foods and add them. Every "not found" = user opens MFP.
 

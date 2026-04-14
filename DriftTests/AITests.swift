@@ -1727,6 +1727,50 @@ import Testing
     #expect(titles.count == alerts.count, "Alert titles should be unique")
 }
 
+@Test @MainActor func proactiveAlertsAreNeverPositive() async throws {
+    // Alerts should always be negative (actionable warnings, not praise)
+    let alerts = BehaviorInsightService.computeProactiveAlerts()
+    for alert in alerts {
+        #expect(!alert.isPositive, "Proactive alerts should be isPositive=false, got: \(alert.title)")
+    }
+}
+
+@Test @MainActor func insightsWithEmptySleepHistory() async throws {
+    // Empty sleep history should not crash; sleep insight requires 7+ entries
+    let insights = BehaviorInsightService.computeInsights(sleepHistory: [])
+    for insight in insights {
+        #expect(!insight.title.isEmpty)
+        #expect(!insight.detail.isEmpty)
+    }
+    // Sleep insight should NOT appear with empty data
+    let hasSleep = insights.contains { $0.title.contains("Sleep") || $0.title.contains("sleep") }
+    #expect(!hasSleep, "Sleep insight should not appear with empty sleep history")
+}
+
+@Test @MainActor func insightsWithShortSleepHistory() async throws {
+    // < 7 entries should not produce sleep insight
+    let shortHistory = (0..<5).map { i in
+        (date: Calendar.current.date(byAdding: .day, value: -i, to: Date())!, hours: 7.5)
+    }
+    let insights = BehaviorInsightService.computeInsights(sleepHistory: shortHistory)
+    let hasSleep = insights.contains { $0.title.contains("Sleep") || $0.title.contains("sleep") }
+    #expect(!hasSleep, "Sleep insight should not appear with fewer than 7 data points")
+}
+
+@Test @MainActor func notificationServiceRefreshDoesNotCrash() async throws {
+    // Refreshing alerts on a test DB (no data) should complete without error
+    await NotificationService.refreshScheduledAlerts()
+    // If we get here without crash, the test passes
+}
+
+@Test @MainActor func behaviorInsightStructFields() {
+    let insight = BehaviorInsight(icon: "star.fill", title: "Test", detail: "Detail here", isPositive: true)
+    #expect(insight.icon == "star.fill")
+    #expect(insight.title == "Test")
+    #expect(insight.detail == "Detail here")
+    #expect(insight.isPositive == true)
+}
+
 // MARK: - Navigation Tool Tests
 
 @MainActor @Test func staticOverrideNavigateWeight() {
