@@ -22,22 +22,43 @@
     <span style="font-size:12px;color:var(--text-muted);">▼</span>
   </div>
   <div id="quick-bug-form" style="display:none;background:var(--surface);border-bottom:1px solid var(--border);padding:16px 24px;">
-    <div style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:12px;">
-      <input id="quick-bug-title" type="text" placeholder="What went wrong? (e.g. App crashes when tapping voice button)"
-        style="width:100%;padding:10px 12px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:14px;">
-      <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;">
-        <textarea id="quick-bug-body" rows="2" placeholder="Steps to reproduce (optional)"
-          style="flex:1;min-width:200px;padding:10px 12px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:14px;resize:none;font-family:inherit;"></textarea>
-        <div style="display:flex;gap:8px;align-items:center;">
-          <label style="cursor:pointer;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:13px;color:var(--text-muted);">
-            📷 <input id="quick-bug-screenshot" type="file" accept="image/*" style="display:none;" onchange="this.parentElement.textContent='📷 '+this.files[0]?.name?.slice(0,15)">
-          </label>
-          <button class="btn btn-primary" onclick="submitQuickBug()" id="quick-bug-btn" style="background:var(--red);border-color:var(--red);white-space:nowrap;">Submit Bug</button>
-        </div>
-      </div>
-      <div id="quick-bug-result"></div>
+    <div style="max-width:640px;margin:0 auto;" id="quick-bug-inner">
+      <!-- Shows sign-in or form based on auth state -->
     </div>
   </div>
+  <script>
+    // Render bug form after auth resolves
+    function renderQuickBugForm() {
+      const el = document.getElementById('quick-bug-inner');
+      if (!localStorage.getItem('drift_gh_token')) {
+        el.innerHTML = `
+          <div style="text-align:center;padding:12px 0;">
+            <p style="margin-bottom:12px;color:var(--text-muted);">Sign in with GitHub to file a bug report</p>
+            <button class="btn btn-primary" onclick="startOAuth()">Sign in with GitHub</button>
+          </div>`;
+      } else {
+        el.innerHTML = `
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <input id="quick-bug-title" type="text" placeholder="What went wrong? (e.g. App crashes when tapping voice button)"
+              style="width:100%;padding:10px 12px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:14px;">
+            <div style="display:flex;gap:12px;align-items:end;flex-wrap:wrap;">
+              <textarea id="quick-bug-body" rows="2" placeholder="Steps to reproduce (optional)"
+                style="flex:1;min-width:200px;padding:10px 12px;background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:6px;font-size:14px;resize:none;font-family:inherit;"></textarea>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <label style="cursor:pointer;padding:8px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-size:13px;color:var(--text-muted);">
+                  📷 <input id="quick-bug-screenshot" type="file" accept="image/*" style="display:none;" onchange="this.parentElement.textContent='📷 '+this.files[0]?.name?.slice(0,15)">
+                </label>
+                <button class="btn btn-primary" onclick="submitQuickBug()" id="quick-bug-btn" style="background:var(--red);border-color:var(--red);white-space:nowrap;">Submit Bug</button>
+              </div>
+            </div>
+            <div id="quick-bug-result"></div>
+          </div>`;
+      }
+    }
+    // Render on page load and when form is opened
+    document.querySelector('[onclick*="quick-bug-form"]').addEventListener('click', () => setTimeout(renderQuickBugForm, 10));
+    renderQuickBugForm();
+  </script>
 
   <div class="metrics" id="metrics">
     <div class="loading"><span class="spinner"></span> Loading metrics...</div>
