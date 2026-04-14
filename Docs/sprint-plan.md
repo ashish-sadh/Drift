@@ -1,81 +1,66 @@
-# Sprint Plan — Review #37 (Cycles 1483–1503)
+# Sprint Plan — Review #38 (Cycles 1550–1570)
 
 Created: 2026-04-13
 
 ---
 
-## Task 1: sendMessage decomposition
+## Task 1: Fix recovery score mismatch (#41)
 **Priority:** P0
 **Classification:** JUNIOR (Sonnet + advisor)
-**Status:** [x] done (already decomposed — 128 lines, 21 extracted handle* methods)
+**Status:** [ ] pending
 
-**Goal:** Break 491-line sendMessage into focused named methods. Pure refactor, no behavior change.
+**Goal:** Dashboard shows recovery 77 but Body Rhythm page shows 58. Trace both data paths, find divergence, make consistent.
 
 **Files:**
-- `Drift/ViewModels/AIChatViewModel.swift`
+- Dashboard recovery display
+- Body Rhythm / Sleep & Recovery page
 
 **Approach:**
-1. Read full sendMessage, identify logical sections (input validation, state prep, static overrides, LLM pipeline, response handling, card attachment, cleanup)
-2. Extract each into private methods with clear names
-3. Keep public interface identical — `sendMessage()` becomes a coordinator that calls private methods
-4. Run all 1,037 tests to verify zero behavior change
+1. Read both views to find where recovery score is computed/fetched
+2. Identify if one uses a different HealthKit query, time window, or calculation
+3. Unify to single source of truth
+4. Add regression test
 
-**Edge cases:**
-- Early returns in nested conditions must be preserved (guard statements)
-- Shared mutable state between sections (conversation state, pending vars)
-- Error handling paths must remain identical
-
-**Tests:**
-- All existing 1,037 tests must pass unchanged
-- No new tests needed (pure refactor)
-
-**Acceptance:** sendMessage under 100 lines, all tests pass, zero behavior change.
+**Acceptance:** Dashboard and detail page show same recovery score for same data.
 
 ---
 
-## Task 2: Food search miss analysis + targeted additions
-**Priority:** P1
+## Task 2: Fix progressive overload space (#42)
+**Priority:** P0
 **Classification:** JUNIOR (Sonnet + advisor)
-**Status:** [x] done — 20 high-value foods added (protein snacks, supplements, fitness staples). DB at 1,520.
+**Status:** [ ] pending
 
-**Goal:** Identify the most-searched missing foods and add them. Every "not found" = user opens MFP.
+**Goal:** Progressive overload list shows all 14+ exercises, overwhelming the screen. Cap to top 5 with "Show more" expand.
 
 **Files:**
-- `Drift/Resources/foods.json`
-- Possibly `Drift/Services/SpellCorrectService.swift` for new synonyms
+- Exercise tab view (progressive overload section)
 
 **Approach:**
-1. Review common food queries from eval harness and failing-queries.md
-2. Cross-reference with USDA for accurate nutrition data
-3. Add 20-30 high-value missing foods (focus on frequently searched items)
-4. Add synonyms for regional variants
+1. Read current progressive overload rendering
+2. Sort by staleness (longest plateau first)
+3. Show top 5 by default with "Show all N exercises" expand button
+4. Collapsed state persists across visits
 
-**Tests:**
-- Search tests for each added food
-- Verify existing foods not broken
-
-**Acceptance:** Top 20 search misses addressed. Build passes.
+**Acceptance:** Progressive overload shows max 5 items by default. Expand reveals all. Less visual noise.
 
 ---
 
-## Task 3: Notification + behavior alert test coverage
+## Task 3: State.md refresh
 **Priority:** P1
 **Classification:** JUNIOR (Sonnet + advisor)
 **Status:** [ ] pending
 
-**Goal:** NotificationService and BehaviorInsightService alert detection have zero dedicated unit tests. Add edge-case coverage.
+**Goal:** State.md is stale — build 108 (actual: 113), tests 981 (actual: 1,037+), foods 1,500 (actual: 1,520).
 
 **Files:**
-- `DriftTests/` — new test file or extend existing
+- `Docs/state.md`
 
 **Approach:**
-1. Test proteinStreakAlert edge cases: exactly 3 days, 2 days (no alert), data gaps
-2. Test supplementGapAlert: new supplement (no history), all taken, mixed
-3. Test workoutConsistencyAlert: 4 days vs 5 days threshold
-4. Test loggingGapAlert: logged today only, logged yesterday only
-5. Test composeNotification: single alert, multiple alerts
+1. Update all numbers: tests, build, foods, exercises, tools, card types
+2. Update AI chat capabilities list
+3. Update tech stack notes if changed
 
-**Acceptance:** All alert detection methods have dedicated tests. Coverage for BehaviorInsightService above 50%.
+**Acceptance:** State.md accurately reflects current build.
 
 ---
 
@@ -96,19 +81,16 @@ Created: 2026-04-13
 
 ---
 
-## Task 5: State.md refresh
+## Task 5: Progressive overload UI polish
 **Priority:** P2
 **Classification:** JUNIOR (Sonnet + advisor)
 **Status:** [ ] pending
 
-**Goal:** State.md is stale — tests show 981 (actual: 1,037), build 108 (actual: 112), capabilities incomplete.
-
-**Files:**
-- `Docs/state.md`
+**Goal:** After fixing the space issue, improve coaching feel of progressive overload suggestions.
 
 **Approach:**
-1. Update all numbers: tests, build, foods, exercises, tools, card types
-2. Update AI chat capabilities list
-3. Update tech stack notes if changed
+1. Add exercise name highlighting or bold styling
+2. Make weight suggestions more prominent
+3. Consider grouping by body part or priority
 
-**Acceptance:** State.md accurately reflects current build.
+**Acceptance:** Progressive overload section feels like curated coaching, not a warning list.

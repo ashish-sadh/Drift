@@ -172,6 +172,11 @@
 - All Phase 3c "Now" items are complete. The product is at a natural inflection point — decide whether to deepen polish or expand to new surfaces (widgets, Apple Watch).
 - Exercise query bug (plurals, trailing phrases failing silently) is a reminder that AI-first products must handle natural language gracefully. Silent failures erode trust more than visible errors.
 
+### What I Learned — Review #38 (Cycle 1550, 2026-04-13)
+- Two P0 bugs from real-world testing (#41 recovery mismatch, #42 progressive overload space) show that data-heavy screens need curation, not exhaustive display. Progressive overload should show top 5 most actionable, not every exercise.
+- MFP's new Today tab with logging streaks and Healthy Habits section is a proven engagement mechanic. Consider adding a streak counter to our dashboard.
+- Barcode calorie bug (#40) was a silent accuracy issue — users would see wrong per-piece calories and not know it. Silent data bugs are the most trust-eroding kind.
+
 ## Preferences & Style
 - Prefer opinionated design over configurability — make good defaults, don't add settings
 - Prefer chat-first interactions — every feature should be reachable from conversation

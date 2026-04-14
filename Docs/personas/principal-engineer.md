@@ -176,6 +176,11 @@
 - Regex-based exercise name extraction has a natural ceiling for natural language. The retry-with-singular-fallback is pragmatic for now, but long-term, routing through LLM intent classifier is the answer if edge cases proliferate.
 - Tests 981→1,037 (+56). NotificationService and BehaviorInsightService alert logic have zero dedicated tests — harden in next sprint.
 
+### What I Learned — Review #38 (Cycle 1550, 2026-04-13)
+- `parsePieceCount` for barcode serving strings was architecturally clean — no DB migration needed because the piece count can be re-derived from the cached `servingDescription` string. Prefer derivable data over stored data when the computation is cheap.
+- Recovery score mismatch (Bug #41) is likely a data freshness issue — dashboard and detail page fetching HealthKit at different times or with different predicates. Need to audit all HealthKit fetch points for consistent time windows.
+- Sprint completion at 60% (3/5) with the remaining 2 correctly displaced by a P0 bug. The pattern of P2s slipping persists — consider not planning P2s at all and using freed cycles for bug hunting.
+
 ## Preferences & Approach
 - Prefer boring, proven solutions over clever abstractions
 - Prefer fixing patterns over fixing instances (fix the stale-preference pattern, not just one ViewModel)

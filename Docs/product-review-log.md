@@ -4,6 +4,22 @@ Periodic product + engineering reviews. Every 10 cycles of the self-improvement 
 
 ---
 
+## Review #38 — 2026-04-13 (Cycle 1550)
+
+### Summary
+Fixed P0 barcode calorie bug (#40), added 20 fitness-focused foods to DB (1,520 total), added notification/alert test coverage. 3/5 sprint items shipped, 2 carried. Two new P0 owner-reported bugs: recovery score mismatch (#41) and progressive overload space (#42).
+
+### Key Achievement
+Barcode calorie fix for multi-piece servings — silent data accuracy bug that showed full-package calories instead of per-piece.
+
+### Key Concern
+Two new P0 UX bugs from real-world testing. Data-heavy screens (progressive overload, recovery) need curation to feel like coaching rather than data dumps.
+
+### Sprint Plan (next 20 cycles)
+P0: Fix recovery score mismatch (#41). P0: Fix progressive overload space (#42). P1: State.md refresh. P1: Systematic bug hunt. P2: Progressive overload UI polish.
+
+---
+
 ## Review #37 — 2026-04-13 (Cycle 1483)
 
 ### Summary
