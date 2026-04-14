@@ -224,7 +224,7 @@ async function getSprintPlan() {
       status: i.state === 'closed' ? 'done'
         : i.labels.some(l => l.name === 'in-progress') ? 'in-progress'
         : 'pending',
-      classification: i.labels.some(l => l.name === 'SENIOR') ? 'SENIOR (Opus)' : 'JUNIOR (Sonnet)',
+      classification: i.labels.some(l => l.name === 'SENIOR') || i.labels.some(l => l.name === 'P0') ? 'SENIOR (Opus)' : 'JUNIOR (Sonnet)',
       priority: i.labels.find(l => ['P0','P1','P2'].includes(l.name))?.name || '',
       isPermanent: i.labels.some(l => l.name === 'permanent-task'),
       url: i.html_url,
