@@ -474,6 +474,7 @@ extension AIChatViewModel {
         }
         if stripped.hasSuffix(" please") { stripped = String(stripped.dropLast(7)) }
         stripped = stripped.trimmingCharacters(in: .whitespaces)
+        while let last = stripped.last, "?!.,;:".contains(last) { stripped = String(stripped.dropLast()) }
         guard let verb = ["log ", "add ", "track "].first(where: { stripped.hasPrefix($0) }) else { return false }
         let remainder = String(stripped.dropFirst(verb.count)).trimmingCharacters(in: .whitespaces)
         guard exerciseNouns.contains(remainder) else { return false }
@@ -493,6 +494,8 @@ extension AIChatViewModel {
         // Strip trailing "please": "log lunch please" → "log lunch"
         if stripped.hasSuffix(" please") { stripped = String(stripped.dropLast(7)) }
         stripped = stripped.trimmingCharacters(in: .whitespaces)
+        // Strip trailing punctuation so "log lunch?" → "log lunch" (prevents "?" leaking as food search)
+        while let last = stripped.last, "?!.,;:".contains(last) { stripped = String(stripped.dropLast()) }
         guard let verb = ["log ", "ate ", "had ", "log for ", "ate for ", "had for "].first(where: { stripped.hasPrefix($0) }) else { return false }
         var remainder = String(stripped.dropFirst(verb.count)).trimmingCharacters(in: .whitespaces)
         if remainder.hasPrefix("for ") { remainder = String(remainder.dropFirst(4)).trimmingCharacters(in: .whitespaces) }
