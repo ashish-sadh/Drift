@@ -232,7 +232,30 @@
       const result = document.getElementById('bug-result');
 
       if (!title) { alert('Title is required'); return; }
-      if (!getToken()) { alert('Sign in first'); return; }
+
+      // Anonymous submission via Cloudflare Worker if not signed in
+      if (!getToken()) {
+        btn.textContent = 'Submitting...'; btn.disabled = true;
+        try {
+          const resp = await fetch(`${WORKER_URL}/bug`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, description: body || '' })
+          });
+          const data = await resp.json();
+          if (data.success) {
+            result.innerHTML = `<span style="color:var(--green)">Bug filed: <a href="${data.url}" target="_blank">#${data.number}</a> — thanks!</span>`;
+            document.getElementById('bug-title').value = '';
+            document.getElementById('bug-body').value = '';
+          } else {
+            result.innerHTML = `<span style="color:var(--red)">${data.error}</span>`;
+          }
+        } catch (e) {
+          result.innerHTML = `<span style="color:var(--red)">Failed: ${e.message}</span>`;
+        }
+        btn.textContent = 'Submit'; btn.disabled = false;
+        return;
+      }
 
       btn.textContent = 'Submitting...';
       btn.disabled = true;
