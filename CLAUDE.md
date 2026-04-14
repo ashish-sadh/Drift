@@ -20,12 +20,21 @@ Fully autonomous background operation. The watchdog (`scripts/self-improve-watch
 
 | User says | You do | What happens |
 |-----------|--------|-------------|
-| "start drift control" | `echo "RUN" > ~/drift-control.txt && cd /Users/ashishsadh/workspace/Drift && nohup ./scripts/self-improve-watchdog.sh > /dev/null 2>&1 &` | Watchdog starts, sets _Override: CONTINUE, launches Autopilot |
-| "stop drift control" | `echo "STOP" > ~/drift-control.txt` | Kills current session immediately, watchdog exits |
-| "pause drift control" | `echo "PAUSE" > ~/drift-control.txt` | Kills current session, watchdog stays alive |
-| "drain" / "graceful stop" | `echo "DRAIN" > ~/drift-control.txt` | Sets _Override: STOP, waits for cycle to finish, exits cleanly |
-| "resume" (after pause) | `echo "RUN" > ~/drift-control.txt` | Resumes, sets override to CONTINUE, starts Autopilot |
-| "status" | `cat ~/drift-control.txt && cat ~/drift-state/cycle-counter && ps aux \| grep 'claude.*autopilot' \| grep -v grep` | Control state, cycle count, running processes |
+| "start drift control" | `echo "RUN" > ~/drift-control.txt && cd /Users/ashishsadh/workspace/Drift && nohup ./scripts/self-improve-watchdog.sh > /dev/null 2>&1 &` | Watchdog starts, picks model based on work available |
+| "stop drift control" | `echo "STOP" > ~/drift-control.txt` | Kills session immediately, watchdog exits |
+| "drain" / "graceful stop" | `echo "DRAIN" > ~/drift-control.txt` | Finishes current commit, exits cleanly |
+| "take over from autopilot" | `echo "PAUSE" > ~/drift-control.txt` → wait for autopilot to exit (`while ps aux \| grep -q 'claude.*autopilot'; do sleep 5; done`) → confirm "Autopilot stopped. You're in control." | Graceful handoff — autopilot finishes commit, stops. Human works freely. |
+| "release control to autopilot" | `echo "RUN" > ~/drift-control.txt` → confirm "Autopilot will resume on next watchdog check (~30s)." | Watchdog restarts sessions |
+| "status" | `cat ~/drift-control.txt && cat ~/drift-state/last-model && ps aux \| grep 'claude.*autopilot' \| grep -v grep` | Control state, last model used, running processes |
+
+### Sprint Lifecycle
+
+The watchdog orchestrates a 3-phase sprint:
+1. **Sprint Planning (Opus, every 3h):** Review + create sprint-task Issues (SENIOR/JUNIOR)
+2. **Senior Execution (Opus):** SENIOR Issues + P0 bugs. Alternates with Sonnet.
+3. **Junior Execution (Sonnet + advisor):** JUNIOR Issues, then permanent tasks. Always running.
+
+Sprint tasks are GitHub Issues with `sprint-task` + `SENIOR`/`JUNIOR` labels. Sonnet is the default — Opus only runs when there's SENIOR/P0 work or planning is due.
 
 ### Enforced Hooks
 

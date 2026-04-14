@@ -207,37 +207,28 @@ async function showUser() {
   _resolveUserReady();
 }
 
-// Sprint plan parsing
+// Sprint tasks from GitHub Issues
 async function getSprintPlan() {
   try {
-    console.log('[Sprint] Fetching sprint plan...');
-    const content = await getReportContent('Docs/sprint-plan.md');
-    console.log('[Sprint] Got content, length:', content.length);
-    const lines = content.split('\n');
-    const title = lines[0]?.replace(/^#\s*/, '') || 'Current Sprint';
+    const issues = await smartApi(`/repos/${OWNER}/${REPO}/issues?labels=sprint-task&state=all&per_page=50&sort=created&direction=desc`);
 
-    const tasks = [];
-    let current = null;
-    for (const line of lines) {
-      const taskMatch = line.match(/^## Task \d+:\s*(.+)/);
-      if (taskMatch) {
-        if (current) tasks.push(current);
-        current = { name: taskMatch[1], status: 'pending', priority: '', classification: '' };
-      }
-      if (current) {
-        const statusMatch = line.match(/\*\*Status:\*\*\s*\[([ x])\]/);
-        if (statusMatch) current.status = statusMatch[1] === 'x' ? 'done' : 'pending';
-        const prioMatch = line.match(/\*\*Priority:\*\*\s*(\w+)/);
-        if (prioMatch) current.priority = prioMatch[1];
-        const classMatch = line.match(/\*\*Classification:\*\*\s*(.+)/);
-        if (classMatch) current.classification = classMatch[1].trim();
-      }
-    }
-    if (current) tasks.push(current);
+    const openTasks = issues.filter(i => i.state === 'open');
+    const closedTasks = issues.filter(i => i.state === 'closed').slice(0, 10);
+    const allTasks = [...openTasks, ...closedTasks];
+
+    if (allTasks.length === 0) return null;
+
+    const tasks = allTasks.map(i => ({
+      name: i.title.replace(/^Sprint:\s*/i, ''),
+      status: i.state === 'closed' ? 'done' : 'pending',
+      classification: i.labels.some(l => l.name === 'SENIOR') ? 'SENIOR (Opus)' : 'JUNIOR (Sonnet)',
+      priority: i.labels.find(l => ['P0','P1','P2'].includes(l.name))?.name || '',
+      url: i.html_url,
+      number: i.number
+    }));
 
     const done = tasks.filter(t => t.status === 'done').length;
-    console.log('[Sprint] Parsed:', tasks.length, 'tasks');
-    return { title, tasks, done, total: tasks.length };
+    return { title: 'Current Sprint', tasks, done, total: tasks.length };
   } catch (e) {
     console.error('[Sprint] Error:', e);
     return null;

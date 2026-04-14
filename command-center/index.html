@@ -867,7 +867,7 @@
             const classLabel = isSenior ? 'Opus' : 'Sonnet';
             return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border);${isDone ? 'opacity:0.6;' : ''}">
               <span style="font-size:16px;">${isDone ? '✅' : '⏳'}</span>
-              <span style="flex:1;font-size:14px;${isDone ? 'text-decoration:line-through;' : ''}">${escapeHtml(t.name)}</span>
+              <a href="${t.url || '#'}" target="_blank" style="flex:1;font-size:14px;color:var(--text);${isDone ? 'text-decoration:line-through;opacity:0.6;' : ''}">${t.number ? '#'+t.number+' ' : ''}${escapeHtml(t.name)}</a>
               <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:${classColor};color:${classTextColor}">${classLabel}</span>
               ${t.priority ? `<span style="font-size:11px;color:var(--text-muted)">${t.priority}</span>` : ''}
             </div>`;
@@ -878,10 +878,13 @@
 
     // (Quick bug banner removed — Bugs tab is now the default landing page)
 
-    // Show sign-in prompt if not authenticated
+    // Show sign-in prompt if not authenticated — replace all spinners
     if (!getToken()) {
       document.getElementById('signin-prompt').style.display = 'block';
       document.getElementById('metrics').innerHTML = '';
+      document.querySelectorAll('.loading').forEach(el => {
+        el.innerHTML = '<div class="empty">Sign in to view this content</div>';
+      });
     }
 
     showUser();
