@@ -108,7 +108,7 @@ What's not: Color palette feels disjointed (dark blue/purple + bright rings), no
 
 ### Now
 - ~~**Muscle group heatmaps (P0)**~~ DONE — Weekly set counts per group + opacity intensity scaling with volume. Visual body map in exercise tab.
-- **Exercise instructions via chat** — "How do I do a deadlift?" → form tips + muscles targeted from existing exercise DB.
+- ~~**Exercise instructions via chat**~~ DONE — "How do I do a deadlift?" returns form tips, muscles, equipment from 873-exercise DB. StaticOverrides routing for instant response.
 
 ### Next
 - **Exercise presentation** — Images, muscle group icons, exercise instructions. Match Boostcamp quality.
@@ -142,7 +142,7 @@ What's not: Color palette feels disjointed (dark blue/purple + bright rings), no
 - ~~**Hardcoded insight cards (3-5)**~~ ✅ DONE — 3 insights on dashboard: workout frequency vs weight, protein adherence, logging consistency. Minimum data thresholds.
 
 ### Now
-- **Proactive push notifications (P0)** — Passive dashboard alerts → active nudges. Protein streak, supplement gap, workout gap. On-device scheduling, no cloud.
+- ~~**Proactive push notifications (P0)**~~ DONE — Local notifications for protein streaks, supplement gaps, workout gaps. Reuses BehaviorInsightService. 6pm daily schedule, settings toggle, permission deferred until data exists.
 
 ### Next
 - ~~**Behavior insights v2**~~ DONE — 4th insight: sleep vs next-day calories. Protein window extended 14→30 days. Sleep history passed from HealthKit.

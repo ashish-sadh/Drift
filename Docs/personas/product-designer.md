@@ -167,6 +167,11 @@
 - Push notifications deferred a 4th time is a systemic prioritization failure, not a scoping problem. Making it the ONLY P0 with no competing priorities is the fix.
 - Exercise instructions via chat ("how do I deadlift?") is more aligned with our AI-first identity than static images. Lean into conversational exercise coaching over Boostcamp-style media content.
 
+### What I Learned — Review #37 (Cycle 1483, 2026-04-13)
+- Push notifications shipped after 4 reviews of deferral. Making it the ONLY P0 with zero competing priorities was the fix. Apply this pattern to any feature that keeps slipping: isolate it, remove distractions.
+- All Phase 3c "Now" items are complete. The product is at a natural inflection point — decide whether to deepen polish or expand to new surfaces (widgets, Apple Watch).
+- Exercise query bug (plurals, trailing phrases failing silently) is a reminder that AI-first products must handle natural language gracefully. Silent failures erode trust more than visible errors.
+
 ## Preferences & Style
 - Prefer opinionated design over configurability — make good defaults, don't add settings
 - Prefer chat-first interactions — every feature should be reachable from conversation

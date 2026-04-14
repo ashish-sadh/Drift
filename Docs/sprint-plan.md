@@ -1,92 +1,11 @@
-# Sprint Plan — Review #36 (Cycles 1380–1400)
+# Sprint Plan — Review #37 (Cycles 1483–1503)
 
 Created: 2026-04-13
 
 ---
 
-## Task 1: Proactive push notifications (protein / supplement / workout)
+## Task 1: sendMessage decomposition
 **Priority:** P0
-**Classification:** SENIOR (Opus)
-**Status:** [x] done (commit cf6782a)
-
-**Goal:** Extend proactive dashboard alerts to active push notifications. Three patterns: protein streak (3+ days low), supplement gap (missed 2+ days), workout gap (4+ days without training). This transforms Drift from passive data logger to active health coach.
-
-**Files:**
-- New: `Drift/Services/NotificationService.swift` — schedule/cancel local notifications
-- `Drift/App/DriftApp.swift` — request permission at right moment (after first food log)
-- Existing alert logic in dashboard — reuse detection patterns
-
-**Approach:**
-1. Add UserNotifications framework usage
-2. Create NotificationService with: requestPermission(), scheduleProteinAlert(), scheduleSupplementAlert(), scheduleWorkoutGapAlert(), cancelAll()
-3. Permission request: prompt after first successful food log (not on launch)
-4. Schedule notifications at 6pm daily, cancel if condition resolved
-5. Respect quiet hours: 9pm–8am no notifications
-6. Add Settings toggle: "Health Nudges" on/off
-
-**Edge cases:**
-- User denies permission (gracefully degrade, don't prompt again)
-- Condition resolved mid-day (cancel scheduled notification)
-- App killed — use scheduled local notifications, not background fetch
-- Multiple conditions at once (send one combined notification, not three)
-
-**Tests:**
-- NotificationService unit tests (permission state, scheduling logic)
-- Condition detection tests (reuse from dashboard alert tests)
-- Quiet hours enforcement
-
-**Acceptance:** Users who miss protein/supplements/workouts receive a timely notification. No duplicate or 3am notifications.
-
----
-
-## Task 2: Exercise instructions via AI chat
-**Priority:** P1
-**Classification:** JUNIOR (Sonnet + advisor)
-**Status:** [x] done (commit 859b5ff)
-
-**Goal:** "How do I do a deadlift?" returns form tips and muscle group info from the existing 873-exercise DB.
-
-**Files:**
-- `Drift/Services/ExerciseService.swift` — add exerciseInstructions(name:) method
-- `Drift/AI/StaticOverrides.swift` or tool routing — route "how do I" exercise queries
-
-**Approach:**
-1. Check how exercise info is stored (instructions, muscle groups, category)
-2. Add a query: given exercise name, return instructions + muscles + category
-3. Route "how do I [exercise]" / "form tips for [exercise]" queries
-4. Format response: brief form cue (2-3 sentences) + muscles targeted
-
-**Edge cases:**
-- Exercise not found (fall back to LLM general knowledge)
-- Ambiguous name ("press" → clarify)
-
-**Tests:**
-- exerciseInstructions() returns data for known exercises
-- Routing test: "how do I squat" triggers exercise info intent
-
-**Acceptance:** Asking about exercise form in chat returns structured, useful response.
-
----
-
-## Task 3: Systematic bug hunt
-**Priority:** P1
-**Classification:** JUNIOR (Sonnet + advisor)
-**Status:** [ ] pending
-
-**Goal:** Run analysis across new code paths (heatmap, recent AI changes). Find silent bugs before users do.
-
-**Approach:**
-1. Review recent commits for potential edge cases
-2. Trace data paths through new features
-3. Look for: off-by-one, empty state handling, nil coalescing, race conditions
-4. Add regression tests for anything found
-
-**Acceptance:** Analysis complete, any bugs found are fixed with regression tests.
-
----
-
-## Task 4: sendMessage decomposition
-**Priority:** P2
 **Classification:** JUNIOR (Sonnet + advisor)
 **Status:** [ ] pending
 
@@ -96,9 +15,100 @@ Created: 2026-04-13
 - `Drift/ViewModels/AIChatViewModel.swift`
 
 **Approach:**
-1. Read full sendMessage, identify logical sections
-2. Extract each into private methods
-3. Keep public interface identical
-4. Run all tests to verify
+1. Read full sendMessage, identify logical sections (input validation, state prep, static overrides, LLM pipeline, response handling, card attachment, cleanup)
+2. Extract each into private methods with clear names
+3. Keep public interface identical — `sendMessage()` becomes a coordinator that calls private methods
+4. Run all 1,037 tests to verify zero behavior change
 
-**Acceptance:** sendMessage under 100 lines, all 981+ tests pass.
+**Edge cases:**
+- Early returns in nested conditions must be preserved (guard statements)
+- Shared mutable state between sections (conversation state, pending vars)
+- Error handling paths must remain identical
+
+**Tests:**
+- All existing 1,037 tests must pass unchanged
+- No new tests needed (pure refactor)
+
+**Acceptance:** sendMessage under 100 lines, all tests pass, zero behavior change.
+
+---
+
+## Task 2: Food search miss analysis + targeted additions
+**Priority:** P1
+**Classification:** JUNIOR (Sonnet + advisor)
+**Status:** [ ] pending
+
+**Goal:** Identify the most-searched missing foods and add them. Every "not found" = user opens MFP.
+
+**Files:**
+- `Drift/Resources/foods.json`
+- Possibly `Drift/Services/SpellCorrectService.swift` for new synonyms
+
+**Approach:**
+1. Review common food queries from eval harness and failing-queries.md
+2. Cross-reference with USDA for accurate nutrition data
+3. Add 20-30 high-value missing foods (focus on frequently searched items)
+4. Add synonyms for regional variants
+
+**Tests:**
+- Search tests for each added food
+- Verify existing foods not broken
+
+**Acceptance:** Top 20 search misses addressed. Build passes.
+
+---
+
+## Task 3: Notification + behavior alert test coverage
+**Priority:** P1
+**Classification:** JUNIOR (Sonnet + advisor)
+**Status:** [ ] pending
+
+**Goal:** NotificationService and BehaviorInsightService alert detection have zero dedicated unit tests. Add edge-case coverage.
+
+**Files:**
+- `DriftTests/` — new test file or extend existing
+
+**Approach:**
+1. Test proteinStreakAlert edge cases: exactly 3 days, 2 days (no alert), data gaps
+2. Test supplementGapAlert: new supplement (no history), all taken, mixed
+3. Test workoutConsistencyAlert: 4 days vs 5 days threshold
+4. Test loggingGapAlert: logged today only, logged yesterday only
+5. Test composeNotification: single alert, multiple alerts
+
+**Acceptance:** All alert detection methods have dedicated tests. Coverage for BehaviorInsightService above 50%.
+
+---
+
+## Task 4: Systematic bug hunt
+**Priority:** P1
+**Classification:** JUNIOR (Sonnet + advisor)
+**Status:** [ ] pending
+
+**Goal:** Quarterly practice. Focus on notification scheduling, food diary edge cases, recent AI changes.
+
+**Approach:**
+1. Review NotificationService for edge cases (permission revoked mid-session, toggle race)
+2. Review food diary copy/reorder for timestamp edge cases
+3. Trace data paths through recent features
+4. Add regression tests for anything found
+
+**Acceptance:** Analysis complete, any bugs found are fixed with regression tests.
+
+---
+
+## Task 5: State.md refresh
+**Priority:** P2
+**Classification:** JUNIOR (Sonnet + advisor)
+**Status:** [ ] pending
+
+**Goal:** State.md is stale — tests show 981 (actual: 1,037), build 108 (actual: 112), capabilities incomplete.
+
+**Files:**
+- `Docs/state.md`
+
+**Approach:**
+1. Update all numbers: tests, build, foods, exercises, tools, card types
+2. Update AI chat capabilities list
+3. Update tech stack notes if changed
+
+**Acceptance:** State.md accurately reflects current build.

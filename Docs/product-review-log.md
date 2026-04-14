@@ -4,6 +4,22 @@ Periodic product + engineering reviews. Every 10 cycles of the self-improvement 
 
 ---
 
+## Review #37 — 2026-04-13 (Cycle 1483)
+
+### Summary
+Push notifications shipped (4 reviews deferred → sole P0 strategy worked). Exercise coaching in chat and query parsing bug fix also landed. 3/4 sprint items shipped, tests 981→1,037. All Phase 3c "Now" roadmap items complete.
+
+### Key Achievement
+Push notifications transform Drift from passive data logger to proactive health coach. Protein, supplement, and workout nudges — all on-device, free, private.
+
+### Key Concern
+All "Now" roadmap items are done. Need to decide: deepen Phase 3c polish or advance to Phase 4 (widgets, Apple Watch).
+
+### Sprint Plan (next 20 cycles)
+P0: sendMessage decomposition. P1: Food search miss analysis. P1: Notification/alert test coverage. P1: Systematic bug hunt. P2: State.md refresh.
+
+---
+
 ## Review #36 — 2026-04-13 (Cycle 1380)
 
 ### Summary
