@@ -14,6 +14,8 @@ _Directive:_ **Read `Docs/roadmap.md` to understand product direction. Be bold. 
 
 _Override:_ CONTINUE
 
+**Design principle:** Important behaviors must be enforced via hooks, not instructions. Instructions in this file can be ignored or forgotten by sessions. Hooks in `.claude/hooks/` and watchdog logic in `scripts/self-improve-watchdog.sh` are mechanically enforced — they cannot be skipped. If a behavior is critical (clean state, control flow, review gates, TestFlight guards), it must be a hook. This file is for guidance; hooks are for guarantees.
+
 ---
 
 ## Sprint Planning (Opus, every ~3 hours)
