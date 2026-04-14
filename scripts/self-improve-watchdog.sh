@@ -57,6 +57,15 @@ cleanup_dirty_state() {
         git clean -fd --exclude=.claude/ 2>/dev/null || true
         log "Working tree cleaned."
     fi
+
+    # Remove stale in-progress labels — no session is running, nothing is in-progress
+    local IN_PROGRESS=$(gh issue list --state open --label in-progress --json number --jq '.[].number' 2>/dev/null || true)
+    if [[ -n "$IN_PROGRESS" ]]; then
+        for NUM in $IN_PROGRESS; do
+            gh issue edit "$NUM" --remove-label in-progress 2>/dev/null || true
+        done
+        log "Removed in-progress from: $IN_PROGRESS"
+    fi
 }
 
 kill_claude() {
