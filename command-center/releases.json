@@ -1126,5 +1126,17 @@
       "dual-model cost optimization + sprint planning + online food default"
     ],
     "fixes": []
+  },
+  {
+    "build": 112,
+    "date": "2026-04-13T18:30:00-07:00",
+    "description": "chore: TestFlight build 112",
+    "features": [
+      "Muscle group heatmap — volume intensity shading shows workout emphasis",
+      "Muscle group heatmap — weekly set counts per muscle group"
+    ],
+    "fixes": [
+      "Sonnet was skipping TestFlight — removed misleading except text"
+    ]
   }
 ]
