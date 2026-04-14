@@ -146,7 +146,7 @@
         </div>
       </details>
 
-      <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">Feature ideas from humans and from the PE/Product Designer personas during sprint planning.</p>
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">Your feature requests. P0 gets picked up next senior session, P1 gets planned next sprint.</p>
       <div id="features-list">
         <div class="empty" style="color:var(--text-muted)">Loading...</div>
       </div>
@@ -831,13 +831,16 @@
     async function loadFeatureRequests() {
       const el = document.getElementById('features-list');
       try {
-        const [open, closed] = await Promise.all([
+        const isHuman = i => (i.body || '').includes('Feature request submitted via Drift Command Center');
+        const [openRaw, closedRaw] = await Promise.all([
           api(`/repos/${OWNER}/${REPO}/issues?labels=feature-request&state=open&per_page=30`),
           api(`/repos/${OWNER}/${REPO}/issues?labels=feature-request&state=closed&per_page=10&sort=updated&direction=desc`)
         ]);
+        const open = openRaw.filter(isHuman);
+        const closed = closedRaw.filter(isHuman);
 
         if (open.length === 0 && closed.length === 0) {
-          el.innerHTML = '<div class="empty">No feature requests yet. The PE and Product Designer personas will generate these during sprint planning.</div>';
+          el.innerHTML = '<div class="empty">No feature requests yet. Use the form above to submit one.</div>';
           return;
         }
 
