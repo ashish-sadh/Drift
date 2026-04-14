@@ -76,9 +76,9 @@ enum BehaviorInsightService {
         var missedNames: [String] = []
 
         for supp in supplements {
-            // Check last 3 days for this supplement
+            // Check previous 3 days (skip today — new supplements shouldn't false-alert)
             var takenRecently = false
-            for dayOffset in 0...2 {
+            for dayOffset in 1...3 {
                 guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: Date()) else { continue }
                 let dateStr = DateFormatters.dateOnly.string(from: date)
                 if let logs = try? AppDatabase.shared.fetchSupplementLogs(for: dateStr),
@@ -239,7 +239,7 @@ enum BehaviorInsightService {
                   nutrition.calories > 200 else { continue }  // skip days with minimal logging
 
             totalDays += 1
-            if nutrition.proteinG >= targets.proteinG * 0.9 {  // within 10% of target
+            if nutrition.proteinG >= targets.proteinG * 0.8 {  // matches alert threshold (80%)
                 hitDays += 1
             } else {
                 missedDays += 1

@@ -2530,6 +2530,34 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     }
 }
 
+@Test func copyEntryToTodayPreservesMealType() async throws {
+    let db = try AppDatabase.empty()
+    let vm = await FoodLogViewModel(database: db)
+
+    // Log a breakfast item yesterday
+    let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+    await vm.goToDate(yesterday)
+    await vm.quickAdd(name: "Morning Oats", calories: 350, proteinG: 12, carbsG: 55, fatG: 8, fiberG: 5, mealType: .breakfast)
+
+    let entries = await vm.todayEntries
+    guard let entry = entries.first else {
+        #expect(Bool(false), "Should have an entry to copy")
+        return
+    }
+    #expect(entry.mealType == MealType.breakfast.rawValue)
+
+    // Copy to today (regardless of current time, meal type should stay breakfast)
+    await vm.copyEntryToToday(entry)
+
+    await vm.goToDate(Date())
+    await vm.loadTodayMeals()
+    let todayEntries = await vm.todayEntries
+    #expect(!todayEntries.isEmpty, "Should have copied entry")
+    if let copied = todayEntries.first {
+        #expect(copied.mealType == MealType.breakfast.rawValue, "Copied entry should preserve original meal type, got \(copied.mealType ?? "nil")")
+    }
+}
+
 @Test func plantPointsFoodItemsQuery() async throws {
     let db = try AppDatabase.empty()
     try db.seedFoodsFromJSON()

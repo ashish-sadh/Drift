@@ -202,8 +202,7 @@ final class FoodLogViewModel {
     /// Copy a food entry to today (used when viewing a past day).
     func copyEntryToToday(_ entry: FoodEntry) {
         let todayStr = DateFormatters.todayString
-        let hour = Calendar.current.component(.hour, from: Date())
-        let mealType: MealType = hour < 11 ? .breakfast : hour < 15 ? .lunch : hour < 18 ? .snack : .dinner
+        let mealType = MealType(rawValue: entry.mealType ?? "") ?? .snack
         do {
             let mealLogs = try database.fetchMealLogs(for: todayStr)
             var mealLog = mealLogs.first { $0.mealType == mealType.rawValue }
