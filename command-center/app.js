@@ -74,7 +74,13 @@ async function listReports() {
   const contents = await smartApi(`/repos/${OWNER}/${REPO}/contents/Docs/reports`);
   return contents
     .filter(f => f.name.endsWith('.md'))
-    .sort((a, b) => b.name.localeCompare(a.name));
+    .sort((a, b) => {
+      // Numeric sort for cycle numbers, date sort for exec reports
+      const numA = a.name.match(/cycle-(\d+)/)?.[1];
+      const numB = b.name.match(/cycle-(\d+)/)?.[1];
+      if (numA && numB) return parseInt(numB) - parseInt(numA);
+      return b.name.localeCompare(a.name);
+    });
 }
 
 async function getReportContent(path) {
@@ -198,6 +204,39 @@ async function showUser() {
     showAuth();
   }
   _resolveUserReady();
+}
+
+// Sprint plan parsing
+async function getSprintPlan() {
+  try {
+    const content = await getReportContent('Docs/sprint-plan.md');
+    const lines = content.split('\n');
+    const title = lines[0]?.replace(/^#\s*/, '') || 'Current Sprint';
+
+    const tasks = [];
+    let current = null;
+    for (const line of lines) {
+      const taskMatch = line.match(/^## Task \d+:\s*(.+)/);
+      if (taskMatch) {
+        if (current) tasks.push(current);
+        current = { name: taskMatch[1], status: 'pending', priority: '', classification: '' };
+      }
+      if (current) {
+        const statusMatch = line.match(/\*\*Status:\*\*\s*\[([ x])\]/);
+        if (statusMatch) current.status = statusMatch[1] === 'x' ? 'done' : 'pending';
+        const prioMatch = line.match(/\*\*Priority:\*\*\s*(\w+)/);
+        if (prioMatch) current.priority = prioMatch[1];
+        const classMatch = line.match(/\*\*Classification:\*\*\s*(.+)/);
+        if (classMatch) current.classification = classMatch[1].trim();
+      }
+    }
+    if (current) tasks.push(current);
+
+    const done = tasks.filter(t => t.status === 'done').length;
+    return { title, tasks, done, total: tasks.length };
+  } catch {
+    return null;
+  }
 }
 
 function formatDate(filename) {

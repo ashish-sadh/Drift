@@ -22,12 +22,17 @@
       <div class="tab" data-tab="bugs">Bugs</div>
       <div class="tab" data-tab="releases">Releases</div>
       <div class="tab" data-tab="feedback">Feedback</div>
+      <div class="tab" data-tab="sprint">Sprint</div>
       <div class="tab" data-tab="designs" id="designs-tab" style="display:none">Designs</div>
       <div class="tab" data-tab="review" id="review-tab" style="display:none">Review</div>
       <div class="tab" data-tab="admin" id="admin-tab" style="display:none">Admin</div>
     </div>
 
     <div id="tab-reports">
+      <!-- Current Sprint -->
+      <div id="sprint-section" style="margin-bottom:24px;"></div>
+
+      <h3 style="color:var(--text-muted);font-size:13px;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:12px;">Reports</h3>
       <div class="loading" id="reports-loading"><span class="spinner"></span> Loading reports...</div>
       <ul class="report-list" id="report-list"></ul>
     </div>
@@ -90,6 +95,12 @@
     <div id="tab-releases" style="display:none">
       <div id="releases-list">
         <div class="loading"><span class="spinner"></span> Loading release notes...</div>
+      </div>
+    </div>
+
+    <div id="tab-sprint" style="display:none">
+      <div id="sprint-content">
+        <div class="loading"><span class="spinner"></span> Loading sprint...</div>
       </div>
     </div>
 
@@ -161,7 +172,7 @@
   <script src="app.js"></script>
   <script>
     // Tabs
-    const allTabs = ['reports', 'bugs', 'feedback', 'releases', 'designs', 'review', 'admin'];
+    const allTabs = ['reports', 'bugs', 'feedback', 'releases', 'sprint', 'designs', 'review', 'admin'];
     document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -173,6 +184,7 @@
         if (tab.dataset.tab === 'feedback') loadFeedback();
         if (tab.dataset.tab === 'bugs') { loadIssues(); loadFixedBugs(); }
         if (tab.dataset.tab === 'releases') loadReleases();
+        if (tab.dataset.tab === 'sprint') loadSprint();
         if (tab.dataset.tab === 'designs') loadDesignDocs();
         if (tab.dataset.tab === 'review') loadReviewItems();
         if (tab.dataset.tab === 'admin') loadAdmin();
@@ -788,9 +800,122 @@
       }
     }
 
+    // Load sprint board
+    async function loadSprint() {
+      const el = document.getElementById('sprint-content');
+      try {
+        const [sprintMd, roadmapMd] = await Promise.all([
+          getReportContent('Docs/sprint.md'),
+          getReportContent('Docs/roadmap.md')
+        ]);
+
+        // Parse sprint into sections
+        const sections = [];
+        let current = null;
+        for (const line of sprintMd.split('\n')) {
+          if (line.startsWith('## ')) {
+            current = { title: line.replace('## ', ''), items: [], raw: '' };
+            sections.push(current);
+          } else if (current) {
+            current.raw += line + '\n';
+          }
+        }
+
+        // Count tasks
+        const todoCount = (sprintMd.match(/- \[ \]/g) || []).length;
+        const doneCount = (sprintMd.match(/- \[x\]/g) || []).length;
+
+        // Extract roadmap "Now" items
+        const nowMatch = roadmapMd.match(/## Now[\s\S]*?(?=## Next|## Later|$)/i);
+        const nowSection = nowMatch ? nowMatch[0] : '';
+
+        let html = `
+          <div style="display:flex;gap:16px;margin-bottom:20px;flex-wrap:wrap;">
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;flex:1;min-width:140px;">
+              <div style="font-size:24px;font-weight:700;color:var(--green);">${doneCount}</div>
+              <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;">Done</div>
+            </div>
+            <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;flex:1;min-width:140px;">
+              <div style="font-size:24px;font-weight:700;color:var(--accent);">${todoCount}</div>
+              <div style="font-size:12px;color:var(--text-muted);text-transform:uppercase;">Remaining</div>
+            </div>
+          </div>
+        `;
+
+        // Render each sprint section
+        for (const section of sections) {
+          const isDone = section.title.toLowerCase().includes('done');
+          const isCollapsed = isDone || section.title.toLowerCase().includes('permanent');
+          html += `
+            <details ${isCollapsed ? '' : 'open'} style="margin-bottom:16px;">
+              <summary style="cursor:pointer;font-size:16px;font-weight:600;color:${isDone ? 'var(--green)' : 'var(--accent)'};padding:8px 0;">${escapeHtml(section.title)}</summary>
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-top:4px;">
+                <div class="sprint-items">${renderMarkdown(section.raw)}</div>
+              </div>
+            </details>
+          `;
+        }
+
+        // Roadmap "Now" section
+        if (nowSection) {
+          html += `
+            <details style="margin-bottom:16px;">
+              <summary style="cursor:pointer;font-size:16px;font-weight:600;color:var(--yellow);padding:8px 0;">Roadmap — Now</summary>
+              <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 20px;margin-top:4px;">
+                <div class="sprint-items">${renderMarkdown(nowSection)}</div>
+              </div>
+            </details>
+          `;
+        }
+
+        el.innerHTML = html;
+      } catch (e) {
+        el.innerHTML = `<div class="empty">Failed to load sprint: ${e.message}</div>`;
+      }
+    }
+
     // Init
+    // Load sprint board
+    async function loadSprint() {
+      const el = document.getElementById('sprint-section');
+      const sprint = await getSprintPlan();
+      if (!sprint || sprint.tasks.length === 0) {
+        el.innerHTML = '';
+        return;
+      }
+
+      const pct = sprint.total > 0 ? Math.round(sprint.done / sprint.total * 100) : 0;
+      el.innerHTML = `
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <h3 style="margin:0;font-size:16px;">${escapeHtml(sprint.title)}</h3>
+            <span style="font-size:13px;color:var(--text-muted)">${sprint.done}/${sprint.total} done</span>
+          </div>
+          <div style="background:var(--bg);border-radius:4px;height:6px;margin-bottom:16px;overflow:hidden;">
+            <div style="background:var(--green);height:100%;width:${pct}%;border-radius:4px;transition:width 0.3s;"></div>
+          </div>
+          ${sprint.tasks.map(t => {
+            const isDone = t.status === 'done';
+            const statusColor = isDone ? 'var(--green)' : 'var(--yellow)';
+            const statusText = isDone ? 'Done' : 'In Progress';
+            const isSenior = t.classification.includes('SENIOR');
+            const classColor = isSenior ? 'rgba(248,81,73,0.15)' : 'rgba(88,166,255,0.15)';
+            const classTextColor = isSenior ? 'var(--red)' : 'var(--accent)';
+            const classLabel = isSenior ? 'Opus' : 'Sonnet';
+            return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border);${isDone ? 'opacity:0.6;' : ''}">
+              <span style="font-size:16px;">${isDone ? '✅' : '⏳'}</span>
+              <span style="flex:1;font-size:14px;${isDone ? 'text-decoration:line-through;' : ''}">${escapeHtml(t.name)}</span>
+              <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:${classColor};color:${classTextColor}">${classLabel}</span>
+              ${t.priority ? `<span style="font-size:11px;color:var(--text-muted)">${t.priority}</span>` : ''}
+            </div>`;
+          }).join('')}
+        </div>
+      `;
+    }
+
     showUser();
     loadMetrics();
+    loadSprint();
     loadReports();
 
     // Admin tab loader
