@@ -370,11 +370,13 @@
           const priorityBadge = priority
             ? `<span class="report-type" style="background:${priority.name === 'P0' ? 'rgba(248,81,73,0.15);color:var(--red)' : priority.name === 'P1' ? 'rgba(210,153,34,0.15);color:var(--yellow)' : 'rgba(139,148,158,0.15);color:var(--text-muted)'}">${priority.name}</span>`
             : '';
+          const needsReview = i.labels.some(l => l.name === 'needs-review');
           const hasImage = i.body && i.body.includes('![');
           return `<li class="report-item" onclick="window.open('${i.html_url}','_blank')">
             <div>
               <span class="report-title">#${i.number} ${i.title}</span>
               ${priorityBadge}
+              ${needsReview ? '<span class="report-type" style="background:rgba(210,153,34,0.15);color:var(--yellow)">Needs Review</span>' : ''}
               ${hasImage ? '<span class="badge">screenshot</span>' : ''}
             </div>
             <span class="report-date">${new Date(i.created_at).toLocaleDateString()}</span>
