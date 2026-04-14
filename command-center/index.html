@@ -915,7 +915,9 @@
 
     // HTML defaults: sign-in visible, tabs hidden, screenshot = sign-in link
     // JS only runs to SHOW things when signed in
+    console.log('[Init] token:', getToken() ? 'YES' : 'NO');
     if (getToken()) {
+      console.log('[Init] Showing authed UI...');
       document.getElementById('signin-prompt').style.display = 'none';
       document.getElementById('metrics').style.display = '';
       document.getElementById('bugs-authed').style.display = 'block';
