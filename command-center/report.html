@@ -227,6 +227,9 @@
               commentsBySection[sectionIdx].push(c);
             }
           });
+        } else {
+          document.getElementById('pr-link').innerHTML =
+            `<span style="font-size:13px;color:var(--text-muted);opacity:0.7;">No PR for this report — inline comments unavailable</span>`;
         }
 
         renderReport(content);
@@ -276,7 +279,9 @@
         const hasComments = comments && comments.length > 0;
 
         html += `<div class="report-section${hasComments ? ' has-comments' : ''}" data-section="${idx}" data-start-line="${section.startLine}">`;
-        html += `<button class="comment-btn" onclick="event.stopPropagation();toggleComment(${idx}, ${section.startLine})" title="Add feedback">+</button>`;
+        if (currentPR) {
+          html += `<button class="comment-btn" onclick="event.stopPropagation();toggleComment(${idx}, ${section.startLine})" title="Add feedback">+</button>`;
+        }
         html += rendered;
 
         if (hasComments) {
@@ -312,7 +317,7 @@
       }
 
       if (!getToken()) { alert('Sign in to comment'); return; }
-      if (!currentPR) { alert('No PR found for this report'); return; }
+      if (!currentPR) return;
 
       box.style.display = 'block';
       box.innerHTML = `

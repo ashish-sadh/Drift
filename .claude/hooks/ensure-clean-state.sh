@@ -47,6 +47,27 @@ if [ "$CYCLE_COUNT" -eq "$LAST_REVIEW" ] && [ "$CYCLE_COUNT" -gt 0 ]; then
   done
 fi
 
+# Check if any dirty files are report files (need PR branch, not direct main commit)
+REPORT_FILES=$(git status --porcelain 2>/dev/null | grep -v '^??' | grep 'Docs/reports/' | awk '{print $2}')
+
+if [ -n "$REPORT_FILES" ] && [ -n "$ISSUES" ]; then
+  # Extract report type/name for branch naming
+  REPORT_NAME=$(echo "$REPORT_FILES" | head -1 | sed 's|Docs/reports/||;s|\.md||')
+  if echo "$REPORT_NAME" | grep -q "^review-cycle"; then
+    BRANCH="review/$(echo "$REPORT_NAME" | sed 's/^review-//')"
+  elif echo "$REPORT_NAME" | grep -q "^exec-"; then
+    BRANCH="report/$REPORT_NAME"
+  else
+    BRANCH="report/$REPORT_NAME"
+  fi
+
+  echo -e "BLOCKED: Cannot stop with dirty state.\n\n${ISSUES}" >&2
+  echo -e "IMPORTANT: Report files detected in uncommitted changes ($REPORT_FILES)." >&2
+  echo -e "You MUST create a PR branch for reports — do NOT commit them to main." >&2
+  echo -e "Steps: git checkout -b $BRANCH && commit report + related files && git push -u origin $BRANCH && gh pr create --label report && git checkout main" >&2
+  exit 2
+fi
+
 if [ -n "$ISSUES" ]; then
   echo -e "BLOCKED: Cannot stop with dirty state.\n\n${ISSUES}Commit all changes and push before stopping." >&2
   exit 2
