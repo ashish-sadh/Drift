@@ -74,7 +74,7 @@ struct AIChatView: View {
 
                 TextField(vm.speechService.isRecording ? "Listening..." : "Ask anything...", text: $vm.inputText, axis: .vertical)
                     .textFieldStyle(.plain).font(.subheadline)
-                    .lineLimit(1...3).focused($inputFocused)
+                    .lineLimit(1...(vm.speechService.isRecording ? 6 : 3)).focused($inputFocused)
                     .onSubmit { vm.sendMessage() }
 
                 if vm.speechService.isRecording {

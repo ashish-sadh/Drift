@@ -2,11 +2,10 @@ import Foundation
 import Speech
 import AVFoundation
 
-/// On-device speech recognition for AI chat. Privacy-first: on-device only.
-///
-/// Approach: partial results accumulate the full transcript. We never rely on
-/// isFinal for text — only to know when to restart the recognizer. The last
-/// partial result always has the complete text.
+/// On-device speech recognition. Committed + Live text model:
+/// committedText = locked-in text from finished segments (never lost)
+/// liveText = raw output from current segment (updates constantly)
+/// Display = committedText + liveText (always grows, never flashes)
 @Observable
 final class SpeechRecognitionService: @unchecked Sendable {
     static let shared = SpeechRecognitionService()
@@ -26,9 +25,10 @@ final class SpeechRecognitionService: @unchecked Sendable {
     private let audioQueue = DispatchQueue(label: "com.drift.speech", qos: .userInitiated)
     private var silenceTimer: DispatchWorkItem?
     private var onDoneCallback: (@MainActor (String) -> Void)?
-    private var lastPartialText = ""  // Always the most recent text from partials
 
-    private static let silenceTimeout: TimeInterval = 8.0
+    private var committedText = ""  // Locked-in text from completed segments
+    private static let maxChars = 500
+    private static let silenceTimeout: TimeInterval = 15.0
 
     private init() {}
 
@@ -54,35 +54,52 @@ final class SpeechRecognitionService: @unchecked Sendable {
             return
         }
         onDoneCallback = onDone
-        lastPartialText = ""
+        committedText = ""
         recordingState = .recording
         transcript = ""
-        setupEngine(recognizer: recognizer, onTranscript: onTranscript)
+
+        let status = SFSpeechRecognizer.authorizationStatus()
+        switch status {
+        case .authorized:
+            setupEngine(recognizer: recognizer, onTranscript: onTranscript)
+        case .notDetermined:
+            SFSpeechRecognizer.requestAuthorization { [weak self] s in
+                DispatchQueue.main.async {
+                    if s == .authorized {
+                        self?.setupEngine(recognizer: recognizer, onTranscript: onTranscript)
+                    } else {
+                        self?.recordingState = .unavailable("Speech recognition denied.")
+                    }
+                }
+            }
+        case .denied, .restricted:
+            recordingState = .unavailable("Enable in Settings → Privacy → Speech Recognition.")
+        @unknown default: break
+        }
     }
 
-    /// Stop and send — uses lastPartialText (always complete).
+    /// Stop and send
     @MainActor
     func gracefulStop() {
         silenceTimer?.cancel(); silenceTimer = nil
-        let text = lastPartialText
+        let text = transcript.trimmingCharacters(in: .whitespaces)
         cleanup()
         recordingState = .idle
         let cb = onDoneCallback; onDoneCallback = nil
-        if !text.trimmingCharacters(in: .whitespaces).isEmpty { cb?(text) }
+        if !text.isEmpty { cb?(text) }
     }
 
-    /// Stop for editing — keeps text in field, doesn't send.
+    /// Stop for editing — keeps text, doesn't send
     @MainActor
     func forceStop() {
         silenceTimer?.cancel(); silenceTimer = nil
         onDoneCallback = nil
         cleanup()
         recordingState = .idle
-        // transcript and inputText keep their values
     }
 
     @MainActor
-    private func finishFromSilence(text: String) {
+    private func autoSend(text: String) {
         silenceTimer?.cancel(); silenceTimer = nil
         cleanup()
         recordingState = .idle
@@ -131,7 +148,7 @@ final class SpeechRecognitionService: @unchecked Sendable {
                 return
             }
 
-            // Audio tap writes to currentRequest — survives request swaps
+            // Audio tap writes to currentRequest (survives segment restarts)
             inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
                 self?.currentRequest?.append(buffer)
             }
@@ -162,8 +179,6 @@ final class SpeechRecognitionService: @unchecked Sendable {
     ) {
         guard recordingState == .recording else { return }
 
-        let prefix = lastPartialText  // Text accumulated from previous segments
-
         let request = SFSpeechAudioBufferRecognitionRequest()
         request.shouldReportPartialResults = true
         request.taskHint = .dictation
@@ -177,35 +192,44 @@ final class SpeechRecognitionService: @unchecked Sendable {
                 guard self.recordingState == .recording else { return }
 
                 if let text = result?.bestTranscription.formattedString, !text.isEmpty {
-                    // Combine with previous segments
-                    let full = prefix.isEmpty ? text : prefix + " " + text
-                    self.lastPartialText = full
+                    // Combine committed (locked) + live (current segment)
+                    let full = self.committedText.isEmpty ? text : self.committedText + " " + text
                     self.transcript = full
                     onTranscript(full)
 
-                    // Reset silence timer
+                    // Reset silence timer (15s of no new results → auto-send)
                     self.silenceTimer?.cancel()
                     let captured = full
                     let timer = DispatchWorkItem { [weak self] in
-                        self?.finishFromSilence(text: captured)
+                        self?.autoSend(text: captured)
                     }
                     self.silenceTimer = timer
                     DispatchQueue.main.asyncAfter(deadline: .now() + Self.silenceTimeout, execute: timer)
+
+                    // Auto-stop at 500 chars
+                    if full.count > Self.maxChars {
+                        self.gracefulStop()
+                        return
+                    }
                 }
 
                 let isFinal = result?.isFinal ?? false
                 if isFinal {
-                    // Apple ended this segment (pause detected).
-                    // Don't touch lastPartialText — it already has the full text.
-                    // Just start a new segment to keep listening.
+                    // Pause detected — commit current text, restart segment
+                    // Display stays because committedText is updated BEFORE liveText resets
+                    let segmentText = result?.bestTranscription.formattedString ?? ""
+                    if !segmentText.isEmpty {
+                        self.committedText = self.committedText.isEmpty ? segmentText : self.committedText + " " + segmentText
+                    }
+                    // Display still shows committedText (no flash)
+                    onTranscript(self.committedText)
+                    // Restart for next utterance
                     self.startSegment(recognizer: unsafeRec, supportsOnDevice: supportsOnDevice, onTranscript: onTranscript)
                 } else if error != nil {
                     let desc = error?.localizedDescription ?? ""
                     if desc.contains("203") || desc.contains("no speech") {
-                        // No speech — just restart
                         self.startSegment(recognizer: unsafeRec, supportsOnDevice: supportsOnDevice, onTranscript: onTranscript)
                     }
-                    // Other errors: just keep going, silence timer will finish
                 }
             }
         }
