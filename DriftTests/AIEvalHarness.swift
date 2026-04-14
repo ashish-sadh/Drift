@@ -1480,4 +1480,70 @@ final class AIEvalHarness: XCTestCase {
         let promptDefault = AIActionExecutor.nutritionEstimationPrompt(food: "biryani", servings: nil)
         XCTAssertTrue(promptDefault.contains("1 serving"), "Default should be 1 serving")
     }
+
+    // MARK: - Word Fraction Amounts
+
+    @MainActor
+    func testWordFractionAmounts() {
+        // "third pizza" → 0.333
+        let (thirdSrv, thirdName, _) = AIActionExecutor.extractAmount(from: "third pizza")
+        XCTAssertNotNil(thirdSrv, "'third' should parse as ~0.333")
+        if let s = thirdSrv { XCTAssertEqual(s, 1.0/3, accuracy: 0.01) }
+        XCTAssertEqual(thirdName, "pizza")
+
+        // "sixth cake" → 0.167
+        let (sixthSrv, _, _) = AIActionExecutor.extractAmount(from: "sixth cake")
+        XCTAssertNotNil(sixthSrv)
+        if let s = sixthSrv { XCTAssertEqual(s, 1.0/6, accuracy: 0.01) }
+
+        // "eighth pie" → 0.125
+        let (eighthSrv, _, _) = AIActionExecutor.extractAmount(from: "eighth pie")
+        XCTAssertNotNil(eighthSrv)
+        if let s = eighthSrv { XCTAssertEqual(s, 0.125, accuracy: 0.01) }
+    }
+
+    // MARK: - Goal Pattern Expansion
+
+    @MainActor
+    func testGoalPatternExpanded() {
+        let goalQueries = [
+            "trying to reach 160 lbs",
+            "get down to 75 kg",
+            "want to reach 155",
+            "reach 70 kg",
+        ]
+        for query in goalQueries {
+            let result = StaticOverrides.match(query.lowercased())
+            XCTAssertNotNil(result, "'\(query)' should match as weight goal")
+        }
+    }
+
+    // MARK: - Activity Verb Expansion
+
+    @MainActor
+    func testActivityVerbsExpanded() {
+        let activities = [
+            "worked out for 30 min",
+            "i worked out for an hour",
+            "trained legs for 45 min",
+            "i trained for 20 minutes",
+            "i ran for 30 min",
+            "ran for 20 minutes",
+        ]
+        for query in activities {
+            let result = StaticOverrides.match(query.lowercased())
+            XCTAssertNotNil(result, "'\(query)' should match as activity")
+        }
+    }
+
+    // MARK: - Barcode Trigger Expansion
+
+    @MainActor
+    func testBarcodeTriggerExpanded() {
+        let triggers = ["barcode scan", "scan product"]
+        for query in triggers {
+            let result = StaticOverrides.match(query.lowercased())
+            XCTAssertNotNil(result, "'\(query)' should trigger barcode scanner")
+        }
+    }
 }

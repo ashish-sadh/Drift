@@ -48,7 +48,8 @@ enum StaticOverrides {
 
         // Barcode scan
         if lower == "scan barcode" || lower == "scan food" || lower == "scan" || lower == "scan a product"
-            || lower == "barcode" || lower.contains("scan barcode") {
+            || lower == "barcode" || lower == "barcode scan" || lower == "scan product"
+            || lower.contains("scan barcode") {
             return .uiAction(.openBarcodeScanner, "Opening barcode scanner...")
         }
 
@@ -272,7 +273,7 @@ enum StaticOverrides {
 
         // Set weight goal — resolve word numbers first ("one sixty" → "160")
         let goalInput = Self.resolveWordNumbers(lower)
-        let goalPattern = #"(?:set (?:my )?goal to|target weight|i want to weigh|goal weight|my goal is)\s+(\d+\.?\d*)\s*(kg|lbs|lb|pounds?)?"#
+        let goalPattern = #"(?:set (?:my )?goal to|target weight|i want to weigh|goal weight|my goal is|(?:trying|want) to (?:reach|get (?:down )?to)|get (?:down )?to|reach)\s+(\d+\.?\d*)\s*(kg|lbs|lb|pounds?)?"#
         if let goalRegex = try? NSRegularExpression(pattern: goalPattern),
            let goalMatch = goalRegex.firstMatch(in: goalInput, range: NSRange(goalInput.startIndex..., in: goalInput)),
            let numRange = Range(goalMatch.range(at: 1), in: goalInput),
@@ -393,7 +394,8 @@ enum StaticOverrides {
         // Diet/fitness advice → food_info tool (LLM presents personalized advice with macro data)
 
         // Completed activity (both models)
-        let activityPrefixes = ["i did ", "i went ", "just did ", "just finished ", "did "]
+        let activityPrefixes = ["i did ", "i went ", "just did ", "just finished ", "did ",
+                                  "worked out ", "i worked out ", "trained ", "i trained ", "i ran ", "ran "]
         if let prefix = activityPrefixes.first(where: { lower.hasPrefix($0) }) {
             var activity = String(lower.dropFirst(prefix.count)).trimmingCharacters(in: .whitespaces)
             for suffix in [" today", " this morning", " this evening", " just now"] {
@@ -429,6 +431,15 @@ enum StaticOverrides {
                     durationMin = mins
                     activity = String(activity.dropLast(phrase.count)).trimmingCharacters(in: .whitespaces)
                     break
+                }
+            }
+            // Default activity name when only duration given ("worked out for an hour")
+            if activity.isEmpty || activity.count <= 2 {
+                let defaults: [String: String] = ["worked out ": "Workout", "i worked out ": "Workout",
+                                                   "trained ": "Training", "i trained ": "Training",
+                                                   "i ran ": "Running", "ran ": "Running"]
+                if let name = defaults[prefix], durationMin != nil {
+                    return .response("Log \(name) (\(durationMin!) min) for today? Say yes to confirm.")
                 }
             }
             if !activity.isEmpty && activity.count > 2 {
