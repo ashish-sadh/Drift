@@ -205,8 +205,8 @@
       });
     });
 
-    // Screenshot preview (multiple)
-    document.getElementById('bug-screenshot').addEventListener('change', (e) => {
+    // Screenshot preview (multiple) — element may not exist when not signed in
+    document.getElementById('bug-screenshot')?.addEventListener('change', (e) => {
       const preview = document.getElementById('screenshot-preview');
       preview.innerHTML = '';
       for (const file of e.target.files) {
