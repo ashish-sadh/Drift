@@ -1163,5 +1163,26 @@
       "Recovery score mismatch (#41)",
       "Progressive overload spacing (#42)"
     ]
+  },
+  {
+    "build": 116,
+    "date": "2026-04-14T19:00:00-07:00",
+    "description": "chore: TestFlight build 116",
+    "features": [
+      "Indian sweets added to food database",
+      "Command Center: loading indicators on all tabs",
+      "Anonymous bug reports via Cloudflare Worker proxy",
+      "Report a Bug moved to top of More tab",
+      "Screenshot field for signed-in bug reporters",
+      "Sprint tab shows sprint tasks + permanent tasks + completed"
+    ],
+    "fixes": [
+      "Health Nudges default OFF — no notification prompt unless enabled",
+      "Voice input: committed + live text model, no more lost words on pauses",
+      "Command Center JS crash — null check on bug-screenshot element",
+      "Command Center: stray closing brace breaking all JS",
+      "Command Center: HTML-first auth state, no JS needed for anonymous view",
+      "3 bugs from systematic hunt (#46, #47, #48)"
+    ]
   }
 ]
