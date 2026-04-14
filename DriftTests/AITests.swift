@@ -2069,3 +2069,58 @@ import Testing
     let names = suggestions.map(\.name)
     #expect(Set(names).count == names.count, "Suggestions should have no duplicates")
 }
+
+// MARK: - Exercise Instructions via Chat
+
+@MainActor @Test func exerciseInstructionsReturnsFormTip() {
+    let exercise = ExerciseDatabase.ExerciseInfo(
+        name: "Barbell Bench Press", bodyPart: "chest",
+        primaryMuscles: ["pectorals"], secondaryMuscles: ["triceps", "anterior deltoid"],
+        equipment: "barbell", category: "strength", level: "intermediate"
+    )
+    let result = ExerciseService.exerciseInstructions(exercise)
+    #expect(result.contains("Barbell Bench Press"))
+    #expect(result.contains("Form:"))
+    #expect(result.contains("pectorals"))
+    #expect(result.contains("triceps"))
+    #expect(result.contains("barbell"))
+}
+
+@MainActor @Test func exerciseInstructionsNoFormTip() {
+    let exercise = ExerciseDatabase.ExerciseInfo(
+        name: "Zottman Curl", bodyPart: "upper arms",
+        primaryMuscles: ["biceps"], secondaryMuscles: ["forearms"],
+        equipment: "dumbbell", category: "strength", level: "intermediate"
+    )
+    let result = ExerciseService.exerciseInstructions(exercise)
+    #expect(result.contains("Zottman Curl"))
+    #expect(!result.contains("Form:"))
+    #expect(result.contains("biceps"))
+}
+
+@MainActor @Test func staticOverrideHowDoIDeadlift() {
+    let result = StaticOverrides.match("how do I do a deadlift?")
+    if case .handler = result {
+        // Matched — good
+    } else {
+        Issue.record("Expected handler for 'how do I do a deadlift?'")
+    }
+}
+
+@MainActor @Test func staticOverrideFormTipsForSquats() {
+    let result = StaticOverrides.match("form tips for squats")
+    if case .handler = result {
+        // Matched — good
+    } else {
+        Issue.record("Expected handler for 'form tips for squats'")
+    }
+}
+
+@MainActor @Test func staticOverrideHowToBenchPress() {
+    let result = StaticOverrides.match("how to bench press")
+    if case .handler = result {
+        // Matched — good
+    } else {
+        Issue.record("Expected handler for 'how to bench press'")
+    }
+}

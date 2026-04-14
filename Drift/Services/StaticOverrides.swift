@@ -212,6 +212,22 @@ enum StaticOverrides {
             }
         }
 
+        // Exercise instructions: "how do I do a deadlift?", "form tips for squats", "how to bench press"
+        let instructionPattern = #"(?:how (?:do i|do you|to|should i) (?:do )?(?:a |an )?|form (?:tips?|cues?|check) (?:for |on )?(?:a |an )?|(?:teach|show|explain) (?:me )?(?:how to )?(?:do )?(?:a |an )?)(.+?)(?:\?|$)"#
+        if let instrRegex = try? NSRegularExpression(pattern: instructionPattern),
+           let instrMatch = instrRegex.firstMatch(in: lower, range: NSRange(lower.startIndex..., in: lower)),
+           let nameRange = Range(instrMatch.range(at: 1), in: lower) {
+            let exerciseQuery = String(lower[nameRange]).trimmingCharacters(in: .whitespaces)
+            if !exerciseQuery.isEmpty {
+                let results = ExerciseDatabase.search(query: exerciseQuery)
+                if let exercise = results.first {
+                    return .handler {
+                        ExerciseService.exerciseInstructions(exercise)
+                    }
+                }
+            }
+        }
+
         // Body comp entry
         let bfPattern = #"(?:body fat|bf|body fat %|bodyfat)\s*(?:is\s+)?(\d+\.?\d*)"#
         if let bfRegex = try? NSRegularExpression(pattern: bfPattern),

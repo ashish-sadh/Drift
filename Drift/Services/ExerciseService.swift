@@ -362,6 +362,28 @@ enum ExerciseService {
         return nil
     }
 
+    /// Formatted exercise instructions from the DB: form tip, muscles, equipment, level.
+    static func exerciseInstructions(_ exercise: ExerciseDatabase.ExerciseInfo) -> String {
+        var lines: [String] = []
+        lines.append("**\(exercise.name)** (\(exercise.category), \(exercise.level))")
+
+        if let tip = formTip(for: exercise.name) {
+            lines.append("Form: \(tip)")
+        }
+
+        let primary = exercise.primaryMuscles.joined(separator: ", ")
+        if !primary.isEmpty { lines.append("Primary muscles: \(primary)") }
+
+        let secondary = exercise.secondaryMuscles.joined(separator: ", ")
+        if !secondary.isEmpty { lines.append("Secondary: \(secondary)") }
+
+        if !exercise.equipment.isEmpty && exercise.equipment != "other" {
+            lines.append("Equipment: \(exercise.equipment)")
+        }
+
+        return lines.joined(separator: "\n")
+    }
+
     /// Body parts trained in the last 7 days.
     private static func recentBodyParts() -> Set<String> {
         guard let workouts = try? WorkoutService.fetchWorkouts(limit: 7) else { return [] }
