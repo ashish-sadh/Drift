@@ -7,9 +7,12 @@ enum AIResponseCleaner {
     static func clean(_ response: String) -> String {
         var text = response
 
-        // Remove ChatML artifacts
-        for artifact in ["<|im_start|>", "<|im_end|>", "<|endoftext|>", "<|assistant|>", "<|user|>", "<|system|>"] {
-            text = text.replacingOccurrences(of: artifact, with: "")
+        // Remove ChatML and Gemma special tokens
+        let specialTokens = ["<|im_start|>", "<|im_end|>", "<|endoftext|>", "<|assistant|>", "<|user|>", "<|system|>",
+                             "<start_of_turn>", "</start_of_turn>", "<end_of_turn>", "</end_of_turn>",
+                             "<bos>", "<eos>"]
+        for token in specialTokens {
+            text = text.replacingOccurrences(of: token, with: "")
         }
 
         // Remove format echoes from small models

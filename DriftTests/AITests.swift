@@ -596,6 +596,17 @@ import Testing
     #expect(!clean.contains("<|im_start|>"))
 }
 
+@Test func aiResponseCleanerRemovesGemmaTokens() async throws {
+    // Bug #69: Gemma model leaks </start_of_turn> into responses
+    let dirty = "Where to upload ?\n</start_of_turn>"
+    let clean = AIResponseCleaner.clean(dirty)
+    #expect(!clean.contains("</start_of_turn>"), "Gemma end token should be stripped")
+    #expect(!clean.contains("<start_of_turn>"))
+    #expect(!clean.contains("<end_of_turn>"))
+    #expect(!clean.contains("</end_of_turn>"))
+    #expect(clean.contains("upload"), "Real content should be preserved")
+}
+
 @Test func aiResponseCleanerRemovesDisclaimers() async throws {
     let dirty = "You're doing great. As an AI, I cannot provide medical advice. Keep it up!"
     let clean = AIResponseCleaner.clean(dirty)
