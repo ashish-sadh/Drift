@@ -7,6 +7,7 @@ struct WorkoutView: View {
     @Binding var selectedTab: Int
     @State private var workouts: [WorkoutSummary] = []
     @State private var overloadAlerts: [ProgressiveOverloadInfo] = []
+    @State private var showAllOverload = false
     @State private var weeklyCounts: [(weekStart: Date, count: Int)] = []
     @State private var templates: [WorkoutTemplate] = []
     @State private var showingNewWorkout = false
@@ -443,13 +444,20 @@ struct WorkoutView: View {
 
     private var overloadCard: some View {
         let wu = Preferences.weightUnit
+        let maxVisible = 5
+        let visible = showAllOverload ? overloadAlerts : Array(overloadAlerts.prefix(maxVisible))
+        let hasMore = overloadAlerts.count > maxVisible
         return VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "chart.line.uptrend.xyaxis").font(.caption).foregroundStyle(Theme.accent)
                 Text("Progressive Overload").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+                Spacer()
+                if hasMore {
+                    Text("\(overloadAlerts.count)").font(.caption2).foregroundStyle(.tertiary)
+                }
             }
 
-            ForEach(overloadAlerts, id: \.exercise) { info in
+            ForEach(visible, id: \.exercise) { info in
                 HStack(spacing: 8) {
                     Image(systemName: info.status == .stalling ? "exclamationmark.triangle.fill" : "arrow.down.circle.fill")
                         .font(.caption)
@@ -465,6 +473,16 @@ struct WorkoutView: View {
                         }
                     }
                     Spacer()
+                }
+            }
+
+            if hasMore {
+                Button {
+                    withAnimation(.easeInOut(duration: 0.2)) { showAllOverload.toggle() }
+                } label: {
+                    Text(showAllOverload ? "Show less" : "Show all \(overloadAlerts.count) exercises")
+                        .font(.caption2).foregroundStyle(Theme.accent)
+                        .frame(maxWidth: .infinity)
                 }
             }
         }.card()

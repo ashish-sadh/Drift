@@ -123,14 +123,16 @@ final class DashboardViewModel {
             hrvMs = (try? await hkService.fetchHRV(for: Date())) ?? 0
             restingHR = (try? await hkService.fetchRestingHeartRate(for: Date())) ?? 0
 
-            // Build baselines (same as detail page) for consistent recovery score
+            // Build baselines with 14-day windows (must match SleepRecoveryView for consistent scores)
             let hrvHist = (try? await hkService.fetchHRVHistory(days: 14)) ?? []
             let rhrHist = (try? await hkService.fetchRestingHeartRateHistory(days: 14)) ?? []
-            sleepHist = (try? await hkService.fetchSleepHistory(days: 30)) ?? []
+            let sleepHist14 = (try? await hkService.fetchSleepHistory(days: 14)) ?? []
             let respHist = (try? await hkService.fetchRespiratoryRateHistory(days: 14)) ?? []
             let baselines = RecoveryEstimator.calculateBaselines(
                 hrvHistory: hrvHist, rhrHistory: rhrHist,
-                respHistory: respHist, sleepHistory: sleepHist)
+                respHistory: respHist, sleepHistory: sleepHist14)
+            // 30-day sleep for behavior insights (needs longer window)
+            sleepHist = (try? await hkService.fetchSleepHistory(days: 30)) ?? []
 
             recoveryScore = RecoveryEstimator.calculateRecovery(
                 hrvMs: hrvMs, restingHR: restingHR, sleepHours: sleepHours,
