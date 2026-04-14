@@ -8,7 +8,8 @@ const CLIENT_ID = 'Ov23liSpSMfDtbMAiMdf';
 let currentUser = null;
 let _resolveUserReady;
 const userReady = new Promise(r => { _resolveUserReady = r; });
-function isOwner() { return currentUser && currentUser.login === OWNER; }
+const ADMINS = [OWNER, 'nimisha-26'];
+function isOwner() { return currentUser && ADMINS.includes(currentUser.login); }
 
 // Auth
 function getToken() { return localStorage.getItem('drift_gh_token'); }
