@@ -499,6 +499,8 @@ extension AIChatViewModel {
         guard let verb = ["log ", "ate ", "had ", "log for ", "ate for ", "had for "].first(where: { stripped.hasPrefix($0) }) else { return false }
         var remainder = String(stripped.dropFirst(verb.count)).trimmingCharacters(in: .whitespaces)
         if remainder.hasPrefix("for ") { remainder = String(remainder.dropFirst(4)).trimmingCharacters(in: .whitespaces) }
+        // Strip possessive: "my lunch" → "lunch"
+        if remainder.hasPrefix("my ") { remainder = String(remainder.dropFirst(3)) }
         guard let meal = mealWords.first(where: { remainder.hasPrefix($0) }) else { return false }
         let afterMeal = String(remainder.dropFirst(meal.count)).trimmingCharacters(in: .whitespaces)
         var foodText = afterMeal

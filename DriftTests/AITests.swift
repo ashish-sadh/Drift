@@ -626,6 +626,48 @@ import Testing
     #expect(truncated.count <= 200)
 }
 
+// MARK: - Conversational Prefix + Possessive Stripping (Bug #67)
+
+@Test func aiConversationalPrefix_IWantToLog() async throws {
+    let intent = AIActionExecutor.parseFoodIntent("i want to log my avocado")
+    #expect(intent != nil, "'i want to log my X' should be recognized")
+    #expect(intent?.query == "avocado")
+}
+
+@Test func aiConversationalPrefix_LogMy() async throws {
+    let intent = AIActionExecutor.parseFoodIntent("log my banana")
+    #expect(intent != nil, "'log my X' should strip 'my' and parse correctly")
+    #expect(intent?.query == "banana")
+}
+
+@Test func aiConversationalPrefix_IWantToLogWithServings() async throws {
+    let intent = AIActionExecutor.parseFoodIntent("i want to log 2 eggs")
+    #expect(intent != nil, "'i want to log N X' should work")
+    #expect(intent?.query == "eggs")
+    #expect(intent?.servings == 2)
+}
+
+@Test func aiConversationalPrefix_IdLikeToAdd() async throws {
+    let intent = AIActionExecutor.parseFoodIntent("i'd like to add my chicken breast")
+    #expect(intent != nil, "'i'd like to add my X' should be recognized")
+    #expect(intent?.query == "chicken breast")
+}
+
+@Test func aiConversationalPrefix_CanYouLog() async throws {
+    let intent = AIActionExecutor.parseFoodIntent("can you log my rice")
+    #expect(intent != nil, "'can you log my X' should be recognized")
+    #expect(intent?.query == "rice")
+}
+
+@Test func aiMultiConversationalPrefix_IWantToLogMultiple() async throws {
+    let intents = AIActionExecutor.parseMultiFoodIntent("i want to log my eggs and toast")
+    #expect(intents != nil, "'i want to log my X and Y' should parse as multi-food")
+    #expect(intents?.count == 2)
+    let names = intents?.map { $0.query } ?? []
+    #expect(names.contains("eggs"))
+    #expect(names.contains("toast"))
+}
+
 // MARK: - Natural Food Phrasing
 
 @Test func aiNaturalPhrasing_IJustHad() async throws {
