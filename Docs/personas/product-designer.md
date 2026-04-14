@@ -172,6 +172,16 @@
 - All Phase 3c "Now" items are complete. The product is at a natural inflection point — decide whether to deepen polish or expand to new surfaces (widgets, Apple Watch).
 - Exercise query bug (plurals, trailing phrases failing silently) is a reminder that AI-first products must handle natural language gracefully. Silent failures erode trust more than visible errors.
 
+### What I Learned — Review #38 (Cycle 1601, 2026-04-14)
+- 60% sprint completion (3/5) continues the pattern: P0s ship, P1/P2 slip. Sprint scope of 4-5 items remains the right ceiling.
+- MacroFactor Workouts + Boostcamp's Jeff Nippard integration proves the market is consolidating around all-in-one + expert content. Our counter: free, private, AI-first.
+- Phase 3c "Now" items are all complete. Time to expand surfaces — iOS widgets make Drift visible without opening the app. Whoop's lock screen complications are a major stickiness driver. This is the highest-impact Phase 4 feature.
+
+### What I Learned — Review #39 (Cycle 1627, 2026-04-14)
+- WHOOP's exercise auto-detection (AI identifies exercises for muscular load breakdown) raises the bar for AI-powered fitness coaching. Our text-based equivalent is chat exercise recognition — lean into it.
+- Industry consensus ("three apps that don't talk to each other") validates our all-in-one positioning. iOS widgets are the next visibility surface — makes Drift present throughout the day.
+- Three-time carry on systematic bug hunting is a prioritization failure. Making it a named P0 with no competing items is the fix (same pattern that shipped push notifications after 4 deferrals).
+
 ## Preferences & Style
 - Prefer opinionated design over configurability — make good defaults, don't add settings
 - Prefer chat-first interactions — every feature should be reachable from conversation

@@ -4,6 +4,38 @@ Periodic product + engineering reviews. Every 10 cycles of the self-improvement 
 
 ---
 
+## Review #39 — 2026-04-14 (Cycle 1627)
+
+### Summary
+Short sprint (26 cycles). TestFlight archive timeout resolved — build 115 published. sendMessage decomposition analyzed but not yet coded. 1/5 sprint items shipped due to short interval.
+
+### Key Achievement
+Build pipeline restored — TestFlight 115 available to testers with all recent fixes.
+
+### Key Concern
+Systematic bug hunt carried third time. Must ship as named P0 next sprint.
+
+### Sprint Plan (next 20 cycles)
+P0: sendMessage decomposition, systematic bug hunt. P1: iOS widget prototype. P2: Food search miss analysis.
+
+---
+
+## Review #38 — 2026-04-14 (Cycle 1601)
+
+### Summary
+Fixed recovery score mismatch and progressive overload list overflow. 60% sprint completion (3/5). TestFlight archive timing out — new infrastructure issue. All Phase 3c "Now" items remain complete; product at inflection point.
+
+### Key Achievement
+Recovery score consistency fix and cleaner progressive overload UX — reliability improvements that build user trust.
+
+### Key Concern
+TestFlight archive failing (compilation timeout, not build errors). Must debug before it blocks future releases.
+
+### Sprint Plan (next 20 cycles)
+P0: Fix TestFlight archive, sendMessage decomposition. P1: Systematic bug hunt, iOS widget prototype. P2: Food search miss analysis.
+
+---
+
 ## Review #37 — 2026-04-13 (Cycle 1483)
 
 ### Summary

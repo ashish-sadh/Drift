@@ -176,6 +176,16 @@
 - Regex-based exercise name extraction has a natural ceiling for natural language. The retry-with-singular-fallback is pragmatic for now, but long-term, routing through LLM intent classifier is the answer if edge cases proliferate.
 - Tests 981→1,037 (+56). NotificationService and BehaviorInsightService alert logic have zero dedicated tests — harden in next sprint.
 
+### What I Learned — Review #38 (Cycle 1601, 2026-04-14)
+- TestFlight archive timing out during compilation (no build errors) is a new failure mode. Likely stale DerivedData or resource contention. Clean build + investigation needed before it becomes a recurring blocker.
+- sendMessage at 491 lines has been flagged since Review #34 (4 reviews). Every sprint that doesn't address it makes the next feature harder. Treat as P0 this sprint — pair with any chat work.
+- WidgetKit + App Groups for iOS widgets is low architectural risk. GRDB read-only from widget extension is well-supported. The main concern is timeline refresh frequency vs. battery impact.
+
+### What I Learned — Review #39 (Cycle 1627, 2026-04-14)
+- sendMessage is 128 lines of dispatcher + 1,168 lines of handlers in the extension. The decomposition is about organizing handler groups and clarifying phase transition ownership, not shrinking one function.
+- TestFlight archive timeout resolved by clean build — no underlying compilation issue found. Monitor but don't invest in build system changes yet.
+- WidgetKit + App Groups for iOS widgets: start with static timeline refresh on app foreground, not live-updating. Battery impact is the main concern for widget extensions.
+
 ## Preferences & Approach
 - Prefer boring, proven solutions over clever abstractions
 - Prefer fixing patterns over fixing instances (fix the stale-preference pattern, not just one ViewModel)
