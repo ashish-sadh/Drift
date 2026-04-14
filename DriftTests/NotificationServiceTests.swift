@@ -3,26 +3,37 @@ import XCTest
 
 final class NotificationServiceTests: XCTestCase {
 
-    // MARK: - Preferences
+    // MARK: - Preference Defaults
 
-    func testHealthNudgesDefaultsToOn() {
-        // Clear any existing value
+    func testHealthNudgesDefaultsToOff() {
         UserDefaults.standard.removeObject(forKey: "drift_health_nudges")
-        XCTAssertTrue(Preferences.healthNudgesEnabled)
+        XCTAssertFalse(Preferences.healthNudgesEnabled, "Health nudges should default to OFF")
     }
 
-    func testHealthNudgesToggleOff() {
-        Preferences.healthNudgesEnabled = false
-        XCTAssertFalse(Preferences.healthNudgesEnabled)
-        // Restore
-        UserDefaults.standard.removeObject(forKey: "drift_health_nudges")
+    func testOnlineFoodSearchDefaultsToOn() {
+        UserDefaults.standard.removeObject(forKey: "drift_online_food_search")
+        XCTAssertTrue(Preferences.onlineFoodSearchEnabled, "Online food search should default to ON")
     }
 
-    func testHealthNudgesToggleOn() {
-        Preferences.healthNudgesEnabled = false
+    // MARK: - Toggles
+
+    func testHealthNudgesToggle() {
+        let original = UserDefaults.standard.object(forKey: "drift_health_nudges")
+        defer { if let o = original { UserDefaults.standard.set(o, forKey: "drift_health_nudges") } else { UserDefaults.standard.removeObject(forKey: "drift_health_nudges") } }
+
         Preferences.healthNudgesEnabled = true
         XCTAssertTrue(Preferences.healthNudgesEnabled)
-        // Restore
-        UserDefaults.standard.removeObject(forKey: "drift_health_nudges")
+        Preferences.healthNudgesEnabled = false
+        XCTAssertFalse(Preferences.healthNudgesEnabled)
+    }
+
+    func testOnlineFoodSearchToggle() {
+        let original = UserDefaults.standard.object(forKey: "drift_online_food_search")
+        defer { if let o = original { UserDefaults.standard.set(o, forKey: "drift_online_food_search") } else { UserDefaults.standard.removeObject(forKey: "drift_online_food_search") } }
+
+        Preferences.onlineFoodSearchEnabled = false
+        XCTAssertFalse(Preferences.onlineFoodSearchEnabled)
+        Preferences.onlineFoodSearchEnabled = true
+        XCTAssertTrue(Preferences.onlineFoodSearchEnabled)
     }
 }

@@ -200,6 +200,7 @@
           const el = document.getElementById('tab-' + t);
           if (el) el.style.display = tab.dataset.tab === t ? '' : 'none';
         });
+        if (!getToken()) return;  // Don't load data when not signed in
         if (tab.dataset.tab === 'feedback') loadFeedback();
         if (tab.dataset.tab === 'bugs') { loadIssues(); loadFixedBugs(); }
         if (tab.dataset.tab === 'releases') loadReleases();
