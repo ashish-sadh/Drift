@@ -860,13 +860,17 @@
     // Init
     function renderTask(t) {
       const isDone = t.status === 'done';
+      const isInProgress = t.status === 'in-progress';
       const isSenior = t.classification.includes('SENIOR');
       const classColor = isSenior ? 'rgba(248,81,73,0.15)' : 'rgba(88,166,255,0.15)';
       const classTextColor = isSenior ? 'var(--red)' : 'var(--accent)';
       const classLabel = isSenior ? 'Opus' : 'Sonnet';
+      const icon = isDone ? '✅' : isInProgress ? '🔧' : t.isPermanent ? '🔄' : '⏳';
+      const inProgressBadge = isInProgress ? '<span style="font-size:11px;padding:2px 8px;border-radius:10px;background:rgba(210,153,34,0.15);color:var(--yellow)">In Progress</span>' : '';
       return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--border);">
-        <span style="font-size:16px;">${isDone ? '✅' : t.isPermanent ? '🔄' : '⏳'}</span>
+        <span style="font-size:16px;">${icon}</span>
         <a href="${t.url || '#'}" target="_blank" style="flex:1;font-size:14px;color:var(--text);${isDone ? 'text-decoration:line-through;opacity:0.5;' : ''}">${t.number ? '#'+t.number+' ' : ''}${escapeHtml(t.name)}</a>
+        ${inProgressBadge}
         <span style="font-size:11px;padding:2px 8px;border-radius:10px;background:${classColor};color:${classTextColor}">${classLabel}</span>
         ${t.priority ? `<span style="font-size:11px;color:var(--text-muted)">${t.priority}</span>` : ''}
         ${t.comments > 0 ? `<span style="font-size:11px;color:var(--text-muted)">${t.comments} updates</span>` : ''}
@@ -882,6 +886,14 @@
       }
 
       let html = '';
+
+      // P0 Bugs (highest priority, shown first)
+      if (data.p0Bugs && data.p0Bugs.length > 0) {
+        html += `<div style="background:var(--surface);border:1px solid rgba(248,81,73,0.3);border-radius:12px;padding:16px 20px;margin-bottom:12px;">
+          <h3 style="margin:0 0 8px;font-size:14px;color:var(--red);text-transform:uppercase;letter-spacing:0.5px;">P0 Bugs</h3>
+          ${data.p0Bugs.map(renderTask).join('')}
+        </div>`;
+      }
 
       // Sprint tasks (open)
       if (data.sprintTasks.length > 0) {

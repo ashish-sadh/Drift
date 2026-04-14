@@ -56,10 +56,11 @@ You are the senior engineer. Execute complex tasks that need judgment.
 1. Re-read steering notes. Stop if override says STOP.
 2. **P0 bugs first:** `gh issue list --state open --label P0` → fix these before anything else
 3. **Pick next SENIOR sprint-task:** `gh issue list --state open --label sprint-task --label SENIOR` → read the spec → execute
-4. **Before editing any file: READ it first.** Understand types, signatures, imports. Never edit blind.
-5. **Boy scout rule:** Clean what you touch. Read `Docs/principles/` for guidance.
-6. Build → test → commit → push
-7. **Close the Issue with a comment:** what was fixed + commit hash. Never close silently.
+4. **Mark in-progress:** `gh issue edit {N} --add-label in-progress` (shows on Command Center dashboard)
+5. **Before editing any file: READ it first.** Understand types, signatures, imports. Never edit blind.
+6. **Boy scout rule:** Clean what you touch. Read `Docs/principles/` for guidance.
+7. Build → test → commit → push
+8. **Close the Issue with a comment:** what was fixed + commit hash. Remove label: `gh issue edit {N} --remove-label in-progress`. Never close silently.
 8. **Can create max 3 new Issues per session** (SENIOR or JUNIOR) when discovering work.
 9. Repeat until no SENIOR/P0 issues left → exit. Watchdog restarts with Sonnet.
 
@@ -72,13 +73,16 @@ You are the junior engineer with a senior advisor. Execute well-specified tasks.
 1. Re-read steering notes. Stop if override says STOP.
 2. **P0 bugs:** If straightforward → fix. If complex/ambiguous → `gh issue edit {N} --add-label SENIOR` → skip.
 3. **Pick next JUNIOR sprint-task:** `gh issue list --state open --label sprint-task --label JUNIOR` → read spec → execute
-4. If task is too complex → `gh issue edit {N} --add-label SENIOR --remove-label JUNIOR` → skip
-5. **Before editing: READ first.** Boy scout rule applies.
-6. Build → test → commit → push
-7. **Close Issue with comment:** what was done + commit hash.
-8. **When no JUNIOR sprint-tasks left → work on permanent-task Issues:**
+4. **Mark in-progress:** `gh issue edit {N} --add-label in-progress` (shows on Command Center dashboard)
+5. If task is too complex → `gh issue edit {N} --add-label SENIOR --remove-label JUNIOR` → skip
+6. **Before editing: READ first.** Boy scout rule applies.
+7. Build → test → commit → push
+8. **Close Issue with comment:** what was done + commit hash. Remove label: `gh issue edit {N} --remove-label in-progress`.
+9. **When no JUNIOR sprint-tasks left → work on permanent-task Issues:**
    - `gh issue list --state open --label permanent-task` → pick one
+   - `gh issue edit {N} --add-label in-progress` before starting
    - Do the work, then **comment on the Issue** with what you did (don't close it — permanent tasks stay open)
+   - `gh issue edit {N} --remove-label in-progress` after commenting
    - Rotate between: Food DB (#49), Test Coverage (#50), Bug Hunting (#51), UI Polish (#52), AI Chat (#53)
 9. Repeat forever. Sonnet never idles.
 

@@ -211,15 +211,18 @@ async function showUser() {
 // Sprint: sprint-task Issues + permanent-task Issues + recently closed
 async function getSprintPlan() {
   try {
-    const [sprintOpen, sprintClosed, permanent] = await Promise.all([
+    const [sprintOpen, sprintClosed, permanent, p0Bugs] = await Promise.all([
       smartApi(`/repos/${OWNER}/${REPO}/issues?labels=sprint-task&state=open&per_page=30`),
       smartApi(`/repos/${OWNER}/${REPO}/issues?labels=sprint-task&state=closed&per_page=10&sort=updated&direction=desc`),
-      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=permanent-task&state=open&per_page=10`)
+      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=permanent-task&state=open&per_page=10`),
+      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=bug,P0&state=open&per_page=10`)
     ]);
 
     const mapIssue = i => ({
-      name: i.title.replace(/^(Sprint|Permanent):\s*/i, ''),
-      status: i.state === 'closed' ? 'done' : 'pending',
+      name: i.title.replace(/^(Sprint|Permanent|Bug):\s*/i, ''),
+      status: i.state === 'closed' ? 'done'
+        : i.labels.some(l => l.name === 'in-progress') ? 'in-progress'
+        : 'pending',
       classification: i.labels.some(l => l.name === 'SENIOR') ? 'SENIOR (Opus)' : 'JUNIOR (Sonnet)',
       priority: i.labels.find(l => ['P0','P1','P2'].includes(l.name))?.name || '',
       isPermanent: i.labels.some(l => l.name === 'permanent-task'),
@@ -228,7 +231,12 @@ async function getSprintPlan() {
       comments: i.comments
     });
 
+    // Exclude P0 bugs that already have sprint-task label (they show in Sprint Tasks)
+    const sprintNumbers = new Set(sprintOpen.map(i => i.number));
+    const dedupedP0 = p0Bugs.filter(i => !sprintNumbers.has(i.number));
+
     return {
+      p0Bugs: dedupedP0.map(mapIssue),
       sprintTasks: sprintOpen.map(mapIssue),
       completedTasks: sprintClosed.map(mapIssue),
       permanentTasks: permanent.map(mapIssue)
