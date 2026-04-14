@@ -18,9 +18,9 @@ _Override:_ CONTINUE
 
 ---
 
-## Sprint Planning (Opus, every ~3 hours)
+## Sprint Planning (Opus, every ~6 hours)
 
-You are the Product Designer + Principal Engineer. This is a replanning session.
+You are the Product Designer + Principal Engineer. This is a replanning session. With 6 hours between sprints, be thorough — create enough well-specified issues to keep execution busy for the full period.
 
 1. **Read persona files:** `Docs/personas/product-designer.md`, `Docs/personas/principal-engineer.md`
 2. **Read admin feedback from report PRs:**
@@ -35,20 +35,27 @@ You are the Product Designer + Principal Engineer. This is a replanning session.
    - `gh issue list --state open --label design-doc` → write docs for new requests
    - `gh pr list --label design-doc --state open` → respond to comments, revise
    - `gh pr list --label design-doc --label approved` → create implementation Issues, merge PR
-5. **Product review:**
-   - Read `Docs/roadmap.md`, `Docs/state.md`, `git log --oneline -20`
+5. **Assess current state deeply:**
+   - Read `Docs/roadmap.md`, `Docs/state.md`, `Docs/ai-parity.md`, `Docs/failing-queries.md`
+   - `git log --oneline -40` (more history since longer sprint)
+   - Review closed issues since last planning: `gh issue list --state closed --label sprint-task --json number,title,closedAt --jq '.[] | select(.closedAt > "LAST_PLAN_DATE")'`
+   - Check test count, coverage snapshot, eval results
+6. **Product review:**
    - Web search competitors (Boostcamp, MFP, Whoop, Strong, MacroFactor)
    - Write review report (exec summary, scorecard, what shipped, competitive position, designer + engineer discussion)
    - Open review PR with `report` label
-6. **Create sprint-task Issues:**
+7. **Create sprint-task Issues (target 8-12 issues for 6h sprint):**
    - For each task: `gh issue create --label sprint-task --label SENIOR/JUNIOR`
-   - Include in body: Goal, Files, Approach, Edge cases, Tests, Acceptance criteria
+   - Include in body: Goal, Files (list specific files to modify), Approach (step-by-step), Edge cases, Tests (specific test cases to write), Acceptance criteria
+   - Break large features into multiple Issues — prefer 3 small Issues over 1 big one
+   - Mix of sizes: ~2-3 SENIOR (architecture, AI, multi-file) + ~6-8 JUNIOR (UI, tests, food DB, fixes)
    - **SENIOR:** AI pipeline, architecture, multi-file refactors, P0 bugs, design doc implementation
    - **JUNIOR:** Food DB, single-file UI, tests, docs, simple fixes, well-specified work
-7. **Update personas** — append "What I learned this review"
-8. **Update roadmap** — apply agreed changes
-9. **Close the planning Issue** — if the prompt says "close Issue #N", run: `gh issue close N --comment "Sprint planning complete. Created X sprint-task issues. Review PR: #Y."` and `gh issue edit N --remove-label in-progress`
-10. **Exit** — watchdog restarts with appropriate model for first task
+   - Prioritize: P0 bugs > admin feedback > roadmap "Now" items > parity gaps > polish
+8. **Update personas** — append "What I learned this review"
+9. **Update roadmap** — apply agreed changes
+10. **Close the planning Issue** — if the prompt says "close Issue #N", run: `gh issue close N --comment "Sprint planning complete. Created X sprint-task issues. Review PR: #Y."` and `gh issue edit N --remove-label in-progress`
+11. **Exit** — watchdog restarts with appropriate model for first task
 
 ---
 

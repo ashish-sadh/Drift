@@ -70,11 +70,11 @@ start_claude() {
     local SESSION_PROMPT="$PROMPT"
     local NOW=$(date +%s)
 
-    # 1. Sprint planning due? (every 3 hours)
+    # 1. Sprint planning due? (every 6 hours)
     local LAST_REVIEW=$(cat "$HOME/drift-state/last-review-time" 2>/dev/null || echo "0")
     local HOURS_SINCE=$(( (NOW - LAST_REVIEW) / 3600 ))
 
-    if [[ "$HOURS_SINCE" -ge 3 ]]; then
+    if [[ "$HOURS_SINCE" -ge 6 ]]; then
         MODEL="opus"
         SESSION_TYPE="planning"
         echo "$NOW" > "$HOME/drift-state/last-review-time"  # Guaranteed update

@@ -30,7 +30,7 @@ Fully autonomous background operation. The watchdog (`scripts/self-improve-watch
 ### Sprint Lifecycle
 
 The watchdog orchestrates a 3-phase sprint:
-1. **Sprint Planning (Opus, every 3h):** Review + create sprint-task Issues (SENIOR/JUNIOR)
+1. **Sprint Planning (Opus, every 6h):** Deep review + create 8-12 sprint-task Issues (SENIOR/JUNIOR)
 2. **Senior Execution (Opus):** SENIOR Issues + P0 bugs. Alternates with Sonnet.
 3. **Junior Execution (Sonnet + advisor):** JUNIOR Issues, then permanent tasks. Always running.
 
