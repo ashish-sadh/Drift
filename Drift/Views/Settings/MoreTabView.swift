@@ -339,6 +339,29 @@ struct SettingsView: View {
                 }
                 .card()
 
+                // Health Nudges
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "bell.badge")
+                            .foregroundStyle(Theme.accent).frame(width: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Health Nudges").font(.subheadline.weight(.medium))
+                            Text("Reminders for protein, supplements, and workout gaps")
+                                .font(.caption2).foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        Toggle("", isOn: Binding(
+                            get: { Preferences.healthNudgesEnabled },
+                            set: {
+                                Preferences.healthNudgesEnabled = $0
+                                Task { await NotificationService.refreshScheduledAlerts() }
+                            }
+                        ))
+                        .labelsHidden().tint(Theme.accent)
+                    }
+                }
+                .card()
+
                 // Algorithm
                 NavigationLink {
                     AlgorithmSettingsView()

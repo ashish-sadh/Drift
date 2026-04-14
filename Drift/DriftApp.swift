@@ -32,6 +32,8 @@ struct DriftApp: App {
                         #endif
                         // Refresh TDEE estimate (uses Apple Health + weight trend + food data)
                         await TDEEEstimator.shared.refresh()
+                        // Schedule health nudge notifications (protein, supplements, workouts)
+                        await NotificationService.refreshScheduledAlerts()
                         syncComplete = true
                     }
                 }

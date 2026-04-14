@@ -82,4 +82,16 @@ enum Preferences {
         }
         set { UserDefaults.standard.set(newValue, forKey: onlineFoodSearchKey) }
     }
+
+    private static let healthNudgesKey = "drift_health_nudges"
+
+    /// When enabled, local push notifications remind users about protein streaks,
+    /// supplement gaps, and workout gaps. Default: ON.
+    static var healthNudgesEnabled: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: healthNudgesKey) == nil { return true }
+            return UserDefaults.standard.bool(forKey: healthNudgesKey)
+        }
+        set { UserDefaults.standard.set(newValue, forKey: healthNudgesKey) }
+    }
 }
