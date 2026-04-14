@@ -481,16 +481,21 @@
       const el = document.getElementById('metrics');
       const metrics = await getMetrics();
       if (!metrics) {
-        // Fallback: try state.md
+        // Fallback: read project.yml for build + state.md for other metrics
         try {
-          const state = await getReportContent('Docs/state.md');
-          const tests = state.match(/Tests:\*\*\s*(\d+)/)?.[1] || '?';
-          const build = state.match(/Build\s+(\d+)/)?.[1] || '?';
+          const [projectYml, state] = await Promise.all([
+            getReportContent('project.yml').catch(() => ''),
+            getReportContent('Docs/state.md').catch(() => '')
+          ]);
+          const build = projectYml.match(/CURRENT_PROJECT_VERSION:\s*"(\d+)"/)?.[1] || state.match(/Build\s+(\d+)/)?.[1] || '?';
+          const tests = state.match(/Tests:\*\*\s*([\d,]+)/)?.[1] || '?';
           const foods = state.match(/Foods:\*\*\s*([\d,]+)/)?.[1] || '?';
+          const tools = state.match(/Tools:\*\*\s*(\d+)/)?.[1] || '?';
           el.innerHTML = `
             <div class="metric"><span class="metric-value">${build}</span><span class="metric-label">Build</span></div>
             <div class="metric"><span class="metric-value">${tests}</span><span class="metric-label">Tests</span></div>
             <div class="metric"><span class="metric-value">${foods}</span><span class="metric-label">Foods</span></div>
+            <div class="metric"><span class="metric-value">${tools}</span><span class="metric-label">AI Tools</span></div>
           `;
         } catch { el.innerHTML = '<div class="metric"><span class="metric-label">Metrics unavailable</span></div>'; }
         return;
