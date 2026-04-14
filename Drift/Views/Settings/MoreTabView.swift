@@ -11,6 +11,29 @@ struct MoreTabView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
+                    // Report a Bug — prominent at top
+                    Link(destination: URL(string: "https://ashish-sadh.github.io/Drift/")!) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "ant.fill")
+                                .foregroundStyle(.red)
+                                .frame(width: 24)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Report a Bug")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.primary)
+                                Text("Found something wrong? Let us know")
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                            }
+                            Spacer()
+                            Image(systemName: "arrow.up.right")
+                                .font(.caption)
+                                .foregroundStyle(.tertiary)
+                        }
+                        .padding(.vertical, 10)
+                    }
+                    .card()
+
                     // Goal
                     VStack(spacing: 0) {
                         navRow(icon: "target", title: "Weight Goal", subtitle: "Target weight, timeline, deficit plan", color: Theme.deficit) {
@@ -128,29 +151,6 @@ struct MoreTabView: View {
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity)
-                    .card()
-
-                    // Report a Bug
-                    Link(destination: URL(string: "https://ashish-sadh.github.io/Drift/")!) {
-                        HStack(spacing: 12) {
-                            Image(systemName: "ant.fill")
-                                .foregroundStyle(.red)
-                                .frame(width: 24)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Report a Bug")
-                                    .font(.subheadline.weight(.medium))
-                                    .foregroundStyle(.primary)
-                                Text("Screenshot + description → we'll fix it")
-                                    .font(.caption2)
-                                    .foregroundStyle(.tertiary)
-                            }
-                            Spacer()
-                            Image(systemName: "arrow.up.right")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
-                        }
-                        .padding(.vertical, 10)
-                    }
                     .card()
 
                     // Version
