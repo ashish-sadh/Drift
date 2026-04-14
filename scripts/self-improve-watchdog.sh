@@ -46,6 +46,19 @@ read_control() {
     fi
 }
 
+cleanup_dirty_state() {
+    cd "$WORK_DIR"
+    local DIRTY=$(git status --porcelain 2>/dev/null | head -20)
+    if [[ -n "$DIRTY" ]]; then
+        log "Dirty state after session exit. Discarding incomplete changes:"
+        log "$DIRTY"
+        git checkout . 2>/dev/null || true
+        # Also clean untracked files that autopilot may have created (but not in .claude/)
+        git clean -fd --exclude=.claude/ 2>/dev/null || true
+        log "Working tree cleaned."
+    fi
+}
+
 kill_claude() {
     if [[ -n "$CLAUDE_PID" ]] && kill -0 "$CLAUDE_PID" 2>/dev/null; then
         log "Sending SIGTERM to claude (PID $CLAUDE_PID)..."
@@ -205,6 +218,7 @@ if [[ "$STATE" == "RUN" ]]; then
     # Ensure override is CONTINUE
     sed -i '' 's/_Override:_ STOP/_Override:_ CONTINUE/' "$WORK_DIR/program.md" 2>/dev/null || true
     if [[ -z "$CLAUDE_PID" ]]; then
+        cleanup_dirty_state
         start_claude
     else
         log "Autopilot already running (adopted). Skipping initial start."
@@ -315,11 +329,13 @@ while true; do
             # Check if autopilot is dead
             if ! is_claude_alive; then
                 log "Autopilot exited. Restarting..."
+                cleanup_dirty_state
                 start_claude
             # Check if autopilot is stalled
             elif is_log_stale; then
                 log "Autopilot stalled (log not updated in ${STALE_THRESHOLD}s). Restarting..."
                 kill_claude
+                cleanup_dirty_state
                 start_claude
             else
                 log "Autopilot running normally (PID $CLAUDE_PID)."
