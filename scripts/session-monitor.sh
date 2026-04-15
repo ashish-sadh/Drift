@@ -43,7 +43,7 @@ for line in sys.stdin:
     # Summarize via Haiku
     SUMMARY=$(echo "$RECENT" | claude -p \
         "You are a concise status reporter. Summarize in 2-3 sentences what this autopilot session is currently doing. Be specific: mention the issue number if visible, the task type, and the current action. No preamble." \
-        --model haiku --output-format text --bare 2>/dev/null || echo "Unable to generate summary")
+        --model haiku --output-format text 2>/dev/null || echo "Unable to generate summary")
 
     # Update the GitHub Issue
     BODY="**Model:** ${MODEL} | **Type:** ${SESSION_TYPE} | **Cycle:** ${CYCLE} | **Updated:** $(date '+%Y-%m-%d %H:%M:%S')
