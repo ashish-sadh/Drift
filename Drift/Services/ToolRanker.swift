@@ -463,7 +463,7 @@ enum ToolRanker {
         )
 
         p["supplements"] = ToolProfile(
-            triggers: [("supplement", 2.5), ("vitamin", 2), ("stack", 2),
+            triggers: [("supplement", 2.5), ("supplements", 2.5), ("vitamin", 2), ("vitamins", 2), ("stack", 2),
                        ("supplement status", 4), ("did i take", 3), ("what supplements", 3)],
             logBoost: 0, queryBoost: 1.5,
             screens: [.supplements: 0.5],
@@ -496,7 +496,7 @@ enum ToolRanker {
         )
 
         p["biomarkers"] = ToolProfile(
-            triggers: [("biomarker", 3), ("blood test", 3), ("lab", 2.5), ("cholesterol", 3),
+            triggers: [("biomarker", 3), ("biomarkers", 3), ("blood test", 3), ("lab", 2.5), ("cholesterol", 3),
                        ("a1c", 3), ("lab results", 4), ("blood work", 3.5)],
             logBoost: 0, queryBoost: 1.5,
             screens: [.biomarkers: 0.5],
@@ -505,7 +505,7 @@ enum ToolRanker {
 
         p["body_comp"] = ToolProfile(
             triggers: [("body fat", 3), ("bmi", 2.5), ("lean mass", 3), ("dexa", 3),
-                       ("muscle mass", 3), ("body composition", 3),
+                       ("muscle mass", 3), ("body composition", 3), ("recomposition", 3),
                        ("how's my body fat", 4)],
             logBoost: -0.5, queryBoost: 2,
             screens: [.bodyComposition: 0.5],
