@@ -2937,3 +2937,75 @@ enum TestError: Error { case msg(String); init(_ s: String) { self = .msg(s) } }
     #expect(intent != nil)
     #expect(intent?.mealHint == "dinner")
 }
+
+// MARK: - New Foods (junior cycle 2 — bakery, soups, seafood)
+
+@Test func newFoodRyeBread() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "rye bread")).isEmpty)
+}
+
+@Test func newFoodBriocheBun() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "brioche")).isEmpty)
+}
+
+@Test func newFoodBaguette() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "baguette")).isEmpty)
+}
+
+@Test func newFoodPumpkinSoup() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "pumpkin soup")).isEmpty)
+}
+
+@Test func newFoodCreamMushroomSoup() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "cream of mushroom")).isEmpty)
+}
+
+@Test func newFoodSplitPeaSoup() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "split pea")).isEmpty)
+}
+
+@Test func newFoodTilapia() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "tilapia")).isEmpty)
+}
+
+@Test func newFoodSardines() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "sardines")).isEmpty)
+}
+
+@Test func newFoodShrimpCocktail() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "shrimp cocktail")).isEmpty)
+}
+
+@Test func newFoodCrabSteamed() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "crab")).isEmpty)
+}
+
+@Test func newFoodScallops() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "scallops")).isEmpty)
+}
+
+@Test func newFoodTroutBaked() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "trout")).isEmpty)
+}
+
+@Test func newFoodOysters() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "oysters")).isEmpty)
+}
+
+@Test func newFoodMussels() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "mussels")).isEmpty)
+}
