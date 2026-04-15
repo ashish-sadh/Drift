@@ -62,6 +62,11 @@ if [ "$MODEL" = "opus" ]; then
         CONTEXT="${CONTEXT}DESIGN DOCS AWAITING PE:\n$(cat "$STATE_DIR/cache-pending-designs")\nCreate branch, write doc, create PR, add doc-ready label.\n\n"
     fi
 
+    # Design docs awaiting approval — DO NOT IMPLEMENT
+    if [ -s "$STATE_DIR/cache-awaiting-approval" ]; then
+        CONTEXT="${CONTEXT}DESIGN DOCS AWAITING HUMAN APPROVAL — DO NOT IMPLEMENT:\n$(cat "$STATE_DIR/cache-awaiting-approval")\nOnly reply to PR comments and revise. Do NOT write code for these until human adds 'approved' label.\n\n"
+    fi
+
     # Admin feedback unreplied
     if [ -s "$STATE_DIR/cache-admin-feedback" ]; then
         CONTEXT="${CONTEXT}ADMIN FEEDBACK UNREPLIED:\n$(cat "$STATE_DIR/cache-admin-feedback")\nRead full report at line numbers, reply to every comment.\n\n"

@@ -160,6 +160,11 @@ refresh_compliance_cache() {
         --jq '.[] | select(.comments > 0) | "#\(.number) \(.title) (\(.comments) comments)"' \
         | head -5 > "$SD/cache-admin-feedback" 2>/dev/null || true
 
+    # Design docs awaiting approval (doc-ready but NOT approved — DO NOT IMPLEMENT)
+    gh issue list --state open --label design-doc --label doc-ready --json number,title,labels \
+        --jq '[.[] | select(.labels | map(.name) | index("approved") | not)] | .[] | "#\(.number) \(.title)"' \
+        > "$SD/cache-awaiting-approval" 2>/dev/null || true
+
     # Approved design docs without implementation tasks (senior/planning cares)
     gh issue list --state open --label design-doc --label approved --json number,title \
         --jq '.[] | "#\(.number) \(.title)"' > "$SD/cache-approved-designs" 2>/dev/null || true
