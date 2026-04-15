@@ -92,7 +92,8 @@ You are the senior engineer AND the PE (Principal Engineer). Execute complex tas
      4. Reply to EACH comment individually: `gh api repos/OWNER/REPO/pulls/{PR}/comments/{COMMENT_ID}/replies -f body="Addressed: {what you changed and why}"`
      5. Push the revised doc. Revision must still follow Docs/designs/TEMPLATE.md format.
      6. Do NOT just revise the doc silently — every comment gets an explicit reply.
-   - **Has `approved`**: create implementation tasks with label `design-impl-{N}`, merge the PR.
+   - **Has `approved` but NOT `implementing`**: create sprint-task Issues with label `design-impl-{N}`. Add `implementing` label to the design issue. Merge the design PR. Do NOT start coding until tasks are created.
+   - **Has `implementing`**: pick up `design-impl-{N}` sprint-tasks and execute them.
    - **All `design-impl-{N}` tasks closed**: close the original design-doc issue.
    - **Every senior session must check design doc status.**
 5. **Pick next SENIOR sprint-task:** `gh issue list --state open --label sprint-task --label SENIOR` → read the spec → execute

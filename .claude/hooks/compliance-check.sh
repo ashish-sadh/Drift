@@ -77,9 +77,9 @@ if [ "$MODEL" = "opus" ]; then
         CONTEXT="${CONTEXT}P0 FEATURE REQUESTS — create sprint-task:\n$(cat "$STATE_DIR/cache-p0-features")\n\n"
     fi
 
-    # Approved design docs needing implementation tasks
+    # Approved design docs needing implementation tasks (approved but NOT yet implementing)
     if [ -s "$STATE_DIR/cache-approved-designs" ]; then
-        CONTEXT="${CONTEXT}APPROVED DESIGNS — create implementation tasks (design-impl-{N} label):\n$(cat "$STATE_DIR/cache-approved-designs")\n\n"
+        CONTEXT="${CONTEXT}APPROVED DESIGNS — create implementation task Issues FIRST, do NOT code directly:\n$(cat "$STATE_DIR/cache-approved-designs")\n1. Create sprint-task Issues with label design-impl-{N}\n2. Add implementing label: gh issue edit {N} --add-label implementing\n3. Merge the design PR\n4. Then pick up implementation tasks one by one\n\n"
     fi
 fi
 

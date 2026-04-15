@@ -165,9 +165,10 @@ refresh_compliance_cache() {
         --jq '[.[] | select(.labels | map(.name) | index("approved") | not)] | .[] | "#\(.number) \(.title)"' \
         > "$SD/cache-awaiting-approval" 2>/dev/null || true
 
-    # Approved design docs without implementation tasks (senior/planning cares)
-    gh issue list --state open --label design-doc --label approved --json number,title \
-        --jq '.[] | "#\(.number) \(.title)"' > "$SD/cache-approved-designs" 2>/dev/null || true
+    # Approved design docs NOT yet implementing (need task creation first)
+    gh issue list --state open --label design-doc --label approved --json number,title,labels \
+        --jq '[.[] | select(.labels | map(.name) | index("implementing") | not)] | .[] | "#\(.number) \(.title)"' \
+        > "$SD/cache-approved-designs" 2>/dev/null || true
 
     # In-progress issues (for mark-in-progress hook to detect stale ones)
     gh issue list --state open --label in-progress --json number \
