@@ -1132,11 +1132,11 @@
     "date": "2026-04-13T18:30:00-07:00",
     "description": "chore: TestFlight build 112",
     "features": [
-      "Muscle group heatmap — volume intensity shading shows workout emphasis",
-      "Muscle group heatmap — weekly set counts per muscle group"
+      "Muscle group heatmap \u2014 volume intensity shading shows workout emphasis",
+      "Muscle group heatmap \u2014 weekly set counts per muscle group"
     ],
     "fixes": [
-      "Sonnet was skipping TestFlight — removed misleading except text"
+      "Sonnet was skipping TestFlight \u2014 removed misleading except text"
     ]
   },
   {
@@ -1177,12 +1177,37 @@
       "Sprint tab shows sprint tasks + permanent tasks + completed"
     ],
     "fixes": [
-      "Health Nudges default OFF — no notification prompt unless enabled",
+      "Health Nudges default OFF \u2014 no notification prompt unless enabled",
       "Voice input: committed + live text model, no more lost words on pauses",
-      "Command Center JS crash — null check on bug-screenshot element",
+      "Command Center JS crash \u2014 null check on bug-screenshot element",
       "Command Center: stray closing brace breaking all JS",
       "Command Center: HTML-first auth state, no JS needed for anonymous view",
       "3 bugs from systematic hunt (#46, #47, #48)"
+    ]
+  },
+  {
+    "build": 117,
+    "date": "2026-04-14T08:00:00-07:00",
+    "description": "tests: coverage improvements + build 117 (#81 #82 #85 #87)",
+    "features": [
+      "Voice-style eval: 13 InputNormalizer test cases (run-on, filler+restart, conjunctions, mixed-case)"
+    ],
+    "fixes": [
+      "WeightTrendService stale-with-old-entries test coverage",
+      "AIRuleEngine: 11 food-seeded branch tests (yesterdaySummary, caloriesLeft, dailySummary, quickInsight, nextAction, weeklySummary)",
+      "NotificationService + BehaviorInsightService hardening (4-alert composition, sleep boundaries)"
+    ]
+  },
+  {
+    "build": 119,
+    "date": "2026-04-14T23:00:00-07:00",
+    "description": "feat: food DB +20 foods, fix multi-food meal hint (#83 #84)",
+    "features": [
+      "Food DB: +20 foods \u2014 chana masala, rajma chawal, dal chawal, kadhi chawal, kati rolls (chicken/paneer/egg/veg), chivda, chakli, salted lassi, masala omelette, guava, garden salad, idiyappam (1544\u21921564 foods)"
+    ],
+    "fixes": [
+      "P1: multi-food with meal suffix always logged under Meal instead of breakfast/lunch/dinner/snack",
+      "activityLoadClassification test expectation: extreme load correctly expected for 1000 cal + 20k steps"
     ]
   }
 ]

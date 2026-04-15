@@ -16,8 +16,8 @@ _(pick from Ready)_
 ### JUNIOR
 - [x] **#81 Coverage: WeightTrendService** — Stale-with-old-entries test (73-76 day entries, latestWeightKg from unfiltered fetch).
 - [x] **#82 Coverage: AIRuleEngine** — 11 food-seeded branch tests: yesterdaySummary with data, caloriesLeft remaining/over, dailySummary food path, quickInsight with food+trend, nextAction protein branches, weeklySummary structure.
-- [ ] **#83 Food DB: Top 20 search misses** — Use search miss tracking data. USDA cross-reference.
-- [ ] **#84 Bug hunting: AI food logging edge cases** — Systematic analysis. Last hunt found 3 P0s.
+- [x] **#83 Food DB: Top 20 search misses** — Added 20 missing foods (chana masala, rajma chawal, dal chawal, kadhi chawal, kati rolls x4, chivda, chakli, guava, garden salad, etc). DB: 1544→1564.
+- [x] **#84 Bug hunting: AI food logging edge cases** — Fixed P1: multi-food meal hint lost ('log eggs and toast for breakfast' → 'Meal' not 'breakfast'). Found 8 bugs total, fixed highest impact one.
 - [x] **#85 Eval: Voice-style input test cases** — 13 cases: run-on multi-food, filler+restart, repeated conjunctions, mixed-case fillers, chained restarts, extra whitespace.
 - [x] **#86 UI: Exercise card visual enhancement** — Done (muscle group SF Symbol chips shipped in prior sprint).
 - [x] **#87 Coverage: NotificationService + BehaviorInsightService hardening** — 4-alert composition, all-poor-sleep boundary, exactly-6h boundary, proactive alerts structural integrity.
