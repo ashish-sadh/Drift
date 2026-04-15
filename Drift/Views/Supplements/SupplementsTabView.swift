@@ -125,6 +125,10 @@ struct SupplementsTabView: View {
                                 .foregroundStyle(Theme.accent.opacity(0.5))
                             Text("No supplements yet")
                                 .font(.subheadline).foregroundStyle(.secondary)
+                            Button { showingAdd = true } label: {
+                                Label("Add Supplement", systemImage: "plus.circle.fill")
+                                    .font(.caption)
+                            }.buttonStyle(.bordered).tint(Theme.accent)
                         }
                         .padding(.top, 40)
                     }
@@ -254,10 +258,8 @@ struct SupplementsTabView: View {
     }
 
     private func formatTime(_ iso: String) -> String {
-        guard let d = ISO8601DateFormatter().date(from: iso) else { return "" }
-        let f = DateFormatter()
-        f.dateFormat = "h:mm a"
-        return f.string(from: d)
+        guard let d = DateFormatters.iso8601.date(from: iso) else { return "" }
+        return DateFormatters.shortTime.string(from: d)
     }
 }
 
