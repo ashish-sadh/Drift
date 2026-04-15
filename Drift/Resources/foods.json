@@ -11337,8 +11337,8 @@
   {
     "name": "French Toast (2 slices)",
     "category": "Grains & Cereals",
-    "serving_size": 2,
-    "serving_unit": "slices",
+    "serving_size": 130,
+    "serving_unit": "g",
     "calories": 340,
     "protein_g": 12,
     "carbs_g": 36,
