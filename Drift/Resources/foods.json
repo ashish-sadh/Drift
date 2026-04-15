@@ -27251,5 +27251,418 @@
       "cinnamon"
     ],
     "nova_group": 3
+  },
+  {
+    "name": "Kadhai Chicken",
+    "category": "Indian Staples",
+    "serving_size": 240,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 30,
+    "carbs_g": 10,
+    "fat_g": 17,
+    "fiber_g": 2,
+    "ingredients": [
+      "chicken",
+      "capsicum",
+      "tomato",
+      "onion",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Paneer Lababdar",
+    "category": "Indian Staples",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 14,
+    "carbs_g": 16,
+    "fat_g": 25,
+    "fiber_g": 3,
+    "ingredients": [
+      "paneer",
+      "tomato",
+      "onion",
+      "cream",
+      "butter",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Paneer Do Pyaza",
+    "category": "Indian Staples",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 300,
+    "protein_g": 13,
+    "carbs_g": 14,
+    "fat_g": 22,
+    "fiber_g": 3,
+    "ingredients": [
+      "paneer",
+      "onion",
+      "tomato",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Methi Malai Chicken",
+    "category": "Indian Staples",
+    "serving_size": 240,
+    "serving_unit": "g",
+    "calories": 350,
+    "protein_g": 26,
+    "carbs_g": 9,
+    "fat_g": 22,
+    "fiber_g": 2,
+    "ingredients": [
+      "chicken",
+      "fenugreek",
+      "cream",
+      "onion",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Chicken Handi",
+    "category": "Indian Staples",
+    "serving_size": 240,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 28,
+    "carbs_g": 8,
+    "fat_g": 18,
+    "fiber_g": 2,
+    "ingredients": [
+      "chicken",
+      "yogurt",
+      "onion",
+      "tomato",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Achari Murgh",
+    "category": "Indian Staples",
+    "serving_size": 240,
+    "serving_unit": "g",
+    "calories": 310,
+    "protein_g": 28,
+    "carbs_g": 8,
+    "fat_g": 18,
+    "fiber_g": 2,
+    "ingredients": [
+      "chicken",
+      "pickle spices",
+      "mustard oil",
+      "yogurt",
+      "onion"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Chicken Saagwala",
+    "category": "Indian Staples",
+    "serving_size": 240,
+    "serving_unit": "g",
+    "calories": 290,
+    "protein_g": 29,
+    "carbs_g": 8,
+    "fat_g": 15,
+    "fiber_g": 4,
+    "ingredients": [
+      "chicken",
+      "spinach",
+      "onion",
+      "tomato",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Ven Pongal",
+    "category": "South Indian",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 7,
+    "carbs_g": 42,
+    "fat_g": 9,
+    "fiber_g": 3,
+    "ingredients": [
+      "rice",
+      "moong dal",
+      "ghee",
+      "pepper",
+      "cumin",
+      "cashew"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kuzhi Paniyaram",
+    "category": "South Indian",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 5,
+    "carbs_g": 32,
+    "fat_g": 8,
+    "fiber_g": 2,
+    "ingredients": [
+      "rice",
+      "urad dal",
+      "oil",
+      "mustard",
+      "curry leaves"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Meen Kuzhambu",
+    "category": "South Indian",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 200,
+    "protein_g": 18,
+    "carbs_g": 8,
+    "fat_g": 11,
+    "fiber_g": 2,
+    "ingredients": [
+      "fish",
+      "tamarind",
+      "coconut",
+      "tomato",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kozhukattai",
+    "category": "South Indian",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 180,
+    "protein_g": 4,
+    "carbs_g": 34,
+    "fat_g": 3,
+    "fiber_g": 2,
+    "ingredients": [
+      "rice flour",
+      "coconut",
+      "steamed"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kottu Parotta",
+    "category": "South Indian",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 520,
+    "protein_g": 22,
+    "carbs_g": 62,
+    "fat_g": 18,
+    "fiber_g": 4,
+    "ingredients": [
+      "parotta",
+      "egg",
+      "onion",
+      "capsicum",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Laal Maas",
+    "category": "Indian Regional",
+    "serving_size": 220,
+    "serving_unit": "g",
+    "calories": 350,
+    "protein_g": 28,
+    "carbs_g": 6,
+    "fat_g": 23,
+    "fiber_g": 2,
+    "ingredients": [
+      "mutton",
+      "red chili",
+      "yogurt",
+      "ghee",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Gatte Ki Sabzi",
+    "category": "Indian Regional",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 10,
+    "carbs_g": 28,
+    "fat_g": 14,
+    "fiber_g": 4,
+    "ingredients": [
+      "besan",
+      "yogurt",
+      "spices",
+      "oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Amritsari Kulcha",
+    "category": "Indian Regional",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 310,
+    "protein_g": 8,
+    "carbs_g": 48,
+    "fat_g": 9,
+    "fiber_g": 3,
+    "ingredients": [
+      "maida",
+      "potato",
+      "onion",
+      "butter",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Kosha Mangsho",
+    "category": "Indian Regional",
+    "serving_size": 220,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 30,
+    "carbs_g": 8,
+    "fat_g": 24,
+    "fiber_g": 2,
+    "ingredients": [
+      "mutton",
+      "onion",
+      "ginger",
+      "garlic",
+      "yogurt",
+      "mustard oil",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Luchi",
+    "category": "Indian Regional",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 5,
+    "carbs_g": 38,
+    "fat_g": 12,
+    "fiber_g": 1,
+    "ingredients": [
+      "maida",
+      "oil"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Shorshe Ilish",
+    "category": "Indian Regional",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 22,
+    "carbs_g": 4,
+    "fat_g": 16,
+    "fiber_g": 1,
+    "ingredients": [
+      "hilsa fish",
+      "mustard paste",
+      "coconut",
+      "mustard oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Doi Maach",
+    "category": "Indian Regional",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 240,
+    "protein_g": 20,
+    "carbs_g": 8,
+    "fat_g": 14,
+    "fiber_g": 1,
+    "ingredients": [
+      "fish",
+      "yogurt",
+      "mustard oil",
+      "onion",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Begun Bhaja",
+    "category": "Indian Regional",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 170,
+    "protein_g": 2,
+    "carbs_g": 10,
+    "fat_g": 13,
+    "fiber_g": 3,
+    "ingredients": [
+      "eggplant",
+      "mustard oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Fafda",
+    "category": "Indian Regional",
+    "serving_size": 60,
+    "serving_unit": "g",
+    "calories": 240,
+    "protein_g": 7,
+    "carbs_g": 26,
+    "fat_g": 12,
+    "fiber_g": 3,
+    "ingredients": [
+      "besan",
+      "ajwain",
+      "oil",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Handvo",
+    "category": "Indian Regional",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 7,
+    "carbs_g": 30,
+    "fat_g": 8,
+    "fiber_g": 4,
+    "ingredients": [
+      "rice",
+      "lentils",
+      "yogurt",
+      "vegetables",
+      "sesame",
+      "spices"
+    ],
+    "nova_group": 2
   }
 ]
