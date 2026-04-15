@@ -1552,6 +1552,50 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     #expect(units.contains(where: { $0.label == "g" }))
 }
 
+@Test func smartUnitsIndianSweetPiece() async throws {
+    let gulab = Food(name: "Gulab Jamun", category: "Desserts", servingSize: 45, servingUnit: "g", calories: 175)
+    #expect(FoodUnit.smartUnits(for: gulab).first?.label == "piece",
+            "Gulab jamun should default to piece, not serving or grams")
+
+    let laddu = Food(name: "Besan Laddu", category: "Desserts", servingSize: 40, servingUnit: "g", calories: 185)
+    #expect(FoodUnit.smartUnits(for: laddu).first?.label == "piece",
+            "Laddu should default to piece")
+
+    let jalebi = Food(name: "Jalebi", category: "Desserts", servingSize: 30, servingUnit: "g", calories: 120)
+    #expect(FoodUnit.smartUnits(for: jalebi).first?.label == "piece",
+            "Jalebi should default to piece")
+}
+
+@Test func smartUnitsBatterCup() async throws {
+    let batter = Food(name: "Dosa Batter", category: "Indian Staples", servingSize: 100, servingUnit: "g", calories: 82)
+    let units = FoodUnit.smartUnits(for: batter)
+    #expect(units.first?.label == "cup", "Dosa batter should default to cup, not piece")
+
+    let idliBatter = Food(name: "Idli Batter", category: "Indian Staples", servingSize: 100, servingUnit: "g", calories: 78)
+    #expect(FoodUnit.smartUnits(for: idliBatter).first?.label == "cup",
+            "Idli batter should default to cup")
+}
+
+@Test func smartUnitsBreadSlice() async throws {
+    let bread = Food(name: "Whole Wheat Bread", category: "Bakery", servingSize: 30, servingUnit: "g", calories: 75)
+    #expect(FoodUnit.smartUnits(for: bread).first?.label == "slice",
+            "Bread should default to slice")
+
+    let toast = Food(name: "White Toast", category: "Bakery", servingSize: 25, servingUnit: "g", calories: 65)
+    #expect(FoodUnit.smartUnits(for: toast).first?.label == "slice",
+            "Toast should default to slice")
+
+    let sourdough = Food(name: "Sourdough Bread", category: "Bakery", servingSize: 35, servingUnit: "g", calories: 90)
+    #expect(FoodUnit.smartUnits(for: sourdough).first?.label == "slice",
+            "Sourdough bread should default to slice, not cup")
+}
+
+@Test func smartUnitsPizzaSlice() async throws {
+    let pizza = Food(name: "Margherita Pizza", category: "Italian", servingSize: 100, servingUnit: "g", calories: 250)
+    #expect(FoodUnit.smartUnits(for: pizza).first?.label == "slice",
+            "Pizza should default to slice")
+}
+
 // MARK: - Factory Reset Safety Test
 
 @Test func factoryResetClearsAllData() async throws {
