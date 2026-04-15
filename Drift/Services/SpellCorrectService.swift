@@ -127,6 +127,20 @@ enum SpellCorrectService {
         "methi": "fenugreek",
         "arbi": "taro",
         "shimla mirch": "bell pepper", "capsicum": "bell pepper",
+        // Bengali — fish & staples
+        "ilish": "hilsa", "ilish maach": "hilsa", "ilish mach": "hilsa",
+        "rui": "rohu", "rui maach": "rohu",
+        "maach": "fish", "mach": "fish",
+        "begun": "eggplant", "patol": "parwal",
+        "alu posto": "potato poppy seed", "shorshe ilish": "hilsa mustard",
+        // Tamil / South Indian
+        "kozhi": "chicken", "thayir": "yogurt", "kanji": "rice porridge",
+        "rasam": "rasam", "vengayam": "onion",
+        // Indian condiments & ingredients
+        "imli": "tamarind", "til": "sesame seeds", "kismis": "raisins",
+        "gur": "jaggery", "shakkar": "sugar", "cheeni": "sugar",
+        "suji": "semolina", "rava": "semolina", "besan": "chickpea flour",
+        "bhature": "bhatura",
         // Common abbreviations
         "pb": "peanut butter", "oj": "orange juice", "evoo": "olive oil",
         "pb&j": "peanut butter jelly", "pbj": "peanut butter jelly",
