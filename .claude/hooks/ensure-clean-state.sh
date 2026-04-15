@@ -8,7 +8,7 @@ set -e
 cd "${CLAUDE_PROJECT_DIR:-.}"
 
 # Skip dirty state check if autopilot is running (it owns the working directory)
-if pgrep -f 'claude.*-p.*execute\|claude.*-p.*run.*autopilot\|claude.*-p.*sprint' > /dev/null 2>&1; then
+if pgrep -f 'claude.*-p.*(execute|run.*autopilot|sprint)' > /dev/null 2>&1; then
   exit 0
 fi
 
