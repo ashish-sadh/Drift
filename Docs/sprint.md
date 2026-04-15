@@ -4,12 +4,7 @@ Focus: **AI Chat LLM-First Pipeline — Revised Architecture.** Address owner fe
 
 ## Blocker
 
-**Design doc #65 (PR #112) has 3 unaddressed review comments from the owner.** The feedback fundamentally redirects the architecture — not just pipeline reorder, but a redesigned flow with specialized per-domain prompts and proper state transitions. Revising the doc is the #1 priority this sprint.
-
-Owner feedback summary:
-1. Remove A/B testing — app is fully local, no telemetry possible
-2. The problem isn't the StaticOverrides list, it's the flow design. Need proper states: normalize → intent clarification → specialized extraction → confirmation. Research how production chat systems handle this.
-3. Classification + data extraction errors persist even on clear input. Break the single classifier prompt into multiple specialized prompts (food extraction, exercise extraction, etc.) — even if it means multiple LLM passes.
+**Design doc #65 (PR #112) revised — awaiting owner approval.** All 3 review comments addressed (commit 98c06ab). Contingent tasks (#92–#95) unblock once approved.
 
 ## In Progress
 
@@ -19,12 +14,12 @@ _(pick from Ready)_
 
 ### SENIOR — Unblock First
 
-- [ ] **#120 Revise design doc #65 (PR #112)** — Address all 3 owner review comments. Remove A/B testing. Research multi-stage LLM pipeline patterns (intent → domain-specific slot extraction → confirmation). Propose specialized per-domain prompts instead of one unified classifier. Update PR #112, reply to each comment. This unblocks the entire sprint.
+- [x] **#120 Revise design doc #65 (PR #112)** — All 3 review comments addressed (commit 98c06ab): removed A/B testing, redesigned flow with 6 stages (normalize → intent classify → domain extract → Swift validation → confirmation → execute), added specialized per-domain prompts. Replied to each inline comment.
 
 ### SENIOR — Independent (no approval needed)
 
 - [x] **#121 Food logging: confirm-first on all paths** — Fixed all 5 paths. 4 bypass paths fixed in original PR (Log Again + Quick open ManualFoodEntrySheet prefilled, Copy to Today alert, copy-yesterday in chat preview). 5th path (Copy previous day button in empty diary) fixed in follow-up commit 13dbfbe — now shows alert with calorie count before copying.
-- [ ] **#122 AI Chat: research multi-stage pipeline patterns** — Research how production LLM chat systems handle intent → extraction → confirmation flows. Look at function-calling patterns, chain-of-thought extraction, multi-prompt architectures. Document findings in design doc #65 revision. This feeds directly into the doc revision.
+- [x] **#122 AI Chat: research multi-stage pipeline patterns** — Research documented in #65 revision: OpenAI function calling, Rasa NLU/dialogue separation, Dialogflow intent/entity decomposition. Key insight: decompose into stages, specialize each stage, validate between stages.
 
 ### SENIOR — Contingent on Revised #65 Approval
 
@@ -107,6 +102,8 @@ Autonomous refactoring. Run `code-improvement.md`. Principles in `Docs/principle
 - [x] #121 (follow-up) Copy-previous-day button in empty diary now shows confirmation alert (13dbfbe)
 - [x] #123 state.md verified accurate: build 120, foods 1641, tests 1324+ (35 files)
 - [x] #97 Bug hunting: 2 confirm-first bugs found and fixed — copy_yesterday tool bypassed preview (5fa3ce4), flaky test stabilized with @MainActor (0882b9b)
+- [x] #120 Revised design doc #65 (PR #112) — all 3 owner review comments addressed (98c06ab)
+- [x] #122 Multi-stage pipeline research — documented in #65 revision (OpenAI, Rasa, Dialogflow patterns)
 
 ## Done (previous sprint)
 
