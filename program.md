@@ -25,8 +25,8 @@ You are the Product Designer + Principal Engineer. This is a replanning session.
 1. **Read persona files:** `Docs/personas/product-designer.md`, `Docs/personas/principal-engineer.md`
 2. **Read admin feedback from report PRs:**
    - `gh pr list --label report --state all` → for each PR with comments:
-     - **Read the full report first** (`Docs/reports/` on main) to understand context
-     - Then read comments — each comment references a specific section. You MUST understand the full section to interpret the feedback.
+     - Comments include `[Line N]` and a quoted section. Read the report file (`Docs/reports/` on main) at that line number to understand the full context around the comment.
+     - Only then interpret the feedback — "Yes, we should" means nothing without reading what the Decision Needed section actually proposed.
    - **Reply to every admin comment** (ashish-sadh, nimisha-26) directly on the PR:
      - Actionable → "Added to sprint as [task]. Will be in next execution cycle."
      - Already done → "Addressed in commit abc123 — [what changed]."
