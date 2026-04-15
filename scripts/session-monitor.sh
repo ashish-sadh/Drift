@@ -80,7 +80,8 @@ Write a 2-3 sentence status update for a human dashboard. Be specific: mention f
     # Fallback to raw log if Haiku failed
     [[ -z "$SUMMARY" ]] && SUMMARY="$RECENT"
 
-    BODY="**${MODEL^}** ${SESSION_TYPE} session | Cycle ${CYCLE} | ${LOG_LINES} lines | Updated $(date '+%H:%M')
+    MODEL_DISPLAY=$(echo "$MODEL" | awk '{print toupper(substr($0,1,1)) substr($0,2)}')
+    BODY="**${MODEL_DISPLAY}** ${SESSION_TYPE} session | Cycle ${CYCLE} | ${LOG_LINES} lines | Updated $(date '+%H:%M')
 
 ${SUMMARY}"
 
