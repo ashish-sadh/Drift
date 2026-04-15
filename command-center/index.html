@@ -1272,19 +1272,24 @@
           await api(`/repos/${OWNER}/${REPO}/issues/${issue.number}`, {
             method: 'PATCH',
             headers: { ...headers(), 'Content-Type': 'application/json' },
-            body: JSON.stringify({ state: 'closed', state_reason: 'completed' })
+            body: JSON.stringify({ state: 'closed' })
           });
         }
-        // Create new focus issue
-        await api(`/repos/${OWNER}/${REPO}/issues`, {
-          method: 'POST',
-          headers: { ...headers(), 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            title: title,
-            body: `Product focus set via Command Center.\n\nAll sprint tasks and sessions should align with this direction.\n\n---\n*Set by ${currentUser?.login || 'admin'} at ${new Date().toISOString()}*`,
-            labels: ['product-focus']
-          })
-        });
+        // Create new focus issue — retry without labels if permission denied
+        const focusBody = `Product focus set via Command Center.\n\nAll sprint tasks and sessions should align with this direction.\n\n---\n*Set by ${currentUser?.login || 'admin'} at ${new Date().toISOString()}*`;
+        try {
+          await api(`/repos/${OWNER}/${REPO}/issues`, {
+            method: 'POST',
+            headers: { ...headers(), 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: title, body: focusBody, labels: ['product-focus'] })
+          });
+        } catch (labelErr) {
+          await api(`/repos/${OWNER}/${REPO}/issues`, {
+            method: 'POST',
+            headers: { ...headers(), 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: title, body: focusBody })
+          });
+        }
         loadProductFocus();
       } catch (e) {
         alert('Failed: ' + e.message);
@@ -1299,7 +1304,7 @@
           await api(`/repos/${OWNER}/${REPO}/issues/${issue.number}`, {
             method: 'PATCH',
             headers: { ...headers(), 'Content-Type': 'application/json' },
-            body: JSON.stringify({ state: 'closed', state_reason: 'completed' })
+            body: JSON.stringify({ state: 'closed' })
           });
         }
         loadProductFocus();
