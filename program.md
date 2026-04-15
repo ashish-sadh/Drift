@@ -71,8 +71,9 @@ You are the Product Designer + Principal Engineer. This is a replanning session.
 You are the senior engineer AND the PE (Principal Engineer). Execute complex tasks and steward design docs.
 
 1. Re-read steering notes. Stop if override says STOP.
-2. **P0 bugs first:** `gh issue list --state open --label P0` → fix these before anything else
+2. **P0 bugs first — MANDATORY, before anything else:** `gh issue list --state open --label P0` → fix ALL of these before touching design docs, sprint-tasks, or features. Add SENIOR label if missing: `gh issue edit {N} --add-label SENIOR`
    - Read the full issue body. If it contains screenshots (`![screenshot]`), **download and view them** — the image shows the actual broken UI/behavior. Use the Read tool on the image URL or local path (`Docs/screenshots/`). Don't guess from text alone.
+   - Do NOT proceed to step 3 until all P0 bugs are fixed or escalated.
 3. **P0 feature requests:** `gh issue list --state open --label feature-request --label P0` → create sprint-task Issue (SENIOR) for it immediately, add to current sprint
 4. **Design docs (label-driven lifecycle):** `gh issue list --state open --label design-doc` → for each:
    - **No `doc-ready` label** (pending): write the doc.
