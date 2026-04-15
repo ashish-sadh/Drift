@@ -47,7 +47,7 @@ enum ToolRegistration {
                 var gramAmount: Double? = nil
                 var servings = params.double("amount")
 
-                // --- Route 1: Has custom calories → quick-add directly ---
+                // --- Route 1: Has custom calories → open prefilled manual entry for review ---
                 if let cal = params.double("calories"), cal > 0 {
                     // Validate range
                     guard cal <= 10000 else { return .invalid(reason: "That's over 10,000 calories — did you mean something else?") }
@@ -55,13 +55,8 @@ enum ToolRegistration {
                     let c = params.double("carbs") ?? 0
                     let f = params.double("fat") ?? 0
                     guard p >= 0, c >= 0, f >= 0 else { return .invalid(reason: "Macros can't be negative.") }
-                    // Quick-add — no DB search needed
-                    let vm = FoodLogViewModel()
-                    vm.quickAdd(name: name, calories: cal, proteinG: p, carbsG: c, fatG: f,
-                                fiberG: 0, mealType: vm.autoMealType)
-                    let macroLine = [p > 0 ? "\(Int(p))P" : nil, c > 0 ? "\(Int(c))C" : nil, f > 0 ? "\(Int(f))F" : nil]
-                        .compactMap { $0 }.joined(separator: " ")
-                    return .route(.text("Logged \(name) — \(Int(cal)) cal\(macroLine.isEmpty ? "" : " \(macroLine)")."))
+                    // Open ManualFoodEntrySheet prefilled — user reviews before logging
+                    return .route(.action(.openManualFoodEntry(name: name, calories: Int(cal), proteinG: p, carbsG: c, fatG: f)))
                 }
 
                 // Parse gram amounts: "paneer biryani 200g" or amount="200g"

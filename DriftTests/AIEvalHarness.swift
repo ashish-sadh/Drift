@@ -1469,14 +1469,37 @@ final class AIEvalHarness: XCTestCase {
     // MARK: - PreHookResult Routing (log_food)
 
     @MainActor
-    func testPreHookRouting_customCalories() {
-        // With calories → should route to quick-add (not search)
-        // Can't test the full preHook without ToolRegistry, but we can test
-        // that the IntentClassifier parses macros correctly
-        let json = #"{"tool":"log_food","name":"chipotle bowl","calories":"3000","protein":"30"}"#
-        let intent = IntentClassifier.parseResponse(json)
-        XCTAssertEqual(intent?.params["calories"], "3000")
-        XCTAssertEqual(intent?.params["protein"], "30")
+    func testPreHookRouting_customCalories_opensManualEntry() async {
+        // Route 1: custom calories must open ManualFoodEntrySheet for review — NOT log directly.
+        // Regression test: previously called quickAdd() bypassing confirm-first policy.
+        ToolRegistration.registerAll()
+        let call = ToolCall(tool: "log_food", params: ToolCallParams(values: [
+            "name": "chipotle bowl", "calories": "800", "protein": "30", "carbs": "80", "fat": "25"
+        ]))
+        let result = await ToolRegistry.shared.execute(call)
+        if case .action(let action) = result, case .openManualFoodEntry(let name, let cal, let p, _, _) = action {
+            XCTAssertEqual(name, "chipotle bowl")
+            XCTAssertEqual(cal, 800)
+            XCTAssertEqual(p, 30)
+        } else {
+            XCTFail("Expected .action(.openManualFoodEntry), got \(result)")
+        }
+    }
+
+    @MainActor
+    func testPreHookRouting_customCaloriesOnly_opensManualEntry() async {
+        // Calories without macros should also open ManualFoodEntrySheet.
+        ToolRegistration.registerAll()
+        let call = ToolCall(tool: "log_food", params: ToolCallParams(values: [
+            "name": "protein bar", "calories": "250"
+        ]))
+        let result = await ToolRegistry.shared.execute(call)
+        if case .action(let action) = result, case .openManualFoodEntry(let name, let cal, _, _, _) = action {
+            XCTAssertEqual(name, "protein bar")
+            XCTAssertEqual(cal, 250)
+        } else {
+            XCTFail("Expected .action(.openManualFoodEntry), got \(result)")
+        }
     }
 
     @MainActor
