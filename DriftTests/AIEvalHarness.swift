@@ -450,7 +450,7 @@ final class AIEvalHarness: XCTestCase {
     @MainActor
     func testToolRankerExerciseTools() {
         let queries: [(String, String, AIScreen)] = [
-            // start_workout (10 queries)
+            // start_workout (15 queries)
             ("start chest workout", "start_workout", .exercise),
             ("start smart workout", "start_workout", .exercise),
             ("begin leg day", "start_workout", .exercise),
@@ -461,7 +461,12 @@ final class AIEvalHarness: XCTestCase {
             ("let's do legs", "start_workout", .exercise),
             ("train shoulders", "start_workout", .exercise),
             ("upper body workout time", "start_workout", .exercise),
-            // exercise_info (10 queries)
+            ("let's do back and biceps", "start_workout", .exercise),
+            ("begin glute workout", "start_workout", .exercise),
+            ("want to do abs today", "start_workout", .exercise),
+            ("work on triceps today", "start_workout", .exercise),
+            ("begin lower body session", "start_workout", .exercise),
+            // exercise_info (15 queries)
             ("what should I train today", "exercise_info", .exercise),
             ("show workout history", "exercise_info", .exercise),
             ("how many workouts this week", "exercise_info", .exercise),
@@ -472,7 +477,12 @@ final class AIEvalHarness: XCTestCase {
             ("how often did I train last month", "exercise_info", .exercise),
             ("bench press progress", "exercise_info", .exercise),
             ("am I overloading my lifts", "exercise_info", .exercise),
-            // log_activity (10 queries)
+            ("workout count this month", "exercise_info", .exercise),
+            ("am i stalling on my lifts", "exercise_info", .exercise),
+            ("how many workouts last month", "exercise_info", .exercise),
+            ("overloading my bench press", "exercise_info", .exercise),
+            ("squat and deadlift progress", "exercise_info", .exercise),
+            // log_activity (15 queries)
             ("I did yoga for 30 min", "log_activity", .exercise),
             ("just finished cycling session", "log_activity", .exercise),
             ("i did 45 min cardio", "log_activity", .exercise),
@@ -483,6 +493,11 @@ final class AIEvalHarness: XCTestCase {
             ("went hiking for 60 minutes", "log_activity", .exercise),
             ("i did 30 min of running", "log_activity", .exercise),
             ("just did 60 minutes cycling", "log_activity", .exercise),
+            ("just did 20 minutes of yoga", "log_activity", .exercise),
+            ("i did rowing for 20 minutes", "log_activity", .exercise),
+            ("just did hiit for 30 minutes", "log_activity", .exercise),
+            ("went hiking for 2 hours", "log_activity", .exercise),
+            ("just finished a swimming workout", "log_activity", .exercise),
         ]
         for (query, expectedTool, screen) in queries {
             let tools = ToolRanker.rank(query: query.lowercased(), screen: screen)
@@ -494,7 +509,7 @@ final class AIEvalHarness: XCTestCase {
     @MainActor
     func testToolRankerHealthTools() {
         let queries: [(String, String, AIScreen)] = [
-            // sleep_recovery (10 queries)
+            // sleep_recovery (15 queries)
             ("how'd I sleep", "sleep_recovery", .bodyRhythm),
             ("sleep trend", "sleep_recovery", .bodyRhythm),
             ("how was my sleep", "sleep_recovery", .bodyRhythm),
@@ -505,7 +520,12 @@ final class AIEvalHarness: XCTestCase {
             ("am I recovered from yesterday", "sleep_recovery", .bodyRhythm),
             ("sleep score last night", "sleep_recovery", .bodyRhythm),
             ("how was my sleep quality this week", "sleep_recovery", .bodyRhythm),
-            // mark_supplement (10 queries)
+            ("how did I sleep this week", "sleep_recovery", .bodyRhythm),
+            ("last night's sleep quality", "sleep_recovery", .bodyRhythm),
+            ("sleep hours this week", "sleep_recovery", .bodyRhythm),
+            ("was I in deep sleep last night", "sleep_recovery", .bodyRhythm),
+            ("what's my recovery score", "sleep_recovery", .bodyRhythm),
+            // mark_supplement (15 queries)
             ("took my creatine", "mark_supplement", .supplements),
             ("took my vitamins", "mark_supplement", .supplements),
             ("had my fish oil today", "mark_supplement", .supplements),
@@ -516,7 +536,12 @@ final class AIEvalHarness: XCTestCase {
             ("taken my magnesium", "mark_supplement", .supplements),
             ("took my supplements this morning", "mark_supplement", .supplements),
             ("had my vitamin d", "mark_supplement", .supplements),
-            // supplements status (10 queries)
+            ("took my zinc today", "mark_supplement", .supplements),
+            ("had my b12 this morning", "mark_supplement", .supplements),
+            ("took my l-theanine", "mark_supplement", .supplements),
+            ("just took my probiotic", "mark_supplement", .supplements),
+            ("taken my multivitamin", "mark_supplement", .supplements),
+            // supplements status (15 queries)
             ("supplement status", "supplements", .supplements),
             ("what supplements do I take", "supplements", .supplements),
             ("did I take my vitamins", "supplements", .supplements),
@@ -527,7 +552,12 @@ final class AIEvalHarness: XCTestCase {
             ("what's in my stack", "supplements", .supplements),
             ("vitamin D status", "supplements", .supplements),
             ("which supplements am I missing today", "supplements", .supplements),
-            // glucose (10 queries)
+            ("did i take all my vitamins today", "supplements", .supplements),
+            ("what supplements do i have", "supplements", .supplements),
+            ("check my supplement schedule", "supplements", .supplements),
+            ("am i missing any supplements", "supplements", .supplements),
+            ("show my vitamin schedule", "supplements", .supplements),
+            // glucose (15 queries)
             ("any glucose spikes", "glucose", .glucose),
             ("blood sugar today", "glucose", .glucose),
             ("how's my glucose", "glucose", .glucose),
@@ -538,7 +568,12 @@ final class AIEvalHarness: XCTestCase {
             ("cgm data", "glucose", .glucose),
             ("blood sugar spike today", "glucose", .glucose),
             ("blood sugar chart", "glucose", .glucose),
-            // biomarkers (10 queries)
+            ("show glucose trend", "glucose", .glucose),
+            ("what's my blood sugar average", "glucose", .glucose),
+            ("any glucose issues today", "glucose", .glucose),
+            ("my cgm readings today", "glucose", .glucose),
+            ("my cgm spike data", "glucose", .glucose),
+            // biomarkers (15 queries)
             ("lab results", "biomarkers", .biomarkers),
             ("any markers out of range", "biomarkers", .biomarkers),
             ("show my biomarkers", "biomarkers", .biomarkers),
@@ -549,7 +584,12 @@ final class AIEvalHarness: XCTestCase {
             ("a1c results", "biomarkers", .biomarkers),
             ("blood test results", "biomarkers", .biomarkers),
             ("which biomarkers are abnormal", "biomarkers", .biomarkers),
-            // body_comp (10 queries)
+            ("show my blood work summary", "biomarkers", .biomarkers),
+            ("my a1c results", "biomarkers", .biomarkers),
+            ("latest blood test", "biomarkers", .biomarkers),
+            ("thyroid lab results", "biomarkers", .biomarkers),
+            ("review my lab numbers", "biomarkers", .biomarkers),
+            // body_comp (15 queries)
             ("how's my body fat", "body_comp", .bodyComposition),
             ("body composition", "body_comp", .bodyComposition),
             ("muscle mass trend", "body_comp", .bodyComposition),
@@ -560,6 +600,11 @@ final class AIEvalHarness: XCTestCase {
             ("dexa results", "body_comp", .bodyComposition),
             ("what's my current body fat", "body_comp", .bodyComposition),
             ("show body composition trend", "body_comp", .bodyComposition),
+            ("body fat trend over time", "body_comp", .bodyComposition),
+            ("my lean mass history", "body_comp", .bodyComposition),
+            ("check my body recomposition progress", "body_comp", .bodyComposition),
+            ("weekly body fat chart", "body_comp", .bodyComposition),
+            ("how's my body composition changing", "body_comp", .bodyComposition),
         ]
         for (query, expectedTool, screen) in queries {
             let tools = ToolRanker.rank(query: query.lowercased(), screen: screen)
@@ -1803,7 +1848,7 @@ final class AIEvalHarness: XCTestCase {
     @MainActor
     func testToolRankerMiscTools() {
         let queries: [(String, String, AIScreen)] = [
-            // add_supplement (10 queries)
+            // add_supplement (15 queries)
             ("add creatine 5g", "add_supplement", .supplements),
             ("add fish oil to my stack", "add_supplement", .supplements),
             ("add magnesium 400mg", "add_supplement", .supplements),
@@ -1814,7 +1859,12 @@ final class AIEvalHarness: XCTestCase {
             ("add creatine monohydrate", "add_supplement", .supplements),
             ("add to stack omega 3", "add_supplement", .supplements),
             ("add vitamin D 2000 IU", "add_supplement", .supplements),
-            // log_body_comp (10 queries) — use "is" to trigger anti-keyword on body_comp
+            ("add supplement omega 3", "add_supplement", .supplements),
+            ("add vitamin b12 daily", "add_supplement", .supplements),
+            ("new supplement l-theanine", "add_supplement", .supplements),
+            ("add supplement probiotic daily", "add_supplement", .supplements),
+            ("add creatine hcl to my stack", "add_supplement", .supplements),
+            // log_body_comp (15 queries) — use "is" to trigger anti-keyword on body_comp
             ("body fat is 18", "log_body_comp", .bodyComposition),
             ("my body fat is 22", "log_body_comp", .bodyComposition),
             ("bmi is 24.5", "log_body_comp", .bodyComposition),
@@ -1825,7 +1875,12 @@ final class AIEvalHarness: XCTestCase {
             ("my body fat is 21", "log_body_comp", .bodyComposition),
             ("my bmi is 25", "log_body_comp", .bodyComposition),
             ("body fat is 15 percent", "log_body_comp", .bodyComposition),
-            // explain_calories (10 queries) — use exact trigger phrases to beat set_goal
+            ("body fat is 16.5 percent", "log_body_comp", .bodyComposition),
+            ("my body fat is 23.5", "log_body_comp", .bodyComposition),
+            ("bmi is 26.8", "log_body_comp", .bodyComposition),
+            ("recorded body fat is 21", "log_body_comp", .bodyComposition),
+            ("my bmi is 22.4", "log_body_comp", .bodyComposition),
+            // explain_calories (15 queries) — use exact trigger phrases to beat set_goal
             ("how are calories calculated", "explain_calories", .food),
             ("why is my target 1800", "explain_calories", .food),
             ("how is my calorie target set", "explain_calories", .food),
@@ -1836,6 +1891,11 @@ final class AIEvalHarness: XCTestCase {
             ("how is my calorie limit set", "explain_calories", .food),
             ("why is my target 2000 calories", "explain_calories", .food),
             ("how are calories determined", "explain_calories", .food),
+            ("how are calories tracked in the app", "explain_calories", .food),
+            ("why is my target 2200 calories", "explain_calories", .food),
+            ("how is my calorie budget determined", "explain_calories", .food),
+            ("explain my calorie target", "explain_calories", .food),
+            ("how is my calorie limit calculated", "explain_calories", .food),
         ]
         for (query, expectedTool, screen) in queries {
             let tools = ToolRanker.rank(query: query.lowercased(), screen: screen)

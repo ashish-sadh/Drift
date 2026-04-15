@@ -34,6 +34,7 @@ import Testing
     #expect(result != nil, "75 kg is a valid weight")
     if let entry = result {
         #expect(abs(entry.weightKg - 75.0) < 0.01, "kg values should be stored as-is")
+        if let id = entry.id { try? AppDatabase.shared.deleteWeightEntry(id: id) }
     }
 }
 
@@ -43,6 +44,7 @@ import Testing
     if let entry = result {
         let expectedKg = 165.0 / 2.20462
         #expect(abs(entry.weightKg - expectedKg) < 0.01, "lbs should convert to kg correctly")
+        if let id = entry.id { try? AppDatabase.shared.deleteWeightEntry(id: id) }
     }
 }
 
@@ -51,17 +53,24 @@ import Testing
     let result = WeightServiceAPI.logWeight(value: 80, unit: "kgs")
     if let entry = result {
         #expect(abs(entry.weightKg - 80.0) < 0.01, "kg prefix variants should not convert")
+        if let id = entry.id { try? AppDatabase.shared.deleteWeightEntry(id: id) }
     }
 }
 
 @Test @MainActor func logWeightBoundaryJustAbove10() async throws {
     let result = WeightServiceAPI.logWeight(value: 11, unit: "kg")
     #expect(result != nil, "11 kg is just above the 10 kg lower bound")
+    if let entry = result, let id = entry.id {
+        try? AppDatabase.shared.deleteWeightEntry(id: id)
+    }
 }
 
 @Test @MainActor func logWeightBoundaryJustBelow300() async throws {
     let result = WeightServiceAPI.logWeight(value: 299, unit: "kg")
     #expect(result != nil, "299 kg is just below the 300 kg upper bound")
+    if let entry = result, let id = entry.id {
+        try? AppDatabase.shared.deleteWeightEntry(id: id)
+    }
 }
 
 // MARK: - getHistory Filtering
