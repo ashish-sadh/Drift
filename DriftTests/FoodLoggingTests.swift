@@ -1636,7 +1636,7 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
 
     let (high, raw) = RecoveryEstimator.calculateActivityLoad(activeCalories: 1000, steps: 20000)
     #expect(raw > 10, "High activity should produce raw > 10, got \(raw)")
-    #expect(high == .moderate || high == .heavy)
+    #expect(high == .heavy || high == .extreme, "1000 cal + 20k steps should be heavy or extreme, got \(high)")
 }
 
 // MARK: - Recovery Algorithm Tests (missing data handling)
@@ -2751,4 +2751,105 @@ enum TestError: Error { case msg(String); init(_ s: String) { self = .msg(s) } }
     let db = seededDB()
     #expect(!(try db.searchFoods(query: "shrimp curry")).isEmpty)
     #expect(!(try db.searchFoods(query: "shrimp")).isEmpty)
+}
+
+// MARK: - New Foods Added (#83) — Top 20 search miss coverage (9 tests)
+
+@Test func newFoodChanaMasala() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "chana masala")).isEmpty)
+}
+
+@Test func newFoodRajmaChawal() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "rajma chawal")).isEmpty)
+}
+
+@Test func newFoodDalChawal() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "dal chawal")).isEmpty)
+}
+
+@Test func newFoodKadhiChawal() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "kadhi chawal")).isEmpty)
+}
+
+@Test func newFoodGuava() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "guava")).isEmpty)
+}
+
+@Test func newFoodGardenSalad() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "garden salad")).isEmpty)
+}
+
+@Test func newFoodKatiRoll() async throws {
+    let db = seededDB()
+    let results = try db.searchFoods(query: "kati roll")
+    #expect(!results.isEmpty, "Kati roll variants should be searchable")
+}
+
+@Test func newFoodChivda() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "chivda")).isEmpty)
+}
+
+@Test func newFoodMasalaOmelette() async throws {
+    let db = seededDB()
+    #expect(!(try db.searchFoods(query: "masala omelette")).isEmpty)
+}
+
+// MARK: - AIActionExecutor Multi-Food Parsing Tests (#84) (7 tests)
+
+@Test func multiFoodParsesTwoItems() {
+    let intents = AIActionExecutor.parseMultiFoodIntent("log eggs and toast")
+    #expect(intents != nil && intents!.count == 2)
+    let names = intents!.map { $0.query }
+    #expect(names.contains("eggs"))
+    #expect(names.contains("toast"))
+}
+
+@Test func multiFoodStripsMealSuffix() {
+    // Meal suffix should be stripped — no food named "eggs for breakfast"
+    let intents = AIActionExecutor.parseMultiFoodIntent("log eggs and toast for breakfast")
+    #expect(intents != nil)
+    let names = intents!.map { $0.query }
+    for name in names {
+        #expect(!name.contains("breakfast"), "Food name should not contain meal suffix: \(name)")
+    }
+}
+
+@Test func multiFoodWithServings() {
+    let intents = AIActionExecutor.parseMultiFoodIntent("log 2 eggs and 1 banana")
+    #expect(intents != nil && intents!.count == 2)
+    let egg = intents!.first { $0.query.contains("egg") }
+    #expect(egg?.servings == 2)
+}
+
+@Test func multiFoodWithGrams() {
+    let intents = AIActionExecutor.parseMultiFoodIntent("log 200g chicken and 100g rice")
+    #expect(intents != nil && intents!.count == 2)
+    let chicken = intents!.first { $0.query.contains("chicken") }
+    #expect(chicken?.gramAmount == 200)
+}
+
+@Test func multiFoodRejectsCompoundFoodOnly() {
+    // Pure compound food with no extras → nil (fall through to single food parser)
+    let intents = AIActionExecutor.parseMultiFoodIntent("log mac and cheese")
+    #expect(intents == nil, "Pure compound food should return nil to use single parser")
+}
+
+@Test func singleFoodMealHintBreakfast() {
+    let intent = AIActionExecutor.parseFoodIntent("log 2 eggs for breakfast")
+    #expect(intent != nil)
+    #expect(intent?.mealHint == "breakfast")
+    #expect(intent?.query.contains("egg") == true)
+}
+
+@Test func singleFoodMealHintDinner() {
+    let intent = AIActionExecutor.parseFoodIntent("had rice for dinner")
+    #expect(intent != nil)
+    #expect(intent?.mealHint == "dinner")
 }

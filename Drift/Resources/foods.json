@@ -25103,5 +25103,393 @@
       "curry powder"
     ],
     "nova_group": 2
+  },
+  {
+    "name": "Chana Masala",
+    "category": "Indian Staples",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 12,
+    "carbs_g": 40,
+    "fat_g": 8,
+    "fiber_g": 10,
+    "ingredients": [
+      "chickpeas",
+      "tomato",
+      "onion",
+      "garlic",
+      "ginger",
+      "coriander",
+      "cumin",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Rajma Chawal",
+    "category": "Indian Staples",
+    "serving_size": 450,
+    "serving_unit": "g",
+    "calories": 580,
+    "protein_g": 22,
+    "carbs_g": 100,
+    "fat_g": 8,
+    "fiber_g": 14,
+    "ingredients": [
+      "kidney beans",
+      "tomato",
+      "onion",
+      "spices",
+      "rice",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Dal Chawal",
+    "category": "Indian Staples",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 490,
+    "protein_g": 18,
+    "carbs_g": 88,
+    "fat_g": 7,
+    "fiber_g": 10,
+    "ingredients": [
+      "toor dal",
+      "rice",
+      "tomato",
+      "onion",
+      "oil",
+      "cumin",
+      "turmeric"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Kadhi Chawal",
+    "category": "Indian Staples",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 460,
+    "protein_g": 12,
+    "carbs_g": 82,
+    "fat_g": 9,
+    "fiber_g": 4,
+    "ingredients": [
+      "yogurt",
+      "besan",
+      "rice",
+      "oil",
+      "cumin",
+      "turmeric",
+      "onion"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Puri Sabzi",
+    "category": "Indian Staples",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 400,
+    "protein_g": 8,
+    "carbs_g": 54,
+    "fat_g": 17,
+    "fiber_g": 5,
+    "ingredients": [
+      "wheat flour",
+      "potato",
+      "oil",
+      "spices",
+      "tomato",
+      "onion"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Halwa Puri",
+    "category": "Indian Staples",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 570,
+    "protein_g": 9,
+    "carbs_g": 84,
+    "fat_g": 22,
+    "fiber_g": 5,
+    "ingredients": [
+      "wheat flour",
+      "semolina",
+      "sugar",
+      "ghee",
+      "oil"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Punjabi Thali",
+    "category": "Indian Staples",
+    "serving_size": 600,
+    "serving_unit": "g",
+    "calories": 820,
+    "protein_g": 26,
+    "carbs_g": 130,
+    "fat_g": 22,
+    "fiber_g": 14,
+    "ingredients": [
+      "roti",
+      "dal",
+      "sabzi",
+      "rice",
+      "salad",
+      "raita",
+      "pickle"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "South Indian Meals",
+    "category": "Indian Staples",
+    "serving_size": 500,
+    "serving_unit": "g",
+    "calories": 640,
+    "protein_g": 16,
+    "carbs_g": 118,
+    "fat_g": 10,
+    "fiber_g": 10,
+    "ingredients": [
+      "rice",
+      "sambar",
+      "rasam",
+      "papad",
+      "pickle",
+      "coconut chutney"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Chicken Kati Roll",
+    "category": "Indian Street Food",
+    "serving_size": 220,
+    "serving_unit": "g",
+    "calories": 370,
+    "protein_g": 24,
+    "carbs_g": 38,
+    "fat_g": 12,
+    "fiber_g": 3,
+    "ingredients": [
+      "wheat flour",
+      "chicken",
+      "egg",
+      "onion",
+      "green chutney",
+      "oil"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Paneer Kati Roll",
+    "category": "Indian Street Food",
+    "serving_size": 210,
+    "serving_unit": "g",
+    "calories": 390,
+    "protein_g": 18,
+    "carbs_g": 36,
+    "fat_g": 20,
+    "fiber_g": 3,
+    "ingredients": [
+      "wheat flour",
+      "paneer",
+      "egg",
+      "onion",
+      "green chutney",
+      "oil"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Egg Kati Roll",
+    "category": "Indian Street Food",
+    "serving_size": 180,
+    "serving_unit": "g",
+    "calories": 310,
+    "protein_g": 15,
+    "carbs_g": 32,
+    "fat_g": 14,
+    "fiber_g": 2,
+    "ingredients": [
+      "wheat flour",
+      "egg",
+      "onion",
+      "green chutney",
+      "oil"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Vegetable Kati Roll",
+    "category": "Indian Street Food",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 290,
+    "protein_g": 8,
+    "carbs_g": 42,
+    "fat_g": 10,
+    "fiber_g": 4,
+    "ingredients": [
+      "wheat flour",
+      "potato",
+      "capsicum",
+      "onion",
+      "green chutney",
+      "oil"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Chivda",
+    "category": "Indian Street Food",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 132,
+    "protein_g": 3,
+    "carbs_g": 21,
+    "fat_g": 4.5,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "flattened rice",
+      "peanuts",
+      "oil",
+      "curry leaves",
+      "mustard seeds",
+      "sugar",
+      "salt"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Chakli",
+    "category": "Indian Street Food",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 148,
+    "protein_g": 2.5,
+    "carbs_g": 19,
+    "fat_g": 7,
+    "fiber_g": 1,
+    "ingredients": [
+      "rice flour",
+      "urad dal flour",
+      "oil",
+      "sesame seeds",
+      "cumin"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Salted Lassi",
+    "category": "Indian Staples",
+    "serving_size": 250,
+    "serving_unit": "ml",
+    "calories": 120,
+    "protein_g": 6,
+    "carbs_g": 10,
+    "fat_g": 5,
+    "fiber_g": 0,
+    "ingredients": [
+      "yogurt",
+      "water",
+      "salt",
+      "cumin",
+      "mint"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Masala Omelette",
+    "category": "Proteins",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 225,
+    "protein_g": 17,
+    "carbs_g": 5,
+    "fat_g": 15,
+    "fiber_g": 1,
+    "ingredients": [
+      "egg",
+      "onion",
+      "tomato",
+      "green chili",
+      "coriander",
+      "oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Guava",
+    "category": "Fruits",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 68,
+    "protein_g": 2.6,
+    "carbs_g": 14.3,
+    "fat_g": 1,
+    "fiber_g": 5.4,
+    "ingredients": [
+      "guava"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Guava (1 medium)",
+    "category": "Fruits",
+    "serving_size": 165,
+    "serving_unit": "g",
+    "calories": 112,
+    "protein_g": 4.2,
+    "carbs_g": 23.6,
+    "fat_g": 1.6,
+    "fiber_g": 8.9,
+    "ingredients": [
+      "guava"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Garden Salad",
+    "category": "Vegetables",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 35,
+    "protein_g": 2,
+    "carbs_g": 7,
+    "fat_g": 0.5,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "lettuce",
+      "tomato",
+      "cucumber",
+      "carrot",
+      "onion"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Idiyappam",
+    "category": "Indian Staples",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 188,
+    "protein_g": 3.5,
+    "carbs_g": 42,
+    "fat_g": 0.5,
+    "fiber_g": 1,
+    "ingredients": [
+      "rice flour",
+      "water",
+      "salt"
+    ],
+    "nova_group": 2
   }
 ]

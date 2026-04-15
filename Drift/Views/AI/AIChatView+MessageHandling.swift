@@ -537,13 +537,20 @@ extension AIChatViewModel {
 
     private func handleMultiFoodIntent(_ resolved: String) -> Bool {
         guard let intents = AIActionExecutor.parseMultiFoodIntent(resolved), intents.count > 1 else { return false }
+        // Capture meal hint from suffix BEFORE parseMultiFoodIntent strips it
+        var mealName = "Meal"
+        let lower = resolved.lowercased()
+        for (suffix, meal) in [(" for breakfast", "breakfast"), (" for lunch", "lunch"),
+                                (" for dinner", "dinner"), (" for snack", "snack")] {
+            if lower.hasSuffix(suffix) { mealName = meal; break }
+        }
         let foodText = intents.map { intent in
             var s = intent.query
             if let srv = intent.servings, srv != 1 { s = "\(String(format: "%g", srv)) \(s)" }
             if let g = intent.gramAmount { s = "\(Int(g))g \(s)" }
             return s
         }.joined(separator: " and ")
-        buildMealFromText(foodText, mealName: "Meal")
+        buildMealFromText(foodText, mealName: mealName)
         return true
     }
 
