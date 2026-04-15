@@ -957,10 +957,16 @@
     async function loadDesignDocs() {
       const el = document.getElementById('designs-list');
       try {
-        // Get design-doc PRs — use Issues API (supports label filter) then filter for PRs
+        // Get design-doc issues and check for PRs or files in Docs/designs/
         const allDesignItems = await api(`/repos/${OWNER}/${REPO}/issues?labels=design-doc&state=all&per_page=30`);
+        // Check which issues have design doc files on main
+        let designFiles = [];
+        try { designFiles = await api(`/repos/${OWNER}/${REPO}/contents/Docs/designs`); } catch {}
+        const fileNumbers = new Set(designFiles.map(f => f.name.match(/^(\d+)-/)?.[1]).filter(Boolean));
         const prs = allDesignItems.filter(i => i.pull_request);
-        const pendingRequests = allDesignItems.filter(i => !i.pull_request && i.state === 'open');
+        const hasFile = allDesignItems.filter(i => !i.pull_request && fileNumbers.has(String(i.number)));
+        const docsWritten = [...prs, ...hasFile];
+        const pendingRequests = allDesignItems.filter(i => !i.pull_request && !fileNumbers.has(String(i.number)) && i.state === 'open');
 
         if (prs.length === 0 && pendingRequests.length === 0) {
           el.innerHTML = '<div class="empty">No design docs yet. Request one above.</div>';
@@ -984,11 +990,11 @@
         }
 
         // Design doc PRs
-        if (prs.length > 0) {
+        if (docsWritten.length > 0) {
           html += '<h3 style="color:var(--accent);margin:20px 0 12px;">Design Documents</h3>';
-          html += prs.map(pr => {
+          html += docsWritten.map(pr => {
             const isApproved = pr.labels.some(l => l.name === 'approved');
-            const isMerged = pr.state === 'closed' && isApproved;  // Approximation via Issues API
+            const isMerged = pr.state === 'closed' && isApproved;
             const prUrl = pr.pull_request ? pr.pull_request.html_url : pr.html_url;
             const status = isMerged ? 'Implemented' : isApproved ? 'Approved' : 'Pending Review';
             const statusColor = isMerged ? 'var(--text-muted)' : isApproved ? 'var(--green)' : 'var(--yellow)';
@@ -1002,7 +1008,7 @@
                 <div>
                   <span class="report-title">${escapeHtml(pr.title)}</span>
                   <span class="report-type" style="background:${statusBg};color:${statusColor}">${status}</span>
-                  <span class="badge">${pr.comments + pr.review_comments} comments</span>
+                  <span class="badge">${pr.comments + (pr.review_comments || 0)} comments</span>
                 </div>
                 <span class="report-date">${new Date(pr.created_at).toLocaleDateString()}</span>
               </div>
