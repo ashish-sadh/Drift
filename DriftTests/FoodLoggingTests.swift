@@ -370,6 +370,31 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     #expect(entry.portionText == "", "Quick add should have empty portion text")
 }
 
+@Test func portionTextBread() {
+    let entry = FoodEntry(mealLogId: 1, foodName: "White Bread", servingSizeG: 30, servings: 2, calories: 80)
+    #expect(entry.portionText == "2 slices", "Bread should show slices")
+}
+
+@Test func portionTextPizza() {
+    let entry = FoodEntry(mealLogId: 1, foodName: "Margherita Pizza", servingSizeG: 100, servings: 2, calories: 250)
+    #expect(entry.portionText == "2 slices", "Pizza should show slices")
+}
+
+@Test func portionTextProteinPowder() {
+    let entry = FoodEntry(mealLogId: 1, foodName: "Whey Protein Powder", servingSizeG: 30, servings: 2, calories: 120)
+    #expect(entry.portionText == "2 scoops", "Protein powder should show scoops")
+}
+
+@Test func portionTextSoup() {
+    let entry = FoodEntry(mealLogId: 1, foodName: "Tomato Soup", servingSizeG: 240, servings: 1, calories: 90)
+    #expect(entry.portionText == "1 bowl", "Soup should show bowl")
+}
+
+@Test func portionTextBroth() {
+    let entry = FoodEntry(mealLogId: 1, foodName: "Chicken Broth", servingSizeG: 240, servings: 2, calories: 15)
+    #expect(entry.portionText == "2 bowls", "Broth should show bowls")
+}
+
 // MARK: - Food Usage Tracking Tests (6 tests)
 
 @Test func trackFoodUsageInsert() async throws {

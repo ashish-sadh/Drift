@@ -113,7 +113,16 @@ extension FoodEntry {
         if lower.contains("strip") && servingSizeG < 50 { return fmt(servings, "strip", "strips") }
         if lower.contains("link") && servingSizeG < 100 { return fmt(servings, "link", "links") }
         if lower.contains("slice") { return fmt(servings, "slice", "slices") }
+        // Bread/toast → slice (exclude breadfruit, breadstick, per-slice entries already caught above)
+        if (lower.contains("bread") || lower.contains("toast")) &&
+           !lower.contains("breadfruit") && !lower.contains("breadstick") && servingSizeG < 80 {
+            return fmt(servings, "slice", "slices")
+        }
+        // Pizza → slice
+        if lower.contains("pizza") && servingSizeG < 150 { return fmt(servings, "slice", "slices") }
         if lower.contains("scoop") { return fmt(servings, "scoop", "scoops") }
+        // Protein powder → scoop (food name doesn't contain "scoop")
+        if lower.contains("protein powder") { return fmt(servings, "scoop", "scoops") }
         if lower.contains("patty") || lower.contains("pattie") { return fmt(servings, "patty", "patties") }
         if lower.contains("bar") && !lower.contains("barley") && servingSizeG < 80 { return fmt(servings, "bar", "bars") }
         if lower.contains("tortilla") && servingSizeG < 80 { return fmt(servings, "tortilla", "tortillas") }
@@ -122,6 +131,9 @@ extension FoodEntry {
         if lower.contains("muffin") && servingSizeG < 120 { return fmt(servings, "muffin", "muffins") }
         if lower.contains("bagel") && servingSizeG < 130 { return fmt(servings, "bagel", "bagels") }
         if lower.contains("cup") && servingSizeG > 200 { return fmt(servings, "cup", "cups") }
+        // Soups, stews, broths → bowl
+        if lower.contains("soup") || lower.contains("stew") || lower.contains("chowder") ||
+           lower.contains("broth") || lower.contains("bisque") { return fmt(servings, "bowl", "bowls") }
 
         return "\(Int(totalG))g"
     }
