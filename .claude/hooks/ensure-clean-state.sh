@@ -7,6 +7,11 @@ set -e
 
 cd "${CLAUDE_PROJECT_DIR:-.}"
 
+# Skip dirty state check if autopilot is running (it owns the working directory)
+if pgrep -f 'claude.*-p.*execute\|claude.*-p.*run.*autopilot\|claude.*-p.*sprint' > /dev/null 2>&1; then
+  exit 0
+fi
+
 # Check for uncommitted changes (staged or unstaged)
 DIRTY=$(git status --porcelain 2>/dev/null | grep -v '^??' | head -5)
 UNTRACKED=$(git status --porcelain 2>/dev/null | grep '^??' | grep -v '.claude/' | head -5)

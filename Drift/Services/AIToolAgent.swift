@@ -47,9 +47,14 @@ enum AIToolAgent {
 
         let pipelineStart = CFAbsoluteTimeGetCurrent()
 
+        // ── Step 0: Input normalization (instant, no LLM) ──
+        // Strips filler words, voice artifacts, repeated words, collapses whitespace.
+        // All subsequent phases see clean input.
+        let normalized = InputNormalizer.normalize(message)
+
         // ── Phase 1: Try rules on raw input (instant, both models) ──
         // Only for high-confidence action commands (undo, delete, greetings)
-        if let toolCall = ToolRanker.tryRulePick(query: message, screen: screen) {
+        if let toolCall = ToolRanker.tryRulePick(query: normalized, screen: screen) {
             logTiming("Phase 1 (rules)", start: pipelineStart)
             return await executeTool(toolCall)
         }
@@ -61,7 +66,7 @@ enum AIToolAgent {
 
             // Try LLM intent classifier first
             let classifyStart = CFAbsoluteTimeGetCurrent()
-            if let result = await IntentClassifier.classifyFull(message: message, history: history) {
+            if let result = await IntentClassifier.classifyFull(message: normalized, history: history) {
                 logTiming("Phase 2 (classify)", start: classifyStart)
                 switch result {
                 case .toolCall(let intent):
@@ -92,8 +97,8 @@ enum AIToolAgent {
         }
 
         // ── Phase 3: Tool-first execution → stream presentation (both models) ──
-        onStep(stepMessage(for: message))
-        let toolResults = await executeRelevantTools(query: message, screen: screen)
+        onStep(stepMessage(for: normalized))
+        let toolResults = await executeRelevantTools(query: normalized, screen: screen)
 
         // If a tool returned a UI action, return it directly
         if let actionResult = toolResults.first(where: { $0.action != nil }) {
@@ -107,7 +112,7 @@ enum AIToolAgent {
             if isLargeModel {
                 onStep("Preparing answer...")
                 return await streamPresentation(
-                    query: message, toolData: data, screen: screen, history: history, onToken: onToken
+                    query: normalized, toolData: data, screen: screen, history: history, onToken: onToken
                 )
             } else {
                 // SmolLM: add a brief insight prefix to raw data
@@ -120,9 +125,9 @@ enum AIToolAgent {
         onStep("Thinking...")
         if isLargeModel {
             // Gemma: direct streaming with tool-call detection
-            let context = gatherContext(query: message, screen: screen)
+            let context = gatherContext(query: normalized, screen: screen)
             let (systemPrompt, userMessage) = ToolRanker.buildPrompt(
-                query: message, screen: screen, context: context, history: history
+                query: normalized, screen: screen, context: context, history: history
             )
 
             let state = StreamState()
@@ -155,7 +160,7 @@ enum AIToolAgent {
         } else {
             // SmolLM: context-enriched streaming via AIChainOfThought
             let response = await AIChainOfThought.execute(
-                query: message, screen: screen, history: history,
+                query: normalized, screen: screen, history: history,
                 onStep: onStep, onToken: onToken
             )
 
