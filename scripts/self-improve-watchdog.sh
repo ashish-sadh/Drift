@@ -117,6 +117,53 @@ stop_monitor() {
     MONITOR_PID=""
 }
 
+check_compliance() {
+    # Only check if session has been running for at least 10 minutes
+    if [[ -z "$CURRENT_LOG" ]] || [[ ! -f "$CURRENT_LOG" ]]; then return; fi
+    local NOW=$(date +%s)
+    local LOG_START=$(stat -f %B "$CURRENT_LOG" 2>/dev/null || echo "$NOW")
+    local AGE=$(( NOW - LOG_START ))
+    if (( AGE < 600 )); then return; fi  # Give session 10 min to start
+
+    # Check P0 bugs — if they exist and session isn't working on them, kill and refocus
+    local P0_BUGS=$(gh issue list --state open --label P0 --json number,title --jq '.[].number' 2>/dev/null || true)
+    if [[ -n "$P0_BUGS" ]]; then
+        # Check if recent commits reference any P0 bug
+        local RECENT_COMMITS=$(git log --oneline --since="10 minutes ago" 2>/dev/null || true)
+        local WORKING_ON_P0=false
+        for NUM in $P0_BUGS; do
+            echo "$RECENT_COMMITS" | grep -q "#$NUM" && WORKING_ON_P0=true
+        done
+        if ! $WORKING_ON_P0; then
+            # Check if log mentions P0 bug numbers (even if not committed yet)
+            local LOG_TAIL=$(tail -50 "$CURRENT_LOG" 2>/dev/null || true)
+            for NUM in $P0_BUGS; do
+                echo "$LOG_TAIL" | grep -q "#$NUM\|issue.*$NUM\|bug.*$NUM" && WORKING_ON_P0=true
+            done
+        fi
+        if ! $WORKING_ON_P0; then
+            local P0_LIST=$(gh issue list --state open --label P0 --json number,title --jq '.[] | "#\(.number) \(.title)"' 2>/dev/null || true)
+            log "COMPLIANCE: Session ignoring P0 bugs after ${AGE}s. Killing and refocusing."
+            kill_claude
+            cleanup_dirty_state
+            # Override prompt to focus on P0 bugs only
+            PROMPT="Fix these P0 bugs FIRST, do nothing else: ${P0_LIST}"
+            start_claude
+            return
+        fi
+    fi
+
+    # Check TestFlight — if overdue and session hasn't started publishing
+    local LAST_TF=$(cat "$HOME/drift-state/last-testflight-publish" 2>/dev/null || echo "0")
+    local TF_ELAPSED=$(( NOW - LAST_TF ))
+    if (( TF_ELAPSED > 14400 )); then  # 4 hours (1h grace beyond 3h cadence)
+        local TF_AUTH=$(test -f "$HOME/drift-state/testflight-publish-authorized" && echo "yes" || echo "no")
+        if [[ "$TF_AUTH" == "no" ]]; then
+            log "COMPLIANCE: TestFlight ${TF_ELAPSED}s overdue. Will be enforced on next commit via hook."
+        fi
+    fi
+}
+
 start_claude() {
     local MODEL="sonnet"
     local SESSION_TYPE="junior"
@@ -411,6 +458,8 @@ while true; do
                 start_claude
             else
                 log "Autopilot running normally (PID $CLAUDE_PID)."
+                # Compliance check — is the session addressing priorities?
+                check_compliance
             fi
             ;;
         *)
