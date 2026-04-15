@@ -125,7 +125,7 @@ struct ExercisePickerView: View {
 
     private func exerciseRow(name: String, bodyPart: String, equipment: String? = nil) -> some View {
         Button { onSelect(name); dismiss() } label: {
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     if favs.contains(name) {
                         Image(systemName: "star.fill").font(.caption2).foregroundStyle(Theme.fatYellow)
@@ -135,10 +135,14 @@ struct ExercisePickerView: View {
                     if let lastW = try? WorkoutService.lastWeight(for: name) {
                         Text("\(Int(Preferences.weightUnit.convertFromLbs(lastW))) \(Preferences.weightUnit.displayName)").font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
                     }
-                    Text(bodyPart).font(.caption2).foregroundStyle(.tertiary)
                 }
-                if let equipment, !equipment.isEmpty {
-                    Text(equipment).font(.caption).foregroundStyle(.quaternary)
+                HStack(spacing: 4) {
+                    if !bodyPart.isEmpty {
+                        muscleChip(bodyPart)
+                    }
+                    if let equipment, !equipment.isEmpty && equipment.lowercased() != "other" {
+                        equipmentChip(equipment)
+                    }
                 }
             }
         }
@@ -150,6 +154,52 @@ struct ExercisePickerView: View {
             } label: {
                 Label(favs.contains(name) ? "Unfavorite" : "Favorite", systemImage: favs.contains(name) ? "star.slash" : "star")
             }.tint(Theme.fatYellow)
+        }
+    }
+
+    private func muscleChip(_ bodyPart: String) -> some View {
+        HStack(spacing: 2) {
+            Image(systemName: muscleIcon(bodyPart)).font(.system(size: 8))
+            Text(bodyPart).font(.system(size: 9))
+        }
+        .padding(.horizontal, 6).padding(.vertical, 2)
+        .background(Theme.accent.opacity(0.1), in: Capsule())
+        .foregroundStyle(Theme.accent)
+    }
+
+    private func equipmentChip(_ equipment: String) -> some View {
+        HStack(spacing: 2) {
+            Image(systemName: equipmentIcon(equipment)).font(.system(size: 8))
+            Text(equipment.capitalized).font(.system(size: 9))
+        }
+        .padding(.horizontal, 6).padding(.vertical, 2)
+        .background(Color.secondary.opacity(0.1), in: Capsule())
+        .foregroundStyle(.secondary)
+    }
+
+    private func muscleIcon(_ bodyPart: String) -> String {
+        switch bodyPart.lowercased() {
+        case "chest": return "figure.strengthtraining.traditional"
+        case "back": return "figure.rowing"
+        case "legs": return "figure.run"
+        case "shoulders": return "figure.boxing"
+        case "arms": return "figure.cooldown"
+        case "core": return "figure.core.training"
+        default: return "figure.mixed.cardio"
+        }
+    }
+
+    private func equipmentIcon(_ equipment: String) -> String {
+        switch equipment.lowercased() {
+        case "barbell", "e-z curl bar": return "dumbbell.fill"
+        case "dumbbell": return "dumbbell"
+        case "cable": return "link"
+        case "machine": return "gearshape"
+        case "body only": return "figure.stand"
+        case "kettlebells": return "circle.fill"
+        case "bands": return "arrow.left.and.right"
+        case "exercise ball", "medicine ball": return "circle.dotted"
+        default: return "wrench.and.screwdriver"
         }
     }
 
