@@ -108,6 +108,15 @@ extension FoodEntry {
         if lower.contains("banana") && servingSizeG < 160 { return fmt(servings, "banana", "bananas") }
         if lower.contains("apple") && servingSizeG < 250 { return fmt(servings, "apple", "apples") }
         if lower.contains("cookie") || lower.contains("biscuit") { return fmt(servings, "piece", "pieces") }
+        if lower.contains("brownie") || lower.contains("cupcake") { return fmt(servings, "piece", "pieces") }
+        if lower.contains("momo") { return fmt(servings, "momo", "momos") }
+        if lower.contains("vada") && servingSizeG < 120 { return fmt(servings, "vada", "vadas") }
+        if lower.contains("pakora") { return fmt(servings, "pakora", "pakoras") }
+        // Indian sweets
+        if lower.contains("laddu") || lower.contains("laddoo") || lower.contains("barfi") ||
+           lower.contains("burfi") || lower.contains("jalebi") || lower.contains("rasgulla") ||
+           lower.contains("modak") || lower.contains("peda") || lower.contains("gujiya") ||
+           lower.contains("kaju katli") { return fmt(servings, "piece", "pieces") }
         if lower.contains("nugget") { return fmt(servings, "nugget", "nuggets") }
         if lower.contains("wing") && servingSizeG < 100 { return fmt(servings, "wing", "wings") }
         if lower.contains("strip") && servingSizeG < 50 { return fmt(servings, "strip", "strips") }
