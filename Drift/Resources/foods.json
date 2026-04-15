@@ -5098,7 +5098,7 @@
     "nova_group": 3
   },
   {
-    "name": "A\u00e7a\u00ed Bowl (medium)",
+    "name": "Açaí Bowl (medium)",
     "category": "US Staples",
     "serving_size": 300,
     "serving_unit": "g",
@@ -5108,7 +5108,7 @@
     "fat_g": 18,
     "fiber_g": 8,
     "ingredients": [
-      "A\u00e7a\u00ed Bowl (medium)"
+      "Açaí Bowl (medium)"
     ],
     "nova_group": 3
   },
@@ -9788,7 +9788,7 @@
     "nova_group": 3
   },
   {
-    "name": "Costco A\u00e7a\u00ed Bowl (food court)",
+    "name": "Costco Açaí Bowl (food court)",
     "category": "Costco",
     "serving_size": 355,
     "serving_unit": "g",
@@ -9798,7 +9798,7 @@
     "fat_g": 19,
     "fiber_g": 7,
     "ingredients": [
-      "Costco A\u00e7a\u00ed Bowl (food court)"
+      "Costco Açaí Bowl (food court)"
     ],
     "nova_group": 3
   },
@@ -10493,7 +10493,7 @@
     "nova_group": 4
   },
   {
-    "name": "Starbucks Caff\u00e8 Latte (Grande, 2% milk)",
+    "name": "Starbucks Caffè Latte (Grande, 2% milk)",
     "category": "Beverages",
     "serving_size": 473,
     "serving_unit": "ml",
@@ -10503,7 +10503,7 @@
     "fat_g": 7,
     "fiber_g": 0,
     "ingredients": [
-      "Starbucks Caff\u00e8 Latte (Grande, 2% milk)"
+      "Starbucks Caffè Latte (Grande, 2% milk)"
     ],
     "nova_group": 3
   },
@@ -25155,7 +25155,7 @@
     "ingredients": [
       "fries",
       "cheese sauce",
-      "jalape\u00f1os",
+      "jalapeños",
       "sour cream"
     ],
     "nova_group": 4
@@ -28726,7 +28726,7 @@
       "beef",
       "onion",
       "tomato",
-      "jalape\u00f1o",
+      "jalapeño",
       "rosemary",
       "Ethiopian spices",
       "butter"
@@ -30050,5 +30050,506 @@
       "pepper"
     ],
     "nova_group": 1
+  },
+  {
+    "name": "Moong Dal Tadka",
+    "category": "Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 105,
+    "protein_g": 7,
+    "carbs_g": 16,
+    "fat_g": 2,
+    "fiber_g": 4,
+    "ingredients": [
+      "moong dal",
+      "ghee",
+      "cumin",
+      "garlic",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Rajma Masala",
+    "category": "Indian",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 16,
+    "carbs_g": 40,
+    "fat_g": 4,
+    "fiber_g": 12,
+    "ingredients": [
+      "kidney beans",
+      "tomato",
+      "onion",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Chicken Korma",
+    "category": "Indian",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 315,
+    "protein_g": 27,
+    "carbs_g": 9,
+    "fat_g": 20,
+    "fiber_g": 1,
+    "ingredients": [
+      "chicken",
+      "yogurt",
+      "cream",
+      "onion",
+      "almonds",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Chicken Saag",
+    "category": "Indian",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 278,
+    "protein_g": 30,
+    "carbs_g": 8,
+    "fat_g": 15,
+    "fiber_g": 2,
+    "ingredients": [
+      "chicken",
+      "spinach",
+      "onion",
+      "tomato",
+      "cream",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Mutton Biryani",
+    "category": "Indian",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 430,
+    "protein_g": 26,
+    "carbs_g": 48,
+    "fat_g": 15,
+    "fiber_g": 2,
+    "ingredients": [
+      "mutton",
+      "basmati rice",
+      "yogurt",
+      "onion",
+      "oil",
+      "biryani spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Matar Mushroom",
+    "category": "Indian",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 158,
+    "protein_g": 8,
+    "carbs_g": 18,
+    "fat_g": 6,
+    "fiber_g": 4,
+    "ingredients": [
+      "mushroom",
+      "peas",
+      "tomato",
+      "onion",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Prawn Masala",
+    "category": "Indian",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 248,
+    "protein_g": 30,
+    "carbs_g": 8,
+    "fat_g": 12,
+    "fiber_g": 2,
+    "ingredients": [
+      "prawns",
+      "tomato",
+      "onion",
+      "coconut",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Peas Pulao",
+    "category": "Indian",
+    "serving_size": 180,
+    "serving_unit": "g",
+    "calories": 270,
+    "protein_g": 7,
+    "carbs_g": 50,
+    "fat_g": 5,
+    "fiber_g": 3,
+    "ingredients": [
+      "basmati rice",
+      "peas",
+      "ghee",
+      "cumin",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Sev Puri (1 plate)",
+    "category": "Indian",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 275,
+    "protein_g": 6,
+    "carbs_g": 38,
+    "fat_g": 12,
+    "fiber_g": 3,
+    "ingredients": [
+      "puri",
+      "sev",
+      "potato",
+      "chutney",
+      "onion",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Poori Bhaji (2 pooris)",
+    "category": "Indian",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 385,
+    "protein_g": 9,
+    "carbs_g": 52,
+    "fat_g": 16,
+    "fiber_g": 4,
+    "ingredients": [
+      "wheat flour",
+      "potato",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Egg Dosa",
+    "category": "Indian",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 12,
+    "carbs_g": 28,
+    "fat_g": 7,
+    "fiber_g": 1,
+    "ingredients": [
+      "rice batter",
+      "urad dal",
+      "egg",
+      "oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Onion Dosa",
+    "category": "Indian",
+    "serving_size": 130,
+    "serving_unit": "g",
+    "calories": 190,
+    "protein_g": 5,
+    "carbs_g": 30,
+    "fat_g": 5,
+    "fiber_g": 2,
+    "ingredients": [
+      "rice batter",
+      "urad dal",
+      "onion",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Idli Sambar (3 idli)",
+    "category": "Indian",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 11,
+    "carbs_g": 50,
+    "fat_g": 4,
+    "fiber_g": 4,
+    "ingredients": [
+      "rice",
+      "urad dal",
+      "toor dal",
+      "tamarind",
+      "vegetables",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Batata Poha",
+    "category": "Indian",
+    "serving_size": 180,
+    "serving_unit": "g",
+    "calories": 310,
+    "protein_g": 6,
+    "carbs_g": 52,
+    "fat_g": 9,
+    "fiber_g": 3,
+    "ingredients": [
+      "flattened rice",
+      "potato",
+      "onion",
+      "oil",
+      "peanuts",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kanda Poha",
+    "category": "Indian",
+    "serving_size": 180,
+    "serving_unit": "g",
+    "calories": 295,
+    "protein_g": 6,
+    "carbs_g": 50,
+    "fat_g": 8,
+    "fiber_g": 3,
+    "ingredients": [
+      "flattened rice",
+      "onion",
+      "oil",
+      "peanuts",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Poha Chivda (100g)",
+    "category": "Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 385,
+    "protein_g": 8,
+    "carbs_g": 60,
+    "fat_g": 13,
+    "fiber_g": 3,
+    "ingredients": [
+      "flattened rice",
+      "peanuts",
+      "oil",
+      "curry leaves",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Masala Chai with Milk",
+    "category": "Indian",
+    "serving_size": 200,
+    "serving_unit": "ml",
+    "calories": 80,
+    "protein_g": 3,
+    "carbs_g": 12,
+    "fat_g": 2,
+    "fiber_g": 0,
+    "ingredients": [
+      "tea",
+      "milk",
+      "sugar",
+      "ginger",
+      "cardamom",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Chaas (Buttermilk)",
+    "category": "Indian",
+    "serving_size": 250,
+    "serving_unit": "ml",
+    "calories": 50,
+    "protein_g": 3,
+    "carbs_g": 6,
+    "fat_g": 1,
+    "fiber_g": 0,
+    "ingredients": [
+      "yogurt",
+      "water",
+      "cumin",
+      "salt",
+      "coriander"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Masala Milk",
+    "category": "Indian",
+    "serving_size": 250,
+    "serving_unit": "ml",
+    "calories": 160,
+    "protein_g": 7,
+    "carbs_g": 20,
+    "fat_g": 5,
+    "fiber_g": 0,
+    "ingredients": [
+      "milk",
+      "sugar",
+      "cardamom",
+      "saffron",
+      "almonds",
+      "pistachios"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Haldi Doodh (Turmeric Milk)",
+    "category": "Indian",
+    "serving_size": 250,
+    "serving_unit": "ml",
+    "calories": 155,
+    "protein_g": 7,
+    "carbs_g": 18,
+    "fat_g": 5,
+    "fiber_g": 0,
+    "ingredients": [
+      "milk",
+      "turmeric",
+      "black pepper",
+      "honey",
+      "ginger"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Amla Juice (100ml)",
+    "category": "Indian",
+    "serving_size": 100,
+    "serving_unit": "ml",
+    "calories": 25,
+    "protein_g": 0,
+    "carbs_g": 6,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "ingredients": [
+      "amla",
+      "water"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Boondi Raita",
+    "category": "Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 80,
+    "protein_g": 4,
+    "carbs_g": 8,
+    "fat_g": 3,
+    "fiber_g": 0,
+    "ingredients": [
+      "yogurt",
+      "boondi",
+      "cumin",
+      "chili",
+      "coriander"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Rice Kheer",
+    "category": "Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 168,
+    "protein_g": 5,
+    "carbs_g": 28,
+    "fat_g": 4,
+    "fiber_g": 0,
+    "ingredients": [
+      "rice",
+      "milk",
+      "sugar",
+      "cardamom",
+      "saffron",
+      "nuts"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Gajar Halwa",
+    "category": "Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 230,
+    "protein_g": 5,
+    "carbs_g": 35,
+    "fat_g": 8,
+    "fiber_g": 2,
+    "ingredients": [
+      "carrot",
+      "milk",
+      "sugar",
+      "ghee",
+      "cardamom",
+      "nuts"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Lauki Halwa",
+    "category": "Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 175,
+    "protein_g": 4,
+    "carbs_g": 28,
+    "fat_g": 5,
+    "fiber_g": 1,
+    "ingredients": [
+      "bottle gourd",
+      "milk",
+      "sugar",
+      "ghee",
+      "cardamom"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Gujiya (1 piece)",
+    "category": "Indian",
+    "serving_size": 60,
+    "serving_unit": "g",
+    "calories": 190,
+    "protein_g": 4,
+    "carbs_g": 25,
+    "fat_g": 9,
+    "fiber_g": 1,
+    "ingredients": [
+      "wheat flour",
+      "khoya",
+      "dry fruits",
+      "sugar",
+      "oil"
+    ],
+    "nova_group": 3
   }
 ]
