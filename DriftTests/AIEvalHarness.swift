@@ -406,15 +406,39 @@ final class AIEvalHarness: XCTestCase {
     @MainActor
     func testToolRankerWeightTools() {
         let queries: [(String, String, AIScreen)] = [
+            // log_weight (10 queries)
             ("I weigh 165 lbs", "log_weight", .weight),
+            ("weighed in at 170 this morning", "log_weight", .weight),
+            ("scale said 82 kg", "log_weight", .weight),
+            ("log weight 78", "log_weight", .weight),
+            ("my weight is 74 kg", "log_weight", .weight),
+            ("scale shows 180 lbs", "log_weight", .weight),
+            ("weighed myself 165", "log_weight", .weight),
+            ("weigh 72 kg today", "log_weight", .weight),
+            ("scale reading 68 kg", "log_weight", .weight),
+            ("i weigh 155 this morning", "log_weight", .weight),
+            // weight_info (10 queries)
             ("how's my weight trend", "weight_info", .weight),
             ("am I on track to reach my goal", "weight_info", .weight),
-            ("set goal to 160", "set_goal", .goal),
-            // Removed from StaticOverrides — must route here
             ("how much have I lost", "weight_info", .weight),
             ("am I losing weight", "weight_info", .weight),
             ("weight progress", "weight_info", .weight),
             ("why am I not losing weight", "weight_info", .weight),
+            ("am I at a plateau", "weight_info", .weight),
+            ("what's my TDEE", "weight_info", .weight),
+            ("explain my BMR", "weight_info", .weight),
+            ("am I gaining too fast", "weight_info", .weight),
+            // set_goal (10 queries)
+            ("set goal to 160", "set_goal", .goal),
+            ("goal weight 155 pounds", "set_goal", .goal),
+            ("target weight 70 kg", "set_goal", .goal),
+            ("i want to weigh 140 lbs", "set_goal", .goal),
+            ("update my goal weight to 72 kg", "set_goal", .goal),
+            ("set goal weight to 150", "set_goal", .goal),
+            ("set my target to 160 lbs", "set_goal", .goal),
+            ("change goal to 145", "set_goal", .goal),
+            ("new goal weight 65 kg", "set_goal", .goal),
+            ("set target 175 lbs", "set_goal", .goal),
         ]
         for (query, expectedTool, screen) in queries {
             let tools = ToolRanker.rank(query: query.lowercased(), screen: screen)
@@ -426,12 +450,39 @@ final class AIEvalHarness: XCTestCase {
     @MainActor
     func testToolRankerExerciseTools() {
         let queries: [(String, String, AIScreen)] = [
+            // start_workout (10 queries)
             ("start chest workout", "start_workout", .exercise),
-            ("what should I train today", "exercise_info", .exercise),
-            ("I did yoga for 30 min", "log_activity", .exercise),
             ("start smart workout", "start_workout", .exercise),
             ("begin leg day", "start_workout", .exercise),
             ("start push day", "start_workout", .exercise),
+            ("start arms workout", "start_workout", .exercise),
+            ("begin full body session", "start_workout", .exercise),
+            ("want to train biceps today", "start_workout", .exercise),
+            ("let's do legs", "start_workout", .exercise),
+            ("train shoulders", "start_workout", .exercise),
+            ("upper body workout time", "start_workout", .exercise),
+            // exercise_info (10 queries)
+            ("what should I train today", "exercise_info", .exercise),
+            ("show workout history", "exercise_info", .exercise),
+            ("how many workouts this week", "exercise_info", .exercise),
+            ("how many times did I work out", "exercise_info", .exercise),
+            ("how's my deadlift", "exercise_info", .exercise),
+            ("workout count for the month", "exercise_info", .exercise),
+            ("is my squat improving", "exercise_info", .exercise),
+            ("how often did I train last month", "exercise_info", .exercise),
+            ("bench press progress", "exercise_info", .exercise),
+            ("am I overloading my lifts", "exercise_info", .exercise),
+            // log_activity (10 queries)
+            ("I did yoga for 30 min", "log_activity", .exercise),
+            ("just finished cycling session", "log_activity", .exercise),
+            ("i did 45 min cardio", "log_activity", .exercise),
+            ("just did 30 min swimming", "log_activity", .exercise),
+            ("i walked for 30 minutes", "log_activity", .exercise),
+            ("went running for 20 minutes", "log_activity", .exercise),
+            ("i did pilates for 45 minutes", "log_activity", .exercise),
+            ("went hiking for 60 minutes", "log_activity", .exercise),
+            ("i did 30 min of running", "log_activity", .exercise),
+            ("just did 60 minutes cycling", "log_activity", .exercise),
         ]
         for (query, expectedTool, screen) in queries {
             let tools = ToolRanker.rank(query: query.lowercased(), screen: screen)
@@ -443,15 +494,32 @@ final class AIEvalHarness: XCTestCase {
     @MainActor
     func testToolRankerHealthTools() {
         let queries: [(String, String, AIScreen)] = [
+            // sleep_recovery (10 queries)
             ("how'd I sleep", "sleep_recovery", .bodyRhythm),
-            ("took my creatine", "mark_supplement", .supplements),
-            ("any glucose spikes", "glucose", .glucose),
-            ("lab results", "biomarkers", .biomarkers),
-            ("how's my body fat", "body_comp", .bodyComposition),
-            // Sleep routing for removed StaticOverrides queries
             ("sleep trend", "sleep_recovery", .bodyRhythm),
             ("how was my sleep", "sleep_recovery", .bodyRhythm),
             ("sleep quality", "sleep_recovery", .bodyRhythm),
+            ("how'd I sleep last night", "sleep_recovery", .bodyRhythm),
+            ("show my sleep trend", "sleep_recovery", .bodyRhythm),
+            ("what's my HRV last night", "sleep_recovery", .bodyRhythm),
+            ("am I recovered from yesterday", "sleep_recovery", .bodyRhythm),
+            ("sleep score last night", "sleep_recovery", .bodyRhythm),
+            ("how was my sleep quality this week", "sleep_recovery", .bodyRhythm),
+            // mark_supplement (10 queries)
+            ("took my creatine", "mark_supplement", .supplements),
+            ("took my vitamins", "mark_supplement", .supplements),
+            ("had my fish oil today", "mark_supplement", .supplements),
+            ("took vitamin d", "mark_supplement", .supplements),
+            ("took fish oil", "mark_supplement", .supplements),
+            ("had my creatine today", "mark_supplement", .supplements),
+            ("just took my omega 3", "mark_supplement", .supplements),
+            ("taken my magnesium", "mark_supplement", .supplements),
+            ("took my supplements this morning", "mark_supplement", .supplements),
+            ("had my vitamin d", "mark_supplement", .supplements),
+            // Other health tools
+            ("any glucose spikes", "glucose", .glucose),
+            ("lab results", "biomarkers", .biomarkers),
+            ("how's my body fat", "body_comp", .bodyComposition),
         ]
         for (query, expectedTool, screen) in queries {
             let tools = ToolRanker.rank(query: query.lowercased(), screen: screen)
