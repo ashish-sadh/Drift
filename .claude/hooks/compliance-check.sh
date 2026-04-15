@@ -33,7 +33,11 @@ if [ "${DRIFT_AUTONOMOUS:-0}" = "1" ]; then
     ELAPSED=$(( NOW - LAST_TF ))
     if [ "$ELAPSED" -gt 10800 ]; then
         HOURS=$(( ELAPSED / 3600 ))
-        CONTEXT="${CONTEXT}TESTFLIGHT ${HOURS}h OVERDUE — publish on next commit.\n\n"
+        CONTEXT="${CONTEXT}TESTFLIGHT ${HOURS}h OVERDUE. STOP current work and publish NOW:\n"
+        CONTEXT="${CONTEXT}1. Bump CURRENT_PROJECT_VERSION in project.yml (increment by 1)\n"
+        CONTEXT="${CONTEXT}2. xcodegen generate\n"
+        CONTEXT="${CONTEXT}3. git add project.yml Drift.xcodeproj && git commit -m 'chore: TestFlight build' && git push\n"
+        CONTEXT="${CONTEXT}4. The testflight-check hook will inject archive+upload steps on the commit.\n\n"
     fi
 fi
 
