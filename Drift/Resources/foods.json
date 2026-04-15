@@ -29405,7 +29405,14 @@
     "carbs_g": 48,
     "fat_g": 6,
     "fiber_g": 5,
-    "ingredients": ["rice", "toor dal", "mixed vegetables", "ghee", "bisibelebath powder", "tamarind"],
+    "ingredients": [
+      "rice",
+      "toor dal",
+      "mixed vegetables",
+      "ghee",
+      "bisibelebath powder",
+      "tamarind"
+    ],
     "nova_group": 1
   },
   {
@@ -29418,7 +29425,14 @@
     "carbs_g": 52,
     "fat_g": 9,
     "fiber_g": 2,
-    "ingredients": ["rice", "moong dal", "jaggery", "ghee", "cashews", "cardamom"],
+    "ingredients": [
+      "rice",
+      "moong dal",
+      "jaggery",
+      "ghee",
+      "cashews",
+      "cardamom"
+    ],
     "nova_group": 1
   },
   {
@@ -29431,7 +29445,15 @@
     "carbs_g": 44,
     "fat_g": 9,
     "fiber_g": 1,
-    "ingredients": ["semolina", "sugar", "ghee", "milk", "cardamom", "cashews", "raisins"],
+    "ingredients": [
+      "semolina",
+      "sugar",
+      "ghee",
+      "milk",
+      "cardamom",
+      "cashews",
+      "raisins"
+    ],
     "nova_group": 1
   },
   {
@@ -29444,7 +29466,15 @@
     "carbs_g": 55,
     "fat_g": 14,
     "fiber_g": 5,
-    "ingredients": ["whole wheat flour", "potato", "onion", "tomato", "oil", "mustard seeds", "turmeric"],
+    "ingredients": [
+      "whole wheat flour",
+      "potato",
+      "onion",
+      "tomato",
+      "oil",
+      "mustard seeds",
+      "turmeric"
+    ],
     "nova_group": 1
   },
   {
@@ -29457,7 +29487,15 @@
     "carbs_g": 18,
     "fat_g": 12,
     "fiber_g": 3,
-    "ingredients": ["beef", "broccoli", "soy sauce", "oyster sauce", "garlic", "ginger", "cornstarch"],
+    "ingredients": [
+      "beef",
+      "broccoli",
+      "soy sauce",
+      "oyster sauce",
+      "garlic",
+      "ginger",
+      "cornstarch"
+    ],
     "nova_group": 3
   },
   {
@@ -29470,7 +29508,15 @@
     "carbs_g": 20,
     "fat_g": 13,
     "fiber_g": 2,
-    "ingredients": ["chicken", "capsicum", "onion", "soy sauce", "green chillies", "cornflour", "oil"],
+    "ingredients": [
+      "chicken",
+      "capsicum",
+      "onion",
+      "soy sauce",
+      "green chillies",
+      "cornflour",
+      "oil"
+    ],
     "nova_group": 3
   },
   {
@@ -29483,7 +29529,14 @@
     "carbs_g": 30,
     "fat_g": 15,
     "fiber_g": 2,
-    "ingredients": ["eggs", "bread", "butter", "onion", "green chilli", "coriander"],
+    "ingredients": [
+      "eggs",
+      "bread",
+      "butter",
+      "onion",
+      "green chilli",
+      "coriander"
+    ],
     "nova_group": 2
   },
   {
@@ -29496,7 +29549,14 @@
     "carbs_g": 32,
     "fat_g": 13,
     "fiber_g": 3,
-    "ingredients": ["chicken", "corn tortilla", "enchilada sauce", "cheese", "onion", "cumin"],
+    "ingredients": [
+      "chicken",
+      "corn tortilla",
+      "enchilada sauce",
+      "cheese",
+      "onion",
+      "cumin"
+    ],
     "nova_group": 3
   },
   {
@@ -29509,7 +29569,14 @@
     "carbs_g": 19,
     "fat_g": 9,
     "fiber_g": 2,
-    "ingredients": ["ground beef", "flour tortilla", "cheese", "lettuce", "tomato", "sour cream"],
+    "ingredients": [
+      "ground beef",
+      "flour tortilla",
+      "cheese",
+      "lettuce",
+      "tomato",
+      "sour cream"
+    ],
     "nova_group": 3
   },
   {
@@ -29522,7 +29589,12 @@
     "carbs_g": 18,
     "fat_g": 7,
     "fiber_g": 2,
-    "ingredients": ["potato", "besan", "oil", "spices"],
+    "ingredients": [
+      "potato",
+      "besan",
+      "oil",
+      "spices"
+    ],
     "nova_group": 3
   },
   {
@@ -29535,7 +29607,15 @@
     "carbs_g": 22,
     "fat_g": 7,
     "fiber_g": 4,
-    "ingredients": ["besan", "onion", "garlic", "green chilli", "mustard seeds", "oil", "turmeric"],
+    "ingredients": [
+      "besan",
+      "onion",
+      "garlic",
+      "green chilli",
+      "mustard seeds",
+      "oil",
+      "turmeric"
+    ],
     "nova_group": 1
   },
   {
@@ -29548,7 +29628,11 @@
     "carbs_g": 34,
     "fat_g": 9,
     "fiber_g": 2,
-    "ingredients": ["whole wheat flour", "oil", "salt"],
+    "ingredients": [
+      "whole wheat flour",
+      "oil",
+      "salt"
+    ],
     "nova_group": 1
   },
   {
@@ -29561,7 +29645,14 @@
     "carbs_g": 48,
     "fat_g": 5,
     "fiber_g": 6,
-    "ingredients": ["rice", "moong dal", "ghee", "cumin", "turmeric", "ginger"],
+    "ingredients": [
+      "rice",
+      "moong dal",
+      "ghee",
+      "cumin",
+      "turmeric",
+      "ginger"
+    ],
     "nova_group": 1
   },
   {
@@ -29574,7 +29665,16 @@
     "carbs_g": 60,
     "fat_g": 18,
     "fiber_g": 10,
-    "ingredients": ["rice", "black beans", "ground beef", "cheese", "sour cream", "salsa", "lettuce", "guacamole"],
+    "ingredients": [
+      "rice",
+      "black beans",
+      "ground beef",
+      "cheese",
+      "sour cream",
+      "salsa",
+      "lettuce",
+      "guacamole"
+    ],
     "nova_group": 3
   },
   {
@@ -29587,7 +29687,13 @@
     "carbs_g": 52,
     "fat_g": 13,
     "fiber_g": 3,
-    "ingredients": ["naan", "tomato sauce", "mozzarella", "vegetables", "olive oil"],
+    "ingredients": [
+      "naan",
+      "tomato sauce",
+      "mozzarella",
+      "vegetables",
+      "olive oil"
+    ],
     "nova_group": 3
   },
   {
@@ -29600,7 +29706,14 @@
     "carbs_g": 40,
     "fat_g": 18,
     "fiber_g": 2,
-    "ingredients": ["chicken patty", "burger bun", "lettuce", "tomato", "mayo", "pickles"],
+    "ingredients": [
+      "chicken patty",
+      "burger bun",
+      "lettuce",
+      "tomato",
+      "mayo",
+      "pickles"
+    ],
     "nova_group": 4
   },
   {
@@ -29613,7 +29726,13 @@
     "carbs_g": 42,
     "fat_g": 16,
     "fiber_g": 2,
-    "ingredients": ["fish fillet", "burger bun", "tartar sauce", "lettuce", "cheese"],
+    "ingredients": [
+      "fish fillet",
+      "burger bun",
+      "tartar sauce",
+      "lettuce",
+      "cheese"
+    ],
     "nova_group": 4
   },
   {
@@ -29626,7 +29745,14 @@
     "carbs_g": 28,
     "fat_g": 8,
     "fiber_g": 2,
-    "ingredients": ["maida", "paneer", "onion", "ginger", "garlic", "spices"],
+    "ingredients": [
+      "maida",
+      "paneer",
+      "onion",
+      "ginger",
+      "garlic",
+      "spices"
+    ],
     "nova_group": 2
   },
   {
@@ -29639,7 +29765,13 @@
     "carbs_g": 48,
     "fat_g": 7,
     "fiber_g": 6,
-    "ingredients": ["rolled oats", "protein powder", "milk", "banana", "peanut butter"],
+    "ingredients": [
+      "rolled oats",
+      "protein powder",
+      "milk",
+      "banana",
+      "peanut butter"
+    ],
     "nova_group": 2
   },
   {
@@ -29652,7 +29784,16 @@
     "carbs_g": 56,
     "fat_g": 12,
     "fiber_g": 3,
-    "ingredients": ["rice noodles", "chicken", "egg", "bean sprouts", "green onion", "peanuts", "tamarind", "fish sauce"],
+    "ingredients": [
+      "rice noodles",
+      "chicken",
+      "egg",
+      "bean sprouts",
+      "green onion",
+      "peanuts",
+      "tamarind",
+      "fish sauce"
+    ],
     "nova_group": 2
   },
   {
@@ -29665,7 +29806,15 @@
     "carbs_g": 60,
     "fat_g": 12,
     "fiber_g": 2,
-    "ingredients": ["jasmine rice", "chicken", "chicken broth", "ginger", "garlic", "cucumber", "dipping sauce"],
+    "ingredients": [
+      "jasmine rice",
+      "chicken",
+      "chicken broth",
+      "ginger",
+      "garlic",
+      "cucumber",
+      "dipping sauce"
+    ],
     "nova_group": 1
   },
   {
@@ -29678,7 +29827,15 @@
     "carbs_g": 54,
     "fat_g": 21,
     "fiber_g": 4,
-    "ingredients": ["rice noodles", "coconut milk", "shrimp", "tofu", "bean sprouts", "laksa paste", "lime"],
+    "ingredients": [
+      "rice noodles",
+      "coconut milk",
+      "shrimp",
+      "tofu",
+      "bean sprouts",
+      "laksa paste",
+      "lime"
+    ],
     "nova_group": 3
   },
   {
@@ -29691,7 +29848,14 @@
     "carbs_g": 36,
     "fat_g": 18,
     "fiber_g": 3,
-    "ingredients": ["beef patty", "burger bun", "mushrooms", "swiss cheese", "onion", "mayo"],
+    "ingredients": [
+      "beef patty",
+      "burger bun",
+      "mushrooms",
+      "swiss cheese",
+      "onion",
+      "mayo"
+    ],
     "nova_group": 4
   },
   {
@@ -29715,7 +29879,176 @@
     "carbs_g": 45,
     "fat_g": 17,
     "fiber_g": 4,
-    "ingredients": ["flour tortilla", "scrambled eggs", "cheese", "black beans", "salsa", "sour cream"],
+    "ingredients": [
+      "flour tortilla",
+      "scrambled eggs",
+      "cheese",
+      "black beans",
+      "salsa",
+      "sour cream"
+    ],
     "nova_group": 3
+  },
+  {
+    "name": "Paneer Makhani",
+    "category": "Indian Staples",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 18,
+    "carbs_g": 14,
+    "fat_g": 28,
+    "fiber_g": 2,
+    "ingredients": [
+      "paneer",
+      "tomato",
+      "cream",
+      "onion",
+      "garlic",
+      "ginger",
+      "kashmiri chili",
+      "garam masala",
+      "butter"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Batata Vada (2 pieces)",
+    "category": "Indian Snacks",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 290,
+    "protein_g": 5,
+    "carbs_g": 40,
+    "fat_g": 12,
+    "fiber_g": 3,
+    "ingredients": [
+      "potato",
+      "besan",
+      "green chili",
+      "mustard seeds",
+      "turmeric",
+      "oil"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Aloo Bharta",
+    "category": "Indian Vegetarian",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 160,
+    "protein_g": 3,
+    "carbs_g": 26,
+    "fat_g": 5,
+    "fiber_g": 3,
+    "ingredients": [
+      "potato",
+      "onion",
+      "green chili",
+      "mustard oil",
+      "coriander",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Kaddu Sabzi (Pumpkin)",
+    "category": "Indian Vegetarian",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 110,
+    "protein_g": 2,
+    "carbs_g": 16,
+    "fat_g": 4,
+    "fiber_g": 3,
+    "ingredients": [
+      "pumpkin",
+      "onion",
+      "tomato",
+      "turmeric",
+      "cumin",
+      "oil",
+      "coriander"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Lauki Sabzi (Bottle Gourd)",
+    "category": "Indian Vegetarian",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 85,
+    "protein_g": 2,
+    "carbs_g": 11,
+    "fat_g": 3,
+    "fiber_g": 2,
+    "ingredients": [
+      "bottle gourd",
+      "onion",
+      "tomato",
+      "turmeric",
+      "cumin",
+      "oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Sewai Kheer (Vermicelli Pudding)",
+    "category": "Indian Sweets",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 240,
+    "protein_g": 7,
+    "carbs_g": 38,
+    "fat_g": 7,
+    "fiber_g": 1,
+    "ingredients": [
+      "vermicelli",
+      "whole milk",
+      "sugar",
+      "cardamom",
+      "ghee",
+      "cashews",
+      "raisins"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Tuna Sandwich",
+    "category": "Sandwiches",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 24,
+    "carbs_g": 35,
+    "fat_g": 11,
+    "fiber_g": 2,
+    "ingredients": [
+      "canned tuna",
+      "mayonnaise",
+      "bread",
+      "celery",
+      "onion",
+      "lemon juice"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Ribeye Steak (grilled)",
+    "category": "Proteins",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 530,
+    "protein_g": 46,
+    "carbs_g": 0,
+    "fat_g": 37,
+    "fiber_g": 0,
+    "ingredients": [
+      "beef ribeye",
+      "salt",
+      "pepper"
+    ],
+    "nova_group": 1
   }
 ]
