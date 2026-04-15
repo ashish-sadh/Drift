@@ -276,7 +276,7 @@ start_claude() {
         --dangerously-skip-permissions \
         --model "$MODEL" \
         $FALLBACK \
-        --effort max \
+        --effort high \
         --output-format stream-json \
         --verbose \
         > "$CURRENT_LOG" 2>&1 &
