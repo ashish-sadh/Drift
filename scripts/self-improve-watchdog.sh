@@ -158,9 +158,8 @@ check_compliance() {
             fi
             cleanup_dirty_state
             sed -i '' 's/_Override:_ STOP/_Override:_ CONTINUE/' "$WORK_DIR/program.md" 2>/dev/null || true
-            # Restart with P0-focused prompt
-            PROMPT="Fix these P0 bugs FIRST, do nothing else: ${P0_LIST}"
-            start_claude
+            # Restart with P0-focused prompt (passes override, skips planning/model selection)
+            start_claude "Fix these P0 bugs FIRST, do nothing else: ${P0_LIST}"
             return
         fi
     fi
@@ -177,16 +176,22 @@ check_compliance() {
 }
 
 start_claude() {
+    local OVERRIDE_PROMPT="${1:-}"  # Optional: compliance override prompt
     local MODEL="sonnet"
     local SESSION_TYPE="junior"
     local SESSION_PROMPT="$PROMPT"
     local NOW=$(date +%s)
 
+    # If compliance override — skip all selection, go straight to Opus with the override prompt
+    if [[ -n "$OVERRIDE_PROMPT" ]]; then
+        MODEL="opus"
+        SESSION_TYPE="senior"
+        SESSION_PROMPT="$OVERRIDE_PROMPT"
+        log "Compliance override: $SESSION_PROMPT"
     # 1. Sprint planning due? (every 6 hours)
-    local LAST_REVIEW=$(cat "$HOME/drift-state/last-review-time" 2>/dev/null || echo "0")
-    local HOURS_SINCE=$(( (NOW - LAST_REVIEW) / 3600 ))
-
-    if [[ "$HOURS_SINCE" -ge 6 ]]; then
+    elif [[ "$(( (NOW - $(cat "$HOME/drift-state/last-review-time" 2>/dev/null || echo "0")) / 3600 ))" -ge 6 ]]; then
+        local LAST_REVIEW=$(cat "$HOME/drift-state/last-review-time" 2>/dev/null || echo "0")
+        local HOURS_SINCE=$(( (NOW - LAST_REVIEW) / 3600 ))
         MODEL="opus"
         SESSION_TYPE="planning"
         echo "$NOW" > "$HOME/drift-state/last-review-time"  # Guaranteed update
