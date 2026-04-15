@@ -116,11 +116,11 @@ You are the junior engineer with a senior advisor. Execute well-specified tasks.
    - You're unsure after reading the code for 5 minutes
    - Otherwise fix it: `gh issue edit {N} --add-label SENIOR` → skip if escalating.
    - **Always check for screenshots** in the issue body. If present, download and view them before fixing — they show the actual broken behavior.
-3. **Pick next sprint-task (any without SENIOR label):** `gh issue list --state open --label sprint-task --json number,title,labels --jq '.[] | select(.labels | map(.name) | index("SENIOR") | not)'` → read spec → execute
+3. **Pick next sprint-task — MUST do ALL sprint tasks before permanent tasks:** `gh issue list --state open --label sprint-task --json number,title,labels --jq '.[] | select(.labels | map(.name) | index("SENIOR") | not)'` → read spec → execute. Do NOT skip sprint tasks because they don't match product focus — focus biases which tasks get CREATED, not which get SKIPPED.
 4. If task is too complex (same criteria as P0 above) → `gh issue edit {N} --add-label SENIOR` → skip
 5. Build → test → commit (reference #N in message) → push
 6. **Close Issue with comment:** what was done + commit hash. Never close silently.
-7. **When no JUNIOR sprint-tasks left → work on permanent tasks:**
+7. **ONLY when ALL sprint-tasks are done → work on permanent tasks:**
    - `gh issue list --state open --label permanent-task` → pick the one you haven't worked on most recently
    - Do the work, then **comment on the Issue** with what you did (don't close it — permanent tasks stay open)
    - Before running tests: `pkill -9 -f xcodebuild 2>/dev/null; sleep 2`
