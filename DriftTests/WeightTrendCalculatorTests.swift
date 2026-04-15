@@ -647,6 +647,41 @@ func makeEntries(days: Int, startKg: Double, ratePerDay: Double) -> [(date: Stri
     #expect(changes.ninetyDay == nil)
 }
 
+// MARK: - WeightTrendService: Stale-with-Old-Entries Coverage
+
+@Test @MainActor func weightTrendService_staleWithOldEntries_latestWeightKgIsSet() async throws {
+    // Seed entries 73-76 days ago: within the 90-day trend window, but > 60 days (stale).
+    // Verifies that latestWeightKg is populated from the unfiltered fetch even when isStale=true.
+    let db = AppDatabase.shared
+    let cal = Calendar.current
+    var savedIds: [Int64] = []
+
+    for i in 73...76 {
+        let date = DateFormatters.dateOnly.string(from: cal.date(byAdding: .day, value: -i, to: Date())!)
+        var entry = WeightEntry(date: date, weightKg: 66.5, source: "manual")
+        try db.saveWeightEntry(&entry)
+        if let id = entry.id { savedIds.append(id) }
+    }
+    defer {
+        for id in savedIds { try? db.deleteWeightEntry(id: id) }
+        WeightTrendService.shared.refresh()
+    }
+
+    WeightTrendService.shared.refresh()
+    let svc = WeightTrendService.shared
+
+    // Core invariant holds regardless of other seeded data in the DB
+    if svc.isStale {
+        #expect(svc.weeklyRate == nil, "weeklyRate must be nil when stale")
+        #expect(svc.trendWeight == svc.latestWeightKg, "Stale trendWeight falls back to latestWeightKg")
+    } else {
+        #expect(svc.trend != nil, "Non-stale service must have a trend")
+        #expect(svc.trendWeight == svc.trend?.currentEMA, "Non-stale trendWeight uses EMA")
+    }
+    // Unfiltered fetch should always populate latestWeightKg when any entries exist
+    #expect(svc.latestWeightKg != nil, "latestWeightKg populated from unfiltered fetch")
+}
+
 @Test func trendDirectionMaintainingHighThreshold() {
     // With a high threshold, a small loss should classify as maintaining
     let config = WeightTrendCalculator.AlgorithmConfig(

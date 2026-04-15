@@ -154,4 +154,50 @@ final class NotificationServiceTests: XCTestCase {
             XCTAssertFalse(alert.icon.isEmpty, "Every alert should have a non-empty icon")
         }
     }
+
+    @MainActor
+    func testComputeProactiveAlerts_structuralIntegrity() {
+        // Every alert returned must have non-empty title, detail, and icon.
+        let alerts = BehaviorInsightService.computeProactiveAlerts()
+        for alert in alerts {
+            XCTAssertFalse(alert.title.isEmpty, "Alert title must not be empty")
+            XCTAssertFalse(alert.detail.isEmpty, "Alert detail must not be empty")
+            XCTAssertFalse(alert.icon.isEmpty, "Alert icon must not be empty")
+        }
+    }
+
+    // MARK: - BehaviorInsightService Sleep Edge Cases (additional)
+
+    func testSleepInsightWith7EntriesAllPoorSleep() {
+        // All poor sleep (<6h) — goodSleepCals will be empty → guard fails → no insight
+        let entries = (0..<7).map { i -> (date: Date, hours: Double) in
+            (date: Calendar.current.date(byAdding: .day, value: -i - 300, to: Date())!, hours: 5.0)
+        }
+        let insights = BehaviorInsightService.computeInsights(sleepHistory: entries)
+        let hasSleepInsight = insights.contains { $0.icon == "moon.zzz.fill" }
+        XCTAssertFalse(hasSleepInsight, "All-poor-sleep without good-sleep days should produce no sleep insight")
+    }
+
+    func testSleepInsightExactly6Hours_isNotGoodOrPoor() {
+        // 6.0h is the boundary: not good (≥7), not poor (<6) — should produce no insight
+        let entries = (0..<8).map { i -> (date: Date, hours: Double) in
+            (date: Calendar.current.date(byAdding: .day, value: -i - 400, to: Date())!, hours: 6.0)
+        }
+        let insights = BehaviorInsightService.computeInsights(sleepHistory: entries)
+        let hasSleepInsight = insights.contains { $0.icon == "moon.zzz.fill" }
+        XCTAssertFalse(hasSleepInsight, "Exactly 6h sleep is neither good nor poor, produces no insight")
+    }
+
+    // MARK: - NotificationService Composition Edge Cases
+
+    func testComposeNotification_fourAlerts_allTitlesPresent() {
+        let alerts = ["Alpha", "Beta", "Gamma", "Delta"].map {
+            BehaviorInsight(icon: "circle", title: $0, detail: "detail", isPositive: false)
+        }
+        let (title, body) = NotificationService.composeNotification(from: alerts)
+        XCTAssertEqual(title, "Health check-in")
+        for name in ["Alpha", "Beta", "Gamma", "Delta"] {
+            XCTAssertTrue(body.contains(name), "All alert titles must appear in body")
+        }
+    }
 }

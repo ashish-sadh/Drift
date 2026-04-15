@@ -186,3 +186,99 @@ import Testing
     let result = InputNormalizer.normalize("ok so umm I basically had like chicken and rice for lunch")
     #expect(result == "I had chicken and rice for lunch")
 }
+
+// MARK: Voice-Style Input Test Cases (#85)
+// Real transcription patterns: no caps, no punctuation, fillers, restarts, run-ons.
+
+@Test func normalizerVoice_allLowerNoPunctuation() {
+    let result = InputNormalizer.normalize("log breakfast two eggs and some toast")
+    #expect(!result.isEmpty)
+    #expect(result.contains("eggs") && result.contains("toast"))
+}
+
+@Test func normalizerVoice_runOnMultiFood() {
+    let result = InputNormalizer.normalize("i had rice and chicken and also some yogurt")
+    // Fillers removed, meaningful content preserved
+    #expect(result.contains("rice"))
+    #expect(result.contains("chicken"))
+    #expect(result.contains("yogurt"))
+}
+
+@Test func normalizerVoice_fillerPlusRestart() {
+    let result = InputNormalizer.normalize("umm i had i had like some chicken for dinner")
+    #expect(result.contains("chicken"))
+    #expect(!result.contains("umm"))
+    // Restart "i had i had" collapses to "i had"
+    let hadCount = result.components(separatedBy: "had").count - 1
+    #expect(hadCount <= 1, "Restart should be collapsed to single occurrence")
+}
+
+@Test func normalizerVoice_longCompoundWithFillers() {
+    let result = InputNormalizer.normalize("ok so basically i had some rice and dal and then i also had some chai")
+    #expect(result.contains("rice"))
+    #expect(result.contains("dal"))
+    #expect(result.contains("chai"))
+    #expect(!result.contains("basically"))
+}
+
+@Test func normalizerVoice_repeatedConjunction() {
+    let result = InputNormalizer.normalize("i had rice and and dal")
+    #expect(result.contains("rice"))
+    #expect(result.contains("dal"))
+    // Repeated "and and" should collapse
+    #expect(!result.contains("and and"))
+}
+
+@Test func normalizerVoice_multipleFillerTypes() {
+    let result = InputNormalizer.normalize("you know um i basically had like chicken you know")
+    #expect(result.contains("chicken"))
+    #expect(!result.contains("you know"))
+    #expect(!result.contains("basically"))
+}
+
+@Test func normalizerVoice_trailingFillers() {
+    let result = InputNormalizer.normalize("i had eggs and stuff")
+    // "and stuff" preserved — not a filler word
+    #expect(result.contains("eggs"))
+}
+
+@Test func normalizerVoice_extraWhitespace() {
+    let result = InputNormalizer.normalize("i   had    rice   and   dal")
+    #expect(result == "i had rice and dal")
+}
+
+@Test func normalizerVoice_mixedCaseWithFillers() {
+    let result = InputNormalizer.normalize("UM I Had LIKE Some RICE")
+    // Fillers removed case-insensitively; content preserved
+    #expect(result.lowercased().contains("rice"))
+    #expect(!result.lowercased().contains("um"))
+}
+
+@Test func normalizerVoice_weightLogStyle() {
+    let result = InputNormalizer.normalize("um so my weight is like 72 kilos")
+    #expect(result.contains("72"))
+    #expect(result.contains("kilos") || result.contains("weight"))
+    #expect(!result.contains("um"))
+}
+
+@Test func normalizerVoice_contractionAndFiller_combined() {
+    let result = InputNormalizer.normalize("umm whats my protein today")
+    #expect(result.contains("what's") || result.contains("protein"))
+    #expect(!result.contains("umm"))
+}
+
+@Test func normalizerVoice_wellPrefix_stripped() {
+    // "well" is a leading conjunction — gets stripped; "so" may remain (one-pass)
+    let result = InputNormalizer.normalize("well so I want to log lunch")
+    #expect(result.contains("log") && result.contains("lunch"))
+    #expect(!result.hasPrefix("well"))
+}
+
+@Test func normalizerVoice_chainedRestartWithFiller() {
+    let result = InputNormalizer.normalize("log log log umm rice and dal")
+    #expect(result.contains("rice"))
+    #expect(result.contains("dal"))
+    // Multiple restarts should collapse
+    let logCount = result.components(separatedBy: " ").filter { $0.lowercased() == "log" }.count
+    #expect(logCount <= 1)
+}
