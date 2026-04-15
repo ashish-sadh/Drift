@@ -59,12 +59,26 @@ for l in lines[-10:]:
     SESSION_TYPE=$(basename "$CURRENT_LOG" | sed 's/session_\([a-z]*\)_.*/\1/')
     LOG_LINES=$(wc -l < "$CURRENT_LOG" | tr -d ' ')
 
-    # Summarize via Haiku — run from /tmp so it doesn't load project context
-    SUMMARY=$(cd /tmp && echo "This is a log of an AI coding assistant working on the Drift iOS app. The session type is '${SESSION_TYPE}' using model '${MODEL}'. Here are the last 10 actions:
+    # Summarize via Haiku with 30s timeout — fallback to raw log
+    HAIKU_INPUT="This is a log of an AI coding assistant working on the Drift iOS app. The session type is '${SESSION_TYPE}' using model '${MODEL}'. Here are the last 10 actions:
 
 ${RECENT}
 
-Write a 2-3 sentence status update for a human dashboard. Be specific: mention file names, issue numbers (#N), and what the session is doing (fixing a bug, writing tests, creating a design doc, refactoring code). Start directly with what it's doing — no preamble." | claude -p --model haiku --output-format text 2>/dev/null || echo "$RECENT")
+Write a 2-3 sentence status update for a human dashboard. Be specific: mention file names, issue numbers (#N), and what the session is doing (fixing a bug, writing tests, creating a design doc, refactoring code). Start directly with what it's doing — no preamble."
+
+    # macOS timeout: run in background, kill after 30s
+    SUMMARY=""
+    TMPOUT=$(mktemp)
+    (cd /tmp && echo "$HAIKU_INPUT" | claude -p --model haiku --output-format text > "$TMPOUT" 2>/dev/null) &
+    HAIKU_PID=$!
+    ( sleep 30 && kill "$HAIKU_PID" 2>/dev/null ) &
+    TIMER_PID=$!
+    wait "$HAIKU_PID" 2>/dev/null
+    kill "$TIMER_PID" 2>/dev/null || true
+    SUMMARY=$(cat "$TMPOUT" 2>/dev/null)
+    rm -f "$TMPOUT"
+    # Fallback to raw log if Haiku failed
+    [[ -z "$SUMMARY" ]] && SUMMARY="$RECENT"
 
     BODY="**${MODEL^}** ${SESSION_TYPE} session | Cycle ${CYCLE} | ${LOG_LINES} lines | Updated $(date '+%H:%M')
 

@@ -94,9 +94,10 @@ kill_claude() {
     CLAUDE_PID=""
 }
 
+MONITOR_PID_FILE="$LOG_DIR/monitor.pid"
+
 start_monitor() {
     stop_monitor
-    # Get or create the live-status issue
     local ISSUE_NUM=$(cat "$HOME/drift-state/live-status-issue" 2>/dev/null || echo "")
     if [[ -z "$ISSUE_NUM" ]] || ! gh issue view "$ISSUE_NUM" --json state --jq '.state' 2>/dev/null | grep -q "OPEN"; then
         ISSUE_NUM=$(gh issue create --title "Drift Live Status" --label live-status --body "Starting..." --json number --jq '.number' 2>/dev/null || echo "")
@@ -105,16 +106,24 @@ start_monitor() {
     if [[ -n "$ISSUE_NUM" ]] && [[ -n "$CURRENT_LOG" ]]; then
         "$WORK_DIR/scripts/session-monitor.sh" "$CURRENT_LOG" "$ISSUE_NUM" &
         MONITOR_PID=$!
+        echo "$MONITOR_PID" > "$MONITOR_PID_FILE"
         log "Monitor started (PID $MONITOR_PID, issue #$ISSUE_NUM)"
     fi
 }
 
 stop_monitor() {
+    # Kill by PID variable first, then by PID file (survives watchdog restart)
     if [[ -n "$MONITOR_PID" ]] && kill -0 "$MONITOR_PID" 2>/dev/null; then
         kill "$MONITOR_PID" 2>/dev/null || true
-        log "Monitor stopped."
     fi
+    local SAVED_PID=$(cat "$MONITOR_PID_FILE" 2>/dev/null || echo "")
+    if [[ -n "$SAVED_PID" ]] && kill -0 "$SAVED_PID" 2>/dev/null; then
+        kill "$SAVED_PID" 2>/dev/null || true
+    fi
+    # Also kill any orphaned monitors
+    pkill -f "session-monitor.sh" 2>/dev/null || true
     MONITOR_PID=""
+    rm -f "$MONITOR_PID_FILE"
 }
 
 refresh_compliance_cache() {
