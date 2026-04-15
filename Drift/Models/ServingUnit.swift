@@ -446,10 +446,17 @@ struct FoodUnit: Hashable {
 
     private static func cupGrams(for name: String) -> Double {
         if name.contains("rice") { return 185 }
-        if name.contains("oats") { return 80 }
+        if name.contains("quinoa") { return 185 }
+        if name.contains("oats") || name.contains("oatmeal") { return 80 }
+        if name.contains("granola") { return 120 }
+        if name.contains("muesli") { return 85 }
         if name.contains("flour") || name.contains("atta") { return 120 }
+        if name.contains("pasta") || name.contains("spaghetti") || name.contains("penne") ||
+           name.contains("macaroni") || name.contains("noodle") { return 140 }  // cooked
         if name.contains("dal") || name.contains("lentil") { return 200 }
         if name.contains("chickpea") || name.contains("chole") || name.contains("rajma") { return 164 }
+        if name.contains("black bean") || name.contains("kidney bean") ||
+           name.contains("pinto bean") || name.contains("navy bean") { return 172 }  // cooked
         if name.contains("paneer") { return 150 }
         if name.contains("yogurt") || name.contains("curd") || name.contains("dahi") { return 245 }
         if name.contains("poha") { return 60 }
