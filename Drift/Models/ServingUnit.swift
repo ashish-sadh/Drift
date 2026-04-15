@@ -351,6 +351,25 @@ struct FoodUnit: Hashable {
             return FoodUnit(label: "tbsp", gramsEquivalent: 14)
         }
 
+        // Soups, stews, broths — served by bowl
+        if name.contains("soup") || name.contains("stew") || name.contains("chowder") ||
+           name.contains("bisque") || name.contains("broth") || name.contains("rasam") ||
+           name.contains("sambar") {
+            return FoodUnit(label: "bowl", gramsEquivalent: ss)
+        }
+
+        // Yogurt / curd — measured in cups
+        if words.contains("yogurt") || words.contains("curd") || words.contains("dahi") ||
+           name.contains("yoghurt") {
+            return FoodUnit(label: "cup", gramsEquivalent: cupGrams(for: name))
+        }
+
+        // Oats / oatmeal / porridge — measured in cups
+        if name.contains("oatmeal") || name.contains("oats") || name.contains("porridge") ||
+           name.contains("granola") {
+            return FoodUnit(label: "cup", gramsEquivalent: cupGrams(for: name))
+        }
+
         // Liquid items (word boundaries to avoid "steak"→"tea", "classic"→"lassi")
         if words.contains("milk") || words.contains("juice") || words.contains("lassi") ||
            words.contains("chai") || words.contains("tea") || words.contains("coffee") ||
