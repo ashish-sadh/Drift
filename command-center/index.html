@@ -1289,9 +1289,17 @@
           headers: { ...headers(), 'Content-Type': 'application/json' },
           body: JSON.stringify({ body: `${focus}\n\n---\n*Updated by ${currentUser?.login || 'admin'} at ${new Date().toISOString()}*` })
         });
-        // Flash success
-        el.innerHTML = `<div style="padding:10px 14px;background:rgba(63,185,80,0.15);border:1px solid rgba(63,185,80,0.3);border-radius:8px;color:var(--green);font-size:14px;font-weight:600;">Focus updated!</div>`;
-        setTimeout(() => loadProductFocus(), 1000);
+        // Show immediately with the value we just wrote (don't wait for API consistency)
+        const now = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        el.innerHTML = `<div style="padding:14px 16px;background:rgba(212,197,249,0.15);border:1px solid rgba(212,197,249,0.4);border-radius:10px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:11px;text-transform:uppercase;letter-spacing:0.5px;color:rgb(180,160,230);font-weight:600;">Active Focus</span>
+            <span style="font-size:11px;color:var(--green);">Updated ${now}</span>
+          </div>
+          <div style="font-size:15px;font-weight:600;color:var(--text);">${escapeHtml(focus)}</div>
+        </div>`;
+        document.getElementById('clear-focus-btn').style.display = '';
+        btn.textContent = 'Update Focus';
       } catch (e) {
         el.innerHTML = `<div style="padding:10px 14px;background:rgba(248,81,73,0.15);border-radius:8px;color:var(--red);font-size:13px;">Failed: ${e.message}</div>`;
       }
@@ -1310,7 +1318,10 @@
           headers: { ...headers(), 'Content-Type': 'application/json' },
           body: JSON.stringify({ body: '' })
         });
-        el.innerHTML = `<div style="padding:10px 14px;background:rgba(63,185,80,0.15);border-radius:8px;color:var(--green);font-size:14px;">Focus cleared.</div>`;
+        el.innerHTML = '<div style="padding:14px 16px;background:var(--bg);border:1px dashed var(--border);border-radius:10px;color:var(--text-muted);font-size:13px;text-align:center;">No focus set — autopilot has liberty to choose priorities</div>';
+        document.getElementById('focus-input').value = '';
+        document.getElementById('set-focus-btn').textContent = 'Set Focus';
+        clearBtn.style.display = 'none';
         setTimeout(() => loadProductFocus(), 1000);
       } catch (e) {
         el.innerHTML = `<div style="padding:10px 14px;background:rgba(248,81,73,0.15);border-radius:8px;color:var(--red);font-size:13px;">Failed: ${e.message}</div>`;
