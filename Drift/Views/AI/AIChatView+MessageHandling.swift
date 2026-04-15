@@ -744,7 +744,7 @@ extension AIChatViewModel {
             return true
         }
 
-        // Treat anything else as a food to log directly (e.g., user types "chicken breast")
+        // Treat anything else as a food to add — opens FoodSearch for confirmation (e.g., user types "chicken breast")
         if lower.count > 2 {
             if let intent = AIActionExecutor.parseFoodIntent(lower) {
                 foodSearchQuery = intent.query
