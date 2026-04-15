@@ -40,13 +40,19 @@ CONTEXT=""
 [ -n "$MARKED" ] && CONTEXT="Marked in-progress:${MARKED}\n\n"
 [ -n "$SCREENSHOT_CHECK" ] && CONTEXT="${CONTEXT}SCREENSHOT VERIFICATION REQUIRED:\n${SCREENSHOT_CHECK}"
 
-# Check for stale in-progress issues (read LOCAL cache — zero API calls)
+# Maintain in-progress cache — hook has API data, so keep cache accurate
 CACHE_FILE="$HOME/drift-state/cache-in-progress"
-# Update cache with current commit's issues
+# Add current commit's issues if OPEN (we already queried state above)
 for NUM in $ISSUE_NUMS; do
-  grep -q "^$NUM$" "$CACHE_FILE" 2>/dev/null || echo "$NUM" >> "$CACHE_FILE" 2>/dev/null
+  INFO=$(gh issue view "$NUM" --json state --jq '.state' 2>/dev/null || echo "")
+  if [ "$INFO" = "OPEN" ]; then
+    grep -q "^$NUM$" "$CACHE_FILE" 2>/dev/null || echo "$NUM" >> "$CACHE_FILE" 2>/dev/null
+  else
+    # Issue is closed — remove from cache
+    sed -i '' "/^$NUM$/d" "$CACHE_FILE" 2>/dev/null || true
+  fi
 done
-# Check if other issues are stuck in-progress
+# Check if other cached issues are stale (not in current commit)
 if [ -f "$CACHE_FILE" ]; then
   STALE=""
   while read -r IP_NUM; do
