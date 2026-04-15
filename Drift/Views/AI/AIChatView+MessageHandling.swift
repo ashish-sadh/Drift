@@ -768,6 +768,8 @@ extension AIChatViewModel {
             }
         }
 
+        // Unrecognized input — exit planning mode so the message falls through to the AI pipeline
+        convState.phase = .idle
         return false
     }
 
@@ -966,6 +968,9 @@ extension AIChatViewModel {
     // MARK: - AI Pipeline
 
     private func handleAIPipeline(_ text: String) {
+        // Clear any stale pending intent — if we reached the AI pipeline, the user moved on
+        convState.pendingIntent = nil
+
         if !aiService.isModelLoaded {
             if aiService.state == .ready {
                 messages.append(ChatMessage(role: .assistant, text: "Preparing AI assistant..."))
@@ -1001,6 +1006,11 @@ extension AIChatViewModel {
         let isLarge = aiService.isLargeModel
 
         Task {
+            defer {
+                streamingMessageId = nil
+                generatingState = .idle
+            }
+
             let output = await AIToolAgent.run(
                 message: text, screen: screen, history: history,
                 isLargeModel: isLarge,
@@ -1027,8 +1037,6 @@ extension AIChatViewModel {
                     attachToolCards(to: &messages[idx], toolsCalled: output.toolsCalled)
                 }
             }
-            streamingMessageId = nil
-            generatingState = .idle
 
             // Handle UI actions from tool results
             if let action = output.action {

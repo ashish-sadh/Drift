@@ -223,11 +223,15 @@ final class SpeechRecognitionService: @unchecked Sendable {
                     }
                     // Display still shows committedText (no flash)
                     onTranscript(self.committedText)
-                    // Restart for next utterance
+                    // Cancel old task before restarting — prevents stale callback firing startSegment again
+                    self.recognitionTask?.cancel()
+                    self.recognitionTask = nil
                     self.startSegment(recognizer: unsafeRec, supportsOnDevice: supportsOnDevice, onTranscript: onTranscript)
                 } else if error != nil {
                     let desc = error?.localizedDescription ?? ""
                     if desc.contains("203") || desc.contains("no speech") {
+                        self.recognitionTask?.cancel()
+                        self.recognitionTask = nil
                         self.startSegment(recognizer: unsafeRec, supportsOnDevice: supportsOnDevice, onTranscript: onTranscript)
                     }
                 }
