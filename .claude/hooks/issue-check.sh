@@ -1,5 +1,5 @@
 #!/bin/bash
-# Hook: PreToolUse on Bash(git commit *)
+# Hook: PostToolUse on Bash(git commit *)
 # Every commit: checks for open bug issues and surfaces them.
 # Flags bugs that have screenshots so engineers know to view them.
 
