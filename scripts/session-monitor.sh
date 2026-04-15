@@ -1,7 +1,7 @@
 #!/bin/bash
-# Haiku-powered live session monitor for Drift Control.
-# Reads the current session log, summarizes via Haiku, updates a GitHub Issue.
-# Launched and managed by the watchdog.
+# Live session monitor for Drift Control.
+# Reads the current session log, extracts recent activity, updates a GitHub Issue.
+# No LLM needed — just parses the stream-json log directly.
 #
 # Usage: ./scripts/session-monitor.sh <session-log-path> <issue-number>
 
@@ -9,29 +9,42 @@ set -uo pipefail
 
 CURRENT_LOG="$1"
 ISSUE_NUM="$2"
-INTERVAL=120  # 2 minutes between updates
+INTERVAL=60  # 1 minute between updates
 
 while true; do
     sleep "$INTERVAL"
 
-    # Skip if log doesn't exist or is empty
     [[ ! -f "$CURRENT_LOG" ]] && continue
 
     # Extract recent activity from stream-json log
-    RECENT=$(tail -20 "$CURRENT_LOG" | python3 -c "
+    RECENT=$(tail -30 "$CURRENT_LOG" | python3 -c "
 import sys, json
+lines = []
 for line in sys.stdin:
     try:
         d = json.loads(line)
         if d.get('type') == 'assistant':
             for c in d.get('message', {}).get('content', []):
                 if c.get('type') == 'text':
-                    print('AI:', c['text'][:150])
+                    lines.append(c['text'][:120])
                 elif c.get('type') == 'tool_use':
-                    inp = str(c.get('input', {}))[:80]
-                    print(f'Tool: {c[\"name\"]} — {inp}')
+                    name = c.get('name', '?')
+                    inp = c.get('input', {})
+                    if name == 'Bash':
+                        lines.append(f'Running: {inp.get(\"command\",\"\")[:80]}')
+                    elif name == 'Read':
+                        lines.append(f'Reading: {inp.get(\"file_path\",\"\").split(\"/\")[-1]}')
+                    elif name == 'Edit':
+                        lines.append(f'Editing: {inp.get(\"file_path\",\"\").split(\"/\")[-1]}')
+                    elif name == 'Agent':
+                        lines.append(f'Agent: {inp.get(\"description\",\"\")[:60]}')
+                    else:
+                        lines.append(f'{name}')
     except:
         pass
+# Show last 5 meaningful actions
+for l in lines[-5:]:
+    print(l)
 " 2>/dev/null)
 
     [[ -z "$RECENT" ]] && continue
@@ -39,16 +52,13 @@ for line in sys.stdin:
     MODEL=$(cat ~/drift-state/last-model 2>/dev/null || echo "?")
     CYCLE=$(cat ~/drift-state/cycle-counter 2>/dev/null || echo "?")
     SESSION_TYPE=$(basename "$CURRENT_LOG" | sed 's/session_\([a-z]*\)_.*/\1/')
+    LOG_LINES=$(wc -l < "$CURRENT_LOG" | tr -d ' ')
 
-    # Summarize via Haiku
-    SUMMARY=$(echo "$RECENT" | claude -p \
-        "You are a concise status reporter. Summarize in 2-3 sentences what this autopilot session is currently doing. Be specific: mention the issue number if visible, the task type, and the current action. No preamble." \
-        --model haiku --output-format text 2>/dev/null || echo "Unable to generate summary")
+    BODY="**Model:** ${MODEL} | **Type:** ${SESSION_TYPE} | **Cycle:** ${CYCLE} | **Log:** ${LOG_LINES} lines | **Updated:** $(date '+%H:%M:%S')
 
-    # Update the GitHub Issue
-    BODY="**Model:** ${MODEL} | **Type:** ${SESSION_TYPE} | **Cycle:** ${CYCLE} | **Updated:** $(date '+%Y-%m-%d %H:%M:%S')
-
-${SUMMARY}"
+\`\`\`
+${RECENT}
+\`\`\`"
 
     gh issue edit "$ISSUE_NUM" --body "$BODY" 2>/dev/null || true
 done
