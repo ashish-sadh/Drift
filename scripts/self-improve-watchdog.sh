@@ -73,6 +73,8 @@ cleanup_dirty_state() {
         done
         log "Removed in-progress from: $IN_PROGRESS"
     fi
+    # Clear in-progress cache (session will rebuild it)
+    > "$HOME/drift-state/cache-in-progress" 2>/dev/null || true
 }
 
 kill_claude() {
@@ -161,6 +163,10 @@ refresh_compliance_cache() {
     # Approved design docs without implementation tasks (senior/planning cares)
     gh issue list --state open --label design-doc --label approved --json number,title \
         --jq '.[] | "#\(.number) \(.title)"' > "$SD/cache-approved-designs" 2>/dev/null || true
+
+    # In-progress issues (for mark-in-progress hook to detect stale ones)
+    gh issue list --state open --label in-progress --json number \
+        --jq '.[].number' > "$SD/cache-in-progress" 2>/dev/null || true
 
     # Product focus
     gh issue list --state open --label product-focus --json body \

@@ -40,6 +40,28 @@ CONTEXT=""
 [ -n "$MARKED" ] && CONTEXT="Marked in-progress:${MARKED}\n\n"
 [ -n "$SCREENSHOT_CHECK" ] && CONTEXT="${CONTEXT}SCREENSHOT VERIFICATION REQUIRED:\n${SCREENSHOT_CHECK}"
 
+# Check for stale in-progress issues (read LOCAL cache — zero API calls)
+CACHE_FILE="$HOME/drift-state/cache-in-progress"
+# Update cache with current commit's issues
+for NUM in $ISSUE_NUMS; do
+  grep -q "^$NUM$" "$CACHE_FILE" 2>/dev/null || echo "$NUM" >> "$CACHE_FILE" 2>/dev/null
+done
+# Check if other issues are stuck in-progress
+if [ -f "$CACHE_FILE" ]; then
+  STALE=""
+  while read -r IP_NUM; do
+    [ -z "$IP_NUM" ] && continue
+    IS_CURRENT=false
+    for NUM in $ISSUE_NUMS; do
+      [ "$IP_NUM" = "$NUM" ] && IS_CURRENT=true
+    done
+    $IS_CURRENT || STALE="${STALE}#${IP_NUM} "
+  done < "$CACHE_FILE"
+  if [ -n "$STALE" ]; then
+    CONTEXT="${CONTEXT}STALE IN-PROGRESS — you moved on without closing: ${STALE}\nVerify work is done, then close with comment. Or remove in-progress if unfinished.\n\n"
+  fi
+fi
+
 if [ -n "$CONTEXT" ]; then
   cat <<ENDJSON
 {
