@@ -31,7 +31,7 @@ These implement design doc #65. Do not start until PR #112 is approved.
 
 - [ ] **#96 Coverage: Pipeline refactor tests** — After pipeline changes land, ensure AIToolAgent, IntentClassifier, and StaticOverrides maintain coverage targets (80% logic, 50% services). Write new tests for LLM-first routing path.
 - [ ] **#97 Bug hunting: Voice + chat end-to-end** — Exercise the new pipeline with realistic voice transcription output. Focus on food logging (most common action) and multi-turn flows.
-- [ ] **#118 Food DB: +30 missing foods (voice-friendly)** — Continue enrichment toward USDA API integration. Focus on commonly spoken foods (voice users say "burger" not "hamburger patty"). Cross-reference search misses.
+- [x] **#118 Food DB: +30 missing foods (voice-friendly)** — Done. 1541→1571 foods (commit c4aa9f0). Voice-friendly staples added.
 - [ ] **#99 Docs: Update state.md** — Reflect pipeline architecture changes post-refactor.
 
 ### Design Docs (pending review)
@@ -97,6 +97,7 @@ Autonomous refactoring. Run `code-improvement.md`. Principles in `Docs/principle
 
 ## Done (this sprint)
 
+- [x] #118 Food DB: +30 voice-friendly foods (1541→1571, commit c4aa9f0)
 - [x] #116 AI Chat: Expand gold set eval to 55 queries (cross-domain: food, weight, exercise, navigation, health, multi-turn, negatives. 100% baseline accuracy)
 - [x] #117 AI Chat: Voice input edge case hardening (mid-sentence correction handling in InputNormalizer, 10 new tests)
 

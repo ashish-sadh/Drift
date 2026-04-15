@@ -462,6 +462,7 @@ import Testing
 @Test func weightMilestoneDetectsNewLow() async throws {
     let db = try AppDatabase.empty()
     let vm = await WeightViewModel(database: db)
+    WeightGoal.clear() // ensure no stale UserDefaults goal flips isLosing
 
     let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
     await vm.addWeight(value: 70.0, date: yesterday)
@@ -475,6 +476,7 @@ import Testing
 @Test func weightGoalAwareColors() async throws {
     let db = try AppDatabase.empty()
     let vm = await WeightViewModel(database: db)
+    WeightGoal.clear() // ensure no stale UserDefaults goal flips isLosing
 
     // Default is isLosing = true
     let deficitColor = await vm.changeColor(for: -0.5) // losing weight = good

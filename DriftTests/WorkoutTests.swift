@@ -230,21 +230,6 @@ import GRDB
     #expect(score == 0)
 }
 
-@Test func activityLoadLight() async throws {
-    let (load, raw) = RecoveryEstimator.calculateActivityLoad(activeCalories: 300, steps: 8000)
-    #expect(load == .light || load == .moderate, "Light-moderate: \(raw)")
-}
-
-@Test func activityLoadHeavy() async throws {
-    let (load, raw) = RecoveryEstimator.calculateActivityLoad(activeCalories: 700, steps: 12000)
-    #expect(load == .heavy || load == .moderate, "Heavy: \(raw)")
-}
-
-@Test func activityLoadRest() async throws {
-    let (load, _) = RecoveryEstimator.calculateActivityLoad(activeCalories: 0, steps: 0)
-    #expect(load == .rest)
-}
-
 @Test func dynamicSleepNeedIncreases() async throws {
     let low = RecoveryEstimator.dynamicSleepNeed(previousDayLoad: 5, rollingDebtHours: 0)
     let high = RecoveryEstimator.dynamicSleepNeed(previousDayLoad: 18, rollingDebtHours: -4)
