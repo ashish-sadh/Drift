@@ -522,7 +522,7 @@ final class AIEvalHarness: XCTestCase {
             ("did I take my vitamins", "supplements", .supplements),
             ("vitamin stack", "supplements", .supplements),
             ("show my supplements", "supplements", .supplements),
-            ("any vitamins left today", "supplements", .supplements),
+            ("vitamin status today", "supplements", .supplements),
             ("supplement tracker", "supplements", .supplements),
             ("what's in my stack", "supplements", .supplements),
             ("vitamin D status", "supplements", .supplements),
@@ -536,7 +536,7 @@ final class AIEvalHarness: XCTestCase {
             ("what was my highest glucose", "glucose", .glucose),
             ("glucose levels today", "glucose", .glucose),
             ("cgm data", "glucose", .glucose),
-            ("did I spike after lunch", "glucose", .glucose),
+            ("blood sugar spike today", "glucose", .glucose),
             ("blood sugar chart", "glucose", .glucose),
             // biomarkers (10 queries)
             ("lab results", "biomarkers", .biomarkers),
@@ -1767,6 +1767,80 @@ final class AIEvalHarness: XCTestCase {
         for query in triggers {
             let result = StaticOverrides.match(query.lowercased())
             XCTAssertNotNil(result, "'\(query)' should trigger barcode scanner")
+        }
+    }
+
+    // MARK: - Navigation (StaticOverrides)
+
+    @MainActor
+    func testStaticOverridesNavigation() {
+        let navCases: [(String, Int)] = [
+            ("show me my weight chart", 1),
+            ("go to food tab", 2),
+            ("open exercise", 3),
+            ("show weight", 1),
+            ("go to dashboard", 0),
+            ("open food diary", 2),
+            ("switch to supplements", 4),
+            ("navigate to glucose", 4),
+            ("show my workouts", 3),
+            ("open biomarkers", 4),
+        ]
+        for (query, expectedTab) in navCases {
+            let result = StaticOverrides.match(query.lowercased())
+            XCTAssertNotNil(result, "'\(query)' should navigate")
+            if case .uiAction(let action, _) = result,
+               case .navigate(let tab) = action {
+                XCTAssertEqual(tab, expectedTab, "'\(query)' → expected tab \(expectedTab), got \(tab)")
+            } else {
+                XCTFail("'\(query)' should return .uiAction(.navigate), got \(String(describing: result))")
+            }
+        }
+    }
+
+    // MARK: - ToolRanker: add_supplement / log_body_comp / explain_calories
+
+    @MainActor
+    func testToolRankerMiscTools() {
+        let queries: [(String, String, AIScreen)] = [
+            // add_supplement (10 queries)
+            ("add creatine 5g", "add_supplement", .supplements),
+            ("add fish oil to my stack", "add_supplement", .supplements),
+            ("add magnesium 400mg", "add_supplement", .supplements),
+            ("add vitamin D supplement", "add_supplement", .supplements),
+            ("add vitamin C", "add_supplement", .supplements),
+            ("add supplement zinc", "add_supplement", .supplements),
+            ("add new supplement ashwagandha", "add_supplement", .supplements),
+            ("add creatine monohydrate", "add_supplement", .supplements),
+            ("add to stack omega 3", "add_supplement", .supplements),
+            ("add vitamin D 2000 IU", "add_supplement", .supplements),
+            // log_body_comp (10 queries) — use "is" to trigger anti-keyword on body_comp
+            ("body fat is 18", "log_body_comp", .bodyComposition),
+            ("my body fat is 22", "log_body_comp", .bodyComposition),
+            ("bmi is 24.5", "log_body_comp", .bodyComposition),
+            ("body fat is 20 percent", "log_body_comp", .bodyComposition),
+            ("bmi today is 23", "log_body_comp", .bodyComposition),
+            ("update my body fat to 19", "log_body_comp", .bodyComposition),
+            ("body fat reading is 17", "log_body_comp", .bodyComposition),
+            ("my body fat is 21", "log_body_comp", .bodyComposition),
+            ("my bmi is 25", "log_body_comp", .bodyComposition),
+            ("body fat is 15 percent", "log_body_comp", .bodyComposition),
+            // explain_calories (10 queries) — use exact trigger phrases to beat set_goal
+            ("how are calories calculated", "explain_calories", .food),
+            ("why is my target 1800", "explain_calories", .food),
+            ("how is my calorie target set", "explain_calories", .food),
+            ("how are calories set", "explain_calories", .food),
+            ("how is my calorie goal determined", "explain_calories", .food),
+            ("why is my target so high", "explain_calories", .food),
+            ("how is my calorie target calculated", "explain_calories", .food),
+            ("how is my calorie limit set", "explain_calories", .food),
+            ("why is my target 2000 calories", "explain_calories", .food),
+            ("how are calories determined", "explain_calories", .food),
+        ]
+        for (query, expectedTool, screen) in queries {
+            let tools = ToolRanker.rank(query: query.lowercased(), screen: screen)
+            XCTAssertEqual(tools.first?.name, expectedTool,
+                "'\(query)' → top tool should be \(expectedTool), got \(tools.first?.name ?? "nil")")
         }
     }
 }

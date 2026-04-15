@@ -371,10 +371,10 @@ enum ToolRanker {
         )
 
         p["explain_calories"] = ToolProfile(
-            triggers: [("tdee", 3), ("calculated", 2), ("target number", 2),
-                       ("how are calories", 3), ("why is my target", 3),
-                       ("how is my calorie", 2.5), ("calorie target", 2)],
-            logBoost: 0, queryBoost: 1,
+            triggers: [("tdee", 3), ("calculated", 2.5), ("target number", 2.5),
+                       ("how are calories", 4), ("why is my target", 4),
+                       ("how is my calorie", 3.5), ("calorie target", 3)],
+            logBoost: 0, queryBoost: 1.5,
             screens: [.food: 0.3],
             antiKeywords: ["log", "ate", "had"]
         )
