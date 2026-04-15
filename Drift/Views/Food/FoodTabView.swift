@@ -19,6 +19,7 @@ struct FoodTabView: View {
     @State private var confirmPrefill: AIChatViewModel.ManualFoodPrefill?
     @State private var copyToTodayEntry: FoodEntry?
     @State private var showingCopyYesterdayAlert = false
+    @State private var showingCopyAllAlert = false
 
     enum FoodSortMode: String, CaseIterable {
         case time, protein, carbs, fat, plantPoints
@@ -142,6 +143,17 @@ struct FoodTabView: View {
                 if let cal = yesterdayCalories() {
                     Text("This will copy all \(Int(cal)) cal from yesterday to today.")
                 }
+            }
+            .alert("Copy All to Today?", isPresented: $showingCopyAllAlert) {
+                Button("Cancel", role: .cancel) {}
+                Button("Copy") {
+                    copyAllToToday()
+                    copiedToTodayName = "all \(viewModel.todayEntries.count) items"
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copiedToTodayName = nil }
+                }
+            } message: {
+                let totalCal = viewModel.todayEntries.reduce(0) { $0 + $1.totalCalories }
+                Text("Copy \(viewModel.todayEntries.count) items (\(Int(totalCal)) cal) to today?")
             }
             .onAppear { AIScreenTracker.shared.currentScreen = .food; weekOffset = 0; reload() }
             .onChange(of: showingSearch) { _, showing in if !showing { reload() } }
@@ -294,9 +306,7 @@ struct FoodTabView: View {
 
                 if !viewModel.todayEntries.isEmpty {
                     Button {
-                        copyAllToToday()
-                        copiedToTodayName = "all \(viewModel.todayEntries.count) items"
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copiedToTodayName = nil }
+                        showingCopyAllAlert = true
                     } label: {
                         HStack(spacing: 6) {
                             Image(systemName: "doc.on.doc").font(.caption2)
@@ -763,10 +773,6 @@ struct FoodTabView: View {
             }
         }
     }
-
-    // Edit entry sheet in EditFoodEntrySheet.swift
-
-    // Edit entry sheet in EditFoodEntrySheet.swift
 
     // MARK: - Consistency
 
