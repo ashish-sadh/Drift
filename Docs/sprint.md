@@ -1,10 +1,10 @@
 # Sprint Board
 
-Focus: **AI Chat LLM-First Pipeline — Revised Architecture.** Address owner feedback on design doc #65, then implement multi-stage LLM pipeline with specialized prompts. Food logging must always confirm before writing.
+Focus: **Implement Multi-Stage LLM Pipeline (Design Doc #65).** Design doc merged (PR #112). Build the 6-stage pipeline: normalize → intent classify → domain extract → Swift validate → confirm → execute. Gemma path only — SmolLM keeps current rules-first pipeline unchanged.
 
-## Blocker
+## Regression Gate
 
-**Design doc #65 (PR #112) revised — awaiting owner approval.** All 3 review comments addressed (commit 98c06ab). Contingent tasks (#92–#95) unblock once approved.
+**55-query gold set at 100% baseline.** Every pipeline task MUST run gold set eval before AND after. If accuracy drops, the task is not done.
 
 ## In Progress
 
@@ -12,34 +12,48 @@ _(pick from Ready)_
 
 ## Ready
 
-### SENIOR — Unblock First
+### Phase 1 — Foundation (start here)
 
-- [x] **#120 Revise design doc #65 (PR #112)** — All 3 review comments addressed (commit 98c06ab): removed A/B testing, redesigned flow with 6 stages (normalize → intent classify → domain extract → Swift validation → confirmation → execute), added specialized per-domain prompts. Replied to each inline comment.
+- [ ] **#92 Stage 2: Intent classifier (classification-only prompt)** — Replace unified IntentClassifier with a focused prompt that returns `{domain, intent}` ONLY. No extraction. Domains: food/exercise/weight/supplement/health/navigation/chat. Run gold set eval before AND after. Reference: `Docs/designs/65-fix-ai-chat.md` Stage 2.
+- [ ] **#129 Stage 0+1: Wire pipeline skeleton** — Create the multi-stage pipeline orchestrator in AIToolAgent for Gemma path. Stage 0 (InputNormalizer, exists) → Stage 1 (trimmed StaticOverrides, ~10 patterns: greetings, undo, help, barcode, navigation) → Stage 2 (intent classifier) → routing to Stage 3. SmolLM path unchanged.
 
-### SENIOR — Independent (no approval needed)
+### Phase 2 — Domain Extractors (after #92 is stable)
 
-- [x] **#121 Food logging: confirm-first on all paths** — Fixed all 5 paths. 4 bypass paths fixed in original PR (Log Again + Quick open ManualFoodEntrySheet prefilled, Copy to Today alert, copy-yesterday in chat preview). 5th path (Copy previous day button in empty diary) fixed in follow-up commit 13dbfbe — now shows alert with calorie count before copying.
-- [x] **#122 AI Chat: research multi-stage pipeline patterns** — Research documented in #65 revision: OpenAI function calling, Rasa NLU/dialogue separation, Dialogflow intent/entity decomposition. Key insight: decompose into stages, specialize each stage, validate between stages.
+- [ ] **#95 Stage 3: Domain-specific extraction prompts** — One specialized prompt per domain (food, exercise, weight, supplement). Each extracts only the params relevant to its domain. Food extractor: multi-item split, portions, meal type. Exercise extractor: sets/reps/weight, duration. Run gold set eval before AND after.
+- [ ] **#130 Stage 3b: Swift validation between stages** — Wire existing parseFoodIntent/regex extraction as validation fallback after LLM extraction. Reject nonsense, fix types, sanity-check extracted params before confirmation.
 
-### SENIOR — Contingent on Revised #65 Approval
+### Phase 3 — Cleanup (after Phase 2 passes eval)
 
-These implement the revised design doc #65. Do not start until the revised PR #112 is approved.
+- [ ] **#93 Prune StaticOverrides to ~10 essential patterns (Gemma path)** — Only after #92+#95 prove they handle what StaticOverrides currently catches. Keep all StaticOverrides for SmolLM path. Run gold set eval before AND after.
+- [ ] **#94 Retire ToolRanker keyword scoring (Gemma path)** — Remove `tryRulePick()` for Gemma. Keep `rank()` for SmolLM and `buildPrompt()` for streaming fallback. Last cleanup step. Run gold set eval before AND after.
 
-- [ ] **#92 AI Chat: Reorder AIToolAgent pipeline (LLM-first)** — Implement the revised multi-stage pipeline per approved design. Run gold set eval before AND after.
-- [ ] **#93 AI Chat: Prune StaticOverrides to essential patterns** — Scope TBD by revised design doc.
-- [ ] **#94 AI Chat: Retire ToolRanker keyword scoring (Gemma path)** — Scope TBD by revised design doc.
-- [ ] **#95 AI Chat: Specialized per-domain extraction prompts** — New: implement domain-specific prompts (food, exercise, weight, health) for slot extraction after intent classification. Multiple LLM passes if needed.
+### Phase 4 — Stabilize
 
-### JUNIOR
+- [ ] **#96 Coverage: Pipeline refactor tests** — After pipeline changes land, ensure coverage targets hold (80% logic, 50% services). New files (intent classifier, domain extractors) need unit tests.
+- [ ] **#131 Update state.md + roadmap** — Reflect new pipeline architecture, updated test counts, build number after pipeline ships.
 
-- [ ] **#96 Coverage: Pipeline refactor tests** — After pipeline changes land, ensure coverage targets hold (80% logic, 50% services).
-- [x] **#97 Bug hunting: Voice + chat end-to-end** — Found 2 bugs: (1) copy_yesterday LLM tool bypassed confirm-first flow, now shows preview; (2) workoutSetDisplayFormatted flaky due to concurrent UserDefaults writes, fixed with @MainActor.
-- [x] **#123 Docs: Update state.md** — Verified: build 120, foods 1641 (json count), tests 1321+ (35 files), pipeline description current. Pipeline section update deferred until refactor lands.
-
-### Design Docs (pending review)
-- #65 Design: How should we structurally fix AI chat? — PR #112, `doc-ready`, **3 review comments unaddressed → revision needed**
-- #66 Design: How to enrich images and youtube in exercises — `doc-ready`
+### Design Docs (pending review — not this sprint)
+- #66 Design: How to enrich images and youtube in exercises — `doc-ready`, `approved`
 - #74 Feature: Improve lab reports upload + LLM parsing — `doc-ready`
+
+---
+
+## Dependency Chain
+
+```
+#92 (intent classifier) + #129 (pipeline skeleton)
+        │
+        ▼
+#95 (domain extractors) + #130 (Swift validation)
+        │
+        ▼
+#93 (prune StaticOverrides) + #94 (retire ToolRanker)
+        │
+        ▼
+#96 (coverage) + #131 (docs)
+```
+
+Do NOT start a later phase until the previous phase passes gold set eval at 100%.
 
 ---
 
@@ -99,19 +113,13 @@ Autonomous refactoring. Run `code-improvement.md`. Principles in `Docs/principle
 
 ## Done (this sprint)
 
-- [x] #121 (follow-up) Copy-previous-day button in empty diary now shows confirmation alert (13dbfbe)
-- [x] #123 state.md verified accurate: build 120, foods 1641, tests 1324+ (35 files)
-- [x] #97 Bug hunting: 2 confirm-first bugs found and fixed — copy_yesterday tool bypassed preview (5fa3ce4), flaky test stabilized with @MainActor (0882b9b)
-- [x] #120 Revised design doc #65 (PR #112) — all 3 owner review comments addressed (98c06ab)
-- [x] #122 Multi-stage pipeline research — documented in #65 revision (OpenAI, Rasa, Dialogflow patterns)
+_(new sprint — nothing yet)_
 
 ## Done (previous sprint)
 
-- [x] #118 Food DB: +30 voice-friendly foods (1541→1571, commit c4aa9f0)
-- [x] #116 AI Chat: Expand gold set eval to 55 queries (100% baseline accuracy)
-- [x] #117 AI Chat: Voice input edge case hardening (10 new tests)
-- [x] Food DB: +25 voice-friendly foods (1571→1596, commit 7d42b5f)
-- [x] Food DB: +20 voice-friendly foods (1596→1616, commit 1cf1d78)
-- [x] P0 #119: Show prefilled review form before logging food from chat (commit 2ce944f)
-- [x] Fix: Route workout-set queries to AI pipeline (commit 2b25687)
-- [x] TestFlight build 120 (commit 4d714bd)
+- [x] #121 Food confirm-first on all 5 paths (13dbfbe)
+- [x] #123 state.md verified accurate: build 120, foods 1641, tests 1324+
+- [x] #97 Bug hunting: 2 confirm-first bugs fixed (5fa3ce4, 0882b9b)
+- [x] #120 Revised design doc #65 (PR #112) — all 3 owner comments addressed (98c06ab)
+- [x] #122 Multi-stage pipeline research — documented in #65 revision
+- [x] #65 Design doc merged (PR #112). Implementation unblocked.
