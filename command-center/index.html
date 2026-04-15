@@ -953,95 +953,84 @@
       }
     }
 
-    // Load design docs
+    // Load design docs — label-based, no matching logic
     async function loadDesignDocs() {
       const el = document.getElementById('designs-list');
       try {
-        // Get design-doc issues — PRs and issues both come back
-        const allDesignItems = await api(`/repos/${OWNER}/${REPO}/issues?labels=design-doc&state=all&per_page=30`);
-        const prs = allDesignItems.filter(i => i.pull_request);
-        // Build set of issue numbers that have a PR (by matching branch names like design/65-*)
-        const prBranches = prs.map(p => p.title.match(/\d+/)?.[0]).filter(Boolean);
-        // Also check PR branches directly
-        const prIssueNums = new Set();
-        for (const pr of prs) {
-          const branchNum = pr.pull_request?.html_url?.match(/\/(\d+)$/)?.[1]; // PR number
-          // Extract issue number from branch or body
-          const bodyMatch = (pr.body || '').match(/#(\d+)/);
-          if (bodyMatch) prIssueNums.add(bodyMatch[1]);
-          // Branch name contains issue number: design/65-fix-ai-chat
-          const ref = pr.title; // We don't have ref here, but issues in the list that match PR titles
-        }
-        // Simpler: issues that have a corresponding PR (same title pattern or PR body references them)
-        const issuesOnly = allDesignItems.filter(i => !i.pull_request);
-        const issuesWithPR = new Set(prs.map(p => {
-          const m = (p.body || '').match(/#(\d+)/);
-          return m ? m[1] : null;
-        }).filter(Boolean));
-        let designFiles = [];
-        try { designFiles = await api(`/repos/${OWNER}/${REPO}/contents/Docs/designs`); } catch {}
-        const fileNumbers = new Set(designFiles.map(f => f.name.match(/^(\d+)-/)?.[1]).filter(Boolean));
-        // Pending = issues without PR AND without file on any branch
-        const pendingRequests = issuesOnly.filter(i => !issuesWithPR.has(String(i.number)) && !fileNumbers.has(String(i.number)) && i.state === 'open');
-        const docsWritten = prs;
+        const all = await api(`/repos/${OWNER}/${REPO}/issues?labels=design-doc&state=all&per_page=30`);
+        const issues = all.filter(i => !i.pull_request);
+        const prs = all.filter(i => i.pull_request);
 
-        if (docsWritten.length === 0 && pendingRequests.length === 0) {
+        // State determined by labels on the issue
+        const pending = issues.filter(i => i.state === 'open' && !i.labels.some(l => l.name === 'doc-ready') && !i.labels.some(l => l.name === 'approved'));
+        const readyForReview = prs.filter(i => i.state === 'open');
+        const approved = issues.filter(i => i.labels.some(l => l.name === 'approved'));
+        const implemented = issues.filter(i => i.state === 'closed');
+
+        if (pending.length === 0 && readyForReview.length === 0 && approved.length === 0 && implemented.length === 0) {
           el.innerHTML = '<div class="empty">No design docs yet. Request one above.</div>';
           return;
         }
 
         let html = '';
 
-        // Pending requests (no doc written yet)
-        if (pendingRequests.length > 0) {
-          html += '<h3 style="color:var(--yellow);margin-bottom:12px;">Pending Requests (awaiting PE)</h3>';
-          html += pendingRequests.map(i => `
+        if (pending.length > 0) {
+          html += '<h3 style="color:var(--yellow);margin-bottom:12px;">Pending (awaiting PE)</h3>';
+          html += pending.map(i => `
             <div class="report-item" onclick="window.open('${i.html_url}','_blank')">
               <div>
                 <span class="report-title">#${i.number} ${escapeHtml(i.title)}</span>
                 <span class="report-type" style="background:rgba(210,153,34,0.15);color:var(--yellow)">Awaiting Doc</span>
               </div>
               <span class="report-date">${new Date(i.created_at).toLocaleDateString()}</span>
-            </div>
-          `).join('');
+            </div>`).join('');
         }
 
-        // Design doc PRs
-        if (docsWritten.length > 0) {
-          html += '<h3 style="color:var(--accent);margin:20px 0 12px;">Design Documents</h3>';
-          html += docsWritten.map(pr => {
-            const isApproved = pr.labels.some(l => l.name === 'approved');
-            const isMerged = pr.state === 'closed' && isApproved;
-            const prUrl = pr.pull_request ? pr.pull_request.html_url : pr.html_url;
-            const status = isMerged ? 'Implemented' : isApproved ? 'Approved' : 'Pending Review';
-            const statusColor = isMerged ? 'var(--text-muted)' : isApproved ? 'var(--green)' : 'var(--yellow)';
-            const statusBg = isMerged ? 'rgba(139,148,158,0.15)' : isApproved ? 'rgba(63,185,80,0.15)' : 'rgba(210,153,34,0.15)';
-
-            // Extract linked issue number from PR body (e.g., "Design doc for #65")
-            const linkedIssue = (pr.body || '').match(/#(\d+)/)?.[1] || pr.number;
-            const fileSlug = matchFile ? matchFile.name.replace('.md','') : '';
-
-            return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;">
-              <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleDesignDoc('design-body-${linkedIssue}')">
+        if (readyForReview.length > 0) {
+          html += '<h3 style="color:var(--accent);margin:20px 0 12px;">Ready for Review</h3>';
+          html += readyForReview.map(pr => {
+            const prUrl = pr.pull_request.html_url;
+            const linkedIssue = (pr.body || '').match(/#(\d+)/)?.[1] || '';
+            return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:12px;padding:16px 20px;">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                 <div>
                   <span style="font-size:15px;font-weight:600;color:var(--text);">${escapeHtml(pr.title)}</span>
-                  <span class="report-type" style="background:${statusBg};color:${statusColor}">${status}</span>
-                  ${pr.comments > 0 ? `<span class="badge">${pr.comments + (pr.review_comments || 0)} comments</span>` : ''}
+                  <span class="report-type" style="background:rgba(88,166,255,0.15);color:var(--accent)">Review PR</span>
+                  ${pr.comments > 0 ? `<span class="badge">${pr.comments} comments</span>` : ''}
                 </div>
                 <span class="report-date">${new Date(pr.created_at).toLocaleDateString()}</span>
               </div>
-              <div id="design-body-${linkedIssue}" style="display:none;padding:0 20px 16px;">
-                <div id="design-content-${linkedIssue}" style="font-size:14px;color:var(--text);line-height:1.6;max-height:400px;overflow-y:auto;padding:16px;background:var(--bg);border-radius:8px;margin-bottom:12px;">
-                  <div class="empty">Loading...</div>
-                </div>
-                <div style="display:flex;gap:8px;">
-                  <a href="${prUrl}" target="_blank" class="btn">View PR on GitHub</a>
-                  ${!isApproved && !isMerged ? `<button class="btn btn-primary" onclick="approveDesignDoc(${pr.number})">Approve for Implementation</button>` : ''}
-                  ${!isMerged ? `<button class="btn" onclick="window.open('${prUrl}/files','_blank')">Review Diff</button>` : ''}
-                </div>
+              <div style="display:flex;gap:8px;">
+                <a href="${prUrl}/files" target="_blank" class="btn btn-primary">Review Design Doc</a>
+                <a href="${prUrl}" target="_blank" class="btn">View PR</a>
+                ${linkedIssue ? `<button class="btn" style="color:var(--green);border-color:var(--green);" onclick="approveDesignDoc(${linkedIssue}, ${pr.number})">Approve</button>` : ''}
               </div>
             </div>`;
           }).join('');
+        }
+
+        if (approved.length > 0) {
+          html += '<h3 style="color:var(--green);margin:20px 0 12px;">Approved</h3>';
+          html += approved.map(i => `
+            <div class="report-item" onclick="window.open('${i.html_url}','_blank')" style="border-left:3px solid var(--green);">
+              <div>
+                <span class="report-title">#${i.number} ${escapeHtml(i.title)}</span>
+                <span class="report-type" style="background:rgba(63,185,80,0.15);color:var(--green)">Approved</span>
+              </div>
+              <span class="report-date">${new Date(i.updated_at).toLocaleDateString()}</span>
+            </div>`).join('');
+        }
+
+        if (implemented.length > 0) {
+          html += '<h3 style="color:var(--text-muted);margin:20px 0 12px;">Implemented</h3>';
+          html += implemented.map(i => `
+            <div class="report-item" onclick="window.open('${i.html_url}','_blank')" style="opacity:0.5;">
+              <div>
+                <span class="report-title">#${i.number} ${escapeHtml(i.title)}</span>
+                <span class="report-type" style="background:rgba(139,148,158,0.15);color:var(--text-muted)">Done</span>
+              </div>
+              <span class="report-date">${new Date(i.closed_at).toLocaleDateString()}</span>
+            </div>`).join('');
         }
 
         el.innerHTML = html;
@@ -1050,58 +1039,22 @@
       }
     }
 
-    async function toggleDesignDoc(id) {
-      const el = document.getElementById(id);
-      if (el.style.display === 'none') {
-        el.style.display = '';
-        // Load content if not loaded yet
-        const num = id.replace('design-body-', '');
-        const contentEl = document.getElementById('design-content-' + num);
-        if (contentEl.querySelector('.empty')) {
-          try {
-            // Find the design doc file — try design branch first (design/NUM-*), then main
-            const branches = [`design/${num}-`];
-            let fileData = null;
-            // Search open PRs for branch containing this issue number
-            const prs = await api(`/repos/${OWNER}/${REPO}/pulls?state=open&labels=design-doc&per_page=20`);
-            const designPr = prs.find(p => p.head?.ref?.includes('/' + num + '-') || p.head?.ref?.includes('/' + num));
-            const branch = designPr?.head?.ref || 'main';
-            let files = [];
-            try { files = await api(`/repos/${OWNER}/${REPO}/contents/Docs/designs?ref=${encodeURIComponent(branch)}`); } catch {}
-            if (files.length === 0) try { files = await api(`/repos/${OWNER}/${REPO}/contents/Docs/designs`); } catch {}
-            const match = files.find(f => f.name.startsWith(num + '-'));
-            if (match) {
-              fileData = await api(`/repos/${OWNER}/${REPO}/contents/${match.path}?ref=${encodeURIComponent(branch)}`);
-              const bytes = Uint8Array.from(atob(fileData.content), c => c.charCodeAt(0));
-              const md = new TextDecoder('utf-8').decode(bytes);
-              contentEl.innerHTML = renderMarkdown(md);
-            } else {
-              // Try PR diff as fallback
-              contentEl.innerHTML = '<div class="empty">Design doc file not found. Check the PR diff.</div>';
-            }
-          } catch (e) {
-            contentEl.innerHTML = `<div class="empty">Failed to load: ${e.message}</div>`;
-          }
-        }
-      } else {
-        el.style.display = 'none';
-      }
-    }
-
-    async function approveDesignDoc(prNumber) {
-      if (!confirm('Approve this design doc for implementation?')) return;
+    async function approveDesignDoc(issueNumber, prNumber) {
+      if (!confirm('Approve this design for implementation?')) return;
       try {
-        await api(`/repos/${OWNER}/${REPO}/issues/${prNumber}/labels`, {
+        // Add approved label to the issue (not the PR)
+        await api(`/repos/${OWNER}/${REPO}/issues/${issueNumber}/labels`, {
           method: 'POST',
           headers: { ...headers(), 'Content-Type': 'application/json' },
           body: JSON.stringify({ labels: ['approved'] })
         });
+        // Comment on the PR
         await api(`/repos/${OWNER}/${REPO}/issues/${prNumber}/comments`, {
           method: 'POST',
           headers: { ...headers(), 'Content-Type': 'application/json' },
-          body: JSON.stringify({ body: 'Approved for implementation. PE will create tasks from this design doc in the next sprint planning.' })
+          body: JSON.stringify({ body: 'Approved for implementation. Senior will create implementation tasks.' })
         });
-        alert('Design doc approved! Implementation tasks will be created in the next sprint planning.');
+        alert('Design approved!');
         loadDesignDocs();
       } catch (e) {
         alert('Failed: ' + e.message);

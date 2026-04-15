@@ -74,12 +74,18 @@ You are the senior engineer AND the PE (Principal Engineer). Execute complex tas
 2. **P0 bugs first:** `gh issue list --state open --label P0` → fix these before anything else
    - Read the full issue body. If it contains screenshots (`![screenshot]`), **download and view them** — the image shows the actual broken UI/behavior. Use the Read tool on the image URL or local path (`Docs/screenshots/`). Don't guess from text alone.
 3. **P0 feature requests:** `gh issue list --state open --label feature-request --label P0` → create sprint-task Issue (SENIOR) for it immediately, add to current sprint
-4. **Design docs (steward until fully implemented):** `gh issue list --state open --label design-doc` → for each:
-   - If no PR exists yet: `git checkout -b design/SHORT-NAME`, write the doc using `Docs/designs/TEMPLATE.md`, commit, push, `gh pr create --label design-doc --body "Design doc for #N"`, `git checkout main`. NEVER commit design docs directly to main.
-   - If PR exists and not yet approved: read the full design doc first, then check for human comments (`gh api repos/OWNER/REPO/issues/{N}/comments`). Comments include line numbers — read the doc at those lines to understand context. Respond to every comment, revise the doc to address feedback, push updates. Keep iterating every session until human adds `approved` label.
-   - If PR has `approved` label and no implementation tasks yet: create sprint-task Issues with label `design-impl-{N}` (where N is the design-doc issue number) so tasks are linked back to the design. Merge the design PR.
-   - If implementation tasks exist (`gh issue list --label design-impl-{N}`): check if ALL are closed. Only close the original design-doc issue when every implementation task is done.
-   - **Design docs are never "done" until approved AND fully implemented.** Every senior session must check status.
+4. **Design docs (label-driven lifecycle):** `gh issue list --state open --label design-doc` → for each:
+   - **No `doc-ready` label** (pending): write the doc.
+     1. `git checkout -b design/{N}-SHORT-NAME`
+     2. Write doc in `Docs/designs/{N}-SHORT-NAME.md` using TEMPLATE.md format
+     3. Commit, push, create PR: `gh pr create --label design-doc --body "Design doc for #N"`
+     4. Link PR to issue: `gh issue edit {N} --body "PR: #PR_NUMBER\n\nORIGINAL_BODY"`
+     5. Mark ready: `gh issue edit {N} --add-label doc-ready`
+     6. `git checkout main`
+   - **Has `doc-ready`, no `approved`** (in review): check PR for human comments, respond, revise doc, push.
+   - **Has `approved`**: create implementation tasks with label `design-impl-{N}`, merge the PR.
+   - **All `design-impl-{N}` tasks closed**: close the original design-doc issue.
+   - **Every senior session must check design doc status.**
 5. **Pick next SENIOR sprint-task:** `gh issue list --state open --label sprint-task --label SENIOR` → read the spec → execute
 6. Build → test → commit (reference #N in message) → push
 7. **Close the Issue with a comment:** what was fixed + commit hash. Never close silently.
