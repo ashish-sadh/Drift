@@ -1,4 +1,5 @@
 # Product Review — Cycle 1601 (2026-04-14)
+
 Review covering cycles 1570–1601. Previous review: cycle 1483 (Review #37).
 
 ## Executive Summary
