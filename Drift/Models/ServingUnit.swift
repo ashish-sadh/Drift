@@ -297,6 +297,13 @@ struct FoodUnit: Hashable {
         // Countable items
         if words.contains("egg") && ss < 80 { return FoodUnit(label: "egg", gramsEquivalent: ss) }
         if name.contains("meatball") && ss < 50 { return FoodUnit(label: "meatball", gramsEquivalent: ss) }
+
+        // Batter / dough — measured in cups (must come before dosa/idli rule)
+        // Exclude sourdough/bread doughs that are consumed as slices
+        if name.contains("batter") || (name.contains("dough") && !name.contains("bread") && !name.contains("sourdough")) {
+            return FoodUnit(label: "cup", gramsEquivalent: cupGrams(for: name))
+        }
+
         if name.contains("roti") || name.contains("chapati") || name.contains("naan") || name.contains("paratha") {
             return FoodUnit(label: "piece", gramsEquivalent: ss)
         }
@@ -304,6 +311,22 @@ struct FoodUnit: Hashable {
            name.contains("samosa") || name.contains("pakora") || name.contains("momo") {
             return FoodUnit(label: "piece", gramsEquivalent: ss)
         }
+
+        // Indian sweets — always countable by piece
+        if name.contains("gulab") || name.contains("jamun") || name.contains("laddu") ||
+           name.contains("laddoo") || name.contains("barfi") || name.contains("burfi") ||
+           name.contains("jalebi") || name.contains("rasgulla") || name.contains("rasmalai") ||
+           name.contains("modak") || name.contains("peda") || name.contains("gujiya") ||
+           name.contains("mithai") || name.contains("pinni") || name.contains("kaju katli") {
+            return FoodUnit(label: "piece", gramsEquivalent: ss)
+        }
+
+        // Sliceable foods
+        if (name.contains("bread") || name.contains("toast")) &&
+           !name.contains("breadfruit") && !name.contains("breadstick") {
+            return FoodUnit(label: "slice", gramsEquivalent: ss)
+        }
+        if name.contains("pizza") { return FoodUnit(label: "slice", gramsEquivalent: ss) }
         if name.contains("date") && !name.contains("update") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
         if name.contains("tortilla") || name.contains("wrap") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
         if name.contains("wing") || name.contains("nugget") || name.contains("tender") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
