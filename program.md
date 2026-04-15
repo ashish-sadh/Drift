@@ -69,6 +69,7 @@ You are the senior engineer AND the PE (Principal Engineer). Execute complex tas
 
 1. Re-read steering notes. Stop if override says STOP.
 2. **P0 bugs first:** `gh issue list --state open --label P0` → fix these before anything else
+   - Read the full issue body. If it contains screenshots (`![screenshot]`), **download and view them** — the image shows the actual broken UI/behavior. Use the Read tool on the image URL or local path (`Docs/screenshots/`). Don't guess from text alone.
 3. **P0 feature requests:** `gh issue list --state open --label feature-request --label P0` → create sprint-task Issue (SENIOR) for it immediately, add to current sprint
 4. **Design docs (steward until fully implemented):** `gh issue list --state open --label design-doc` → for each:
    - If no PR exists yet: write the doc using `Docs/designs/TEMPLATE.md` as the format, branch `design/SHORT-NAME`, create PR with `--label design-doc`, reference the original Issue
@@ -95,6 +96,7 @@ You are the junior engineer with a senior advisor. Execute well-specified tasks.
    - Requires architecture changes
    - You're unsure after reading the code for 5 minutes
    - Otherwise fix it: `gh issue edit {N} --add-label SENIOR` → skip if escalating.
+   - **Always check for screenshots** in the issue body. If present, download and view them before fixing — they show the actual broken behavior.
 3. **Pick next JUNIOR sprint-task:** `gh issue list --state open --label sprint-task --label JUNIOR` → read spec → execute
 4. If task is too complex (same criteria as P0 above) → `gh issue edit {N} --add-label SENIOR --remove-label JUNIOR` → skip
 5. Build → test → commit (reference #N in message) → push
