@@ -78,6 +78,16 @@ if [ -n "$ISSUES" ]; then
   exit 2
 fi
 
+# Check for in-progress issues that weren't closed (autonomous sessions only)
+DRIFT_CONTROL=$(cat "$HOME/drift-control.txt" 2>/dev/null | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')
+if [ "$DRIFT_CONTROL" = "RUN" ]; then
+  IN_PROGRESS=$(gh issue list --state open --label in-progress --json number,title --jq '.[] | "#\(.number) \(.title)"' 2>/dev/null || true)
+  if [ -n "$IN_PROGRESS" ]; then
+    echo -e "BLOCKED: Issues still in-progress. Verify work is done (build + tests pass), then close with comment:\n\n${IN_PROGRESS}\n\nFor each: gh issue close N --comment 'Done: {what was done} (commit {hash})'\nOr remove in-progress if unfinished: gh issue edit N --remove-label in-progress" >&2
+    exit 2
+  fi
+fi
+
 # Planning session validation — check deliverables before allowing exit
 SESSION_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "")
 if [ "$SESSION_TYPE" = "planning" ]; then
