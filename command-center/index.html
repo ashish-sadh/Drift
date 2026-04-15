@@ -963,7 +963,12 @@
 
         // State determined by labels on the issue
         const pending = issues.filter(i => i.state === 'open' && !i.labels.some(l => l.name === 'doc-ready') && !i.labels.some(l => l.name === 'approved'));
-        const readyForReview = prs.filter(i => i.state === 'open');
+        const approvedIssueNums = new Set(issues.filter(i => i.labels.some(l => l.name === 'approved')).map(i => String(i.number)));
+        const readyForReview = prs.filter(i => {
+          if (i.state !== 'open') return false;
+          const linked = (i.body || '').match(/#(\d+)/)?.[1];
+          return !linked || !approvedIssueNums.has(linked);
+        });
         const approved = issues.filter(i => i.labels.some(l => l.name === 'approved'));
         const implemented = issues.filter(i => i.state === 'closed');
 
