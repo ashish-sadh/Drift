@@ -4,6 +4,14 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 
 ---
 
+## Cycle · 2026-04-15 (Human-shepherded junior tasks, session 2)
+
+- **Food DB +17** (1896→1913): South Indian (Uttapam, Set Dosa, Chettinad Chicken Curry, Paal Payasam), Indian Snacks (Chakli/Murukku, Roasted Makhana, Bhakarwadi, Sev, Raj Kachori, Golgappa/Pani Puri), Middle Eastern (Hummus plain, Baba Ghanoush, Tzatziki, Fattoush Salad, Lamb Kofta, Lentil Soup), Filter Coffee. Fixed duplicate "Breakfast Burrito" → "Breakfast Burrito (Fast Food)" vs Breakfast category.
+- **Synonym dict +24**: South Indian: kaapi/kapi/filter kaapi→filter coffee, pani puri/puchka/phuchka/gupchup→golgappa, makhana variants, murukku→chakli, payasam→kheer. Middle Eastern: khobz/pitta→pita, labneh→yogurt, kibbeh/kofta, foul→fava beans. Indian: imarti→jalebi, kadhi, sadam→rice, thayir sadam→curd rice.
+- **portionText fixes**: uttapam→piece, kachori→piece, payasam/rasam→bowl.
+- **primaryUnit fixes**: uttapam/kachori added to piece group (same as dosa/idli/vada); payasam added to bowl group.
+- All 159 unit tests passing.
+
 ## Cycle · 2026-04-15 (Human-shepherded junior tasks, continued)
 
 - **Smart Units major expansion** (product focus: #1 complaint): primaryUnit() now covers 10+ new food categories:
