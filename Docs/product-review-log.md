@@ -4,6 +4,22 @@ Periodic product + engineering reviews. Every 10 cycles of the self-improvement 
 
 ---
 
+## Review #40 — 2026-04-14 (Cycle 2277)
+
+### Summary
+Previous sprint (from Review #39) fully completed: iOS widget (#59), food search miss tracking (#60), notification tests (#61), state.md refresh (#62). Since then: P0 AI intent bugs fixed (#67-69), iOS widget shipped, 222 tests added, food search tightening, Gemma special token stripping. Test count 1077, foods 1532. Three user-filed design docs now pending: AI chat structural fix (#65), exercise images (#66), lab reports LLM (#74). Two test-submission bugs (#75, #76) closed.
+
+### Key Achievement
+All 4 sprint tasks from Review #39 completed. iOS widget is the first Phase 4 surface expansion — Drift now visible on home screen.
+
+### Key Concern
+User filed #65 saying "AI chat is really brittle" with parsing failures and multi-turn issues. This is the #1 product quality gap. Three design docs pending with no senior sessions to write them.
+
+### Sprint Plan (10 tasks)
+SENIOR: #78 Input normalization pipeline, #79 Food logging gold set eval, #80 Multi-turn context hardening. JUNIOR: #81 WeightTrendService coverage, #82 AIRuleEngine coverage, #83 Top search misses, #84 Bug hunting food logging, #85 Voice eval cases, #86 Exercise card enhancement, #87 NotificationService hardening.
+
+---
+
 ## Review #37 — 2026-04-13 (Cycle 1483)
 
 ### Summary

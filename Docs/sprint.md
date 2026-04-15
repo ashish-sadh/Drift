@@ -1,6 +1,6 @@
 # Sprint Board
 
-Priority: LLM-first AI chat — remove hardcoded strings, use LLM for intent detection + tool calling.
+Priority: AI chat reliability + coverage hardening. Addresses design doc #65 (brittle AI chat) and voice input edge cases.
 
 ## In Progress
 
@@ -8,8 +8,24 @@ _(pick from Ready)_
 
 ## Ready
 
-### P2: Food DB Quality
-- [ ] **Search miss analysis + targeted additions** — Identify most-searched missing foods. Cross-reference with USDA. Every "not found" = user opens competitor.
+### SENIOR
+- [ ] **#78 AI Chat: Input normalization pipeline** — Centralized preprocessing before all matchers. Strip filler words, normalize whitespace, handle voice artifacts. Root cause fix for P0s #67-69.
+- [ ] **#79 AI Chat: Food logging gold set eval** — 30+ comprehensive eval queries covering voice-style, multi-food, Indian foods, vague quantities. Measurement framework for design doc #65.
+- [ ] **#80 AI Chat: Multi-turn context hardening** — Test and fix context loss between turns. 10+ multi-turn scenarios. Addresses #65 ("need to get better with multi turn").
+
+### JUNIOR
+- [ ] **#81 Coverage: WeightTrendService → 80%** — Currently 61%. Edge cases and error paths.
+- [ ] **#82 Coverage: AIRuleEngine → 80%** — Currently 50%. Per-rule match/non-match tests.
+- [ ] **#83 Food DB: Top 20 search misses** — Use search miss tracking data. USDA cross-reference.
+- [ ] **#84 Bug hunting: AI food logging edge cases** — Systematic analysis. Last hunt found 3 P0s.
+- [ ] **#85 Eval: Voice-style input test cases** — 10+ cases without punctuation, filler words, run-on.
+- [ ] **#86 UI: Exercise card visual enhancement** — Muscle group SF Symbol chips. Prep for design doc #66.
+- [ ] **#87 Coverage: NotificationService + BehaviorInsightService hardening** — Permission denial, empty data, schedule failures.
+
+### Design Docs (senior handles directly, not sprint tasks)
+- #65 Design: How should we structurally fix AI chat?
+- #66 Design: How to enrich images and youtube in exercises
+- #74 Feature: Improve lab reports upload and try to use LLM when available to parse values
 
 ---
 

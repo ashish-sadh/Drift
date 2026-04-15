@@ -176,6 +176,13 @@
 - Regex-based exercise name extraction has a natural ceiling for natural language. The retry-with-singular-fallback is pragmatic for now, but long-term, routing through LLM intent classifier is the answer if edge cases proliferate.
 - Tests 981→1,037 (+56). NotificationService and BehaviorInsightService alert logic have zero dedicated tests — harden in next sprint.
 
+### What I Learned — Review #40 (Cycle 2277, 2026-04-14)
+- sendMessage decomposition shipped (Review #39) — 491→8 handlers. The architecture is clean for new chat features. No more tech debt blocking AI chat improvements.
+- P0s #67-69 exposed a pattern: voice input produces text that breaks rule-based matchers (no punctuation, filler words, implicit lists). A centralized InputNormalizer before all matchers is the right architectural fix — normalize once, match everywhere.
+- Coverage: WeightTrendService at 61%, AIRuleEngine at 50%. Both should be 80%+. NotificationService has 15 tests but edge paths (permission denial, empty data) are untested.
+- The user's request for a "gold set" (#65) aligns with the PE principle: measure before you optimize. Build the eval framework, get pass rates per category, then fix the worst categories systematically.
+- Tests 1077, foods 1532, 20 AI tools, 8 card types. The codebase is mature enough that the primary risk is regression, not missing features. Coverage investment pays dividends.
+
 ## Preferences & Approach
 - Prefer boring, proven solutions over clever abstractions
 - Prefer fixing patterns over fixing instances (fix the stale-preference pattern, not just one ViewModel)

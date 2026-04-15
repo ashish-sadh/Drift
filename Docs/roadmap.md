@@ -36,6 +36,9 @@ What's not: Color palette feels disjointed (dark blue/purple + bright rings), no
 - ~~**Wire USDA into AI chat (P1)**~~ DONE — Chat uses searchWithFallback when local food not found. log_food preHook + food_info handler both fall back to USDA/OpenFoodFacts.
 - ~~**Rich confirmation cards (P0)**~~ DONE — Navigation cards, activity preview cards, weight/workout cards. All chat actions show structured visual feedback.
 
+### Now
+- **AI Chat reliability (P0)** — Input normalization pipeline, food logging gold set eval, multi-turn hardening. Design doc #65. Sprint tasks #78-80.
+
 ### Next
 - ~~**USDA API Phase 1**~~ DONE — Opt-in toggle, rate limiting, searchWithFallback, privacy notice. Behind toggle (default OFF).
 - ~~**Workout split builder**~~ DONE — "Build me a PPL split" → multi-turn workout design. 4 split types, exercise suggestions, template creation.

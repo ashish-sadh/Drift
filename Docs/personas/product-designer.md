@@ -172,6 +172,12 @@
 - All Phase 3c "Now" items are complete. The product is at a natural inflection point — decide whether to deepen polish or expand to new surfaces (widgets, Apple Watch).
 - Exercise query bug (plurals, trailing phrases failing silently) is a reminder that AI-first products must handle natural language gracefully. Silent failures erode trust more than visible errors.
 
+### What I Learned — Review #40 (Cycle 2277, 2026-04-14)
+- User filed #65 calling AI chat "really brittle" — this is the strongest product signal we've gotten. When the developer/primary user explicitly says the core feature doesn't work well, that's P0. The sprint is entirely oriented around measuring and fixing this.
+- Three design docs (#65, #66, #74) from the user show clear product direction: AI chat reliability, exercise visual enrichment, LLM-powered lab reports. These are the user's priorities — respect them.
+- iOS widget shipped (Phase 4 begins) but the user's attention is on AI chat quality, not surface expansion. Product direction follows user pain, not roadmap sequence.
+- "Have a gold set and see what works or not" (#65) — the user wants measurement before action. Build the eval framework first, then fix based on data.
+
 ## Preferences & Style
 - Prefer opinionated design over configurability — make good defaults, don't add settings
 - Prefer chat-first interactions — every feature should be reachable from conversation
