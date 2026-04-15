@@ -54,7 +54,7 @@ fi
 if [ "$MODEL" = "opus" ]; then
     # Design doc PRs needing reply
     if [ -s "$STATE_DIR/cache-design-reviews" ]; then
-        CONTEXT="${CONTEXT}DESIGN DOC PRs NEED REPLY:\n$(cat "$STATE_DIR/cache-design-reviews")\nCheck PR comments, respond, revise doc.\n\n"
+        CONTEXT="${CONTEXT}DESIGN DOC PRs NEED REPLY:\n$(cat "$STATE_DIR/cache-design-reviews")\nReply to EACH comment individually via gh api (pulls/{PR}/comments/{ID}/replies). Then revise doc. Do NOT just revise silently.\n\n"
     fi
 
     # Pending design docs (no doc written yet)

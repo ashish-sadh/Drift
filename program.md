@@ -85,7 +85,13 @@ You are the senior engineer AND the PE (Principal Engineer). Execute complex tas
      4. Link PR to issue: `gh issue edit {N} --body "PR: #PR_NUMBER\n\nORIGINAL_BODY"`
      5. Mark ready: `gh issue edit {N} --add-label doc-ready`
      6. `git checkout main`
-   - **Has `doc-ready`, no `approved`** (in review): check PR for human comments, respond, revise doc, push.
+   - **Has `doc-ready`, no `approved`** (in review):
+     1. Find the PR number from the issue body (`PR: #N`)
+     2. Read ALL comments: `gh api repos/OWNER/REPO/pulls/{PR}/comments --jq '.[] | select(.in_reply_to_id == null) | {id, line, body, user: .user.login}'`
+     3. For EACH unreplied human comment: understand the feedback, revise the doc to address it
+     4. Reply to EACH comment individually: `gh api repos/OWNER/REPO/pulls/{PR}/comments/{COMMENT_ID}/replies -f body="Addressed: {what you changed and why}"`
+     5. Push the revised doc. Revision must still follow Docs/designs/TEMPLATE.md format.
+     6. Do NOT just revise the doc silently — every comment gets an explicit reply.
    - **Has `approved`**: create implementation tasks with label `design-impl-{N}`, merge the PR.
    - **All `design-impl-{N}` tasks closed**: close the original design-doc issue.
    - **Every senior session must check design doc status.**
