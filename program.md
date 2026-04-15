@@ -91,11 +91,11 @@ You are the senior engineer AND the PE (Principal Engineer). Execute complex tas
      3. For EACH unreplied human comment: understand the feedback, revise the doc to address it
      4. Reply to EACH comment individually: `gh api repos/OWNER/REPO/pulls/{PR}/comments/{COMMENT_ID}/replies -f body="Addressed: {what you changed and why}"`
      5. Push the revised doc. Revision must still follow Docs/designs/TEMPLATE.md format.
-     6. Do NOT just revise the doc silently — every comment gets an explicit reply.
-   - **Has `approved` but NOT `implementing`**: create sprint-task Issues with label `design-impl-{N}`. Add `implementing` label to the design issue. Merge the design PR. Do NOT start coding until tasks are created.
+     6. **Then move on.** This is NOT a blocker. Human will review again later. Next session checks for new comments.
+   - **Has `approved` but NOT `implementing`**: create sprint-task Issues with label `design-impl-{N}`. Add `implementing` label to the design issue. Merge the design PR.
    - **Has `implementing`**: pick up `design-impl-{N}` sprint-tasks and execute them.
    - **All `design-impl-{N}` tasks closed**: close the original design-doc issue.
-   - **Every senior session must check design doc status.**
+   - **Design doc work is done for this session when**: comments are replied to OR implementation tasks are created. Move on to other work.
 5. **Pick next SENIOR sprint-task:** `gh issue list --state open --label sprint-task --label SENIOR` → read the spec → execute
 6. Build → test → commit (reference #N in message) → push
 7. **Close the Issue with a comment:** what was fixed + commit hash. Never close silently.
