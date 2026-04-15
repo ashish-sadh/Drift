@@ -90,7 +90,7 @@ You are the senior engineer AND the PE (Principal Engineer). Execute complex tas
      2. Read ALL comments: `gh api repos/OWNER/REPO/pulls/{PR}/comments --jq '.[] | select(.in_reply_to_id == null) | {id, line, body, user: .user.login}'`
      3. For EACH unreplied human comment: understand the feedback, revise the doc to address it
      4. Reply to EACH comment individually: `gh api repos/OWNER/REPO/pulls/{PR}/comments/{COMMENT_ID}/replies -f body="Addressed: {what you changed and why}"`
-     5. Push the revised doc. Revision must still follow Docs/designs/TEMPLATE.md format.
+     5. Push the revised doc. Revision must still follow Docs/designs/TEMPLATE.md format. Every comment gets an explicit reply — do NOT just revise silently.
      6. **Then move on.** This is NOT a blocker. Human will review again later. Next session checks for new comments.
    - **Has `approved` but NOT `implementing`**: create sprint-task Issues with label `design-impl-{N}`. Add `implementing` label to the design issue. Merge the design PR.
    - **Has `implementing`**: pick up `design-impl-{N}` sprint-tasks and execute them.
