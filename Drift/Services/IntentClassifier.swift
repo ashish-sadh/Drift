@@ -58,7 +58,7 @@ enum IntentClassifier {
     /// Build the user message with optional history context. Public for testing.
     nonisolated static func buildUserMessage(message: String, history: String) -> String {
         if !history.isEmpty {
-            return "Chat:\n\(String(history.prefix(200)))\n\nUser: \(message)"
+            return "Chat:\n\(String(history.prefix(400)))\n\nUser: \(message)"
         }
         return message
     }

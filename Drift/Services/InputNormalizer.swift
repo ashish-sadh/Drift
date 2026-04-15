@@ -31,20 +31,10 @@ enum InputNormalizer {
 
     // MARK: - Filler Words
 
-    /// Words that add no meaning, common in voice input.
-    /// Only remove when they appear as standalone words (word boundaries).
-    private static let fillerWords: Set<String> = [
-        "umm", "um", "uh", "uhh", "hmm", "hm",
-        "like", "basically", "literally", "actually",
-        "you know", "i mean", "sort of", "kind of",
-        "so yeah", "well yeah", "oh yeah",
-        "let me see", "let me think"
-    ]
-
     /// Single-word fillers removed via word-boundary splitting.
     private static let singleFillers: Set<String> = [
         "umm", "um", "uh", "uhh", "hmm", "hm",
-        "basically", "literally", "actually"
+        "like", "basically", "literally", "actually"
     ]
 
     /// Multi-word fillers removed via substring replacement.
@@ -55,21 +45,19 @@ enum InputNormalizer {
     ]
 
     static func removeFillerWords(_ text: String) -> String {
-        var result = text.lowercased()
+        var result = text
 
-        // Remove multi-word fillers first (before splitting)
+        // Remove multi-word fillers first (case-insensitive)
         for filler in multiFillers {
-            result = result.replacingOccurrences(of: filler, with: " ")
+            result = result.replacingOccurrences(of: filler, with: " ", options: .caseInsensitive)
         }
 
-        // Remove single-word fillers using word boundaries
+        // Remove single-word fillers (check lowercased, preserve original casing)
         let words = result.split(separator: " ", omittingEmptySubsequences: true)
-        let filtered = words.filter { !singleFillers.contains(String($0)) }
+        let filtered = words.filter { !singleFillers.contains($0.lowercased()) }
 
-        // Preserve original casing by rebuilding from original words
-        // when possible; use lowercased filtered result as fallback
         if filtered.isEmpty { return text }
-        return filtered.joined(separator: " ")
+        return filtered.map(String.init).joined(separator: " ")
     }
 
     // MARK: - Partial Restarts

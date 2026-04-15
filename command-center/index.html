@@ -1045,17 +1045,19 @@
         const contentEl = document.getElementById('design-content-' + num);
         if (contentEl.querySelector('.empty')) {
           try {
-            // Try to find the design doc file — check branches first, then main
-            let files = [];
-            // Find the PR branch for this issue
-            const prs = await api(`/repos/${OWNER}/${REPO}/pulls?state=open&per_page=50`);
-            const designPr = prs.find(p => p.labels?.some(l => l.name === 'design-doc') && p.title.includes('#' + num) || p.head?.ref?.includes(num));
+            // Find the design doc file — try design branch first (design/NUM-*), then main
+            const branches = [`design/${num}-`];
+            let fileData = null;
+            // Search open PRs for branch containing this issue number
+            const prs = await api(`/repos/${OWNER}/${REPO}/pulls?state=open&labels=design-doc&per_page=20`);
+            const designPr = prs.find(p => p.head?.ref?.includes('/' + num + '-') || p.head?.ref?.includes('/' + num));
             const branch = designPr?.head?.ref || 'main';
-            try { files = await api(`/repos/${OWNER}/${REPO}/contents/Docs/designs?ref=${branch}`); } catch {}
+            let files = [];
+            try { files = await api(`/repos/${OWNER}/${REPO}/contents/Docs/designs?ref=${encodeURIComponent(branch)}`); } catch {}
             if (files.length === 0) try { files = await api(`/repos/${OWNER}/${REPO}/contents/Docs/designs`); } catch {}
             const match = files.find(f => f.name.startsWith(num + '-'));
             if (match) {
-              const fileData = await api(`/repos/${OWNER}/${REPO}/contents/${match.path}?ref=${branch}`);
+              fileData = await api(`/repos/${OWNER}/${REPO}/contents/${match.path}?ref=${encodeURIComponent(branch)}`);
               const bytes = Uint8Array.from(atob(fileData.content), c => c.charCodeAt(0));
               const md = new TextDecoder('utf-8').decode(bytes);
               contentEl.innerHTML = renderMarkdown(md);
