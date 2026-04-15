@@ -552,3 +552,130 @@ func makeEntries(days: Int, startKg: Double, ratePerDay: Double) -> [(date: Stri
     }
     // nil is also valid when no data exists — either outcome is acceptable
 }
+
+// MARK: - WeightTrendService Non-Stale Coverage (seeded data)
+
+@Test @MainActor func weightTrendServiceNonStaleAfterSeeding() async throws {
+    // Seed 10 days of weight data to guarantee non-stale state
+    let db = AppDatabase.shared
+    let cal = Calendar.current
+    for i in 0..<10 {
+        let date = DateFormatters.dateOnly.string(from: cal.date(byAdding: .day, value: -i, to: Date())!)
+        var entry = WeightEntry(date: date, weightKg: 70.0 - Double(i) * 0.05, source: "manual")
+        try db.saveWeightEntry(&entry)
+    }
+    let svc = WeightTrendService.shared
+    svc.refresh()
+
+    #expect(!svc.isStale, "Service should not be stale with recent data")
+    #expect(svc.trend != nil)
+    // Non-stale: trendWeight uses EMA, not raw latestWeightKg
+    #expect(svc.trendWeight == svc.trend?.currentEMA)
+    #expect(svc.weeklyRate != nil)
+    #expect(svc.dailyDeficit != nil)
+    #expect(svc.trendDirection != nil)
+    #expect(svc.weightChanges != nil)
+}
+
+@Test @MainActor func weightTrendServiceProjectedWeightMatchesFormula() async throws {
+    let svc = WeightTrendService.shared
+    svc.refresh()
+    guard !svc.isStale, let trend = svc.trend else { return }
+    let expected = trend.currentEMA + (trend.weeklyRateKg * 4.3)
+    #expect(svc.projectedWeightKg != nil)
+    #expect(abs(svc.projectedWeightKg! - expected) < 0.0001)
+}
+
+@Test @MainActor func weightTrendServiceTrendForRangeWithCustomConfig() async throws {
+    // Seed data so trendForRange has something to work with
+    let db = AppDatabase.shared
+    let cal = Calendar.current
+    for i in 0..<14 {
+        let date = DateFormatters.dateOnly.string(from: cal.date(byAdding: .day, value: -i, to: Date())!)
+        var entry = WeightEntry(date: date, weightKg: 70.0 - Double(i) * 0.05, source: "manual")
+        try db.saveWeightEntry(&entry)
+    }
+    let svc = WeightTrendService.shared
+    let conservative = svc.trendForRange(days: 30, config: .conservative)
+    let responsive = svc.trendForRange(days: 30, config: .responsive)
+
+    #expect(conservative != nil, "Conservative trend should not be nil with seeded data")
+    #expect(responsive != nil, "Responsive trend should not be nil with seeded data")
+    if let c = conservative {
+        #expect(c.config.kcalPerKg == 5500)
+    }
+    if let r = responsive {
+        #expect(r.config.kcalPerKg == 7700)
+    }
+}
+
+@Test @MainActor func weightTrendServiceAllEntriesConsistentWithLatest() async throws {
+    let svc = WeightTrendService.shared
+    svc.refresh()
+    let entries = svc.allEntries()
+    if let first = entries.first, let latestKg = svc.latestWeightKg {
+        #expect(abs(first.weightKg - latestKg) < 0.001, "allEntries.first should match latestWeightKg")
+    }
+}
+
+// MARK: - WeightTrendCalculator Additional Edge Cases
+
+@Test func calculateTrendAllInvalidDatesReturnsNil() {
+    let result = WeightTrendCalculator.calculateTrend(entries: [
+        (date: "not-a-date", weightKg: 70.0),
+        (date: "also-bad", weightKg: 71.0),
+    ])
+    #expect(result == nil, "All-invalid dates should return nil")
+}
+
+@Test func calculateWeightChangesNilActualWeight() {
+    let pt = WeightTrendCalculator.WeightDataPoint(
+        date: Date(), dateString: "2026-04-14", actualWeight: nil, emaWeight: 70.0
+    )
+    let changes = WeightTrendCalculator.calculateWeightChanges(dataPoints: [pt])
+    #expect(changes.threeDay == nil)
+    #expect(changes.sevenDay == nil)
+    #expect(changes.thirtyDay == nil)
+}
+
+@Test func calculateWeightChangesEmptyReturnsAllNil() {
+    let changes = WeightTrendCalculator.calculateWeightChanges(dataPoints: [])
+    #expect(changes.threeDay == nil)
+    #expect(changes.sevenDay == nil)
+    #expect(changes.fourteenDay == nil)
+    #expect(changes.thirtyDay == nil)
+    #expect(changes.ninetyDay == nil)
+}
+
+@Test func trendDirectionMaintainingHighThreshold() {
+    // With a high threshold, a small loss should classify as maintaining
+    let config = WeightTrendCalculator.AlgorithmConfig(
+        emaAlpha: 0.1, regressionWindowDays: 21, kcalPerKg: 6000,
+        maintainingThresholdKgPerWeek: 0.5
+    )
+    let entries: [(String, Double)] = (0..<21).map {
+        (String(format: "2026-03-%02d", $0 + 1), 70.0 - Double($0) * 0.01)
+    }
+    let t = WeightTrendCalculator.calculateTrend(entries: entries, config: config)!
+    #expect(t.trendDirection == .maintaining)
+}
+
+@Test func linearRegressionAllSameDateDenominatorZero() {
+    let date = Date()
+    let pts = [
+        WeightTrendCalculator.WeightDataPoint(date: date, dateString: "", actualWeight: 70, emaWeight: 70),
+        WeightTrendCalculator.WeightDataPoint(date: date, dateString: "", actualWeight: 70, emaWeight: 70),
+    ]
+    #expect(WeightTrendCalculator.linearRegressionSlope(points: pts) == 0)
+}
+
+@Test func calculateTrendExtremeSingleDayOutlierFiltered() {
+    let entries: [(date: String, weightKg: Double)] = [
+        (date: "2026-03-01", weightKg: 80.0),
+        (date: "2026-03-02", weightKg: 79.8),
+        (date: "2026-03-03", weightKg: 80.1),
+        (date: "2026-03-04", weightKg: 0.001), // extreme typo 1 day after cluster
+    ]
+    let t = WeightTrendCalculator.calculateTrend(entries: entries)!
+    #expect(t.currentEMA > 75.0, "Extreme single-day outlier should be filtered")
+}
