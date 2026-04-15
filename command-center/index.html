@@ -957,18 +957,35 @@
     async function loadDesignDocs() {
       const el = document.getElementById('designs-list');
       try {
-        // Get design-doc issues and check for PRs or files in Docs/designs/
+        // Get design-doc issues — PRs and issues both come back
         const allDesignItems = await api(`/repos/${OWNER}/${REPO}/issues?labels=design-doc&state=all&per_page=30`);
-        // Check which issues have design doc files on main
+        const prs = allDesignItems.filter(i => i.pull_request);
+        // Build set of issue numbers that have a PR (by matching branch names like design/65-*)
+        const prBranches = prs.map(p => p.title.match(/\d+/)?.[0]).filter(Boolean);
+        // Also check PR branches directly
+        const prIssueNums = new Set();
+        for (const pr of prs) {
+          const branchNum = pr.pull_request?.html_url?.match(/\/(\d+)$/)?.[1]; // PR number
+          // Extract issue number from branch or body
+          const bodyMatch = (pr.body || '').match(/#(\d+)/);
+          if (bodyMatch) prIssueNums.add(bodyMatch[1]);
+          // Branch name contains issue number: design/65-fix-ai-chat
+          const ref = pr.title; // We don't have ref here, but issues in the list that match PR titles
+        }
+        // Simpler: issues that have a corresponding PR (same title pattern or PR body references them)
+        const issuesOnly = allDesignItems.filter(i => !i.pull_request);
+        const issuesWithPR = new Set(prs.map(p => {
+          const m = (p.body || '').match(/#(\d+)/);
+          return m ? m[1] : null;
+        }).filter(Boolean));
         let designFiles = [];
         try { designFiles = await api(`/repos/${OWNER}/${REPO}/contents/Docs/designs`); } catch {}
         const fileNumbers = new Set(designFiles.map(f => f.name.match(/^(\d+)-/)?.[1]).filter(Boolean));
-        const prs = allDesignItems.filter(i => i.pull_request);
-        const hasFile = allDesignItems.filter(i => !i.pull_request && fileNumbers.has(String(i.number)));
-        const docsWritten = [...prs, ...hasFile];
-        const pendingRequests = allDesignItems.filter(i => !i.pull_request && !fileNumbers.has(String(i.number)) && i.state === 'open');
+        // Pending = issues without PR AND without file on any branch
+        const pendingRequests = issuesOnly.filter(i => !issuesWithPR.has(String(i.number)) && !fileNumbers.has(String(i.number)) && i.state === 'open');
+        const docsWritten = prs;
 
-        if (prs.length === 0 && pendingRequests.length === 0) {
+        if (docsWritten.length === 0 && pendingRequests.length === 0) {
           el.innerHTML = '<div class="empty">No design docs yet. Request one above.</div>';
           return;
         }
@@ -1000,15 +1017,12 @@
             const statusColor = isMerged ? 'var(--text-muted)' : isApproved ? 'var(--green)' : 'var(--yellow)';
             const statusBg = isMerged ? 'rgba(139,148,158,0.15)' : isApproved ? 'rgba(63,185,80,0.15)' : 'rgba(210,153,34,0.15)';
 
-            // Find the design doc file in the PR
-            const designFile = pr.title.replace('Design: ', '').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-
-            // Find matching file in Docs/designs/
-            const matchFile = designFiles.find(f => f.name.startsWith(pr.number + '-'));
+            // Extract linked issue number from PR body (e.g., "Design doc for #65")
+            const linkedIssue = (pr.body || '').match(/#(\d+)/)?.[1] || pr.number;
             const fileSlug = matchFile ? matchFile.name.replace('.md','') : '';
 
             return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:16px;overflow:hidden;">
-              <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleDesignDoc('design-body-${pr.number}')">
+              <div style="padding:16px 20px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="toggleDesignDoc('design-body-${linkedIssue}')">
                 <div>
                   <span style="font-size:15px;font-weight:600;color:var(--text);">${escapeHtml(pr.title)}</span>
                   <span class="report-type" style="background:${statusBg};color:${statusColor}">${status}</span>
@@ -1016,8 +1030,8 @@
                 </div>
                 <span class="report-date">${new Date(pr.created_at).toLocaleDateString()}</span>
               </div>
-              <div id="design-body-${pr.number}" style="display:none;padding:0 20px 16px;">
-                <div id="design-content-${pr.number}" style="font-size:14px;color:var(--text);line-height:1.6;max-height:400px;overflow-y:auto;padding:16px;background:var(--bg);border-radius:8px;margin-bottom:12px;">
+              <div id="design-body-${linkedIssue}" style="display:none;padding:0 20px 16px;">
+                <div id="design-content-${linkedIssue}" style="font-size:14px;color:var(--text);line-height:1.6;max-height:400px;overflow-y:auto;padding:16px;background:var(--bg);border-radius:8px;margin-bottom:12px;">
                   <div class="empty">Loading...</div>
                 </div>
                 <div style="display:flex;gap:8px;">
