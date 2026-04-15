@@ -277,6 +277,7 @@ start_claude() {
         --model "$MODEL" \
         $FALLBACK \
         --effort max \
+        --disallowedTools advisor \
         --output-format stream-json \
         --verbose \
         > "$CURRENT_LOG" 2>&1 &
