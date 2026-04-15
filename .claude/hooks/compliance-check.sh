@@ -51,9 +51,9 @@ if [ "$DRIFT_CONTROL" = "RUN" ] && ! $HAS_P0; then
     fi
 fi
 
-# === SENIOR ONLY (Opus) ===
+# === SENIOR / PLANNING ONLY (based on session type, not model) ===
 
-if [ "$MODEL" = "opus" ]; then
+if [ "$SESSION_TYPE" = "senior" ] || [ "$SESSION_TYPE" = "planning" ]; then
     # Design doc PRs needing reply
     if [ -s "$STATE_DIR/cache-design-reviews" ]; then
         CONTEXT="${CONTEXT}[3] DESIGN DOC PRs — reply to EACH comment individually:\n$(cat "$STATE_DIR/cache-design-reviews")\nUse gh api pulls/{PR}/comments/{ID}/replies. Then revise doc.\n\n"

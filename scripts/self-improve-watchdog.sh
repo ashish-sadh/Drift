@@ -40,6 +40,17 @@ log() {
     echo "$msg" | tee -a "$WATCHDOG_LOG"
 }
 
+get_model() {
+    local SESSION_TYPE="$1"
+    local DEFAULT="$2"
+    local CONFIG="$HOME/drift-state/model-config"
+    if [[ -f "$CONFIG" ]]; then
+        local OVERRIDE=$(grep "^${SESSION_TYPE}=" "$CONFIG" 2>/dev/null | cut -d= -f2 | tr -d '[:space:]')
+        [[ -n "$OVERRIDE" ]] && echo "$OVERRIDE" && return
+    fi
+    echo "$DEFAULT"
+}
+
 read_control() {
     if [[ -f "$CONTROL_FILE" ]]; then
         tr -d '[:space:]' < "$CONTROL_FILE" | tr '[:lower:]' '[:upper:]'
@@ -189,10 +200,10 @@ start_claude() {
     if [[ "$(( (NOW - $(cat "$HOME/drift-state/last-review-time" 2>/dev/null || echo "0")) / 3600 ))" -ge 6 ]]; then
         local LAST_REVIEW=$(cat "$HOME/drift-state/last-review-time" 2>/dev/null || echo "0")
         local HOURS_SINCE=$(( (NOW - LAST_REVIEW) / 3600 ))
-        MODEL="opus"
+        MODEL=$(get_model planning opus)
         SESSION_TYPE="planning"
         echo "$NOW" > "$HOME/drift-state/last-review-time"  # Guaranteed update
-        log "Sprint planning due (${HOURS_SINCE}h since last) — Opus"
+        log "Sprint planning due (${HOURS_SINCE}h since last) — $MODEL"
 
         # Create tracking Issue so Command Center shows planning in progress
         local CYCLE=$(cat "$HOME/drift-state/cycle-counter" 2>/dev/null || echo "?")
@@ -213,27 +224,27 @@ start_claude() {
     else
         local SENIOR=$(gh issue list --state open --label sprint-task --label SENIOR --json number --jq 'length' 2>/dev/null || echo "0")
         local P0=$(gh issue list --state open --label P0 --json number --jq 'length' 2>/dev/null || echo "0")
-        local LAST_MODEL=$(cat "$HOME/drift-state/last-model" 2>/dev/null || echo "sonnet")
+        local LAST_SESSION=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "junior")
 
         if [[ "$SENIOR" -gt 0 ]] || [[ "$P0" -gt 0 ]]; then
-            if [[ "$LAST_MODEL" == "opus" ]] && [[ "$P0" -eq 0 ]]; then
-                # Opus just ran and no P0s left — give Sonnet a turn
-                MODEL="sonnet"
+            if [[ "$LAST_SESSION" == "senior" ]] && [[ "$P0" -eq 0 ]]; then
+                # Senior just ran and no P0s left — give junior a turn
+                MODEL=$(get_model junior sonnet)
                 SESSION_TYPE="junior"
                 SESSION_PROMPT="execute junior tasks"
-                log "Alternating to Sonnet (${SENIOR} senior, no P0s remaining)"
+                log "Alternating to junior (${SENIOR} senior, no P0s remaining) — $MODEL"
             else
-                MODEL="opus"
+                MODEL=$(get_model senior opus)
                 SESSION_TYPE="senior"
                 SESSION_PROMPT="execute senior tasks and P0 bugs"
-                log "SENIOR/P0 work available (${SENIOR} senior, ${P0} P0) — Opus"
+                log "SENIOR/P0 work available (${SENIOR} senior, ${P0} P0) — $MODEL"
             fi
         else
-            # 3. Default: Sonnet always-on (junior tasks + permanent tasks)
-            MODEL="sonnet"
+            # 3. Default: junior always-on (junior tasks + permanent tasks)
+            MODEL=$(get_model junior sonnet)
             SESSION_TYPE="junior"
             SESSION_PROMPT="execute junior tasks"
-            log "No senior/P0 work — Sonnet (always-on)"
+            log "No senior/P0 work — junior ($MODEL)"
         fi
     fi
 
