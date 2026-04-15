@@ -4,6 +4,22 @@ Periodic product + engineering reviews. Every 10 cycles of the self-improvement 
 
 ---
 
+## Review #41 — 2026-04-15 (Cycle 3200)
+
+### Summary
+Since Review #40: voice input hardened, gold set eval expanded to 55 queries (100% baseline), food DB 1,532→1,616, P0 food confirmation flow shipped (#119), workout routing fixed, TestFlight build 120. Design doc #65 reviewed by owner with 3 substantive comments redirecting architecture toward multi-stage specialized prompts. New sprint planned around doc revision + food confirm-first audit.
+
+### Key Achievement
+Gold set eval (55 queries, 100% baseline accuracy) gives quantitative measurement of AI chat quality for the first time. This was the owner's explicit ask in #65.
+
+### Key Concern
+Design doc #65 has unaddressed owner feedback for days. The feedback changes the architecture fundamentally — multi-stage specialized prompts instead of pipeline reorder. Must address before implementation can begin.
+
+### Sprint Plan (7 tasks)
+SENIOR: #120 Revise design doc #65, #121 Food confirm-first audit, #122 Pipeline research. Contingent on approval: #92-95 pipeline implementation. JUNIOR: #96 Coverage, #97 Voice+chat e2e, #123 State.md update.
+
+---
+
 ## Review #40 — 2026-04-14 (Cycle 2277)
 
 ### Summary
