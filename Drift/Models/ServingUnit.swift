@@ -299,8 +299,9 @@ struct FoodUnit: Hashable {
         if name.contains("meatball") && ss < 50 { return FoodUnit(label: "meatball", gramsEquivalent: ss) }
 
         // Batter / dough — measured in cups (must come before dosa/idli rule)
-        // Exclude sourdough/bread doughs that are consumed as slices
-        if name.contains("batter") || (name.contains("dough") && !name.contains("bread") && !name.contains("sourdough")) {
+        // Exclude consumed forms: sourdough/bread (→slice), doughnut (→piece), cookie dough (flavor)
+        if name.contains("batter") || (name.contains("dough") && !name.contains("bread") &&
+           !name.contains("sourdough") && !name.contains("doughnut") && !name.contains("cookie")) {
             return FoodUnit(label: "cup", gramsEquivalent: cupGrams(for: name))
         }
 

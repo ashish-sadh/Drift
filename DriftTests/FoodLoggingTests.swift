@@ -1574,6 +1574,16 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     let idliBatter = Food(name: "Idli Batter", category: "Indian Staples", servingSize: 100, servingUnit: "g", calories: 78)
     #expect(FoodUnit.smartUnits(for: idliBatter).first?.label == "cup",
             "Idli batter should default to cup")
+
+    // "doughnut" contains "dough" but is a countable — must not be treated as batter
+    let doughnut = Food(name: "Glazed Doughnut", category: "Bakery", servingSize: 60, servingUnit: "g", calories: 250)
+    #expect(FoodUnit.smartUnits(for: doughnut).first?.label == "piece",
+            "Doughnut should default to piece, not cup")
+
+    // "cookie dough" flavor (e.g. protein bar) — must not be treated as batter
+    let bar = Food(name: "Quest Bar Cookie Dough", category: "Protein Bars", servingSize: 60, servingUnit: "g", calories: 190)
+    #expect(FoodUnit.smartUnits(for: bar).first?.label != "cup",
+            "Cookie dough flavor bar must not default to cup")
 }
 
 @Test func smartUnitsBreadSlice() async throws {
