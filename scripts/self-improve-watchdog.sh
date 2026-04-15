@@ -23,9 +23,11 @@ CONTROL_FILE="$HOME/drift-control.txt"
 LOG_DIR="$HOME/drift-self-improve-logs"
 WATCHDOG_LOG="$LOG_DIR/watchdog.log"
 PID_FILE="$LOG_DIR/claude.pid"
-CHECK_INTERVAL=900  # 15 minutes
-STALE_THRESHOLD=1500 # 25 minutes (in seconds)
+CHECK_INTERVAL=300  # 5 minutes
+STALE_THRESHOLD=600  # 10 minutes (in seconds)
 KILL_WAIT=10
+CRASH_FILE="$HOME/drift-state/consecutive-crashes"
+MONITOR_PID=""
 
 PROMPT="run autopilot"
 CLAUDE_PID=""
@@ -87,8 +89,32 @@ kill_claude() {
             kill -9 "$CLAUDE_PID" 2>/dev/null || true
         fi
         log "Claude process stopped."
+        stop_monitor
     fi
     CLAUDE_PID=""
+}
+
+start_monitor() {
+    stop_monitor
+    # Get or create the live-status issue
+    local ISSUE_NUM=$(cat "$HOME/drift-state/live-status-issue" 2>/dev/null || echo "")
+    if [[ -z "$ISSUE_NUM" ]] || ! gh issue view "$ISSUE_NUM" --json state --jq '.state' 2>/dev/null | grep -q "OPEN"; then
+        ISSUE_NUM=$(gh issue create --title "Drift Live Status" --label live-status --body "Starting..." --json number --jq '.number' 2>/dev/null || echo "")
+        [[ -n "$ISSUE_NUM" ]] && echo "$ISSUE_NUM" > "$HOME/drift-state/live-status-issue"
+    fi
+    if [[ -n "$ISSUE_NUM" ]] && [[ -n "$CURRENT_LOG" ]]; then
+        "$WORK_DIR/scripts/session-monitor.sh" "$CURRENT_LOG" "$ISSUE_NUM" &
+        MONITOR_PID=$!
+        log "Monitor started (PID $MONITOR_PID, issue #$ISSUE_NUM)"
+    fi
+}
+
+stop_monitor() {
+    if [[ -n "$MONITOR_PID" ]] && kill -0 "$MONITOR_PID" 2>/dev/null; then
+        kill "$MONITOR_PID" 2>/dev/null || true
+        log "Monitor stopped."
+    fi
+    MONITOR_PID=""
 }
 
 start_claude() {
@@ -155,16 +181,24 @@ start_claude() {
 
     log "Starting autopilot ($SESSION_TYPE, model=$MODEL, log: $CURRENT_LOG)"
     cd "$WORK_DIR"
+
+    # Opus gets Sonnet fallback for API overload. Sonnet gets no fallback.
+    local FALLBACK=""
+    [[ "$MODEL" == "opus" ]] && FALLBACK="--fallback-model sonnet"
+
     DRIFT_AUTONOMOUS=1 claude -p "$SESSION_PROMPT" \
         --dangerously-skip-permissions \
         --model "$MODEL" \
+        $FALLBACK \
         --effort max \
         --output-format stream-json \
-        --verbose \
         > "$CURRENT_LOG" 2>&1 &
     CLAUDE_PID=$!
     echo "$CLAUDE_PID" > "$PID_FILE"
     log "Autopilot started with PID $CLAUDE_PID (model=$MODEL)"
+
+    # Start Haiku monitor
+    start_monitor
 }
 
 is_claude_alive() {
@@ -342,7 +376,20 @@ while true; do
             sed -i '' 's/_Override:_ STOP/_Override:_ CONTINUE/' "$WORK_DIR/program.md" 2>/dev/null || true
             # Check if autopilot is dead
             if ! is_claude_alive; then
-                log "Autopilot exited. Restarting..."
+                stop_monitor
+                if [[ -n "$CURRENT_LOG" ]] && grep -q '"type":"result"' "$CURRENT_LOG" 2>/dev/null; then
+                    log "Autopilot completed normally. Restarting..."
+                    echo "0" > "$CRASH_FILE"
+                else
+                    local CRASHES=$(cat "$CRASH_FILE" 2>/dev/null || echo "0")
+                    CRASHES=$((CRASHES + 1))
+                    echo "$CRASHES" > "$CRASH_FILE"
+                    log "Autopilot CRASHED (no result event). Crash #$CRASHES. Restarting..."
+                    if [[ "$CRASHES" -ge 3 ]]; then
+                        log "WARNING: $CRASHES consecutive crashes. Backing off 5 min."
+                        sleep 300
+                    fi
+                fi
                 cleanup_dirty_state
                 start_claude
             # Check if autopilot is stalled

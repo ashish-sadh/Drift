@@ -34,7 +34,8 @@
     </div>
 
     <div id="tab-sprint" style="display:none">
-      <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">Current sprint plan from the latest product review. Tasks are assigned to Opus (complex) or Sonnet (routine). Updated after each review cycle.</p>
+      <div id="live-activity" style="margin-bottom:16px;padding:12px 16px;border:1px solid var(--border);border-radius:10px;background:var(--surface);"></div>
+      <p style="color:var(--text-muted);font-size:13px;margin-bottom:16px;">Tasks assigned to Opus (complex) or Sonnet (routine). Updated after each review cycle.</p>
       <div id="sprint-section">
         <div class="empty">Click to load sprint plan.</div>
       </div>
@@ -234,7 +235,7 @@
         if (tab.dataset.tab === 'feedback') loadFeedback();
         if (tab.dataset.tab === 'bugs') { loadIssues(); loadFixedBugs(); }
         if (tab.dataset.tab === 'releases') loadReleases();
-        if (tab.dataset.tab === 'sprint') loadSprint();
+        if (tab.dataset.tab === 'sprint') { loadSprint(); loadLiveStatus(); }
         if (tab.dataset.tab === 'features') loadFeatureRequests();
         if (tab.dataset.tab === 'designs') loadDesignDocs();
         if (tab.dataset.tab === 'review') loadReviewItems();
@@ -1057,6 +1058,25 @@
         ${t.comments > 0 ? `<span style="font-size:11px;color:var(--text-muted)">${t.comments} updates</span>` : ''}
       </div>`;
     }
+
+    async function loadLiveStatus() {
+      const el = document.getElementById('live-activity');
+      try {
+        const issues = await api(`/repos/${OWNER}/${REPO}/issues?labels=live-status&state=open&per_page=1`);
+        if (issues.length > 0 && issues[0].body) {
+          el.style.display = '';
+          el.innerHTML = `<div style="font-size:13px;color:var(--text);">${renderMarkdown(issues[0].body)}</div>`;
+        } else {
+          el.style.display = 'none';
+        }
+      } catch (e) {
+        el.style.display = 'none';
+      }
+    }
+    // Auto-refresh live status every 30s when Sprint tab is active
+    setInterval(() => {
+      if (getToken() && document.querySelector('.tab.active')?.dataset.tab === 'sprint') loadLiveStatus();
+    }, 30000);
 
     async function loadSprint() {
       const el = document.getElementById('sprint-section');
