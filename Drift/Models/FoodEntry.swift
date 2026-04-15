@@ -112,6 +112,8 @@ extension FoodEntry {
         if lower.contains("momo") { return fmt(servings, "momo", "momos") }
         if lower.contains("vada") && servingSizeG < 120 { return fmt(servings, "vada", "vadas") }
         if lower.contains("pakora") { return fmt(servings, "pakora", "pakoras") }
+        if lower.contains("uttapam") && servingSizeG < 150 { return fmt(servings, "uttapam", "uttapams") }
+        if lower.contains("kachori") && servingSizeG < 200 { return fmt(servings, "kachori", "kachoris") }
         // Indian sweets
         if lower.contains("laddu") || lower.contains("laddoo") || lower.contains("barfi") ||
            lower.contains("burfi") || lower.contains("jalebi") || lower.contains("rasgulla") ||
@@ -140,9 +142,10 @@ extension FoodEntry {
         if lower.contains("muffin") && servingSizeG < 120 { return fmt(servings, "muffin", "muffins") }
         if lower.contains("bagel") && servingSizeG < 130 { return fmt(servings, "bagel", "bagels") }
         if lower.contains("cup") && servingSizeG > 200 { return fmt(servings, "cup", "cups") }
-        // Soups, stews, broths → bowl
+        // Soups, stews, broths, liquid desserts → bowl
         if lower.contains("soup") || lower.contains("stew") || lower.contains("chowder") ||
-           lower.contains("broth") || lower.contains("bisque") { return fmt(servings, "bowl", "bowls") }
+           lower.contains("broth") || lower.contains("bisque") || lower.contains("payasam") ||
+           lower.contains("rasam") { return fmt(servings, "bowl", "bowls") }
 
         return "\(Int(totalG))g"
     }
