@@ -387,6 +387,31 @@ enum FoodService {
 
     // MARK: - Copy Yesterday
 
+    /// Preview yesterday's food entries without copying. Returns summary for confirmation.
+    static func previewYesterday() -> String {
+        guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) else {
+            return "Couldn't determine yesterday's date."
+        }
+        let yesterdayStr = DateFormatters.dateOnly.string(from: yesterday)
+        guard let mealLogs = try? AppDatabase.shared.fetchMealLogs(for: yesterdayStr), !mealLogs.isEmpty else {
+            return "No food logged yesterday."
+        }
+        var names: [String] = []
+        var totalCal = 0.0
+        for ml in mealLogs {
+            guard let mlId = ml.id,
+                  let entries = try? AppDatabase.shared.fetchFoodEntries(forMealLog: mlId) else { continue }
+            for entry in entries {
+                names.append(entry.foodName)
+                totalCal += entry.calories
+            }
+        }
+        if names.isEmpty { return "No entries to copy from yesterday." }
+        let list = names.prefix(6).joined(separator: ", ")
+        let more = names.count > 6 ? " + \(names.count - 6) more" : ""
+        return "Yesterday: \(list)\(more) — \(names.count) items, \(Int(totalCal)) cal total. Say **\"confirm copy\"** to copy them to today."
+    }
+
     /// Copy all of yesterday's food entries to today. Returns confirmation.
     static func copyYesterday() -> String {
         guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) else {

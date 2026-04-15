@@ -34,6 +34,7 @@ final class AIChatViewModel {
         let proteinG: Double
         let carbsG: Double
         let fatG: Double
+        var fiberG: Double = 0
     }
 
     // MARK: - Types

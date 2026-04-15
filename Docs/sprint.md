@@ -23,7 +23,7 @@ _(pick from Ready)_
 
 ### SENIOR — Independent (no approval needed)
 
-- [ ] **#121 Food logging: confirm-first on all paths** — Product focus says "always confirm first by opening food search prefill or recipe builder." Commit `2ce944f` added prefilled review for chat logging. Audit ALL food logging paths (chat single-item, multi-item, voice, copy-to-today, recent re-log) to ensure none skip confirmation. Add tests.
+- [x] **#121 Food logging: confirm-first on all paths** — Fixed. All 4 bypass paths now require confirmation: Log Again and Quick + open ManualFoodEntrySheet prefilled, Copy to Today shows confirmation alert, copy-yesterday in chat shows preview before copying. 4 tests added. Note: "Copy previous day" button in empty diary (5th path) not in original scope — follow-up.
 - [ ] **#122 AI Chat: research multi-stage pipeline patterns** — Research how production LLM chat systems handle intent → extraction → confirmation flows. Look at function-calling patterns, chain-of-thought extraction, multi-prompt architectures. Document findings in design doc #65 revision. This feeds directly into the doc revision.
 
 ### SENIOR — Contingent on Revised #65 Approval

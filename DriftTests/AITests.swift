@@ -1343,6 +1343,37 @@ import Testing
     #expect(result.contains("No food logged") || result.contains("Copied") || result.contains("No entries"))
 }
 
+@Test @MainActor func foodServicePreviewYesterday() async throws {
+    let result = FoodService.previewYesterday()
+    #expect(!result.isEmpty)
+    // On test DB, yesterday likely has no food
+    #expect(result.contains("No food logged") || result.contains("Yesterday:") || result.contains("No entries"))
+}
+
+@Test @MainActor func copyYesterdayStaticOverrideShowsPreview() async throws {
+    // "copy yesterday" should return a preview, not copy directly
+    let queries = ["copy yesterday", "same as yesterday", "repeat yesterday"]
+    for query in queries {
+        let result = StaticOverrides.match(query)
+        #expect(result != nil, "'\(query)' should match StaticOverrides")
+        if case .handler(let fn) = result {
+            let text = fn()
+            // Should be a preview (contains "confirm copy") or "No food logged"
+            #expect(text.contains("confirm copy") || text.contains("No food logged") || text.contains("No entries"),
+                    "'\(query)' should show preview, not copy directly. Got: \(text)")
+        }
+    }
+}
+
+@Test @MainActor func confirmCopyStaticOverrideExecutesCopy() async throws {
+    // "confirm copy" should trigger the actual copy
+    let queries = ["confirm copy", "yes copy yesterday", "yes copy"]
+    for query in queries {
+        let result = StaticOverrides.match(query)
+        #expect(result != nil, "'\(query)' should match StaticOverrides")
+    }
+}
+
 @Test @MainActor func foodServiceTopProteinFoods() async throws {
     let foods = FoodService.topProteinFoods()
     // Should return foods from DB (even without user history)

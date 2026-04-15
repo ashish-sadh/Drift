@@ -122,9 +122,12 @@ enum StaticOverrides {
 
         // Calorie estimation ("calories in samosa") → food_info tool handles via FoodService.getNutrition()
 
-        // Copy yesterday
+        // Copy yesterday — preview first, require confirmation
         if lower == "copy yesterday" || lower == "same as yesterday" || lower == "repeat yesterday"
             || lower == "log same as yesterday" || lower == "yesterday's food" {
+            return .handler { FoodService.previewYesterday() }
+        }
+        if lower == "confirm copy" || lower == "yes copy yesterday" || lower == "yes copy" {
             return .handler { FoodService.copyYesterday() }
         }
 

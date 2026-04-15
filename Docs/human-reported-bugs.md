@@ -85,7 +85,7 @@ Plant points section shows "Today" even when user navigates to a different date.
 ## BUG-004: Food logging confirmation bypassed on 4 paths
 
 **Reported:** 2026-04-15 (found via audit)
-**Status:** Open — tracked under sprint task #121
+**Status:** Fixed
 **Severity:** High (product focus: always confirm before logging food)
 
 Four paths in FoodTabView and StaticOverrides log food directly without showing the prefilled review form or recipe builder:

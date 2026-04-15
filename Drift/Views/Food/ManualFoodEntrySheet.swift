@@ -22,6 +22,7 @@ struct ManualFoodEntrySheet: View {
         _protein = State(initialValue: prefill.map { $0.proteinG > 0 ? "\(Int($0.proteinG))" : "" } ?? "")
         _carbs = State(initialValue: prefill.map { $0.carbsG > 0 ? "\(Int($0.carbsG))" : "" } ?? "")
         _fat = State(initialValue: prefill.map { $0.fatG > 0 ? "\(Int($0.fatG))" : "" } ?? "")
+        _fiber = State(initialValue: prefill.map { $0.fiberG > 0 ? "\(Int($0.fiberG))" : "" } ?? "")
     }
 
     private var macroCalories: Int {

@@ -15,6 +15,9 @@ struct FoodTabView: View {
     @State private var showingPlantPointsDetail = false
     @State private var copiedToTodayName: String? = nil
     @State private var foodSortMode: FoodSortMode = .time
+    @State private var showingConfirmLog = false
+    @State private var confirmPrefill: AIChatViewModel.ManualFoodPrefill?
+    @State private var copyToTodayEntry: FoodEntry?
 
     enum FoodSortMode: String, CaseIterable {
         case time, protein, carbs, fat, plantPoints
@@ -105,10 +108,34 @@ struct FoodTabView: View {
                 NavigationStack { PlantPointsCardView(viewModel: viewModel) }
                     .presentationDetents([.medium, .large])
             }
+            .sheet(isPresented: $showingConfirmLog) {
+                ManualFoodEntrySheet(viewModel: viewModel, prefill: confirmPrefill) {
+                    reload()
+                }
+            }
+            .alert("Copy to Today?", isPresented: Binding(
+                get: { copyToTodayEntry != nil },
+                set: { if !$0 { copyToTodayEntry = nil } }
+            )) {
+                Button("Cancel", role: .cancel) { copyToTodayEntry = nil }
+                Button("Copy") {
+                    if let entry = copyToTodayEntry {
+                        viewModel.copyEntryToToday(entry)
+                        copiedToTodayName = entry.foodName
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copiedToTodayName = nil }
+                    }
+                    copyToTodayEntry = nil
+                }
+            } message: {
+                if let entry = copyToTodayEntry {
+                    Text("\(entry.foodName) — \(Int(entry.totalCalories)) cal, \(Int(entry.totalProtein))g protein")
+                }
+            }
             .onAppear { AIScreenTracker.shared.currentScreen = .food; weekOffset = 0; reload() }
             .onChange(of: showingSearch) { _, showing in if !showing { reload() } }
             .onChange(of: showingRecipeBuilder) { _, showing in if !showing { reload() } }
             .onChange(of: showingScanner) { _, showing in if !showing { reload() } }
+            .onChange(of: showingConfirmLog) { _, showing in if !showing { reload() } }
             .onChange(of: viewModel.selectedDate) { _, _ in foodSortMode = .time }
         }
     }
@@ -497,20 +524,17 @@ struct FoodTabView: View {
                 Label(isFav ? "Unfavorite" : "Favorite", systemImage: isFav ? "star.slash" : "star")
             }
             Button {
-                viewModel.quickAdd(name: entry.foodName, calories: entry.totalCalories,
-                                   proteinG: entry.totalProtein, carbsG: entry.totalCarbs,
-                                   fatG: entry.totalFat, fiberG: entry.totalFiber,
-                                   mealType: viewModel.autoMealType,
-                                   servingSizeG: entry.servingSizeG)
-                reload()
+                confirmPrefill = AIChatViewModel.ManualFoodPrefill(
+                    name: entry.foodName, calories: Int(entry.totalCalories),
+                    proteinG: entry.totalProtein, carbsG: entry.totalCarbs,
+                    fatG: entry.totalFat, fiberG: entry.totalFiber)
+                showingConfirmLog = true
             } label: {
                 Label("Log Again", systemImage: "arrow.counterclockwise")
             }
             if !viewModel.isToday {
                 Button {
-                    viewModel.copyEntryToToday(entry)
-                    copiedToTodayName = entry.foodName
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copiedToTodayName = nil }
+                    copyToTodayEntry = entry
                 } label: {
                     Label("Copy to Today", systemImage: "doc.on.doc")
                 }
@@ -581,7 +605,13 @@ struct FoodTabView: View {
                                 Text(food.macroSummary).font(.caption2).foregroundStyle(.secondary)
                             }
                             Spacer()
-                            Button { viewModel.quickLogFood(food); reload() } label: {
+                            Button {
+                                confirmPrefill = AIChatViewModel.ManualFoodPrefill(
+                                    name: food.name, calories: Int(food.calories),
+                                    proteinG: food.proteinG, carbsG: food.carbsG,
+                                    fatG: food.fatG, fiberG: food.fiberG)
+                                showingConfirmLog = true
+                            } label: {
                                 Image(systemName: "plus.circle.fill").foregroundStyle(Theme.accent)
                             }.buttonStyle(.plain)
                         }
