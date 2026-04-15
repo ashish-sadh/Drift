@@ -40,6 +40,17 @@
       },
       {
         "matcher": "Bash",
+        "if": "Bash(gh issue close *)",
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/enforce-close-comment.sh",
+            "timeout": 5
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
         "if": "Bash(git commit *)",
         "hooks": [
           {

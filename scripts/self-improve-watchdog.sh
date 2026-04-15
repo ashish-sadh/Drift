@@ -48,12 +48,17 @@ read_control() {
 
 cleanup_dirty_state() {
     cd "$WORK_DIR"
+    # Abort interrupted merges/rebases
+    git merge --abort 2>/dev/null || true
+    git rebase --abort 2>/dev/null || true
+    # Drop stashes left by crashed sessions
+    git stash drop 2>/dev/null || true
+
     local DIRTY=$(git status --porcelain 2>/dev/null | head -20)
     if [[ -n "$DIRTY" ]]; then
         log "Dirty state after session exit. Discarding incomplete changes:"
         log "$DIRTY"
         git checkout . 2>/dev/null || true
-        # Also clean untracked files that autopilot may have created (but not in .claude/)
         git clean -fd --exclude=.claude/ 2>/dev/null || true
         log "Working tree cleaned."
     fi
@@ -124,12 +129,12 @@ start_claude() {
         local LAST_MODEL=$(cat "$HOME/drift-state/last-model" 2>/dev/null || echo "sonnet")
 
         if [[ "$SENIOR" -gt 0 ]] || [[ "$P0" -gt 0 ]]; then
-            if [[ "$LAST_MODEL" == "opus" ]]; then
-                # Opus just ran — give Sonnet a turn
+            if [[ "$LAST_MODEL" == "opus" ]] && [[ "$P0" -eq 0 ]]; then
+                # Opus just ran and no P0s left — give Sonnet a turn
                 MODEL="sonnet"
                 SESSION_TYPE="junior"
                 SESSION_PROMPT="execute junior tasks"
-                log "Alternating to Sonnet (${SENIOR} senior, ${P0} P0 remaining)"
+                log "Alternating to Sonnet (${SENIOR} senior, no P0s remaining)"
             else
                 MODEL="opus"
                 SESSION_TYPE="senior"
@@ -294,8 +299,8 @@ while true; do
                 PAUSE_WAIT=0
                 PAUSE_TIMEOUT=300
                 while is_claude_alive && (( PAUSE_WAIT < PAUSE_TIMEOUT )); do
-                    sleep 30
-                    (( PAUSE_WAIT += 30 ))
+                    sleep 10
+                    (( PAUSE_WAIT += 10 ))
                     if is_log_stale_seconds 120; then
                         log "PAUSE: session stalled (no output in 120s). Force killing."
                         break

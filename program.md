@@ -77,11 +77,8 @@ You are the senior engineer AND the PE (Principal Engineer). Execute complex tas
    - If implementation tasks exist (`gh issue list --label design-impl-{N}`): check if ALL are closed. Only close the original design-doc issue when every implementation task is done.
    - **Design docs are never "done" until approved AND fully implemented.** Every senior session must check status.
 5. **Pick next SENIOR sprint-task:** `gh issue list --state open --label sprint-task --label SENIOR` → read the spec → execute
-6. **Mark in-progress:** `gh issue edit {N} --add-label in-progress` (shows on Command Center dashboard)
-7. **Before editing any file: READ it first.** Understand types, signatures, imports. Never edit blind.
-8. **Boy scout rule:** Clean what you touch. Read `Docs/principles/` for guidance.
-9. Build → test → commit → push
-10. **Close the Issue with a comment:** what was fixed + commit hash. Remove label: `gh issue edit {N} --remove-label in-progress`. Never close silently.
+6. Build → test → commit (reference #N in message) → push
+7. **Close the Issue with a comment:** what was fixed + commit hash. Never close silently.
 11. **Can create max 3 new Issues per session** (SENIOR or JUNIOR) when discovering work.
 12. Repeat until no SENIOR/P0/design-doc issues left → exit. Watchdog restarts with Sonnet.
 
@@ -92,20 +89,21 @@ You are the senior engineer AND the PE (Principal Engineer). Execute complex tas
 You are the junior engineer with a senior advisor. Execute well-specified tasks.
 
 1. Re-read steering notes. Stop if override says STOP.
-2. **P0 bugs:** If straightforward → fix. If complex/ambiguous → `gh issue edit {N} --add-label SENIOR` → skip.
+2. **P0 bugs — escalate to SENIOR if ANY of:**
+   - Touches 3+ files
+   - Involves AI pipeline (IntentClassifier, ToolRanker, AIToolAgent, ToolRegistration)
+   - Requires architecture changes
+   - You're unsure after reading the code for 5 minutes
+   - Otherwise fix it: `gh issue edit {N} --add-label SENIOR` → skip if escalating.
 3. **Pick next JUNIOR sprint-task:** `gh issue list --state open --label sprint-task --label JUNIOR` → read spec → execute
-4. **Mark in-progress:** `gh issue edit {N} --add-label in-progress` (shows on Command Center dashboard)
-5. If task is too complex → `gh issue edit {N} --add-label SENIOR --remove-label JUNIOR` → skip
-6. **Before editing: READ first.** Boy scout rule applies.
-7. Build → test → commit → push
-8. **Close Issue with comment:** what was done + commit hash. Remove label: `gh issue edit {N} --remove-label in-progress`.
-9. **When no JUNIOR sprint-tasks left → work on permanent-task Issues:**
-   - `gh issue list --state open --label permanent-task` → pick one
-   - `gh issue edit {N} --add-label in-progress` before starting
+4. If task is too complex (same criteria as P0 above) → `gh issue edit {N} --add-label SENIOR --remove-label JUNIOR` → skip
+5. Build → test → commit (reference #N in message) → push
+6. **Close Issue with comment:** what was done + commit hash. Never close silently.
+7. **When no JUNIOR sprint-tasks left → work on permanent tasks:**
+   - `gh issue list --state open --label permanent-task` → pick the one you haven't worked on most recently
    - Do the work, then **comment on the Issue** with what you did (don't close it — permanent tasks stay open)
-   - `gh issue edit {N} --remove-label in-progress` after commenting
-   - Rotate between: Food DB (#49), Test Coverage (#50), Bug Hunting (#51), UI Polish (#52), AI Chat (#53)
-9. Repeat forever. Sonnet never idles.
+   - Before running tests: `pkill -9 -f xcodebuild 2>/dev/null; sleep 2`
+8. Repeat forever. Sonnet never idles.
 
 ---
 
@@ -132,8 +130,6 @@ Human says "run autopilot" in a session. No watchdog, no model switching.
 - **TestFlight publishing is MANDATORY** when the hook injects instructions. Do NOT skip.
 
 ### Quality
-- **READ before EDIT.** Non-negotiable.
-- **Boy scout rule.** Clean what you touch. `Docs/principles/` for guidance.
 - Write tests for new code. Coverage: 80% logic, 50% services.
 - When fixing a failing query: fix the CATEGORY, add 3+ variant tests.
 

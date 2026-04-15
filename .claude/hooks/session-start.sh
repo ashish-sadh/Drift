@@ -14,16 +14,26 @@ echo "Cycle count: $COUNT"
 echo "Last product review: cycle $LAST_REVIEW"
 echo "Next product review due: cycle $NEXT_REVIEW"
 echo "Read Docs/roadmap.md first to understand product direction."
-echo "REMINDER: Mark your target issue in-progress BEFORE starting work: gh issue edit {N} --add-label in-progress"
 
 # Surface pending design-doc issues
 DESIGN_DOCS=$(gh issue list --state open --label design-doc --json number,title --jq '.[] | "#\(.number) \(.title)"' 2>/dev/null || true)
 if [ -n "$DESIGN_DOCS" ]; then
   DESIGN_COUNT=$(echo "$DESIGN_DOCS" | wc -l | tr -d ' ')
   echo ""
-  echo "⚠ PENDING DESIGN DOCS ($DESIGN_COUNT):"
+  echo "PENDING DESIGN DOCS ($DESIGN_COUNT):"
   echo "$DESIGN_DOCS"
-  echo "Senior sessions: write/revise these BEFORE sprint-tasks. Use Docs/designs/TEMPLATE.md."
+  echo "Senior: write/revise these BEFORE sprint-tasks. Use Docs/designs/TEMPLATE.md."
+fi
+
+# Surface unreplied admin comments on report PRs
+UNREPLIED=$(gh pr list --label report --state all --json number,title,comments --jq '
+  .[] | select(.comments > 0) | "#\(.number) \(.title) (\(.comments) comments)"
+' 2>/dev/null | head -5 || true)
+if [ -n "$UNREPLIED" ]; then
+  echo ""
+  echo "REPORT PRs WITH COMMENTS (check for unreplied admin feedback):"
+  echo "$UNREPLIED"
+  echo "Read the full report, then reply to every admin comment."
 fi
 
 echo "========================"
