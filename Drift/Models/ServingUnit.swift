@@ -346,6 +346,11 @@ struct FoodUnit: Hashable {
         if name.contains("pistachio") { return FoodUnit(label: "serving", gramsEquivalent: ss) }
         if name.contains("walnut") { return FoodUnit(label: "serving", gramsEquivalent: ss) }
 
+        // Protein powder — measured by scoop
+        if name.contains("protein powder") {
+            return FoodUnit(label: "scoop", gramsEquivalent: ss)
+        }
+
         // Tablespoon items (word boundaries: "boiled" contains "oil", "butternut" contains "butter")
         if words.contains("oil") || words.contains("ghee") { return FoodUnit(label: "tbsp", gramsEquivalent: 15) }
         if words.contains("butter") && !name.contains("peanut") && !name.contains("almond") && !name.contains("paneer") {
@@ -357,6 +362,19 @@ struct FoodUnit: Hashable {
         if name.contains("rice") && !name.contains("cake") && !name.contains("paper") &&
            !name.contains("wine") && !name.contains("cracker") && !name.contains("noodle") &&
            !name.contains("pudding") && !name.contains("crisp") {
+            return FoodUnit(label: "cup", gramsEquivalent: cupGrams(for: name))
+        }
+
+        // Dal and cooked legumes — measured in cups
+        // Word boundary on "dal"/"daal" prevents false matches on unrelated words.
+        // Exclude coffee beans, jelly beans, cocoa beans.
+        if words.contains("dal") || words.contains("daal") {
+            return FoodUnit(label: "cup", gramsEquivalent: cupGrams(for: name))
+        }
+        if (name.contains("black bean") || name.contains("kidney bean") ||
+            name.contains("pinto bean") || name.contains("navy bean") ||
+            name.contains("chickpea") || name.contains("lentil")) &&
+           !name.contains("jelly") && !name.contains("cocoa") && !name.contains("coffee") {
             return FoodUnit(label: "cup", gramsEquivalent: cupGrams(for: name))
         }
 

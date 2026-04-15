@@ -3133,3 +3133,27 @@ enum TestError: Error { case msg(String); init(_ s: String) { self = .msg(s) } }
     let units = FoodUnit.smartUnits(for: food)
     #expect(units.first?.label == "cup", "Protein shake primary unit should be cup")
 }
+
+@Test func smartUnitsProteinPowderShowsScoop() {
+    let food = Food(name: "Whey Protein Powder", category: "Fitness", servingSize: 30, servingUnit: "g", calories: 120)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label == "scoop", "Protein powder primary unit should be scoop")
+}
+
+@Test func smartUnitsDalShowsCup() {
+    let food = Food(name: "Toor Dal (cooked)", category: "Indian", servingSize: 200, servingUnit: "g", calories: 220)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label == "cup", "Dal primary unit should be cup")
+}
+
+@Test func smartUnitsBlackBeansShowsCup() {
+    let food = Food(name: "Black Beans (cooked)", category: "Legumes", servingSize: 172, servingUnit: "g", calories: 227)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label == "cup", "Black beans primary unit should be cup")
+}
+
+@Test func smartUnitsLentilsShowsCup() {
+    let food = Food(name: "Lentils (cooked)", category: "Legumes", servingSize: 198, servingUnit: "g", calories: 230)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label == "cup", "Lentils primary unit should be cup")
+}
