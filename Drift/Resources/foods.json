@@ -5098,7 +5098,7 @@
     "nova_group": 3
   },
   {
-    "name": "A\u00e7a\u00ed Bowl (medium)",
+    "name": "Açaí Bowl (medium)",
     "category": "US Staples",
     "serving_size": 300,
     "serving_unit": "g",
@@ -5108,7 +5108,7 @@
     "fat_g": 18,
     "fiber_g": 8,
     "ingredients": [
-      "A\u00e7a\u00ed Bowl (medium)"
+      "Açaí Bowl (medium)"
     ],
     "nova_group": 3
   },
@@ -9788,7 +9788,7 @@
     "nova_group": 3
   },
   {
-    "name": "Costco A\u00e7a\u00ed Bowl (food court)",
+    "name": "Costco Açaí Bowl (food court)",
     "category": "Costco",
     "serving_size": 355,
     "serving_unit": "g",
@@ -9798,7 +9798,7 @@
     "fat_g": 19,
     "fiber_g": 7,
     "ingredients": [
-      "Costco A\u00e7a\u00ed Bowl (food court)"
+      "Costco Açaí Bowl (food court)"
     ],
     "nova_group": 3
   },
@@ -10493,7 +10493,7 @@
     "nova_group": 4
   },
   {
-    "name": "Starbucks Caff\u00e8 Latte (Grande, 2% milk)",
+    "name": "Starbucks Caffè Latte (Grande, 2% milk)",
     "category": "Beverages",
     "serving_size": 473,
     "serving_unit": "ml",
@@ -10503,7 +10503,7 @@
     "fat_g": 7,
     "fiber_g": 0,
     "ingredients": [
-      "Starbucks Caff\u00e8 Latte (Grande, 2% milk)"
+      "Starbucks Caffè Latte (Grande, 2% milk)"
     ],
     "nova_group": 3
   },
@@ -25487,6 +25487,544 @@
     "fiber_g": 1,
     "ingredients": [
       "rice flour",
+      "water",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Cappuccino",
+    "category": "Beverages",
+    "serving_size": 240,
+    "serving_unit": "ml",
+    "calories": 80,
+    "protein_g": 4,
+    "carbs_g": 8,
+    "fat_g": 3,
+    "fiber_g": 0,
+    "ingredients": [
+      "espresso",
+      "milk",
+      "milk foam"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Americano",
+    "category": "Beverages",
+    "serving_size": 240,
+    "serving_unit": "ml",
+    "calories": 10,
+    "protein_g": 0.5,
+    "carbs_g": 2,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "ingredients": [
+      "espresso",
+      "water"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Latte",
+    "category": "Beverages",
+    "serving_size": 360,
+    "serving_unit": "ml",
+    "calories": 150,
+    "protein_g": 10,
+    "carbs_g": 15,
+    "fat_g": 5,
+    "fiber_g": 0,
+    "ingredients": [
+      "espresso",
+      "steamed milk"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Cold Brew Coffee",
+    "category": "Beverages",
+    "serving_size": 360,
+    "serving_unit": "ml",
+    "calories": 5,
+    "protein_g": 0.5,
+    "carbs_g": 0,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "ingredients": [
+      "coffee",
+      "water"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Club Soda",
+    "category": "Beverages",
+    "serving_size": 355,
+    "serving_unit": "ml",
+    "calories": 0,
+    "protein_g": 0,
+    "carbs_g": 0,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "ingredients": [
+      "carbonated water",
+      "sodium bicarbonate"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Maggi Masala Noodles",
+    "category": "Indian Staples",
+    "serving_size": 70,
+    "serving_unit": "g",
+    "calories": 293,
+    "protein_g": 7,
+    "carbs_g": 43,
+    "fat_g": 11,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "wheat flour",
+      "palm oil",
+      "salt",
+      "masala",
+      "onion",
+      "spices"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Parle-G Biscuits",
+    "category": "Indian Staples",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 141,
+    "protein_g": 2.4,
+    "carbs_g": 23,
+    "fat_g": 4.5,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "wheat flour",
+      "sugar",
+      "vegetable oil",
+      "milk solids",
+      "salt",
+      "raising agents"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Marie Biscuits",
+    "category": "Indian Staples",
+    "serving_size": 28,
+    "serving_unit": "g",
+    "calories": 118,
+    "protein_g": 1.8,
+    "carbs_g": 20,
+    "fat_g": 3.5,
+    "fiber_g": 0.4,
+    "ingredients": [
+      "wheat flour",
+      "sugar",
+      "vegetable oil",
+      "milk",
+      "vanilla"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Murmura",
+    "category": "Indian Staples",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 116,
+    "protein_g": 2.5,
+    "carbs_g": 26,
+    "fat_g": 0.3,
+    "fiber_g": 0.3,
+    "ingredients": [
+      "puffed rice",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Avial",
+    "category": "Indian Regional",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 165,
+    "protein_g": 3,
+    "carbs_g": 12,
+    "fat_g": 12,
+    "fiber_g": 4,
+    "ingredients": [
+      "raw banana",
+      "yam",
+      "drumstick",
+      "raw mango",
+      "coconut",
+      "yogurt",
+      "cumin",
+      "curry leaves",
+      "coconut oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Thalipeeth",
+    "category": "Indian Regional",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 210,
+    "protein_g": 7,
+    "carbs_g": 32,
+    "fat_g": 6,
+    "fiber_g": 3,
+    "ingredients": [
+      "jowar flour",
+      "bajra flour",
+      "chickpea flour",
+      "onion",
+      "coriander",
+      "green chili",
+      "sesame seeds",
+      "oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Rava Idli",
+    "category": "Indian Staples",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 170,
+    "protein_g": 5,
+    "carbs_g": 28,
+    "fat_g": 4.5,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "semolina",
+      "yogurt",
+      "mustard seeds",
+      "curry leaves",
+      "cashews",
+      "oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Bhakri",
+    "category": "Indian Regional",
+    "serving_size": 60,
+    "serving_unit": "g",
+    "calories": 176,
+    "protein_g": 5,
+    "carbs_g": 32,
+    "fat_g": 3.5,
+    "fiber_g": 3,
+    "ingredients": [
+      "jowar flour",
+      "salt",
+      "water"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kulfi",
+    "category": "Indian Sweets",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 230,
+    "protein_g": 4,
+    "carbs_g": 28,
+    "fat_g": 12,
+    "fiber_g": 0,
+    "ingredients": [
+      "full cream milk",
+      "sugar",
+      "cardamom",
+      "saffron",
+      "pistachios"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Ground Chicken (cooked)",
+    "category": "Proteins",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 195,
+    "protein_g": 25,
+    "carbs_g": 0,
+    "fat_g": 10,
+    "fiber_g": 0,
+    "ingredients": [
+      "chicken"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Cottage Cheese",
+    "category": "Dairy",
+    "serving_size": 113,
+    "serving_unit": "g",
+    "calories": 110,
+    "protein_g": 14,
+    "carbs_g": 5,
+    "fat_g": 2.5,
+    "fiber_g": 0,
+    "ingredients": [
+      "skim milk",
+      "cream",
+      "salt",
+      "cultures"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Mozzarella",
+    "category": "Dairy",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 85,
+    "protein_g": 6,
+    "carbs_g": 1,
+    "fat_g": 6,
+    "fiber_g": 0,
+    "ingredients": [
+      "whole milk",
+      "salt",
+      "cultures",
+      "enzymes"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Ricotta",
+    "category": "Dairy",
+    "serving_size": 60,
+    "serving_unit": "g",
+    "calories": 100,
+    "protein_g": 7,
+    "carbs_g": 2,
+    "fat_g": 7,
+    "fiber_g": 0,
+    "ingredients": [
+      "whey",
+      "whole milk",
+      "vinegar",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Turkey Jerky",
+    "category": "Protein Snacks",
+    "serving_size": 28,
+    "serving_unit": "g",
+    "calories": 80,
+    "protein_g": 13,
+    "carbs_g": 3,
+    "fat_g": 1,
+    "fiber_g": 0,
+    "ingredients": [
+      "turkey",
+      "soy sauce",
+      "brown sugar",
+      "salt",
+      "spices"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Corn Chips",
+    "category": "Snacks",
+    "serving_size": 28,
+    "serving_unit": "g",
+    "calories": 150,
+    "protein_g": 2,
+    "carbs_g": 19,
+    "fat_g": 8,
+    "fiber_g": 1,
+    "ingredients": [
+      "corn",
+      "vegetable oil",
+      "salt"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Rice Cakes",
+    "category": "Snacks",
+    "serving_size": 18,
+    "serving_unit": "g",
+    "calories": 70,
+    "protein_g": 1.5,
+    "carbs_g": 15,
+    "fat_g": 0.5,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "brown rice",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Bagel",
+    "category": "Bakery",
+    "serving_size": 98,
+    "serving_unit": "g",
+    "calories": 270,
+    "protein_g": 10,
+    "carbs_g": 53,
+    "fat_g": 1.5,
+    "fiber_g": 2,
+    "ingredients": [
+      "wheat flour",
+      "water",
+      "yeast",
+      "salt",
+      "sugar"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Sourdough Bread",
+    "category": "Bakery",
+    "serving_size": 50,
+    "serving_unit": "g",
+    "calories": 120,
+    "protein_g": 5,
+    "carbs_g": 23,
+    "fat_g": 0.8,
+    "fiber_g": 1,
+    "ingredients": [
+      "wheat flour",
+      "water",
+      "sourdough starter",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Multigrain Bread",
+    "category": "Bakery",
+    "serving_size": 40,
+    "serving_unit": "g",
+    "calories": 110,
+    "protein_g": 4,
+    "carbs_g": 19,
+    "fat_g": 2,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "whole wheat flour",
+      "sunflower seeds",
+      "oats",
+      "flaxseeds",
+      "yeast",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Soba Noodles (cooked)",
+    "category": "Asian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 99,
+    "protein_g": 4.5,
+    "carbs_g": 21,
+    "fat_g": 0.5,
+    "fiber_g": 1,
+    "ingredients": [
+      "buckwheat flour",
+      "wheat flour",
+      "water",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Udon Noodles (cooked)",
+    "category": "Asian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 132,
+    "protein_g": 3.5,
+    "carbs_g": 28,
+    "fat_g": 0.5,
+    "fiber_g": 1,
+    "ingredients": [
+      "wheat flour",
+      "water",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Jackfruit",
+    "category": "Fruits",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 95,
+    "protein_g": 1.7,
+    "carbs_g": 24,
+    "fat_g": 0.6,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "jackfruit"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Gyoza (pan-fried)",
+    "category": "Japanese",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 210,
+    "protein_g": 8,
+    "carbs_g": 22,
+    "fat_g": 10,
+    "fiber_g": 1,
+    "ingredients": [
+      "wheat flour",
+      "pork",
+      "cabbage",
+      "garlic",
+      "ginger",
+      "sesame oil",
+      "soy sauce"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Flaxseeds (ground)",
+    "category": "Nuts & Seeds",
+    "serving_size": 14,
+    "serving_unit": "g",
+    "calories": 74,
+    "protein_g": 2.6,
+    "carbs_g": 4,
+    "fat_g": 5.9,
+    "fiber_g": 3.8,
+    "ingredients": [
+      "flaxseeds"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Corn Tortilla",
+    "category": "Mexican",
+    "serving_size": 28,
+    "serving_unit": "g",
+    "calories": 58,
+    "protein_g": 1.5,
+    "carbs_g": 12,
+    "fat_g": 0.8,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "corn masa flour",
       "water",
       "salt"
     ],
