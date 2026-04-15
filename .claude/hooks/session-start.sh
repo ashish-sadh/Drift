@@ -25,6 +25,14 @@ if [ -n "$DESIGN_DOCS" ]; then
   echo "Senior: write/revise these BEFORE sprint-tasks. Use Docs/designs/TEMPLATE.md."
 fi
 
+# Surface product focus
+FOCUS=$(gh issue list --state open --label product-focus --json title --jq '.[0].title' 2>/dev/null || true)
+if [ -n "$FOCUS" ]; then
+  echo ""
+  echo "PRODUCT FOCUS: $FOCUS"
+  echo "All work this session should align with this focus. Deprioritize unrelated work."
+fi
+
 # Surface unreplied admin comments on report PRs
 UNREPLIED=$(gh pr list --label report --state all --json number,title,comments --jq '
   .[] | select(.comments > 0) | "#\(.number) \(.title) (\(.comments) comments)"

@@ -23,7 +23,10 @@ _Override:_ CONTINUE
 You are the Product Designer + Principal Engineer. This is a replanning session. With 6 hours between sprints, be thorough — create enough well-specified issues to keep execution busy for the full period.
 
 1. **Read persona files:** `Docs/personas/product-designer.md`, `Docs/personas/principal-engineer.md`
-2. **Read admin feedback from report PRs:**
+2. **Read product focus:** `gh issue list --state open --label product-focus --json title,body`
+   - If set: ALL sprint tasks must align with this focus. Create tasks that advance it. Deprioritize unrelated work.
+   - If not set: use roadmap and own judgment.
+3. **Read admin feedback from report PRs:**
    - `gh pr list --label report --state all` → for each PR with comments:
      - Comments include `[Line N]` and a quoted section. Read the report file (`Docs/reports/` on main) at that line number to understand the full context around the comment.
      - Only then interpret the feedback — "Yes, we should" means nothing without reading what the Decision Needed section actually proposed.
@@ -32,34 +35,34 @@ You are the Product Designer + Principal Engineer. This is a replanning session.
      - Already done → "Addressed in commit abc123 — [what changed]."
      - Deferred → "Noted — adding to backlog. Will revisit in Review #N."
    - Create sprint-task Issues from actionable feedback
-3. **Read open bugs:** `gh issue list --state open --label bug`
-4. **Design docs:** Review open design-doc Issues and PRs (senior handles these directly during execution, no separate sprint-task needed)
-5. **Feature requests** — capture ideas the PE/Product Designer personas generate during review:
+4. **Read open bugs:** `gh issue list --state open --label bug`
+5. **Design docs:** Review open design-doc Issues and PRs (senior handles these directly during execution, no separate sprint-task needed)
+6. **Feature requests** — capture ideas the PE/Product Designer personas generate during review:
    - Create Issues for promising features: `gh issue create --label feature-request --title "Feature: ..." --body "Problem: ...\nProposal: ...\nPriority rationale: ..."`
    - Only create for ideas worth exploring — not every thought, just the ones that advance the roadmap
    - These show up on Command Center's Feature Requests tab for human review
-6. **Assess current state deeply:**
+7. **Assess current state deeply:**
    - Read `Docs/roadmap.md`, `Docs/state.md`, `Docs/ai-parity.md`, `Docs/failing-queries.md`
    - `git log --oneline -40` (more history since longer sprint)
    - Review closed issues since last planning: `gh issue list --state closed --label sprint-task --json number,title,closedAt --jq '.[] | select(.closedAt > "LAST_PLAN_DATE")'`
    - Check test count, coverage snapshot, eval results
-7. **Product review:**
+8. **Product review:**
    - Web search competitors (Boostcamp, MFP, Whoop, Strong, MacroFactor)
    - Write review report (exec summary, scorecard, what shipped, competitive position, designer + engineer discussion)
    - Open review PR with `report` label, then merge immediately: `gh pr merge --squash --delete-branch && git checkout main && git pull`
    - (Merging immediately makes it visible on dashboard. Humans can still comment on merged PRs.)
-8. **Create sprint-task Issues (target 8-12 issues for 6h sprint):**
+9. **Create sprint-task Issues (target 8-12 issues for 6h sprint):**
    - For each task: `gh issue create --label sprint-task --label SENIOR/JUNIOR`
    - Include in body: Goal, Files (list specific files to modify), Approach (step-by-step), Edge cases, Tests (specific test cases to write), Acceptance criteria
    - Break large features into multiple Issues — prefer 3 small Issues over 1 big one
    - Mix of sizes: ~2-3 SENIOR (architecture, AI, multi-file) + ~6-8 JUNIOR (UI, tests, food DB, fixes)
    - **SENIOR:** AI pipeline, architecture, multi-file refactors, P0 bugs, design doc implementation
    - **JUNIOR:** Food DB, single-file UI, tests, docs, simple fixes, well-specified work
-   - Prioritize: P0 bugs > admin feedback > roadmap "Now" items > parity gaps > polish
-9. **Update personas** — append "What I learned this review"
-10. **Update roadmap** — apply agreed changes
-11. **Close the planning Issue** — if the prompt says "close Issue #N", run: `gh issue close N --comment "Sprint planning complete. Created X sprint-task issues. Review PR: #Y."` and `gh issue edit N --remove-label in-progress`
-12. **Exit** — watchdog restarts with appropriate model for first task
+   - Prioritize: P0 bugs > **product focus** > admin feedback > roadmap "Now" items > parity gaps > polish
+11. **Update personas** — append "What I learned this review"
+12. **Update roadmap** — apply agreed changes
+13. **Close the planning Issue** — if the prompt says "close Issue #N", run: `gh issue close N --comment "Sprint planning complete. Created X sprint-task issues. Review PR: #Y."` and `gh issue edit N --remove-label in-progress`
+14. **Exit** — watchdog restarts with appropriate model for first task
 
 ---
 
