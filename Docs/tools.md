@@ -102,7 +102,7 @@ Both models check these first. Universal (no isLargeModel gate).
 | "copy yesterday" | `FoodService.copyYesterday()` |
 | "body fat X%" / "bmi X" | Direct DB log (bf >= 3 && <= 60, bmi >= 12 && <= 60) |
 | "set goal to X" | `WeightGoal.save()` |
-| Quick-add calories | `FoodService.quickAddCalories()` |
+| Quick-add calories ("log 500 cal") | Opens `ManualFoodEntry` prefilled via `StaticOverrides` |
 | "took my creatine" | `SupplementService.markTaken()` |
 | "scan barcode" | Opens barcode scanner |
 
