@@ -1762,6 +1762,35 @@ final class AIEvalHarness: XCTestCase {
         XCTAssertFalse(aloo.isEmpty, "aloo (potato) should return results via synonym expansion")
     }
 
+    @MainActor
+    func testBengaliAndTamilSynonymSearch() {
+        // Bengali: ilish→hilsa, rui→rohu, maach→fish
+        let ilish = FoodService.searchFood(query: "ilish")
+        XCTAssertTrue(ilish.contains(where: { $0.name.lowercased().contains("hilsa") }),
+                      "ilish should resolve to hilsa via synonym expansion")
+
+        let rui = FoodService.searchFood(query: "rui")
+        XCTAssertTrue(rui.contains(where: { $0.name.lowercased().contains("rohu") }),
+                      "rui should resolve to rohu via synonym expansion")
+
+        let maach = FoodService.searchFood(query: "maach")
+        XCTAssertFalse(maach.isEmpty, "maach (fish) should return fish results via synonym expansion")
+
+        // Tamil: kozhi→chicken, thayir→yogurt
+        let kozhi = FoodService.searchFood(query: "kozhi")
+        XCTAssertTrue(kozhi.contains(where: { $0.name.lowercased().contains("chicken") }),
+                      "kozhi should resolve to chicken via synonym expansion")
+
+        let thayir = FoodService.searchFood(query: "thayir")
+        XCTAssertTrue(thayir.contains(where: { $0.name.lowercased().contains("yogurt") || $0.name.lowercased().contains("curd") }),
+                      "thayir should resolve to yogurt via synonym expansion")
+
+        // Hindi ingredient: gur→jaggery
+        let gur = FoodService.searchFood(query: "gur")
+        XCTAssertTrue(gur.contains(where: { $0.name.lowercased().contains("jaggery") }),
+                      "gur should resolve to jaggery via synonym expansion")
+    }
+
     func testNutritionEstimationPrompt() {
         // Cover nutritionEstimationPrompt
         let prompt = AIActionExecutor.nutritionEstimationPrompt(food: "samosa", servings: 2)
