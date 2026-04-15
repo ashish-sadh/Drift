@@ -133,10 +133,10 @@ enum RecoveryEstimator {
 
         let load: ActivityLoad
         switch raw {
-        case ..<3: load = .rest
-        case ..<7: load = .light
-        case ..<14: load = .moderate
-        case ..<18: load = .heavy
+        case ..<2: load = .rest
+        case ..<5: load = .light
+        case ..<8: load = .moderate
+        case ..<11: load = .heavy
         default: load = .extreme
         }
         return (load, raw)

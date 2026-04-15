@@ -261,9 +261,9 @@ import Testing
 @Test func intentClassifierBuildUserMessageTruncatesLongHistory() {
     let longHistory = String(repeating: "a", count: 500)
     let msg = IntentClassifier.buildUserMessage(message: "test", history: longHistory)
-    // History should be truncated to 200 chars
+    // History should be truncated to 400 chars
     let historyPart = msg.components(separatedBy: "Chat:\n")[1].components(separatedBy: "\n\nUser:")[0]
-    #expect(historyPart.count == 200)
+    #expect(historyPart.count == 400)
 }
 
 // MARK: - IntentClassifier mapResponse Tests
