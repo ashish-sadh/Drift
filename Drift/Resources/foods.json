@@ -26038,5 +26038,365 @@
       "rose water"
     ],
     "nova_group": 2
+  },
+  {
+    "name": "Besan Cheela",
+    "category": "Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 165,
+    "protein_g": 9,
+    "carbs_g": 22,
+    "fat_g": 5,
+    "fiber_g": 4,
+    "ingredients": [
+      "chickpea flour",
+      "onion",
+      "tomato",
+      "green chilli",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Sprouted Moong Salad",
+    "category": "Indian",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 110,
+    "protein_g": 8,
+    "carbs_g": 16,
+    "fat_g": 1,
+    "fiber_g": 5,
+    "ingredients": [
+      "sprouted moong",
+      "cucumber",
+      "tomato",
+      "lemon",
+      "chaat masala"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Vada Sambar",
+    "category": "South Indian",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 10,
+    "carbs_g": 38,
+    "fat_g": 10,
+    "fiber_g": 4,
+    "ingredients": [
+      "urad dal",
+      "toor dal",
+      "vegetables",
+      "tamarind",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Samosa Chaat",
+    "category": "Indian Street Food",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 8,
+    "carbs_g": 45,
+    "fat_g": 12,
+    "fiber_g": 5,
+    "ingredients": [
+      "samosa",
+      "chole",
+      "yogurt",
+      "chutneys",
+      "onion",
+      "sev"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Ragda Pattis",
+    "category": "Indian Street Food",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 290,
+    "protein_g": 9,
+    "carbs_g": 45,
+    "fat_g": 8,
+    "fiber_g": 6,
+    "ingredients": [
+      "white peas ragda",
+      "potato patty",
+      "chutneys",
+      "onion",
+      "sev"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Chole Tikki",
+    "category": "Indian Street Food",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 310,
+    "protein_g": 10,
+    "carbs_g": 46,
+    "fat_g": 10,
+    "fiber_g": 6,
+    "ingredients": [
+      "chole",
+      "potato tikki",
+      "chutneys",
+      "yogurt",
+      "onion"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Nimbu Pani",
+    "category": "Indian Drinks",
+    "serving_size": 300,
+    "serving_unit": "ml",
+    "calories": 60,
+    "protein_g": 0,
+    "carbs_g": 15,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "ingredients": [
+      "lemon juice",
+      "water",
+      "sugar",
+      "salt",
+      "cumin"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Egg White Omelette",
+    "category": "Eggs",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 90,
+    "protein_g": 18,
+    "carbs_g": 1,
+    "fat_g": 1,
+    "fiber_g": 0,
+    "ingredients": [
+      "egg whites",
+      "vegetables",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Black Coffee",
+    "category": "Beverages",
+    "serving_size": 240,
+    "serving_unit": "ml",
+    "calories": 5,
+    "protein_g": 0,
+    "carbs_g": 0,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "ingredients": [
+      "brewed coffee"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Protein Muffin",
+    "category": "Fitness Foods",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 200,
+    "protein_g": 15,
+    "carbs_g": 25,
+    "fat_g": 5,
+    "fiber_g": 2,
+    "ingredients": [
+      "whey protein",
+      "oat flour",
+      "eggs",
+      "banana",
+      "baking powder"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "BCAA Drink",
+    "category": "Fitness Foods",
+    "serving_size": 350,
+    "serving_unit": "ml",
+    "calories": 15,
+    "protein_g": 5,
+    "carbs_g": 1,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "ingredients": [
+      "BCAAs",
+      "water",
+      "natural flavoring"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Pre-Workout Drink",
+    "category": "Fitness Foods",
+    "serving_size": 350,
+    "serving_unit": "ml",
+    "calories": 20,
+    "protein_g": 0,
+    "carbs_g": 4,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "ingredients": [
+      "caffeine",
+      "beta-alanine",
+      "creatine",
+      "water"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Passion Fruit",
+    "category": "Fruits",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 97,
+    "protein_g": 2,
+    "carbs_g": 23,
+    "fat_g": 1,
+    "fiber_g": 10,
+    "ingredients": [
+      "passion fruit"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Starfruit",
+    "category": "Fruits",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 31,
+    "protein_g": 1,
+    "carbs_g": 7,
+    "fat_g": 0,
+    "fiber_g": 3,
+    "ingredients": [
+      "starfruit"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Amaranth Porridge",
+    "category": "Grains",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 250,
+    "protein_g": 9,
+    "carbs_g": 46,
+    "fat_g": 4,
+    "fiber_g": 5,
+    "ingredients": [
+      "amaranth",
+      "water",
+      "milk",
+      "honey"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Teff Porridge",
+    "category": "Grains",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 7,
+    "carbs_g": 43,
+    "fat_g": 2,
+    "fiber_g": 4,
+    "ingredients": [
+      "teff",
+      "water",
+      "milk",
+      "honey"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Balsamic Vinegar",
+    "category": "Condiments",
+    "serving_size": 15,
+    "serving_unit": "ml",
+    "calories": 14,
+    "protein_g": 0,
+    "carbs_g": 3,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "ingredients": [
+      "balsamic vinegar"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Peri Peri Chicken",
+    "category": "Fast Food",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 330,
+    "protein_g": 38,
+    "carbs_g": 8,
+    "fat_g": 16,
+    "fiber_g": 1,
+    "ingredients": [
+      "chicken",
+      "peri peri sauce",
+      "garlic",
+      "lemon",
+      "herbs"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Poke Bowl (Salmon)",
+    "category": "Bowls",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 520,
+    "protein_g": 30,
+    "carbs_g": 60,
+    "fat_g": 16,
+    "fiber_g": 5,
+    "ingredients": [
+      "salmon",
+      "sushi rice",
+      "edamame",
+      "cucumber",
+      "avocado",
+      "soy sauce"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "French Toast",
+    "category": "Breakfast",
+    "serving_size": 130,
+    "serving_unit": "g",
+    "calories": 310,
+    "protein_g": 10,
+    "carbs_g": 42,
+    "fat_g": 11,
+    "fiber_g": 2,
+    "ingredients": [
+      "bread",
+      "eggs",
+      "milk",
+      "cinnamon",
+      "butter",
+      "syrup"
+    ],
+    "nova_group": 3
   }
 ]
