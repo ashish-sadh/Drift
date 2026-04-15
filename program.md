@@ -46,11 +46,13 @@ You are the Product Designer + Principal Engineer. This is a replanning session.
    - `git log --oneline -40` (more history since longer sprint)
    - Review closed issues since last planning: `gh issue list --state closed --label sprint-task --json number,title,closedAt --jq '.[] | select(.closedAt > "LAST_PLAN_DATE")'`
    - Check test count, coverage snapshot, eval results
-8. **Product review:**
-   - Web search competitors (Boostcamp, MFP, Whoop, Strong, MacroFactor)
-   - Write review report (exec summary, scorecard, what shipped, competitive position, designer + engineer discussion)
+8. **Product review — MUST follow template exactly:**
+   - Read both persona files FIRST: `Docs/personas/product-designer.md` and `Docs/personas/principal-engineer.md`
+   - Web search ALL competitors (Boostcamp, MFP, Whoop, Strong, MacroFactor) for recent updates
+   - Write report using `Docs/reports/REVIEW-TEMPLATE.md` — every section is REQUIRED
+   - Filename MUST be `review-cycle-{CYCLE_NUMBER}.md` (e.g., `review-cycle-2855.md`)
+   - The report MUST include: Designer Assessment, Engineer Assessment, and The Debate section where personas discuss and disagree
    - Open review PR with `report` label, then merge immediately: `gh pr merge --squash --delete-branch && git checkout main && git pull`
-   - (Merging immediately makes it visible on dashboard. Humans can still comment on merged PRs.)
 9. **Create sprint-task Issues (target 8-12 issues for 6h sprint):**
    - For each task: `gh issue create --label sprint-task --label SENIOR/JUNIOR`
    - Include in body: Goal, Files (list specific files to modify), Approach (step-by-step), Edge cases, Tests (specific test cases to write), Acceptance criteria
