@@ -26398,5 +26398,475 @@
       "syrup"
     ],
     "nova_group": 3
+  },
+  {
+    "name": "Kadala Curry",
+    "category": "South Indian",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 200,
+    "protein_g": 12,
+    "carbs_g": 28,
+    "fat_g": 5,
+    "fiber_g": 8,
+    "ingredients": [
+      "black chickpeas",
+      "coconut milk",
+      "onion",
+      "tomato",
+      "coconut oil",
+      "curry leaves",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kerala Fish Curry",
+    "category": "South Indian",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 22,
+    "carbs_g": 6,
+    "fat_g": 12,
+    "fiber_g": 1,
+    "ingredients": [
+      "fish",
+      "coconut milk",
+      "tomato",
+      "kodampuli",
+      "onion",
+      "coconut oil",
+      "curry leaves",
+      "turmeric",
+      "chilli"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Fish Molee",
+    "category": "South Indian",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 185,
+    "protein_g": 20,
+    "carbs_g": 5,
+    "fat_g": 9,
+    "fiber_g": 1,
+    "ingredients": [
+      "fish",
+      "coconut milk",
+      "onion",
+      "green chilli",
+      "ginger",
+      "turmeric",
+      "coconut oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Thoran (Kerala Stir Fry)",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 85,
+    "protein_g": 2,
+    "carbs_g": 9,
+    "fat_g": 5,
+    "fiber_g": 3,
+    "ingredients": [
+      "vegetables",
+      "coconut",
+      "curry leaves",
+      "mustard seeds",
+      "coconut oil",
+      "turmeric"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Keerai (Spinach Sabzi)",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 60,
+    "protein_g": 3,
+    "carbs_g": 6,
+    "fat_g": 3,
+    "fiber_g": 2,
+    "ingredients": [
+      "spinach",
+      "onion",
+      "garlic",
+      "coconut",
+      "coconut oil",
+      "mustard seeds",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Paneer Tikka Masala",
+    "category": "Indian",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 420,
+    "protein_g": 20,
+    "carbs_g": 18,
+    "fat_g": 30,
+    "fiber_g": 3,
+    "ingredients": [
+      "paneer",
+      "onion",
+      "tomato",
+      "cream",
+      "butter",
+      "tikka masala spices",
+      "ginger",
+      "garlic"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Mix Veg Curry",
+    "category": "Indian",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 150,
+    "protein_g": 5,
+    "carbs_g": 18,
+    "fat_g": 7,
+    "fiber_g": 4,
+    "ingredients": [
+      "mixed vegetables",
+      "onion",
+      "tomato",
+      "oil",
+      "spices",
+      "cream"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Dal Tadka",
+    "category": "Indian",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 200,
+    "protein_g": 11,
+    "carbs_g": 28,
+    "fat_g": 6,
+    "fiber_g": 6,
+    "ingredients": [
+      "yellow lentils",
+      "onion",
+      "tomato",
+      "ghee",
+      "cumin",
+      "garlic",
+      "ginger",
+      "turmeric",
+      "red chilli"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Shakarpara",
+    "category": "Indian Snacks",
+    "serving_size": 50,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 3,
+    "carbs_g": 32,
+    "fat_g": 9,
+    "fiber_g": 1,
+    "ingredients": [
+      "flour",
+      "sugar",
+      "oil",
+      "cardamom"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Corn Bhel",
+    "category": "Indian Street Food",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 180,
+    "protein_g": 5,
+    "carbs_g": 34,
+    "fat_g": 4,
+    "fiber_g": 3,
+    "ingredients": [
+      "sweet corn",
+      "onion",
+      "tomato",
+      "coriander",
+      "lemon",
+      "chaat masala",
+      "sev"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Nimbu Soda",
+    "category": "Indian Drinks",
+    "serving_size": 300,
+    "serving_unit": "ml",
+    "calories": 30,
+    "protein_g": 0,
+    "carbs_g": 8,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "ingredients": [
+      "soda water",
+      "lemon juice",
+      "black salt",
+      "sugar"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Rose Milk",
+    "category": "Indian Drinks",
+    "serving_size": 250,
+    "serving_unit": "ml",
+    "calories": 180,
+    "protein_g": 6,
+    "carbs_g": 28,
+    "fat_g": 5,
+    "fiber_g": 0,
+    "ingredients": [
+      "milk",
+      "rose syrup",
+      "sugar"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Haldi Milk",
+    "category": "Indian Drinks",
+    "serving_size": 250,
+    "serving_unit": "ml",
+    "calories": 145,
+    "protein_g": 7,
+    "carbs_g": 14,
+    "fat_g": 6,
+    "fiber_g": 0,
+    "ingredients": [
+      "milk",
+      "turmeric",
+      "black pepper",
+      "honey",
+      "ginger"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Whey Protein Shake",
+    "category": "Fitness Foods",
+    "serving_size": 300,
+    "serving_unit": "ml",
+    "calories": 165,
+    "protein_g": 25,
+    "carbs_g": 8,
+    "fat_g": 3,
+    "fiber_g": 1,
+    "ingredients": [
+      "whey protein",
+      "water",
+      "milk"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Casein Protein Shake",
+    "category": "Fitness Foods",
+    "serving_size": 300,
+    "serving_unit": "ml",
+    "calories": 170,
+    "protein_g": 24,
+    "carbs_g": 10,
+    "fat_g": 3,
+    "fiber_g": 1,
+    "ingredients": [
+      "casein protein",
+      "water",
+      "milk"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Fat-Free Greek Yogurt",
+    "category": "Dairy",
+    "serving_size": 170,
+    "serving_unit": "g",
+    "calories": 100,
+    "protein_g": 17,
+    "carbs_g": 6,
+    "fat_g": 0,
+    "fiber_g": 0,
+    "ingredients": [
+      "skim milk",
+      "live cultures"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Low Fat Paneer",
+    "category": "Dairy",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 160,
+    "protein_g": 18,
+    "carbs_g": 6,
+    "fat_g": 7,
+    "fiber_g": 0,
+    "ingredients": [
+      "low fat milk",
+      "lemon juice"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "McAloo Tikki Burger",
+    "category": "Fast Food",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 7,
+    "carbs_g": 48,
+    "fat_g": 14,
+    "fiber_g": 3,
+    "ingredients": [
+      "potato patty",
+      "bun",
+      "lettuce",
+      "tomato",
+      "sauce",
+      "onion"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "McVeggie Burger",
+    "category": "Fast Food",
+    "serving_size": 160,
+    "serving_unit": "g",
+    "calories": 350,
+    "protein_g": 10,
+    "carbs_g": 46,
+    "fat_g": 14,
+    "fiber_g": 3,
+    "ingredients": [
+      "veg patty",
+      "bun",
+      "lettuce",
+      "tomato",
+      "cheese",
+      "sauce"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Crispy Veg Burger",
+    "category": "Fast Food",
+    "serving_size": 160,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 9,
+    "carbs_g": 50,
+    "fat_g": 16,
+    "fiber_g": 3,
+    "ingredients": [
+      "breaded veg patty",
+      "bun",
+      "lettuce",
+      "tomato",
+      "sauce"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Veg Whopper",
+    "category": "Fast Food",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 490,
+    "protein_g": 18,
+    "carbs_g": 62,
+    "fat_g": 18,
+    "fiber_g": 5,
+    "ingredients": [
+      "soy patty",
+      "sesame bun",
+      "tomato",
+      "lettuce",
+      "onion",
+      "pickles",
+      "mayo"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Custard Apple (Sitaphal)",
+    "category": "Fruits",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 90,
+    "protein_g": 2,
+    "carbs_g": 22,
+    "fat_g": 0,
+    "fiber_g": 3,
+    "ingredients": [
+      "custard apple"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Amla (Indian Gooseberry)",
+    "category": "Fruits",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 44,
+    "protein_g": 1,
+    "carbs_g": 10,
+    "fat_g": 1,
+    "fiber_g": 4,
+    "ingredients": [
+      "amla"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Karonda (Indian Currant)",
+    "category": "Fruits",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 42,
+    "protein_g": 1,
+    "carbs_g": 9,
+    "fat_g": 1,
+    "fiber_g": 3,
+    "ingredients": [
+      "karonda"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Bael Fruit",
+    "category": "Fruits",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 88,
+    "protein_g": 2,
+    "carbs_g": 20,
+    "fat_g": 0,
+    "fiber_g": 2,
+    "ingredients": [
+      "bael fruit"
+    ],
+    "nova_group": 1
   }
 ]
