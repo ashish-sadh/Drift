@@ -27664,5 +27664,394 @@
       "spices"
     ],
     "nova_group": 2
+  },
+  {
+    "name": "Usal",
+    "category": "Indian Regional",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 160,
+    "protein_g": 9,
+    "carbs_g": 22,
+    "fat_g": 4,
+    "fiber_g": 6,
+    "ingredients": [
+      "sprouted moth beans",
+      "onion",
+      "tomato",
+      "coconut",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Matki Usal",
+    "category": "Indian Regional",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 165,
+    "protein_g": 10,
+    "carbs_g": 22,
+    "fat_g": 4,
+    "fiber_g": 7,
+    "ingredients": [
+      "moth beans",
+      "onion",
+      "tomato",
+      "goda masala",
+      "coconut"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Pithla",
+    "category": "Indian Regional",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 130,
+    "protein_g": 6,
+    "carbs_g": 14,
+    "fat_g": 5,
+    "fiber_g": 3,
+    "ingredients": [
+      "besan",
+      "onion",
+      "garlic",
+      "green chili",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Bharli Vangi",
+    "category": "Indian Regional",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 175,
+    "protein_g": 4,
+    "carbs_g": 14,
+    "fat_g": 12,
+    "fiber_g": 5,
+    "ingredients": [
+      "eggplant",
+      "peanuts",
+      "coconut",
+      "sesame",
+      "onion",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Pitha",
+    "category": "Indian Regional",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 180,
+    "protein_g": 3,
+    "carbs_g": 38,
+    "fat_g": 1,
+    "fiber_g": 1,
+    "ingredients": [
+      "rice flour",
+      "jaggery",
+      "coconut"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Masor Tenga",
+    "category": "Indian Regional",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 210,
+    "protein_g": 22,
+    "carbs_g": 6,
+    "fat_g": 10,
+    "fiber_g": 1,
+    "ingredients": [
+      "fish",
+      "tomato",
+      "lemon",
+      "mustard oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Thekua",
+    "category": "Indian Regional",
+    "serving_size": 50,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 3,
+    "carbs_g": 32,
+    "fat_g": 9,
+    "fiber_g": 2,
+    "ingredients": [
+      "whole wheat flour",
+      "jaggery",
+      "ghee",
+      "fennel"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Rugra",
+    "category": "Indian Regional",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 120,
+    "protein_g": 5,
+    "carbs_g": 12,
+    "fat_g": 6,
+    "fiber_g": 3,
+    "ingredients": [
+      "wild mushrooms",
+      "onion",
+      "tomato",
+      "mustard oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Keema Naan",
+    "category": "Indian Regional",
+    "serving_size": 130,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 18,
+    "carbs_g": 42,
+    "fat_g": 10,
+    "fiber_g": 2,
+    "ingredients": [
+      "refined flour",
+      "minced mutton",
+      "onion",
+      "spices",
+      "yeast"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Roomali Roti",
+    "category": "Indian Regional",
+    "serving_size": 60,
+    "serving_unit": "g",
+    "calories": 165,
+    "protein_g": 5,
+    "carbs_g": 32,
+    "fat_g": 2,
+    "fiber_g": 1,
+    "ingredients": [
+      "refined flour",
+      "whole wheat flour",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Bajra Roti",
+    "category": "Indian Regional",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 210,
+    "protein_g": 6,
+    "carbs_g": 38,
+    "fat_g": 4,
+    "fiber_g": 4,
+    "ingredients": [
+      "pearl millet flour",
+      "water",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Jowar Roti",
+    "category": "Indian Regional",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 195,
+    "protein_g": 6,
+    "carbs_g": 38,
+    "fat_g": 2,
+    "fiber_g": 4,
+    "ingredients": [
+      "sorghum flour",
+      "water",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Chana Sattu Paratha",
+    "category": "Indian Regional",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 295,
+    "protein_g": 11,
+    "carbs_g": 42,
+    "fat_g": 9,
+    "fiber_g": 6,
+    "ingredients": [
+      "whole wheat flour",
+      "sattu",
+      "onion",
+      "spices",
+      "ghee"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Gur Papdi",
+    "category": "Indian Regional",
+    "serving_size": 40,
+    "serving_unit": "g",
+    "calories": 195,
+    "protein_g": 4,
+    "carbs_g": 22,
+    "fat_g": 10,
+    "fiber_g": 2,
+    "ingredients": [
+      "sesame seeds",
+      "jaggery",
+      "ghee",
+      "wheat flour"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Dal Baati Churma",
+    "category": "Indian Regional",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 650,
+    "protein_g": 18,
+    "carbs_g": 80,
+    "fat_g": 28,
+    "fiber_g": 8,
+    "ingredients": [
+      "wheat flour",
+      "toor dal",
+      "ghee",
+      "jaggery",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Ker Sangri",
+    "category": "Indian Regional",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 170,
+    "protein_g": 5,
+    "carbs_g": 18,
+    "fat_g": 9,
+    "fiber_g": 7,
+    "ingredients": [
+      "ker berries",
+      "sangri beans",
+      "dried red chili",
+      "mustard oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Hyderabadi Haleem",
+    "category": "Indian Regional",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 22,
+    "carbs_g": 28,
+    "fat_g": 12,
+    "fiber_g": 5,
+    "ingredients": [
+      "mutton",
+      "broken wheat",
+      "lentils",
+      "fried onion",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Gongura Mutton",
+    "category": "Indian Regional",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 24,
+    "carbs_g": 8,
+    "fat_g": 17,
+    "fiber_g": 3,
+    "ingredients": [
+      "mutton",
+      "sorrel leaves",
+      "onion",
+      "tomato",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kori Rotti",
+    "category": "Indian Regional",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 28,
+    "carbs_g": 30,
+    "fat_g": 15,
+    "fiber_g": 2,
+    "ingredients": [
+      "chicken",
+      "coconut milk",
+      "rice rotti",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Neer Dosa",
+    "category": "Indian Regional",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 130,
+    "protein_g": 2,
+    "carbs_g": 28,
+    "fat_g": 1,
+    "fiber_g": 0,
+    "ingredients": [
+      "rice",
+      "water",
+      "salt",
+      "coconut oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Sabudana Kheer",
+    "category": "Indian Regional",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 210,
+    "protein_g": 3,
+    "carbs_g": 38,
+    "fat_g": 5,
+    "fiber_g": 0,
+    "ingredients": [
+      "tapioca pearls",
+      "milk",
+      "sugar",
+      "cardamom",
+      "raisins"
+    ],
+    "nova_group": 3
   }
 ]
