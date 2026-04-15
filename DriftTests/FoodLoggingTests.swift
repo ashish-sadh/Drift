@@ -3081,3 +3081,55 @@ enum TestError: Error { case msg(String); init(_ s: String) { self = .msg(s) } }
     let db = seededDB()
     #expect(!(try db.searchFoods(query: "wheat bran")).isEmpty)
 }
+
+// MARK: - Smart Units — pasta, cereal, smoothie
+
+@Test func smartUnitsPastaShowsCup() {
+    let food = Food(name: "Pasta (cooked)", category: "Grains", servingSize: 140, servingUnit: "g", calories: 220)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label == "cup", "Pasta primary unit should be cup")
+}
+
+@Test func smartUnitsSpaghettiShowsCup() {
+    let food = Food(name: "Spaghetti Bolognese", category: "Italian", servingSize: 300, servingUnit: "g", calories: 420)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label == "cup", "Spaghetti primary unit should be cup")
+}
+
+@Test func smartUnitsNoodlesShowsCup() {
+    let food = Food(name: "Hakka Noodles", category: "Indo-Chinese", servingSize: 200, servingUnit: "g", calories: 310)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label == "cup", "Noodles primary unit should be cup")
+}
+
+@Test func smartUnitsNoodleSoupNotNoodleRule() {
+    // Soup rule fires before noodle rule — bowl is correct
+    let food = Food(name: "Chicken Noodle Soup", category: "Soups", servingSize: 240, servingUnit: "ml", calories: 75)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label == "bowl", "Noodle soup primary unit should be bowl (soup rule first)")
+}
+
+@Test func smartUnitsMuesliShowsCup() {
+    let food = Food(name: "Muesli", category: "Breakfast", servingSize: 45, servingUnit: "g", calories: 170)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label == "cup", "Muesli primary unit should be cup")
+}
+
+@Test func smartUnitsMuesliBarNotCup() {
+    // Bar exclusion — a muesli bar is eaten by piece
+    let food = Food(name: "Muesli Bar", category: "Snacks", servingSize: 35, servingUnit: "g", calories: 145)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label != "cup", "Muesli bar should not be cup")
+}
+
+@Test func smartUnitsSmoothieShowsCup() {
+    let food = Food(name: "Mango Smoothie", category: "Beverages", servingSize: 300, servingUnit: "ml", calories: 180)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label == "cup", "Smoothie primary unit should be cup")
+}
+
+@Test func smartUnitsProteinShakeShowsCup() {
+    let food = Food(name: "Protein Shake", category: "Fitness", servingSize: 330, servingUnit: "ml", calories: 160)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label == "cup", "Protein shake primary unit should be cup")
+}

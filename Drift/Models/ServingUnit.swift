@@ -373,9 +373,22 @@ struct FoodUnit: Hashable {
             return FoodUnit(label: "cup", gramsEquivalent: cupGrams(for: name))
         }
 
-        // Oats / oatmeal / porridge — measured in cups
-        if name.contains("oatmeal") || name.contains("oats") || name.contains("porridge") ||
-           name.contains("granola") {
+        // Oats, cereals — measured in cups (exclude bars, which are pieces)
+        if (name.contains("oatmeal") || name.contains("oats") || name.contains("porridge") ||
+            name.contains("granola") || name.contains("muesli") || name.contains("cereal") ||
+            name.contains("corn flakes") || name.contains("cornflakes")) && !name.contains("bar") {
+            return FoodUnit(label: "cup", gramsEquivalent: cupGrams(for: name))
+        }
+
+        // Pasta and noodles — measured in cups (cooked portions)
+        if name.contains("pasta") || name.contains("spaghetti") || name.contains("penne") ||
+           name.contains("macaroni") || name.contains("fettuccine") || name.contains("linguine") ||
+           name.contains("fusilli") || name.contains("rigatoni") || name.contains("noodle") {
+            return FoodUnit(label: "cup", gramsEquivalent: cupGrams(for: name))
+        }
+
+        // Smoothies and shakes — measured by cup
+        if name.contains("smoothie") || name.contains("shake") {
             return FoodUnit(label: "cup", gramsEquivalent: cupGrams(for: name))
         }
 
