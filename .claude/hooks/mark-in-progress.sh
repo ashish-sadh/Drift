@@ -12,6 +12,12 @@ if [ -z "$ISSUE_NUMS" ]; then
   exit 0
 fi
 
+# Only mark in-progress if commit touches Swift files (actual code work)
+HAS_CODE=$(git diff-tree --no-commit-id --name-only -r HEAD 2>/dev/null | grep -c '\.swift$' || echo "0")
+if [ "$HAS_CODE" -eq 0 ]; then
+  exit 0
+fi
+
 MARKED=""
 SCREENSHOT_CHECK=""
 OPEN_NUMS=""
