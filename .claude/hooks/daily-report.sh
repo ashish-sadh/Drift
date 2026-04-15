@@ -5,8 +5,9 @@
 
 set -e
 
-# Only for autonomous sessions
-if [ "${DRIFT_AUTONOMOUS:-0}" != "1" ]; then
+# Only for autonomous sessions (env var may not propagate to hooks)
+SESSION_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "")
+if [ -z "$SESSION_TYPE" ]; then
   exit 0
 fi
 

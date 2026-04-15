@@ -26,8 +26,9 @@ if [ -s "$STATE_DIR/cache-bugs-with-screenshots" ]; then
     CONTEXT="${CONTEXT}BUGS WITH SCREENSHOTS (download + view before fixing):\n$(cat "$STATE_DIR/cache-bugs-with-screenshots")\n\n"
 fi
 
-# TestFlight (autonomous only)
-if [ "${DRIFT_AUTONOMOUS:-0}" = "1" ]; then
+# TestFlight (autonomous sessions only — detected via session-type file, not env var)
+SESSION_TYPE_FOR_TF=$(cat "$STATE_DIR/cache-session-type" 2>/dev/null || echo "")
+if [ -n "$SESSION_TYPE_FOR_TF" ]; then
     LAST_TF=$(cat "$STATE_DIR/last-testflight-publish" 2>/dev/null || echo "0")
     NOW=$(date +%s)
     ELAPSED=$(( NOW - LAST_TF ))
