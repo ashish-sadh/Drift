@@ -969,7 +969,7 @@
           const linked = (i.body || '').match(/#(\d+)/)?.[1];
           return !linked || !approvedIssueNums.has(linked);
         });
-        const approved = issues.filter(i => i.labels.some(l => l.name === 'approved'));
+        const approved = issues.filter(i => i.state === 'open' && i.labels.some(l => l.name === 'approved'));
         const implemented = issues.filter(i => i.state === 'closed');
 
         if (pending.length === 0 && readyForReview.length === 0 && approved.length === 0 && implemented.length === 0) {
