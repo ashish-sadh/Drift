@@ -337,6 +337,33 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     #expect(units.first?.label == "banana", "Banana should show 'banana' as primary unit")
 }
 
+@Test func smartUnitPapadShowsPiece() async throws {
+    let food = Food(name: "Papad (roasted)", category: "Indian Snacks", servingSize: 10, servingUnit: "g", calories: 35)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label == "piece", "Papad should default to piece")
+}
+
+@Test func smartUnitProteinBarShowsPiece() async throws {
+    let bar = Food(name: "Protein Bar", category: "Snacks", servingSize: 60, servingUnit: "g", calories: 200)
+    #expect(FoodUnit.smartUnits(for: bar).first?.label == "piece", "Protein bar should default to piece")
+
+    let granola = Food(name: "Granola Bar", category: "Snacks", servingSize: 40, servingUnit: "g", calories: 180)
+    #expect(FoodUnit.smartUnits(for: granola).first?.label == "piece", "Granola bar should default to piece")
+}
+
+@Test func smartUnitPickleShowsTbsp() async throws {
+    let food = Food(name: "Pickle / Achar", category: "Condiments", servingSize: 15, servingUnit: "g", calories: 20)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label == "tbsp", "Pickle/achar should default to tbsp")
+}
+
+@Test func smartUnitQuinoaShowsCup() async throws {
+    let food = Food(name: "Quinoa (cooked)", category: "Grains", servingSize: 185, servingUnit: "g", calories: 222)
+    let units = FoodUnit.smartUnits(for: food)
+    #expect(units.first?.label == "cup", "Quinoa should default to cup")
+    #expect(units.first?.gramsEquivalent == 185)
+}
+
 // MARK: - Portion Text Tests (6 tests)
 
 @Test func portionTextEgg() async throws {
