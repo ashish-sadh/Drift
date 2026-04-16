@@ -789,3 +789,53 @@ func makeEntries(days: Int, startKg: Double, ratePerDay: Double) -> [(date: Stri
     // highProtein: 2.2 g/kg * 80 = 176g
     #expect(abs(m.proteinG - 176) < 1)
 }
+
+@Test func customMacrosAllSet_deriveCalorieFromSum() {
+    // When all 3 macros are set, calorieTarget = macro sum regardless of TDEE/override
+    var goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 3,
+                         startDate: "2026-04-01", startWeightKg: 80,
+                         dietPreference: .custom, calorieTargetOverride: 1700)
+    goal.proteinTargetG = 180  // × 4 = 720
+    goal.carbsTargetG   = 200  // × 4 = 800
+    goal.fatTargetG     = 60   // × 9 = 540 → total 2060
+
+    let m = goal.macroTargets(currentWeightKg: 80, actualTDEE: 1900)!
+    #expect(m.proteinG == 180)
+    #expect(m.carbsG == 200)
+    #expect(m.fatG == 60)
+    #expect(abs(m.calorieTarget - 2060) < 1, "Calorie target should be macro sum 2060, not TDEE 1900 or override 1700")
+    #expect(!m.fatWasClamped)
+}
+
+@Test func customMacrosAllSet_fatBelowFloor_isClamped() {
+    // Fat entered below safety floor → fat raised, calories reflect clamped value
+    var goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 3,
+                         startDate: "2026-04-01", startWeightKg: 80,
+                         dietPreference: .custom)
+    goal.proteinTargetG = 180
+    goal.carbsTargetG   = 200
+    goal.fatTargetG     = 10   // well below floor (~48g for 80 kg)
+
+    let m = goal.macroTargets(currentWeightKg: 80, actualTDEE: 1900)!
+    #expect(m.fatG > 10, "Fat should be raised to minimum")
+    #expect(m.fatWasClamped, "fatWasClamped should be true when user fat was below floor")
+    // calorie = actual macro sum with clamped fat
+    let expectedCal = 180 * 4 + 200 * 4 + m.fatG * 9
+    #expect(abs(m.calorieTarget - expectedCal) < 1)
+}
+
+@Test func customMacrosPartial_extremeProtein_reportsHonestCalorie() {
+    // Extreme protein exceeds TDEE; carbs floor at 0; reported calorie = macro sum, not TDEE
+    var goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 3,
+                         startDate: "2026-04-01", startWeightKg: 80,
+                         dietPreference: .custom, calorieTargetOverride: 2000)
+    goal.proteinTargetG = 400  // 400 × 4 = 1600 kcal alone
+
+    let m = goal.macroTargets(currentWeightKg: 80, actualTDEE: 2000)!
+    #expect(m.proteinG == 400)
+    #expect(m.carbsG == 0, "Carbs should floor at 0 when protein + fat exceed calorie anchor")
+    // Reported calorie = protein + fat (no carbs) — honest, not anchored to 2000
+    let expectedCal = 400 * 4 + m.fatG * 9
+    #expect(abs(m.calorieTarget - expectedCal) < 1, "Should report honest macro sum, not TDEE anchor 2000")
+    #expect(m.calorieTarget > 2000, "Extreme protein pushes intake above TDEE anchor")
+}

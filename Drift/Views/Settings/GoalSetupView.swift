@@ -84,13 +84,22 @@ struct GoalSetupView: View {
                     } header: {
                         Text("Custom Macros")
                     } footer: {
-                        let implied = (Double(customProtein) ?? 0) * 4
-                            + (Double(customCarbs) ?? 0) * 4
-                            + (Double(customFat) ?? 0) * 9
-                        if implied > 0 {
-                            Text("Implied: \(Int(implied)) kcal/day (P×4 + C×4 + F×9). Leave a field blank to auto-compute.")
-                        } else {
-                            Text("Leave fields blank to auto-compute from calorie target.")
+                        let p = Double(customProtein) ?? 0
+                        let c = Double(customCarbs) ?? 0
+                        let f = Double(customFat) ?? 0
+                        let implied = p * 4 + c * 4 + f * 9
+                        let weightForFloor = getCurrentWeight() ?? existingGoal?.startWeightKg ?? 70
+                        let fatFloor = WeightGoal.minimumFatG(bodyweightKg: weightForFloor, calorieTarget: nil)
+                        VStack(alignment: .leading, spacing: 2) {
+                            if implied > 0 {
+                                Text("Total: \(Int(implied)) kcal/day. Blank fields auto-compute within your calorie target.")
+                            } else {
+                                Text("Enter grams to override. Blank fields auto-compute within your calorie target.")
+                            }
+                            if f > 0 && f < fatFloor {
+                                Text("Fat below safe minimum (\(Int(fatFloor))g) — will be raised automatically.")
+                                    .foregroundStyle(Theme.surplus)
+                            }
                         }
                     }
                 }
@@ -99,16 +108,34 @@ struct GoalSetupView: View {
                     HStack {
                         Text("Daily calories")
                         Spacer()
-                        TextField("auto", text: $calorieTarget)
-                            .keyboardType(.numberPad)
-                            .multilineTextAlignment(.trailing)
-                            .frame(width: 80)
+                        let allMacrosSet = dietPref == .custom
+                            && !customProtein.isEmpty && !customCarbs.isEmpty && !customFat.isEmpty
+                        let impliedCal = (Double(customProtein) ?? 0) * 4
+                            + (Double(customCarbs) ?? 0) * 4
+                            + (Double(customFat) ?? 0) * 9
+                        if allMacrosSet {
+                            Text("\(Int(impliedCal))").foregroundStyle(.secondary)
+                        } else {
+                            TextField("auto", text: $calorieTarget)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 80)
+                        }
                         Text("kcal").font(.caption).foregroundStyle(.secondary)
                     }
                 } header: {
                     Text("Calorie Target")
                 } footer: {
-                    Text("Leave blank to estimate from Apple Health activity data. Set a number if you know your daily intake target.")
+                    let allMacrosSet = dietPref == .custom
+                        && !customProtein.isEmpty && !customCarbs.isEmpty && !customFat.isEmpty
+                    if allMacrosSet {
+                        let implied = (Double(customProtein) ?? 0) * 4
+                            + (Double(customCarbs) ?? 0) * 4
+                            + (Double(customFat) ?? 0) * 9
+                        Text("Set by your macros (\(Int(implied)) kcal/day). To set calories independently, clear a macro field.")
+                    } else {
+                        Text("Leave blank to estimate from Apple Health activity data. Set a number if you know your daily intake target.")
+                    }
                 }
 
                 Section("Timeline") {
@@ -118,12 +145,6 @@ struct GoalSetupView: View {
                         let targetKg = unit.convertToKg(target)
                         let currentKg = getCurrentWeight()
                         if let current = currentKg {
-                            let change = targetKg - current
-                            let weeks = Double(months) * 4.33
-                            let weeklyRate = change / weeks
-                            let config = WeightTrendCalculator.loadConfig()
-                            let dailyDeficit = weeklyRate * config.kcalPerKg / 7
-
                             let calOverride = Double(calorieTarget)
                             let previewGoal = WeightGoal(
                                 targetWeightKg: targetKg, monthsToAchieve: months,
@@ -136,26 +157,67 @@ struct GoalSetupView: View {
                                 calorieTargetOverride: calOverride
                             )
                             let macros = previewGoal.macroTargets(currentWeightKg: current)
+                            let hasAnyCustomMacro = dietPref == .custom &&
+                                (!customProtein.isEmpty || !customCarbs.isEmpty || !customFat.isEmpty)
 
                             VStack(alignment: .leading, spacing: 6) {
                                 Text("This means:")
                                     .font(.caption.weight(.semibold)).foregroundStyle(.secondary)
-                                Text("\u{2022} \(String(format: "%.2f", unit.convert(fromKg: weeklyRate))) \(unit.displayName)/week")
-                                    .font(.caption)
-                                Text("\u{2022} \(String(format: "%+.0f", dailyDeficit)) kcal/day \(dailyDeficit < 0 ? "deficit" : "surplus")")
-                                    .font(.caption)
-                                if let m = macros {
-                                    Text("\u{2022} \(Int(m.calorieTarget)) kcal/day target")
-                                        .font(.caption)
+
+                                if hasAnyCustomMacro, let m = macros {
+                                    // Honest macro-based projection: what will actually happen vs TDEE
+                                    let tdee = TDEEEstimator.shared.cachedOrSync().tdee
+                                    let config = WeightTrendCalculator.loadConfig()
+                                    let dailySurplus = m.calorieTarget - tdee
+                                    let weeklyRateFromMacros = dailySurplus / config.kcalPerKg * 7
+                                    let rateAbs = abs(unit.convert(fromKg: weeklyRateFromMacros))
+                                    let rateLabel = rateAbs < 0.01 ? "stable weight"
+                                        : "\(String(format: "%.2f", rateAbs)) \(unit.displayName)/week \(weeklyRateFromMacros > 0 ? "gaining" : "losing")"
+                                    let diffLabel = dailySurplus >= 0
+                                        ? "+\(Int(dailySurplus)) kcal/day surplus"
+                                        : "\u{2212}\(Int(abs(dailySurplus))) kcal/day deficit"
+
+                                    Text("\u{2022} Your intake: \(Int(m.calorieTarget)) kcal/day").font(.caption)
+                                    Text("\u{2022} vs TDEE (~\(Int(tdee)) kcal): \(diffLabel)").font(.caption)
+                                    Text("\u{2022} \(rateLabel)").font(.caption).foregroundStyle(Theme.accent)
+
+                                    let goalIsLosing = targetKg < current
+                                    if weeklyRateFromMacros > 0.05 && goalIsLosing {
+                                        Text("These macros exceed your TDEE — you'll gain weight. Reduce to reach your goal.")
+                                            .font(.caption).foregroundStyle(Theme.surplus)
+                                    } else if weeklyRateFromMacros < -0.05 && !goalIsLosing {
+                                        Text("These macros are below your TDEE — you'll lose weight. Increase to reach your goal.")
+                                            .font(.caption).foregroundStyle(Theme.surplus)
+                                    }
+                                    if m.fatWasClamped {
+                                        Text("Fat raised to safe minimum (\(Int(m.fatG))g).")
+                                            .font(.caption).foregroundStyle(.secondary)
+                                    }
                                     Text("\u{2022} \(Int(m.proteinG))g protein \u{00B7} \(Int(m.carbsG))g carbs \u{00B7} \(Int(m.fatG))g fat")
                                         .font(.caption).foregroundStyle(Theme.accent)
                                 } else {
-                                    Text("\u{2022} Set a calorie target above to see macro breakdown")
-                                        .font(.caption).foregroundStyle(.tertiary)
-                                }
-                                if abs(dailyDeficit) > 1000 {
-                                    Text("Aggressive — consider extending the timeline")
-                                        .font(.caption).foregroundStyle(Theme.surplus)
+                                    // Geometric bullets: fully auto mode (no macro overrides)
+                                    let change = targetKg - current
+                                    let weeks = Double(months) * 4.33
+                                    let weeklyRate = change / weeks
+                                    let config = WeightTrendCalculator.loadConfig()
+                                    let dailyDeficit = weeklyRate * config.kcalPerKg / 7
+                                    Text("\u{2022} \(String(format: "%.2f", unit.convert(fromKg: weeklyRate))) \(unit.displayName)/week")
+                                        .font(.caption)
+                                    Text("\u{2022} \(String(format: "%+.0f", dailyDeficit)) kcal/day \(dailyDeficit < 0 ? "deficit" : "surplus")")
+                                        .font(.caption)
+                                    if let m = macros {
+                                        Text("\u{2022} \(Int(m.calorieTarget)) kcal/day target").font(.caption)
+                                        Text("\u{2022} \(Int(m.proteinG))g protein \u{00B7} \(Int(m.carbsG))g carbs \u{00B7} \(Int(m.fatG))g fat")
+                                            .font(.caption).foregroundStyle(Theme.accent)
+                                    } else {
+                                        Text("\u{2022} Set a calorie target above to see macro breakdown")
+                                            .font(.caption).foregroundStyle(.tertiary)
+                                    }
+                                    if abs(dailyDeficit) > 1000 {
+                                        Text("Aggressive — consider extending the timeline")
+                                            .font(.caption).foregroundStyle(Theme.surplus)
+                                    }
                                 }
                             }
                             .padding(.vertical, 4)

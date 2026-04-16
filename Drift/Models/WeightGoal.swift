@@ -156,27 +156,42 @@ struct WeightGoal: Codable, Sendable {
     }
 
     /// Effective macro targets.
+    /// - Fat floor is always enforced (sex-aware safety minimum), even on explicit user input.
+    /// - Reported calorieTarget = actual macro sum, not TDEE anchor. TDEE only auto-fills unset carbs.
     func macroTargets(currentWeightKg: Double? = nil, actualTDEE: Double? = nil) -> MacroTargets? {
-        guard let calTarget = resolvedCalorieTarget(currentWeightKg: currentWeightKg, actualTDEE: actualTDEE) else { return nil }
-
         let weight = currentWeightKg ?? startWeightKg
         let pref = dietPreference ?? .balanced
-        let isLosing = weight > targetWeightKg  // current-based direction
+        let isLosing = weight > targetWeightKg
+        let fatFloor = Self.minimumFatG(bodyweightKg: weight, calorieTarget: nil)
 
-        // Protein
+        // All 3 custom macros set → calorie IS the sum of macros (fully determined, no TDEE needed).
+        // calorieTargetOverride is ignored (UI disables the calorie field when all 3 macros are set).
+        if let p = proteinTargetG, let c = carbsTargetG, let f = fatTargetG {
+            let fat = max(f, fatFloor)
+            let calTarget = p * 4 + c * 4 + fat * 9
+            return MacroTargets(proteinG: p, carbsG: c, fatG: fat,
+                                calorieTarget: calTarget, isLosing: isLosing, preference: pref,
+                                fatWasClamped: fat > f)
+        }
+
+        // Partial or no overrides: TDEE anchors auto-fill of unset macros (primarily carbs).
+        // Fat floor always enforced even on explicit user input.
+        // Reported calorie = actual macro sum — if extreme protein pushes above TDEE, we report honestly.
+        guard let tdeeAnchor = resolvedCalorieTarget(currentWeightKg: currentWeightKg, actualTDEE: actualTDEE) else { return nil }
+
         let protein = proteinTargetG ?? (weight * pref.proteinPerKg)
+        let fatFromPref = tdeeAnchor * pref.fatCalorieFraction / 9
+        let fatBase = fatTargetG ?? max(fatFromPref, fatFloor)
+        let fat = max(fatBase, fatFloor)                        // floor always wins, even on explicit input
+        let remainingCal = tdeeAnchor - (protein * 4) - (fat * 9)
+        let carbs = carbsTargetG ?? max(0, remainingCal / 4)    // floor at 0, can't go negative
 
-        // Fat: from preference %, enforce research-based minimum
-        let fatFromPref = calTarget * pref.fatCalorieFraction / 9
-        let fatFloor = Self.minimumFatG(bodyweightKg: weight, calorieTarget: calTarget)
-        let fat = fatTargetG ?? max(fatFromPref, fatFloor)
-
-        // Carbs: fill remaining calories, floor at 0
-        let remainingCal = calTarget - (protein * 4) - (fat * 9)
-        let carbs = carbsTargetG ?? max(0, remainingCal / 4)
-
+        // Always report what the user will actually eat, not the TDEE anchor.
+        let effectiveCal = protein * 4 + carbs * 4 + fat * 9
+        let userSetFat = fatTargetG
         return MacroTargets(proteinG: protein, carbsG: carbs, fatG: fat,
-                            calorieTarget: calTarget, isLosing: isLosing, preference: pref)
+                            calorieTarget: effectiveCal, isLosing: isLosing, preference: pref,
+                            fatWasClamped: userSetFat != nil && fat > userSetFat!)
     }
 
     struct MacroTargets: Sendable {
@@ -186,6 +201,7 @@ struct WeightGoal: Codable, Sendable {
         let calorieTarget: Double
         let isLosing: Bool
         let preference: DietPreference
+        var fatWasClamped: Bool = false
     }
 
     /// Target date.
