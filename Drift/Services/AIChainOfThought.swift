@@ -30,8 +30,18 @@ enum AIChainOfThought {
     /// Determine if a query needs multi-step data fetching before answering.
     /// Returns nil for simple queries that can go straight to LLM.
     static func plan(query: String, screen: AIScreen) -> [Step]? {
-        let q = query.lowercased()
+        let q = query.lowercased().trimmingCharacters(in: .punctuationCharacters).trimmingCharacters(in: .whitespaces)
         var steps: [Step] = []
+
+        // Simple acknowledgments never need data context
+        let simpleAcks: Set<String> = [
+            "ok", "okay", "sure", "yes", "no", "yep", "nope", "yeah",
+            "thanks", "thank you", "thank you so much", "cheers",
+            "got it", "got it thanks", "sounds good", "alright",
+            "cool", "great", "nice", "wow", "awesome", "perfect",
+            "hello", "hi", "hey", "bye", "goodbye", "haha", "lol"
+        ]
+        if simpleAcks.contains(q) { return nil }
 
         // Always start with base context
         let needsWeight = q.contains("track") || q.contains("progress") || q.contains("on track")

@@ -1670,10 +1670,18 @@ final class AIEvalHarness: XCTestCase {
             ("which markers are out of range", .biomarkers, true),
             ("what should I train", .exercise, true),
             ("why am I not losing weight", .weight, true),
-            // Simple → should NOT trigger
+            ("how many calories did I eat today", .food, true),
+            ("am I getting enough protein", .food, true),
+            ("how was my sleep last week", .bodyRhythm, true),
+            // Simple acknowledgments → should NOT trigger
             ("hello", .dashboard, false),
             ("thanks", .dashboard, false),
             ("ok", .dashboard, false),
+            ("thank you", .dashboard, false),
+            ("got it", .dashboard, false),
+            ("sounds good", .dashboard, false),
+            ("yeah", .dashboard, false),
+            ("cool", .dashboard, false),
         ]
         var correct = 0
         for (query, screen, expected) in queries {
