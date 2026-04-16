@@ -80,7 +80,7 @@ enum AIChainOfThought {
             || q.contains("i did") || q.contains("just finished")
             || q.contains("push day") || q.contains("pull day") || q.contains("leg day")
             || q.contains("body part") || q.contains("muscle") || q.contains("ppl")
-            || q.contains("split") || q.contains("start") && q.contains("day")
+            || q.contains("split") || q.contains("start workout") || q.contains("start training")
         let needsSupplements = q.contains("supplement") || q.contains("vitamin") || q.contains("pill")
             || q.contains("stack")
         let needsOverview = q.contains("how am i") || q.contains("overview") || q.contains("how am i doing")

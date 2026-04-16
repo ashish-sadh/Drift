@@ -1673,6 +1673,8 @@ final class AIEvalHarness: XCTestCase {
             ("how many calories did I eat today", .food, true),
             ("am I getting enough protein", .food, true),
             ("how was my sleep last week", .bodyRhythm, true),
+            // Food/diet queries that contain "day" should NOT trigger workout context
+            ("start tracking today", .dashboard, true),   // CoT yes, but not workout
             // Simple acknowledgments → should NOT trigger
             ("hello", .dashboard, false),
             ("thanks", .dashboard, false),
@@ -1692,6 +1694,23 @@ final class AIEvalHarness: XCTestCase {
         let pct = Double(correct) / Double(queries.count) * 100
         print("📊 CoT routing: \(correct)/\(queries.count) (\(String(format: "%.0f", pct))%)")
         XCTAssertGreaterThanOrEqual(correct, queries.count * 85 / 100)
+    }
+
+    @MainActor
+    func testCoTWorkoutFalsePositives() {
+        // Queries containing "start"+"today" (and thus "day") must NOT trigger workout steps.
+        // Regression: old code matched q.contains("start") && q.contains("day") which fired on "today".
+        let workoutFalsePositives = [
+            "start tracking today",
+            "I want to start eating better today",
+            "how do I start logging meals today",
+            "let's start fresh today",
+        ]
+        for query in workoutFalsePositives {
+            let steps = AIChainOfThought.plan(query: query, screen: .dashboard) ?? []
+            let hasWorkout = steps.contains { $0.label.lowercased().contains("workout") }
+            XCTAssertFalse(hasWorkout, "'\(query)' should not trigger workout steps")
+        }
     }
 
     // MARK: - SpellCorrectService
