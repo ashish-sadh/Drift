@@ -1,4 +1,4 @@
-# Product Review — Cycle 5228 (2026-04-16)
+# Product Review — Cycle 5228 (2026-04-16) · PR #172
 
 ## Executive Summary
 Since Review #45 (cycle 4805): LLM-first lab report parsing shipped (#151 — two-sprint deferred, now done), food DB grew by 100 foods (2,067→2,167), macOS LLM eval harness launched with full E2E pipeline eval, IntentClassifier prompt tuning resolved CoT false-positives and routing gaps, and Smart Units cross-interface consistency closed 4 bugs. Sprint is now planned around eval expansion (#158/#160), voice input hardening (#159), and exercise visual enrichment (#66).
