@@ -5098,7 +5098,7 @@
     "nova_group": 3
   },
   {
-    "name": "Açaí Bowl (medium)",
+    "name": "A\u00e7a\u00ed Bowl (medium)",
     "category": "US Staples",
     "serving_size": 300,
     "serving_unit": "g",
@@ -5108,7 +5108,7 @@
     "fat_g": 18,
     "fiber_g": 8,
     "ingredients": [
-      "Açaí Bowl (medium)"
+      "A\u00e7a\u00ed Bowl (medium)"
     ],
     "nova_group": 3
   },
@@ -9788,7 +9788,7 @@
     "nova_group": 3
   },
   {
-    "name": "Costco Açaí Bowl (food court)",
+    "name": "Costco A\u00e7a\u00ed Bowl (food court)",
     "category": "Costco",
     "serving_size": 355,
     "serving_unit": "g",
@@ -9798,7 +9798,7 @@
     "fat_g": 19,
     "fiber_g": 7,
     "ingredients": [
-      "Costco Açaí Bowl (food court)"
+      "Costco A\u00e7a\u00ed Bowl (food court)"
     ],
     "nova_group": 3
   },
@@ -10493,7 +10493,7 @@
     "nova_group": 4
   },
   {
-    "name": "Starbucks Caffè Latte (Grande, 2% milk)",
+    "name": "Starbucks Caff\u00e8 Latte (Grande, 2% milk)",
     "category": "Beverages",
     "serving_size": 473,
     "serving_unit": "ml",
@@ -10503,7 +10503,7 @@
     "fat_g": 7,
     "fiber_g": 0,
     "ingredients": [
-      "Starbucks Caffè Latte (Grande, 2% milk)"
+      "Starbucks Caff\u00e8 Latte (Grande, 2% milk)"
     ],
     "nova_group": 3
   },
@@ -25155,7 +25155,7 @@
     "ingredients": [
       "fries",
       "cheese sauce",
-      "jalapeños",
+      "jalape\u00f1os",
       "sour cream"
     ],
     "nova_group": 4
@@ -28726,7 +28726,7 @@
       "beef",
       "onion",
       "tomato",
-      "jalapeño",
+      "jalape\u00f1o",
       "rosemary",
       "Ethiopian spices",
       "butter"
@@ -35141,5 +35141,383 @@
       "mustard"
     ],
     "nova_group": 3
+  },
+  {
+    "name": "Mujaddara",
+    "category": "Middle Eastern",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 285,
+    "protein_g": 11,
+    "carbs_g": 50,
+    "fat_g": 5,
+    "fiber_g": 8.0,
+    "ingredients": [
+      "lentils",
+      "rice",
+      "onion",
+      "olive oil",
+      "cumin"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Shish Tawook",
+    "category": "Middle Eastern",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 30,
+    "carbs_g": 4,
+    "fat_g": 9,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "chicken breast",
+      "lemon",
+      "garlic",
+      "yogurt",
+      "paprika"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Manaeesh",
+    "category": "Middle Eastern",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 12,
+    "carbs_g": 50,
+    "fat_g": 16,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "flour",
+      "za'atar",
+      "olive oil",
+      "sesame seeds"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Knafeh",
+    "category": "Middle Eastern",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 420,
+    "protein_g": 10,
+    "carbs_g": 58,
+    "fat_g": 18,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "semolina",
+      "cheese",
+      "sugar",
+      "rose water",
+      "pistachio"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Fatteh",
+    "category": "Middle Eastern",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 14,
+    "carbs_g": 42,
+    "fat_g": 12,
+    "fiber_g": 6.0,
+    "ingredients": [
+      "pita bread",
+      "chickpeas",
+      "yogurt",
+      "tahini",
+      "garlic",
+      "lemon"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Mercimek Corbasi",
+    "category": "Turkish",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 190,
+    "protein_g": 10,
+    "carbs_g": 32,
+    "fat_g": 3,
+    "fiber_g": 9.0,
+    "ingredients": [
+      "red lentils",
+      "onion",
+      "carrot",
+      "tomato paste",
+      "cumin",
+      "mint"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Iskender Kebab",
+    "category": "Turkish",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 520,
+    "protein_g": 32,
+    "carbs_g": 42,
+    "fat_g": 24,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "lamb",
+      "pita bread",
+      "tomato sauce",
+      "butter",
+      "yogurt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Kofte",
+    "category": "Turkish",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 300,
+    "protein_g": 24,
+    "carbs_g": 8,
+    "fat_g": 20,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "ground beef",
+      "onion",
+      "parsley",
+      "cumin",
+      "paprika"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Tikel Gomen",
+    "category": "Ethiopian",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 110,
+    "protein_g": 3,
+    "carbs_g": 14,
+    "fat_g": 5,
+    "fiber_g": 5.0,
+    "ingredients": [
+      "cabbage",
+      "carrot",
+      "potato",
+      "turmeric",
+      "ginger",
+      "garlic"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Atakilt Wat",
+    "category": "Ethiopian",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 130,
+    "protein_g": 4,
+    "carbs_g": 20,
+    "fat_g": 4,
+    "fiber_g": 6.0,
+    "ingredients": [
+      "cabbage",
+      "carrot",
+      "potato",
+      "onion",
+      "garlic",
+      "ginger",
+      "berbere"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Chhena Poda",
+    "category": "Indian Regional",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 10,
+    "carbs_g": 40,
+    "fat_g": 9,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "cottage cheese",
+      "sugar",
+      "cardamom",
+      "cashew",
+      "raisin"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Thalassery Biryani",
+    "category": "Indian Regional",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 580,
+    "protein_g": 28,
+    "carbs_g": 78,
+    "fat_g": 18,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "khyma rice",
+      "chicken",
+      "onion",
+      "coconut milk",
+      "ghee",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Machher Jhol",
+    "category": "Indian Regional",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 28,
+    "carbs_g": 8,
+    "fat_g": 15,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "fish",
+      "potato",
+      "tomato",
+      "turmeric",
+      "mustard oil",
+      "cumin"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Cottage Cheese Bowl",
+    "category": "Healthy Options",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 195,
+    "protein_g": 22,
+    "carbs_g": 20,
+    "fat_g": 3,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "cottage cheese",
+      "berries"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Rice Cake with Peanut Butter",
+    "category": "Snacks",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 7,
+    "carbs_g": 30,
+    "fat_g": 9,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "rice",
+      "peanut butter"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Tuna Rice Bowl",
+    "category": "Proteins",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 480,
+    "protein_g": 38,
+    "carbs_g": 58,
+    "fat_g": 8,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "rice",
+      "tuna",
+      "soy sauce",
+      "sesame oil",
+      "cucumber",
+      "avocado"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Protein Overnight Oats",
+    "category": "Breakfast",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 420,
+    "protein_g": 32,
+    "carbs_g": 52,
+    "fat_g": 9,
+    "fiber_g": 7.0,
+    "ingredients": [
+      "oats",
+      "milk",
+      "protein powder",
+      "banana",
+      "almond butter"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Smoked Salmon Bagel",
+    "category": "Breakfast",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 390,
+    "protein_g": 26,
+    "carbs_g": 46,
+    "fat_g": 12,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "bagel",
+      "smoked salmon",
+      "cream cheese",
+      "capers",
+      "red onion"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Turkey Avocado Sandwich",
+    "category": "Grocery",
+    "serving_size": 220,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 28,
+    "carbs_g": 34,
+    "fat_g": 15,
+    "fiber_g": 6.0,
+    "ingredients": [
+      "whole wheat bread",
+      "turkey",
+      "avocado",
+      "lettuce",
+      "tomato",
+      "mustard"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Hard Boiled Eggs",
+    "category": "Proteins",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 155,
+    "protein_g": 13,
+    "carbs_g": 1,
+    "fat_g": 11,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "egg"
+    ],
+    "nova_group": 1
   }
 ]
