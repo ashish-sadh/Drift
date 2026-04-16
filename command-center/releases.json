@@ -1242,5 +1242,23 @@
       "Approved design docs no longer duplicate in Designs tab",
       "Sprint tasks must complete before permanent tasks"
     ]
+  },
+  {
+    "build": 123,
+    "date": "2026-04-15T12:00:00-07:00",
+    "description": "Smart Units expansion + food DB to 1,913 + P0 diary query fix",
+    "features": [
+      "Food DB expanded to 1,913 (+184 foods) \u2014 South Indian, Indian snacks/drinks, Middle Eastern expansion",
+      "Synonym dict expansion \u2014 South Indian, Middle Eastern, Bengali, Tamil food terms (+24 terms)",
+      "Smart units: portionText fixes for uttapam, kachori \u2192 piece; payasam, rasam \u2192 bowl",
+      "Smart units: primaryUnit \u2014 uttapam/kachori \u2192 piece, payasam \u2192 bowl",
+      "Smart units: cupGrams accuracy improvements (pasta, granola, muesli, beans, quinoa)"
+    ],
+    "fixes": [
+      "P0 #135: diary queries like 'how many calories left' no longer trigger food search",
+      "portionText \u2014 uttapam, kachori show piece; payasam, rasam show bowl",
+      "primaryUnit \u2014 uttapam/kachori default to piece, payasam to bowl",
+      "cupGrams accuracy \u2014 pasta 140g, granola 120g, muesli 85g, beans 172g, quinoa 185g"
+    ]
   }
 ]
