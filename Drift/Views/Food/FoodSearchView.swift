@@ -276,7 +276,7 @@ struct FoodSearchView: View {
                 } else {
                     viewModel.quickAdd(name: entry.name, calories: entry.calories,
                                        proteinG: entry.proteinG, carbsG: entry.carbsG,
-                                       fatG: entry.fatG, fiberG: 0,
+                                       fatG: entry.fatG, fiberG: entry.fiberG,
                                        mealType: effectiveMealType)
                 }
                 viewModel.loadSuggestions()

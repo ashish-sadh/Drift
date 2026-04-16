@@ -9,6 +9,7 @@ struct RecentEntry: Identifiable, Sendable {
     let proteinG: Double
     let carbsG: Double
     let fatG: Double
+    let fiberG: Double
     let servingSize: Double
     let lastServings: Double
 
@@ -62,7 +63,7 @@ extension AppDatabase {
         try reader.read { db in
             let rows = try Row.fetchAll(db, sql: """
                 SELECT food_name, food_id, last_servings,
-                       calories, protein_g, carbs_g, fat_g, serving_size_g
+                       calories, protein_g, carbs_g, fat_g, fiber_g, serving_size_g
                 FROM food_usage
                 ORDER BY last_used DESC
                 LIMIT ?
@@ -75,6 +76,7 @@ extension AppDatabase {
                     proteinG: row["protein_g"],
                     carbsG: row["carbs_g"],
                     fatG: row["fat_g"],
+                    fiberG: row["fiber_g"] ?? 0,
                     servingSize: row["serving_size_g"],
                     lastServings: row["last_servings"]
                 )
@@ -131,7 +133,7 @@ extension AppDatabase {
         try reader.read { db in
             let rows = try Row.fetchAll(db, sql: """
                 SELECT fu.food_name, fu.food_id, fu.last_servings,
-                       fu.calories, fu.protein_g, fu.carbs_g, fu.fat_g, fu.serving_size_g
+                       fu.calories, fu.protein_g, fu.carbs_g, fu.fat_g, fu.fiber_g, fu.serving_size_g
                 FROM food_usage fu
                 WHERE fu.is_favorite = 1
                 ORDER BY fu.food_name
@@ -140,6 +142,7 @@ extension AppDatabase {
                 RecentEntry(name: row["food_name"], foodId: row["food_id"],
                             calories: row["calories"], proteinG: row["protein_g"],
                             carbsG: row["carbs_g"], fatG: row["fat_g"],
+                            fiberG: row["fiber_g"] ?? 0,
                             servingSize: row["serving_size_g"], lastServings: row["last_servings"])
             }
         }
