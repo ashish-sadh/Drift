@@ -1286,7 +1286,7 @@
   {
     "build": 125,
     "date": "2026-04-15T20:00:00-07:00",
-    "description": "Smart Units batch 3 — 30+ new rules + portionText sync + bug fixes",
+    "description": "Smart Units batch 3 \u2014 30+ new rules + portionText sync + bug fixes",
     "features": [
       "Smart Units: 30+ new primaryUnit rules \u2014 bhujia\u2192cup, jerky\u2192strip, calamari\u2192piece, cantaloupe/honeydew\u2192piece, cherry tomato\u2192cup, celery\u2192piece, begun bhaja/bharwa baingan\u2192piece, galbi/samgyeopsal\u2192bowl, chettinad/chicken handi/adobo\u2192bowl, bibim naengmyeon/bun thit nuong\u2192bowl, built bar/kind bar/rxbar\u2192piece, ancient grains (barley/farro/millet)\u2192cup, flours (besan/bajra/ragi)\u2192cup",
       "portionText diary display synced with all new primaryUnit rules \u2014 latte/cappuccino/espresso\u2192ml, mac and cheese/gnocchi/carbonara\u2192cup, cheesecake/tiramisu\u2192slice, stir fry/bulgogi/rendang\u2192bowl, Indian regional dishes\u2192bowl",
@@ -1296,6 +1296,21 @@
     "fixes": [
       "honey rule now uses word boundary \u2014 honeydew melon correctly defaults to piece not tbsp",
       "almond/cashew nut rules exclude foods containing 'bar' to prevent false matches"
+    ]
+  },
+  {
+    "build": 126,
+    "date": "2026-04-16T08:00:00-07:00",
+    "description": "Smart Units batch 4 + sprint planning \u2014 AI chat bugs, lab reports, food DB",
+    "features": [
+      "Smart Units batch 4 \u2014 100+ new rules: eggs\u2192piece, oil/ghee\u2192tsp, butter\u2192tbsp, flour\u2192cup, honey\u2192tbsp, salt/pepper\u2192tsp, all yogurt\u2192cup, sour cream\u2192tbsp, cheese\u2192slice/cup, cream cheese\u2192tbsp, nuts\u2192cup/piece, most fruits\u2192piece, most vegetables\u2192piece/cup",
+      "Smart Units: eggs and egg-based foods now default to piece (not serving)",
+      "Food DB enriched: kanda bhaji, mooli paratha, ribbon pakoda, seedai, shikanji, egg paratha, chicken paratha, akki roti, makki di roti, pyaaz kachori, stuffed capsicum, lauki sabzi, arbi masala, bajra khichdi"
+    ],
+    "fixes": [
+      "#142: fiber always showing 0g fixed \u2014 RecentEntry model and SQL queries updated",
+      "#143: edit ingredient now shows correct servings (was always 1)",
+      "#135: calories-left query no longer misfires food search"
     ]
   }
 ]
