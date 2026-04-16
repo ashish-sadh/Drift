@@ -162,21 +162,31 @@ enum ToolRegistration {
                     }
                     foodName = foodName.trimmingCharacters(in: .whitespaces)
 
-                    if !foodName.isEmpty, let result = FoodService.getNutrition(name: foodName) {
-                        return .text("\(result.perServing) Say 'log \(result.food.name.lowercased())' to add it.")
-                    }
-                    // Also try the raw query as food name
-                    if let result = FoodService.getNutrition(name: query) {
-                        return .text("\(result.perServing) Say 'log \(result.food.name.lowercased())' to add it.")
-                    }
-                    // Try USDA/OpenFoodFacts if enabled and not found locally (5s timeout)
-                    let lookupQuery = foodName.isEmpty ? query : foodName
-                    let onlineResults = await IntentClassifier.withTimeout(seconds: 5) {
-                        await FoodService.searchWithFallback(query: lookupQuery, localThreshold: 1)
-                    } ?? []
-                    if let best = onlineResults.first {
-                        let desc = "\(best.name) (per \(Int(best.servingSize))\(best.servingUnit)): \(Int(best.calories)) cal, \(Int(best.proteinG))g protein, \(Int(best.carbsG))g carbs, \(Int(best.fatG))g fat"
-                        return .text("\(desc) Say 'log \(best.name.lowercased())' to add it.")
+                    // Diary/tracking queries ("calories left", "how many calories left") should fall
+                    // through to the summary logic below — not trigger a food lookup.
+                    // Guard: skip lookup if foodName still contains question/diary phrases after stripping.
+                    let isDiaryQuery = foodName.hasSuffix(" left") || foodName.hasSuffix(" remaining") ||
+                        (foodName.hasPrefix("how many") && !foodName.contains(" in ") && !foodName.contains(" for ")) ||
+                        (foodName.hasPrefix("how much") && !foodName.contains(" in ") && !foodName.contains(" for ")) ||
+                        foodName.contains("how am i") || foodName.contains("on track") || foodName.contains("so far")
+
+                    if !isDiaryQuery {
+                        if !foodName.isEmpty, let result = FoodService.getNutrition(name: foodName) {
+                            return .text("\(result.perServing) Say 'log \(result.food.name.lowercased())' to add it.")
+                        }
+                        // Also try the raw query as food name
+                        if let result = FoodService.getNutrition(name: query) {
+                            return .text("\(result.perServing) Say 'log \(result.food.name.lowercased())' to add it.")
+                        }
+                        // Try USDA/OpenFoodFacts if enabled and not found locally (5s timeout)
+                        let lookupQuery = foodName.isEmpty ? query : foodName
+                        let onlineResults = await IntentClassifier.withTimeout(seconds: 5) {
+                            await FoodService.searchWithFallback(query: lookupQuery, localThreshold: 1)
+                        } ?? []
+                        if let best = onlineResults.first {
+                            let desc = "\(best.name) (per \(Int(best.servingSize))\(best.servingUnit)): \(Int(best.calories)) cal, \(Int(best.proteinG))g protein, \(Int(best.carbsG))g carbs, \(Int(best.fatG))g fat"
+                            return .text("\(desc) Say 'log \(best.name.lowercased())' to add it.")
+                        }
                     }
                 }
 

@@ -991,6 +991,26 @@ import Testing
     #expect(!output.text.isEmpty)
 }
 
+// Regression test for #135: "how many calories left" was returning a food search result
+// instead of the daily summary because the diary-query guard was missing in food_info handler.
+@Test @MainActor func foodInfoDiaryQueriesDoNotTriggerFoodLookup() async throws {
+    ToolRegistration.registerAll()
+    let diaryQueries = [
+        "how many calories left",
+        "calories left",
+        "calories remaining",
+        "how many calories remaining",
+        "how much have i eaten so far",
+    ]
+    for query in diaryQueries {
+        let call = ToolCall(tool: "food_info", params: ToolCallParams(values: ["query": query]))
+        let output = await AIToolAgent.executeTool(call)
+        // Must NOT return a food-lookup response ("Say 'log X' to add it.")
+        #expect(!output.text.contains("Say 'log"), "Diary query '\(query)' triggered food lookup instead of summary")
+        #expect(!output.text.isEmpty)
+    }
+}
+
 @Test @MainActor func aiToolAgentExecuteToolWithExplainCalories() async throws {
     ToolRegistration.registerAll()
     let call = ToolCall(tool: "explain_calories", params: ToolCallParams(values: [:]))
