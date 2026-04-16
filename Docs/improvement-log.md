@@ -4,6 +4,13 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 
 ---
 
+## Cycle · 2026-04-15 (Human-shepherded junior tasks, session 3)
+
+- **Smart Units expansion** (primaryUnit + portionText): Fixed chaat ordering bug (sev puri/dahi puri/pani puri were wrongly returning "piece" — chaat check now precedes puri flatbread check). New rules: omelette/frittata→piece, dhokla/khaman/khakhra/fafda/handvo/chilla/cheela→piece, pav bhaji/misal→bowl, pav (standalone)→piece, Indian milk desserts (rabri/shrikhand/basundi/phirni/seviyan)→bowl, chili dish (ss>15)→bowl, pudding/custard/mousse (ss>50)→bowl. Bread pudding excluded from bread→slice rule. Matching portionText entries for all new rules.
+- **Food DB +18** (1964→1982): Gujarati snacks (Dhokla, Khakhra Plain, Khakhra Masala), savory pancakes (Besan Chilla, Moong Dal Chilla), Mumbai street food (Pav Bhaji, Misal Pav, Batata Vada, Dahi Puri), North Indian (Dal Makhani, Palak Paneer, Kadai Paneer, Paneer Bhurji, Keema Matar), fasting foods (Sabudana Khichdi, Sabudana Vada), South Indian (Lemon Rice), healthy options (Overnight Oats, Chia Seed Pudding).
+- **Tests +16**: smart unit tests for all new rules + portionText tests. Fixed smartServingTextDalShowsCup test (servingSize 240→200 to match cupGrams=200).
+- All 1479 unit tests passing.
+
 ## Cycle · 2026-04-15 (Human-shepherded junior tasks, session 2)
 
 - **Food DB +17** (1896→1913): South Indian (Uttapam, Set Dosa, Chettinad Chicken Curry, Paal Payasam), Indian Snacks (Chakli/Murukku, Roasted Makhana, Bhakarwadi, Sev, Raj Kachori, Golgappa/Pani Puri), Middle Eastern (Hummus plain, Baba Ghanoush, Tzatziki, Fattoush Salad, Lamb Kofta, Lentil Soup), Filter Coffee. Fixed duplicate "Breakfast Burrito" → "Breakfast Burrito (Fast Food)" vs Breakfast category.
