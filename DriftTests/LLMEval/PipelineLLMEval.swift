@@ -15,19 +15,27 @@ final class PipelineLLMEval: XCTestCase {
 
     override class func setUp() {
         super.setUp()
-        // Load Gemma for normalization + tool-call tests
-        let gemmaPath = URL(fileURLWithPath: "/tmp/gemma-4-e2b-q4_k_m.gguf")
-        if FileManager.default.fileExists(atPath: gemmaPath.path) {
-            let b = LlamaCppBackend(modelPath: gemmaPath, threads: 4)
-            try? b.loadSync()
-            if b.isLoaded { gemmaBackend = b; print("✅ Gemma 4 loaded for pipeline eval") }
+        let homeDir = ProcessInfo.processInfo.environment["HOME"] ?? "/tmp"
+        let modelsDir = URL(fileURLWithPath: homeDir).appendingPathComponent("drift-state/models")
+        let gemmaPath = modelsDir.appendingPathComponent("gemma-4-e2b-q4_k_m.gguf")
+        let smolPath  = modelsDir.appendingPathComponent("smollm2-360m-instruct-q8_0.gguf")
+
+        guard FileManager.default.fileExists(atPath: gemmaPath.path) else {
+            XCTFail("❌ Gemma 4 not found at \(gemmaPath.path)\nRun: bash scripts/download-models.sh")
+            return
         }
-        // Load SmolLM for tool-call tests
-        let smolPath = URL(fileURLWithPath: "/tmp/smollm2-360m-instruct-q8_0.gguf")
+
+        // Load Gemma for normalization + tool-call tests
+        let b = LlamaCppBackend(modelPath: gemmaPath, threads: 4)
+        try? b.loadSync()
+        if b.isLoaded { gemmaBackend = b; print("✅ Gemma 4 loaded for pipeline eval") }
+        else { XCTFail("❌ Gemma 4 failed to load — check model integrity") }
+
+        // Load SmolLM if available
         if FileManager.default.fileExists(atPath: smolPath.path) {
-            let b = LlamaCppBackend(modelPath: smolPath, threads: 4)
-            try? b.loadSync()
-            if b.isLoaded { smolBackend = b; print("✅ SmolLM loaded for pipeline eval") }
+            let s = LlamaCppBackend(modelPath: smolPath, threads: 4)
+            try? s.loadSync()
+            if s.isLoaded { smolBackend = s; print("✅ SmolLM loaded for pipeline eval") }
         }
     }
 

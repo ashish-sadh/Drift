@@ -28,8 +28,9 @@ _(pick from Ready)_
 
 - [x] **#156 Smart Units: cross-interface consistency audit** — 4 bugs fixed (Butter Chicken/tbsp, Chicken Parmesan/tbsp, Vindaloo/serving, Chicken Stock/serving). 5 regression tests added. All 3 interfaces verified consistent. Commit b237f4e.
 - [x] **#157 Food DB enrichment: +20 foods** — 2067→2087: Sev Puri, Dahi Bhalla, Sprouts Chaat, Mini Idli, Masala Vada, Kotambri Vada, Kande Pohe, ON Gold Standard Whey, ONE Bar, KIND Protein Bar, Creatine Monohydrate, MyProtein Impact Whey, Isopure Zero Carb, Baked Oats, Shakshuka with Feta, Quiche, Breakfast Frittata, Gujiya, Basundi, Patishapta. Commit 51912a1.
+- [x] **Food DB enrichment: +20 foods** — 2087→2107: Ragi Mudde, Sol Kadi, Tindora Sabzi, Gavar Sabzi, Vazhakkai Fry, Surmai Curry, Rawas Fish, Bangda Curry, Bombil Fry, Squid Stir Fry, Koliwada Prawn, Malvani Chicken Curry, Kombdi Vade, Saoji Chicken Curry, Amboli, Karanji, Undi, Tisrya Masala, Pathande, Masala Crab.
 - [x] **#153 Test coverage** — All files pass thresholds (100% green). No fixes needed.
-- [ ] **#140 Exercise visual enrichment research** — Per design doc #66. Research image/video sources (Wger, free-exercise-db, YouTube API, public domain GIFs). Document findings in `Docs/designs/133-exercise-enrichment.md` (create if missing). Time-boxed — go/no-go decision after research, not indefinite deferral.
+- [x] **#140 Exercise visual enrichment research** — Research complete. Doc at `Docs/designs/133-exercise-enrichment.md`: GO decision, free-exercise-db (MIT) for GIFs, YouTube manual curation for top 50. SENIOR impl task needed.
 
 ### Design Docs (approved — pending implementation slot)
 - #66 Design: Exercise image/video enrichment — `doc-ready`, `approved`
