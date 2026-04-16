@@ -87,12 +87,21 @@ struct GoalSetupView: View {
                         let p = Double(customProtein) ?? 0
                         let c = Double(customCarbs) ?? 0
                         let f = Double(customFat) ?? 0
-                        let implied = p * 4 + c * 4 + f * 9
                         let weightForFloor = getCurrentWeight() ?? existingGoal?.startWeightKg ?? 70
                         let fatFloor = WeightGoal.minimumFatG(bodyweightKg: weightForFloor, calorieTarget: nil)
+                        // Effective fat: user value (floored) or auto-computed minimum
+                        let effectiveFat = f > 0 ? max(f, fatFloor) : fatFloor
+                        let hasAnyEntry = p > 0 || c > 0 || f > 0
+                        let effectiveTotal = p * 4 + c * 4 + effectiveFat * 9
+                        let enteredOnly = p * 4 + c * 4 + (f > 0 ? f * 9 : 0)
                         VStack(alignment: .leading, spacing: 2) {
-                            if implied > 0 {
-                                Text("Total: \(Int(implied)) kcal/day. Blank fields auto-compute within your calorie target.")
+                            if hasAnyEntry {
+                                if f == 0 {
+                                    // Fat is auto — show entered subtotal + auto fat so user sees the real picture
+                                    Text("Entered: \(Int(enteredOnly)) kcal + auto fat ~\(Int(effectiveFat))g = ~\(Int(effectiveTotal)) kcal/day. Blank fields auto-compute within your calorie target.")
+                                } else {
+                                    Text("Total: \(Int(effectiveTotal)) kcal/day. Blank fields auto-compute within your calorie target.")
+                                }
                             } else {
                                 Text("Enter grams to override. Blank fields auto-compute within your calorie target.")
                             }

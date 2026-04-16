@@ -174,21 +174,35 @@ struct WeightGoal: Codable, Sendable {
                                 fatWasClamped: fat > f)
         }
 
-        // Partial or no overrides: TDEE anchors auto-fill of unset macros (primarily carbs).
-        // Fat floor always enforced even on explicit user input.
-        // Reported calorie = actual macro sum — if extreme protein pushes above TDEE, we report honestly.
+        // Partial or no overrides: TDEE anchors auto-fill of unset macros.
+        // Fill rule: the unset flexible macro fills the remaining TDEE budget.
+        //   - Fat not set, carbs set → fat fills remaining (carbs can't flex)
+        //   - Fat set (or both unset) → carbs fill remaining (standard path)
+        // Fat floor always enforced. Reported calorie = actual macro sum.
         guard let tdeeAnchor = resolvedCalorieTarget(currentWeightKg: currentWeightKg, actualTDEE: actualTDEE) else { return nil }
 
         let protein = proteinTargetG ?? (weight * pref.proteinPerKg)
-        let fatFromPref = tdeeAnchor * pref.fatCalorieFraction / 9
-        let fatBase = fatTargetG ?? max(fatFromPref, fatFloor)
-        let fat = max(fatBase, fatFloor)                        // floor always wins, even on explicit input
-        let remainingCal = tdeeAnchor - (protein * 4) - (fat * 9)
-        let carbs = carbsTargetG ?? max(0, remainingCal / 4)    // floor at 0, can't go negative
+
+        let fat: Double
+        let carbs: Double
+        let userSetFat = fatTargetG
+
+        if fatTargetG == nil, let c = carbsTargetG {
+            // Carbs fixed, fat is the fill macro — avoid unexpected deficit
+            let remainingForFat = tdeeAnchor - protein * 4 - c * 4
+            fat = max(remainingForFat / 9, fatFloor)
+            carbs = c
+        } else {
+            // Standard: fat from preference %, carbs fill remaining
+            let fatFromPref = tdeeAnchor * pref.fatCalorieFraction / 9
+            let fatBase = fatTargetG ?? max(fatFromPref, fatFloor)
+            fat = max(fatBase, fatFloor)                        // floor always wins, even on explicit input
+            let remainingCal = tdeeAnchor - protein * 4 - fat * 9
+            carbs = carbsTargetG ?? max(0, remainingCal / 4)    // floor at 0, can't go negative
+        }
 
         // Always report what the user will actually eat, not the TDEE anchor.
         let effectiveCal = protein * 4 + carbs * 4 + fat * 9
-        let userSetFat = fatTargetG
         return MacroTargets(proteinG: protein, carbsG: carbs, fatG: fat,
                             calorieTarget: effectiveCal, isLosing: isLosing, preference: pref,
                             fatWasClamped: userSetFat != nil && fat > userSetFat!)
