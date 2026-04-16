@@ -511,7 +511,13 @@ struct FoodUnit: Hashable {
             return FoodUnit(label: "piece", gramsEquivalent: ss)
         }
 
-        // Parmesan and feta — grated/crumbled topping; measured by tbsp
+        // Parmesan-style dishes (breaded protein topped with marinara/cheese) — single piece
+        if name.contains("chicken parmesan") || name.contains("eggplant parmesan") ||
+           name.contains("veal parmesan") || name.contains("parmigiana") {
+            return FoodUnit(label: "piece", gramsEquivalent: ss)
+        }
+
+        // Parmesan and feta cheese — grated/crumbled topping; measured by tbsp
         if name.contains("parmesan") || name.contains("feta") {
             return FoodUnit(label: "tbsp", gramsEquivalent: 15)
         }
@@ -566,7 +572,9 @@ struct FoodUnit: Hashable {
 
         // Tablespoon items (word boundaries: "boiled" contains "oil", "butternut" contains "butter")
         if words.contains("oil") || words.contains("ghee") { return FoodUnit(label: "tbsp", gramsEquivalent: 15) }
-        if words.contains("butter") && !name.contains("peanut") && !name.contains("almond") && !name.contains("paneer") {
+        // Exclude "butter chicken" — it's a dish (bowl), not a fat/spread (tbsp)
+        if words.contains("butter") && !name.contains("peanut") && !name.contains("almond") &&
+           !name.contains("paneer") && !name.contains("chicken") {
             return FoodUnit(label: "tbsp", gramsEquivalent: 14)
         }
 
@@ -735,11 +743,12 @@ struct FoodUnit: Hashable {
             return FoodUnit(label: "bowl", gramsEquivalent: ss)
         }
 
-        // Soups, stews, broths, liquid desserts, chili (dish) — served by bowl
+        // Soups, stews, broths, stocks, liquid desserts, chili (dish) — served by bowl
         // ss > 15 guard keeps spice powders (chili powder, chili flakes) from matching
         if name.contains("soup") || name.contains("stew") || name.contains("chowder") ||
-           name.contains("bisque") || name.contains("broth") || name.contains("rasam") ||
-           name.contains("sambar") || name.contains("sambhar") || name.contains("payasam") {
+           name.contains("bisque") || name.contains("broth") || name.contains("stock") ||
+           name.contains("rasam") || name.contains("sambar") || name.contains("sambhar") ||
+           name.contains("payasam") {
             return FoodUnit(label: "bowl", gramsEquivalent: ss)
         }
         if (words.contains("chili") || words.contains("chilli")) && ss > 15 &&
@@ -840,6 +849,7 @@ struct FoodUnit: Hashable {
         // Exclude beverages like masala chai, masala tea
         if (name.contains("curry") || name.contains("sabzi") || name.contains("sabji") ||
             name.contains("saag") || name.contains("palak") || name.contains("makhani") ||
+            name.contains("butter chicken") || name.contains("vindaloo") ||
             name.contains("biryani") || name.contains("pulao") || name.contains("pilaf") ||
             name.contains("khichdi") || name.contains("masala") || name.contains("kheer") ||
             name.contains("halwa") || name.contains("bharta") ||

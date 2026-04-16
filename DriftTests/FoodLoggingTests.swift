@@ -451,6 +451,35 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     #expect(FoodUnit.smartUnits(for: food).first?.label == "tbsp", "Feta should default to tbsp")
 }
 
+// Regression: "Butter Chicken" was getting tbsp (butter word rule firing before dish rules)
+@Test func smartUnitButterChickenShowsBowl() {
+    let food = Food(name: "Butter Chicken", category: "Indian Mains", servingSize: 250, servingUnit: "g", calories: 350)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "bowl", "Butter Chicken is a dish — should be bowl, not tbsp")
+    let frozen = Food(name: "TJ's Butter Chicken (frozen)", category: "Frozen", servingSize: 284, servingUnit: "g", calories: 400)
+    #expect(FoodUnit.smartUnits(for: frozen).first?.label == "bowl", "Frozen Butter Chicken should also be bowl")
+}
+
+// Regression: "Chicken Parmesan" was getting tbsp (parmesan rule firing before dish check)
+@Test func smartUnitChickenParmesanShowsPiece() {
+    let food = Food(name: "Chicken Parmesan", category: "Mains", servingSize: 300, servingUnit: "g", calories: 480)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "piece", "Chicken Parmesan is a dish — should be piece, not tbsp")
+    // Plain parmesan cheese itself should still be tbsp
+    let cheese = Food(name: "Parmesan Cheese (grated)", category: "Dairy", servingSize: 15, servingUnit: "g", calories: 55)
+    #expect(FoodUnit.smartUnits(for: cheese).first?.label == "tbsp", "Parmesan cheese itself should remain tbsp")
+}
+
+// Regression: "Chicken Vindaloo" was falling through to serving (vindaloo not in curry list)
+@Test func smartUnitVindalooShowsBowl() {
+    let food = Food(name: "Chicken Vindaloo", category: "Indian Mains", servingSize: 250, servingUnit: "g", calories: 320)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "bowl", "Vindaloo should default to bowl")
+}
+
+// Regression: "Chicken Stock" was getting serving ("stock" not in broth/soup list)
+@Test func smartUnitChickenStockShowsBowl() {
+    let food = Food(name: "Kirkland Organic Chicken Stock", category: "Pantry", servingSize: 240, servingUnit: "ml", calories: 20)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "bowl", "Chicken stock should default to bowl like broth")
+}
+
 @Test func smartUnitShreddedCheeseShowsCup() {
     let cheddar = Food(name: "Cheddar Cheese (Shredded)", category: "Dairy", servingSize: 112, servingUnit: "g", calories: 450)
     #expect(FoodUnit.smartUnits(for: cheddar).first?.label == "cup", "Shredded cheddar should default to cup")
