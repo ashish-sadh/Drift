@@ -594,6 +594,186 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     #expect(entry.portionText == "1 cup", "Shredded cheese should show cup")
 }
 
+// MARK: - Smart Unit Tests — Batch 2/3 (flatbreads, snacks, grains, meats, produce)
+
+@Test func smartUnitBhakri() {
+    let food = Food(name: "Bhakri (Jowar)", category: "Indian Breads", servingSize: 50, servingUnit: "g", calories: 160)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "piece", "Bhakri should default to piece")
+}
+
+@Test func smartUnitBhujia() {
+    let food = Food(name: "Aloo Bhujia", category: "Indian Snacks", servingSize: 30, servingUnit: "g", calories: 160)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "cup", "Aloo Bhujia should default to cup (loose snack)")
+    // Aloo sabzi (not bhujia) should still be bowl
+    let sabzi = Food(name: "Aloo Matar Sabzi", category: "Indian Mains", servingSize: 200, servingUnit: "g", calories: 180)
+    #expect(FoodUnit.smartUnits(for: sabzi).first?.label == "bowl", "Aloo sabzi should be bowl")
+}
+
+@Test func smartUnitAncientGrainsShowCup() {
+    let barley = Food(name: "Barley (cooked)", category: "Grains", servingSize: 182, servingUnit: "g", calories: 193)
+    #expect(FoodUnit.smartUnits(for: barley).first?.label == "cup", "Barley should default to cup")
+    let farro = Food(name: "Farro (cooked)", category: "Grains", servingSize: 182, servingUnit: "g", calories: 220)
+    #expect(FoodUnit.smartUnits(for: farro).first?.label == "cup", "Farro should default to cup")
+    let millet = Food(name: "Millet", category: "Grains", servingSize: 182, servingUnit: "g", calories: 207)
+    #expect(FoodUnit.smartUnits(for: millet).first?.label == "cup", "Millet should default to cup")
+}
+
+@Test func smartUnitFloursShowCup() {
+    let besan = Food(name: "Besan (Chickpea Flour)", category: "Flours", servingSize: 120, servingUnit: "g", calories: 440)
+    #expect(FoodUnit.smartUnits(for: besan).first?.label == "cup", "Besan should default to cup")
+    let bajra = Food(name: "Bajra Flour", category: "Flours", servingSize: 120, servingUnit: "g", calories: 380)
+    #expect(FoodUnit.smartUnits(for: bajra).first?.label == "cup", "Bajra flour should default to cup")
+    let ragi = Food(name: "Ragi Flour", category: "Flours", servingSize: 120, servingUnit: "g", calories: 336)
+    #expect(FoodUnit.smartUnits(for: ragi).first?.label == "cup", "Ragi flour should default to cup")
+}
+
+@Test func smartUnitJerkyShowsStrip() {
+    let food = Food(name: "Beef Jerky", category: "Snacks", servingSize: 28, servingUnit: "g", calories: 116)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "strip", "Beef jerky should default to strip")
+    let turkey = Food(name: "Turkey Jerky", category: "Snacks", servingSize: 28, servingUnit: "g", calories: 90)
+    #expect(FoodUnit.smartUnits(for: turkey).first?.label == "strip", "Turkey jerky should default to strip")
+}
+
+@Test func smartUnitCalamariShowsPiece() {
+    let food = Food(name: "Fried Calamari", category: "Seafood", servingSize: 60, servingUnit: "g", calories: 150)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "piece", "Calamari should default to piece")
+}
+
+@Test func smartUnitBuiltBarShowsPiece() {
+    let food = Food(name: "Built Bar (Coconut Almond)", category: "Protein Bars", servingSize: 56, servingUnit: "g", calories: 180)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "piece", "Built Bar should default to piece")
+}
+
+@Test func smartUnitCantaloupeShowsPiece() {
+    let food = Food(name: "Cantaloupe", category: "Fruits", servingSize: 177, servingUnit: "g", calories: 60)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "piece", "Cantaloupe should default to piece")
+    let honeydew = Food(name: "Honeydew Melon", category: "Fruits", servingSize: 177, servingUnit: "g", calories: 64)
+    #expect(FoodUnit.smartUnits(for: honeydew).first?.label == "piece", "Honeydew should default to piece")
+}
+
+@Test func smartUnitCherryTomatoShowsCup() {
+    let food = Food(name: "Cherry Tomatoes", category: "Vegetables", servingSize: 150, servingUnit: "g", calories: 27)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "cup", "Cherry tomatoes should default to cup")
+}
+
+@Test func smartUnitCeleryShowsPiece() {
+    let food = Food(name: "Celery (2 stalks)", category: "Vegetables", servingSize: 80, servingUnit: "g", calories: 13)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "piece", "Celery should default to piece (stalk)")
+}
+
+@Test func smartUnitBegunBhajaShowsPiece() {
+    let food = Food(name: "Begun Bhaja (Bengali Fried Eggplant)", category: "Indian Mains", servingSize: 100, servingUnit: "g", calories: 120)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "piece", "Begun Bhaja should default to piece")
+    let stuffed = Food(name: "Bharwa Baingan", category: "Indian Mains", servingSize: 150, servingUnit: "g", calories: 180)
+    #expect(FoodUnit.smartUnits(for: stuffed).first?.label == "piece", "Bharwa Baingan should default to piece")
+}
+
+@Test func smartUnitStirFryShowsBowl() {
+    let food = Food(name: "Chicken Stir Fry", category: "Mains", servingSize: 300, servingUnit: "g", calories: 350)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "bowl", "Stir fry should default to bowl")
+    let rendang = Food(name: "Beef Rendang", category: "Mains", servingSize: 250, servingUnit: "g", calories: 420)
+    #expect(FoodUnit.smartUnits(for: rendang).first?.label == "bowl", "Rendang should default to bowl")
+}
+
+@Test func smartUnitKoreanDishesShowBowl() {
+    let bulgogi = Food(name: "Beef Bulgogi", category: "Korean", servingSize: 200, servingUnit: "g", calories: 280)
+    #expect(FoodUnit.smartUnits(for: bulgogi).first?.label == "bowl", "Bulgogi should default to bowl")
+    let galbi = Food(name: "Galbi (Korean Short Ribs)", category: "Korean", servingSize: 200, servingUnit: "g", calories: 380)
+    #expect(FoodUnit.smartUnits(for: galbi).first?.label == "bowl", "Galbi should default to bowl")
+}
+
+@Test func smartUnitChettinadShowsBowl() {
+    let food = Food(name: "Chicken Chettinad", category: "Indian Mains", servingSize: 250, servingUnit: "g", calories: 350)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "bowl", "Chicken Chettinad should default to bowl")
+    let handi = Food(name: "Chicken Handi", category: "Indian Mains", servingSize: 250, servingUnit: "g", calories: 380)
+    #expect(FoodUnit.smartUnits(for: handi).first?.label == "bowl", "Chicken Handi should default to bowl")
+}
+
+// MARK: - Portion Text Tests — Batch 2/3
+
+@Test func portionTextBhakri() {
+    let entry = FoodEntry(mealLogId: 1, foodName: "Bhakri (Jowar)", servingSizeG: 50, servings: 2, calories: 160)
+    #expect(entry.portionText == "2 bhakris", "Bhakri should show bhakris")
+}
+
+@Test func portionTextLadooVariants() {
+    let ladoo = FoodEntry(mealLogId: 1, foodName: "Besan Ladoo", servingSizeG: 40, servings: 2, calories: 200)
+    #expect(ladoo.portionText == "2 pieces", "Ladoo should show pieces")
+    let modak = FoodEntry(mealLogId: 1, foodName: "Ukadiche Modak", servingSizeG: 50, servings: 3, calories: 150)
+    #expect(modak.portionText == "3 pieces", "Modak should show pieces")
+    let baklava = FoodEntry(mealLogId: 1, foodName: "Baklava", servingSizeG: 35, servings: 2, calories: 180)
+    #expect(baklava.portionText == "2 pieces", "Baklava should show pieces")
+}
+
+@Test func portionTextBhujia() {
+    let entry = FoodEntry(mealLogId: 1, foodName: "Aloo Bhujia", servingSizeG: 30, servings: 1, calories: 160)
+    #expect(entry.portionText == "1 cup", "Bhujia should show cup")
+}
+
+@Test func portionTextGrains() {
+    let barley = FoodEntry(mealLogId: 1, foodName: "Barley (cooked)", servingSizeG: 182, servings: 1, calories: 193)
+    #expect(barley.portionText == "1 cup", "Barley should show cup")
+    let bulgur = FoodEntry(mealLogId: 1, foodName: "Bulgur Wheat", servingSizeG: 182, servings: 2, calories: 150)
+    #expect(bulgur.portionText == "2 cups", "Bulgur should show cups")
+}
+
+@Test func portionTextFlours() {
+    let besan = FoodEntry(mealLogId: 1, foodName: "Besan (Chickpea Flour)", servingSizeG: 120, servings: 1, calories: 440)
+    #expect(besan.portionText == "1 cup", "Besan should show cup")
+    let ragi = FoodEntry(mealLogId: 1, foodName: "Ragi Flour", servingSizeG: 120, servings: 1, calories: 336)
+    #expect(ragi.portionText == "1 cup", "Ragi flour should show cup")
+}
+
+@Test func portionTextStirFryAndBulgogi() {
+    let stirFry = FoodEntry(mealLogId: 1, foodName: "Chicken Stir Fry", servingSizeG: 300, servings: 1, calories: 350)
+    #expect(stirFry.portionText == "1 bowl", "Stir fry should show bowl")
+    let bulgogi = FoodEntry(mealLogId: 1, foodName: "Beef Bulgogi", servingSizeG: 200, servings: 1, calories: 280)
+    #expect(bulgogi.portionText == "1 bowl", "Bulgogi should show bowl")
+    let rendang = FoodEntry(mealLogId: 1, foodName: "Beef Rendang", servingSizeG: 250, servings: 1, calories: 420)
+    #expect(rendang.portionText == "1 bowl", "Rendang should show bowl")
+}
+
+@Test func portionTextPastaExtended() {
+    let mac = FoodEntry(mealLogId: 1, foodName: "Mac and Cheese", servingSizeG: 240, servings: 1, calories: 380)
+    #expect(mac.portionText == "1 cup", "Mac and cheese should show cup")
+    let carbonara = FoodEntry(mealLogId: 1, foodName: "Pasta Carbonara", servingSizeG: 250, servings: 1, calories: 450)
+    #expect(carbonara.portionText == "1 cup", "Carbonara should show cup")
+    let gnocchi = FoodEntry(mealLogId: 1, foodName: "Gnocchi", servingSizeG: 170, servings: 1, calories: 280)
+    #expect(gnocchi.portionText == "1 cup", "Gnocchi should show cup")
+}
+
+@Test func portionTextDessertSlices() {
+    let cheesecake = FoodEntry(mealLogId: 1, foodName: "New York Cheesecake", servingSizeG: 120, servings: 1, calories: 400)
+    #expect(cheesecake.portionText == "1 slice", "Cheesecake should show slice")
+    let tiramisu = FoodEntry(mealLogId: 1, foodName: "Tiramisu", servingSizeG: 150, servings: 1, calories: 350)
+    #expect(tiramisu.portionText == "1 slice", "Tiramisu should show slice")
+    let pannaCotta = FoodEntry(mealLogId: 1, foodName: "Panna Cotta", servingSizeG: 120, servings: 1, calories: 210)
+    #expect(pannaCotta.portionText == "1 piece", "Panna cotta should show piece")
+}
+
+@Test func portionTextCoffeeDrinksShowMl() {
+    let latte = FoodEntry(mealLogId: 1, foodName: "Oat Milk Latte", servingSizeG: 240, servings: 1, calories: 120)
+    #expect(latte.portionText == "240ml", "Latte should show ml not grams")
+    let espresso = FoodEntry(mealLogId: 1, foodName: "Espresso", servingSizeG: 30, servings: 2, calories: 4)
+    #expect(espresso.portionText == "60ml", "Espresso should show ml")
+    let cappuccino = FoodEntry(mealLogId: 1, foodName: "Cappuccino", servingSizeG: 180, servings: 1, calories: 80)
+    #expect(cappuccino.portionText == "180ml", "Cappuccino should show ml")
+}
+
+@Test func portionTextFastFood() {
+    let bigMac = FoodEntry(mealLogId: 1, foodName: "Big Mac", servingSizeG: 200, servings: 1, calories: 563)
+    #expect(bigMac.portionText == "1 piece", "Big Mac should show piece")
+    let whopper = FoodEntry(mealLogId: 1, foodName: "Whopper", servingSizeG: 270, servings: 1, calories: 657)
+    #expect(whopper.portionText == "1 piece", "Whopper should show piece")
+}
+
+@Test func portionTextCornOnCob() {
+    let cob = FoodEntry(mealLogId: 1, foodName: "Corn on the Cob", servingSizeG: 90, servings: 2, calories: 77)
+    #expect(cob.portionText == "2 pieces", "Corn on the cob should show pieces")
+    let kernels = FoodEntry(mealLogId: 1, foodName: "Sweet Corn (cooked)", servingSizeG: 154, servings: 1, calories: 132)
+    #expect(kernels.portionText == "1 cup", "Corn kernels should show cup")
+}
+
 // MARK: - Food Usage Tracking Tests (6 tests)
 
 @Test func trackFoodUsageInsert() async throws {

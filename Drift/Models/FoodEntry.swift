@@ -102,6 +102,7 @@ extension FoodEntry {
         if lower.contains("roti") || lower.contains("chapati") { return fmt(servings, "roti", "rotis") }
         if lower.contains("paratha") { return fmt(servings, "paratha", "parathas") }
         if lower.contains("naan") { return fmt(servings, "naan", "naans") }
+        if lower.contains("bhakri") { return fmt(servings, "bhakri", "bhakris") }
         if lower.contains("dosa") { return fmt(servings, "dosa", "dosas") }
         if lower.contains("idli") { return fmt(servings, "idli", "idlis") }
         if lower.contains("samosa") { return fmt(servings, "samosa", "samosas") }
@@ -115,10 +116,15 @@ extension FoodEntry {
         if lower.contains("uttapam") && servingSizeG < 150 { return fmt(servings, "uttapam", "uttapams") }
         if lower.contains("kachori") && servingSizeG < 200 { return fmt(servings, "kachori", "kachoris") }
         // Indian sweets
-        if lower.contains("laddu") || lower.contains("laddoo") || lower.contains("barfi") ||
-           lower.contains("burfi") || lower.contains("jalebi") || lower.contains("rasgulla") ||
-           lower.contains("modak") || lower.contains("peda") || lower.contains("gujiya") ||
-           lower.contains("kaju katli") { return fmt(servings, "piece", "pieces") }
+        if lower.contains("laddu") || lower.contains("laddoo") || lower.contains("ladoo") ||
+           lower.contains("barfi") || lower.contains("burfi") || lower.contains("jalebi") ||
+           lower.contains("rasgulla") || lower.contains("modak") || lower.contains("peda") ||
+           lower.contains("gujiya") || lower.contains("kaju katli") ||
+           lower.contains("kalakand") || lower.contains("mysore pak") || lower.contains("sandesh") ||
+           lower.contains("malpua") || lower.contains("soan papdi") || lower.contains("bebinca") ||
+           lower.contains("kozhukattai") || lower.contains("thekua") || lower.contains("baklava") {
+            return fmt(servings, "piece", "pieces")
+        }
         // Indian snack pieces
         if lower.contains("omelette") || lower.contains("omelet") || lower.contains("frittata") {
             return fmt(servings, "omelette", "omelettes")
@@ -132,6 +138,27 @@ extension FoodEntry {
         if lower.contains("pav bhaji") || lower.contains("misal") {
             return fmt(servings, "bowl", "bowls")
         }
+        // Indian crispy snack pieces
+        if lower.contains("chakli") || lower.contains("murukku") || lower.contains("mathri") ||
+           lower.contains("bhakarwadi") || lower.contains("namak pare") || lower.contains("shakarpara") ||
+           lower.contains("shakkar pare") || lower.contains("seedai") || lower.contains("chikki") {
+            return fmt(servings, "piece", "pieces")
+        }
+        // Aloo tikki (potato patty) — piece
+        if lower.contains("tikki") { return fmt(servings, "piece", "pieces") }
+        // Bhujia (loose crispy snack) — cup
+        if lower.contains("bhujia") { return fmt(servings, "cup", "cups") }
+        // Loose Indian snack mixes — cup
+        if lower.contains("murmura") ||
+           (lower.contains("sev") && !lower.contains("puri")) ||
+           lower.contains("chivda") || lower.contains("namkeen") { return fmt(servings, "cup", "cups") }
+        // Ancient/whole grains (cooked) — cup
+        if lower.contains("barley") || lower.contains("bulgur") || lower.contains("farro") ||
+           lower.contains("freekeh") || lower.contains("millet") || lower.contains("sorghum") ||
+           lower.contains("teff") || lower.contains("amaranth") { return fmt(servings, "cup", "cups") }
+        // Flours and meals — cup
+        if lower.contains("besan") || lower.contains("bajra") || lower.contains("maida") ||
+           lower.contains("ragi") || lower.contains("jowar") { return fmt(servings, "cup", "cups") }
         if lower.contains("nugget") { return fmt(servings, "nugget", "nuggets") }
         if lower.contains("wing") && servingSizeG < 100 { return fmt(servings, "wing", "wings") }
         if lower.contains("strip") && servingSizeG < 50 { return fmt(servings, "strip", "strips") }
@@ -147,6 +174,7 @@ extension FoodEntry {
         if lower.contains("french toast") || lower.contains("croissant") || lower.contains("danish") {
             return fmt(servings, "piece", "pieces")
         }
+        if lower.contains("baguette") || lower.contains("kulcha") { return fmt(servings, "piece", "pieces") }
         // Bread/toast → slice (exclude breadfruit, breadstick, per-slice entries already caught above)
         if (lower.contains("bread") || lower.contains("toast")) &&
            !lower.contains("breadfruit") && !lower.contains("breadstick") && servingSizeG < 80 {
@@ -161,6 +189,19 @@ extension FoodEntry {
             return fmt(servings, "scoop", "scoops")
         }
         if lower.contains("almond butter") { return fmt(servings, "tbsp", "tbsp") }
+        if lower.contains("peanut butter") || lower.contains("pb2") { return fmt(servings, "tbsp", "tbsp") }
+        // Cheeses
+        if lower.contains("string cheese") { return fmt(servings, "piece", "pieces") }
+        if lower.contains("mozzarella stick") { return fmt(servings, "piece", "pieces") }
+        if lower.contains("burrata") { return fmt(servings, "piece", "pieces") }
+        if (lower.contains("cheddar") || lower.contains("mozzarella") || lower.contains("provolone") ||
+            lower.contains("gruyere") || lower.contains("gouda") || lower.contains("halloumi") ||
+            lower.contains("colby") || lower.contains("monterey jack") || lower.contains("pepper jack") ||
+            lower.contains("swiss cheese") || lower.contains("saganaki")) &&
+           !lower.contains("shredded") && !lower.contains("grated") { return fmt(servings, "slice", "slices") }
+        if lower.contains("brie") || lower.contains("goat cheese") || lower.contains("mascarpone") ||
+           lower.contains("ricotta") || lower.contains("quark") || lower.contains("labneh") ||
+           (lower.contains("blue cheese") && !lower.contains("dressing")) { return fmt(servings, "tbsp", "tbsp") }
         if (lower.contains("syrup") && !lower.contains("cough")) || lower.contains("agave") {
             return fmt(servings, "tbsp", "tbsp")
         }
@@ -186,6 +227,97 @@ extension FoodEntry {
         // Standalone pav (bread roll)
         let lowerWords = Set(lower.split(whereSeparator: { !$0.isLetter }).map(String.init))
         if lowerWords.contains("pav") { return fmt(servings, "pav", "pavs") }
+        // Pho and ramen — bowl
+        if lower.contains("pho") || lower.contains("ramen") || lower.contains("ramyeon") {
+            return fmt(servings, "bowl", "bowls")
+        }
+        // Aloo Indian sabzis — bowl (tikki already caught above)
+        if lower.contains("aloo") && !lower.contains("tikki") && !lower.contains("bhujia") &&
+           !lower.contains("puri") { return fmt(servings, "bowl", "bowls") }
+        // Keema, haleem, nihari — bowl
+        if lower.contains("keema") || lower.contains("haleem") || lower.contains("nihari") {
+            return fmt(servings, "bowl", "bowls")
+        }
+        // Asian stir-fry and noodle dishes — bowl
+        if lower.contains("pad thai") || lower.contains("pad see ew") || lower.contains("pad kra pao") ||
+           lower.contains("general tso") || lower.contains("kung pao") || lower.contains("sweet and sour") ||
+           lower.contains("sesame chicken") || lower.contains("char siu") ||
+           lower.contains("lo mein") || lower.contains("chow mein") ||
+           lower.contains("bibimbap") || lower.contains("japchae") ||
+           lower.contains("jajangmyeon") || lower.contains("jjajangmyeon") || lower.contains("dakgalbi") ||
+           lower.contains("nasi goreng") || lower.contains("nasi lemak") || lower.contains("pancit") ||
+           lower.contains("kare-kare") || lower.contains("sinigang") || lower.contains("sisig") ||
+           lower.contains("tteokbokki") || lower.contains("okonomiyaki") || lower.contains("cao lau") ||
+           lower.contains("bun cha") || lower.contains("bun bo") || lower.contains("thukpa") ||
+           lower.contains("bibim naengmyeon") || lower.contains("bun thit nuong") {
+            return fmt(servings, "bowl", "bowls")
+        }
+        // South Indian and regional Indian dishes — bowl
+        if lower.contains("avial") || lower.contains("aviyal") || lower.contains("thoran") ||
+           lower.contains("poriyal") || lower.contains("kootu") || lower.contains("olan") ||
+           lower.contains("bisi bele") || lower.contains("bisibele") ||
+           lower.contains("zunka") || lower.contains("pithla") || lower.contains("galho") ||
+           lower.contains("kosha") || lower.contains("laal maas") || lower.contains("eromba") ||
+           lower.contains("masor tenga") || lower.contains("shorshe") || lower.contains("gongura") ||
+           lower.contains("meen kuzhambu") || lower.contains("doi maach") || lower.contains("fish molee") ||
+           lower.contains("chettinad") || lower.contains("chicken handi") || lower.contains("chicken adobo") {
+            return fmt(servings, "bowl", "bowls")
+        }
+        // Stir-fry dishes, rendang — bowl
+        if (lower.contains("stir fry") || lower.contains("stir-fry")) && !lower.contains("vegetable blend") {
+            return fmt(servings, "bowl", "bowls")
+        }
+        if lower.contains("rendang") { return fmt(servings, "bowl", "bowls") }
+        // Fajitas, bulgogi, Korean/African dishes — bowl
+        if lower.contains("fajita") || lower.contains("bulgogi") || lower.contains("jerk chicken") ||
+           lower.contains("peri peri") || lower.contains("piri piri") || lower.contains("tocino") ||
+           lower.contains("arroz con pollo") || lower.contains("bunny chow") || lower.contains("bobotie") ||
+           lower.contains("kitfo") || lower.contains("tibs") || lower.contains("doro wat") ||
+           lower.contains("shiro wat") || lower.contains("suya") ||
+           lower.contains("galbi") || lower.contains("samgyeopsal") || lower.contains("dakgui") {
+            return fmt(servings, "bowl", "bowls")
+        }
+        // Fried/baked finger foods — piece
+        if lower.contains("empanada") || lower.contains("calzone") || lower.contains("chimichanga") ||
+           lower.contains("tamale") || lower.contains("arepa") || lower.contains("pupusa") ||
+           lower.contains("arancini") || lower.contains("bao bun") || lower.contains("steamed bao") ||
+           lower.contains("tostada") || lower.contains("corn dog") ||
+           lower.contains("gyoza") || lower.contains("takoyaki") || lower.contains("kibbeh") ||
+           lower.contains("dolma") || lower.contains("stuffed grape") || lower.contains("spanakopita") ||
+           lower.contains("bruschetta") || lower.contains("onion ring") || lower.contains("cannoli") ||
+           lower.contains("churros") || lower.contains("lumpia") || lower.contains("injera") {
+            return fmt(servings, "piece", "pieces")
+        }
+        // Casserole, loaf, and slice desserts — slice
+        if lower.contains("meatloaf") || lower.contains("lasagna") || lower.contains("moussaka") ||
+           lower.contains("cottage pie") || lower.contains("shepherd") ||
+           lower.contains("cheesecake") || lower.contains("tiramisu") || lower.contains("key lime pie") ||
+           lower.contains("tres leches") || lower.contains("pumpkin pie") || lower.contains("peach cobbler") {
+            return fmt(servings, "slice", "slices")
+        }
+        // Cup/bowl-served desserts — piece
+        if lower.contains("panna cotta") || lower.contains("funnel cake") || lower.contains("bingsu") {
+            return fmt(servings, "piece", "pieces")
+        }
+        // Pulled/shredded slow-cooked meats — cup
+        if lower.contains("carnitas") || lower.contains("barbacoa") || lower.contains("pulled pork") ||
+           lower.contains("al pastor") { return fmt(servings, "cup", "cups") }
+        // Brisket, ribs — piece
+        if lower.contains("brisket") || lower.contains("ribs") { return fmt(servings, "piece", "pieces") }
+        // Popcorn — cup
+        if lower.contains("popcorn") { return fmt(servings, "cup", "cups") }
+        // Corn on the cob or elote — piece; other corn — cup
+        if lower.contains("corn on the cob") || lower.contains("elote") { return fmt(servings, "piece", "pieces") }
+        if lower.contains("corn") && !lower.contains("chip") && !lower.contains("dog") &&
+           !lower.contains("flake") && !lower.contains("popcorn") { return fmt(servings, "cup", "cups") }
+        // Pasta and noodle dishes — cup
+        if lower.contains("pasta") || lower.contains("spaghetti") || lower.contains("penne") ||
+           lower.contains("macaroni") || lower.contains("fettuccine") || lower.contains("linguine") ||
+           lower.contains("fusilli") || lower.contains("rigatoni") || lower.contains("noodle") ||
+           lower.contains("mac and cheese") || lower.contains("mac & cheese") ||
+           lower.contains("carbonara") || lower.contains("cacio e pepe") || lower.contains("gnocchi") {
+            return fmt(servings, "cup", "cups")
+        }
         // Soups, stews, broths, liquid desserts, chili (dish), pudding → bowl
         if lower.contains("soup") || lower.contains("stew") || lower.contains("chowder") ||
            lower.contains("broth") || lower.contains("bisque") || lower.contains("payasam") ||
@@ -205,15 +337,38 @@ extension FoodEntry {
            !lower.contains("mashed") && !lower.contains("sweet") {
             return fmt(servings, "piece", "pieces")
         }
+        // Leafy greens — cup
+        if lower.contains("arugula") || lower.contains("romaine") ||
+           (lower.contains("lettuce") && !lower.contains("taco")) { return fmt(servings, "cup", "cups") }
         if lower.contains("broccoli") || lower.contains("cauliflower") || lower.contains("asparagus") ||
            lower.contains("green bean") || lower.contains("edamame") ||
            lower.contains("kale") || (lower.contains("spinach") && !lower.contains("artichoke") && !lower.contains("dip")) {
             return fmt(servings, "cup", "cups")
         }
         if lower.contains("zucchini") || lower.contains("courgette") { return fmt(servings, "piece", "pieces") }
+        if lower.contains("eggplant") || lower.contains("brinjal") { return fmt(servings, "piece", "pieces") }
         // Salads — bowl (dressings already matched by condiment rules and show as grams)
         if lower.contains("salad") && !lower.contains("dressing") {
             return fmt(servings, "bowl", "bowls")
+        }
+
+        // Fast food items by brand name — piece
+        if lower.contains("big mac") || lower.contains("mcdouble") || lower.contains("mcchicken") ||
+           lower.contains("filet-o-fish") || lower.contains("quarter pounder") ||
+           lower.contains("whopper") || lower.contains("veg whopper") || lower.contains("dave's single") {
+            return fmt(servings, "piece", "pieces")
+        }
+        // Liquid foods (coffee drinks, spirits, Indian drinks) — ml
+        if lower.contains("latte") || lower.contains("cappuccino") || lower.contains("espresso") ||
+           lower.contains("macchiato") || lower.contains("frappuccino") || lower.contains("americano") ||
+           lower.contains("cold brew") || lower.contains("matcha latte") ||
+           lower.contains("aam panna") || lower.contains("thandai") || lower.contains("jaljeera") ||
+           lower.contains("nimbu pani") || lower.contains("nimbu soda") || lower.contains("shikanji") ||
+           lower.contains("rooh afza") || lower.contains("falooda") || lower.contains("kahwa") ||
+           lower.contains("horchata") || lower.contains("margarita") ||
+           lower.contains("bcaa drink") || lower.contains("electrolyte drink") {
+            let totalMl = servingSizeG * servings
+            return totalMl == Double(Int(totalMl)) ? "\(Int(totalMl))ml" : String(format: "%.0fml", totalMl)
         }
 
         // Fish fillets — single-serve piece (ss > 70 excludes tiny garnish/topping amounts)
