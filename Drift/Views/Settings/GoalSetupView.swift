@@ -12,6 +12,9 @@ struct GoalSetupView: View {
     @State private var unit: WeightUnit = Preferences.weightUnit
     @State private var dietPref: DietPreference = .balanced
     @State private var calorieTarget: String = ""
+    @State private var customProtein: String = ""
+    @State private var customCarbs: String = ""
+    @State private var customFat: String = ""
 
     var body: some View {
         NavigationStack {
@@ -49,6 +52,49 @@ struct GoalSetupView: View {
                     }
                 }
 
+                if dietPref == .custom {
+                    Section {
+                        HStack {
+                            Text("Protein")
+                            Spacer()
+                            TextField("auto", text: $customProtein)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 60)
+                            Text("g").font(.caption).foregroundStyle(.secondary)
+                        }
+                        HStack {
+                            Text("Carbs")
+                            Spacer()
+                            TextField("auto", text: $customCarbs)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 60)
+                            Text("g").font(.caption).foregroundStyle(.secondary)
+                        }
+                        HStack {
+                            Text("Fat")
+                            Spacer()
+                            TextField("auto", text: $customFat)
+                                .keyboardType(.numberPad)
+                                .multilineTextAlignment(.trailing)
+                                .frame(width: 60)
+                            Text("g").font(.caption).foregroundStyle(.secondary)
+                        }
+                    } header: {
+                        Text("Custom Macros")
+                    } footer: {
+                        let implied = (Double(customProtein) ?? 0) * 4
+                            + (Double(customCarbs) ?? 0) * 4
+                            + (Double(customFat) ?? 0) * 9
+                        if implied > 0 {
+                            Text("Implied: \(Int(implied)) kcal/day (P×4 + C×4 + F×9). Leave a field blank to auto-compute.")
+                        } else {
+                            Text("Leave fields blank to auto-compute from calorie target.")
+                        }
+                    }
+                }
+
                 Section {
                     HStack {
                         Text("Daily calories")
@@ -79,10 +125,16 @@ struct GoalSetupView: View {
                             let dailyDeficit = weeklyRate * config.kcalPerKg / 7
 
                             let calOverride = Double(calorieTarget)
-                            let previewGoal = WeightGoal(targetWeightKg: targetKg, monthsToAchieve: months,
-                                                        startDate: DateFormatters.todayString,
-                                                        startWeightKg: current, dietPreference: dietPref,
-                                                        calorieTargetOverride: calOverride)
+                            let previewGoal = WeightGoal(
+                                targetWeightKg: targetKg, monthsToAchieve: months,
+                                startDate: DateFormatters.todayString,
+                                startWeightKg: current,
+                                proteinTargetG: dietPref == .custom ? Double(customProtein) : nil,
+                                carbsTargetG: dietPref == .custom ? Double(customCarbs) : nil,
+                                fatTargetG: dietPref == .custom ? Double(customFat) : nil,
+                                dietPreference: dietPref,
+                                calorieTargetOverride: calOverride
+                            )
                             let macros = previewGoal.macroTargets(currentWeightKg: current)
 
                             VStack(alignment: .leading, spacing: 6) {
@@ -130,6 +182,9 @@ struct GoalSetupView: View {
                             monthsToAchieve: months,
                             startDate: DateFormatters.todayString,
                             startWeightKg: existingGoal?.startWeightKg ?? currentKg,
+                            proteinTargetG: dietPref == .custom ? Double(customProtein) : nil,
+                            carbsTargetG: dietPref == .custom ? Double(customCarbs) : nil,
+                            fatTargetG: dietPref == .custom ? Double(customFat) : nil,
                             dietPreference: dietPref,
                             calorieTargetOverride: calOverride
                         )
@@ -145,6 +200,9 @@ struct GoalSetupView: View {
                     months = g.monthsToAchieve
                     dietPref = g.dietPreference ?? .balanced
                     if let cal = g.calorieTargetOverride { calorieTarget = "\(Int(cal))" }
+                    if let p = g.proteinTargetG { customProtein = "\(Int(p))" }
+                    if let c = g.carbsTargetG { customCarbs = "\(Int(c))" }
+                    if let f = g.fatTargetG { customFat = "\(Int(f))" }
                 }
             }
         }

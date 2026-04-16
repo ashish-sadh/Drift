@@ -6,6 +6,7 @@ enum DietPreference: String, Codable, CaseIterable, Sendable {
     case highProtein = "high_protein"
     case lowCarb     = "low_carb"
     case lowFat      = "low_fat"
+    case custom      = "custom"
 
     var displayName: String {
         switch self {
@@ -13,6 +14,7 @@ enum DietPreference: String, Codable, CaseIterable, Sendable {
         case .highProtein: "High Protein"
         case .lowCarb: "Low Carb"
         case .lowFat: "Low Fat"
+        case .custom: "Custom"
         }
     }
 
@@ -24,6 +26,7 @@ enum DietPreference: String, Codable, CaseIterable, Sendable {
         case .highProtein: 2.2  // Muscle-sparing deficit: 2.2 g/kg (ISSN upper bound)
         case .lowCarb: 1.8     // Moderate-high protein for satiety
         case .lowFat: 1.4      // Lower protein allows more carb calories
+        case .custom: 1.6      // Fallback if fields left blank — same as balanced
         }
     }
 
@@ -36,6 +39,7 @@ enum DietPreference: String, Codable, CaseIterable, Sendable {
         case .highProtein: 0.25 // Lower fat to make room for high protein
         case .lowCarb: 0.45    // Was 0.40 — keto-adjacent, fat replaces carbs
         case .lowFat: 0.20     // Was 0.15 — 20% is USDA minimum, 15% was too aggressive
+        case .custom: 0.30     // Fallback if fields left blank — same as balanced
         }
     }
 
@@ -45,6 +49,7 @@ enum DietPreference: String, Codable, CaseIterable, Sendable {
         case .highProtein: "2.2 g/kg protein, muscle-focused"
         case .lowCarb: "45% fat, fewer carbs, keto-friendly"
         case .lowFat: "20% fat, higher carbs, endurance-friendly"
+        case .custom: "Set your own protein, carbs & fat in grams"
         }
     }
 }

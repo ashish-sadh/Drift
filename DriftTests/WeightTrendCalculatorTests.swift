@@ -714,3 +714,78 @@ func makeEntries(days: Int, startKg: Double, ratePerDay: Double) -> [(date: Stri
     let t = WeightTrendCalculator.calculateTrend(entries: entries)!
     #expect(t.currentEMA > 75.0, "Extreme single-day outlier should be filtered")
 }
+
+// MARK: - Custom Macro Targets (#144)
+
+@Test func customDietPreferenceOverridesAllMacros() {
+    var goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 3,
+                         startDate: "2026-04-01", startWeightKg: 80,
+                         dietPreference: .custom, calorieTargetOverride: 2000)
+    goal.proteinTargetG = 180
+    goal.carbsTargetG = 200
+    goal.fatTargetG = 60
+
+    let m = goal.macroTargets(currentWeightKg: 80)!
+    #expect(m.proteinG == 180)
+    #expect(m.carbsG == 200)
+    #expect(m.fatG == 60)
+}
+
+@Test func customDietPreferenceBlankFieldsAutoComputes() {
+    // When custom but no overrides set, falls back to balanced defaults
+    let goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 3,
+                         startDate: "2026-04-01", startWeightKg: 80,
+                         dietPreference: .custom, calorieTargetOverride: 2000)
+
+    let m = goal.macroTargets(currentWeightKg: 80)!
+    // proteinPerKg = 1.6 (balanced fallback), weight = 80kg → 128g protein
+    #expect(abs(m.proteinG - 128) < 1)
+    // fatCalorieFraction = 0.30 → 2000 * 0.30 / 9 ≈ 66.7g fat
+    #expect(m.fatG >= 55)
+    // carbs fill the rest
+    #expect(m.carbsG > 0)
+}
+
+@Test func customDietPreferencePartialOverride() {
+    // Only protein set — fat and carbs auto-compute
+    var goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 3,
+                         startDate: "2026-04-01", startWeightKg: 80,
+                         dietPreference: .custom, calorieTargetOverride: 2000)
+    goal.proteinTargetG = 200
+
+    let m = goal.macroTargets(currentWeightKg: 80)!
+    #expect(m.proteinG == 200)
+    // fat auto-computed from preference fraction
+    #expect(m.fatG > 0)
+    // carbs = remaining after protein (200*4=800) and fat
+    let impliedCarbs = (2000 - 200 * 4 - m.fatG * 9) / 4
+    #expect(abs(m.carbsG - impliedCarbs) < 1)
+}
+
+@Test func customDietPreferenceSavedAndRestored() throws {
+    var goal = WeightGoal(targetWeightKg: 70, monthsToAchieve: 6,
+                         startDate: "2026-04-01", startWeightKg: 80,
+                         dietPreference: .custom, calorieTargetOverride: 1800)
+    goal.proteinTargetG = 150
+    goal.carbsTargetG = 180
+    goal.fatTargetG = 55
+
+    let data = try JSONEncoder().encode(goal)
+    let restored = try JSONDecoder().decode(WeightGoal.self, from: data)
+
+    #expect(restored.dietPreference == .custom)
+    #expect(restored.proteinTargetG == 150)
+    #expect(restored.carbsTargetG == 180)
+    #expect(restored.fatTargetG == 55)
+}
+
+@Test func presetDietClearsOverridesInMacroCalc() {
+    // Switching back to a preset — overrides should be nil, preset formula applies
+    let goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 3,
+                         startDate: "2026-04-01", startWeightKg: 80,
+                         dietPreference: .highProtein, calorieTargetOverride: 2000)
+    // No overrides set (nil)
+    let m = goal.macroTargets(currentWeightKg: 80)!
+    // highProtein: 2.2 g/kg * 80 = 176g
+    #expect(abs(m.proteinG - 176) < 1)
+}
