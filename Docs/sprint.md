@@ -25,11 +25,11 @@ _(pick from Ready)_
 
 ### P1 — Junior Tasks
 
-- [ ] **#137 Smart Units: Complete audit of all 2,046 foods** — Audit every food for correct primaryUnit + portionText. Batch 3+4 landed (staged changes now committed). Continue until "serving" count < 500. Focus: branded items, American staples, beverages, snack bars, condiments.
+- [x] **#137 Smart Units: Complete audit of all 2,046 foods** — Serving count reduced to ~65 (intentional nuts/canned only). Fixed: eggs plural, bhaji, ras malai, kulfi, scone, cashew/pesto ordering, whey word-boundary, sambhar variant, rogan josh/sorpotel/rista/methi malai/balchao → bowl, orange chicken → bowl, sub/6-inch sandwiches → piece, biltong → strip, dressing → tbsp, half and half → tbsp, crab meat → cup, crab → piece, karela/bitter gourd → piece, lobia → cup, frosty → scoop. Goal (<500) achieved.
 - [ ] **#140 Exercise visual enrichment research** — Per design doc #66. Research image/video sources (Wger, free-exercise-db, YouTube API, public domain GIFs). Document findings in `Docs/designs/133-exercise-enrichment.md` (create if missing). Time-boxed — go/no-go decision after research, not indefinite deferral.
-- [ ] **#152 Food DB enrichment** — +20 new foods. Focus: North Indian regional dishes, breakfast items, branded protein products, Indian sweets/snacks not yet in DB.
+- [x] **#152 Food DB enrichment** — +20 new foods added (2,047→2,067): Bedmi Puri, Sooji Halwa, Anda Paratha, Churma Ladoo, Rajma Rice, Poha Cutlet, Ghevar, Imarti, Green Moong Dal, Sheer Khurma, Tawa Pulao, Methi Matar Malai, Oats Upma, Navratan Korma, Kathal Ki Sabzi, Lobia, Aloo Baingan, MuscleBlaze Biozyme Whey, Ghost Whey Protein, Masala Chai Powder.
 - [ ] **#153 Test coverage** — Run `./scripts/coverage-check.sh`. Fix any files below 80% (logic) or 50% (services) threshold. Priority: `LabReportOCR.swift` after #151 lands.
-- [ ] **#154 AI eval: verify gold set at 100% after P0 bug fixes** — Run LLM eval lite after #147-150 are fixed. Gold set must hold at 100%. Update `Docs/failing-queries.md`.
+- [x] **#154 AI eval: verify gold set at 100% after P0 bug fixes** — LLM eval lite passed. All suites green. Gold set holds at 100%.
 
 ### Design Docs (approved — pending implementation slot)
 - #66 Design: Exercise image/video enrichment — `doc-ready`, `approved`
