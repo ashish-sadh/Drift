@@ -1,6 +1,6 @@
 # Sprint Board
 
-Focus: **AI Chat Stability + Lab Reports LLM + Smart Units Continued.** Four P0 AI chat bugs were filed this cycle — fix first. Then implement LLM-first lab report parsing (#74, design doc approved). Smart Units saturation continues as permanent highest-priority focus.
+Focus: **Lab Reports LLM + Smart Units Interface Polish + Coverage.** Lab reports LLM (#151) is the big P1 SENIOR carry-forward. Smart Units shifts from rule-writing to cross-interface consistency verification. Coverage and food DB continue as junior tracks.
 
 ## Regression Gate
 
@@ -12,24 +12,16 @@ _(pick from Ready)_
 
 ## Ready
 
-### P0 — Bug Fixes (fix immediately, SENIOR)
-
-- [ ] **#147 Bug: "Daily summary" tries to log food named "daily summary"** — Intent classifier misrouting summary queries to food log tool. Fix routing in StaticOverrides or classifier. Add regression test.
-- [ ] **#148 Bug: "Weekly summary" query is broken** — Same class of issue as #147. Summary queries misclassified. Fix and add test.
-- [ ] **#149 Bug: "Log 2 eggs" adds egg benedict** — Food search matching wrong item. Audit SmartUnits egg rules + food search ranking. Fix and add test.
-- [ ] **#150 Bug: AI chat regressed badly across queries** — Broad regression possibly from StaticOverrides pruning or prompt changes. Run LLM eval lite, identify failure modes, restore coverage. Use `Docs/failing-queries.md` as anchor.
-
 ### P1 — Senior Implementation
 
 - [ ] **#151 Implement LLM-first lab report parsing (#74)** — Per `Docs/designs/74-lab-reports-llm.md`. Gemma 4 as primary extractor (chunked, ~500 tokens/chunk), regex as validation layer. Add: confidence scoring, report date extraction (regex → LLM fallback → date picker), AI-parsed badge in biomarker history, accuracy warning banner in preview. SmolLM devices use existing regex-only path. Files: `Services/LabReportOCR.swift`, `Services/LabReportOCR+Biomarkers.swift`, `Models/BiomarkerResult.swift`. Tests required.
 
 ### P1 — Junior Tasks
 
-- [x] **#137 Smart Units: Complete audit of all 2,046 foods** — Serving count reduced to ~65 (intentional nuts/canned only). Fixed: eggs plural, bhaji, ras malai, kulfi, scone, cashew/pesto ordering, whey word-boundary, sambhar variant, rogan josh/sorpotel/rista/methi malai/balchao → bowl, orange chicken → bowl, sub/6-inch sandwiches → piece, biltong → strip, dressing → tbsp, half and half → tbsp, crab meat → cup, crab → piece, karela/bitter gourd → piece, lobia → cup, frosty → scoop. Goal (<500) achieved.
-- [ ] **#140 Exercise visual enrichment research** — Per design doc #66. Research image/video sources (Wger, free-exercise-db, YouTube API, public domain GIFs). Document findings in `Docs/designs/133-exercise-enrichment.md` (create if missing). Time-boxed — go/no-go decision after research, not indefinite deferral.
-- [x] **#152 Food DB enrichment** — +20 new foods added (2,047→2,067): Bedmi Puri, Sooji Halwa, Anda Paratha, Churma Ladoo, Rajma Rice, Poha Cutlet, Ghevar, Imarti, Green Moong Dal, Sheer Khurma, Tawa Pulao, Methi Matar Malai, Oats Upma, Navratan Korma, Kathal Ki Sabzi, Lobia, Aloo Baingan, MuscleBlaze Biozyme Whey, Ghost Whey Protein, Masala Chai Powder.
+- [ ] **#156 Smart Units: cross-interface consistency audit** — Log 10 varied foods (dosa, milk, rice, eggs, chicken, olive oil, almonds, dal, bread, protein powder) via (1) AI chat, (2) recipe builder, (3) manual food search. Verify all show natural units, not "serving". Fix any inconsistencies found. Add regression tests for fixes.
+- [ ] **#157 Food DB enrichment: +20 foods** — Target gaps: street food/chaat, South Indian tiffin, gym/protein branded, Western breakfast, regional Indian sweets. Verify correct macros + smart unit assignment for each.
 - [ ] **#153 Test coverage** — Run `./scripts/coverage-check.sh`. Fix any files below 80% (logic) or 50% (services) threshold. Priority: `LabReportOCR.swift` after #151 lands.
-- [x] **#154 AI eval: verify gold set at 100% after P0 bug fixes** — LLM eval lite passed. All suites green. Gold set holds at 100%.
+- [ ] **#140 Exercise visual enrichment research** — Per design doc #66. Research image/video sources (Wger, free-exercise-db, YouTube API, public domain GIFs). Document findings in `Docs/designs/133-exercise-enrichment.md` (create if missing). Time-boxed — go/no-go decision after research, not indefinite deferral.
 
 ### Design Docs (approved — pending implementation slot)
 - #66 Design: Exercise image/video enrichment — `doc-ready`, `approved`
@@ -95,17 +87,15 @@ Autonomous refactoring. Run `code-improvement.md`. Principles in `Docs/principle
 
 _(empty — sprint just started)_
 
-## Done (previous sprint — Smart Units Saturation + Pipeline Wrap-Up)
+## Done (previous sprint — AI Chat P0 Fixes + Smart Units Audit)
 
-- [x] #135 Bug: "How many calories left" answers food search — fixed isDiaryQuery guard in food_info handler. Regression test added.
-- [x] #142 P0 Bug: Fiber always shows 0g in diary — RecentEntry was missing fiberG field; SQL queries omitted fiber_g; FoodSearchView hardcoded fiberG: 0. Fixed all three.
-- [x] #131 Update state.md + roadmap — 6-stage pipeline documented, build 123, 1424+ tests, food count updated. AI Chat reliability marked DONE in roadmap.
-- [x] Smart Units audit: 340 foods improved — Indian flatbreads, chaat, condiments, curries, beverages, burgers/wraps, large fruits, berries, whole vegetables now get natural units. 1,311→971 foods at "serving".
-- [x] Food DB enrichment: 1,913→1,927 (+14 foods) — kanda bhaji, mooli paratha, ribbon pakoda, seedai, shikanji, egg paratha, chicken paratha, akki roti, makki di roti, pyaaz kachori, stuffed capsicum, lauki sabzi, arbi masala, bajra khichdi.
-- [x] #130 Merge PR #136 — Swift validation (Stage 3b) between LLM extraction and execution. Merged and closed.
-- [x] Smart Units in AI chat — Confirmation card + recipe builder now use smartServingText(). "log 2 dosas" shows "2 piece" not "2.0 serving".
-- [x] #143 P0 Bug: Edit ingredient shows wrong amount — derived servings from calories ratio; AI-created items no longer show "1" always.
-- [x] #74 Design doc: Lab reports + LLM parsing — Done. Branch `design/74-lab-reports-llm`, doc at `Docs/designs/74-lab-reports-llm.md`, PR #114 merged.
+- [x] #147 Bug: "Daily summary" tries to log food named "daily summary" — intent routing fixed, regression test added.
+- [x] #148 Bug: "Weekly summary" query broken — same class fix, test added.
+- [x] #149 Bug: "Log 2 eggs" adds egg benedict — food search ranking + SmartUnits egg rules fixed, test added.
+- [x] #150 Bug: AI chat regressed broadly — LLM eval lite run, failure modes identified and restored. Gold set at 100%.
+- [x] #154 AI eval: gold set at 100% verified post P0 fixes.
+- [x] #152 Food DB enrichment: +20 foods (2,047→2,067): Bedmi Puri, Sooji Halwa, Anda Paratha, Churma Ladoo, Rajma Rice, Poha Cutlet, Ghevar, Imarti, Green Moong Dal, Sheer Khurma, Tawa Pulao, Methi Matar Malai, Oats Upma, Navratan Korma, Kathal Ki Sabzi, Lobia, Aloo Baingan, MuscleBlaze Biozyme Whey, Ghost Whey Protein, Masala Chai Powder.
+- [x] #137 Smart Units: Complete audit of all 2,046 foods — serving count at ~65 (intentional nuts/canned). Eggs plural, bhaji, ras malai, kulfi, scone, cashew/pesto ordering, whey word-boundary, sambhar variant, rogan josh/sorpotel/rista/methi malai/balchao → bowl, orange chicken → bowl, sub/6-inch sandwiches → piece, biltong → strip, dressing → tbsp, half and half → tbsp, crab meat → cup, crab → piece, karela/bitter gourd → piece, lobia → cup, frosty → scoop.
 
 ## Done (two sprints ago — Multi-Stage LLM Pipeline)
 
