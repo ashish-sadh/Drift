@@ -4,6 +4,24 @@ import SwiftUI
 
 extension AIChatViewModel {
 
+    // MARK: - Smart Serving Text
+
+    /// Format a food amount using its natural unit (piece, ml, cup, tbsp, etc.)
+    /// instead of always showing "N serving". Mirrors the unit FoodSearchView shows.
+    static func smartServingText(food: Food, servings: Double, gramAmount: Double?) -> String {
+        if let grams = gramAmount { return "\(Int(grams))g" }
+        let units = FoodUnit.smartUnits(for: food)
+        guard let primary = units.first, primary.label != "serving",
+              food.servingSize > 0, primary.gramsEquivalent > 0 else {
+            return "\(String(format: "%g", servings)) serving"
+        }
+        let totalGrams = servings * food.servingSize
+        let amount = totalGrams / primary.gramsEquivalent
+        let formatted = (amount == amount.rounded() && amount < 100)
+            ? String(Int(amount.rounded())) : String(format: "%.1f", amount)
+        return "\(formatted) \(primary.label)"
+    }
+
     // MARK: - Tab Metadata
 
     /// Map tab index to (label, SF Symbol) for confirmation cards.
@@ -91,7 +109,7 @@ extension AIChatViewModel {
         let (servings, foodName, gramAmount) = AIActionExecutor.extractAmount(from: text)
         guard let match = AIActionExecutor.findFood(query: foodName, servings: servings, gramAmount: gramAmount) else { return nil }
         let f = match.food
-        let portionText = gramAmount.map { "\(Int($0))g" } ?? "\(String(format: "%.1f", match.servings)) serving"
+        let portionText = Self.smartServingText(food: f, servings: match.servings, gramAmount: gramAmount)
         return QuickAddView.RecipeItem(
             name: f.name, portionText: portionText,
             calories: f.calories * match.servings, proteinG: f.proteinG * match.servings,
@@ -568,7 +586,7 @@ extension AIChatViewModel {
             let f = match.food
             let s = match.servings
             foodSearchServings = s
-            let servingText = intent.gramAmount.map { "\(Int($0))g" } ?? "\(String(format: "%.1f", s)) serving"
+            let servingText = Self.smartServingText(food: f, servings: s, gramAmount: intent.gramAmount)
             let card = FoodCardData(
                 name: f.name, calories: Int(f.calories * s),
                 proteinG: Int(f.proteinG * s), carbsG: Int(f.carbsG * s),
@@ -753,7 +771,7 @@ extension AIChatViewModel {
                 if let match = AIActionExecutor.findFood(query: intent.query, servings: intent.servings, gramAmount: intent.gramAmount) {
                     let f = match.food
                     let s = match.servings
-                    let servingText = intent.gramAmount.map { "\(Int($0))g" } ?? "\(String(format: "%.1f", s)) serving"
+                    let servingText = Self.smartServingText(food: f, servings: s, gramAmount: intent.gramAmount)
                     let card = FoodCardData(
                         name: f.name, calories: Int(f.calories * s),
                         proteinG: Int(f.proteinG * s), carbsG: Int(f.carbsG * s),
