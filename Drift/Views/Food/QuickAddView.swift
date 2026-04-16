@@ -279,11 +279,17 @@ private struct IngredientPickerView: View {
                     results = FoodService.searchFood(query: item.name)
                     if let food = results.first, food.name.lowercased() == item.name.lowercased() {
                         selectedFood = food
-                        // Calculate amount from stored serving size
-                        if food.servingSize > 0 && item.servingSizeG > 0 {
-                            let servings = item.servingSizeG / food.servingSize
-                            amount = servings == Double(Int(servings)) ? "\(Int(servings))" : String(format: "%.1f", servings)
+                        // Derive servings from calories (reliable for both AI-created and
+                        // picker-added items; servingSizeG may be per-serving or total).
+                        let servings: Double
+                        if food.calories > 0 {
+                            servings = item.calories / food.calories
+                        } else if food.servingSize > 0 && item.servingSizeG > 0 {
+                            servings = item.servingSizeG / food.servingSize
+                        } else {
+                            servings = 1
                         }
+                        amount = servings == Double(Int(servings)) ? "\(Int(servings))" : String(format: "%.1f", servings)
                     }
                 } else {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { searchFocused = true }
