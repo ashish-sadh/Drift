@@ -21,14 +21,15 @@ _(pick from Ready)_
 
 ### P1 — Senior Implementation
 
-- [ ] **#74 Implement LLM-first lab report parsing** — Per `Docs/designs/74-lab-reports-llm.md`. Gemma 4 as primary extractor (chunked, ~500 tokens/chunk), regex as validation layer. Add: confidence scoring, report date extraction (regex → LLM fallback → date picker), AI-parsed badge in biomarker history, accuracy warning banner in preview. SmolLM devices use existing regex-only path. Files: `Services/LabReportOCR.swift`, `Services/LabReportOCR+Biomarkers.swift`, `Models/BiomarkerResult.swift`. Tests required.
+- [ ] **#151 Implement LLM-first lab report parsing (#74)** — Per `Docs/designs/74-lab-reports-llm.md`. Gemma 4 as primary extractor (chunked, ~500 tokens/chunk), regex as validation layer. Add: confidence scoring, report date extraction (regex → LLM fallback → date picker), AI-parsed badge in biomarker history, accuracy warning banner in preview. SmolLM devices use existing regex-only path. Files: `Services/LabReportOCR.swift`, `Services/LabReportOCR+Biomarkers.swift`, `Models/BiomarkerResult.swift`. Tests required.
 
 ### P1 — Junior Tasks
 
-- [ ] **#137 Smart Units: Complete audit of all 2,046 foods** — Audit every food for correct primaryUnit + portionText. Commit the staged `ServingUnit.swift` changes first (egg benedict fix + Indian flatbreads). Continue until "serving" count < 500. Focus: branded items, American staples, beverages, snack bars, condiments.
-- [ ] **#140 Exercise visual enrichment research** — Per design doc #66. Research image/video sources (Wger, free-exercise-db, YouTube API, public domain GIFs). Document findings in `Docs/designs/133-exercise-enrichment.md` (create if missing). No implementation — research only.
-- [ ] **Food DB enrichment** — +20 new foods. Focus: North Indian regional dishes, breakfast items, branded protein products, Indian sweets/snacks not yet in DB.
-- [ ] **Test coverage** — Run `./scripts/coverage-check.sh`. Fix any files below 80% (logic) or 50% (services) threshold. Priority: `LabReportOCR.swift` after #74 lands.
+- [ ] **#137 Smart Units: Complete audit of all 2,046 foods** — Audit every food for correct primaryUnit + portionText. Batch 3+4 landed (staged changes now committed). Continue until "serving" count < 500. Focus: branded items, American staples, beverages, snack bars, condiments.
+- [ ] **#140 Exercise visual enrichment research** — Per design doc #66. Research image/video sources (Wger, free-exercise-db, YouTube API, public domain GIFs). Document findings in `Docs/designs/133-exercise-enrichment.md` (create if missing). Time-boxed — go/no-go decision after research, not indefinite deferral.
+- [ ] **#152 Food DB enrichment** — +20 new foods. Focus: North Indian regional dishes, breakfast items, branded protein products, Indian sweets/snacks not yet in DB.
+- [ ] **#153 Test coverage** — Run `./scripts/coverage-check.sh`. Fix any files below 80% (logic) or 50% (services) threshold. Priority: `LabReportOCR.swift` after #151 lands.
+- [ ] **#154 AI eval: verify gold set at 100% after P0 bug fixes** — Run LLM eval lite after #147-150 are fixed. Gold set must hold at 100%. Update `Docs/failing-queries.md`.
 
 ### Design Docs (approved — pending implementation slot)
 - #66 Design: Exercise image/video enrichment — `doc-ready`, `approved`
