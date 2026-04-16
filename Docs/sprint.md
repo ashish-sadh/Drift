@@ -12,13 +12,6 @@ _(pick from Ready)_
 
 ## Ready
 
-### P1 — Pipeline Wrap-Up (finish the old sprint)
-
-- [ ] **#130 Merge PR #136** — Swift validation between stages is implemented (branch `130-swift-validation-between-stages`, PR #136). Review, merge, close issue.
-
-### P1 — Smart Units Saturation (product focus)
-
-- [ ] **Smart Units in AI chat** — Verify AI chat uses smart units when logging. "log 2 dosas" should use pieces, not grams. "log a bowl of dal" should use cups. Test across food categories and fix any gaps in the extraction/confirmation pipeline.
 
 ### P2 — Design Docs
 
@@ -91,6 +84,9 @@ Autonomous refactoring. Run `code-improvement.md`. Principles in `Docs/principle
 - [x] #131 Update state.md + roadmap — 6-stage pipeline documented, build 123, 1424+ tests, food count updated. AI Chat reliability marked DONE in roadmap.
 - [x] Smart Units audit: 340 foods improved — Indian flatbreads, chaat, condiments, curries, beverages, burgers/wraps, large fruits, berries, whole vegetables now get natural units. 1,311→971 foods at "serving".
 - [x] Food DB enrichment: 1,913→1,927 (+14 foods) — kanda bhaji, mooli paratha, ribbon pakoda, seedai, shikanji, egg paratha, chicken paratha, akki roti, makki di roti, pyaaz kachori, stuffed capsicum, lauki sabzi, arbi masala, bajra khichdi.
+- [x] #130 Merge PR #136 — Swift validation (Stage 3b) between LLM extraction and execution. Merged and closed.
+- [x] Smart Units in AI chat — Confirmation card + recipe builder now use smartServingText(). "log 2 dosas" shows "2 piece" not "2.0 serving".
+- [x] #143 P0 Bug: Edit ingredient shows wrong amount — derived servings from calories ratio; AI-created items no longer show "1" always.
 
 ## Done (previous sprint — Multi-Stage LLM Pipeline)
 
