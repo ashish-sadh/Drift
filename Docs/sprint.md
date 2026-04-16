@@ -1,10 +1,12 @@
 # Sprint Board
 
-Focus: **Lab Reports LLM + Smart Units Interface Polish + Coverage.** Lab reports LLM (#151) is the big P1 SENIOR carry-forward. Smart Units shifts from rule-writing to cross-interface consistency verification. Coverage and food DB continue as junior tracks.
+Focus: **AI Chat Quality (every sprint until excellent).** AI chat is the entire product. Every session must improve it. Primary: per-component eval gold sets + LLM-loaded macOS eval + voice reliability. Secondary: Smart Units cross-interface + food DB enrichment.
 
 ## Regression Gate
 
-**55-query gold set at 100% baseline.** Any AI change MUST run gold set eval before AND after.
+**All pipeline gold sets at 100% baseline.** Any AI change MUST run BOTH before AND after:
+1. `xcodebuild test -only-testing:DriftTests/FoodLoggingGoldSetTests` (deterministic, ~2s)
+2. `xcodebuild test -scheme DriftLLMEvalMacOS -destination 'platform=macOS'` (LLM-loaded, ~5min — requires models at `~/drift-state/models/`, run `bash scripts/download-models.sh` first)
 
 ## In Progress
 
@@ -12,15 +14,21 @@ _(pick from Ready)_
 
 ## Ready
 
+### P0 — AI Chat Quality (pick first, every sprint)
+
+- [ ] **#158 LLM-loaded macOS eval: expand routing gold set** — `DriftLLMEvalMacOS` target is wired and builds. Download models (`bash scripts/download-models.sh`), run eval, find any routing failures, fix them in the pipeline (IntentClassifier prompt or validateExtraction). Target: 100% on IntentRoutingEval tests. Run after every IntentClassifier/AIToolAgent change.
+- [ ] **#159 Voice input: investigate remaining bugs** — Silence timeout fixed (15s→30s). Race condition in forceStop/gracefulStop fixed (idle set before cleanup). Test on device: natural pauses, edit-after-stop, multi-sentence dictation. Fix any remaining issues found.
+- [ ] **#160 AI chat: fix misrouted queries from failing-queries.md** — Read `Docs/failing-queries.md`, pick unfixed categories, fix + add regression tests. Run gold set after each fix.
+
 ### P1 — Senior Implementation
 
 - [ ] **#151 Implement LLM-first lab report parsing (#74)** — Per `Docs/designs/74-lab-reports-llm.md`. Gemma 4 as primary extractor (chunked, ~500 tokens/chunk), regex as validation layer. Add: confidence scoring, report date extraction (regex → LLM fallback → date picker), AI-parsed badge in biomarker history, accuracy warning banner in preview. SmolLM devices use existing regex-only path. Files: `Services/LabReportOCR.swift`, `Services/LabReportOCR+Biomarkers.swift`, `Models/BiomarkerResult.swift`. Tests required.
 
 ### P1 — Junior Tasks
 
-- [ ] **#156 Smart Units: cross-interface consistency audit** — Log 10 varied foods (dosa, milk, rice, eggs, chicken, olive oil, almonds, dal, bread, protein powder) via (1) AI chat, (2) recipe builder, (3) manual food search. Verify all show natural units, not "serving". Fix any inconsistencies found. Add regression tests for fixes.
-- [ ] **#157 Food DB enrichment: +20 foods** — Target gaps: street food/chaat, South Indian tiffin, gym/protein branded, Western breakfast, regional Indian sweets. Verify correct macros + smart unit assignment for each.
-- [ ] **#153 Test coverage** — Run `./scripts/coverage-check.sh`. Fix any files below 80% (logic) or 50% (services) threshold. Priority: `LabReportOCR.swift` after #151 lands.
+- [x] **#156 Smart Units: cross-interface consistency audit** — 4 bugs fixed (Butter Chicken/tbsp, Chicken Parmesan/tbsp, Vindaloo/serving, Chicken Stock/serving). 5 regression tests added. All 3 interfaces verified consistent. Commit b237f4e.
+- [x] **#157 Food DB enrichment: +20 foods** — 2067→2087: Sev Puri, Dahi Bhalla, Sprouts Chaat, Mini Idli, Masala Vada, Kotambri Vada, Kande Pohe, ON Gold Standard Whey, ONE Bar, KIND Protein Bar, Creatine Monohydrate, MyProtein Impact Whey, Isopure Zero Carb, Baked Oats, Shakshuka with Feta, Quiche, Breakfast Frittata, Gujiya, Basundi, Patishapta. Commit 51912a1.
+- [x] **#153 Test coverage** — All files pass thresholds (100% green). No fixes needed.
 - [ ] **#140 Exercise visual enrichment research** — Per design doc #66. Research image/video sources (Wger, free-exercise-db, YouTube API, public domain GIFs). Document findings in `Docs/designs/133-exercise-enrichment.md` (create if missing). Time-boxed — go/no-go decision after research, not indefinite deferral.
 
 ### Design Docs (approved — pending implementation slot)
@@ -30,6 +38,8 @@ _(pick from Ready)_
 ---
 
 ## Permanent Tasks (never remove — always pick from these when nothing else is queued)
+
+**AI chat quality is the product's core value. Every session must improve it. No sprint is complete without AI chat being better than when it started.**
 
 **Before picking a task, read `Docs/roadmap.md` → "Now" items in the relevant domain. Work on what advances the current phase.**
 
