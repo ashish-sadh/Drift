@@ -31,7 +31,11 @@ enum IntentClassifier {
     "chipotle bowl 3000 cal 30p 45c 67f"→{"tool":"log_food","name":"chipotle bowl","calories":"3000","protein":"30","carbs":"45","fat":"67"}
     "calories left"→{"tool":"food_info","query":"calories left"}
     "how am I doing"→{"tool":"food_info","query":"daily summary"}
+    "daily summary"→{"tool":"food_info","query":"daily summary"}
+    "weekly summary"→{"tool":"food_info","query":"weekly summary"}
     "what about protein?"→{"tool":"food_info","query":"protein"}
+    "log 2 eggs"→{"tool":"log_food","name":"egg","servings":"2"}
+    "had 3 eggs"→{"tool":"log_food","name":"egg","servings":"3"}
     "I weigh 75 kg"→{"tool":"log_weight","value":"75","unit":"kg"}
     "weight trend"→{"tool":"weight_info","query":"trend"}
     "start push day"→{"tool":"start_workout","name":"push day"}

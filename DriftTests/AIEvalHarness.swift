@@ -2022,4 +2022,56 @@ final class AIEvalHarness: XCTestCase {
             }
         }
     }
+
+    // MARK: - P0 Bug Regression Tests (#147, #148, #149)
+
+    /// #149 regression: "log 2 eggs" must resolve to plain Egg, not Egg Benedict.
+    func testFindFoodEggExactMatch() {
+        let match = AIActionExecutor.findFood(query: "egg", servings: 2)
+        XCTAssertNotNil(match, "Should find Egg")
+        if let m = match {
+            XCTAssertEqual(m.food.name.lowercased(), "egg",
+                "#149 regression: findFood('egg') must return plain 'Egg', not '\(m.food.name)'")
+        }
+    }
+
+    /// #149 regression: parseFoodIntent("log 2 eggs") must parse query as "eggs" (not "eggs benedict" etc.).
+    func testParseFoodIntent_logEggs_extractsEgg() {
+        let intent = AIActionExecutor.parseFoodIntent("log 2 eggs")
+        XCTAssertNotNil(intent, "parseFoodIntent should detect 'log 2 eggs'")
+        if let i = intent {
+            let q = i.query.lowercased()
+            XCTAssertTrue(q == "eggs" || q == "egg",
+                "#149 regression: parseFoodIntent query should be 'eggs', got '\(i.query)'")
+            XCTAssertEqual(i.servings, 2, "parseFoodIntent should extract servings=2")
+        }
+    }
+
+    /// #147 regression: "daily summary" must not be treated as a food name.
+    func testParseFoodIntent_dailySummary_isNotFood() {
+        let intent = AIActionExecutor.parseFoodIntent("daily summary")
+        XCTAssertNil(intent,
+            "#147 regression: 'daily summary' must not be parsed as a food log intent")
+    }
+
+    /// #148 regression: "weekly summary" must not be treated as a food name.
+    func testParseFoodIntent_weeklySummary_isNotFood() {
+        let intent = AIActionExecutor.parseFoodIntent("weekly summary")
+        XCTAssertNil(intent,
+            "#148 regression: 'weekly summary' must not be parsed as a food log intent")
+    }
+
+    /// #147/#148 regression: bare "summary" variants should not route to food_parser layer.
+    func testSummaryQueries_notInFoodParserLayer() {
+        let summaryQueries = [
+            "daily summary", "weekly summary", "how am i doing",
+            "how's my day", "summary", "show summary"
+        ]
+        for q in summaryQueries {
+            XCTAssertNil(AIActionExecutor.parseFoodIntent(q),
+                "'\(q)' should not match parseFoodIntent (#147/#148 regression)")
+            XCTAssertNil(AIActionExecutor.parseMultiFoodIntent(q),
+                "'\(q)' should not match parseMultiFoodIntent (#147/#148 regression)")
+        }
+    }
 }

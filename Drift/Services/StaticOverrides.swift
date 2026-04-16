@@ -60,8 +60,8 @@ enum StaticOverrides {
 
         // --- Gemma: only exact rule engine matches below this point ---
 
-        // Info queries (daily summary, calories left, yesterday, weekly, supplements, weight progress,
-        // meal suggestions, "how am I doing", cross-domain, sleep) are NOT handled here.
+        // Info queries (calories left, yesterday, supplements, weight progress,
+        // meal suggestions, cross-domain, sleep) are NOT handled here.
         // They route through AIToolAgent → tool execution → LLM streaming presentation
         // for natural conversational responses. Only COMMANDS stay in StaticOverrides.
 

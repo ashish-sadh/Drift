@@ -77,6 +77,7 @@ enum AIActionExecutor {
             "exercise", "workout", "a workout", "weight", "sleep", "supplement",
             "supplements", "recovery", "template", "a template", "my weight",
             "breakfast", "lunch", "dinner", "snack", // meal names → ask follow-up
+            "summary", "daily summary", "weekly summary", "today", "yesterday", // info queries
         ]
         if nonFoodWords.contains(food.lowercased()) { return nil }
 
@@ -223,11 +224,12 @@ enum AIActionExecutor {
                !results.isEmpty {
                 let q = searchQuery.lowercased()
                 // Prefer tight name matches: "egg" → "Egg" not "Eggs Benedict"
-                // Tight = name equals query, starts with "query ", or first word equals query
-                let tightMatch = results.prefix(15).first(where: { r in
+                // Priority: exact name > starts-with-query > first-word-equals-query
+                let exactMatch = results.prefix(15).first(where: { $0.name.lowercased() == q })
+                let tightMatch = exactMatch ?? results.prefix(15).first(where: { r in
                     let name = r.name.lowercased()
                     let firstWord = name.split(separator: " ").first.map(String.init) ?? name
-                    return name == q || name.hasPrefix(q + " ") || name.hasPrefix(q + ",") || firstWord == q
+                    return name.hasPrefix(q + " ") || name.hasPrefix(q + ",") || firstWord == q
                 })
                 let candidate = tightMatch ?? results[0]
                 let queryWords = q.split(separator: " ")

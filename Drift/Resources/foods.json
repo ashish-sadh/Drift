@@ -33647,5 +33647,20 @@
     "carbs_g": 20,
     "fat_g": 4,
     "fiber_g": 1
+  },
+  {
+    "name": "Egg",
+    "category": "Eggs",
+    "serving_size": 50,
+    "serving_unit": "g",
+    "calories": 72,
+    "protein_g": 6.3,
+    "carbs_g": 0.4,
+    "fat_g": 4.8,
+    "fiber_g": 0,
+    "ingredients": [
+      "egg"
+    ],
+    "nova_group": 1
   }
 ]
