@@ -39,14 +39,18 @@ final class IntentRoutingEval: XCTestCase {
     // MARK: - System Prompt (mirror of IntentClassifier.systemPrompt)
     // Keep in sync with Drift/Services/IntentClassifier.swift
 
+    // Keep in sync with Drift/Services/IntentClassifier.systemPrompt
     static let systemPrompt = """
     Health app. Reply JSON tool call or short text. Fix typos, word numbers, slang — understand messy input.
     Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) set_goal(target,unit?) delete_food(query?) body_comp(query?) navigate_to(screen)
+    RULES: "calories in X" or "how many calories in X" → food_info (NOT log_food). Only use log_food when user says they ate/had/logged something. Use weight_info for goal progress, weight trends, body goals. Use food_info for nutrition questions and summaries.
     "log 2 eggs and toast"→{"tool":"log_food","name":"eggs, toast","servings":"2"}
     "had biryani"→{"tool":"log_food","name":"biryani"}
     "I had 2 to 3 banans"→{"tool":"log_food","name":"banana","servings":"3"}
     "chipotle bowl 3000 cal 30p 45c 67f"→{"tool":"log_food","name":"chipotle bowl","calories":"3000","protein":"30","carbs":"45","fat":"67"}
     "calories left"→{"tool":"food_info","query":"calories left"}
+    "calories in samosa"→{"tool":"food_info","query":"calories in samosa"}
+    "how many calories in dal"→{"tool":"food_info","query":"calories in dal"}
     "how am I doing"→{"tool":"food_info","query":"daily summary"}
     "daily summary"→{"tool":"food_info","query":"daily summary"}
     "weekly summary"→{"tool":"food_info","query":"weekly summary"}
@@ -55,6 +59,8 @@ final class IntentRoutingEval: XCTestCase {
     "had 3 eggs"→{"tool":"log_food","name":"egg","servings":"3"}
     "I weigh 75 kg"→{"tool":"log_weight","value":"75","unit":"kg"}
     "weight trend"→{"tool":"weight_info","query":"trend"}
+    "am I on track for my goal"→{"tool":"weight_info","query":"goal progress"}
+    "how close am I to my goal"→{"tool":"weight_info","query":"goal progress"}
     "start push day"→{"tool":"start_workout","name":"push day"}
     "did yoga for like half an hour"→{"tool":"log_activity","name":"yoga","duration":"30"}
     "took vitamin d"→{"tool":"mark_supplement","name":"vitamin d"}
