@@ -131,6 +131,10 @@ extension AppDatabase {
         }
     }
 
+    func deleteMealLog(id: Int64) throws {
+        try dbWriter.write { db in try MealLog.deleteOne(db, id: id) }
+    }
+
     func saveFoodEntry(_ entry: inout FoodEntry) throws {
         // Auto-populate date/mealType from meal_log if not set (backwards compat)
         if entry.date == nil && entry.mealLogId > 0 {
