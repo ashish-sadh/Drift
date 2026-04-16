@@ -141,6 +141,7 @@ extension FoodEntry {
            lower.contains("lamb chop") || lower.contains("chicken lollipop") {
             return fmt(servings, "piece", "pieces")
         }
+        if lower.contains("steak") && !lower.contains("sauce") { return fmt(servings, "piece", "pieces") }
         if lower.contains("slice") { return fmt(servings, "slice", "slices") }
         // Bread/toast → slice (exclude breadfruit, breadstick, per-slice entries already caught above)
         if (lower.contains("bread") || lower.contains("toast")) &&
@@ -160,6 +161,13 @@ extension FoodEntry {
         if lower.contains("muffin") && servingSizeG < 120 { return fmt(servings, "muffin", "muffins") }
         if lower.contains("bagel") && servingSizeG < 130 { return fmt(servings, "bagel", "bagels") }
         if lower.contains("cup") && servingSizeG > 200 { return fmt(servings, "cup", "cups") }
+        // Tofu — measured by cup
+        if lower.contains("tofu") { return fmt(servings, "cup", "cups") }
+        // Shredded or grated — measured by cup
+        if lower.contains("shredded") || lower.contains("grated") { return fmt(servings, "cup", "cups") }
+        // Mushrooms: portobello by piece, others by cup
+        if lower.contains("portobello") || lower.contains("portabella") { return fmt(servings, "piece", "pieces") }
+        if lower.contains("mushroom") { return fmt(servings, "cup", "cups") }
         // Standalone pav (bread roll)
         let lowerWords = Set(lower.split(whereSeparator: { !$0.isLetter }).map(String.init))
         if lowerWords.contains("pav") { return fmt(servings, "pav", "pavs") }
@@ -177,6 +185,18 @@ extension FoodEntry {
         // Salads — bowl (dressings already matched by condiment rules and show as grams)
         if lower.contains("salad") && !lower.contains("dressing") {
             return fmt(servings, "bowl", "bowls")
+        }
+
+        // Fish fillets — single-serve piece (ss > 70 excludes tiny garnish/topping amounts)
+        let lowerWordSet = Set(lower.split(whereSeparator: { !$0.isLetter }).map(String.init))
+        if (lower.contains("salmon") || lower.contains("tilapia") || lower.contains("halibut") ||
+            lower.contains("sea bass") || lower.contains("seabass") || lower.contains("snapper") ||
+            lower.contains("mahi") || lower.contains("swordfish") || lower.contains("mackerel") ||
+            lower.contains("trout") || lower.contains("fillet") ||
+            lowerWordSet.contains("cod") || lowerWordSet.contains("haddock")) && servingSizeG > 70 &&
+           !lower.contains("salad") && !lower.contains("roll") && !lower.contains("burger") &&
+           !lower.contains("bite") {
+            return fmt(servings, "piece", "pieces")
         }
 
         return "\(Int(totalG))g"

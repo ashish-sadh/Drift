@@ -420,6 +420,60 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     #expect(FoodUnit.smartUnits(for: dahiPuri).first?.label == "bowl", "Dahi Puri is chaat — should be bowl")
 }
 
+// MARK: - Smart Unit Tests — Cheese, Fish, Tofu, Mushrooms, Steak
+
+@Test func smartUnitTofuShowsCup() {
+    let food = Food(name: "Tofu (firm)", category: "Protein", servingSize: 85, servingUnit: "g", calories: 70)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "cup", "Tofu should default to cup")
+    let superFirm = Food(name: "High Protein Tofu Super Firm", category: "Protein", servingSize: 85, servingUnit: "g", calories: 90)
+    #expect(FoodUnit.smartUnits(for: superFirm).first?.label == "cup", "Super firm tofu should default to cup")
+}
+
+@Test func smartUnitMushroomShowsCup() {
+    let food = Food(name: "Mushrooms (white)", category: "Vegetables", servingSize: 100, servingUnit: "g", calories: 22)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "cup", "Mushrooms should default to cup")
+    let shiitake = Food(name: "Shiitake Mushrooms", category: "Vegetables", servingSize: 100, servingUnit: "g", calories: 56)
+    #expect(FoodUnit.smartUnits(for: shiitake).first?.label == "cup", "Shiitake mushrooms should default to cup")
+}
+
+@Test func smartUnitPortobelloShowsPiece() {
+    let food = Food(name: "Portobello Mushroom", category: "Vegetables", servingSize: 120, servingUnit: "g", calories: 27)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "piece", "Portobello should default to piece")
+}
+
+@Test func smartUnitParmesanShowsTbsp() {
+    let food = Food(name: "Parmesan Cheese", category: "Dairy", servingSize: 15, servingUnit: "g", calories: 55)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "tbsp", "Parmesan should default to tbsp")
+}
+
+@Test func smartUnitFetaShowsTbsp() {
+    let food = Food(name: "Feta Cheese", category: "Dairy", servingSize: 30, servingUnit: "g", calories: 75)
+    #expect(FoodUnit.smartUnits(for: food).first?.label == "tbsp", "Feta should default to tbsp")
+}
+
+@Test func smartUnitShreddedCheeseShowsCup() {
+    let cheddar = Food(name: "Cheddar Cheese (Shredded)", category: "Dairy", servingSize: 112, servingUnit: "g", calories: 450)
+    #expect(FoodUnit.smartUnits(for: cheddar).first?.label == "cup", "Shredded cheddar should default to cup")
+    let mozzarella = Food(name: "Mozzarella Shredded", category: "Dairy", servingSize: 112, servingUnit: "g", calories: 320)
+    #expect(FoodUnit.smartUnits(for: mozzarella).first?.label == "cup", "Shredded mozzarella should default to cup")
+}
+
+@Test func smartUnitSalmonShowsPiece() {
+    let fillet = Food(name: "Grilled Salmon Fillet", category: "Seafood", servingSize: 165, servingUnit: "g", calories: 280)
+    #expect(FoodUnit.smartUnits(for: fillet).first?.label == "piece", "Salmon fillet should default to piece")
+    // Salmon salad should remain bowl (salad rule takes priority)
+    let salad = Food(name: "Salmon Salad", category: "Salads", servingSize: 200, servingUnit: "g", calories: 300)
+    #expect(FoodUnit.smartUnits(for: salad).first?.label == "bowl", "Salmon salad should be bowl")
+}
+
+@Test func smartUnitSteakShowsPiece() {
+    let steak = Food(name: "Beef Steak (sirloin)", category: "Protein", servingSize: 170, servingUnit: "g", calories: 320)
+    #expect(FoodUnit.smartUnits(for: steak).first?.label == "piece", "Steak should default to piece")
+    // Steak sauce should NOT become a piece
+    let sauce = Food(name: "Steak Sauce", category: "Condiments", servingSize: 15, servingUnit: "g", calories: 20)
+    #expect(FoodUnit.smartUnits(for: sauce).first?.label != "piece", "Steak sauce should not be piece")
+}
+
 // MARK: - Portion Text Tests (6 tests)
 
 @Test func portionTextEgg() async throws {
@@ -433,8 +487,8 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
 }
 
 @Test func portionTextGramsDefault() async throws {
-    // "Grilled Salmon" has no specific portionText rule — should fall back to total grams
-    let entry = FoodEntry(mealLogId: 1, foodName: "Grilled Salmon", servingSizeG: 165, servings: 1.5, calories: 250)
+    // A food with no specific portionText rule should fall back to total grams
+    let entry = FoodEntry(mealLogId: 1, foodName: "Vegetable Medley", servingSizeG: 165, servings: 1.5, calories: 90)
     #expect(entry.portionText == "247g", "Should show total grams: 165 * 1.5 = 247")
 }
 
@@ -509,6 +563,35 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
 @Test func portionTextChiliDish() {
     let entry = FoodEntry(mealLogId: 1, foodName: "Chili Con Carne", servingSizeG: 250, servings: 2, calories: 320)
     #expect(entry.portionText == "2 bowls", "Chili dish should show bowls")
+}
+
+@Test func portionTextSalmonFillet() {
+    let entry = FoodEntry(mealLogId: 1, foodName: "Grilled Salmon Fillet", servingSizeG: 165, servings: 2, calories: 280)
+    #expect(entry.portionText == "2 pieces", "Salmon fillet should show pieces")
+    let single = FoodEntry(mealLogId: 1, foodName: "Salmon (baked)", servingSizeG: 150, servings: 1, calories: 240)
+    #expect(single.portionText == "1 piece", "Single salmon serving should show piece")
+}
+
+@Test func portionTextSteak() {
+    let entry = FoodEntry(mealLogId: 1, foodName: "Beef Steak (sirloin)", servingSizeG: 170, servings: 1, calories: 320)
+    #expect(entry.portionText == "1 piece", "Steak should show piece")
+}
+
+@Test func portionTextTofu() {
+    let entry = FoodEntry(mealLogId: 1, foodName: "Tofu (firm)", servingSizeG: 85, servings: 2, calories: 70)
+    #expect(entry.portionText == "2 cups", "Tofu should show cups")
+}
+
+@Test func portionTextMushroom() {
+    let entry = FoodEntry(mealLogId: 1, foodName: "Mushrooms (white)", servingSizeG: 100, servings: 1, calories: 22)
+    #expect(entry.portionText == "1 cup", "Mushrooms should show cup")
+    let portobello = FoodEntry(mealLogId: 1, foodName: "Portobello Mushroom", servingSizeG: 120, servings: 2, calories: 27)
+    #expect(portobello.portionText == "2 pieces", "Portobello should show pieces")
+}
+
+@Test func portionTextShreddedCheese() {
+    let entry = FoodEntry(mealLogId: 1, foodName: "Cheddar Cheese Shredded", servingSizeG: 112, servings: 1, calories: 450)
+    #expect(entry.portionText == "1 cup", "Shredded cheese should show cup")
 }
 
 // MARK: - Food Usage Tracking Tests (6 tests)

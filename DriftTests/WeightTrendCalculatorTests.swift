@@ -824,6 +824,24 @@ func makeEntries(days: Int, startKg: Double, ratePerDay: Double) -> [(date: Stri
     #expect(abs(m.calorieTarget - expectedCal) < 1)
 }
 
+@Test func customMacrosPartial_carbsSetFatFills_matchesTDEE() {
+    // When carbs are fixed and fat is auto, fat fills remaining budget (not just floor)
+    // e.g. P=100g C=20g F=auto, TDEE=2000 → fat = (2000 - 400 - 80)/9 ≈ 169g, not floor 48g
+    var goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 3,
+                         startDate: "2026-04-01", startWeightKg: 80,
+                         dietPreference: .custom, calorieTargetOverride: 2000)
+    goal.proteinTargetG = 100
+    goal.carbsTargetG   = 20
+
+    let m = goal.macroTargets(currentWeightKg: 80, actualTDEE: 2000)!
+    #expect(m.proteinG == 100)
+    #expect(m.carbsG == 20)
+    // fat fills remaining: (2000 - 100*4 - 20*4) / 9 = 1520/9 ≈ 168.9g
+    let expectedFat = (2000.0 - 100.0*4.0 - 20.0*4.0) / 9.0
+    #expect(abs(m.fatG - expectedFat) < 1, "Fat should fill remaining TDEE budget, not just floor")
+    #expect(abs(m.calorieTarget - 2000) < 1, "Effective calorie should match TDEE anchor")
+}
+
 @Test func customMacrosPartial_extremeProtein_reportsHonestCalorie() {
     // Extreme protein exceeds TDEE; carbs floor at 0; reported calorie = macro sum, not TDEE
     var goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 3,

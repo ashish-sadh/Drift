@@ -4,6 +4,20 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 
 ---
 
+## Cycle · 2026-04-15 (Human-shepherded junior tasks, session 5)
+
+- **Smart Units expansion** (primaryUnit + portionText): 7 new rules covering categories with "serving" fallback:
+  - Tofu → cup (126g/cup). Matching portionText rule added.
+  - Mushrooms → cup (70g/cup); portobello → piece. Matching portionText rules added.
+  - Parmesan / feta → tbsp (15g, crumbled/grated topping). Added before condiments rule.
+  - Shredded / grated → cup (112g/cup). Catches shredded cheddar, grated parmesan, etc.
+  - Fish fillets (salmon, tilapia, halibut, sea bass, cod, trout, mackerel, snapper, mahi, swordfish, haddock, fillet) → piece when ss > 70. Excluded: salad, roll, burger, bite. Matching portionText rule added.
+  - Steak → piece (excludes "steak sauce"). Matching portionText rule added.
+  - Fixed pre-existing WeightTrendCalculatorTests build error (integer literals in float expression).
+- **Food DB +21** (2004→2025): Mushrooms (Portobello, Shiitake, Cremini, Enoki, Oyster), Cheese varieties (Gouda, Provolone, Pepper Jack, Monterey Jack, Colby Jack, Cheddar Shredded, Mozzarella Shredded, Blue Cheese, Gruyere), Protein (Turkey Sausage, Pork Sausage, Chicken Liver), Indian Sweets (Til Ladoo, Gond ke Ladoo), Vegetables (Moringa Leaves), South Indian (Ragi Roti).
+- **Tests +17** (1491→1508): smart unit tests for all 7 new rules (tofu cup, mushroom cup/piece, portobello piece, parmesan tbsp, feta tbsp, shredded cheese cup, salmon piece + salad exclusion, steak piece + sauce exclusion) + portionText tests (salmon fillet, steak, tofu, mushroom, portobello, shredded cheese). Updated portionTextGramsDefault to use neutral food (Vegetable Medley).
+- All 1508 unit tests passing.
+
 ## Cycle · 2026-04-15 (Human-shepherded junior tasks, session 4)
 
 - **Smart Units expansion** (primaryUnit + portionText + cupGrams): 3 new rules:

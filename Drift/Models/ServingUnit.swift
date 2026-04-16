@@ -381,6 +381,10 @@ struct FoodUnit: Hashable {
            name.contains("chicken cutlet") || name.contains("chicken drumstick") {
             return FoodUnit(label: "piece", gramsEquivalent: ss)
         }
+        // Beef and pork whole-cut steaks — single piece
+        if name.contains("steak") && !name.contains("sauce") {
+            return FoodUnit(label: "piece", gramsEquivalent: ss)
+        }
         if name.contains("waffle") || name.contains("pancake") || name.contains("donut") || name.contains("doughnut") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
         if name.contains("brownie") || name.contains("muffin") || name.contains("cupcake") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
         if name.contains("banana") && ss < 160 { return FoodUnit(label: "banana", gramsEquivalent: ss) }
@@ -399,6 +403,15 @@ struct FoodUnit: Hashable {
         // Protein powder — measured by scoop
         if name.contains("protein powder") {
             return FoodUnit(label: "scoop", gramsEquivalent: ss)
+        }
+
+        // Parmesan and feta — grated/crumbled topping; measured by tbsp
+        if name.contains("parmesan") || name.contains("feta") {
+            return FoodUnit(label: "tbsp", gramsEquivalent: 15)
+        }
+        // Shredded or grated cheese — measured by cup
+        if name.contains("shredded") || name.contains("grated") {
+            return FoodUnit(label: "cup", gramsEquivalent: 112)
         }
 
         // Condiments and dips — tablespoon (before oil/ghee to avoid double-matching)
@@ -542,6 +555,9 @@ struct FoodUnit: Hashable {
         // Tikka — pieces of meat/paneer (not tikka masala curry, which the masala rule above catches)
         if name.contains("tikka") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
 
+        // Tofu — measured by cup (cubed portions in stir-fry, bowls)
+        if name.contains("tofu") { return FoodUnit(label: "cup", gramsEquivalent: 126) }
+
         // Yogurt / curd — measured in cups
         if words.contains("yogurt") || words.contains("curd") || words.contains("dahi") ||
            name.contains("yoghurt") || name.contains("raita") {
@@ -601,6 +617,18 @@ struct FoodUnit: Hashable {
             return FoodUnit(label: "ml", gramsEquivalent: 1)
         }
 
+        // Fish fillets and whole fish portions — single-serve piece
+        // ss > 70 distinguishes a fillet from a tiny topping/garnish amount
+        if (name.contains("salmon") || name.contains("tilapia") || name.contains("halibut") ||
+            name.contains("sea bass") || name.contains("seabass") || name.contains("snapper") ||
+            name.contains("mahi") || name.contains("swordfish") || name.contains("mackerel") ||
+            name.contains("trout") || name.contains("fillet") ||
+            words.contains("cod") || words.contains("haddock")) && ss > 70 &&
+           !name.contains("salad") && !name.contains("roll") && !name.contains("burger") &&
+           !name.contains("bite") {
+            return FoodUnit(label: "piece", gramsEquivalent: ss)
+        }
+
         // Sandwiches, burgers, tacos, and similar handheld foods — piece
         if name.contains("burger") || name.contains("taco") || name.contains("burrito") ||
            name.contains("hot dog") || name.contains("hotdog") || name.contains("frank") ||
@@ -636,6 +664,12 @@ struct FoodUnit: Hashable {
            name.contains("grapes") || (name.contains("cherr") && !name.contains("tomato")) {
             return FoodUnit(label: "cup", gramsEquivalent: 150)
         }
+
+        // Portobello — single whole mushroom; other mushrooms by cup
+        if name.contains("portobello") || name.contains("portabella") {
+            return FoodUnit(label: "piece", gramsEquivalent: ss)
+        }
+        if name.contains("mushroom") { return FoodUnit(label: "cup", gramsEquivalent: 70) }
 
         // Whole vegetables — by piece
         if name.contains("sweet potato") ||
