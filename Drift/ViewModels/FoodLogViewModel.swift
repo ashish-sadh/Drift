@@ -43,6 +43,8 @@ final class FoodLogViewModel {
 
     #if targetEnvironment(simulator)
     private func seedMockFoodIfNeeded() {
+        // Never seed during test runs — tests use AppDatabase.empty() and manage their own data.
+        guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else { return }
         let key = "drift_mock_food_seeded_v1"
         guard !UserDefaults.standard.bool(forKey: key) else { return }
         let cal = Calendar.current
@@ -109,6 +111,7 @@ final class FoodLogViewModel {
                 }
             }
             UserDefaults.standard.set(true, forKey: key)
+            UserDefaults.standard.synchronize()
         } catch {
             Log.foodLog.error("Mock food seed failed: \(error.localizedDescription)")
         }
