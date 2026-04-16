@@ -374,6 +374,13 @@ struct FoodUnit: Hashable {
         if name.contains("date") && !name.contains("update") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
         if name.contains("tortilla") || name.contains("wrap") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
         if name.contains("wing") || name.contains("nugget") || name.contains("tender") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
+        // Meat cuts and portions — single-serve pieces
+        if name.contains("chicken breast") || name.contains("chicken thigh") ||
+           name.contains("chicken leg") || name.contains("pork chop") ||
+           name.contains("lamb chop") || name.contains("chicken lollipop") ||
+           name.contains("chicken cutlet") || name.contains("chicken drumstick") {
+            return FoodUnit(label: "piece", gramsEquivalent: ss)
+        }
         if name.contains("waffle") || name.contains("pancake") || name.contains("donut") || name.contains("doughnut") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
         if name.contains("brownie") || name.contains("muffin") || name.contains("cupcake") { return FoodUnit(label: "piece", gramsEquivalent: ss) }
         if name.contains("banana") && ss < 160 { return FoodUnit(label: "banana", gramsEquivalent: ss) }
@@ -485,6 +492,11 @@ struct FoodUnit: Hashable {
             name.contains("chole") || name.contains("chana")) &&
            !name.contains("jelly") && !name.contains("cocoa") && !name.contains("coffee") &&
            !name.contains("masala") && !name.contains("curry") {
+            return FoodUnit(label: "cup", gramsEquivalent: cupGrams(for: name))
+        }
+
+        // Polenta, grits, risotto — measured in cups (porridge/grain consistency)
+        if name.contains("polenta") || name.contains("grits") || name.contains("risotto") {
             return FoodUnit(label: "cup", gramsEquivalent: cupGrams(for: name))
         }
 
@@ -603,6 +615,11 @@ struct FoodUnit: Hashable {
             return FoodUnit(label: "piece", gramsEquivalent: ss)
         }
 
+        // Salads — served by bowl (dressings already handled by condiments tbsp rule above)
+        if name.contains("salad") && !name.contains("dressing") {
+            return FoodUnit(label: "bowl", gramsEquivalent: ss)
+        }
+
         // Large fruits — by piece
         if (name.contains("mango") && !name.contains("chutney") && !name.contains("lassi") && !name.contains("juice")) ||
            (name.contains("papaya") && !name.contains("juice")) ||
@@ -659,6 +676,8 @@ struct FoodUnit: Hashable {
     private static func cupGrams(for name: String) -> Double {
         if name.contains("rice") { return 185 }
         if name.contains("quinoa") { return 185 }
+        if name.contains("risotto") { return 185 }
+        if name.contains("polenta") || name.contains("grits") { return 240 }
         if name.contains("oats") || name.contains("oatmeal") { return 80 }
         if name.contains("granola") { return 120 }
         if name.contains("muesli") { return 85 }

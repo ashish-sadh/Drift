@@ -433,7 +433,8 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
 }
 
 @Test func portionTextGramsDefault() async throws {
-    let entry = FoodEntry(mealLogId: 1, foodName: "Chicken Breast", servingSizeG: 165, servings: 1.5, calories: 165)
+    // "Grilled Salmon" has no specific portionText rule — should fall back to total grams
+    let entry = FoodEntry(mealLogId: 1, foodName: "Grilled Salmon", servingSizeG: 165, servings: 1.5, calories: 250)
     #expect(entry.portionText == "247g", "Should show total grams: 165 * 1.5 = 247")
 }
 
@@ -3411,4 +3412,70 @@ enum TestError: Error { case msg(String); init(_ s: String) { self = .msg(s) } }
     let text = AIChatViewModel.smartServingText(food: genericFood, servings: 1.5, gramAmount: nil)
     // Either shows smart unit or "1.5 serving" — must not crash, must be non-empty
     #expect(!text.isEmpty, "smartServingText must always return non-empty string")
+}
+
+// MARK: - Smart Units: Salads, Grains, Meat Cuts
+
+@Test func smartUnitSaladShowsBowl() {
+    let salad = Food(name: "Caesar Salad", category: "Salads", servingSize: 200, servingUnit: "g", calories: 220)
+    #expect(FoodUnit.smartUnits(for: salad).first?.label == "bowl", "Salad should default to bowl")
+}
+
+@Test func smartUnitGreekSaladShowsBowl() {
+    let salad = Food(name: "Greek Salad", category: "Mediterranean", servingSize: 180, servingUnit: "g", calories: 150)
+    #expect(FoodUnit.smartUnits(for: salad).first?.label == "bowl", "Greek salad should default to bowl")
+}
+
+@Test func smartUnitSaladDressingNotBowl() {
+    // Dressings are condiments — tbsp, not bowl
+    let dressing = Food(name: "Caesar Salad Dressing", category: "Condiments", servingSize: 30, servingUnit: "g", calories: 160)
+    let unit = FoodUnit.smartUnits(for: dressing).first?.label
+    #expect(unit != "bowl", "Salad dressing should not be bowl, got: \(unit ?? "nil")")
+}
+
+@Test func smartUnitGritsShowsCup() {
+    let grits = Food(name: "Grits (Cooked)", category: "Grains & Cereals", servingSize: 180, servingUnit: "g", calories: 145)
+    #expect(FoodUnit.smartUnits(for: grits).first?.label == "cup", "Grits should default to cup")
+}
+
+@Test func smartUnitRisottoShowsCup() {
+    let risotto = Food(name: "Mushroom Risotto", category: "Italian", servingSize: 250, servingUnit: "g", calories: 340)
+    #expect(FoodUnit.smartUnits(for: risotto).first?.label == "cup", "Risotto should default to cup")
+}
+
+@Test func smartUnitPolentaShowsCup() {
+    let polenta = Food(name: "Polenta (Cooked)", category: "Grains", servingSize: 150, servingUnit: "g", calories: 90)
+    #expect(FoodUnit.smartUnits(for: polenta).first?.label == "cup", "Polenta should default to cup")
+}
+
+@Test func smartUnitChickenBreastShowsPiece() {
+    let chicken = Food(name: "Chicken Breast (Cooked)", category: "Proteins", servingSize: 165, servingUnit: "g", calories: 165)
+    #expect(FoodUnit.smartUnits(for: chicken).first?.label == "piece", "Chicken breast should default to piece")
+}
+
+@Test func smartUnitPorkChopShowsPiece() {
+    let pork = Food(name: "Pork Chop (Grilled)", category: "Proteins", servingSize: 130, servingUnit: "g", calories: 240)
+    #expect(FoodUnit.smartUnits(for: pork).first?.label == "piece", "Pork chop should default to piece")
+}
+
+@Test func smartUnitLambChopShowsPiece() {
+    let lamb = Food(name: "Lamb Chop (Grilled)", category: "Proteins", servingSize: 120, servingUnit: "g", calories: 290)
+    #expect(FoodUnit.smartUnits(for: lamb).first?.label == "piece", "Lamb chop should default to piece")
+}
+
+@Test func smartUnitChickenLollipopShowsPiece() {
+    let lollipop = Food(name: "Chicken Lollipop", category: "Indian Snacks", servingSize: 50, servingUnit: "g", calories: 120)
+    #expect(FoodUnit.smartUnits(for: lollipop).first?.label == "piece", "Chicken lollipop should default to piece")
+}
+
+@Test func portionTextSaladShowsBowl() {
+    let entry = FoodEntry(foodName: "Caesar Salad", servingSizeG: 200, servings: 1,
+                          calories: 220, proteinG: 12, carbsG: 10, fatG: 18, mealType: "Lunch")
+    #expect(entry.portionText == "1 bowl", "Caesar salad portionText should be '1 bowl', got: \(entry.portionText)")
+}
+
+@Test func portionTextChickenBreastShowsPiece() {
+    let entry = FoodEntry(foodName: "Chicken Breast (Cooked)", servingSizeG: 165, servings: 1,
+                          calories: 165, proteinG: 31, carbsG: 0, fatG: 3, mealType: "Dinner")
+    #expect(entry.portionText == "1 piece", "Chicken breast portionText should be '1 piece', got: \(entry.portionText)")
 }

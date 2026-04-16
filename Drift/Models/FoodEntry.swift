@@ -135,6 +135,12 @@ extension FoodEntry {
         if lower.contains("wing") && servingSizeG < 100 { return fmt(servings, "wing", "wings") }
         if lower.contains("strip") && servingSizeG < 50 { return fmt(servings, "strip", "strips") }
         if lower.contains("link") && servingSizeG < 100 { return fmt(servings, "link", "links") }
+        // Meat cuts and portions
+        if lower.contains("chicken breast") || lower.contains("chicken thigh") ||
+           lower.contains("chicken leg") || lower.contains("pork chop") ||
+           lower.contains("lamb chop") || lower.contains("chicken lollipop") {
+            return fmt(servings, "piece", "pieces")
+        }
         if lower.contains("slice") { return fmt(servings, "slice", "slices") }
         // Bread/toast → slice (exclude breadfruit, breadstick, per-slice entries already caught above)
         if (lower.contains("bread") || lower.contains("toast")) &&
@@ -166,6 +172,10 @@ extension FoodEntry {
             return fmt(servings, "bowl", "bowls")
         }
         if servingSizeG > 50 && (lower.contains("pudding") || lower.contains("custard") || lower.contains("mousse")) {
+            return fmt(servings, "bowl", "bowls")
+        }
+        // Salads — bowl (dressings already matched by condiment rules and show as grams)
+        if lower.contains("salad") && !lower.contains("dressing") {
             return fmt(servings, "bowl", "bowls")
         }
 

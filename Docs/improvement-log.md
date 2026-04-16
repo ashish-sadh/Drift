@@ -4,6 +4,16 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 
 ---
 
+## Cycle · 2026-04-15 (Human-shepherded junior tasks, session 4)
+
+- **Smart Units expansion** (primaryUnit + portionText + cupGrams): 3 new rules:
+  - Salads → bowl (all "salad" foods, excluding dressings which remain tbsp). Matching portionText rule added.
+  - Polenta / grits / risotto → cup. cupGrams entries added (risotto=185, polenta/grits=240). 
+  - Meat cuts → piece: chicken breast, chicken thigh, chicken leg, pork chop, lamb chop, chicken lollipop, chicken cutlet, chicken drumstick. Matching portionText rule added.
+- **Food DB +21** (1983→2004): Greek/Mediterranean (Spanakopita, Moussaka, Saganaki), Kashmiri (Kahwa, Rista), Indian Street Food (Aloo Tikki Chaat, Ram Laddoo, Kachori Sabzi), North Indian (Sarson Da Saag, Pindi Chole), South Indian (Sundal, Olan, Kootu), Indian Drinks (Falooda, Thandai, Rose Milk), Grains (Grits Cooked), Healthy Options (Veggie Stir Fry, Grain Bowl), Indian Snacks (Chicken Lollipop), Condiments (Chimichurri).
+- **Tests +12** (1479→1491): smart unit tests for all 3 new rules (salad bowl, grits/risotto/polenta cup, meat cuts piece) + portionText tests. Fixed portionTextGramsDefault to use "Grilled Salmon" (neutral food). Fixed supplement tests: replaced Int.random with UUID to eliminate cross-run DB pollution.
+- All 1491 unit tests passing.
+
 ## Cycle · 2026-04-15 (Human-shepherded junior tasks, session 3)
 
 - **Smart Units expansion** (primaryUnit + portionText): Fixed chaat ordering bug (sev puri/dahi puri/pani puri were wrongly returning "piece" — chaat check now precedes puri flatbread check). New rules: omelette/frittata→piece, dhokla/khaman/khakhra/fafda/handvo/chilla/cheela→piece, pav bhaji/misal→bowl, pav (standalone)→piece, Indian milk desserts (rabri/shrikhand/basundi/phirni/seviyan)→bowl, chili dish (ss>15)→bowl, pudding/custard/mousse (ss>50)→bowl. Bread pudding excluded from bread→slice rule. Matching portionText entries for all new rules.
