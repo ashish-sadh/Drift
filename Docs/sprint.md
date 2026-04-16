@@ -1,6 +1,6 @@
 # Sprint Board
 
-Focus: **Smart Units Saturation + Pipeline Wrap-Up.** Multi-stage pipeline is shipped (6/8 tasks complete). This sprint: fix the P0 bug, merge remaining pipeline work, and saturate Smart Units per product focus. Smart Units is the #1 user complaint — every food needs natural default units (dosa→piece, milk→ml, rice→cup, eggs→piece).
+Focus: **AI Chat Stability + Lab Reports LLM + Smart Units Continued.** Four P0 AI chat bugs were filed this cycle — fix first. Then implement LLM-first lab report parsing (#74, design doc approved). Smart Units saturation continues as permanent highest-priority focus.
 
 ## Regression Gate
 
@@ -12,14 +12,27 @@ _(pick from Ready)_
 
 ## Ready
 
+### P0 — Bug Fixes (fix immediately, SENIOR)
 
-### P2 — Design Docs
+- [ ] **#147 Bug: "Daily summary" tries to log food named "daily summary"** — Intent classifier misrouting summary queries to food log tool. Fix routing in StaticOverrides or classifier. Add regression test.
+- [ ] **#148 Bug: "Weekly summary" query is broken** — Same class of issue as #147. Summary queries misclassified. Fix and add test.
+- [ ] **#149 Bug: "Log 2 eggs" adds egg benedict** — Food search matching wrong item. Audit SmartUnits egg rules + food search ranking. Fix and add test.
+- [ ] **#150 Bug: AI chat regressed badly across queries** — Broad regression possibly from StaticOverrides pruning or prompt changes. Run LLM eval lite, identify failure modes, restore coverage. Use `Docs/failing-queries.md` as anchor.
 
-- [x] **#74 Design doc: Lab reports + LLM parsing** — Done. Branch `design/74-lab-reports-llm`, doc at `Docs/designs/74-lab-reports-llm.md`, PR #114 open for review.
+### P1 — Senior Implementation
 
-### Design Docs (approved — not this sprint)
-- #66 Design: How to enrich images and youtube in exercises — `doc-ready`, `approved`
-- #133 Design-impl: Exercise image/video enrichment — research task
+- [ ] **#74 Implement LLM-first lab report parsing** — Per `Docs/designs/74-lab-reports-llm.md`. Gemma 4 as primary extractor (chunked, ~500 tokens/chunk), regex as validation layer. Add: confidence scoring, report date extraction (regex → LLM fallback → date picker), AI-parsed badge in biomarker history, accuracy warning banner in preview. SmolLM devices use existing regex-only path. Files: `Services/LabReportOCR.swift`, `Services/LabReportOCR+Biomarkers.swift`, `Models/BiomarkerResult.swift`. Tests required.
+
+### P1 — Junior Tasks
+
+- [ ] **#137 Smart Units: Complete audit of all 2,046 foods** — Audit every food for correct primaryUnit + portionText. Commit the staged `ServingUnit.swift` changes first (egg benedict fix + Indian flatbreads). Continue until "serving" count < 500. Focus: branded items, American staples, beverages, snack bars, condiments.
+- [ ] **#140 Exercise visual enrichment research** — Per design doc #66. Research image/video sources (Wger, free-exercise-db, YouTube API, public domain GIFs). Document findings in `Docs/designs/133-exercise-enrichment.md` (create if missing). No implementation — research only.
+- [ ] **Food DB enrichment** — +20 new foods. Focus: North Indian regional dishes, breakfast items, branded protein products, Indian sweets/snacks not yet in DB.
+- [ ] **Test coverage** — Run `./scripts/coverage-check.sh`. Fix any files below 80% (logic) or 50% (services) threshold. Priority: `LabReportOCR.swift` after #74 lands.
+
+### Design Docs (approved — pending implementation slot)
+- #66 Design: Exercise image/video enrichment — `doc-ready`, `approved`
+- #133 Design-impl: Exercise image/video enrichment — research task (= #140 above)
 
 ---
 
@@ -79,6 +92,10 @@ Autonomous refactoring. Run `code-improvement.md`. Principles in `Docs/principle
 
 ## Done (this sprint)
 
+_(empty — sprint just started)_
+
+## Done (previous sprint — Smart Units Saturation + Pipeline Wrap-Up)
+
 - [x] #135 Bug: "How many calories left" answers food search — fixed isDiaryQuery guard in food_info handler. Regression test added.
 - [x] #142 P0 Bug: Fiber always shows 0g in diary — RecentEntry was missing fiberG field; SQL queries omitted fiber_g; FoodSearchView hardcoded fiberG: 0. Fixed all three.
 - [x] #131 Update state.md + roadmap — 6-stage pipeline documented, build 123, 1424+ tests, food count updated. AI Chat reliability marked DONE in roadmap.
@@ -87,8 +104,9 @@ Autonomous refactoring. Run `code-improvement.md`. Principles in `Docs/principle
 - [x] #130 Merge PR #136 — Swift validation (Stage 3b) between LLM extraction and execution. Merged and closed.
 - [x] Smart Units in AI chat — Confirmation card + recipe builder now use smartServingText(). "log 2 dosas" shows "2 piece" not "2.0 serving".
 - [x] #143 P0 Bug: Edit ingredient shows wrong amount — derived servings from calories ratio; AI-created items no longer show "1" always.
+- [x] #74 Design doc: Lab reports + LLM parsing — Done. Branch `design/74-lab-reports-llm`, doc at `Docs/designs/74-lab-reports-llm.md`, PR #114 merged.
 
-## Done (previous sprint — Multi-Stage LLM Pipeline)
+## Done (two sprints ago — Multi-Stage LLM Pipeline)
 
 - [x] #129 Stage 0+1: Wire pipeline skeleton in AIToolAgent
 - [x] #92 Stage 2: Intent classifier (classification-only prompt)
