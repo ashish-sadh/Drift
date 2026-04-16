@@ -374,6 +374,16 @@ struct BiomarkerRow: View {
                 }
                 .foregroundStyle(statusColor)
                 Spacer()
+                // AI-parsed badge — shown when Gemma extracted this value (not regex)
+                if result.isAIParsed {
+                    HStack(spacing: 2) {
+                        Image(systemName: "cpu")
+                            .font(.system(size: 8))
+                        Text("AI")
+                            .font(.system(size: 9, weight: .medium))
+                    }
+                    .foregroundStyle(Theme.surplus.opacity(0.7))
+                }
             }
 
             // Range bar

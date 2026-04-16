@@ -116,7 +116,7 @@ struct LabReportUploadView: View {
     }
 
     private func previewSection(_ output: LabReportOCR.ExtractionOutput) -> some View {
-        let hasAIParsed = output.results.contains(where: \.isAIParsed)
+        let showAIWarning = output.isLLMParsed || output.results.contains(where: \.isAIParsed)
         return VStack(spacing: 14) {
             // Extracted count
             VStack(spacing: 4) {
@@ -127,8 +127,8 @@ struct LabReportUploadView: View {
                     .foregroundStyle(.secondary)
             }
 
-            // Accuracy warning — shown whenever AI parsing contributed any results
-            if hasAIParsed {
+            // Accuracy warning — shown whenever Gemma was involved in parsing (not just per-result AI)
+            if showAIWarning {
                 aiAccuracyWarning
             }
 
@@ -297,7 +297,9 @@ struct LabReportUploadView: View {
                     normalizedValue: normalized.value,
                     normalizedUnit: normalized.unit,
                     referenceLow: extracted.referenceLow,
-                    referenceHigh: extracted.referenceHigh
+                    referenceHigh: extracted.referenceHigh,
+                    confidence: extracted.confidence,
+                    isAIParsed: extracted.isAIParsed
                 )
             }
 

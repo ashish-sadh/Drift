@@ -625,6 +625,78 @@ HCV Ab <0.1 s/co ratio 0.0-0.9 01
     #expect(output.reportDate == "2026-03-15", "Should parse '15 Mar 2026' format, got \(output.reportDate ?? "nil")")
 }
 
+// MARK: - LLM Response Parsing
+
+@Test func llmResponseParsesThreePartLine() {
+    let response = "glucose|89.0|mg/dL"
+    let results = LabReportOCR.parseLLMBiomarkerResponse(response)
+    #expect(results.count == 1)
+    #expect(results[0].biomarkerId == "glucose")
+    #expect(results[0].value == 89.0)
+    #expect(results[0].unit == "mg/dL")
+    #expect(results[0].confidence == nil)
+    #expect(results[0].isAIParsed == true)
+}
+
+@Test func llmResponseParsesFourPartLineWithConfidence() {
+    let response = "glucose|89.0|mg/dL|0.95"
+    let results = LabReportOCR.parseLLMBiomarkerResponse(response)
+    #expect(results.count == 1)
+    #expect(results[0].confidence == 0.95)
+}
+
+@Test func llmResponseParsesMultipleLines() {
+    let response = """
+    glucose|89.0|mg/dL|0.95
+    hdl_cholesterol|57.0|mg/dL|0.90
+    total_cholesterol|168.0|mg/dL|0.88
+    """
+    let results = LabReportOCR.parseLLMBiomarkerResponse(response)
+    #expect(results.count == 3)
+}
+
+@Test func llmResponseSkipsUnknownBiomarkerIds() {
+    let response = "made_up_biomarker|100.0|mg/dL|0.9"
+    let results = LabReportOCR.parseLLMBiomarkerResponse(response)
+    #expect(results.isEmpty)
+}
+
+@Test func llmResponseSkipsMalformedLines() {
+    let response = """
+    glucose|89.0|mg/dL|0.95
+    this line has no pipes
+    |missing id|mg/dL
+    hdl_cholesterol|not_a_number|mg/dL
+    """
+    let results = LabReportOCR.parseLLMBiomarkerResponse(response)
+    #expect(results.count == 1)
+    #expect(results[0].biomarkerId == "glucose")
+}
+
+@Test func llmResponseHandlesWhitespace() {
+    let response = " glucose | 89.0 | mg/dL | 0.95 "
+    let results = LabReportOCR.parseLLMBiomarkerResponse(response)
+    #expect(results.count == 1)
+    #expect(results[0].value == 89.0)
+}
+
+// MARK: - ExtractionOutput isLLMParsed + Regex Result Flags
+
+@Test func regexParseResultsNotAIParsed() {
+    let output = LabReportOCR.parseLabReport(text: questReportText)
+    #expect(output.results.allSatisfy { !$0.isAIParsed })
+}
+
+@Test func regexParseResultsHaveNilConfidence() {
+    let output = LabReportOCR.parseLabReport(text: questReportText)
+    #expect(output.results.allSatisfy { $0.confidence == nil })
+}
+
+@Test func regexParseOutputNotLLMParsed() {
+    let output = LabReportOCR.parseLabReport(text: questReportText)
+    #expect(output.isLLMParsed == false)
+}
+
 // MARK: - Helper
 
 private func findResult(_ biomarkerId: String, in text: String) -> LabReportOCR.ExtractedResult? {

@@ -493,5 +493,13 @@ enum Migrations {
                 t.column("last_seen", .text).notNull().defaults(sql: "(date('now'))")
             }
         }
+
+        // v30: LLM confidence + AI-parsed flag on biomarker results
+        migrator.registerMigration("v30_biomarker_ai_parsed") { db in
+            try db.alter(table: "biomarker_result") { t in
+                t.add(column: "confidence", .double)
+                t.add(column: "is_ai_parsed", .boolean).notNull().defaults(to: false)
+            }
+        }
     }
 }

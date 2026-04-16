@@ -12,16 +12,19 @@ struct BiomarkerResult: Identifiable, Codable, Sendable {
     var normalizedUnit: String     // standard unit (from BiomarkerDefinition)
     var referenceLow: Double?      // lab's reference range (if provided)
     var referenceHigh: Double?
+    var confidence: Double?        // LLM extraction confidence (0–1); nil = regex-extracted
+    var isAIParsed: Bool           // true when value was extracted by LLM (not regex)
     var createdAt: String
 
     enum CodingKeys: String, CodingKey {
-        case id, value, unit
+        case id, value, unit, confidence
         case reportId = "report_id"
         case biomarkerId = "biomarker_id"
         case normalizedValue = "normalized_value"
         case normalizedUnit = "normalized_unit"
         case referenceLow = "reference_low"
         case referenceHigh = "reference_high"
+        case isAIParsed = "is_ai_parsed"
         case createdAt = "created_at"
     }
 
@@ -35,6 +38,8 @@ struct BiomarkerResult: Identifiable, Codable, Sendable {
         normalizedUnit: String? = nil,
         referenceLow: Double? = nil,
         referenceHigh: Double? = nil,
+        confidence: Double? = nil,
+        isAIParsed: Bool = false,
         createdAt: String = ISO8601DateFormatter().string(from: Date())
     ) {
         self.id = id
@@ -46,6 +51,8 @@ struct BiomarkerResult: Identifiable, Codable, Sendable {
         self.normalizedUnit = normalizedUnit ?? unit
         self.referenceLow = referenceLow
         self.referenceHigh = referenceHigh
+        self.confidence = confidence
+        self.isAIParsed = isAIParsed
         self.createdAt = createdAt
     }
 }
