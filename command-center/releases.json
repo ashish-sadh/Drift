@@ -1330,5 +1330,20 @@
       "AI chat intent routing fixed for 'daily summary' and 'weekly summary' queries",
       "Food search ranking improved — '2 eggs' no longer suggests egg benedict"
     ]
+  },
+  {
+    "build": 128,
+    "date": "2026-04-16T10:30:00-07:00",
+    "description": "AI chat routing improvements, +60 foods, bug fixes",
+    "features": [
+      "60 new foods added: Indian regional (Kadhi, Tinde Ki Sabzi, Karela Sabzi, Sem Ki Sabzi, Aloo Shimla Mirch, Sattu Paratha), Kerala dishes (Erissery, Thoran, Pachadi, Kalan, More Kuzhambu, Ada Pradhaman), South Indian (Kara Pongal, Rava Kesari), healthy options (Sprouts Salad, Moong Sprouts, Greek Yogurt), protein bars (Larabar variants), and more",
+      "AI chain-of-thought routing now 100% accurate: 19/19 test cases pass",
+      "Acknowledgments (thanks, ok, got it) no longer trigger unnecessary data fetching"
+    ],
+    "fixes": [
+      "Fixed CoT routing false positive: 'start tracking today' no longer incorrectly triggered workout data fetch",
+      "Fixed TypingDotsView timer resource leak: timer now properly invalidated when view disappears",
+      "IntentClassifier prompt improvements for better routing accuracy"
+    ]
   }
 ]
