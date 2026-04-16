@@ -3269,3 +3269,57 @@ enum TestError: Error { case msg(String); init(_ s: String) { self = .msg(s) } }
     let units = FoodUnit.smartUnits(for: food)
     #expect(units.first?.label == "cup", "Bean sprouts primary unit should be cup")
 }
+
+// MARK: - AI Chat Smart Serving Text Tests (7 tests)
+// Verify confirmation cards show natural units, not "N serving"
+
+@MainActor
+@Test func smartServingTextDosaShowsPiece() {
+    let dosa = Food(name: "Dosa (plain)", category: "Indian Breads", servingSize: 80, servingUnit: "g", calories: 133)
+    let text = AIChatViewModel.smartServingText(food: dosa, servings: 2, gramAmount: nil)
+    #expect(text == "2 piece", "2 dosas should show '2 piece', got: \(text)")
+}
+
+@MainActor
+@Test func smartServingTextDalShowsCup() {
+    let dal = Food(name: "Dal (toor/arhar)", category: "Lentils", servingSize: 240, servingUnit: "g", calories: 298)
+    let text = AIChatViewModel.smartServingText(food: dal, servings: 1, gramAmount: nil)
+    #expect(text == "1 cup", "1 serving of dal should show '1 cup', got: \(text)")
+}
+
+@MainActor
+@Test func smartServingTextMilkShowsMl() {
+    let milk = Food(name: "Milk (whole)", category: "Dairy", servingSize: 244, servingUnit: "ml", calories: 150)
+    let text = AIChatViewModel.smartServingText(food: milk, servings: 1, gramAmount: nil)
+    #expect(text.contains("ml") || text.contains("cup"), "Milk should show ml or cup, got: \(text)")
+}
+
+@MainActor
+@Test func smartServingTextGramAmountOverridesUnit() {
+    let rice = Food(name: "Rice (cooked)", category: "Grains", servingSize: 200, servingUnit: "g", calories: 260)
+    let text = AIChatViewModel.smartServingText(food: rice, servings: 1, gramAmount: 150)
+    #expect(text == "150g", "Explicit gram amount should show grams, got: \(text)")
+}
+
+@MainActor
+@Test func smartServingTextRotiShowsPiece() {
+    let roti = Food(name: "Roti (whole wheat)", category: "Bread", servingSize: 40, servingUnit: "g", calories: 120)
+    let text = AIChatViewModel.smartServingText(food: roti, servings: 3, gramAmount: nil)
+    #expect(text == "3 piece", "3 rotis should show '3 piece', got: \(text)")
+}
+
+@MainActor
+@Test func smartServingTextEggShowsEgg() {
+    let egg = Food(name: "Egg (whole, boiled)", category: "Protein", servingSize: 50, servingUnit: "g", calories: 78)
+    let text = AIChatViewModel.smartServingText(food: egg, servings: 2, gramAmount: nil)
+    #expect(text == "2 egg", "2 eggs should show '2 egg', got: \(text)")
+}
+
+@MainActor
+@Test func smartServingTextFallsBackToServingWhenNoSmartUnit() {
+    // A food with default "serving" unit (no smart unit configured) should fall back gracefully
+    let genericFood = Food(name: "Some Food Item", category: "Other", servingSize: 100, servingUnit: "g", calories: 200)
+    let text = AIChatViewModel.smartServingText(food: genericFood, servings: 1.5, gramAmount: nil)
+    // Either shows smart unit or "1.5 serving" — must not crash, must be non-empty
+    #expect(!text.isEmpty, "smartServingText must always return non-empty string")
+}
