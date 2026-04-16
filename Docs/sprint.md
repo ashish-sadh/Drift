@@ -28,7 +28,7 @@ _(pick from Ready)_
 
 ### P2 — Design Docs
 
-- [ ] **#74 Design doc: Lab reports + LLM parsing** — Create branch, write design doc, create PR with `--label design-doc`, add `doc-ready` label to issue. Reference: `Docs/designs/` for format.
+- [x] **#74 Design doc: Lab reports + LLM parsing** — Done. Branch `design/74-lab-reports-llm`, doc at `Docs/designs/74-lab-reports-llm.md`, PR #114 open for review.
 
 ### Design Docs (approved — not this sprint)
 - #66 Design: How to enrich images and youtube in exercises — `doc-ready`, `approved`
@@ -92,7 +92,7 @@ Autonomous refactoring. Run `code-improvement.md`. Principles in `Docs/principle
 
 ## Done (this sprint)
 
-_(new sprint — nothing yet)_
+- [x] #135 Bug: "How many calories left" answers food search — fixed isDiaryQuery guard in food_info handler. Regression test added.
 
 ## Done (previous sprint — Multi-Stage LLM Pipeline)
 
