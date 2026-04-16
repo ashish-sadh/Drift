@@ -79,6 +79,20 @@ Known biomarkers: [compact list of 71 IDs with expected units]
 Only extract values you're confident about. Skip headers, dates, patient info.
 ```
 
+### Report date extraction
+
+The report date must be read from the document itself, not defaulted to today. Lab reports contain the collection or result date (e.g. "Collection Date: 03/14/2026" or "Report Date: 14-Mar-2026").
+
+**Current bug:** All uploaded reports are stored with `date = Date()` (today), meaning three reports uploaded in one session all appear as the same date even if they span months.
+
+**Fix in this design:**
+- Add a date extraction pass: before biomarker extraction, run a lightweight regex scan (and LLM fallback) to find the report date
+- Regex patterns: `Collection Date:`, `Report Date:`, `Date:`, `Collected:`, plus common date formats (MM/DD/YYYY, DD-Mon-YYYY, YYYY-MM-DD)
+- If regex finds a date → parse and use it as the report date
+- If regex fails → ask LLM in first chunk: "What is the date of this lab report? Return as YYYY-MM-DD. If no date found, return null."
+- If LLM also fails → show date picker in preview UI so user can enter it manually
+- `LabReportResult` struct gains a `reportDate: Date` field (replaces implicit `Date()`)
+
 ### Chunked processing
 
 OCR text from a full lab report can be 2000-5000 tokens. With 2048 context window:
@@ -120,6 +134,16 @@ With LLM parsing, format support expands automatically:
 - **LLM hallucination:** Returns biomarker values not in the OCR text. Regex validation cross-checks against raw text. Values not found in raw text flagged as low confidence.
 - **Very long report (20+ pages):** Chunk limit of 10 chunks (~5000 tokens). Excess pages skipped with warning.
 - **Duplicate biomarkers across chunks:** Deduplicate by biomarker ID, keep highest confidence value.
+
+## UX: Accuracy Warning
+
+LLM parsing is probabilistic — values can be misread, especially from poor OCR or unusual formats. Users must not make medical decisions based on unverified AI-parsed values.
+
+**Implementation:**
+- Show a persistent banner in the lab report preview screen: "Values extracted by AI — verify against your original report before saving."
+- Banner uses the warning color (Theme.surplus/amber), not dismissible on first upload
+- After saving, biomarker entries from LLM-parsed reports show a subtle "AI-parsed" badge in the biomarker history view
+- This is a non-negotiable UX requirement — privacy-first + accuracy-honest
 
 ## Open Questions
 
