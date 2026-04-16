@@ -1143,6 +1143,49 @@ final class AIEvalHarness: XCTestCase {
         XCTAssertNil(IntentClassifier.parseResponse("Sure, I can help with that!"))
     }
 
+    // Tests parseResponse for tools newly added to the prompt:
+    // body_comp, supplements (status), glucose, biomarkers, navigate_to extended screens
+    func testIntentClassifierNewTools() {
+        // body_comp — no params
+        let bodyComp1 = IntentClassifier.parseResponse(#"{"tool":"body_comp"}"#)
+        XCTAssertEqual(bodyComp1?.tool, "body_comp")
+
+        // body_comp — LLM may include a query param; that's fine
+        let bodyComp2 = IntentClassifier.parseResponse(#"{"tool":"body_comp","query":"body fat"}"#)
+        XCTAssertEqual(bodyComp2?.tool, "body_comp")
+        XCTAssertEqual(bodyComp2?.params["query"], "body fat")
+
+        // supplements status (query, not marking)
+        let supp1 = IntentClassifier.parseResponse(#"{"tool":"supplements"}"#)
+        XCTAssertEqual(supp1?.tool, "supplements")
+
+        // mark_supplement still correct
+        let supp2 = IntentClassifier.parseResponse(#"{"tool":"mark_supplement","name":"creatine"}"#)
+        XCTAssertEqual(supp2?.tool, "mark_supplement")
+        XCTAssertEqual(supp2?.params["name"], "creatine")
+
+        // glucose
+        let glucose = IntentClassifier.parseResponse(#"{"tool":"glucose"}"#)
+        XCTAssertEqual(glucose?.tool, "glucose")
+
+        // biomarkers
+        let bio = IntentClassifier.parseResponse(#"{"tool":"biomarkers"}"#)
+        XCTAssertEqual(bio?.tool, "biomarkers")
+
+        // navigate_to — sleep screen
+        let nav1 = IntentClassifier.parseResponse(#"{"tool":"navigate_to","screen":"bodyRhythm"}"#)
+        XCTAssertEqual(nav1?.tool, "navigate_to")
+        XCTAssertEqual(nav1?.params["screen"], "bodyRhythm")
+
+        // navigate_to — supplements screen
+        let nav2 = IntentClassifier.parseResponse(#"{"tool":"navigate_to","screen":"supplements"}"#)
+        XCTAssertEqual(nav2?.params["screen"], "supplements")
+
+        // navigate_to — dashboard
+        let nav3 = IntentClassifier.parseResponse(#"{"tool":"navigate_to","screen":"dashboard"}"#)
+        XCTAssertEqual(nav3?.params["screen"], "dashboard")
+    }
+
     // MARK: - Full Pipeline Coverage (StaticOverrides → ToolRanker)
 
     @MainActor

@@ -5,7 +5,6 @@ import llama
 final class LlamaCppBackend: AIBackend, @unchecked Sendable {
     private var model: OpaquePointer?                       // llama_model *
     private var context: OpaquePointer?                     // llama_context *
-    private var smpl: UnsafeMutablePointer<llama_sampler>?  // llama_sampler *
     private let modelPath: URL
     private var isGemma: Bool = false  // Gemma uses different chat template
     private let threadOverride: Int?  // nil = auto, set lower for parallel eval
@@ -114,31 +113,60 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
         }
         context = c
 
-        // Create sampler chain
-        let s = llama_sampler_chain_init(llama_sampler_chain_default_params())!
-        llama_sampler_chain_add(s, llama_sampler_init_temp(0.4))
-        llama_sampler_chain_add(s, llama_sampler_init_top_p(0.9, 1))
-        llama_sampler_chain_add(s, llama_sampler_init_dist(UInt32.random(in: .min ... .max)))
-        smpl = s
-
         // Detect model family from filename for chat template
         self.isGemma = modelPath.lastPathComponent.lowercased().contains("gemma")
         Log.app.info("AI: model loaded via raw C API (ctx=\(ctxParams.n_ctx), gemma=\(self.isGemma))")
     }
 
-    // MARK: - Inference
+    // MARK: - Sampler
 
-    func respond(to prompt: String, systemPrompt: String) async -> String {
-        await respondStreaming(to: prompt, systemPrompt: systemPrompt, onToken: { _ in })
+    /// Build a sampler chain for one inference call. Caller owns it and must call llama_sampler_free().
+    /// temperature=0 → greedy (deterministic) — use for intent classification.
+    /// temperature>0 → stochastic (top-p) — use for presentation / conversational responses.
+    private func makeSampler(temperature: Float) -> UnsafeMutablePointer<llama_sampler> {
+        let s = llama_sampler_chain_init(llama_sampler_chain_default_params())!
+        if temperature <= 0 {
+            llama_sampler_chain_add(s, llama_sampler_init_greedy())
+        } else {
+            llama_sampler_chain_add(s, llama_sampler_init_temp(temperature))
+            llama_sampler_chain_add(s, llama_sampler_init_top_p(0.9, 1))
+            llama_sampler_chain_add(s, llama_sampler_init_dist(UInt32.random(in: .min ... .max)))
+        }
+        return s
     }
 
+    // MARK: - Inference (AIBackend protocol)
+
+    /// Protocol conformance: greedy (temp=0) — deterministic, ideal for intent classification.
+    func respond(to prompt: String, systemPrompt: String) async -> String {
+        await _respondStreaming(to: prompt, systemPrompt: systemPrompt, temperature: 0.0, onToken: { _ in })
+    }
+
+    /// Protocol conformance: stochastic (temp=0.4) — natural presentation responses.
     func respondStreaming(to prompt: String, systemPrompt: String, onToken: @escaping @Sendable (String) -> Void) async -> String {
-        guard let model, let context, let smpl else { return "" }
+        await _respondStreaming(to: prompt, systemPrompt: systemPrompt, temperature: 0.4, onToken: onToken)
+    }
+
+    // MARK: - Inference (extended API)
+
+    /// Explicit temperature control. Use temperature=0 for greedy/deterministic output.
+    func respond(to prompt: String, systemPrompt: String, temperature: Float) async -> String {
+        await _respondStreaming(to: prompt, systemPrompt: systemPrompt, temperature: temperature, onToken: { _ in })
+    }
+
+    /// Explicit temperature control with streaming.
+    func respondStreaming(to prompt: String, systemPrompt: String, temperature: Float, onToken: @escaping @Sendable (String) -> Void) async -> String {
+        await _respondStreaming(to: prompt, systemPrompt: systemPrompt, temperature: temperature, onToken: onToken)
+    }
+
+    // MARK: - Core Inference
+
+    private func _respondStreaming(to prompt: String, systemPrompt: String, temperature: Float, onToken: @escaping @Sendable (String) -> Void) async -> String {
+        guard let model, let context else { return "" }
 
         // Build prompt using model-appropriate chat template
         let fullPrompt: String
         if isGemma {
-            // Gemma uses <start_of_turn> format
             fullPrompt = "<start_of_turn>user\n\(systemPrompt)\n\n\(prompt)<end_of_turn>\n<start_of_turn>model\n"
         } else {
             // ChatML for Qwen, SmolLM, etc.
@@ -155,13 +183,17 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
             tokens = Array(tokens.prefix(maxPromptTokens))
         }
 
-        // Clear memory (KV cache)
+        // Clear KV cache
         let mem = llama_get_memory(context)
         if let mem { llama_memory_clear(mem, true) }
 
         // Process prompt
         let promptBatch = llama_batch_get_one(&tokens, Int32(tokens.count))
         if llama_decode(context, promptBatch) != 0 { return "" }
+
+        // Build per-call sampler — freed when this call returns
+        let callSampler = makeSampler(temperature: temperature)
+        defer { llama_sampler_free(callSampler) }
 
         // Generate token by token
         var outputBuf: [CChar] = []
@@ -171,7 +203,7 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
         let eotToken = llama_vocab_eot(vocab)
 
         for _ in 0..<maxNewTokens {
-            let newToken = llama_sampler_sample(smpl, context, -1)
+            let newToken = llama_sampler_sample(callSampler, context, -1)
             if newToken == eosToken || newToken == eotToken { break }
 
             // Token to text
@@ -181,9 +213,8 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
                 let piece = buf.prefix(Int(len))
                 outputBuf.append(contentsOf: piece)
 
-                // Stream the token piece to caller
+                // Stream piece to caller, filtering chat template tokens
                 let tokenStr = String(cString: Array(piece) + [0])
-                // Filter out chat template tokens from streaming
                 let stopTokens = ["<|im_end|>", "<|im_start|>", "<end_of_turn>", "<start_of_turn>"]
                 if !stopTokens.contains(where: { tokenStr.contains($0) }) {
                     onToken(tokenStr)
@@ -197,10 +228,10 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
                 if closes > 0 && opens == closes { break }
             }
 
-            // Check stop sequence — only check tail (not entire buffer)
+            // Check stop sequence in tail (not entire buffer — avoids O(n) scan)
             let bufLen = outputBuf.count
             if bufLen >= 10 {
-                let tailStart = max(0, bufLen - 32) // 32 bytes for multi-token stop sequences
+                let tailStart = max(0, bufLen - 32)
                 let tail = Array(outputBuf[tailStart...]) + [0]
                 let tailStr = String(cString: tail)
                 if tailStr.contains("<|im_end|>") || tailStr.contains("<end_of_turn>") { break }
@@ -211,8 +242,6 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
             let nextBatch = llama_batch_get_one(&tokenArr, 1)
             if llama_decode(context, nextBatch) != 0 { break }
         }
-
-        llama_sampler_reset(smpl)
 
         guard !outputBuf.isEmpty else { return "" }
         var result = String(cString: outputBuf + [0])
@@ -240,10 +269,8 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
     // MARK: - Cleanup
 
     func unload() {
-        if let smpl { llama_sampler_free(smpl) }
         if let context { llama_free(context) }
         if let model { llama_model_free(model) }
-        smpl = nil
         context = nil
         model = nil
     }

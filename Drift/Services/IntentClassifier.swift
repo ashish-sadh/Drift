@@ -20,12 +20,12 @@ enum IntentClassifier {
         case text(String)  // LLM chose to respond with text (follow-up question, greeting, etc.)
     }
 
-    // MARK: - System Prompt (~150 tokens)
+    // MARK: - System Prompt
 
     static let systemPrompt = """
     Health app. Reply JSON tool call or short text. Fix typos, word numbers, slang — understand messy input.
-    Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) set_goal(target,unit?) delete_food(query?) body_comp(query?) navigate_to(screen)
-    RULES: "calories in X" or "how many calories in X" → food_info (NOT log_food). Only use log_food when user says they ate/had/logged something. Use weight_info for goal progress, weight trends, body goals. Use food_info for nutrition questions and summaries.
+    Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) supplements() set_goal(target,unit?) delete_food(query?) body_comp() glucose() biomarkers() navigate_to(screen)
+    RULES: NEVER generate health data from memory — ALWAYS call a tool. "calories in X" → food_info (NOT log_food). Use log_food only when user ate/had/logged. "daily summary"/"weekly summary" → food_info. "weight trend"/"weight history" → weight_info. "body fat/lean mass/DEXA/body composition" → body_comp. "blood sugar/glucose" → glucose. "lab results/blood work/biomarkers/cholesterol" → biomarkers. "go to [screen]"/"open [screen]" → navigate_to.
     "log 2 eggs and toast"→{"tool":"log_food","name":"eggs, toast","servings":"2"}
     "had biryani"→{"tool":"log_food","name":"biryani"}
     "I had 2 to 3 banans"→{"tool":"log_food","name":"banana","servings":"3"}
@@ -46,6 +46,15 @@ enum IntentClassifier {
     "start push day"→{"tool":"start_workout","name":"push day"}
     "did yoga for like half an hour"→{"tool":"log_activity","name":"yoga","duration":"30"}
     "took vitamin d"→{"tool":"mark_supplement","name":"vitamin d"}
+    "did I take my vitamins"→{"tool":"supplements"}
+    "supplement status"→{"tool":"supplements"}
+    "what's my body fat"→{"tool":"body_comp"}
+    "lean mass progress"→{"tool":"body_comp"}
+    "DEXA results"→{"tool":"body_comp"}
+    "any glucose spikes"→{"tool":"glucose"}
+    "how's my blood sugar"→{"tool":"glucose"}
+    "show my biomarkers"→{"tool":"biomarkers"}
+    "lab results"→{"tool":"biomarkers"}
     "how'd I sleep"→{"tool":"sleep_recovery"}
     "how's my muscle recovery"→{"tool":"exercise_info","query":"muscle recovery"}
     "set my goal to one sixty"→{"tool":"set_goal","target":"160","unit":"lbs"}
@@ -53,6 +62,11 @@ enum IntentClassifier {
     "show me my weight chart"→{"tool":"navigate_to","screen":"weight"}
     "go to food tab"→{"tool":"navigate_to","screen":"food"}
     "open exercise"→{"tool":"navigate_to","screen":"exercise"}
+    "go to sleep tab"→{"tool":"navigate_to","screen":"bodyRhythm"}
+    "open supplements"→{"tool":"navigate_to","screen":"supplements"}
+    "show dashboard"→{"tool":"navigate_to","screen":"dashboard"}
+    "go to glucose"→{"tool":"navigate_to","screen":"glucose"}
+    "open biomarkers"→{"tool":"navigate_to","screen":"biomarkers"}
     "log lunch"→What did you have for lunch?
     "add my dinner"→What did you have for dinner?
     "hi"→Hi! How can I help?

@@ -39,11 +39,10 @@ final class IntentRoutingEval: XCTestCase {
     // MARK: - System Prompt (mirror of IntentClassifier.systemPrompt)
     // Keep in sync with Drift/Services/IntentClassifier.swift
 
-    // Keep in sync with Drift/Services/IntentClassifier.systemPrompt
     static let systemPrompt = """
     Health app. Reply JSON tool call or short text. Fix typos, word numbers, slang — understand messy input.
-    Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) set_goal(target,unit?) delete_food(query?) body_comp(query?) navigate_to(screen)
-    RULES: "calories in X" or "how many calories in X" → food_info (NOT log_food). Only use log_food when user says they ate/had/logged something. Use weight_info for goal progress, weight trends, body goals. Use food_info for nutrition questions and summaries.
+    Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) supplements() set_goal(target,unit?) delete_food(query?) body_comp() glucose() biomarkers() navigate_to(screen)
+    RULES: NEVER generate health data from memory — ALWAYS call a tool. "calories in X" → food_info (NOT log_food). Use log_food only when user ate/had/logged. "daily summary"/"weekly summary" → food_info. "weight trend"/"weight history" → weight_info. "body fat/lean mass/DEXA/body composition" → body_comp. "blood sugar/glucose" → glucose. "lab results/blood work/biomarkers/cholesterol" → biomarkers. "go to [screen]"/"open [screen]" → navigate_to.
     "log 2 eggs and toast"→{"tool":"log_food","name":"eggs, toast","servings":"2"}
     "had biryani"→{"tool":"log_food","name":"biryani"}
     "I had 2 to 3 banans"→{"tool":"log_food","name":"banana","servings":"3"}
@@ -64,6 +63,15 @@ final class IntentRoutingEval: XCTestCase {
     "start push day"→{"tool":"start_workout","name":"push day"}
     "did yoga for like half an hour"→{"tool":"log_activity","name":"yoga","duration":"30"}
     "took vitamin d"→{"tool":"mark_supplement","name":"vitamin d"}
+    "did I take my vitamins"→{"tool":"supplements"}
+    "supplement status"→{"tool":"supplements"}
+    "what's my body fat"→{"tool":"body_comp"}
+    "lean mass progress"→{"tool":"body_comp"}
+    "DEXA results"→{"tool":"body_comp"}
+    "any glucose spikes"→{"tool":"glucose"}
+    "how's my blood sugar"→{"tool":"glucose"}
+    "show my biomarkers"→{"tool":"biomarkers"}
+    "lab results"→{"tool":"biomarkers"}
     "how'd I sleep"→{"tool":"sleep_recovery"}
     "how's my muscle recovery"→{"tool":"exercise_info","query":"muscle recovery"}
     "set my goal to one sixty"→{"tool":"set_goal","target":"160","unit":"lbs"}
@@ -71,6 +79,11 @@ final class IntentRoutingEval: XCTestCase {
     "show me my weight chart"→{"tool":"navigate_to","screen":"weight"}
     "go to food tab"→{"tool":"navigate_to","screen":"food"}
     "open exercise"→{"tool":"navigate_to","screen":"exercise"}
+    "go to sleep tab"→{"tool":"navigate_to","screen":"bodyRhythm"}
+    "open supplements"→{"tool":"navigate_to","screen":"supplements"}
+    "show dashboard"→{"tool":"navigate_to","screen":"dashboard"}
+    "go to glucose"→{"tool":"navigate_to","screen":"glucose"}
+    "open biomarkers"→{"tool":"navigate_to","screen":"biomarkers"}
     "log lunch"→What did you have for lunch?
     "add my dinner"→What did you have for dinner?
     "hi"→Hi! How can I help?
@@ -180,6 +193,52 @@ final class IntentRoutingEval: XCTestCase {
         await assertNotFood("how's my body fat")
         await assertNotFood("show me my biomarkers")
         await assertRoutes("how's my body fat", to: "body_comp")
+    }
+
+    // MARK: - Body Composition (body_comp)
+
+    func testBodyComp_routing() async {
+        await assertRoutes("what's my body fat", to: "body_comp")
+        await assertRoutes("lean mass progress", to: "body_comp")
+        await assertRoutes("DEXA results", to: "body_comp")
+        await assertRoutes("show my body composition", to: "body_comp")
+        await assertRoutes("how much muscle have I gained", to: "body_comp")
+    }
+
+    // MARK: - Supplements (mark vs status)
+
+    func testSupplements_markVsStatus() async {
+        // Marking (took/had) → mark_supplement
+        await assertRoutes("took creatine", to: "mark_supplement")
+        await assertRoutes("had my fish oil today", to: "mark_supplement")
+        // Status query (did I take / what supplements) → supplements
+        await assertRoutes("did I take my vitamins", to: "supplements")
+        await assertRoutes("supplement status", to: "supplements")
+        await assertRoutes("which supplements am I missing", to: "supplements")
+    }
+
+    // MARK: - Glucose & Biomarkers
+
+    func testGlucose_routing() async {
+        await assertRoutes("any glucose spikes", to: "glucose")
+        await assertRoutes("how's my blood sugar", to: "glucose")
+        await assertRoutes("blood sugar today", to: "glucose")
+    }
+
+    func testBiomarkers_routing() async {
+        await assertRoutes("show my biomarkers", to: "biomarkers")
+        await assertRoutes("lab results", to: "biomarkers")
+        await assertRoutes("how's my cholesterol", to: "biomarkers")
+    }
+
+    // MARK: - Navigation (extended screens)
+
+    func testNavigation_extendedScreens() async {
+        await assertRoutes("go to sleep tab", to: "navigate_to")
+        await assertRoutes("open supplements", to: "navigate_to")
+        await assertRoutes("show dashboard", to: "navigate_to")
+        await assertRoutes("go to glucose", to: "navigate_to")
+        await assertRoutes("open biomarkers", to: "navigate_to")
     }
 
     // MARK: - Multi-Turn Context
