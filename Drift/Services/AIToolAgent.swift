@@ -225,7 +225,7 @@ enum AIToolAgent {
     /// Validate LLM-extracted params before execution. Catches obvious errors
     /// (bad names, out-of-range values) and falls back to Swift extraction.
     /// Always returns a ToolCall — let preHook handle nuanced edge cases.
-    private static func validateExtraction(_ call: ToolCall, message: String) -> ToolCall {
+    static func validateExtraction(_ call: ToolCall, message: String) -> ToolCall {
         switch call.tool {
         case "log_food":
             return validateFoodParams(call, message: message)

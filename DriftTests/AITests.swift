@@ -836,6 +836,78 @@ import Testing
     #expect(AIToolAgent.isInfoTool("nonexistent_tool") == false)
 }
 
+// MARK: - Stage 3b Validation Tests
+
+@Test @MainActor func stage3bServingsKeyRenamedToAmount() {
+    // IntentClassifier sends "servings"; tool expects "amount" — should be renamed
+    let call = ToolCall(tool: "log_food", params: ToolCallParams(values: ["name": "rice", "servings": "2"]))
+    let validated = AIToolAgent.validateExtraction(call, message: "log 2 cups of rice")
+    #expect(validated.params.values["amount"] == "2", "servings key should be renamed to amount")
+    #expect(validated.params.values["servings"] == nil, "servings key should be removed")
+}
+
+@Test @MainActor func stage3bBadFoodNameFallsBackToSwiftParser() {
+    // Single-char name is bad — should fall back to parseFoodIntent
+    let call = ToolCall(tool: "log_food", params: ToolCallParams(values: ["name": "x"]))
+    let validated = AIToolAgent.validateExtraction(call, message: "log 2 eggs")
+    #expect(validated.params.values["name"] != "x", "Bad single-char name should be replaced")
+    #expect(!(validated.params.values["name"] ?? "").isEmpty, "Fallback name should not be empty")
+}
+
+@Test @MainActor func stage3bAllDigitNameFallsBack() {
+    let call = ToolCall(tool: "log_food", params: ToolCallParams(values: ["name": "123"]))
+    let validated = AIToolAgent.validateExtraction(call, message: "log a banana")
+    #expect(validated.params.values["name"] != "123", "All-digit name should be replaced")
+}
+
+@Test @MainActor func stage3bOutOfRangeAmountStripped() {
+    // amount=999 is nonsensical — should be stripped so preHook can apply default
+    let call = ToolCall(tool: "log_food", params: ToolCallParams(values: ["name": "chicken", "amount": "999"]))
+    let validated = AIToolAgent.validateExtraction(call, message: "log chicken")
+    #expect(validated.params.values["amount"] == nil, "Out-of-range amount (>=100) should be removed")
+}
+
+@Test @MainActor func stage3bNegativeMacrosStripped() {
+    let call = ToolCall(tool: "log_food", params: ToolCallParams(values: [
+        "name": "salad", "protein": "-5", "carbs": "10", "fat": "-2"
+    ]))
+    let validated = AIToolAgent.validateExtraction(call, message: "log salad")
+    #expect(validated.params.values["protein"] == nil, "Negative protein should be stripped")
+    #expect(validated.params.values["fat"] == nil, "Negative fat should be stripped")
+    #expect(validated.params.values["carbs"] == "10", "Valid carbs should be kept")
+}
+
+@Test @MainActor func stage3bCaloriesOver10000Stripped() {
+    let call = ToolCall(tool: "log_food", params: ToolCallParams(values: ["name": "pizza", "calories": "99999"]))
+    let validated = AIToolAgent.validateExtraction(call, message: "log pizza")
+    #expect(validated.params.values["calories"] == nil, "Calories >10000 should be stripped")
+}
+
+@Test @MainActor func stage3bActivityOutOfRangeDurationStripped() {
+    let call = ToolCall(tool: "log_activity", params: ToolCallParams(values: ["activity": "yoga", "duration": "9999"]))
+    let validated = AIToolAgent.validateExtraction(call, message: "log yoga")
+    #expect(validated.params.values["duration"] == nil, "Duration >600 should be stripped")
+
+    let call2 = ToolCall(tool: "log_activity", params: ToolCallParams(values: ["activity": "run", "duration": "30"]))
+    let validated2 = AIToolAgent.validateExtraction(call2, message: "log run")
+    #expect(validated2.params.values["duration"] == "30", "Valid duration should be kept")
+}
+
+@Test @MainActor func stage3bValidFoodParamsPassThrough() {
+    // Good params should not be modified
+    let call = ToolCall(tool: "log_food", params: ToolCallParams(values: ["name": "oatmeal", "amount": "1"]))
+    let validated = AIToolAgent.validateExtraction(call, message: "log oatmeal")
+    #expect(validated.params.values["name"] == "oatmeal")
+    #expect(validated.params.values["amount"] == "1")
+}
+
+@Test @MainActor func stage3bUnknownToolPassesThrough() {
+    let call = ToolCall(tool: "food_info", params: ToolCallParams(values: ["query": "protein"]))
+    let validated = AIToolAgent.validateExtraction(call, message: "how much protein")
+    #expect(validated.tool == "food_info")
+    #expect(validated.params.values["query"] == "protein")
+}
+
 @Test @MainActor func aiToolAgentInsightPrefixNoData() async throws {
     // Empty/no-data states should NOT get a prefix
     #expect(AIToolAgent.addInsightPrefix(to: "No food logged today") == "No food logged today")
