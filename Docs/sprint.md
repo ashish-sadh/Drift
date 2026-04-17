@@ -22,7 +22,7 @@ _(pick from Ready)_
 
 ### P1 — Senior Implementation
 
-- [ ] **#151 Implement LLM-first lab report parsing (#74)** — Per `Docs/designs/74-lab-reports-llm.md`. Gemma 4 as primary extractor (chunked, ~500 tokens/chunk), regex as validation layer. Add: confidence scoring, report date extraction (regex → LLM fallback → date picker), AI-parsed badge in biomarker history, accuracy warning banner in preview. SmolLM devices use existing regex-only path. Files: `Services/LabReportOCR.swift`, `Services/LabReportOCR+Biomarkers.swift`, `Models/BiomarkerResult.swift`. Tests required.
+- [x] **#151 Implement LLM-first lab report parsing (#74)** — Shipped (cycle 5228). Gemma 4 primary extractor with chunked inference, confidence scoring (≥0.85 LLM wins, ≥0.6 LLM-only included), regex validation layer, report date extraction (regex → LLM fallback), AI-parsed badge, accuracy warning banner. SmolLM fallback to regex-only path. Files: `Services/LabReportOCR.swift`, `Services/LabReportOCR+Biomarkers.swift`.
 
 ### P1 — Junior Tasks
 

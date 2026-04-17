@@ -25,7 +25,7 @@ enum IntentClassifier {
     static let systemPrompt = """
     Health app. Reply JSON tool call or short text. Fix typos, word numbers, slang — understand messy input.
     Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) supplements() set_goal(target,unit?) delete_food(query?) body_comp() glucose() biomarkers() navigate_to(screen)
-    RULES: NEVER generate health data from memory — ALWAYS call a tool. "calories in X" → food_info (NOT log_food). Use log_food only when user ate/had/logged. "daily summary"/"weekly summary" → food_info. "weight trend"/"weight history" → weight_info. "body fat/lean mass/DEXA/body composition" → body_comp. "blood sugar/glucose" → glucose. "lab results/blood work/biomarkers/cholesterol" → biomarkers. "go to [screen]"/"open [screen]" → navigate_to.
+    RULES: NEVER generate health data from memory — ALWAYS call a tool. "calories in X" → food_info (NOT log_food). Use log_food only when user ate/had/logged. "daily summary"/"weekly summary" → food_info. "weight trend"/"weight history" → weight_info. "body fat/lean mass/DEXA/body composition" → body_comp. "blood sugar/glucose" → glucose. "lab results/blood work/biomarkers/cholesterol" → biomarkers. "go to [screen]"/"open [screen]" → navigate_to. supplements() queries supplement tracking — ALWAYS call supplements() for any supplement status/history question, NEVER respond with text. mark_supplement(name) logs intake when user says they TOOK/HAD something.
     "daily summary"→{"tool":"food_info","query":"daily summary"}
     "weekly summary"→{"tool":"food_info","query":"weekly summary"}
     "lab results"→{"tool":"biomarkers"}
@@ -50,6 +50,8 @@ enum IntentClassifier {
     "took vitamin d"→{"tool":"mark_supplement","name":"vitamin d"}
     "did I take my vitamins"→{"tool":"supplements"}
     "supplement status"→{"tool":"supplements"}
+    "check my supplements"→{"tool":"supplements"}
+    "which supplements am I missing"→{"tool":"supplements"}
     "what's my body fat"→{"tool":"body_comp"}
     "lean mass progress"→{"tool":"body_comp"}
     "DEXA results"→{"tool":"body_comp"}

@@ -42,7 +42,7 @@ final class IntentRoutingEval: XCTestCase {
     static let systemPrompt = """
     Health app. Reply JSON tool call or short text. Fix typos, word numbers, slang — understand messy input.
     Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) supplements() set_goal(target,unit?) delete_food(query?) body_comp() glucose() biomarkers() navigate_to(screen)
-    RULES: NEVER generate health data from memory — ALWAYS call a tool. "calories in X" → food_info (NOT log_food). Use log_food only when user ate/had/logged. "daily summary"/"weekly summary" → food_info. "weight trend"/"weight history" → weight_info. "body fat/lean mass/DEXA/body composition" → body_comp. "blood sugar/glucose" → glucose. "lab results/blood work/biomarkers/cholesterol" → biomarkers. "go to [screen]"/"open [screen]" → navigate_to.
+    RULES: NEVER generate health data from memory — ALWAYS call a tool. "calories in X" → food_info (NOT log_food). Use log_food only when user ate/had/logged. "daily summary"/"weekly summary" → food_info. "weight trend"/"weight history" → weight_info. "body fat/lean mass/DEXA/body composition" → body_comp. "blood sugar/glucose" → glucose. "lab results/blood work/biomarkers/cholesterol" → biomarkers. "go to [screen]"/"open [screen]" → navigate_to. supplements() queries supplement tracking — ALWAYS call supplements() for any supplement status/history question, NEVER respond with text. mark_supplement(name) logs intake when user says they TOOK/HAD something.
     "daily summary"→{"tool":"food_info","query":"daily summary"}
     "weekly summary"→{"tool":"food_info","query":"weekly summary"}
     "lab results"→{"tool":"biomarkers"}
@@ -67,6 +67,8 @@ final class IntentRoutingEval: XCTestCase {
     "took vitamin d"→{"tool":"mark_supplement","name":"vitamin d"}
     "did I take my vitamins"→{"tool":"supplements"}
     "supplement status"→{"tool":"supplements"}
+    "check my supplements"→{"tool":"supplements"}
+    "which supplements am I missing"→{"tool":"supplements"}
     "what's my body fat"→{"tool":"body_comp"}
     "lean mass progress"→{"tool":"body_comp"}
     "DEXA results"→{"tool":"body_comp"}
@@ -224,12 +226,39 @@ final class IntentRoutingEval: XCTestCase {
         await assertRoutes("any glucose spikes", to: "glucose")
         await assertRoutes("how's my blood sugar", to: "glucose")
         await assertRoutes("blood sugar today", to: "glucose")
+        // Slang + implicit intent
+        await assertRoutes("was I spiking after dinner", to: "glucose")
+        await assertRoutes("show my CGM data", to: "glucose")
+        await assertRoutes("blood glucose this morning", to: "glucose")
     }
 
     func testBiomarkers_routing() async {
         await assertRoutes("show my biomarkers", to: "biomarkers")
         await assertRoutes("show my lab results", to: "biomarkers")
         await assertRoutes("how's my cholesterol", to: "biomarkers")
+        // Specific biomarker types
+        await assertRoutes("what's my vitamin D level", to: "biomarkers")
+        await assertRoutes("A1C results", to: "biomarkers")
+        await assertRoutes("check my iron levels", to: "biomarkers")
+    }
+
+    // MARK: - Supplements (status regression)
+
+    func testSupplements_statusRegression() async {
+        // These must call supplements tool, NOT return text
+        await assertRoutes("supplement status", to: "supplements")
+        await assertRoutes("how are my supplements", to: "supplements")
+        await assertRoutes("which supplements am I missing", to: "supplements")
+        await assertRoutes("what supplements did I take today", to: "supplements")
+    }
+
+    // MARK: - Implicit Food Logging
+
+    func testFoodLogging_implicit() async {
+        // Real user phrasings — no explicit "log" keyword
+        await assertRoutes("grabbed a coffee", to: "log_food")
+        await assertRoutes("snacked on almonds", to: "log_food")
+        await assertRoutes("breakfast was 2 idlis", to: "log_food")
     }
 
     // MARK: - Navigation (extended screens)
