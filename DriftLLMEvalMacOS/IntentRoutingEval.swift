@@ -414,6 +414,40 @@ final class IntentRoutingEval: XCTestCase {
         print("'log lunch' → tool=\(tool ?? "none") response=\(response.prefix(100))")
     }
 
+    // MARK: - Freeform Multi-Item Logging
+
+    func testFoodLogging_freeformMultiItem() async {
+        // Natural freeform — no explicit "log", multiple foods in one sentence
+        await assertRoutes("had eggs toast and coffee this morning", to: "log_food")
+        await assertRoutes("breakfast was oats banana and protein shake", to: "log_food")
+        await assertRoutes("ate rice dal and roti for lunch", to: "log_food")
+        await assertRoutes("just had a bowl of curd with some fruits", to: "log_food")
+        await assertRoutes("dinner was chicken curry with rice and naan", to: "log_food")
+    }
+
+    // MARK: - Supplement Mark vs Query (edge cases)
+
+    func testSupplements_edgeCases() async {
+        // Ambiguous "took" phrasing for specific supplements
+        await assertRoutes("just had my omega 3", to: "mark_supplement")
+        await assertRoutes("took magnesium before bed", to: "mark_supplement")
+        await assertRoutes("had zinc this morning", to: "mark_supplement")
+        // Status queries — must call supplements(), not return text
+        await assertRoutes("have I taken anything today", to: "supplements")
+        await assertRoutes("what vitamins am I missing", to: "supplements")
+    }
+
+    // MARK: - Negative / Symptomatic Queries (must NOT log food)
+
+    func testNegativeHealth_noFoodLog() async {
+        // Feeling descriptions should route to text/health, never log_food
+        await assertNotFood("I feel tired today")
+        await assertNotFood("I'm really sore after yesterday")
+        await assertNotFood("feeling bloated after dinner")
+        await assertNotFood("my back hurts")
+        await assertNotFood("I'm stressed and can't sleep")
+    }
+
     // MARK: - Summary
 
     func testPrintRoutingSummary() async {

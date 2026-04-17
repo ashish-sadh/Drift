@@ -165,6 +165,12 @@ final class SpeechRecognitionService: @unchecked Sendable {
             nonisolated(unsafe) let e = engine
             nonisolated(unsafe) let r = recognizer
             DispatchQueue.main.async {
+                // Guard: user may have called forceStop/gracefulStop while audio engine was starting
+                // on audioQueue. In that case, stop the engine we just started — don't leak it.
+                guard self.recordingState == .recording else {
+                    self.audioQueue.async { e.stop(); e.inputNode.removeTap(onBus: 0) }
+                    return
+                }
                 self.audioEngine = e
                 self.startSegment(recognizer: r, supportsOnDevice: supportsOnDevice, onTranscript: onTranscript)
             }
@@ -200,7 +206,7 @@ final class SpeechRecognitionService: @unchecked Sendable {
                     self.transcript = full
                     onTranscript(full)
 
-                    // Reset silence timer (15s of no new results → auto-send)
+                    // Reset silence timer (30s of no new results → auto-send)
                     self.silenceTimer?.cancel()
                     let captured = full
                     let timer = DispatchWorkItem { [weak self] in
