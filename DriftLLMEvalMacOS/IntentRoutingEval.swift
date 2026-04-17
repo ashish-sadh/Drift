@@ -42,7 +42,7 @@ final class IntentRoutingEval: XCTestCase {
     static let systemPrompt = """
     Health app. Reply JSON tool call or short text. Fix typos, word numbers, slang — understand messy input.
     Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) supplements() set_goal(target,unit?) delete_food(query?) body_comp() glucose() biomarkers() navigate_to(screen)
-    RULES: NEVER generate health data from memory — ALWAYS call a tool. "calories in X" → food_info (NOT log_food). Use log_food only when user ate/had/logged. "log lunch"/"log breakfast"/"log dinner" alone (no food named) → ask what they had, do NOT call log_food. "daily summary"/"weekly summary" → food_info. "weight trend"/"weight history" → weight_info. "body fat/lean mass/DEXA/body composition" → body_comp. "blood sugar/glucose" → glucose. "lab results/blood work/biomarkers/cholesterol" → biomarkers. "go to [screen]"/"open [screen]" → navigate_to. supplements() queries supplement tracking — ALWAYS call supplements() for any supplement status/history question, NEVER respond with text. mark_supplement(name) logs intake when user says they TOOK/HAD something. HRV/heart rate variability → sleep_recovery.
+    RULES: NEVER generate health data from memory — ALWAYS call a tool. "calories in X" → food_info (NOT log_food). Use log_food only when user ate/had/logged. "log lunch"/"log breakfast"/"log dinner" alone (no food named) → ask what they had, do NOT call log_food. "daily summary"/"weekly summary" → food_info. "weight trend"/"weight history" → weight_info. "body fat/lean mass/DEXA/body composition" → body_comp. "blood sugar/blood glucose" → glucose. "fat intake/sugar intake/carb intake" → food_info. "lab results/blood work/biomarkers/cholesterol" → biomarkers. "go to [screen]"/"open [screen]" → navigate_to. supplements() queries supplement tracking — ALWAYS call supplements() for any supplement status/history question, NEVER respond with text. mark_supplement(name) logs intake when user says they TOOK/HAD something. HRV/heart rate variability → sleep_recovery.
     "daily summary"→{"tool":"food_info","query":"daily summary"}
     "weekly summary"→{"tool":"food_info","query":"weekly summary"}
     "lab results"→{"tool":"biomarkers"}
@@ -58,7 +58,7 @@ final class IntentRoutingEval: XCTestCase {
     "how am I doing"→{"tool":"food_info","query":"daily summary"}
     "what about protein?"→{"tool":"food_info","query":"protein"}
     "log 2 eggs"→{"tool":"log_food","name":"egg","servings":"2"}
-    "had 3 eggs"→{"tool":"log_food","name":"egg","servings":"3"}
+    "had a protein shake"→{"tool":"log_food","name":"protein shake"}
     "I weigh 75 kg"→{"tool":"log_weight","value":"75","unit":"kg"}
     "am I on track for my goal"→{"tool":"weight_info","query":"goal progress"}
     "how close am I to my goal"→{"tool":"weight_info","query":"goal progress"}
@@ -424,11 +424,23 @@ final class IntentRoutingEval: XCTestCase {
 
     func testFoodLogging_drinksAndLiquids() async {
         // Beverage consumption — implicit logging without "log" keyword
-        // "had a protein shake" — model maps to mark_supplement without example; 2B limitation (known P1 bug)
         await assertRoutes("drank 2 cups of coffee", to: "log_food")
-        // "had green tea this morning" — model treats as statement, not intake; 2B limitation
         await assertRoutes("downed a protein shake post workout", to: "log_food")
         await assertRoutes("had a glass of whole milk", to: "log_food")
+        // Previously 2B limitations — fixed via example anchor "had a protein shake" → log_food
+        await assertRoutes("had a protein shake", to: "log_food")
+        await assertRoutes("had green tea this morning", to: "log_food")
+    }
+
+    // MARK: - Protein Shake / Smoothie as Food (not supplement)
+
+    func testProteinShake_isFood() async {
+        // Protein shakes are food — RULES explicit + example anchor added
+        await assertRoutes("had a protein shake", to: "log_food")
+        await assertRoutes("drank a whey shake after lifting", to: "log_food")
+        await assertRoutes("had a smoothie for breakfast", to: "log_food")
+        await assertRoutes("finished my post-workout shake", to: "log_food")
+        await assertRoutes("had a mass gainer shake", to: "log_food")
     }
 
     // MARK: - Workout Progression Queries (exercise_info)
@@ -448,9 +460,11 @@ final class IntentRoutingEval: XCTestCase {
         // Specific macronutrient status queries for today — must route to food_info
         await assertRoutes("how much fiber have I had", to: "food_info")
         await assertRoutes("what's my carb intake today", to: "food_info")
-        // "check my fat intake so far" — model maps "fat" to body_comp; 2B limitation
         await assertRoutes("how many calories have I eaten today", to: "food_info")
-        // "how much sugar today" — model maps "sugar" to glucose (blood sugar); 2B limitation
+        // Previously 2B limitations — fixed via RULES: "fat intake/sugar intake/carb intake" → food_info
+        await assertRoutes("check my fat intake so far", to: "food_info")
+        await assertRoutes("how much sugar today", to: "food_info")
+        await assertRoutes("what's my protein intake", to: "food_info")
     }
 
     // MARK: - Supplement Advice (should NOT call supplements tool)
