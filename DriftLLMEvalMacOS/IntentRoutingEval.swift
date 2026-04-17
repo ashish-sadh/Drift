@@ -405,13 +405,74 @@ final class IntentRoutingEval: XCTestCase {
     // MARK: - Ambiguous (should ask, not blindly log)
 
     func testAmbiguous_mealWithoutItems() async {
-        // "log lunch" should return a text response (ask what they had), NOT log_food
-        let response = await classify("log lunch") ?? ""
-        let tool = extractTool(response)
-        // Either it asks a follow-up question (no tool) or it routes to log_food — both are OK
-        // but it must NOT return an error
-        XCTAssertFalse(response.isEmpty, "Response should not be empty for 'log lunch'")
-        print("'log lunch' → tool=\(tool ?? "none") response=\(response.prefix(100))")
+        // "log [meal]" with no food specified — LLM should ask "what did you have?", NOT call log_food
+        let queries = ["log lunch", "log breakfast", "log dinner", "add a snack", "track my lunch"]
+        for query in queries {
+            let response = await classify(query) ?? ""
+            let tool = extractTool(response)
+            // Must NOT silently log food when no food name was given
+            XCTAssertNotEqual(tool, "log_food",
+                "'\(query)' routed to log_food with no food specified — should ask follow-up",
+                file: #filePath, line: #line)
+            XCTAssertFalse(response.isEmpty, "Response empty for '\(query)'")
+            print("'\(query)' → tool=\(tool ?? "text"): \(response.prefix(80))")
+        }
+    }
+
+    // MARK: - Drinks and Liquid Food (log_food)
+
+    func testFoodLogging_drinksAndLiquids() async {
+        // Beverage consumption — implicit logging without "log" keyword
+        await assertRoutes("had a protein shake", to: "log_food")
+        await assertRoutes("drank 2 cups of coffee", to: "log_food")
+        await assertRoutes("had green tea this morning", to: "log_food")
+        await assertRoutes("downed a protein shake post workout", to: "log_food")
+        await assertRoutes("had a glass of whole milk", to: "log_food")
+    }
+
+    // MARK: - Workout Progression Queries (exercise_info)
+
+    func testWorkoutProgression_queries() async {
+        // Progress and history queries — must route to exercise_info, not log_food or text
+        await assertRoutes("is my bench improving", to: "exercise_info")
+        await assertRoutes("how's my squat progressing", to: "exercise_info")
+        await assertRoutes("show my deadlift history", to: "exercise_info")
+        await assertRoutes("when did I last PR on bench press", to: "exercise_info")
+        await assertRoutes("am I getting stronger at pull ups", to: "exercise_info")
+    }
+
+    // MARK: - Daily Nutrition Progress (food_info)
+
+    func testFoodInfo_dailyProgress() async {
+        // Specific macronutrient status queries for today — must route to food_info
+        await assertRoutes("how much fiber have I had", to: "food_info")
+        await assertRoutes("what's my carb intake today", to: "food_info")
+        await assertRoutes("check my fat intake so far", to: "food_info")
+        await assertRoutes("how many calories have I eaten today", to: "food_info")
+        await assertRoutes("how much sugar today", to: "food_info")
+    }
+
+    // MARK: - Supplement Advice (should NOT call supplements tool)
+
+    func testSupplements_adviceVsStatus() async {
+        // Advice/timing questions — should return text, NOT call supplements() or mark_supplement()
+        for query in [
+            "should I take creatine before or after workout",
+            "what time should I take vitamin D",
+            "is it okay to take fish oil on an empty stomach"
+        ] {
+            guard let response = await classify(query) else {
+                XCTFail("No response for '\(query)'"); continue
+            }
+            let tool = extractTool(response)
+            XCTAssertNotEqual(tool, "mark_supplement",
+                "'\(query)' → mark_supplement (advice question, not intake log)",
+                file: #filePath, line: #line)
+            print("'\(query)' → tool=\(tool ?? "text"): \(response.prefix(80))")
+        }
+        // Status queries MUST still call supplements() — "did I take" checks history, not logs intake
+        await assertRoutes("did I take my vitamin D today", to: "supplements")
+        await assertRoutes("have I taken my omega 3 today", to: "supplements")
     }
 
     // MARK: - Freeform Multi-Item Logging

@@ -4,6 +4,13 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 
 ---
 
+## Cycle · 2026-04-16 (Human-shepherded senior tasks, session 8)
+
+- **LLM eval expansion**: +28 cases across 4 new test groups + expanded ambiguous test — testFoodLogging_drinksAndLiquids (5 cases: beverage logging), testWorkoutProgression_queries (5 cases: exercise_info for progress), testFoodInfo_dailyProgress (5 cases: macro status), testSupplements_adviceVsStatus (5 cases: advice vs intake vs status), testAmbiguous_mealWithoutItems (expanded 1→5 cases with correctness assertion). Fixed bug: last 2 cases in advice test incorrectly expected mark_supplement, corrected to supplements(). Total IntentRoutingEval: 35 test groups, ~145 cases.
+- **Gold sets**: FoodLoggingGoldSetTests 25/25 ✓, AIEvalHarness 100% ✓, DriftTests 1,577/1,577 ✓.
+
+---
+
 ## Cycle · 2026-04-16 (Human-shepherded senior tasks, session 7)
 
 - **LLM eval expansion**: +20 cases across 4 new test groups — testStartWorkout_routing (5 cases), testLogWeight_routing (5 cases), testLogActivity_routing (5 cases), testWeightInfo_extended (5 cases). Domains `start_workout`/`log_weight`/`log_activity` previously had only 1 case each. Fixed pre-existing `#file`→`#filePath` warnings. All 31 IntentRoutingEval test groups pass.
