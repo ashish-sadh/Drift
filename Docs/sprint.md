@@ -26,11 +26,11 @@ _(pick from Ready)_
 ### P1 — Voice + Features
 
 - [ ] **#159 Voice input: investigate remaining bugs** — Silence timeout fixed (15s→30s). Race condition in forceStop/gracefulStop fixed (idle set before cleanup). Test on device: natural pauses, edit-after-stop, multi-sentence dictation. Fix any remaining issues found.
-- [ ] **#162 AIChatView.sendMessage refactor** — sendMessage is 491 lines. Extract to AIChatViewModel. No behavior change — pure reorganization. Tests must still pass. This is a precondition for future multi-turn improvements.
+- [x] **#162 AIChatView.sendMessage refactor** — sendMessage extracted to AIChatViewModel (AIChatView+MessageHandling.swift, extension AIChatViewModel). 491-line monolith decomposed into 20+ private handlers. AIChatView.swift is now pure SwiftUI view code.
 
 ### P1 — Junior Tasks
 
-- [ ] **Food DB enrichment: +20 foods** — Focus: branded products (protein bars, supplements, Greek yogurt brands), common restaurant chains (Subway, Domino's, Burger King India), and missing staples found via `Docs/failing-queries.md`. Cross-reference macros with USDA/reliable sources.
+- [x] **Food DB enrichment: +20 foods** — 2,167→2,187: Burger King Whopper Jr., Double Whopper, Crispy Chicken, Medium Fries, Crispy Veg (India), Paneer Royale (India); Subway Veggie Delite, Chicken Teriyaki, Tuna Sub; Domino's Margherita/Farmhouse slices, Garlic Breadstick; Gathiya, Surti Locho, Sev Mamra; Fage Total 0%, Two Good Vanilla; L-Glutamine, Collagen Peptides; Chipotle Burrito Bowl.
 
 ### P1 — Senior Implementation
 
