@@ -4,6 +4,15 @@ Track of autonomous improvement cycles. Each entry = one cycle of the loop.
 
 ---
 
+## Cycle · 2026-04-16 (Human-shepherded senior tasks, session 7)
+
+- **LLM eval expansion**: +20 cases across 4 new test groups — testStartWorkout_routing (5 cases), testLogWeight_routing (5 cases), testLogActivity_routing (5 cases), testWeightInfo_extended (5 cases). Domains `start_workout`/`log_weight`/`log_activity` previously had only 1 case each. Fixed pre-existing `#file`→`#filePath` warnings. All 31 IntentRoutingEval test groups pass.
+- **Sprint cleanup**: Marked #162 (AIChatView.sendMessage refactor) done — sendMessage was already extracted to AIChatViewModel extension.
+- **Food DB**: 2,167→2,187 (+20) — Burger King Whopper Jr./Double Whopper/Crispy Chicken/Medium Fries/Crispy Veg/Paneer Royale (India); Subway Veggie Delite/Chicken Teriyaki/Tuna; Domino's Margherita/Farmhouse slices/Garlic Breadstick; Gathiya/Surti Locho/Sev Mamra; Fage Total 0%/Two Good; L-Glutamine/Collagen Peptides; Chipotle Burrito Bowl.
+- **Tests**: All DriftTests pass. FoodLoggingGoldSetTests ✓, FoodSearchGoldSetTests ✓.
+
+---
+
 ## Cycle · 2026-04-15 (Human-shepherded junior tasks, session 6)
 
 - **Smart Units expansion** (primaryUnit + portionText): 12 new rules — 815→~680 foods still at "serving":
