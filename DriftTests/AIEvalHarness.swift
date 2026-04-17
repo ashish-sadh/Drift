@@ -1475,6 +1475,19 @@ final class AIEvalHarness: XCTestCase {
         let (coupleSrv, coupleName, _) = AIActionExecutor.extractAmount(from: "a couple of eggs")
         XCTAssertEqual(coupleSrv, 2)
         XCTAssertEqual(coupleName, "eggs")
+
+        // Regression #171: "a cup of dal" must extract food="dal", not food="cup of dal"
+        let (aCupSrv, aCupName, _) = AIActionExecutor.extractAmount(from: "a cup of dal")
+        XCTAssertEqual(aCupSrv, 1)
+        XCTAssertEqual(aCupName, "dal")
+
+        let (anCupSrv, anCupName, _) = AIActionExecutor.extractAmount(from: "an cup of oats")
+        XCTAssertEqual(anCupSrv, 1)
+        XCTAssertEqual(anCupName, "oats")
+
+        let (aTbspSrv, aTbspName, _) = AIActionExecutor.extractAmount(from: "a tbsp of ghee")
+        XCTAssertEqual(aTbspSrv, 1)
+        XCTAssertEqual(aTbspName, "ghee")
     }
 
     @MainActor
@@ -1493,6 +1506,15 @@ final class AIEvalHarness: XCTestCase {
         let dinner = AIActionExecutor.parseFoodIntent("had chicken for dinner")
         XCTAssertNotNil(dinner)
         XCTAssertEqual(dinner?.mealHint, "dinner")
+
+        // Regression #171: "log a cup of dal" must resolve food="dal" not food="cup of dal"
+        let cupOfDal = AIActionExecutor.parseFoodIntent("log a cup of dal")
+        XCTAssertNotNil(cupOfDal)
+        XCTAssertEqual(cupOfDal?.query, "dal")
+
+        let aCupOfOats = AIActionExecutor.parseFoodIntent("had a cup of oats")
+        XCTAssertNotNil(aCupOfOats)
+        XCTAssertEqual(aCupOfOats?.query, "oat") // parseFoodIntent singularizes "oats"→"oat"
 
         // Suffix stripping: "for me", "please", "today"
         let polite = AIActionExecutor.parseFoodIntent("log rice please")

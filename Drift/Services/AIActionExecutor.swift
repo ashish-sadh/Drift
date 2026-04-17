@@ -359,8 +359,8 @@ enum AIActionExecutor {
             }
         }
 
-        // Word amount + unit: "half cup oats", "quarter cup rice"
-        let wordAmountsLeading: [String: Double] = ["half": 0.5, "quarter": 0.25, "one": 1, "two": 2, "three": 3]
+        // Word amount + unit: "half cup oats", "a cup of dal", "quarter cup rice"
+        let wordAmountsLeading: [String: Double] = ["half": 0.5, "quarter": 0.25, "one": 1, "two": 2, "three": 3, "a": 1, "an": 1]
         if leadingWords.count >= 3, let amt = wordAmountsLeading[leadingWords[0].lowercased()] {
             let unit = leadingWords[1].lowercased()
             let isGramUnit = gramUnitsLeading.contains(unit)

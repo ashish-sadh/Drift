@@ -499,8 +499,17 @@ extension AIChatViewModel {
             return false
         }
         var cleaned = lower
-        for prefix in ["i had ", "i ate ", "i made ", "we had ", "it was ", "had "] {
+        for prefix in ["can you log ", "could you log ", "please log ", "i want to log ",
+                       "i had ", "i ate ", "i made ", "we had ", "it was ", "had ", "log "] {
             if cleaned.hasPrefix(prefix) { cleaned = String(cleaned.dropFirst(prefix.count)); break }
+        }
+        // If user re-stated the meal type ("can you log lunch", "log lunch"),
+        // re-ask rather than searching for a food named "lunch"
+        let mealKeywords: Set<String> = ["breakfast", "lunch", "dinner", "snack"]
+        if mealKeywords.contains(cleaned.trimmingCharacters(in: .whitespaces)) {
+            messages.append(ChatMessage(role: .assistant,
+                text: "What did you have for \(mealName)? List everything — I'll build a meal entry."))
+            return true
         }
         buildMealFromText(cleaned, mealName: mealName)
         convState.phase = .idle  // Clear after processing, not before
