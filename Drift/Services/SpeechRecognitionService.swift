@@ -240,9 +240,10 @@ final class SpeechRecognitionService: @unchecked Sendable {
                     let desc = error.localizedDescription
                     self.recognitionTask?.cancel()
                     self.recognitionTask = nil
-                    // 203 / "no speech" are normal pauses — always restart
-                    // Other errors: retry up to 3 times, then auto-send what we have
-                    let isNormalPause = desc.contains("203") || desc.contains("no speech")
+                    // Error 203 (kAFAssistantErrorDomain) = no speech / recognizer timed out — normal pause, always restart.
+                    // "no speech" string check is a fallback for locale-variant descriptions.
+                    let nsError = error as NSError
+                    let isNormalPause = nsError.code == 203 || desc.contains("no speech")
                     if isNormalPause || retryCount < 3 {
                         self.startSegment(recognizer: unsafeRec, supportsOnDevice: supportsOnDevice,
                                           onTranscript: onTranscript, retryCount: isNormalPause ? 0 : retryCount + 1)

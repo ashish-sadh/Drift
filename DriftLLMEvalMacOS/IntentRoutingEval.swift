@@ -509,6 +509,34 @@ final class IntentRoutingEval: XCTestCase {
         await assertNotFood("I'm stressed and can't sleep")
     }
 
+    // MARK: - Navigation (core screens + typos)
+
+    func testNavigation_coreScreens() async {
+        await assertRoutes("go to food tab", to: "navigate_to")
+        await assertRoutes("show me my weight chart", to: "navigate_to")
+        await assertRoutes("open exercise tab", to: "navigate_to")
+        await assertRoutes("take me to wieght", to: "navigate_to")     // typo: weight
+        await assertRoutes("open excercise", to: "navigate_to")        // typo: exercise
+    }
+
+    // MARK: - Goal Setting (edge cases: messy phrasing, word numbers)
+
+    func testGoalSetting_edgeCases() async {
+        await assertRoutes("update my goal to 65 kg", to: "set_goal")
+        await assertRoutes("set target 72 kg", to: "set_goal")
+        await assertRoutes("aim for one sixty five pounds", to: "set_goal")
+        await assertRoutes("wanna get down to seventy kilos", to: "set_goal")
+    }
+
+    // MARK: - Delete Food (indirect + implicit phrasings)
+
+    func testDelete_indirectPhrasing() async {
+        await assertRoutes("remove the last thing I logged", to: "delete_food")
+        await assertRoutes("cancel that food log", to: "delete_food")
+        await assertRoutes("take back that last entry", to: "delete_food")
+        await assertRoutes("I made a mistake with my last food entry", to: "delete_food")
+    }
+
     // MARK: - Summary
 
     func testPrintRoutingSummary() async {
