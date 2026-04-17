@@ -490,7 +490,9 @@ extension AIChatViewModel {
               && !["yes", "no", "ok", "okay", "sure", "nah", "nope", "yeah", "yep", "thanks", "thank you", "nevermind", "cancel"].contains(lower) else { return false }
         // Detect topic switches — don't treat "weight trend" or "how did I sleep" as food list
         let topicSwitchWords: Set<String> = ["weight", "weigh", "trend", "sleep", "workout", "exercise",
-                                              "supplement", "glucose", "biomarker", "tdee", "bmr", "goal"]
+                                              "supplement", "glucose", "biomarker", "tdee", "bmr", "goal",
+                                              "protein", "carbs", "fat", "macros", "macro", "how", "what",
+                                              "show", "chart", "history", "week", "yesterday", "daily"]
         let words = Set(lower.split(separator: " ").map(String.init))
         if !words.isDisjoint(with: topicSwitchWords) {
             convState.phase = .idle  // Clear stale phase on topic switch

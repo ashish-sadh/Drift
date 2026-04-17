@@ -171,6 +171,63 @@ final class IntentClassifierGoldSetTests: XCTestCase {
         }
     }
 
+    // MARK: - Supplement vs Food Disambiguation
+
+    /// Regression: "had a protein shake" must parse as log_food, NOT mark_supplement.
+    /// The 2B model was routing this to mark_supplement because the old RULES said "TOOK/HAD something".
+    func testParseResponse_ProteinShakeIsFood() {
+        let foodShakeCases: [(String, String)] = [
+            (#"{"tool":"log_food","name":"protein shake"}"#, "protein shake"),
+            (#"{"tool":"log_food","name":"protein shake","servings":"1"}"#, "protein shake"),
+            (#"{"tool":"log_food","name":"whey protein shake"}"#, "whey protein shake"),
+        ]
+        for (json, expectedName) in foodShakeCases {
+            guard let intent = IntentClassifier.parseResponse(json) else {
+                XCTFail("Protein shake JSON should parse: \(json)")
+                continue
+            }
+            XCTAssertEqual(intent.tool, "log_food", "Protein shake must be log_food, not mark_supplement")
+            XCTAssertEqual(intent.params["name"], expectedName)
+        }
+    }
+
+    /// Regression: mark_supplement JSON must still parse correctly for real supplements.
+    func testParseResponse_RealSupplementsStillWork() {
+        let supplementCases = [
+            #"{"tool":"mark_supplement","name":"fish oil"}"#,
+            #"{"tool":"mark_supplement","name":"vitamin d"}"#,
+            #"{"tool":"mark_supplement","name":"creatine"}"#,
+            #"{"tool":"mark_supplement","name":"omega-3"}"#,
+        ]
+        for json in supplementCases {
+            guard let intent = IntentClassifier.parseResponse(json) else {
+                XCTFail("Real supplement JSON should parse: \(json)")
+                continue
+            }
+            XCTAssertEqual(intent.tool, "mark_supplement", "Real supplements must stay as mark_supplement")
+            XCTAssertNotNil(intent.params["name"])
+        }
+    }
+
+    /// Supplement advice queries should NOT be mark_supplement — they should use supplements() or text.
+    func testParseResponse_SupplementAdviceIsNotMarkSupplement() {
+        // These represent LLM responses for advice questions — should route to supplements() or text
+        let adviceCases = [
+            (#"{"tool":"supplements"}"#, "supplements"),
+            (#"{"tool":"supplements","query":"timing"}"#, "supplements"),
+        ]
+        for (json, expectedTool) in adviceCases {
+            guard let intent = IntentClassifier.parseResponse(json) else {
+                XCTFail("Should parse: \(json)")
+                continue
+            }
+            XCTAssertEqual(intent.tool, expectedTool, "Supplement advice → supplements(), not mark_supplement")
+        }
+        // Text responses are also acceptable for advice questions
+        let textAdvice = "Take vitamin D with a meal for better absorption."
+        XCTAssertNil(IntentClassifier.parseResponse(textAdvice), "Advice text should not parse as tool call")
+    }
+
     // MARK: - StaticOverrides Routing Gold Set
 
     @MainActor

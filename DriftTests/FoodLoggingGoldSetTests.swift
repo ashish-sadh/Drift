@@ -380,6 +380,11 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             "weekly summary",
             "how am I doing today",
             "calories left",
+            // Regression: info/macro queries must not be food intents
+            "how's my protein today",
+            "what's my protein",
+            "how many carbs left",
+            "show my macros",
         ]
         var falsePositives: [String] = []
         for query in nonFoodQueries {
