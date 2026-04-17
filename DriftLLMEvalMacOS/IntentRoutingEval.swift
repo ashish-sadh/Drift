@@ -284,6 +284,24 @@ final class IntentRoutingEval: XCTestCase {
         await assertRoutes("also add toast", to: "log_food", history: history)
     }
 
+    // MARK: - Sleep (extended edge cases: slang, implicit, messy)
+
+    func testSleep_extended() async {
+        await assertRoutes("how many hours did I sleep", to: "sleep_recovery")
+        await assertRoutes("was my sleep good last night", to: "sleep_recovery")
+        await assertRoutes("sleep score this week", to: "sleep_recovery")
+        await assertRoutes("my hrv today", to: "sleep_recovery")
+        await assertRoutes("how rested am I", to: "sleep_recovery")
+    }
+
+    // MARK: - Goal Setting (set_goal)
+
+    func testGoalSetting_routing() async {
+        await assertRoutes("set my goal to 150 lbs", to: "set_goal")
+        await assertRoutes("change my weight goal to 70 kg", to: "set_goal")
+        await assertRoutes("I want to reach 165", to: "set_goal")
+    }
+
     // MARK: - Ambiguous (should ask, not blindly log)
 
     func testAmbiguous_mealWithoutItems() async {

@@ -1353,14 +1353,14 @@ final class AIEvalHarness: XCTestCase {
             ("log 50 ml milk", nil, nil), // gram amount, not servings
             // Natural phrasing
             ("i had some rice", "rice", nil),
-            ("just had eggs", "eggs", nil),
+            ("just had eggs", "egg", nil),
             ("just ate a mango", "mango", nil),
             ("eating a sandwich", "sandwich", nil),
             // Multi-food (no single parse expected)
             ("i ate chicken and rice", nil, nil),
             // Edge cases
             ("log half avocado", "avocado", nil),
-            ("ate a couple of eggs", "eggs", 2),
+            ("ate a couple of eggs", "egg", 2),
             // More edge cases
             ("log 50 ml milk", nil, nil),
             ("ate 100g paneer tikka", nil, nil),

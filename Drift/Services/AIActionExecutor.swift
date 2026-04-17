@@ -18,7 +18,7 @@ enum AIActionExecutor {
 
     /// Try to parse a food logging intent from natural language.
     /// "log 1/3 avocado" → FoodIntent(query: "avocado", servings: 0.33)
-    /// "ate 2 eggs" → FoodIntent(query: "eggs", servings: 2)
+    /// "ate 2 eggs" → FoodIntent(query: "egg", servings: 2)
     /// "had chicken breast" → FoodIntent(query: "chicken breast", servings: nil)
     static func parseFoodIntent(_ text: String) -> FoodIntent? {
         let lower = text.lowercased().trimmingCharacters(in: .whitespaces)
