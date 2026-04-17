@@ -4,7 +4,7 @@
 AI-first local health tracker. AI chat is the primary interface — every data entry doable through conversation. Traditional UI for visual analytics and fallback. No cloud, no accounts. Published on TestFlight as "Drift Fitness" (bundle: com.drift.health).
 
 ## Numbers
-- **Version:** 0.1.0, Build 123
+- **Version:** 0.1.0, Build 132
 - **Tests:** 1564 (35 test files)
 - **AI Eval:** 380+ scenarios in eval harness + LLM eval (55-query gold set)
 - **Foods:** 2,107 (Indian, Mexican, Asian, Thai, Japanese, Korean, Mediterranean, Chinese, Middle Eastern, American classics, fitness staples, coffee drinks, seeds, Indo-Chinese, sushi rolls, meal prep bowls, South Indian, Indian street food, bowls, Kerala dishes, fast food India, Indian fruits, Indian regional, Maharashtrian, Odia, Assamese, Bihari, Rajasthani, Andhra, Karnataka, Goan, Himachal Pradesh, Northeast India, Sindhi, Madhya Pradesh, Coorg, Vietnamese, Latin American, African, Italian expanded, branded protein bars/shakes, bakery, soups, seafood, Bengali fish, Indian snacks, Indian drinks, Filipino, Turkish, Ethiopian)
