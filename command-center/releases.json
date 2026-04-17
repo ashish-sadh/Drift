@@ -1339,6 +1339,19 @@
     "fixes": []
   },
   {
+    "build": 130,
+    "date": "2026-04-16T18:20:00-07:00",
+    "description": "AI routing fix + eval gold set expansion (messy food 21/21, 8 new routing cases)",
+    "features": [
+      "IntentRoutingEval expanded: 8 new cases for sleep (slang, HRV, implicit) and goal-setting domains",
+      "macOS LLM eval 100% pass rate including all new sleep + set_goal routing tests"
+    ],
+    "fixes": [
+      "fix(ai): 'supplement status' query now correctly routes to supplements() tool instead of returning text",
+      "test: messy food parser now correctly expects singularized query ('egg' not 'eggs') — 19/21 → 21/21"
+    ]
+  },
+  {
     "build": 128,
     "date": "2026-04-16T10:30:00-07:00",
     "description": "AI chat routing improvements, +60 foods, bug fixes",
