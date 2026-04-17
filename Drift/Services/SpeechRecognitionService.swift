@@ -240,8 +240,18 @@ final class SpeechRecognitionService: @unchecked Sendable {
                     let desc = error.localizedDescription
                     self.recognitionTask?.cancel()
                     self.recognitionTask = nil
-                    // Error 203 (kAFAssistantErrorDomain) = no speech / recognizer timed out — normal pause, always restart.
-                    // "no speech" string check is a fallback for locale-variant descriptions.
+
+                    // Commit whatever was transcribed in this segment before restarting.
+                    // Without this, speech before a recognizer timeout (error 203) is lost
+                    // when the new segment starts from committedText only — the partial
+                    // transcription of the timed-out segment is discarded.
+                    if let segText = result?.bestTranscription.formattedString, !segText.isEmpty {
+                        self.committedText = self.committedText.isEmpty ? segText : self.committedText + " " + segText
+                        self.transcript = self.committedText
+                        onTranscript(self.committedText)
+                    }
+
+                    // Error 203 (kAFAssistantErrorDomain) = no speech / recognizer timed out — normal pause.
                     let nsError = error as NSError
                     let isNormalPause = nsError.code == 203 || desc.contains("no speech")
                     if isNormalPause || retryCount < 3 {

@@ -10,6 +10,8 @@ final class AIChatViewModel {
     var inputText = ""
     var generatingState: GeneratingState = .idle
     var streamingMessageId: UUID? = nil
+    // Incremented on each new request, then bumped again in defer to invalidate stale onStep callbacks.
+    var generationEpoch: Int = 0
     var showingFoodSearch = false
     var foodSearchQuery = ""
     var foodSearchServings: Double? = nil

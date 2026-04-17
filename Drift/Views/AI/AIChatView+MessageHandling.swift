@@ -1030,12 +1030,18 @@ extension AIChatViewModel {
         streamingMessageId = responseId
         generatingState = .thinking(step: "Understanding your question...")
 
+        generationEpoch += 1
+        let myEpoch = generationEpoch
+
         let screen = screenTracker.currentScreen
         let history = buildConversationHistory()
         let isLarge = aiService.isLargeModel
 
         Task {
             defer {
+                // Bump epoch first — any onStep Tasks queued before this point will see a
+                // mismatched epoch and skip updating generatingState back to .thinking.
+                if generationEpoch == myEpoch { generationEpoch += 1 }
                 streamingMessageId = nil
                 generatingState = .idle
             }
@@ -1044,11 +1050,16 @@ extension AIChatViewModel {
                 message: text, screen: screen, history: history,
                 isLargeModel: isLarge,
                 onStep: { [weak self] step in
-                    Task { @MainActor in self?.generatingState = .thinking(step: step) }
+                    let epoch = myEpoch
+                    Task { @MainActor in
+                        guard let self, self.generationEpoch == epoch else { return }
+                        self.generatingState = .thinking(step: step)
+                    }
                 },
                 onToken: { [weak self] token in
+                    let epoch = myEpoch
                     Task { @MainActor in
-                        guard let self else { return }
+                        guard let self, self.generationEpoch == epoch else { return }
                         if case .thinking = self.generatingState { self.generatingState = .generating }
                         if let idx = self.messages.firstIndex(where: { $0.id == responseId }) {
                             self.messages[idx].text += token
