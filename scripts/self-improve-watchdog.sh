@@ -206,6 +206,7 @@ start_claude() {
             --title "Sprint Planning — Cycle $CYCLE" \
             --label sprint-task --label SENIOR --label in-progress \
             --body "## Planning Checklist
+- [ ] Feedback drained — process-feedback.log reviewed, infra issues created
 - [ ] Admin replies — responded to all admin comments on report PRs
 - [ ] Product review — review-cycle-${CYCLE}.md PR merged to main
 - [ ] Sprint tasks — 8+ sprint-task issues created

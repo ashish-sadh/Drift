@@ -7,8 +7,6 @@ set -euo pipefail
 STATE_DIR="$HOME/drift-state"
 mkdir -p "$STATE_DIR"
 
-NEEDS_REVIEW_QUEUE="$STATE_DIR/needs-review-queue"
-
 cmd_post_plan() {
     local N="${1:-}"
     local BODY="${2:-}"
@@ -63,13 +61,7 @@ cmd_need_review() {
         gh label create "needs-review" --color "#e4e669" --description "Awaiting human review before proceeding" 2>/dev/null || true
 
     gh issue edit "$N" --add-label needs-review 2>/dev/null || true
-    gh issue comment "$N" --body "Awaiting your review. Auto-proceeding in 4h if no response.
-
-Plan is posted above — comment with feedback or concerns." 2>/dev/null || true
-
-    # Record in queue file for watchdog 4h auto-proceed (no GitHub API date parsing needed)
-    NOW=$(date +%s)
-    echo "$N $NOW" >> "$NEEDS_REVIEW_QUEUE" 2>/dev/null || true
+    gh issue comment "$N" --body "Awaiting your review. Plan is posted above — comment with feedback or approve in Command Center to proceed." 2>/dev/null || true
 
     echo "Issue #$N marked needs-review"
 }

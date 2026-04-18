@@ -82,7 +82,7 @@ tmp = "$TMP_DIR"
 def load(f):
     try:
         return json.load(open(f))
-    except:
+    except Exception:
         return []
 
 p0_bugs = load(f"{tmp}/p0_bugs.json")
@@ -103,7 +103,7 @@ state = {"version": 1, "refreshed": $NOW, "in_progress": None, "tasks": tasks}
 try:
     existing = json.load(open("$STATE_FILE"))
     state["in_progress"] = existing.get("in_progress")
-except:
+except Exception:
     pass
 
 print(json.dumps(state, indent=2))
@@ -192,11 +192,10 @@ if filter_mode in ("--senior", "--any"):
         if has(t, "bug") and has(t, "P2"):
             print(f"{t['number']} {t['title']}"); sys.exit(0)
 
-# Priority 5.5: Requested permanent tasks (admin explicitly requested this cycle)
-if filter_mode in ("--senior", "--any"):
-    for t in available:
-        if has(t, "permanent-task") and has(t, "requested") and not has(t, "needs-review"):
-            print(f"{t['number']} {t['title']}"); sys.exit(0)
+# Priority 5.5: Requested permanent tasks (admin explicitly requested this cycle, any session)
+for t in available:
+    if has(t, "permanent-task") and has(t, "requested") and not has(t, "needs-review"):
+        print(f"{t['number']} {t['title']}"); sys.exit(0)
 
 # Priority 6: Regular sprint tasks (--junior or --any)
 if filter_mode in ("--junior", "--any"):
