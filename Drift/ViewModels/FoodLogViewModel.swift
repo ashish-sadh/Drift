@@ -355,6 +355,101 @@ final class FoodLogViewModel {
         }
     }
 
+    var macroTargets: WeightGoal.MacroTargets? {
+        WeightGoal.load()?.macroTargets(currentWeightKg: WeightTrendService.shared.latestWeightKg)
+    }
+
+    func toggleFavorite(name: String, foodId: Int64?) {
+        FoodService.toggleFavorite(name: name, foodId: foodId)
+    }
+
+    func isFavorite(name: String) -> Bool {
+        FoodService.isFavorite(name: name)
+    }
+
+    func yesterdayCalories() -> Double? {
+        guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: selectedDate) else { return nil }
+        let dateStr = DateFormatters.dateOnly.string(from: yesterday)
+        let totals = FoodService.getDailyTotals(date: dateStr)
+        return totals.eaten > 0 ? Double(totals.eaten) : nil
+    }
+
+    func copyFromYesterday() {
+        guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: selectedDate) else { return }
+        let dateStr = DateFormatters.dateOnly.string(from: yesterday)
+        do {
+            let logs = try database.fetchMealLogs(for: dateStr)
+            guard !logs.isEmpty else { return }
+            let iso = DateFormatters.iso8601
+            let todayDate = selectedDate
+            let cal = Calendar.current
+            for log in logs {
+                guard let logId = log.id else { continue }
+                let mealType = MealType(rawValue: log.mealType) ?? autoMealType
+                let entries = try database.fetchFoodEntries(forMealLog: logId)
+                guard !entries.isEmpty else { continue }
+                for entry in entries {
+                    let mappedLoggedAt: String
+                    if let original = iso.date(from: entry.loggedAt) ?? DateFormatters.sqliteDatetime.date(from: entry.loggedAt) {
+                        let time = cal.dateComponents([.hour, .minute, .second], from: original)
+                        var today = cal.dateComponents([.year, .month, .day], from: todayDate)
+                        today.hour = time.hour; today.minute = time.minute; today.second = time.second
+                        mappedLoggedAt = iso.string(from: cal.date(from: today) ?? todayDate)
+                    } else {
+                        mappedLoggedAt = iso.string(from: todayDate)
+                    }
+                    quickAdd(name: entry.foodName, calories: entry.totalCalories,
+                             proteinG: entry.totalProtein, carbsG: entry.totalCarbs,
+                             fatG: entry.totalFat, fiberG: entry.totalFiber,
+                             mealType: mealType, loggedAt: mappedLoggedAt)
+                }
+            }
+        } catch {
+            Log.foodLog.error("Failed to copy from yesterday: \(error.localizedDescription)")
+        }
+    }
+
+    func copyAllToToday(entries: [FoodEntry]) {
+        let cal = Calendar.current
+        let todayDate = Date()
+        let iso = DateFormatters.iso8601
+        for entry in entries {
+            let mappedLoggedAt: String
+            if let original = iso.date(from: entry.loggedAt) ?? DateFormatters.sqliteDatetime.date(from: entry.loggedAt) {
+                let time = cal.dateComponents([.hour, .minute, .second], from: original)
+                var today = cal.dateComponents([.year, .month, .day], from: todayDate)
+                today.hour = time.hour; today.minute = time.minute; today.second = time.second
+                mappedLoggedAt = iso.string(from: cal.date(from: today) ?? todayDate)
+            } else {
+                mappedLoggedAt = iso.string(from: todayDate)
+            }
+            let mealType = MealType(rawValue: entry.mealType ?? "") ?? autoMealType
+            quickAdd(name: entry.foodName, calories: entry.totalCalories,
+                     proteinG: entry.totalProtein, carbsG: entry.totalCarbs,
+                     fatG: entry.totalFat, fiberG: entry.totalFiber,
+                     mealType: mealType, loggedAt: mappedLoggedAt,
+                     servingSizeG: entry.servingSizeG, date: DateFormatters.todayString)
+        }
+    }
+
+    func swapEntries(_ movedIndex: Int, _ targetIndex: Int, in entries: [FoodEntry]) {
+        guard movedIndex >= 0, movedIndex < entries.count,
+              targetIndex >= 0, targetIndex < entries.count,
+              let movedId = entries[movedIndex].id, let targetId = entries[targetIndex].id else { return }
+        var timeMoved = entries[movedIndex].loggedAt
+        var timeTarget = entries[targetIndex].loggedAt
+        if timeMoved == timeTarget,
+           let date = DateFormatters.iso8601.date(from: timeMoved) ?? DateFormatters.sqliteDatetime.date(from: timeMoved) {
+            let iso = DateFormatters.iso8601
+            timeMoved = targetIndex < movedIndex
+                ? iso.string(from: date.addingTimeInterval(-1))
+                : iso.string(from: date.addingTimeInterval(1))
+        }
+        updateEntryLoggedAt(id: movedId, loggedAt: timeTarget)
+        updateEntryLoggedAt(id: targetId, loggedAt: timeMoved)
+        loadTodayMeals()
+    }
+
     /// Days with food logged in last N days (for consistency heatmap).
     /// Uses single batch query instead of N individual queries.
     func loggedDays(last days: Int = 30) -> [Date: Double] {

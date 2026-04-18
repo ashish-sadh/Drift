@@ -11,7 +11,6 @@ struct FoodTabView: View {
     @State private var showingDatePicker = false
     @State private var showingGoalSetup = false
     @State private var editingEntry: FoodEntry?
-    @State private var isCopying = false
     @State private var showingPlantPointsDetail = false
     @State private var copiedToTodayName: String? = nil
     @State private var foodSortMode: FoodSortMode = .time
@@ -136,18 +135,18 @@ struct FoodTabView: View {
             .alert("Copy Previous Day?", isPresented: $showingCopyYesterdayAlert) {
                 Button("Cancel", role: .cancel) {}
                 Button("Copy") {
-                    copyFromYesterday()
+                    viewModel.copyFromYesterday()
                     reload()
                 }
             } message: {
-                if let cal = yesterdayCalories() {
+                if let cal = viewModel.yesterdayCalories() {
                     Text("This will copy all \(Int(cal)) cal from yesterday to today.")
                 }
             }
             .alert("Copy All to Today?", isPresented: $showingCopyAllAlert) {
                 Button("Cancel", role: .cancel) {}
                 Button("Copy") {
-                    copyAllToToday()
+                    viewModel.copyAllToToday(entries: viewModel.todayEntries)
                     copiedToTodayName = "all \(viewModel.todayEntries.count) items"
                     DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copiedToTodayName = nil }
                 }
@@ -326,7 +325,7 @@ struct FoodTabView: View {
 
     private var dailyTotalsCard: some View {
         let n = viewModel.todayNutrition
-        let targets = WeightGoal.load()?.macroTargets(currentWeightKg: WeightTrendService.shared.latestWeightKg)
+        let targets = viewModel.macroTargets
 
         return VStack(spacing: 10) {
             // Calories with target
@@ -539,10 +538,10 @@ struct FoodTabView: View {
         }
         .contextMenu {
             Button {
-                FoodService.toggleFavorite(name: entry.foodName, foodId: entry.foodId)
+                viewModel.toggleFavorite(name: entry.foodName, foodId: entry.foodId)
                 viewModel.loadSuggestions()
             } label: {
-                let isFav = FoodService.isFavorite(name: entry.foodName)
+                let isFav = viewModel.isFavorite(name: entry.foodName)
                 Label(isFav ? "Unfavorite" : "Favorite", systemImage: isFav ? "star.slash" : "star")
             }
             Button {
@@ -566,14 +565,16 @@ struct FoodTabView: View {
                 if let entryIndex = sortedEntries.firstIndex(where: { $0.id == entry.id }) {
                     if entryIndex > 0 {
                         Button {
-                            swapEntries(entryIndex, entryIndex - 1)
+                            viewModel.swapEntries(entryIndex, entryIndex - 1, in: sortedEntries)
+                            reload()
                         } label: {
                             Label("Move Up", systemImage: "arrow.up")
                         }
                     }
                     if entryIndex < sortedEntries.count - 1 {
                         Button {
-                            swapEntries(entryIndex, entryIndex + 1)
+                            viewModel.swapEntries(entryIndex, entryIndex + 1, in: sortedEntries)
+                            reload()
                         } label: {
                             Label("Move Down", systemImage: "arrow.down")
                         }
@@ -601,7 +602,7 @@ struct FoodTabView: View {
             }
 
             // Copy from yesterday
-            if let yesterdayCal = yesterdayCalories(), yesterdayCal > 0 {
+            if let yesterdayCal = viewModel.yesterdayCalories(), yesterdayCal > 0 {
                 Button {
                     showingCopyYesterdayAlert = true
                 } label: {
@@ -638,10 +639,10 @@ struct FoodTabView: View {
                         }
                         .contextMenu {
                             Button {
-                                FoodService.toggleFavorite(name: food.name, foodId: food.id)
+                                viewModel.toggleFavorite(name: food.name, foodId: food.id)
                                 viewModel.loadSuggestions()
                             } label: {
-                                let isFav = FoodService.isFavorite(name: food.name)
+                                let isFav = viewModel.isFavorite(name: food.name)
                                 Label(isFav ? "Unfavorite" : "Favorite", systemImage: isFav ? "star.slash" : "star")
                             }
                         }
@@ -664,13 +665,6 @@ struct FoodTabView: View {
         }.buttonStyle(.plain)
     }
 
-    private func yesterdayCalories() -> Double? {
-        guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: viewModel.selectedDate) else { return nil }
-        let dateStr = DateFormatters.dateOnly.string(from: yesterday)
-        let totals = FoodService.getDailyTotals(date: dateStr)
-        return totals.eaten > 0 ? Double(totals.eaten) : nil
-    }
-
     private func parseTimestamp(_ str: String) -> Date? {
         DateFormatters.iso8601.date(from: str)
             ?? DateFormatters.sqliteDatetime.date(from: str)
@@ -685,93 +679,6 @@ struct FoodTabView: View {
     private func entryTimeString(_ entry: FoodEntry) -> String? {
         guard let date = parseTimestamp(entry.loggedAt) else { return nil }
         return DateFormatters.shortTime.string(from: date)
-    }
-
-    /// Swap two entries by exchanging their timestamps so time-based sort reflects the new order.
-    /// When entries share the same timestamp, offsets by 1 second to break the tie.
-    private func swapEntries(_ movedIndex: Int, _ targetIndex: Int) {
-        let entries = sortedEntries
-        guard movedIndex >= 0, movedIndex < entries.count, targetIndex >= 0, targetIndex < entries.count,
-              let movedId = entries[movedIndex].id, let targetId = entries[targetIndex].id else { return }
-        var timeMoved = entries[movedIndex].loggedAt
-        var timeTarget = entries[targetIndex].loggedAt
-        if timeMoved == timeTarget, let date = parseTimestamp(timeMoved) {
-            let iso = DateFormatters.iso8601
-            if targetIndex < movedIndex {
-                timeMoved = iso.string(from: date.addingTimeInterval(-1))
-            } else {
-                timeMoved = iso.string(from: date.addingTimeInterval(1))
-            }
-        }
-        viewModel.updateEntryLoggedAt(id: movedId, loggedAt: timeTarget)
-        viewModel.updateEntryLoggedAt(id: targetId, loggedAt: timeMoved)
-        reload()
-    }
-
-    /// Copy all entries from the viewed day to today, preserving original meal times.
-    private func copyAllToToday() {
-        let cal = Calendar.current
-        let todayDate = Date()
-        let iso = DateFormatters.iso8601
-        for entry in viewModel.todayEntries {
-            let mappedLoggedAt: String
-            if let originalDate = parseTimestamp(entry.loggedAt) {
-                let timeComponents = cal.dateComponents([.hour, .minute, .second], from: originalDate)
-                var todayComponents = cal.dateComponents([.year, .month, .day], from: todayDate)
-                todayComponents.hour = timeComponents.hour
-                todayComponents.minute = timeComponents.minute
-                todayComponents.second = timeComponents.second
-                mappedLoggedAt = iso.string(from: cal.date(from: todayComponents) ?? todayDate)
-            } else {
-                mappedLoggedAt = iso.string(from: todayDate)
-            }
-            let mealType = entry.mealType.flatMap { MealType(rawValue: $0) } ?? viewModel.autoMealType
-            viewModel.quickAdd(name: entry.foodName, calories: entry.totalCalories,
-                               proteinG: entry.totalProtein, carbsG: entry.totalCarbs,
-                               fatG: entry.totalFat, fiberG: entry.totalFiber,
-                               mealType: mealType, loggedAt: mappedLoggedAt,
-                               servingSizeG: entry.servingSizeG,
-                               date: DateFormatters.todayString)
-        }
-    }
-
-    private func copyFromYesterday() {
-        guard !isCopying else { return }
-        isCopying = true
-        defer { isCopying = false }
-        guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: viewModel.selectedDate) else { return }
-        let dateStr = DateFormatters.dateOnly.string(from: yesterday)
-        let logs = FoodService.fetchMealLogs(for: dateStr)
-        guard !logs.isEmpty else { return }
-        let iso = DateFormatters.iso8601
-        let todayDate = viewModel.selectedDate
-        let cal = Calendar.current
-
-        for log in logs {
-            guard let logId = log.id else { continue }
-            let mealType = MealType(rawValue: log.mealType) ?? viewModel.autoMealType
-            let entries = FoodService.fetchFoodEntries(forMealLog: logId)
-            guard !entries.isEmpty else { continue }
-            for entry in entries {
-                // Map yesterday's time to today's date
-                let mappedLoggedAt: String
-                if let originalDate = parseTimestamp(entry.loggedAt) {
-                    let timeComponents = cal.dateComponents([.hour, .minute, .second], from: originalDate)
-                    var todayComponents = cal.dateComponents([.year, .month, .day], from: todayDate)
-                    todayComponents.hour = timeComponents.hour
-                    todayComponents.minute = timeComponents.minute
-                    todayComponents.second = timeComponents.second
-                    mappedLoggedAt = iso.string(from: cal.date(from: todayComponents) ?? todayDate)
-                } else {
-                    mappedLoggedAt = iso.string(from: todayDate)
-                }
-
-                viewModel.quickAdd(name: entry.foodName, calories: entry.totalCalories,
-                                   proteinG: entry.totalProtein, carbsG: entry.totalCarbs,
-                                   fatG: entry.totalFat, fiberG: entry.totalFiber,
-                                   mealType: mealType, loggedAt: mappedLoggedAt)
-            }
-        }
     }
 
     // MARK: - Consistency
