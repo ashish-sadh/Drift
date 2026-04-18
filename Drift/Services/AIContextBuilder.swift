@@ -68,6 +68,7 @@ enum AIContextBuilder {
         let today = DateFormatters.todayString
 
         // Today's food entries grouped by meal
+        var todayHasFood = false
         if let logs = try? AppDatabase.shared.fetchMealLogs(for: today) {
             for log in logs {
                 guard let logId = log.id, let entries = try? AppDatabase.shared.fetchFoodEntries(forMealLog: logId),
@@ -75,14 +76,18 @@ enum AIContextBuilder {
                 let mealName = log.mealType.capitalized
                 let foods = entries.map { "\($0.foodName) \(Int($0.totalCalories))cal" }.joined(separator: ", ")
                 lines.append("\(mealName): \(foods)")
+                todayHasFood = true
             }
         }
+        if !todayHasFood {
+            lines.append("Today: Nothing logged yet.")
+        }
 
-        // Recent foods with protein — helps meal suggestions
+        // Past foods for meal suggestions — logged on previous days, NOT today
         if let recents = try? AppDatabase.shared.fetchRecentEntryNames() {
             let items = recents.prefix(5).map { "\($0.name)(\(Int($0.proteinG))P)" }
             if !items.isEmpty {
-                lines.append("Recent: \(items.joined(separator: ", "))")
+                lines.append("Suggestions from past days (not today\'s log): \(items.joined(separator: ", "))")
             }
         }
 

@@ -177,3 +177,30 @@ private func cleanupMealLog(_ id: Int64?) {
     #expect(summary.contains("cal") || summary.contains("Workouts:"),
             "Summary should show calorie or workout data")
 }
+
+// MARK: AIContextBuilder.foodContext() — #182 regression
+
+@Test @MainActor func foodContext_emptyDiary_saysNothingLoggedNotRecent() async throws {
+    let today = DateFormatters.todayString
+    // Ensure today has no food by checking before seeding
+    let nutrition = try? AppDatabase.shared.fetchDailyNutrition(for: today)
+    guard (nutrition?.calories ?? 0) == 0 else { return } // skip if food already logged in shared DB
+
+    let context = AIContextBuilder.foodContext()
+    #expect(context.contains("Today: Nothing logged yet."),
+            "Empty diary should explicitly say nothing logged, not show ambiguous recent foods")
+    #expect(!context.contains("\nRecent:"),
+            "Old ambiguous 'Recent:' label must not appear — it caused LLM hallucination (#182)")
+}
+
+@Test @MainActor func foodContext_withFood_showsMealNotNothingLogged() async throws {
+    let today = DateFormatters.todayString
+    let mlId = seedTestFood(name: "TestContextFood", calories: 450, proteinG: 35, date: today)
+    defer { cleanupMealLog(mlId) }
+
+    let context = AIContextBuilder.foodContext()
+    #expect(!context.contains("Today: Nothing logged yet."),
+            "With food logged, should not say nothing logged")
+    #expect(context.contains("TestContextFood"),
+            "Context should include the logged food name")
+}
