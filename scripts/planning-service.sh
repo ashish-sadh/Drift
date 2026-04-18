@@ -91,7 +91,7 @@ cmd_validate() {
     local FAILURES=""
 
     # review_merged — mechanical: check git log
-    if ! git -C "$WORK_DIR" log main --oneline --since="7 hours ago" | grep -q "review-cycle" 2>/dev/null; then
+    if ! git -C "$WORK_DIR" log main --oneline --since="7 hours ago" | grep -qE "review[-/]cycle" 2>/dev/null; then
         FAILURES="${FAILURES}review_merged: no review-cycle commit found on main in last 7 hours\n"
     fi
 

@@ -202,6 +202,7 @@ start_claude() {
         log "Sprint planning due — $MODEL"
 
         local CYCLE=$(cat "$HOME/drift-state/cycle-counter" 2>/dev/null || echo "?")
+        rm -f "$HOME/drift-state/planning-issue"
         local PLAN_ISSUE=$(gh issue create \
             --title "Sprint Planning — Cycle $CYCLE" \
             --label sprint-task --label SENIOR --label in-progress \
