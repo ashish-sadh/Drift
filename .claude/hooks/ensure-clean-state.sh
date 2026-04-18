@@ -112,11 +112,17 @@ fi
 if [ "$SESSION_TYPE" = "planning" ] && [ "$DRIFT_CONTROL" = "RUN" ]; then
   PLAN_ISSUES=""
 
-  # Were open feature requests reviewed and planned?
-  FR_COUNT=$(gh issue list --state open --label feature-request --json number --jq 'length' 2>/dev/null || echo "0")
-  if [ "$FR_COUNT" -gt 0 ]; then
-    FR_LIST=$(gh issue list --state open --label feature-request --json number,title,labels --jq '.[] | "#\(.number) \(.title) [\(.labels | map(.name) | join(", "))]"' 2>/dev/null || true)
-    PLAN_ISSUES="${PLAN_ISSUES}Open feature requests ($FR_COUNT) — review and plan these:\n${FR_LIST}\nP0: create sprint-task now. P1: include in sprint. Others: defer or close.\n\n"
+  # Were open feature requests reviewed and triaged?
+  # Only block if any have NEITHER sprint-task NOR deferred label (truly untriaged).
+  # Deferred FRs with the deferred label are intentionally left open for future sprints.
+  FR_UNTRIAGED=$(gh issue list --state open --label feature-request --json number,labels \
+    --jq '[.[] | select(.labels | map(.name) | (index("sprint-task") == null and index("deferred") == null))] | length' \
+    2>/dev/null || echo "0")
+  if [ "$FR_UNTRIAGED" -gt 0 ]; then
+    FR_LIST=$(gh issue list --state open --label feature-request --json number,title,labels \
+      --jq '[.[] | select(.labels | map(.name) | (index("sprint-task") == null and index("deferred") == null))] | .[] | "#\(.number) \(.title)"' \
+      2>/dev/null || true)
+    PLAN_ISSUES="${PLAN_ISSUES}Untriaged feature requests ($FR_UNTRIAGED) — must triage all before closing:\n${FR_LIST}\nFor each: add sprint-task label OR add deferred label (see program.md step 7).\n\n"
   fi
 
   # Planning checklist validation via planning-service.sh

@@ -65,7 +65,8 @@ scripts/report-service.sh daily-due && scripts/report-service.sh start-exec
 7. **Feature requests** — triage open feature-requests:
    - `gh issue list --state open --label feature-request`
    - P0/P1 → `gh issue edit {N} --add-label sprint-task && gh issue comment {N} --body "Triaged in Sprint Planning: added to sprint. Will execute next cycle."`
-   - Others → `gh issue comment {N} --body "Deferred: not in current sprint. Will revisit in Review #N."`
+   - Others → `gh issue edit {N} --add-label deferred && gh issue comment {N} --body "Deferred: not in current sprint. Will revisit in Review #N."`
+   - The `deferred` label lets the planning gate know these were reviewed (without it, ensure-clean-state blocks planning from closing)
    - Create new feature-request Issues for promising ideas from persona review
 8. **Assess current state deeply:**
    - Read `Docs/roadmap.md`, `Docs/state.md`, `Docs/ai-parity.md`
@@ -220,7 +221,7 @@ You are the junior engineer. Execute well-specified tasks. Loop forever — juni
      gh issue comment $N --body "Done: [what changed]. Commit: $(git rev-parse HEAD)"
      # Remove requested label so it resets to normal priority next cycle
      echo "$LABELS" | grep -q "requested" && gh issue edit $N --remove-label requested 2>/dev/null || true
-     scripts/sprint-service.sh unclaim $N   # do NOT close permanent tasks
+     scripts/sprint-service.sh session-done $N  # marks done locally; no GitHub close; prevents re-selection this session
      # → go to step 2
    fi
    ```

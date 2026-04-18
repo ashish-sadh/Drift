@@ -46,31 +46,32 @@ cmd_refresh() {
     NOW=$(date +%s)
 
     # Write each issue list to temp files (avoids shell quoting fragility)
-    gh issue list --state open --label bug --label P0 --json number,title,labels \
+    # --limit 100 on all calls: gh default is 30, which truncates busy repos
+    gh issue list --state open --label bug --label P0 --limit 100 --json number,title,labels \
         --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
         > "$TMP_DIR/p0_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p0_bugs.json"
 
-    gh issue list --state open --label feature-request --label P0 --json number,title,labels \
+    gh issue list --state open --label feature-request --label P0 --limit 100 --json number,title,labels \
         --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
         > "$TMP_DIR/p0_feats.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p0_feats.json"
 
-    gh issue list --state open --label sprint-task --label SENIOR --json number,title,labels \
+    gh issue list --state open --label sprint-task --label SENIOR --limit 100 --json number,title,labels \
         --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
         > "$TMP_DIR/senior.json" 2>/dev/null || echo "[]" > "$TMP_DIR/senior.json"
 
-    gh issue list --state open --label sprint-task --json number,title,labels \
+    gh issue list --state open --label sprint-task --limit 100 --json number,title,labels \
         --jq '[.[] | select(.labels | map(.name) | index("SENIOR") | not) | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
         > "$TMP_DIR/junior.json" 2>/dev/null || echo "[]" > "$TMP_DIR/junior.json"
 
-    gh issue list --state open --label bug --label P1 --json number,title,labels \
+    gh issue list --state open --label bug --label P1 --limit 100 --json number,title,labels \
         --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
         > "$TMP_DIR/p1_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p1_bugs.json"
 
-    gh issue list --state open --label bug --label P2 --json number,title,labels \
+    gh issue list --state open --label bug --label P2 --limit 100 --json number,title,labels \
         --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
         > "$TMP_DIR/p2_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p2_bugs.json"
 
-    gh issue list --state open --label permanent-task --json number,title,labels,updatedAt \
+    gh issue list --state open --label permanent-task --limit 100 --json number,title,labels,updatedAt \
         --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "permanent", "updatedAt": .updatedAt}]' \
         > "$TMP_DIR/perm.json" 2>/dev/null || echo "[]" > "$TMP_DIR/perm.json"
 
@@ -322,10 +323,37 @@ try:
     for t in d["tasks"]:
         if t["number"] == num: t["status"] = "pending"; break
     with open(state_file, "w") as f: json.dump(d, f, indent=2)
-except: pass
+except Exception: pass
 PYEOF
 
     echo "Unclaimed #$NUM"
+}
+
+cmd_session_done() {
+    local NUM="$1"
+    if [ -z "$NUM" ]; then echo "Usage: sprint-service.sh session-done <number>" >&2; exit 1; fi
+
+    # Remove in-progress label from GitHub
+    gh issue edit "$NUM" --remove-label in-progress 2>/dev/null || true
+
+    # Mark done in LOCAL state only — do NOT close the GitHub issue.
+    # Used for permanent tasks: prevents re-selection this session without destroying the task.
+    # Next refresh() reloads it as "permanent" from GitHub.
+    python3 - "$STATE_FILE" "$NUM" <<'PYEOF'
+import json, sys
+state_file, num = sys.argv[1], int(sys.argv[2])
+try:
+    d = json.load(open(state_file))
+    if d.get("in_progress") == num: d["in_progress"] = None
+    for t in d["tasks"]:
+        if t["number"] == num:
+            t["status"] = "done"  # local-only sentinel; next refresh resets to "permanent"
+            break
+    with open(state_file, "w") as f: json.dump(d, f, indent=2)
+except Exception: pass
+PYEOF
+
+    echo "Session-done #$NUM (not closed on GitHub)"
 }
 
 cmd_clear() {
@@ -354,7 +382,7 @@ try:
     for t in d["tasks"]:
         if t.get("status") == "in_progress": t["status"] = "pending"
     with open(state_file, "w") as f: json.dump(d, f, indent=2)
-except: pass
+except Exception: pass
 PYEOF
 
     # Clear in-progress cache
@@ -438,6 +466,7 @@ case "$CMD" in
     claim)          cmd_claim "$1" ;;
     done)           cmd_done "$1" "${2:-}" ;;
     unclaim)        cmd_unclaim "$1" ;;
+    session-done)   cmd_session_done "$1" ;;
     clear)          cmd_clear ;;
     status)         cmd_status ;;
     count)          cmd_count "${1:---sprint}" ;;

@@ -40,17 +40,17 @@ cmd_pending() {
 }
 
 cmd_in_review() {
-    # Find design-doc PRs with unread comments
+    # Find design-doc PRs with comments (general OR inline review comments)
     local RESULT
-    RESULT=$(gh pr list --label design-doc --state open --json number,title,comments \
-        --jq '.[] | select(.comments > 0) | "#\(.number) \(.title) (\(.comments) comments)"' \
+    RESULT=$(gh pr list --label design-doc --state open --json number,title,comments,reviewComments \
+        --jq '.[] | select(.comments > 0 or .reviewComments > 0) | "#\(.number) \(.title) (\(.comments + .reviewComments) comments)"' \
         2>/dev/null || true)
     if [ -z "$RESULT" ]; then
         echo "none"
     else
         echo "$RESULT"
         echo ""
-        echo "Action: For each PR — read ALL comments, reply individually, then revise doc and push."
+        echo "Action: For each PR — read ALL comments (general + inline review), reply individually, then revise doc and push."
         echo "Reply: gh api repos/$REPO/pulls/{PR}/comments/{ID}/replies -f body='Addressed: ...'"
     fi
 }
@@ -156,8 +156,8 @@ cmd_summary() {
 
     echo "IN REVIEW (PR has comments to reply to):"
     local IN_REVIEW
-    IN_REVIEW=$(gh pr list --label design-doc --state open --json number,title,comments \
-        --jq '.[] | select(.comments > 0) | "  PR #\(.number) \(.title) (\(.comments) comments)"' \
+    IN_REVIEW=$(gh pr list --label design-doc --state open --json number,title,comments,reviewComments \
+        --jq '.[] | select(.comments > 0 or .reviewComments > 0) | "  PR #\(.number) \(.title) (\(.comments + .reviewComments) comments)"' \
         2>/dev/null || true)
     [ -n "$IN_REVIEW" ] && echo "$IN_REVIEW" || echo "  none"
     echo ""

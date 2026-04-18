@@ -1159,7 +1159,7 @@
                 <a href="${t.url}" target="_blank" style="color:var(--text);text-decoration:none;font-size:14px;">${escapeHtml(t.name)}</a>
                 ${t.priority ? `<span class="badge" style="margin-left:6px;">${t.priority}</span>` : ''}
               </div>
-              <button class="btn btn-primary" style="font-size:12px;padding:4px 10px;" onclick="approveBug(${t.number})">Approve → Sprint</button>
+              <button class="btn btn-primary" style="font-size:12px;padding:4px 10px;" onclick="approveBug(${t.number}, '${t.priority || ''}')">Approve → Sprint</button>
             </div>`).join('')}
         </div>`;
       }

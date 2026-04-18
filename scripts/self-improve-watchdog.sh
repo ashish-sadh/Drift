@@ -499,12 +499,13 @@ while true; do
                 # Refresh compliance cache for the PreToolUse hook to read
                 refresh_compliance_cache
 
-                # P0 interrupt: if a new P0 appears mid-junior-session, restart as senior
+                # P0 interrupt: if a new P0 appears mid-session (any non-planning), restart as senior
+                # Uses compliance cache (updated every CHECK_INTERVAL) — not stale state file
                 CURRENT_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "junior")
-                if [[ "$CURRENT_TYPE" == "junior" ]]; then
-                    NEW_P0=$("$WORK_DIR/scripts/sprint-service.sh" count --p0 2>/dev/null || echo "0")
+                if [[ "$CURRENT_TYPE" != "planning" ]]; then
+                    NEW_P0=$(grep -c "^#" "$HOME/drift-state/cache-p0-bugs" 2>/dev/null || echo "0")
                     if [[ "$NEW_P0" -gt 0 ]]; then
-                        log "New P0 detected mid-junior-session — interrupting to handle P0"
+                        log "P0 detected mid-${CURRENT_TYPE}-session — interrupting to handle P0"
                         kill_claude
                         cleanup_dirty_state
                         start_claude
