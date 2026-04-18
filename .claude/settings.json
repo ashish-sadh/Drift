@@ -41,6 +41,11 @@
             "type": "command",
             "command": ".claude/hooks/boy-scout.sh",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": ".claude/hooks/autopilot-test.sh",
+            "timeout": 15
           }
         ]
       },
