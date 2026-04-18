@@ -42,7 +42,15 @@ scripts/report-service.sh daily-due && scripts/report-service.sh start-exec
 2. **Read product focus:** `gh issue list --state open --label product-focus --json body --jq '.[0].body'`
    - If set: bias sprint tasks toward this focus. P0 bugs, feature requests, and design docs are ALWAYS valid regardless of focus. The focus shapes which new tasks to create and how to prioritize the backlog — it doesn't block existing commitments.
    - If not set: use roadmap and own judgment.
-3. **Read admin feedback from report PRs:**
+3. **Drain process feedback from sessions:**
+   ```bash
+   FEEDBACK=$(scripts/issue-service.sh drain-feedback)
+   echo "$FEEDBACK"
+   # For each entry: systemic/recurring → gh issue create --label infra-improvement --label sprint-task --label SENIOR
+   # One-off → skip
+   scripts/planning-service.sh checkpoint feedback_drained
+   ```
+4. **Read admin feedback from report PRs:**
    - `gh pr list --label report --state all` → for each PR with comments:
      - Comments include `[Line N]` and a quoted section. Read the report file (`Docs/reports/` on main) at that line number to understand the full context around the comment.
      - Only then interpret the feedback — "Yes, we should" means nothing without reading what the Decision Needed section actually proposed.
@@ -52,18 +60,19 @@ scripts/report-service.sh daily-due && scripts/report-service.sh start-exec
      - Deferred → "Noted — adding to backlog. Will revisit in Review #N."
    - Create sprint-task Issues from actionable feedback
    - `scripts/planning-service.sh checkpoint admin_replied`
-4. **Read open bugs:** `gh issue list --state open --label bug`
-5. **Design docs:** Review status of open design-doc Issues and PRs. Do NOT write docs here — senior execution handles writing. Just note which ones need attention.
-6. **Feature requests** — capture ideas the PE/Product Designer personas generate during review:
-   - Create Issues for promising features: `gh issue create --label feature-request --title "Feature: ..." --body "Problem: ...\nProposal: ...\nPriority rationale: ..."`
-   - Only create for ideas worth exploring — not every thought, just the ones that advance the roadmap
-   - These show up on Command Center's Feature Requests tab for human review
-7. **Assess current state deeply:**
+5. **Read open bugs:** `gh issue list --state open --label bug`
+6. **Design docs:** Review status of open design-doc Issues and PRs. Note which ones need attention. Do NOT write docs or create impl tasks here — senior handles all design work.
+7. **Feature requests** — triage open feature-requests:
+   - `gh issue list --state open --label feature-request`
+   - P0/P1 → `gh issue edit {N} --add-label sprint-task && gh issue comment {N} --body "Triaged in Sprint Planning: added to sprint. Will execute next cycle."`
+   - Others → `gh issue comment {N} --body "Deferred: not in current sprint. Will revisit in Review #N."`
+   - Create new feature-request Issues for promising ideas from persona review
+8. **Assess current state deeply:**
    - Read `Docs/roadmap.md`, `Docs/state.md`, `Docs/ai-parity.md`
    - `git log --oneline -40` (more history since longer sprint)
    - Review closed issues since last planning: `gh issue list --state closed --label sprint-task --json number,title,closedAt --jq '.[] | select(.closedAt > "LAST_PLAN_DATE")'`
    - Check test count, coverage snapshot, eval results
-8. **Product review — skip if `scripts/report-service.sh review-due` exits 1:**
+9. **Product review — skip if `scripts/report-service.sh review-due` exits 1:**
    - `scripts/report-service.sh start-review` — creates correct branch automatically
    - Read both persona files FIRST: `Docs/personas/product-designer.md` and `Docs/personas/principal-engineer.md`
    - Web search ALL competitors (Boostcamp, MFP, Whoop, Strong, MacroFactor) for recent updates
@@ -73,33 +82,39 @@ scripts/report-service.sh daily-due && scripts/report-service.sh start-exec
    - Open review PR with `report` label, then merge immediately
    - `scripts/report-service.sh finish` — merges and records timestamp
    - `scripts/planning-service.sh checkpoint review_merged`
-9. **Create sprint-task Issues — skip if "Sprint tasks" not in REMAINING:**
-   - For each task: `gh issue create --label sprint-task` (add `--label SENIOR` only for complex/architecture tasks)
-   - Include in body: Goal, Files (list specific files to modify), Approach (step-by-step), Edge cases, Tests (specific test cases to write), Acceptance criteria
-   - Break large features into multiple Issues — prefer 3 small Issues over 1 big one
-   - Mix of sizes: ~2-3 SENIOR (architecture, AI, multi-file) + ~6-8 regular (UI, tests, food DB, fixes)
-   - **SENIOR:** AI pipeline, architecture, multi-file refactors, P0 bugs, design doc implementation
-   - **JUNIOR:** Food DB, single-file UI, tests, docs, simple fixes, well-specified work
-   - Prioritize: P0 bugs > **product focus** > admin feedback > roadmap "Now" items > parity gaps > polish
-   - `scripts/planning-service.sh checkpoint tasks_created`
-10. **Update personas** — append "What I learned this review"
+10. **Create sprint-task Issues — skip if "Sprint tasks" not in REMAINING:**
+    - For each task: `gh issue create --label sprint-task` (add `--label SENIOR` only for complex/architecture tasks)
+    - Include in body: Goal, Files (list specific files to modify), Approach (step-by-step), Edge cases, Tests (specific test cases to write), Acceptance criteria
+    - Break large features into multiple Issues — prefer 3 small Issues over 1 big one
+    - Mix of sizes: ~2-3 SENIOR (architecture, AI, multi-file) + ~6-8 regular (UI, tests, food DB, fixes)
+    - **SENIOR:** AI pipeline, architecture, multi-file refactors, P0 bugs, design doc implementation
+    - **JUNIOR:** Food DB, single-file UI, tests, docs, simple fixes, well-specified work
+    - Prioritize: P0 bugs > **product focus** > admin feedback > roadmap "Now" items > parity gaps > polish
+    - `scripts/planning-service.sh checkpoint tasks_created`
+11. **Update personas** — append "What I learned this review"
     - `scripts/planning-service.sh checkpoint personas_updated`
-11. **Update roadmap** — apply agreed changes
+12. **Update roadmap** — apply agreed changes
     - `scripts/planning-service.sh checkpoint roadmap_updated`
-12. **Refresh sprint service:** `scripts/sprint-service.sh refresh` — loads all new tasks into queue for next session
+13. **Refresh sprint service:** `scripts/sprint-service.sh refresh` — loads all new tasks into queue for next session
     - `scripts/planning-service.sh checkpoint sprint_refreshed`
-13. **Close the planning Issue:**
+14. **Log process hiccup (if any):** Before closing, identify ONE thing that didn't work smoothly this session:
+    ```bash
+    scripts/issue-service.sh log-feedback "planning" "description of what broke or was confusing"
+    # Skip if nothing notable
+    ```
+15. **Close the planning Issue:**
     ```bash
     gh issue close N --comment "Sprint planning complete. Created X sprint-task issues. Review PR: #Y."
     gh issue edit N --remove-label in-progress
     ```
-14. **Exit** — watchdog restarts with appropriate model for first task
+16. **Exit** — watchdog restarts with appropriate model for first task
 
 **DOD — ensure-clean-state.sh blocks Stop until all done (autonomous sessions only):**
 - Product review PR merged
 - 8+ sprint-task issues created
 - All admin PR comments replied to
 - All feature-requests triaged (sprint-task label or defer comment)
+- Process feedback drained (`feedback_drained` checkpoint)
 - `scripts/sprint-service.sh refresh` called
 - Planning issue closed
 
@@ -112,31 +127,54 @@ You are the senior engineer AND the PE (Principal Engineer). Execute complex tas
 1. Re-read steering notes. Stop if override says STOP.
 2. **Design docs first (before sprint tasks):**
    ```bash
-   scripts/design-service.sh in-review         # PRs with comments — reply to each + revise
-   scripts/design-service.sh pending            # Issues needing doc — write on branch, PR, doc-ready label
-   scripts/design-service.sh approved-not-started  # Need impl tasks — run create-impl-tasks + sprint-service.sh refresh
+   scripts/design-service.sh in-review         # PRs with comments — reply to each + revise doc
+   scripts/design-service.sh pending            # Issues needing doc — write on branch, PR, add doc-ready label
+   scripts/design-service.sh approved-not-started  # Approved designs needing impl tasks:
+     # → scripts/design-service.sh create-impl-tasks <N>
+     # → scripts/sprint-service.sh refresh
    # DO NOT touch: scripts/design-service.sh awaiting-approval (human reviewing)
    ```
 3. **Sprint tasks (loop until "none"):**
    ```bash
-   # Get next task (P0s always returned first, regardless of filter)
    TASK=$(scripts/sprint-service.sh next --senior)   # prints "NUMBER TITLE" or "none"
    [ "$TASK" = "none" ] && exit 0
 
    N=$(echo "$TASK" | cut -d' ' -f1)
-   scripts/sprint-service.sh claim $N           # atomic — fails if another task already in-progress
+   scripts/sprint-service.sh claim $N
 
-   gh issue view $N                             # read full spec; if screenshot → Read the image file
-   gh issue comment $N --body "**Starting.** Plan: [1-2 sentences]. Files: [list]. Tests: [what I'll verify]."
+   gh issue view $N    # read full spec; if screenshot → Read the image file
+   LABELS=$(gh issue view $N --json labels --jq '[.labels[].name] | join(" ")')
 
-   # Execute → build → test
-   echo "Fixed: [what changed]" > /tmp/done-note-$N
-   git commit -m "fix|feat: ... (closes #$N)" && git push
-   scripts/sprint-service.sh done $N $(git rev-parse HEAD)
+   # ── P0 bug: fix immediately, no plan gate ──────────────────────────────────
+   if echo "$LABELS" | grep -q "P0"; then
+     gh issue comment $N --body "**Starting.** P0: fixing now."
+     # → implement → build → test → commit → sprint-service.sh done
+
+   # ── P1/P2 bug or non-admin feature WITHOUT sprint-task approval ────────────
+   elif echo "$LABELS" | grep -qE "P1|P2" && ! echo "$LABELS" | grep -q "sprint-task"; then
+     # Not yet approved — post investigation, mark needs-review, move on
+     scripts/issue-service.sh investigate-bug $N
+     scripts/issue-service.sh need-review $N
+     scripts/sprint-service.sh unclaim $N
+     # Human sees plan in Command Center → clicks Approve → adds sprint-task → returns next cycle
+
+   # ── Approved task (has sprint-task, plan required before implement) ────────
+   else
+     gh issue comment $N --body "**Plan:** [1-2 sentences]. Files: [list]. Tests: [what I'll verify]."
+     # → implement → build → test
+     echo "Fixed: [what changed]" > /tmp/done-note-$N
+     git commit -m "fix|feat: ... (closes #$N)" && git push
+     scripts/sprint-service.sh done $N $(git rev-parse HEAD)
+   fi
    ```
    Repeat until `next --senior` returns "none" AND `design-service.sh` shows no pending work.
 4. **Can create max 3 new Issues per session** when discovering work. Add SENIOR label if complex.
-5. Exit when done. Watchdog restarts with appropriate model.
+5. **Log process hiccup (if any):** Before exiting, identify ONE thing that didn't work smoothly:
+   ```bash
+   scripts/issue-service.sh log-feedback "senior" "description of what broke or was confusing"
+   # Skip if nothing notable
+   ```
+6. Exit when done. Watchdog restarts with appropriate model.
 
 ---
 
@@ -181,6 +219,11 @@ You are the junior engineer. Execute well-specified tasks. Loop forever — juni
    scripts/sprint-service.sh done $N $(git rev-parse HEAD)
    ```
 7. **Loop back to step 2.** Never stop between tasks.
+
+**Before watchdog kills the session:** Log any hiccup — if a hook misbehaved, a service returned wrong output, or a step was confusing:
+```bash
+scripts/issue-service.sh log-feedback "junior" "description"
+```
 
 ---
 

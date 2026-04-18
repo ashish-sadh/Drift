@@ -87,7 +87,6 @@ cmd_bugs_needing_plan() {
 }
 
 cmd_ready_from_review() {
-    # List all open needs-review issues (watchdog handles 4h timer via queue file)
     local RESULT
     RESULT=$(gh issue list --state open --label needs-review --json number,title \
         --jq '.[] | "#\(.number) \(.title)"' \
@@ -97,6 +96,30 @@ cmd_ready_from_review() {
     else
         echo "$RESULT"
     fi
+}
+
+FEEDBACK_LOG="$STATE_DIR/process-feedback.log"
+
+cmd_log_feedback() {
+    local SESSION_TYPE="${1:-unknown}"
+    local TEXT="${2:-}"
+    if [ -z "$TEXT" ]; then
+        echo "Usage: issue-service.sh log-feedback <session-type> <text>" >&2
+        exit 1
+    fi
+    local TS
+    TS=$(date '+%Y-%m-%d %H:%M:%S')
+    echo "${TS} | ${SESSION_TYPE} | ${TEXT}" >> "$FEEDBACK_LOG" 2>/dev/null || true
+    echo "Feedback logged"
+}
+
+cmd_drain_feedback() {
+    if [ ! -f "$FEEDBACK_LOG" ] || [ ! -s "$FEEDBACK_LOG" ]; then
+        echo "No process feedback pending."
+        return 0
+    fi
+    cat "$FEEDBACK_LOG"
+    > "$FEEDBACK_LOG"  # truncate (preserve file)
 }
 
 # ── Dispatch ──────────────────────────────────────────────────────────────────
@@ -110,9 +133,11 @@ case "$CMD" in
     need-review)        cmd_need_review "${1:-}" ;;
     bugs-needing-plan)  cmd_bugs_needing_plan ;;
     ready-from-review)  cmd_ready_from_review ;;
+    log-feedback)       cmd_log_feedback "${1:-}" "${2:-}" ;;
+    drain-feedback)     cmd_drain_feedback ;;
     *)
         echo "Unknown command: $CMD" >&2
-        echo "Commands: post-plan <N> <body>, investigate-bug <N>, need-review <N>, bugs-needing-plan, ready-from-review" >&2
+        echo "Commands: post-plan <N> <body>, investigate-bug <N>, need-review <N>, bugs-needing-plan, ready-from-review, log-feedback <type> <text>, drain-feedback" >&2
         exit 1
         ;;
 esac

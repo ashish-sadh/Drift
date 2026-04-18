@@ -215,25 +215,32 @@ async function showUser() {
   _resolveUserReady();
 }
 
-// Sprint: sprint-task Issues + permanent-task Issues + recently closed
+// Sprint: sprint-task Issues + permanent-task Issues + bugs by priority + needs-review
 async function getSprintPlan() {
   try {
-    const [sprintOpen, sprintClosed, permanent, p0Bugs, p0Closed] = await Promise.all([
+    const [sprintOpen, sprintClosed, permanent, p0Bugs, p0Closed, p1Bugs, p2Bugs, needsReview] = await Promise.all([
       smartApi(`/repos/${OWNER}/${REPO}/issues?labels=sprint-task&state=open&per_page=30`),
       smartApi(`/repos/${OWNER}/${REPO}/issues?labels=sprint-task&state=closed&per_page=10&sort=updated&direction=desc`),
       smartApi(`/repos/${OWNER}/${REPO}/issues?labels=permanent-task&state=open&per_page=10`),
       smartApi(`/repos/${OWNER}/${REPO}/issues?labels=bug,P0&state=open&per_page=10`),
-      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=bug,P0&state=closed&per_page=10&sort=updated&direction=desc`)
+      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=bug,P0&state=closed&per_page=10&sort=updated&direction=desc`),
+      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=bug,P1&state=open&per_page=10`),
+      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=bug,P2&state=open&per_page=10`),
+      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=needs-review&state=open&per_page=20`)
     ]);
 
     const mapIssue = i => ({
       name: i.title.replace(/^(Sprint|Permanent|Bug):\s*/i, ''),
       status: i.state === 'closed' ? 'done'
         : i.labels.some(l => l.name === 'in-progress') ? 'in-progress'
+        : i.labels.some(l => l.name === 'needs-review') ? 'awaiting-approval'
         : 'pending',
       classification: i.labels.some(l => l.name === 'SENIOR') || i.labels.some(l => l.name === 'P0') ? 'SENIOR (Opus)' : 'JUNIOR (Sonnet)',
       priority: i.labels.find(l => ['P0','P1','P2'].includes(l.name))?.name || '',
       isPermanent: i.labels.some(l => l.name === 'permanent-task'),
+      isSenior: i.labels.some(l => l.name === 'SENIOR'),
+      isRequested: i.labels.some(l => l.name === 'requested'),
+      hasPlan: i.labels.some(l => l.name === 'plan-posted'),
       url: i.html_url,
       number: i.number,
       comments: i.comments
@@ -250,8 +257,16 @@ async function getSprintPlan() {
       .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
       .slice(0, 10);
 
+    // Bugs awaiting approval: needs-review + bug label + plan-posted
+    const awaitingApproval = needsReview.filter(i =>
+      i.labels.some(l => l.name === 'bug') && i.labels.some(l => l.name === 'plan-posted')
+    );
+
     return {
       p0Bugs: dedupedP0.map(mapIssue),
+      p1Bugs: p1Bugs.map(mapIssue),
+      p2Bugs: p2Bugs.map(mapIssue),
+      awaitingApproval: awaitingApproval.map(mapIssue),
       sprintTasks: sprintOpen.map(mapIssue),
       completedTasks: allCompleted.map(mapIssue),
       permanentTasks: permanent.map(mapIssue)
@@ -259,6 +274,63 @@ async function getSprintPlan() {
   } catch (e) {
     console.error('[Sprint] Error:', e);
     return null;
+  }
+}
+
+// Approve a bug for implementation (adds sprint-task, removes needs-review)
+async function approveBug(num) {
+  if (!isOwner()) { alert('Sign in as admin to approve'); return; }
+  try {
+    await api(`/repos/${OWNER}/${REPO}/issues/${num}/labels`, {
+      method: 'POST',
+      headers: { ...headers(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ labels: ['sprint-task'] })
+    });
+    await api(`/repos/${OWNER}/${REPO}/issues/${num}/labels/needs-review`, { method: 'DELETE' });
+    alert(`Issue #${num} approved — added to sprint queue.`);
+    if (typeof loadSprint === 'function') loadSprint();
+  } catch (e) {
+    alert(`Failed: ${e.message}`);
+  }
+}
+
+// Request a permanent task to run this cycle
+async function requestPermanentTask(num) {
+  if (!isOwner()) { alert('Sign in as admin'); return; }
+  try {
+    await api(`/repos/${OWNER}/${REPO}/issues/${num}/labels`, {
+      method: 'POST',
+      headers: { ...headers(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ labels: ['requested'] })
+    });
+    await api(`/repos/${OWNER}/${REPO}/issues/${num}/comments`, {
+      method: 'POST',
+      headers: { ...headers(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ body: 'Admin requested: run this in the next cycle.' })
+    });
+    alert(`Task #${num} requested for next cycle.`);
+    if (typeof loadSprint === 'function') loadSprint();
+  } catch (e) {
+    alert(`Failed: ${e.message}`);
+  }
+}
+
+// Toggle SENIOR flag on a permanent task
+async function toggleSeniorFlag(num, isSenior) {
+  if (!isOwner()) { alert('Sign in as admin'); return; }
+  try {
+    if (isSenior) {
+      await api(`/repos/${OWNER}/${REPO}/issues/${num}/labels/SENIOR`, { method: 'DELETE' });
+    } else {
+      await api(`/repos/${OWNER}/${REPO}/issues/${num}/labels`, {
+        method: 'POST',
+        headers: { ...headers(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ labels: ['SENIOR'] })
+      });
+    }
+    if (typeof loadSprint === 'function') loadSprint();
+  } catch (e) {
+    alert(`Failed: ${e.message}`);
   }
 }
 

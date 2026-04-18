@@ -3,7 +3,7 @@
 # Commands: checkpoint <step> | remaining | validate | issue-number | reset
 #
 # Steps: admin_replied, review_merged, tasks_created, personas_updated,
-#        roadmap_updated, sprint_refreshed
+#        roadmap_updated, sprint_refreshed, feedback_drained
 
 set -euo pipefail
 
@@ -29,6 +29,7 @@ step_to_line() {
         personas_updated) echo "Personas updated" ;;
         roadmap_updated)  echo "Roadmap updated" ;;
         sprint_refreshed) echo "Sprint refreshed" ;;
+        feedback_drained) echo "Feedback drained" ;;
         *)
             echo "planning-service: unknown step '$STEP'" >&2
             return 1
@@ -60,7 +61,7 @@ cmd_checkpoint() {
         exit 1
     fi
 
-    gh issue edit "$N" --body "$UPDATED" > /dev/null 2>&1
+    gh issue edit "$N" --body "$UPDATED" > /dev/null 2>&1 || true
     echo "planning-service: checkpoint '$STEP' marked done in issue #$N"
 }
 
@@ -102,7 +103,7 @@ cmd_validate() {
     fi
 
     # Remaining steps — self-reported via checklist
-    for STEP in admin_replied personas_updated roadmap_updated sprint_refreshed; do
+    for STEP in admin_replied personas_updated roadmap_updated sprint_refreshed feedback_drained; do
         local LINE_PREFIX
         LINE_PREFIX=$(step_to_line "$STEP")
         if echo "$BODY" | grep -q "^\- \[ \] ${LINE_PREFIX}"; then
@@ -134,7 +135,7 @@ cmd_reset() {
     local RESET
     RESET=$(echo "$BODY" | sed 's/- \[x\]/- [ ]/g')
 
-    gh issue edit "$N" --body "$RESET" > /dev/null 2>&1
+    gh issue edit "$N" --body "$RESET" > /dev/null 2>&1 || true
     echo "planning-service: reset all checkboxes in issue #$N"
 }
 

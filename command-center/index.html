@@ -340,7 +340,11 @@
         // Create labels array
         const labels = ['bug'];
         if (priority) labels.push(priority);
-        if (!isOwner() && priority !== 'P0') labels.push('needs-review');
+        if (isOwner()) {
+          labels.push('sprint-task');  // admin-filed bugs go directly to sprint queue
+        } else if (priority !== 'P0') {
+          labels.push('needs-review');  // non-admin bugs wait for human approval
+        }
 
         // Create issue — retry without labels if permission denied
         let issue;
@@ -643,22 +647,33 @@
       }
     }
 
-    // Load feedback trail
+    // Load feedback trail (report PRs + design doc PRs)
     async function loadFeedback() {
       const el = document.getElementById('feedback-list');
       try {
-        const prs = await api(`/repos/${OWNER}/${REPO}/pulls?labels=report&state=all&per_page=50`);
+        // Fetch report PRs and all PRs (to find design-doc labeled ones)
+        const [reportPRs, allPRs] = await Promise.all([
+          api(`/repos/${OWNER}/${REPO}/pulls?labels=report&state=all&per_page=50`),
+          api(`/repos/${OWNER}/${REPO}/pulls?state=all&per_page=50`)
+        ]);
+        const designPRs = allPRs.filter(pr =>
+          pr.labels && pr.labels.some(l => l.name === 'design-doc') &&
+          (pr.review_comments > 0 || pr.comments > 0)
+        );
+        const prs = [...reportPRs, ...designPRs.filter(d => !reportPRs.some(r => r.number === d.number))];
+
         let allComments = [];
         for (const pr of prs) {
           if (pr.review_comments === 0 && pr.comments === 0) continue;
           const comments = await getPRComments(pr.number);
           const issueComments = await api(`/repos/${OWNER}/${REPO}/issues/${pr.number}/comments`);
-          allComments.push(...comments.map(c => ({ ...c, prTitle: pr.title, prNumber: pr.number })));
-          allComments.push(...issueComments.map(c => ({ ...c, prTitle: pr.title, prNumber: pr.number, isIssueComment: true })));
+          const isDesign = pr.labels && pr.labels.some(l => l.name === 'design-doc');
+          allComments.push(...comments.map(c => ({ ...c, prTitle: pr.title, prNumber: pr.number, isDesign })));
+          allComments.push(...issueComments.map(c => ({ ...c, prTitle: pr.title, prNumber: pr.number, isIssueComment: true, isDesign })));
         }
 
         if (allComments.length === 0) {
-          el.innerHTML = '<div class="empty">No feedback yet. Open a report and comment on any line.</div>';
+          el.innerHTML = '<div class="empty">No feedback yet. Open a report or design doc and comment on any line.</div>';
           return;
         }
 
@@ -669,12 +684,16 @@
           const reportFile = c.prTitle?.includes('Cycle') ? `review-cycle-${c.prTitle.match(/Cycle (\d+)/)?.[1]}.md` : c.prTitle?.includes('Exec') ? `exec-${c.prTitle.match(/\d{4}-\d{2}-\d{2}/)?.[0]}.md` : null;
           const reportLink = reportFile ? `report.html?file=${encodeURIComponent(reportFile)}` : `https://github.com/${OWNER}/${REPO}/pull/${c.prNumber}`;
 
+          const trailLabel = c.isDesign
+            ? `<span class="report-type" style="background:rgba(63,185,80,0.15);color:#3fb950">Design Feedback</span>`
+            : `<span class="report-type type-review">Report Feedback</span>`;
           return `<div class="feedback-item">
             <div class="comment-author">
               <img src="${c.user.avatar_url}" alt="${c.user.login}">
               <strong>${c.user.login}</strong>
               <time>${new Date(c.created_at).toLocaleDateString()}</time>
               <a href="${reportLink}" style="color:var(--accent);font-size:13px;">on ${escapeHtml(c.prTitle || 'report')}</a>
+              ${trailLabel}
             </div>
             ${c.path ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:4px">Line ${c.line || c.position} of ${c.path}</div>` : ''}
             <div class="comment-body">${renderMarkdown(c.body)}</div>
@@ -1129,11 +1148,43 @@
 
       let html = '';
 
+      // Bugs awaiting approval (non-admin bugs with plan posted, needs human Approve)
+      if (data.awaitingApproval && data.awaitingApproval.length > 0) {
+        html += `<div style="background:var(--surface);border:1px solid rgba(210,153,34,0.4);border-radius:12px;padding:16px 20px;margin-bottom:12px;">
+          <h3 style="margin:0 0 8px;font-size:14px;color:var(--yellow);text-transform:uppercase;letter-spacing:0.5px;">Bugs Awaiting Your Approval</h3>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Senior posted an investigation plan. Review it on GitHub, then approve to add to sprint.</div>
+          ${data.awaitingApproval.map(t => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+              <div>
+                <a href="${t.url}" target="_blank" style="color:var(--text);text-decoration:none;font-size:14px;">${escapeHtml(t.name)}</a>
+                ${t.priority ? `<span class="badge" style="margin-left:6px;">${t.priority}</span>` : ''}
+              </div>
+              <button class="btn btn-primary" style="font-size:12px;padding:4px 10px;" onclick="approveBug(${t.number})">Approve → Sprint</button>
+            </div>`).join('')}
+        </div>`;
+      }
+
       // P0 Bugs (highest priority, shown first)
       if (data.p0Bugs && data.p0Bugs.length > 0) {
         html += `<div style="background:var(--surface);border:1px solid rgba(248,81,73,0.3);border-radius:12px;padding:16px 20px;margin-bottom:12px;">
           <h3 style="margin:0 0 8px;font-size:14px;color:var(--red);text-transform:uppercase;letter-spacing:0.5px;">P0 Bugs</h3>
           ${data.p0Bugs.map(renderTask).join('')}
+        </div>`;
+      }
+
+      // P1 Bugs
+      if (data.p1Bugs && data.p1Bugs.length > 0) {
+        html += `<div style="background:var(--surface);border:1px solid rgba(210,153,34,0.2);border-radius:12px;padding:16px 20px;margin-bottom:12px;">
+          <h3 style="margin:0 0 8px;font-size:14px;color:var(--yellow);text-transform:uppercase;letter-spacing:0.5px;">P1 Bugs</h3>
+          ${data.p1Bugs.map(renderTask).join('')}
+        </div>`;
+      }
+
+      // P2 Bugs
+      if (data.p2Bugs && data.p2Bugs.length > 0) {
+        html += `<div style="background:var(--surface);border:1px solid rgba(139,148,158,0.2);border-radius:12px;padding:16px 20px;margin-bottom:12px;">
+          <h3 style="margin:0 0 8px;font-size:14px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">P2 Bugs</h3>
+          ${data.p2Bugs.map(renderTask).join('')}
         </div>`;
       }
 
@@ -1145,11 +1196,27 @@
         </div>`;
       }
 
-      // Permanent tasks (always open)
+      // Permanent tasks (admin controls: request cycle, flag SENIOR)
       if (data.permanentTasks.length > 0) {
         html += `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:12px;">
-          <h3 style="margin:0 0 8px;font-size:14px;color:rgb(111,66,193);text-transform:uppercase;letter-spacing:0.5px;">Ongoing Work</h3>
-          ${data.permanentTasks.map(renderTask).join('')}
+          <h3 style="margin:0 0 4px;font-size:14px;color:rgb(111,66,193);text-transform:uppercase;letter-spacing:0.5px;">Ongoing Work</h3>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;">Permanent tasks loop forever. Request one to prioritize it this cycle.</div>
+          ${data.permanentTasks.map(t => `
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);">
+              <div>
+                <a href="${t.url}" target="_blank" style="color:var(--text);text-decoration:none;font-size:14px;">${escapeHtml(t.name)}</a>
+                ${t.isRequested ? `<span class="badge" style="margin-left:6px;background:rgba(88,166,255,0.2);color:var(--accent)">Requested</span>` : ''}
+                ${t.isSenior ? `<span class="badge" style="margin-left:4px;background:rgba(248,81,73,0.15);color:var(--red)">SENIOR</span>` : ''}
+              </div>
+              ${isOwner() ? `<div style="display:flex;gap:6px;">
+                <button class="btn" style="font-size:11px;padding:3px 8px;" onclick="requestPermanentTask(${t.number})" ${t.isRequested ? 'disabled' : ''}>
+                  ${t.isRequested ? 'Requested' : 'Request Cycle'}
+                </button>
+                <button class="btn" style="font-size:11px;padding:3px 8px;" onclick="toggleSeniorFlag(${t.number}, ${t.isSenior})">
+                  ${t.isSenior ? 'Un-SENIOR' : 'Flag SENIOR'}
+                </button>
+              </div>` : ''}
+            </div>`).join('')}
         </div>`;
       }
 

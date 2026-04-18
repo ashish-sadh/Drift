@@ -119,6 +119,15 @@ if [[ "$SESSION_TYPE" == "planning" ]]; then
       echo "PLANNING: All steps checked. Verify and close the planning issue."
     fi
   fi
+
+  # Show pending process feedback count
+  FEEDBACK_LOG="$HOME/drift-state/process-feedback.log"
+  if [ -f "$FEEDBACK_LOG" ] && [ -s "$FEEDBACK_LOG" ]; then
+    FEEDBACK_COUNT=$(wc -l < "$FEEDBACK_LOG" | tr -d ' ')
+    echo ""
+    echo "PROCESS FEEDBACK: $FEEDBACK_COUNT session hiccup(s) pending review."
+    echo "Run: scripts/issue-service.sh drain-feedback — then create infra-improvement issues for systemic ones."
+  fi
 fi
 
 echo "========================"

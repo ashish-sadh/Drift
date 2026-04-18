@@ -183,13 +183,20 @@ if filter_mode in ("--senior", "--any"):
         if has(t, "sprint-task") and has(t, "SENIOR"):
             print(f"{t['number']} {t['title']}"); sys.exit(0)
 
-# Priority 5: P2 bugs (all filters)
-for t in available:
-    # Skip needs-review — waiting for human
-    if has(t, "needs-review"):
-        continue
-    if has(t, "bug") and has(t, "P2"):
-        print(f"{t['number']} {t['title']}"); sys.exit(0)
+# Priority 5: P2 bugs (--senior or --any only — all bugs need senior judgment)
+if filter_mode in ("--senior", "--any"):
+    for t in available:
+        # Skip needs-review — waiting for human approval
+        if has(t, "needs-review"):
+            continue
+        if has(t, "bug") and has(t, "P2"):
+            print(f"{t['number']} {t['title']}"); sys.exit(0)
+
+# Priority 5.5: Requested permanent tasks (admin explicitly requested this cycle)
+if filter_mode in ("--senior", "--any"):
+    for t in available:
+        if has(t, "permanent-task") and has(t, "requested") and not has(t, "needs-review"):
+            print(f"{t['number']} {t['title']}"); sys.exit(0)
 
 # Priority 6: Regular sprint tasks (--junior or --any)
 if filter_mode in ("--junior", "--any"):

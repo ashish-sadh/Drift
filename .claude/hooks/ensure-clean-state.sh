@@ -12,6 +12,8 @@ if pgrep -f 'claude.*-p.*(execute|run.*autopilot|sprint)' > /dev/null 2>&1; then
   exit 0
 fi
 
+DRIFT_CONTROL=$(cat "$HOME/drift-control.txt" 2>/dev/null | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')
+
 # Check for uncommitted changes (staged or unstaged)
 DIRTY=$(git status --porcelain 2>/dev/null | grep -v '^??' | head -5)
 UNTRACKED=$(git status --porcelain 2>/dev/null | grep '^??' | grep -v '.claude/' | head -5)
@@ -33,23 +35,24 @@ if [ -n "$UNPUSHED" ]; then
   ISSUES="${ISSUES}Unpushed commits:\n${UNPUSHED}\n\n"
 fi
 
-# Check if persona files were updated after a product review
-CYCLE_COUNT=$(cat "$HOME/drift-state/cycle-counter" 2>/dev/null || echo "0")
-LAST_REVIEW=$(cat "$HOME/drift-state/last-review-cycle" 2>/dev/null || echo "0")
-if [ "$CYCLE_COUNT" -eq "$LAST_REVIEW" ] && [ "$CYCLE_COUNT" -gt 0 ]; then
-  # A review just happened this cycle — check persona files were updated
-  DESIGNER_FILE="${CLAUDE_PROJECT_DIR:-.}/Docs/personas/product-designer.md"
-  ENGINEER_FILE="${CLAUDE_PROJECT_DIR:-.}/Docs/personas/principal-engineer.md"
-  LAST_COMMIT_TIME=$(git log -1 --format=%ct 2>/dev/null || echo "0")
+# Check if persona files were updated after a product review (autonomous sessions only)
+if [ "$DRIFT_CONTROL" = "RUN" ]; then
+  CYCLE_COUNT=$(cat "$HOME/drift-state/cycle-counter" 2>/dev/null || echo "0")
+  LAST_REVIEW=$(cat "$HOME/drift-state/last-review-cycle" 2>/dev/null || echo "0")
+  if [ "$CYCLE_COUNT" -eq "$LAST_REVIEW" ] && [ "$CYCLE_COUNT" -gt 0 ]; then
+    DESIGNER_FILE="${CLAUDE_PROJECT_DIR:-.}/Docs/personas/product-designer.md"
+    ENGINEER_FILE="${CLAUDE_PROJECT_DIR:-.}/Docs/personas/principal-engineer.md"
+    LAST_COMMIT_TIME=$(git log -1 --format=%ct 2>/dev/null || echo "0")
 
-  for PFILE in "$DESIGNER_FILE" "$ENGINEER_FILE"; do
-    if [ -f "$PFILE" ]; then
-      PMOD=$(stat -f %m "$PFILE" 2>/dev/null || echo "0")
-      if [ "$PMOD" -lt "$LAST_COMMIT_TIME" ]; then
-        ISSUES="${ISSUES}Persona file not updated after product review: $(basename $PFILE)\n\n"
+    for PFILE in "$DESIGNER_FILE" "$ENGINEER_FILE"; do
+      if [ -f "$PFILE" ]; then
+        PMOD=$(stat -f %m "$PFILE" 2>/dev/null || echo "0")
+        if [ "$PMOD" -lt "$LAST_COMMIT_TIME" ]; then
+          ISSUES="${ISSUES}Persona file not updated after product review: $(basename $PFILE)\n\n"
+        fi
       fi
-    fi
-  done
+    done
+  fi
 fi
 
 # Check if any dirty files are report files (need PR branch, not direct main commit)
@@ -79,7 +82,6 @@ if [ -n "$ISSUES" ]; then
 fi
 
 # Check for in-progress issues that weren't closed (autonomous sessions only)
-DRIFT_CONTROL=$(cat "$HOME/drift-control.txt" 2>/dev/null | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')
 SESSION_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "")
 if [ "$DRIFT_CONTROL" = "RUN" ]; then
   IN_PROGRESS=$(gh issue list --state open --label in-progress --json number,title --jq '.[] | "#\(.number) \(.title)"' 2>/dev/null || true)
@@ -115,12 +117,6 @@ if [ "$SESSION_TYPE" = "planning" ] && [ "$DRIFT_CONTROL" = "RUN" ]; then
   if [ "$FR_COUNT" -gt 0 ]; then
     FR_LIST=$(gh issue list --state open --label feature-request --json number,title,labels --jq '.[] | "#\(.number) \(.title) [\(.labels | map(.name) | join(", "))]"' 2>/dev/null || true)
     PLAN_ISSUES="${PLAN_ISSUES}Open feature requests ($FR_COUNT) — review and plan these:\n${FR_LIST}\nP0: create sprint-task now. P1: include in sprint. Others: defer or close.\n\n"
-  fi
-
-  # Were approved design docs given implementation tasks?
-  APPROVED_NO_IMPL=$("${CLAUDE_PROJECT_DIR:-.}/scripts/design-service.sh" approved-not-started 2>/dev/null || echo "")
-  if [ -n "$APPROVED_NO_IMPL" ] && [ "$APPROVED_NO_IMPL" != "none" ]; then
-    PLAN_ISSUES="${PLAN_ISSUES}Approved design docs need impl tasks:\n${APPROVED_NO_IMPL}\n\n"
   fi
 
   # Planning checklist validation via planning-service.sh
