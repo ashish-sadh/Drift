@@ -103,20 +103,27 @@ async function getMetrics() {
 
 // PR mapping
 async function findPRForReport(filename) {
-  // review-cycle-358.md → branch review/cycle-358
+  // review-cycle-358.md → try multiple branch patterns (naming was inconsistent historically)
   // exec-2026-04-12.md → branch report/exec-2026-04-12
-  let branch;
+  let branches;
   if (filename.startsWith('review-cycle-')) {
     const cycle = filename.replace('review-cycle-', '').replace('.md', '');
-    branch = `review/cycle-${cycle}`;
+    branches = [
+      `review/cycle-${cycle}`,
+      `review-cycle-${cycle}`,
+      `report/review-cycle-${cycle}`
+    ];
   } else if (filename.startsWith('exec-')) {
     const date = filename.replace('exec-', '').replace('.md', '');
-    branch = `report/exec-${date}`;
+    branches = [`report/exec-${date}`];
   }
-  if (!branch) return null;
+  if (!branches) return null;
 
-  const prs = await api(`/repos/${OWNER}/${REPO}/pulls?state=all&head=${OWNER}:${branch}`);
-  return prs[0] || null;
+  for (const branch of branches) {
+    const prs = await api(`/repos/${OWNER}/${REPO}/pulls?state=all&head=${OWNER}:${branch}`);
+    if (prs && prs[0]) return prs[0];
+  }
+  return null;
 }
 
 async function getPRComments(prNumber) {

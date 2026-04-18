@@ -93,45 +93,6 @@ SESSION_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo ""
 if [ "$SESSION_TYPE" = "planning" ] && [ "$DRIFT_CONTROL" = "RUN" ]; then
   PLAN_ISSUES=""
 
-  # Were sprint-task issues created in this session?
-  TASK_COUNT=$(gh issue list --state open --label sprint-task --json number --jq 'length' 2>/dev/null || echo "0")
-  if [ "$TASK_COUNT" -lt 4 ]; then
-    PLAN_ISSUES="${PLAN_ISSUES}Only $TASK_COUNT sprint-task issues open (target 8-12). Create more before stopping.\n\n"
-  fi
-
-  # Was a product review report committed recently? Must be review-cycle-*.md format
-  RECENT_REPORT=$(git log --oneline --since="2 hours ago" -- Docs/reports/review-cycle-*.md 2>/dev/null | head -1)
-  if [ -z "$RECENT_REPORT" ]; then
-    PLAN_ISSUES="${PLAN_ISSUES}No product review report committed this session. Write review-cycle-{N}.md using REVIEW-TEMPLATE.md.\n\n"
-  else
-    # Check report has required sections
-    REPORT_FILE=$(git log --since="2 hours ago" --name-only --pretty=format: -- Docs/reports/review-cycle-*.md 2>/dev/null | head -1)
-    if [ -n "$REPORT_FILE" ] && [ -f "$REPORT_FILE" ]; then
-      MISSING=""
-      grep -q "Product Designer Assessment" "$REPORT_FILE" || MISSING="${MISSING}Product Designer Assessment, "
-      grep -q "Principal Engineer Assessment" "$REPORT_FILE" || MISSING="${MISSING}Principal Engineer Assessment, "
-      grep -q "The Debate" "$REPORT_FILE" || MISSING="${MISSING}The Debate, "
-      grep -q "Competitive Analysis" "$REPORT_FILE" || MISSING="${MISSING}Competitive Analysis, "
-      if [ -n "$MISSING" ]; then
-        PLAN_ISSUES="${PLAN_ISSUES}Product review missing required sections: ${MISSING%. }. Use REVIEW-TEMPLATE.md.\n\n"
-      fi
-    fi
-
-    # Check if a report PR was created (not just committed to main)
-    REPORT_NAME=$(basename "$REPORT_FILE" .md 2>/dev/null || echo "")
-    if [ -n "$REPORT_NAME" ]; then
-      REPORT_PR=$(gh pr list --label report --state all --json title,number --jq ".[] | select(.title | test(\"$REPORT_NAME\")) | .number" 2>/dev/null | head -1 || true)
-      if [ -z "$REPORT_PR" ]; then
-        PLAN_ISSUES="${PLAN_ISSUES}Product review committed but NO PR created. Human needs a PR to comment line-by-line.\nCreate branch, push, create PR with --label report, then merge: gh pr merge --squash --delete-branch\n\n"
-      fi
-    fi
-  fi
-
-  # Were admin feedback comments replied to?
-  if [ -s "$HOME/drift-state/cache-admin-feedback" ]; then
-    PLAN_ISSUES="${PLAN_ISSUES}Admin feedback on report PRs still needs replies:\n$(cat "$HOME/drift-state/cache-admin-feedback")\nReply to every comment before stopping.\n\n"
-  fi
-
   # Were open feature requests reviewed and planned?
   FR_COUNT=$(gh issue list --state open --label feature-request --json number --jq 'length' 2>/dev/null || echo "0")
   if [ "$FR_COUNT" -gt 0 ]; then
@@ -143,6 +104,12 @@ if [ "$SESSION_TYPE" = "planning" ] && [ "$DRIFT_CONTROL" = "RUN" ]; then
   APPROVED_DESIGNS=$(gh issue list --state open --label design-doc --label approved --json number,title --jq '.[] | "#\(.number) \(.title)"' 2>/dev/null || true)
   if [ -n "$APPROVED_DESIGNS" ]; then
     PLAN_ISSUES="${PLAN_ISSUES}Approved design docs need implementation tasks:\n${APPROVED_DESIGNS}\nCreate sprint-task Issues with design-impl-{N} label for each.\n\n"
+  fi
+
+  # Planning checklist validation via planning-service.sh
+  PLAN_VALIDATE_OUTPUT=$("${CLAUDE_PROJECT_DIR:-.}/scripts/planning-service.sh" validate 2>&1 || true)
+  if echo "$PLAN_VALIDATE_OUTPUT" | grep -q "^Planning validation failed"; then
+    PLAN_ISSUES="${PLAN_ISSUES}${PLAN_VALIDATE_OUTPUT}\n\n"
   fi
 
   if [ -n "$PLAN_ISSUES" ]; then

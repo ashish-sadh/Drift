@@ -22,16 +22,12 @@ _Override:_ CONTINUE
 
 You are the Product Designer + Principal Engineer. This is a replanning session. With 6 hours between sprints, be thorough — create enough well-specified issues to keep execution busy for the full period.
 
-**RESUME AWARENESS — check before each step if it was already done this cycle:**
+**RESUME CHECK — do this first, before any other step:**
 ```bash
-CYCLE=$(cat ~/drift-state/cycle-counter 2>/dev/null || echo "0")
-# Review done? Check if review-cycle-{CYCLE} report merged to main this cycle
-git log main --oneline --since="6 hours ago" | grep -q "review-cycle" && REVIEW_DONE=1 || REVIEW_DONE=0
-# Sprint tasks done? Check count from today
-TASKS_TODAY=$(gh issue list --label sprint-task --state open --json createdAt \
-  --jq '[.[] | select(.createdAt > (now - 21600 | strftime("%Y-%m-%dT%H:%M:%SZ")))] | length' 2>/dev/null || echo 0)
+REMAINING=$(scripts/planning-service.sh remaining)
+echo "Remaining planning steps: $REMAINING"
+# Skip steps not in REMAINING. Always do remaining steps in order.
 ```
-Skip steps already completed. Always re-do admin replies (idempotent). Always re-do sprint-service refresh.
 
 1. **Read persona files:** `Docs/personas/product-designer.md`, `Docs/personas/principal-engineer.md`
 2. **Read product focus:** `gh issue list --state open --label product-focus --json body --jq '.[0].body'`
@@ -46,6 +42,7 @@ Skip steps already completed. Always re-do admin replies (idempotent). Always re
      - Already done → "Addressed in commit abc123 — [what changed]."
      - Deferred → "Noted — adding to backlog. Will revisit in Review #N."
    - Create sprint-task Issues from actionable feedback
+   - `scripts/planning-service.sh checkpoint admin_replied`
 4. **Read open bugs:** `gh issue list --state open --label bug`
 5. **Design docs:** Review status of open design-doc Issues and PRs. Do NOT write docs here — senior execution handles writing. Just note which ones need attention.
 6. **Feature requests** — capture ideas the PE/Product Designer personas generate during review:
@@ -63,8 +60,10 @@ Skip steps already completed. Always re-do admin replies (idempotent). Always re
    - Write report using `Docs/reports/REVIEW-TEMPLATE.md` — every section is REQUIRED
    - Filename MUST be `review-cycle-{CYCLE_NUMBER}.md` (e.g., `review-cycle-2855.md`)
    - The report MUST include: Designer Assessment, Engineer Assessment, and The Debate section where personas discuss and disagree
+   - Branch MUST be named `review/cycle-{CYCLE_NUMBER}` (slash, not hyphen — e.g., `review/cycle-2855`). Use: `git checkout -b review/cycle-{CYCLE_NUMBER}`
    - Open review PR with `report` label, then merge immediately: `gh pr merge --squash --delete-branch && git checkout main && git pull`
-9. **Create sprint-task Issues — skip if TASKS_TODAY >= 8 (already created this cycle):**
+   - `scripts/planning-service.sh checkpoint review_merged`
+9. **Create sprint-task Issues — skip if "Sprint tasks" not in REMAINING:**
    - For each task: `gh issue create --label sprint-task` (add `--label SENIOR` only for complex/architecture tasks)
    - Include in body: Goal, Files (list specific files to modify), Approach (step-by-step), Edge cases, Tests (specific test cases to write), Acceptance criteria
    - Break large features into multiple Issues — prefer 3 small Issues over 1 big one
@@ -72,9 +71,13 @@ Skip steps already completed. Always re-do admin replies (idempotent). Always re
    - **SENIOR:** AI pipeline, architecture, multi-file refactors, P0 bugs, design doc implementation
    - **JUNIOR:** Food DB, single-file UI, tests, docs, simple fixes, well-specified work
    - Prioritize: P0 bugs > **product focus** > admin feedback > roadmap "Now" items > parity gaps > polish
+   - `scripts/planning-service.sh checkpoint tasks_created`
 10. **Update personas** — append "What I learned this review"
+    - `scripts/planning-service.sh checkpoint personas_updated`
 11. **Update roadmap** — apply agreed changes
+    - `scripts/planning-service.sh checkpoint roadmap_updated`
 12. **Refresh sprint service:** `scripts/sprint-service.sh refresh` — loads all new tasks into queue for next session
+    - `scripts/planning-service.sh checkpoint sprint_refreshed`
 13. **Close the planning Issue:**
     ```bash
     gh issue close N --comment "Sprint planning complete. Created X sprint-task issues. Review PR: #Y."

@@ -85,6 +85,23 @@ if [ -n "$UNREPLIED" ]; then
   echo "Read the full report, then reply to every admin comment."
 fi
 
+SESSION_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "junior")
+if [[ "$SESSION_TYPE" == "planning" ]]; then
+  PLAN_ISSUE=$(cat "$HOME/drift-state/planning-issue" 2>/dev/null || echo "")
+  if [[ -n "$PLAN_ISSUE" ]]; then
+    REMAINING=$("${CLAUDE_PROJECT_DIR:-.}/scripts/planning-service.sh" remaining 2>/dev/null || echo "")
+    if [[ -n "$REMAINING" ]]; then
+      echo ""
+      echo "PLANNING RESUME — steps still needed:"
+      echo "$REMAINING"
+      echo "Start from the first unchecked step. Completed steps are already done."
+    else
+      echo ""
+      echo "PLANNING: All steps checked. Verify and close the planning issue."
+    fi
+  fi
+fi
+
 echo "========================"
 
 exit 0

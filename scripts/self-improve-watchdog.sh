@@ -205,10 +205,17 @@ start_claude() {
         local PLAN_ISSUE=$(gh issue create \
             --title "Sprint Planning — Cycle $CYCLE" \
             --label sprint-task --label SENIOR --label in-progress \
-            --body "Automated sprint planning session. Includes: product review, competitive analysis, sprint-task creation, persona updates, roadmap updates." \
+            --body "## Planning Checklist
+- [ ] Admin replies — responded to all admin comments on report PRs
+- [ ] Product review — review-cycle-${CYCLE}.md PR merged to main
+- [ ] Sprint tasks — 8+ sprint-task issues created
+- [ ] Personas updated — appended \"What I learned\" to persona files
+- [ ] Roadmap updated — applied agreed changes
+- [ ] Sprint refreshed — scripts/sprint-service.sh refresh called" \
             --json number --jq '.number' 2>/dev/null || echo "")
         if [[ -n "$PLAN_ISSUE" ]]; then
             log "Created planning tracking Issue #$PLAN_ISSUE"
+            echo "$PLAN_ISSUE" > "$HOME/drift-state/planning-issue"
             SESSION_PROMPT="run sprint planning — close Issue #$PLAN_ISSUE when done"
         else
             SESSION_PROMPT="run sprint planning"
