@@ -80,6 +80,7 @@ fi
 
 # Check for in-progress issues that weren't closed (autonomous sessions only)
 DRIFT_CONTROL=$(cat "$HOME/drift-control.txt" 2>/dev/null | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')
+SESSION_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "")
 if [ "$DRIFT_CONTROL" = "RUN" ]; then
   IN_PROGRESS=$(gh issue list --state open --label in-progress --json number,title --jq '.[] | "#\(.number) \(.title)"' 2>/dev/null || true)
   if [ -n "$IN_PROGRESS" ]; then
@@ -88,8 +89,24 @@ if [ "$DRIFT_CONTROL" = "RUN" ]; then
   fi
 fi
 
+# Senior session Stop gate — check design doc and bug plan hygiene
+if [ "$SESSION_TYPE" = "senior" ] && [ "$DRIFT_CONTROL" = "RUN" ]; then
+  # Design docs in-review: if any PR has unreplied comments, block
+  DESIGN_UNREPLIED=$("${CLAUDE_PROJECT_DIR:-.}/scripts/design-service.sh" in-review 2>/dev/null || echo "")
+  if [ -n "$DESIGN_UNREPLIED" ] && [ "$DESIGN_UNREPLIED" != "none" ]; then
+    echo -e "BLOCKED: Design PR comments unreplied:\n$DESIGN_UNREPLIED\nReply to all comments before stopping." >&2
+    exit 2
+  fi
+
+  # Bugs closed this session without plan-posted label — warn (not hard block)
+  UNPLANNED=$(gh issue list --state closed --label bug --json number,title,labels \
+    --jq '[.[] | select(.labels | map(.name) | index("plan-posted") | not)] | length' 2>/dev/null || echo "0")
+  if [ "$UNPLANNED" -gt 0 ] 2>/dev/null; then
+    echo "WARNING: $UNPLANNED bugs closed without plan-posted label — consider posting investigation next time" >&2
+  fi
+fi
+
 # Planning session validation — only for autonomous planning sessions (watchdog sets both)
-SESSION_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "")
 if [ "$SESSION_TYPE" = "planning" ] && [ "$DRIFT_CONTROL" = "RUN" ]; then
   PLAN_ISSUES=""
 
@@ -101,9 +118,9 @@ if [ "$SESSION_TYPE" = "planning" ] && [ "$DRIFT_CONTROL" = "RUN" ]; then
   fi
 
   # Were approved design docs given implementation tasks?
-  APPROVED_DESIGNS=$(gh issue list --state open --label design-doc --label approved --json number,title --jq '.[] | "#\(.number) \(.title)"' 2>/dev/null || true)
-  if [ -n "$APPROVED_DESIGNS" ]; then
-    PLAN_ISSUES="${PLAN_ISSUES}Approved design docs need implementation tasks:\n${APPROVED_DESIGNS}\nCreate sprint-task Issues with design-impl-{N} label for each.\n\n"
+  APPROVED_NO_IMPL=$("${CLAUDE_PROJECT_DIR:-.}/scripts/design-service.sh" approved-not-started 2>/dev/null || echo "")
+  if [ -n "$APPROVED_NO_IMPL" ] && [ "$APPROVED_NO_IMPL" != "none" ]; then
+    PLAN_ISSUES="${PLAN_ISSUES}Approved design docs need impl tasks:\n${APPROVED_NO_IMPL}\n\n"
   fi
 
   # Planning checklist validation via planning-service.sh

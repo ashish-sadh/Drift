@@ -62,6 +62,14 @@ cmd_refresh() {
         --jq '[.[] | select(.labels | map(.name) | index("SENIOR") | not) | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
         > "$TMP_DIR/junior.json" 2>/dev/null || echo "[]" > "$TMP_DIR/junior.json"
 
+    gh issue list --state open --label bug --label P1 --json number,title,labels \
+        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
+        > "$TMP_DIR/p1_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p1_bugs.json"
+
+    gh issue list --state open --label bug --label P2 --json number,title,labels \
+        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
+        > "$TMP_DIR/p2_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p2_bugs.json"
+
     gh issue list --state open --label permanent-task --json number,title,labels,updatedAt \
         --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "permanent", "updatedAt": .updatedAt}]' \
         > "$TMP_DIR/perm.json" 2>/dev/null || echo "[]" > "$TMP_DIR/perm.json"
@@ -79,12 +87,14 @@ def load(f):
 
 p0_bugs = load(f"{tmp}/p0_bugs.json")
 p0_feats = load(f"{tmp}/p0_feats.json")
+p1_bugs  = load(f"{tmp}/p1_bugs.json")
+p2_bugs  = load(f"{tmp}/p2_bugs.json")
 senior   = load(f"{tmp}/senior.json")
 junior   = load(f"{tmp}/junior.json")
 perm     = load(f"{tmp}/perm.json")
 
 seen, tasks = set(), []
-for t in p0_bugs + p0_feats + senior + junior + perm:
+for t in p0_bugs + p0_feats + p1_bugs + p2_bugs + senior + junior + perm:
     if t["number"] not in seen:
         seen.add(t["number"])
         tasks.append(t)
@@ -141,32 +151,61 @@ available = [t for t in tasks
 
 # Priority 1: P0 bugs (always)
 for t in available:
+    # Skip needs-review — waiting for human
+    if has(t, "needs-review"):
+        continue
     if has(t, "bug") and has(t, "P0"):
         print(f"{t['number']} {t['title']}"); sys.exit(0)
 
 # Priority 2: P0 features (always)
 for t in available:
+    # Skip needs-review — waiting for human
+    if has(t, "needs-review"):
+        continue
     if has(t, "feature-request") and has(t, "P0"):
         print(f"{t['number']} {t['title']}"); sys.exit(0)
 
-# Priority 3: SENIOR sprint tasks (--senior or --any)
+# Priority 3: P1 bugs (--senior or --any)
 if filter_mode in ("--senior", "--any"):
     for t in available:
+        # Skip needs-review — waiting for human
+        if has(t, "needs-review"):
+            continue
+        if has(t, "bug") and has(t, "P1"):
+            print(f"{t['number']} {t['title']}"); sys.exit(0)
+
+# Priority 4: SENIOR sprint tasks (--senior or --any)
+if filter_mode in ("--senior", "--any"):
+    for t in available:
+        # Skip needs-review — waiting for human
+        if has(t, "needs-review"):
+            continue
         if has(t, "sprint-task") and has(t, "SENIOR"):
             print(f"{t['number']} {t['title']}"); sys.exit(0)
 
-# Priority 4: Regular sprint tasks (--junior or --any)
+# Priority 5: P2 bugs (all filters)
+for t in available:
+    # Skip needs-review — waiting for human
+    if has(t, "needs-review"):
+        continue
+    if has(t, "bug") and has(t, "P2"):
+        print(f"{t['number']} {t['title']}"); sys.exit(0)
+
+# Priority 6: Regular sprint tasks (--junior or --any)
 if filter_mode in ("--junior", "--any"):
     for t in available:
+        # Skip needs-review — waiting for human
+        if has(t, "needs-review"):
+            continue
         if has(t, "sprint-task") and not has(t, "SENIOR"):
             print(f"{t['number']} {t['title']}"); sys.exit(0)
 
-# Priority 5: Permanent tasks — only when no sprint tasks remain (junior/any)
+# Priority 7: Permanent tasks — only when no sprint tasks remain (junior/any)
 if filter_mode in ("--junior", "--any"):
-    remaining_sprint = [t for t in available if has(t, "sprint-task")]
+    remaining_sprint = [t for t in available if has(t, "sprint-task") and not has(t, "needs-review")]
     if not remaining_sprint:
         perm = sorted(
-            [t for t in available if has(t, "permanent-task")],
+            [t for t in available if has(t, "permanent-task") and not has(t, "needs-review")],
             key=lambda t: t.get("updatedAt", "")
         )
         if perm:

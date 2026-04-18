@@ -86,6 +86,25 @@ if [ -n "$UNREPLIED" ]; then
 fi
 
 SESSION_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "junior")
+
+if [[ "$SESSION_TYPE" == "senior" ]]; then
+  # Design service summary
+  DESIGN_SUMMARY=$("${CLAUDE_PROJECT_DIR:-.}/scripts/design-service.sh" summary 2>/dev/null || echo "")
+  if [ -n "$DESIGN_SUMMARY" ]; then
+    echo ""
+    echo "=== Design Docs ==="
+    echo "$DESIGN_SUMMARY"
+  fi
+
+  # Bugs needing investigation plan
+  BUGS_UNPLANNED=$("${CLAUDE_PROJECT_DIR:-.}/scripts/issue-service.sh" bugs-needing-plan 2>/dev/null || echo "")
+  if [ -n "$BUGS_UNPLANNED" ] && [ "$BUGS_UNPLANNED" != "none" ]; then
+    echo ""
+    echo "BUGS NEEDING PLAN (investigate + post-plan before fixing):"
+    echo "$BUGS_UNPLANNED"
+  fi
+fi
+
 if [[ "$SESSION_TYPE" == "planning" ]]; then
   PLAN_ISSUE=$(cat "$HOME/drift-state/planning-issue" 2>/dev/null || echo "")
   if [[ -n "$PLAN_ISSUE" ]]; then

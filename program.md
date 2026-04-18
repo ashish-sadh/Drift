@@ -29,6 +29,15 @@ echo "Remaining planning steps: $REMAINING"
 # Skip steps not in REMAINING. Always do remaining steps in order.
 ```
 
+**REPORT CHECK — before any planning work:**
+```bash
+# Daily exec briefing (if not done today)
+scripts/report-service.sh daily-due && scripts/report-service.sh start-exec
+# [write exec report, then:]
+# gh pr create --label report → merge → git checkout main && git pull
+# echo $(date +%s) > ~/drift-state/last-report-time
+```
+
 1. **Read persona files:** `Docs/personas/product-designer.md`, `Docs/personas/principal-engineer.md`
 2. **Read product focus:** `gh issue list --state open --label product-focus --json body --jq '.[0].body'`
    - If set: bias sprint tasks toward this focus. P0 bugs, feature requests, and design docs are ALWAYS valid regardless of focus. The focus shapes which new tasks to create and how to prioritize the backlog — it doesn't block existing commitments.
@@ -54,14 +63,15 @@ echo "Remaining planning steps: $REMAINING"
    - `git log --oneline -40` (more history since longer sprint)
    - Review closed issues since last planning: `gh issue list --state closed --label sprint-task --json number,title,closedAt --jq '.[] | select(.closedAt > "LAST_PLAN_DATE")'`
    - Check test count, coverage snapshot, eval results
-8. **Product review — skip if REVIEW_DONE=1 (already merged this cycle):**
+8. **Product review — skip if `scripts/report-service.sh review-due` exits 1:**
+   - `scripts/report-service.sh start-review` — creates correct branch automatically
    - Read both persona files FIRST: `Docs/personas/product-designer.md` and `Docs/personas/principal-engineer.md`
    - Web search ALL competitors (Boostcamp, MFP, Whoop, Strong, MacroFactor) for recent updates
    - Write report using `Docs/reports/REVIEW-TEMPLATE.md` — every section is REQUIRED
    - Filename MUST be `review-cycle-{CYCLE_NUMBER}.md` (e.g., `review-cycle-2855.md`)
    - The report MUST include: Designer Assessment, Engineer Assessment, and The Debate section where personas discuss and disagree
-   - Branch MUST be named `review/cycle-{CYCLE_NUMBER}` (slash, not hyphen — e.g., `review/cycle-2855`). Use: `git checkout -b review/cycle-{CYCLE_NUMBER}`
-   - Open review PR with `report` label, then merge immediately: `gh pr merge --squash --delete-branch && git checkout main && git pull`
+   - Open review PR with `report` label, then merge immediately
+   - `scripts/report-service.sh finish` — merges and records timestamp
    - `scripts/planning-service.sh checkpoint review_merged`
 9. **Create sprint-task Issues — skip if "Sprint tasks" not in REMAINING:**
    - For each task: `gh issue create --label sprint-task` (add `--label SENIOR` only for complex/architecture tasks)

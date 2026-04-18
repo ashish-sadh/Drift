@@ -479,6 +479,28 @@ while true; do
                 log "Autopilot running normally (PID $CLAUDE_PID)."
                 # Refresh compliance cache for the PreToolUse hook to read
                 refresh_compliance_cache
+
+                # Auto-proceed needs-review issues older than 4h (reads local queue file, no GitHub date parsing)
+                NEEDS_REVIEW_QUEUE="$HOME/drift-state/needs-review-queue"
+                if [ -f "$NEEDS_REVIEW_QUEUE" ]; then
+                    NOW_SEC=$(date +%s)
+                    FOUR_HOURS=14400
+                    REMAINING_LINES=""
+                    while IFS=" " read -r NR_NUM NR_TIME; do
+                        [ -z "$NR_NUM" ] && continue
+                        AGE=$(( NOW_SEC - NR_TIME ))
+                        if [ "$AGE" -gt "$FOUR_HOURS" ]; then
+                            gh issue edit "$NR_NUM" --remove-label needs-review 2>/dev/null || true
+                            gh issue comment "$NR_NUM" --body "Auto-proceeding after 4h — no human response received. Continuing with posted plan." 2>/dev/null || true
+                            log "needs-review auto-proceed: issue #$NR_NUM"
+                        else
+                            REMAINING_LINES="${REMAINING_LINES}${NR_NUM} ${NR_TIME}\n"
+                        fi
+                    done < "$NEEDS_REVIEW_QUEUE"
+                    # Rewrite queue with only unprocessed entries
+                    printf "%b" "$REMAINING_LINES" > "$NEEDS_REVIEW_QUEUE" 2>/dev/null || true
+                fi
+
                 # P0 interrupt: if a new P0 appears mid-junior-session, restart as senior
                 CURRENT_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "junior")
                 if [[ "$CURRENT_TYPE" == "junior" ]]; then

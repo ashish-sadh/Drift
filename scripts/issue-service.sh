@@ -1,0 +1,118 @@
+#!/bin/bash
+# Issue lifecycle service — plan-first workflow, bug investigation, needs-review gate
+# Commands: post-plan <N> <body>, investigate-bug <N>, need-review <N>, bugs-needing-plan, ready-from-review
+
+set -euo pipefail
+
+STATE_DIR="$HOME/drift-state"
+mkdir -p "$STATE_DIR"
+
+NEEDS_REVIEW_QUEUE="$STATE_DIR/needs-review-queue"
+
+cmd_post_plan() {
+    local N="${1:-}"
+    local BODY="${2:-}"
+    if [ -z "$N" ]; then
+        echo "Usage: issue-service.sh post-plan <N> <body>" >&2
+        exit 1
+    fi
+
+    gh issue comment "$N" --body "## Plan
+
+$BODY" 2>/dev/null || true
+    gh issue edit "$N" --add-label plan-posted 2>/dev/null || true
+    echo "Plan posted on #$N"
+}
+
+cmd_investigate_bug() {
+    local N="${1:-}"
+    if [ -z "$N" ]; then
+        echo "Usage: issue-service.sh investigate-bug <N>" >&2
+        exit 1
+    fi
+
+    # Read issue for context
+    gh issue view "$N" --json title,body,labels 2>/dev/null || true
+
+    # Post structured investigation comment
+    gh issue comment "$N" --body "## Investigation
+
+**Root cause:** [investigating — update this comment when identified]
+
+**Affected area:** [files/components involved]
+
+**Fix approach:** [what will change]
+
+**Tests to add:** [what tests will verify the fix]
+
+**Risk:** [low/medium/high — why]" 2>/dev/null || true
+
+    gh issue edit "$N" --add-label plan-posted 2>/dev/null || true
+    echo "Investigation posted on #$N — EDIT that comment with actual findings (don't post a new one)"
+}
+
+cmd_need_review() {
+    local N="${1:-}"
+    if [ -z "$N" ]; then
+        echo "Usage: issue-service.sh need-review <N>" >&2
+        exit 1
+    fi
+
+    # Ensure needs-review label exists
+    gh label list --json name --jq '.[].name' 2>/dev/null | grep -q "needs-review" || \
+        gh label create "needs-review" --color "#e4e669" --description "Awaiting human review before proceeding" 2>/dev/null || true
+
+    gh issue edit "$N" --add-label needs-review 2>/dev/null || true
+    gh issue comment "$N" --body "Awaiting your review. Auto-proceeding in 4h if no response.
+
+Plan is posted above — comment with feedback or concerns." 2>/dev/null || true
+
+    # Record in queue file for watchdog 4h auto-proceed (no GitHub API date parsing needed)
+    NOW=$(date +%s)
+    echo "$N $NOW" >> "$NEEDS_REVIEW_QUEUE" 2>/dev/null || true
+
+    echo "Issue #$N marked needs-review"
+}
+
+cmd_bugs_needing_plan() {
+    local RESULT
+    RESULT=$(gh issue list --state open --label bug --json number,title,labels \
+        --jq '[.[] | select(.labels | map(.name) | index("plan-posted") | not)] | .[] | "#\(.number) \(.title)"' \
+        2>/dev/null || true)
+    if [ -z "$RESULT" ]; then
+        echo "none"
+    else
+        echo "$RESULT"
+    fi
+}
+
+cmd_ready_from_review() {
+    # List all open needs-review issues (watchdog handles 4h timer via queue file)
+    local RESULT
+    RESULT=$(gh issue list --state open --label needs-review --json number,title \
+        --jq '.[] | "#\(.number) \(.title)"' \
+        2>/dev/null || true)
+    if [ -z "$RESULT" ]; then
+        echo "none"
+    else
+        echo "$RESULT"
+    fi
+}
+
+# ── Dispatch ──────────────────────────────────────────────────────────────────
+
+CMD="${1:-}"
+shift 2>/dev/null || true
+
+case "$CMD" in
+    post-plan)          cmd_post_plan "${1:-}" "${2:-}" ;;
+    investigate-bug)    cmd_investigate_bug "${1:-}" ;;
+    need-review)        cmd_need_review "${1:-}" ;;
+    bugs-needing-plan)  cmd_bugs_needing_plan ;;
+    ready-from-review)  cmd_ready_from_review ;;
+    *)
+        echo "Unknown command: $CMD" >&2
+        echo "Commands: post-plan <N> <body>, investigate-bug <N>, need-review <N>, bugs-needing-plan, ready-from-review" >&2
+        exit 1
+        ;;
+esac

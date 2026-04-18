@@ -1,37 +1,33 @@
 #!/bin/bash
 # Hook: PostToolUse on Bash(git commit *)
-# Once per day (24h): injects exec report generation instructions.
+# Fallback daily report trigger — planning is primary, this is fallback only.
 
 set -e
 
-# Only for autonomous sessions
 DRIFT_CONTROL=$(cat "$HOME/drift-control.txt" 2>/dev/null | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')
-if [ "$DRIFT_CONTROL" != "RUN" ]; then
-  exit 0
+if [ "$DRIFT_CONTROL" != "RUN" ]; then exit 0; fi
+
+# Only fire in planning sessions (primary) or if planning is stale >12h (fallback)
+SESSION_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "junior")
+LAST_REVIEW=$(cat "$HOME/drift-state/last-review-time" 2>/dev/null || echo "0")
+NOW=$(date +%s)
+PLANNING_STALE=$(( NOW - LAST_REVIEW > 43200 ))  # 12h
+
+if [[ "$SESSION_TYPE" != "planning" ]] && [[ "$PLANNING_STALE" -eq 0 ]]; then
+  exit 0  # Planning is active and recent — it will handle the report
 fi
 
-LAST_REPORT_FILE="$HOME/drift-state/last-report-time"
-MIN_INTERVAL=86400  # 24 hours in seconds
-
-NOW=$(date +%s)
-LAST_REPORT=$(cat "$LAST_REPORT_FILE" 2>/dev/null || echo "0")
-ELAPSED=$((NOW - LAST_REPORT))
-
-if [ "$ELAPSED" -lt "$MIN_INTERVAL" ]; then
-  REMAINING=$(( (MIN_INTERVAL - ELAPSED) / 3600 ))
-  echo "Exec report: ${REMAINING}h until next report."
-  exit 0
+# Check if report already done today
+if ! "${CLAUDE_PROJECT_DIR:-.}/scripts/report-service.sh" daily-due 2>/dev/null; then
+  exit 0  # Already done
 fi
 
 TODAY=$(date +%Y-%m-%d)
-
 cat <<ENDJSON
 {
   "hookSpecificOutput": {
     "hookEventName": "PostToolUse",
-    "additionalContext": "DAILY EXEC BRIEFING REQUIRED. Generate now.\n\nIMPORTANT: Write for leadership who have 30 seconds. User-visible language only. No commit hashes. No file names.\n\n1. Gather data: build number (project.yml), test count, coverage, food count, git log --since='24 hours ago', roadmap phase, risks\n\n2. Write Docs/reports/exec-${TODAY}.md using Docs/reports/EXEC-TEMPLATE.md — every section required. Filename MUST be exec-{DATE}.md.\n\n3. Open PR and merge immediately:\n   git checkout -b report/exec-${TODAY}\n   git add Docs/reports/exec-${TODAY}.md && git commit -m 'report: daily briefing ${TODAY}' && git push -u origin report/exec-${TODAY}\n   gh pr create --title 'Daily Briefing — ${TODAY}' --label report --body 'Executive briefing.'\n   gh pr merge --squash --delete-branch && git checkout main && git pull\n\n4. echo \$(date +%s) > ~/drift-state/last-report-time\n\nDo this NOW. Do NOT skip."
+    "additionalContext": "DAILY EXEC BRIEFING DUE.\n1. scripts/report-service.sh start-exec\n2. Write Docs/reports/exec-${TODAY}.md using EXEC-TEMPLATE.md\n3. git add + commit + push\n4. gh pr create --label report → gh pr merge --squash --delete-branch\n5. git checkout main && git pull\n6. echo \$(date +%s) > ~/drift-state/last-report-time"
   }
 }
 ENDJSON
-
-exit 0
