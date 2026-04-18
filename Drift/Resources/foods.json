@@ -36508,5 +36508,366 @@
       "soy sauce"
     ],
     "nova_group": 2
+  },
+  {
+    "name": "Roti (Whole Wheat)",
+    "category": "Indian Bread",
+    "serving_size": 35,
+    "serving_unit": "g",
+    "calories": 106,
+    "protein_g": 3.6,
+    "carbs_g": 21.8,
+    "fat_g": 1.0,
+    "fiber_g": 2.7,
+    "ingredients": [
+      "whole wheat flour",
+      "water",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Plain Paratha",
+    "category": "Indian Bread",
+    "serving_size": 75,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 5.4,
+    "carbs_g": 36.4,
+    "fat_g": 9.5,
+    "fiber_g": 2.1,
+    "ingredients": [
+      "whole wheat flour",
+      "ghee",
+      "water",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Naan",
+    "category": "Indian Bread",
+    "serving_size": 90,
+    "serving_unit": "g",
+    "calories": 262,
+    "protein_g": 8.7,
+    "carbs_g": 45.4,
+    "fat_g": 5.1,
+    "fiber_g": 1.8,
+    "ingredients": [
+      "all-purpose flour",
+      "yogurt",
+      "yeast",
+      "butter",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Puri",
+    "category": "Indian Bread",
+    "serving_size": 40,
+    "serving_unit": "g",
+    "calories": 151,
+    "protein_g": 2.7,
+    "carbs_g": 16.8,
+    "fat_g": 8.4,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "whole wheat flour",
+      "oil",
+      "water",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Bhatura",
+    "category": "Indian Bread",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 248,
+    "protein_g": 5.4,
+    "carbs_g": 34.5,
+    "fat_g": 9.5,
+    "fiber_g": 0.6,
+    "ingredients": [
+      "all-purpose flour",
+      "yogurt",
+      "oil",
+      "baking soda",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Scrambled Eggs",
+    "category": "Eggs",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 182,
+    "protein_g": 14.0,
+    "carbs_g": 2.0,
+    "fat_g": 13.5,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "eggs",
+      "butter",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Fried Egg",
+    "category": "Eggs",
+    "serving_size": 46,
+    "serving_unit": "g",
+    "calories": 90,
+    "protein_g": 6.3,
+    "carbs_g": 0.4,
+    "fat_g": 7.0,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "egg",
+      "oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Hard Boiled Egg",
+    "category": "Eggs",
+    "serving_size": 50,
+    "serving_unit": "g",
+    "calories": 78,
+    "protein_g": 6.3,
+    "carbs_g": 0.6,
+    "fat_g": 5.3,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "egg"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Aloo Gobi",
+    "category": "Indian Vegetables",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 150,
+    "protein_g": 4.2,
+    "carbs_g": 22.5,
+    "fat_g": 5.1,
+    "fiber_g": 4.5,
+    "ingredients": [
+      "potato",
+      "cauliflower",
+      "onion",
+      "tomato",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Baingan Bharta",
+    "category": "Indian Vegetables",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 134,
+    "protein_g": 3.0,
+    "carbs_g": 14.5,
+    "fat_g": 7.5,
+    "fiber_g": 5.5,
+    "ingredients": [
+      "eggplant",
+      "tomato",
+      "onion",
+      "garlic",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Lauki Ki Sabzi",
+    "category": "Indian Vegetables",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 82,
+    "protein_g": 2.0,
+    "carbs_g": 12.5,
+    "fat_g": 2.5,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "bottle gourd",
+      "onion",
+      "tomato",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Jeera Aloo",
+    "category": "Indian Vegetables",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 195,
+    "protein_g": 3.5,
+    "carbs_g": 31.0,
+    "fat_g": 6.0,
+    "fiber_g": 3.5,
+    "ingredients": [
+      "potato",
+      "cumin seeds",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Quinoa (cooked)",
+    "category": "Grains & Pasta",
+    "serving_size": 185,
+    "serving_unit": "g",
+    "calories": 222,
+    "protein_g": 8.1,
+    "carbs_g": 39.4,
+    "fat_g": 3.6,
+    "fiber_g": 5.2,
+    "ingredients": [
+      "quinoa",
+      "water"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Couscous (cooked)",
+    "category": "Grains & Pasta",
+    "serving_size": 157,
+    "serving_unit": "g",
+    "calories": 176,
+    "protein_g": 6.0,
+    "carbs_g": 36.5,
+    "fat_g": 0.3,
+    "fiber_g": 2.2,
+    "ingredients": [
+      "couscous",
+      "water"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Soba Noodles (cooked)",
+    "category": "Grains & Pasta",
+    "serving_size": 113,
+    "serving_unit": "g",
+    "calories": 113,
+    "protein_g": 5.8,
+    "carbs_g": 24.4,
+    "fat_g": 0.1,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "buckwheat flour",
+      "wheat flour",
+      "water"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Chicken Tikka",
+    "category": "Chicken",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 255,
+    "protein_g": 35.0,
+    "carbs_g": 4.5,
+    "fat_g": 11.0,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "chicken breast",
+      "yogurt",
+      "tikka masala",
+      "oil",
+      "lemon juice"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Butter Chicken",
+    "category": "Chicken",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 310,
+    "protein_g": 28.0,
+    "carbs_g": 10.5,
+    "fat_g": 18.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "chicken",
+      "tomato",
+      "cream",
+      "butter",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Tandoori Chicken",
+    "category": "Chicken",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 240,
+    "protein_g": 33.0,
+    "carbs_g": 5.0,
+    "fat_g": 10.0,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "chicken",
+      "yogurt",
+      "tandoori masala",
+      "lemon juice"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Cobb Salad",
+    "category": "Salads",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 378,
+    "protein_g": 25.0,
+    "carbs_g": 9.5,
+    "fat_g": 27.5,
+    "fiber_g": 3.5,
+    "ingredients": [
+      "romaine lettuce",
+      "chicken",
+      "bacon",
+      "avocado",
+      "egg",
+      "blue cheese",
+      "tomato"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Caprese Salad",
+    "category": "Salads",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 272,
+    "protein_g": 15.0,
+    "carbs_g": 5.5,
+    "fat_g": 21.5,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "fresh mozzarella",
+      "tomato",
+      "basil",
+      "olive oil",
+      "salt"
+    ],
+    "nova_group": 1
   }
 ]
