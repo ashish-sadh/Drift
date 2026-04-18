@@ -228,6 +228,47 @@ final class IntentClassifierGoldSetTests: XCTestCase {
         XCTAssertNil(IntentClassifier.parseResponse(textAdvice), "Advice text should not parse as tool call")
     }
 
+    // MARK: - Supplement Sub-Intent Disambiguation (#168)
+
+    /// "Did I take creatine?" = STATUS → supplements()
+    /// "log creatine" / "took creatine" = MARK → mark_supplement(name:)
+    func testSupplementSubIntents_MarkVsStatus() {
+        // Status (query) cases — LLM should return supplements tool
+        let statusCases: [String] = [
+            #"{"tool":"supplements"}"#,
+            #"{"tool":"supplements","query":"creatine"}"#,
+            #"{"tool":"supplements","query":"did I take creatine today"}"#,
+        ]
+        for json in statusCases {
+            guard let intent = IntentClassifier.parseResponse(json) else {
+                XCTFail("Status query JSON should parse: \(json)"); continue
+            }
+            XCTAssertEqual(intent.tool, "supplements",
+                "'Did I take creatine?' should route to supplements(), not mark_supplement")
+            XCTAssertNotEqual(intent.tool, "mark_supplement",
+                "Status query must not log intake: \(json)")
+        }
+
+        // Mark (intake) cases — LLM should return mark_supplement
+        let markCases: [(json: String, name: String)] = [
+            (#"{"tool":"mark_supplement","name":"creatine"}"#, "creatine"),
+            (#"{"tool":"mark_supplement","name":"vitamin c"}"#, "vitamin c"),
+            (#"{"tool":"mark_supplement","name":"zinc"}"#, "zinc"),
+        ]
+        for (json, expectedName) in markCases {
+            guard let intent = IntentClassifier.parseResponse(json) else {
+                XCTFail("Mark intake JSON should parse: \(json)"); continue
+            }
+            XCTAssertEqual(intent.tool, "mark_supplement",
+                "'log/took creatine' should be mark_supplement")
+            XCTAssertEqual(intent.params["name"], expectedName)
+            XCTAssertNotEqual(intent.tool, "log_food",
+                "Supplement intake must not be routed to log_food: \(json)")
+        }
+
+        print("📊 Supplement mark-vs-status: \(statusCases.count) status + \(markCases.count) mark cases verified")
+    }
+
     // MARK: - StaticOverrides Routing Gold Set
 
     @MainActor

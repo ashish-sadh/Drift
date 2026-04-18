@@ -385,6 +385,13 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             "what's my protein",
             "how many carbs left",
             "show my macros",
+            // #169: Exercise instruction queries must not be food
+            "how do I do a deadlift",
+            "how to do bench press",
+            "form tips for squats",
+            // #169: Protein/nutrition status queries must not log food
+            "am I on track for protein",
+            "how many calories should I eat",
         ]
         var falsePositives: [String] = []
         for query in nonFoodQueries {
@@ -662,6 +669,9 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             ("set goal to 160 lbs", .none),
             ("help", .none),
             ("undo", .none),
+            // #169: exercise instruction and protein-status queries
+            ("how do I do a deadlift", .none),
+            ("am I on track for protein", .none),
         ]
 
         var correct = 0, total = allQueries.count

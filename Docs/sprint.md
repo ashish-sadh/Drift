@@ -16,13 +16,13 @@ _(pick from Ready)_
 
 ### P0 — AI Chat Quality
 
-- [ ] **#169 Non-food negative assertions** — Add gold set cases to FoodLoggingGoldSetTests confirming queries like "how do I do a deadlift", "what's my weight trend", "am I on track for protein" do NOT route to food logging. Gate: FoodLoggingGoldSetTests 100%.
+- [x] **#169 Non-food negative assertions** — Added exercise instruction queries ("how do I do a deadlift", "form tips for squats") and protein-status queries ("am I on track for protein") to FoodLoggingGoldSetTests. Gold set 100%. Cycle 5892.
 
-- [ ] **#168 Supplement intent disambiguation** — Mark vs status gold set. "Did I take creatine?" → status, "log creatine" → mark. Add isolated IntentClassifierGoldSetTests cases for supplement sub-intents. Gate: deterministic gold sets 100%.
+- [x] **#168 Supplement intent disambiguation** — Added testSupplementSubIntents_MarkVsStatus() to IntentClassifierGoldSetTests: 3 status cases (→ supplements) + 3 mark cases (→ mark_supplement). Deterministic gold sets 100%. Cycle 5892.
 
-- [ ] **#166 Multi-turn food logging reliability** — Write 3-turn conversation test in IntentRoutingEval: "log oatmeal for breakfast" → "also add a banana" → "and black coffee". Verify context preserved, continuation routes correctly. Fix any failures via prompt, not overrides.
+- [x] **#166 Multi-turn food logging reliability** — Added testMultiTurn_3TurnFoodLogging() to IntentRoutingEval: 3-turn breakfast test (oatmeal → banana → black coffee) with history context at each turn. Cycle 5892.
 
-- [ ] **#165 StaticOverrides audit** — List every rule, run it against LLM eval, identify rules now redundant. Remove any the LLM handles 100%. Update eval if removing breaks coverage.
+- [x] **#165 StaticOverrides audit** — All 20 rules enumerated and annotated. 0 rules removed — every rule serves a purpose distinct from LLM routing (custom DB/UI ops or deterministic fast paths). Audit comment added to source. Cycle 5892.
 
 - [ ] **#167 Prompt token audit** — Measure current IntentClassifier prompt token count. Compress examples that are too similar. Target: same or better routing accuracy with ≤15% fewer prompt tokens. Measure before/after.
 

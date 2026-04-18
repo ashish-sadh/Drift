@@ -14,6 +14,24 @@ enum StaticResult: Sendable {
 
 /// Matches queries to pre-defined responses/actions. No LLM needed.
 /// All overrides fire for both models. Unmatched queries fall through to AIToolAgent.
+///
+/// # StaticOverrides Audit (#165 — cycle 5892)
+/// Every rule below is listed with its category. Run LLM eval before removing any.
+///
+/// KEEP — custom DB/UI operation (LLM routing alone can't replicate):
+///   emoji-only, barcode-scan, navigation, undo, copy-yesterday, delete-food,
+///   supplement-taken (checks active list), exercise-instructions (ExerciseDatabase),
+///   exercise-progress (ExerciseService trend data), body-comp-entry, bmi-entry,
+///   set-weight-goal, inline-macros (openManualFoodEntry UI), quick-add-calories (UI),
+///   add-supplement, activity-completion (two-step confirmation)
+///
+/// KEEP — fast path (deterministic, LLM adds latency with no quality gain):
+///   greetings, thanks, help
+///
+/// KEEP — protects parseFoodIntent from misrouting:
+///   cheat-meal ("ate out" → parseFoodIntent would produce food:"out" without this guard)
+///
+/// Audit result: 0 rules removed. All rules serve a purpose distinct from LLM routing.
 @MainActor
 enum StaticOverrides {
 

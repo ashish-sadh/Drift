@@ -308,6 +308,23 @@ final class IntentRoutingEval: XCTestCase {
         await assertRoutes("what about last week", to: "sleep_recovery", history: sleepHistory)
     }
 
+    // MARK: - Multi-Turn Food Logging Reliability (#166)
+
+    /// 3-turn breakfast continuation: log oatmeal → also add banana → and black coffee.
+    /// Each turn must route to log_food with prior context preserved.
+    func testMultiTurn_3TurnFoodLogging() async {
+        // Turn 1 (no history)
+        await assertRoutes("log oatmeal for breakfast", to: "log_food")
+
+        // Turn 2: continuation after first log
+        let history1 = "User: log oatmeal for breakfast\nAssistant: Logged oatmeal for breakfast (150 cal)"
+        await assertRoutes("also add a banana", to: "log_food", history: history1)
+
+        // Turn 3: further continuation — terse "and X" phrasing
+        let history2 = history1 + "\nUser: also add a banana\nAssistant: Logged banana for breakfast (89 cal)"
+        await assertRoutes("and black coffee", to: "log_food", history: history2)
+    }
+
     // MARK: - Sleep (extended edge cases: slang, implicit, messy)
 
     func testSleep_extended() async {
