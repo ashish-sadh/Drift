@@ -11,6 +11,16 @@ if [ "$DRIFT_CONTROL" != "RUN" ]; then
   exit 0
 fi
 
+# Check session type — human sessions never auto-publish
+SESSION_TYPE_FILE="$HOME/drift-state/cache-session-type"
+SESSION_TYPE=$(cat "$SESSION_TYPE_FILE" 2>/dev/null || echo "human")
+SESSION_MOD=$(stat -f %m "$SESSION_TYPE_FILE" 2>/dev/null || echo "0")
+SESSION_AGE=$(( $(date +%s) - SESSION_MOD ))
+# Treat as human if explicitly set to "human" or file is stale (>120s = watchdog didn't write it)
+if [[ "$SESSION_TYPE" == "human" ]] || [[ "$SESSION_AGE" -gt 120 ]]; then
+  exit 0
+fi
+
 LAST_PUBLISH_FILE="$HOME/drift-state/last-testflight-publish"
 MIN_INTERVAL=10800  # 3 hours in seconds
 
