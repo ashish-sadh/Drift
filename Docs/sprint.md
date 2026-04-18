@@ -1,6 +1,6 @@
 # Sprint Board
 
-Focus: **AI Chat Quality (60%) + Features/Bugs (40%).** Per-component gold sets are live. AIChatView refactor done. Auto-research optimizer added. This sprint: exhaust the remaining AI eval backlog (#163–#169), ship voice filler stripping, run StaticOverrides audit, run multi-turn reliability tests.
+Focus: **AI Chat Quality (60%) + Code Architecture (40%).** All eval backlog (#163–#169) shipped. This sprint: carry prompt token audit + multi-stage prompt experiment forward, expand LLM eval toward 175-case milestone, context window experiment, FoodTabView extraction.
 
 ## Regression Gate
 
@@ -16,23 +16,21 @@ _(pick from Ready)_
 
 ### P0 — AI Chat Quality
 
-- [x] **#169 Non-food negative assertions** — Added exercise instruction queries ("how do I do a deadlift", "form tips for squats") and protein-status queries ("am I on track for protein") to FoodLoggingGoldSetTests. Gold set 100%. Cycle 5892.
+- [ ] **#167 Prompt token audit** — Measure current IntentClassifier prompt token count. Compress examples that are too similar. Target: same or better routing accuracy with ≤15% fewer prompt tokens. Measure before/after with IntentRoutingEval.
 
-- [x] **#168 Supplement intent disambiguation** — Added testSupplementSubIntents_MarkVsStatus() to IntentClassifierGoldSetTests: 3 status cases (→ supplements) + 3 mark cases (→ mark_supplement). Deterministic gold sets 100%. Cycle 5892.
+- [ ] **#176 Context window expansion** — Test 4096-token context in llama.cpp (currently 2048). Profile Gemma 4 E2B memory on A17 Pro. If overhead ≤200MB and no latency regression, ship: recalculate max_prompt (currently 1776) and max_generation (currently 256) proportionally. Enables longer multi-turn history. Add multi-turn eval case that requires >2048 tokens of context.
 
-- [x] **#166 Multi-turn food logging reliability** — Added testMultiTurn_3TurnFoodLogging() to IntentRoutingEval: 3-turn breakfast test (oatmeal → banana → black coffee) with history context at each turn. Cycle 5892.
+- [ ] **#177 LLM eval milestone: 175 cases** — IntentRoutingEval is at ~145 cases. Add 20–30 new cases targeting under-covered domains: sleep edge cases, glucose queries, supplement advice vs status, implicit intent phrasings. Run auto-research after expanding. Eval case count must never decrease.
 
-- [x] **#165 StaticOverrides audit** — All 20 rules enumerated and annotated. 0 rules removed — every rule serves a purpose distinct from LLM routing (custom DB/UI ops or deterministic fast paths). Audit comment added to source. Cycle 5892.
-
-- [ ] **#167 Prompt token audit** — Measure current IntentClassifier prompt token count. Compress examples that are too similar. Target: same or better routing accuracy with ≤15% fewer prompt tokens. Measure before/after.
-
-- [ ] **#164 Voice filler word stripping** — Add filler word normalization to InputNormalizer (um, uh, like, you know, so). Write deterministic tests. Verify normalizer gold set stays 100%.
+- [ ] **#178 Progressive multi-item disclosure** — For multi-food inputs ("rice and dal"), stream each found item as it resolves instead of batching. AIToolAgent parallel execution already runs TaskGroup — surface individual completions via streaming handler. Better UX: user sees rice result before dal lookup finishes.
 
 ### P1 — SENIOR
 
 - [ ] **#163 Multi-stage prompt experiment** — Prototype domain router + extraction separation: Stage A routes to domain (food/weight/exercise/health/meta), Stage B extracts domain-specific params. Measure latency + accuracy vs current single-stage. Document findings. Only ship if ≥+2% routing improvement with no latency regression.
 
 ### P1 — Junior Tasks
+
+- [ ] **#179 FoodTabView ViewModel extraction** — FoodTabView is still a fat view with business logic. Follow the AIChatView pattern (#162): extract business logic to FoodTabViewModel. This eliminates DDD violations (direct DB calls in view layer). Permanent task.
 
 - [ ] **Food DB enrichment: +20 foods** — Target next cuisine gap. Check `Docs/backlog.md` for gaps. Verify macros via reliable source before adding.
 
@@ -128,7 +126,17 @@ Autonomous refactoring. Run `code-improvement.md`. Principles in `Docs/principle
 - [ ] **Deeper refactoring** — FoodTabView and ActiveWorkoutView still fat. Move business logic out of views into ViewModels/Services.
 - [ ] **DDD violations** — Direct DB calls in views, business logic in UI layer.
 
-## Done (this sprint — cycle 5374→5820)
+## Done (this sprint — cycle 5820→5904)
+
+- [x] **#169 Non-food negative assertions** — Added exercise instruction queries ("how do I do a deadlift", "form tips for squats") and protein-status queries ("am I on track for protein") to FoodLoggingGoldSetTests. Gold set 100%. Cycle 5892.
+- [x] **#168 Supplement intent disambiguation** — Added testSupplementSubIntents_MarkVsStatus() to IntentClassifierGoldSetTests: 3 status cases (→ supplements) + 3 mark cases (→ mark_supplement). Deterministic gold sets 100%. Cycle 5892.
+- [x] **#166 Multi-turn food logging reliability** — Added testMultiTurn_3TurnFoodLogging() to IntentRoutingEval: 3-turn breakfast test (oatmeal → banana → black coffee) with history context at each turn. Cycle 5892.
+- [x] **#165 StaticOverrides audit** — All 20 rules enumerated and annotated. 0 rules removed — every rule serves a purpose distinct from LLM routing. Cycle 5892.
+- [x] **#164 Voice filler word stripping** — Filler word normalization added to InputNormalizer (um, uh, like, you know, so). NormalizerGoldSetTests added. Deterministic gold set 100%. Commit a6ab5bc.
+- [x] **Food DB +20** — 2,167→2,187: Burger King, Subway, Domino's, Gathiya, Surti Locho, Sev Mamra, Fage 0%, Two Good Yogurt, L-Glutamine, Collagen Peptides, Chipotle Burrito Bowl. Commit a6ab5bc.
+- [x] **TestFlight build 134** — Commit c4d386a.
+
+## Done (previous sprint — cycle 5374→5820)
 
 - [x] **#161 Per-component isolated gold sets** — IntentClassifierGoldSetTests (22 cases), FoodSearchGoldSetTests (20+ cases), SmartUnitsGoldSetTests (20+ cases). All deterministic, <1s. Commit baa492a.
 - [x] **#162 AIChatView.sendMessage ViewModel extraction** — sendMessage decomposed into 20+ private handlers in AIChatViewModel. AIChatView.swift now pure SwiftUI. Commit 139338a.
@@ -142,7 +150,7 @@ Autonomous refactoring. Run `code-improvement.md`. Principles in `Docs/principle
 - [x] **Karpathy-style auto-research optimizer + HardEvalSet** — `AutoResearchTests/testAutoResearch` pipeline with HardEvalSet.swift. Commit 8dfd77a.
 - [x] **Food DB +20 foods** — 2,167→2,187: Burger King, Subway, Domino's, Gathiya, Surti Locho, Sev Mamra, Fage 0%, Two Good Yogurt, L-Glutamine, Collagen Peptides, Chipotle Burrito Bowl. Commit b9cd63f.
 
-## Done (previous sprint — Per-Component Gold Sets + LLM Eval)
+## Done (two sprints ago — Per-Component Gold Sets + LLM Eval)
 
 - [x] **#151 LLM-first lab report parsing** — Shipped (cycle 5228). Gemma 4 primary extractor, chunked inference, confidence scoring (≥0.85 LLM wins), regex validation layer, AI-parsed badge.
 - [x] **#156 Smart Units cross-interface consistency** — 4 bugs fixed, 5 regression tests added.
@@ -150,7 +158,7 @@ Autonomous refactoring. Run `code-improvement.md`. Principles in `Docs/principle
 - [x] **Food DB enrichment: +20 foods** — 2,087→2,107 (Maharashtrian/Goan/seafood batch).
 - [x] **#153 Test coverage** — All files pass thresholds.
 
-## Done (two sprints ago — AI Chat P0 Fixes + Smart Units Audit)
+## Done (three sprints ago — AI Chat P0 Fixes + Smart Units Audit)
 
 - [x] #147 Bug: "Daily summary" tries to log food named "daily summary".
 - [x] #148 Bug: "Weekly summary" query broken.
