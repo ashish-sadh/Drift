@@ -168,6 +168,31 @@ enum HardEvalSet {
                  expectedTool: "log_food", expectedParamHints: ["name": "peanut butter"],
                  responseRubric: .contains("logged"), category: .foodRouting,
                  description: "Colloquial 'sneaked in' = ate", isTrainSet: false),
+
+        // edit_meal — remove / update / replace (regression guards added with #207)
+        HardCase(input: "remove rice from lunch", history: nil,
+                 expectedTool: "edit_meal",
+                 expectedParamHints: ["meal_period": "lunch", "action": "remove", "target_food": "rice"],
+                 responseRubric: .any, category: .foodRouting,
+                 description: "edit_meal remove path", isTrainSet: false),
+
+        HardCase(input: "update oatmeal in breakfast to 200g", history: nil,
+                 expectedTool: "edit_meal",
+                 expectedParamHints: ["meal_period": "breakfast", "action": "update_quantity", "target_food": "oatmeal", "new_value": "200"],
+                 responseRubric: .any, category: .foodRouting,
+                 description: "edit_meal quantity path with gram suffix", isTrainSet: false),
+
+        HardCase(input: "replace rice with quinoa in lunch", history: nil,
+                 expectedTool: "edit_meal",
+                 expectedParamHints: ["meal_period": "lunch", "action": "replace", "target_food": "rice", "new_value": "quinoa"],
+                 responseRubric: .any, category: .foodRouting,
+                 description: "edit_meal replace path — bare 'replace X with Y'", isTrainSet: false),
+
+        HardCase(input: "swap chicken for tofu in dinner", history: nil,
+                 expectedTool: "edit_meal",
+                 expectedParamHints: ["meal_period": "dinner", "action": "replace", "target_food": "chicken", "new_value": "tofu"],
+                 responseRubric: .any, category: .foodRouting,
+                 description: "edit_meal replace — 'swap X for Y' synonym", isTrainSet: false),
     ]
 
     // MARK: - Regression (must NOT log_food) — 25 cases
