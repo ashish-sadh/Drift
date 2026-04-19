@@ -31,29 +31,23 @@ enum IntentClassifier {
     "lab results"→{"tool":"biomarkers"}
     "weight trend"→{"tool":"weight_info","query":"trend"}
     "had my fish oil today"→{"tool":"mark_supplement","name":"fish oil"}
-    "log 2 eggs and toast"→{"tool":"log_food","name":"eggs, toast","servings":"2"}
     "had biryani"→{"tool":"log_food","name":"biryani"}
     "I had 2 to 3 banans"→{"tool":"log_food","name":"banana","servings":"3"}
     "chipotle bowl 3000 cal 30p 45c 67f"→{"tool":"log_food","name":"chipotle bowl","calories":"3000","protein":"30","carbs":"45","fat":"67"}
     "calories left"→{"tool":"food_info","query":"calories left"}
     "calories in samosa"→{"tool":"food_info","query":"calories in samosa"}
-    "how many calories in dal"→{"tool":"food_info","query":"calories in dal"}
     "how am I doing"→{"tool":"food_info","query":"daily summary"}
     "what about protein?"→{"tool":"food_info","query":"protein"}
     "log 2 eggs"→{"tool":"log_food","name":"egg","servings":"2"}
     "had a protein shake"→{"tool":"log_food","name":"protein shake"}
     "I weigh 75 kg"→{"tool":"log_weight","value":"75","unit":"kg"}
     "am I on track for my goal"→{"tool":"weight_info","query":"goal progress"}
-    "how close am I to my goal"→{"tool":"weight_info","query":"goal progress"}
     "start push day"→{"tool":"start_workout","name":"push day"}
     "did yoga for like half an hour"→{"tool":"log_activity","name":"yoga","duration":"30"}
     "took vitamin d"→{"tool":"mark_supplement","name":"vitamin d"}
     "did I take my vitamins"→{"tool":"supplements"}
-    "supplement status"→{"tool":"supplements"}
-    "check my supplements"→{"tool":"supplements"}
     "which supplements am I missing"→{"tool":"supplements"}
     "what's my body fat"→{"tool":"body_comp"}
-    "lean mass progress"→{"tool":"body_comp"}
     "DEXA results"→{"tool":"body_comp"}
     "any glucose spikes"→{"tool":"glucose"}
     "how's my blood sugar"→{"tool":"glucose"}
@@ -64,7 +58,6 @@ enum IntentClassifier {
     "set my goal to one sixty"→{"tool":"set_goal","target":"160","unit":"lbs"}
     "delete last"→{"tool":"delete_food"}
     "remove rice from lunch"→{"tool":"edit_meal","meal_period":"lunch","action":"remove","target_food":"rice"}
-    "change chicken to 2 servings"→{"tool":"edit_meal","action":"update_quantity","target_food":"chicken","new_value":"2"}
     "update oatmeal in breakfast to 200g"→{"tool":"edit_meal","meal_period":"breakfast","action":"update_quantity","target_food":"oatmeal","new_value":"200g"}
     "show me my weight chart"→{"tool":"navigate_to","screen":"weight"}
     "go to food tab"→{"tool":"navigate_to","screen":"food"}
@@ -77,10 +70,8 @@ enum IntentClassifier {
     "is it okay to take fish oil on an empty stomach"→Fish oil is generally fine with or without food, though some prefer taking it with meals.
     "should I take creatine before or after workout"→Either works — post-workout is slightly favored but timing matters less than consistency.
     "log lunch"→What did you have for lunch?
-    "add my dinner"→What did you have for dinner?
     "hi"→Hi! How can I help?
     "i just love breakfast"→That's great! What did you have?
-    "i love eating healthy"→Nice! Want to log something?
     "I love eating rajma chawal"→Sounds tasty! Want to log it?
     If chat context shows "What did you have for lunch?" and user says "rice and dal"→{"tool":"log_food","name":"rice, dal"}
     If chat context shows sleep data and user says "what about last week"→{"tool":"sleep_recovery","period":"week"}

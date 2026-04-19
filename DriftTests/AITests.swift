@@ -2499,7 +2499,7 @@ import Testing
     #expect(prompt.contains("i just love breakfast"), "Prompt should include conversational rejection example")
 }
 
-@Test @MainActor func intentClassifierPromptHasAddDinnerExample() {
+@Test @MainActor func intentClassifierPromptHasMealFollowUpExample() {
     let prompt = IntentClassifier.systemPrompt
-    #expect(prompt.contains("add my dinner"), "Prompt should include 'add my dinner' → follow-up example")
+    #expect(prompt.contains("log lunch"), "Prompt should include meal-without-food → follow-up example")
 }
