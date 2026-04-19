@@ -239,14 +239,23 @@ cmd_claim() {
     local NUM="$1"
     if [ -z "$NUM" ]; then echo "Usage: sprint-service.sh claim <number>" >&2; exit 1; fi
 
-    (
-        flock -x -w 10 200 || { echo "CLAIM FAILED: could not acquire lock" >&2; exit 1; }
+    # mkdir-based atomic lock (cross-platform: macOS + Linux)
+    local LOCK_DIR="${LOCK_FILE}.dir"
+    local LOCK_WAIT=0
+    while ! mkdir "$LOCK_DIR" 2>/dev/null; do
+        sleep 0.2
+        LOCK_WAIT=$((LOCK_WAIT + 1))
+        if [[ "$LOCK_WAIT" -ge 50 ]]; then  # 10s timeout
+            echo "CLAIM FAILED: could not acquire lock" >&2; exit 1
+        fi
+    done
+    trap "rmdir '$LOCK_DIR' 2>/dev/null || true" EXIT
 
-        # Fetch issue data for task-not-in-state case (do before Python to avoid gh inside heredoc)
-        local ISSUE_JSON
-        ISSUE_JSON=$(gh issue view "$NUM" --json title,labels 2>/dev/null || echo '{"title":"Issue #'"$NUM"'","labels":[]}')
+    # Fetch issue data for task-not-in-state case (do before Python to avoid gh inside heredoc)
+    local ISSUE_JSON
+    ISSUE_JSON=$(gh issue view "$NUM" --json title,labels 2>/dev/null || echo '{"title":"Issue #'"$NUM"'","labels":[]}')
 
-        python3 - "$STATE_FILE" "$NUM" "$ISSUE_JSON" <<'PYEOF'
+    python3 - "$STATE_FILE" "$NUM" "$ISSUE_JSON" <<'PYEOF'
 import json, sys
 
 state_file  = sys.argv[1]
@@ -280,8 +289,10 @@ with open(state_file, "w") as f:
 print(f"Claimed #{num}")
 PYEOF
 
-        gh issue edit "$NUM" --add-label in-progress 2>/dev/null || true
-    ) 200>"$LOCK_FILE"
+    rmdir "$LOCK_DIR" 2>/dev/null || true
+    trap - EXIT
+
+    gh issue edit "$NUM" --add-label in-progress 2>/dev/null || true
 }
 
 cmd_done() {

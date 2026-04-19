@@ -136,11 +136,14 @@ echo "========================"
 DRIFT_CONTROL=$(cat "$HOME/drift-control.txt" 2>/dev/null | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')
 WORK_DIR="${CLAUDE_PROJECT_DIR:-.}"
 
-if [[ "$DRIFT_CONTROL" == "RUN" ]]; then
+if [[ "${DRIFT_AUTONOMOUS:-}" == "1" ]]; then
     # Reset session task counter (sprint-service enforces 5-task limit via this)
     "$WORK_DIR/scripts/sprint-service.sh" start-session 2>/dev/null || true
 
-    # Create + claim overhead tracking issue (session bookkeeping — not an impl task)
+    # Create overhead tracking issue (session bookkeeping — not an impl task)
+    # NOTE: We do NOT claim via sprint-service.sh — that would set in_progress and block
+    # all subsequent task claims for the session. We just track the issue number for
+    # session-compliance.sh to close, and add the in-progress label on GitHub only.
     SESSION_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "junior")
     OVERHEAD_N=$(gh issue create \
       --label overhead \
@@ -149,10 +152,10 @@ if [[ "$DRIFT_CONTROL" == "RUN" ]]; then
       --json number --jq '.number' 2>/dev/null || echo "")
     if [[ -n "$OVERHEAD_N" ]]; then
         echo "$OVERHEAD_N" > "$HOME/drift-state/current-overhead-issue"
-        "$WORK_DIR/scripts/sprint-service.sh" claim "$OVERHEAD_N" 2>/dev/null || true
+        gh issue edit "$OVERHEAD_N" --add-label in-progress 2>/dev/null || true
         echo ""
         echo "=== Session Init ==="
-        echo "Overhead issue #$OVERHEAD_N created and claimed (close at session end)."
+        echo "Overhead issue #$OVERHEAD_N created (close at session end via session-compliance.sh)."
         echo "Task budget: up to 5 implementation tasks (sprint-service tracks automatically)."
     fi
 

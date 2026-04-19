@@ -63,9 +63,9 @@ Priority order for deciding which session to start next:
 
 **Mechanically handled by hooks — sessions do not need to do this manually:**
 
-1. `session-start.sh` hook fires automatically at session start:
+1. `session-start.sh` hook fires automatically at session start (only when `DRIFT_AUTONOMOUS=1`, i.e., watchdog-launched sessions):
    - Calls `sprint-service.sh start-session` → resets `session_tasks` counter to 0
-   - Creates + claims an overhead tracking issue → stores number in `~/drift-state/current-overhead-issue`
+   - Creates an overhead tracking issue → stores number in `~/drift-state/current-overhead-issue`, adds `in-progress` label on GitHub directly (does NOT call `sprint-service.sh claim` — that would set `in_progress` and block all subsequent task claims)
    - Injects `~/drift-state/last-session-summary.md` content into session context
    - Injects sprint queue state, next task, product focus, design docs, report feedback
 2. Session reads `program.md` for the decision flow for its session type
@@ -91,7 +91,7 @@ Priority order for deciding which session to start next:
 
 ## Post-Session Compliance
 
-**`scripts/session-compliance.sh`** — called by watchdog BEFORE `cleanup_dirty_state` after every session exit (clean, crash, or stall):
+**`scripts/session-compliance.sh`** — called by watchdog after every session exit (clean, crash, or stall):
 
 1. Closes overhead tracking issue (`~/drift-state/current-overhead-issue`) with exit summary comment
 2. Writes `~/drift-state/last-session-summary.md`:
@@ -101,7 +101,7 @@ Priority order for deciding which session to start next:
 3. Appends to Obsidian `Sessions/YYYY-MM-DD.md`
 4. Logs crash/stall exits to `process-feedback.log` (planning drains this each cycle)
 
-Called BEFORE `cleanup_dirty_state` so the interrupted in-progress task is still readable in state. After compliance, `cleanup_dirty_state` clears all in-progress and resets git.
+**Ordering:** For clean exits and crashes, compliance runs BEFORE `cleanup_dirty_state` so the interrupted in-progress task is still readable. For stall exits, `cleanup_dirty_state` runs FIRST (to clear state), then compliance runs with `exit_reason=stall`. After compliance, `cleanup_dirty_state` → `start_claude` for next session.
 
 This ensures the next session always has a clear picture of where to pick up, even after a crash.
 
@@ -324,7 +324,7 @@ This prevents the deadlock where `sprint-service next` keeps returning a closed 
 
 **Nudge before kill**: Watchdog logs stall warning, waits 5 more minutes. If still no progress → kills and restarts.
 
-**After kill**: `cleanup_dirty_state` → unclaims task → `session-compliance.sh` → next session picks up task from the beginning.
+**After kill**: `cleanup_dirty_state` → `session-compliance.sh "stall"` → `start_claude`. Next session picks up task from the beginning. (cleanup before compliance so stale in-progress is cleared before summary is written.)
 
 ---
 
@@ -340,7 +340,7 @@ This prevents the deadlock where `sprint-service next` keeps returning a closed 
 
 **Session crash mid-task:**
 - Watchdog detects (process gone or no log output)
-- Runs `session-compliance.sh` (best-effort — captures what was done)
+- Runs `session-compliance.sh "crash"` BEFORE `cleanup_dirty_state` — captures interrupted task from state while it's still set
 - Runs `cleanup_dirty_state` — discards changes, unclaims task
 - Next session picks up the task from the beginning
 

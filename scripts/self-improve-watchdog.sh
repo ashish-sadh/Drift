@@ -509,8 +509,8 @@ while true; do
             elif is_log_stale; then
                 log "Autopilot stalled (log not updated in ${STALE_THRESHOLD}s). Restarting..."
                 kill_claude
-                run_compliance "stall"
                 cleanup_dirty_state
+                run_compliance "stall"
                 start_claude
             else
                 log "Autopilot running normally (PID $CLAUDE_PID)."
@@ -535,8 +535,8 @@ while true; do
                         log "Session still stalled after nudge window — killing and restarting."
                         rm -f "$NUDGE_FILE"
                         kill_claude
-                        run_compliance "stall"
                         cleanup_dirty_state
+                        run_compliance "stall"
                         start_claude
                     else
                         log "Nudge window active — waiting for session to respond (type=$CURRENT_TYPE)."

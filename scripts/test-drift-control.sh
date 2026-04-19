@@ -946,6 +946,51 @@ assert_contains "after start-session, next --junior works again" "220" "$RESULT"
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# CATEGORY 12: Overhead Issue Tracking (no sprint-service claim)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+run_overhead_tracking() {
+echo ""
+echo "══ Overhead Issue Tracking (no sprint-service claim) ════════════════════"
+
+# 12.1 Overhead NOT claimed via sprint-service → in_progress stays null
+# session-start.sh stores overhead number in current-overhead-issue file only;
+# it does NOT call sprint-service claim so in_progress is never set to overhead num
+write_state '{"version":1,"refreshed":0,"in_progress":null,"session_tasks":0,"tasks":[{"number":300,"title":"Sprint task","labels":["sprint-task"],"status":"pending"}]}'
+# Verify: with in_progress=null, a real task claim succeeds
+sprint_service claim 300 > /dev/null 2>&1 || true
+IP=$(python3 -c "import json; d=json.load(open('$STATE_FILE')); print(d.get('in_progress'))" 2>/dev/null || echo "None")
+assert_eq "overhead not claimed — real task claim succeeds (in_progress=300)" "300" "$IP"
+
+# 12.2 Next task after claiming real task: in_progress=300 → next returns "none" (already claimed)
+RESULT=$(sprint_service next --junior)
+assert_eq "next returns none when in_progress is set (no double-claim)" "none" "$RESULT"
+
+# 12.3 done on claimed real task → in_progress cleared, overhead in file unaffected
+sprint_service done 300 "abc123" > /dev/null 2>&1 || true
+IP=$(python3 -c "import json; d=json.load(open('$STATE_FILE')); print(d.get('in_progress'))" 2>/dev/null || echo "None")
+assert_eq "done clears in_progress (overhead issue unaffected)" "None" "$IP"
+
+# 12.4 start-session does not touch current-overhead-issue file (file managed by session-start.sh/compliance)
+# Simulate: write overhead file, call start-session, verify file still intact
+echo "999" > "$HOME/drift-state/current-overhead-issue"
+sprint_service start-session > /dev/null
+OVERHEAD_FILE=$(cat "$HOME/drift-state/current-overhead-issue" 2>/dev/null || echo "")
+assert_eq "start-session does not clear current-overhead-issue file" "999" "$OVERHEAD_FILE"
+rm -f "$HOME/drift-state/current-overhead-issue"
+
+# 12.5 clear (called by cleanup_dirty_state) does not affect stored overhead file
+echo "888" > "$HOME/drift-state/current-overhead-issue"
+write_state '{"version":1,"refreshed":0,"in_progress":300,"session_tasks":2,"tasks":[{"number":300,"title":"Sprint task","labels":["sprint-task"],"status":"in_progress"}]}'
+sprint_service clear > /dev/null 2>&1 || true
+IP=$(python3 -c "import json; d=json.load(open('$STATE_FILE')); print(d.get('in_progress'))" 2>/dev/null || echo "None")
+OVERHEAD_FILE=$(cat "$HOME/drift-state/current-overhead-issue" 2>/dev/null || echo "")
+assert_eq "clear resets in_progress to null" "None" "$IP"
+assert_eq "clear does not touch current-overhead-issue file" "888" "$OVERHEAD_FILE"
+rm -f "$HOME/drift-state/current-overhead-issue"
+}
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # Run selected categories
 # ═══════════════════════════════════════════════════════════════════════════════
 
@@ -960,7 +1005,8 @@ case "$FILTER" in
     edge)           run_edge_cases ;;
     cycle)          run_cycle_simulation ;;
     advanced)       run_advanced ;;
-    session_budget) run_session_budget ;;
+    session_budget)   run_session_budget ;;
+    overhead)         run_overhead_tracking ;;
     all|*)
         run_happy
         run_priority
@@ -973,6 +1019,7 @@ case "$FILTER" in
         run_cycle_simulation
         run_advanced
         run_session_budget
+        run_overhead_tracking
         ;;
 esac
 

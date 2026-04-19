@@ -85,6 +85,9 @@ You are the senior engineer and PE. session-start.sh has injected your context, 
 4. **Sprint task loop:**
    `TASK=$(scripts/sprint-service.sh next --senior)` — returns "none" when 5 tasks done or queue empty. If "none", exit.
    When you get a task: `scripts/sprint-service.sh claim $N` → read full issue + all comments + screenshots → post plan comment → implement → build → test → commit → `scripts/sprint-service.sh done $N $(git rev-parse HEAD)`.
+   - **Stale task** (issue already closed on GitHub): `scripts/sprint-service.sh session-done $N` → loop.
+   - **Breaking change** (would touch 5+ public APIs or protocol files): unclaim + `gh issue edit $N --add-label blocked` + comment describing needed design → loop.
+   - **Bug close:** write `echo "Resolution: ..." > /tmp/done-note-$N` before calling `done` — hook enforces non-empty resolution.
 
 5. Can create up to 3 new Issues per session when discovering work. Add `SENIOR` label if complex.
 
@@ -103,6 +106,7 @@ You are the junior engineer. session-start.sh has injected your context, created
    When you get a task: `scripts/sprint-service.sh claim $N` → read full issue + all comments + screenshots → post plan comment.
    - **Sprint task:** implement → build → test → commit → `scripts/sprint-service.sh done $N $(git rev-parse HEAD)`
    - **Permanent task:** implement → commit → comment progress → `scripts/sprint-service.sh session-done $N` (do NOT close the GitHub issue). Remove `requested` label if set.
+   - **Stale task** (issue already closed on GitHub): `scripts/sprint-service.sh session-done $N` → loop.
 
 3. **Too complex?** Unclaim + `gh issue edit $N --add-label SENIOR` → back to step 2.
 
@@ -132,7 +136,7 @@ Human says "run autopilot". No watchdog, no model switching.
 - **P0 bugs are Priority 1 in the sprint queue.** No session is killed for P0 — current task finishes first.
 - **Read full issues before implementing** — body + all comments + screenshots.
 - **Post a plan comment before every implementation** (not needed for P0 bugs in emergency).
-- **GitHub API:** Reads = 1pt, writes = 5pts. Budget 900pts/min. Batch edits. Wait 60s on 403/429.
+- **GitHub API:** Reads = 1pt, writes = 5pts. Budget 900pts/min. Batch edits. On 403/429: comment on current task, exit — watchdog restarts with backoff.
 - **Output to `/tmp/`.** Run `xcodegen generate` if adding files. New ideas → `Docs/backlog.md`.
 
 ---
