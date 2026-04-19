@@ -47,7 +47,6 @@ enum IntentClassifier {
     "did yoga for like half an hour"→{"tool":"log_activity","name":"yoga","duration":"30"}
     "took vitamin d"→{"tool":"mark_supplement","name":"vitamin d"}
     "did I take my vitamins"→{"tool":"supplements"}
-    "which supplements am I missing"→{"tool":"supplements"}
     "what's my body fat"→{"tool":"body_comp"}
     "DEXA results"→{"tool":"body_comp"}
     "any glucose spikes"→{"tool":"glucose"}
@@ -61,7 +60,6 @@ enum IntentClassifier {
     "remove rice from lunch"→{"tool":"edit_meal","meal_period":"lunch","action":"remove","target_food":"rice"}
     "update oatmeal in breakfast to 200g"→{"tool":"edit_meal","meal_period":"breakfast","action":"update_quantity","target_food":"oatmeal","new_value":"200g"}
     "replace rice with quinoa in lunch"→{"tool":"edit_meal","meal_period":"lunch","action":"replace","target_food":"rice","new_value":"quinoa"}
-    "swap chicken for tofu in dinner"→{"tool":"edit_meal","meal_period":"dinner","action":"replace","target_food":"chicken","new_value":"tofu"}
     "show me my weight chart"→{"tool":"navigate_to","screen":"weight"}
     "go to food tab"→{"tool":"navigate_to","screen":"food"}
     "open exercise"→{"tool":"navigate_to","screen":"exercise"}

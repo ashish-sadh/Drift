@@ -382,4 +382,15 @@ final class IntentClassifierGoldSetTests: XCTestCase {
             XCTAssertFalse(out.isEmpty)
         }
     }
+
+    // MARK: - Token Ceiling
+
+    /// Locks prompt size after audit v2 (removed 2 redundant examples, -206 chars).
+    /// Fails if someone adds new examples without removing equivalent dead weight.
+    @MainActor
+    func testSystemPrompt_TokenCeiling() {
+        let charCount = IntentClassifier.systemPrompt.count
+        XCTAssertLessThanOrEqual(charCount, 5600,
+            "systemPrompt has \(charCount) chars — over the 5600-char ceiling. Remove redundant examples before adding new ones.")
+    }
 }
