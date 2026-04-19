@@ -71,6 +71,7 @@
       },
       {
         "matcher": "Bash",
+        "if": "Bash(gh issue close *)",
         "hooks": [
           {
             "type": "command",

@@ -266,17 +266,12 @@ start_claude() {
         SESSION_PROMPT="execute senior tasks and P0 bugs"
         log "P0/SENIOR/bug work available — $MODEL"
 
-    # 3. Sprint tasks available → junior
-    elif [[ "$("$WORK_DIR/scripts/sprint-service.sh" count --sprint 2>/dev/null || echo 0)" -gt 0 ]]; then
+    # 3. Default: junior (sprint tasks → permanent tasks as fallback, 5-task budget enforced)
+    else
         MODEL=$(get_model junior sonnet)
         SESSION_TYPE="junior"
         SESSION_PROMPT="execute junior tasks"
-        log "Sprint tasks available — junior ($MODEL)"
-
-    # 4. Nothing but permanent tasks — skip session, wait for planning to add sprint work
-    else
-        log "No sprint/P0/SENIOR work — only permanent tasks remain. Waiting for planning to create sprint tasks."
-        return 1
+        log "No P0/SENIOR work — junior ($MODEL)"
     fi
     fi  # end if not resuming planning
 
