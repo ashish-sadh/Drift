@@ -91,6 +91,8 @@ final class IntentRoutingEval: XCTestCase {
     "show dashboard"→{"tool":"navigate_to","screen":"dashboard"}
     "go to glucose"→{"tool":"navigate_to","screen":"glucose"}
     "open biomarkers"→{"tool":"navigate_to","screen":"biomarkers"}
+    "is it okay to take fish oil on an empty stomach"→Fish oil is generally fine with or without food, though some prefer taking it with meals.
+    "should I take creatine before or after workout"→Either works — post-workout is slightly favored but timing matters less than consistency.
     "log lunch"→What did you have for lunch?
     "add my dinner"→What did you have for dinner?
     "hi"→Hi! How can I help?

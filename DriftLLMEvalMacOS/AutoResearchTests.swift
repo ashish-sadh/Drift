@@ -103,9 +103,13 @@ final class AutoResearchTests: XCTestCase {
     // MARK: - Full Auto-Research Loop (gated)
 
     func testAutoResearch() async throws {
-        guard ProcessInfo.processInfo.environment["DRIFT_AUTORESEARCH"] == "1" else {
-            throw XCTSkip("Set DRIFT_AUTORESEARCH=1 to run the full optimization loop")
+        let envEnabled = ProcessInfo.processInfo.environment["DRIFT_AUTORESEARCH"] == "1"
+        let flagFile = URL.homeDirectory.appending(path: "drift-state/autoresearch-run")
+        let fileEnabled = FileManager.default.fileExists(atPath: flagFile.path)
+        guard envEnabled || fileEnabled else {
+            throw XCTSkip("Set DRIFT_AUTORESEARCH=1 or touch ~/drift-state/autoresearch-run to run the full optimization loop")
         }
+        try? FileManager.default.removeItem(at: flagFile)
         guard let gemma = Self.gemma else {
             XCTFail("Gemma 4 not loaded — run: bash scripts/download-models.sh")
             return

@@ -22,7 +22,7 @@ enum IntentClassifier {
 
     // MARK: - System Prompt
 
-    static let systemPrompt = """
+    static var systemPrompt: String = """
     Health app. Reply JSON tool call or short text. Fix typos, word numbers, slang — understand messy input.
     Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) supplements() set_goal(target,unit?) delete_food(query?) edit_meal(meal_period?,action,target_food,new_value?) body_comp() glucose() biomarkers() navigate_to(screen)
     RULES: NEVER generate health data from memory — ALWAYS call a tool. "calories in X" → food_info (NOT log_food). Use log_food only when user ate/had/logged. "log lunch"/"log breakfast"/"log dinner" alone (no food named) → ask what they had, do NOT call log_food. "daily summary"/"weekly summary" → food_info. "weight trend"/"weight history" → weight_info. "body fat/lean mass/DEXA/body composition" → body_comp. "blood sugar/blood glucose" → glucose. "fat intake/sugar intake/carb intake" → food_info. "lab results/blood work/biomarkers/cholesterol" → biomarkers. "go to [screen]"/"open [screen]" → navigate_to. supplements() queries supplement tracking — ALWAYS call supplements() for any supplement status/history question, NEVER respond with text. mark_supplement(name) logs intake when user says they TOOK/HAD something. HRV/heart rate variability → sleep_recovery.
@@ -74,6 +74,8 @@ enum IntentClassifier {
     "show dashboard"→{"tool":"navigate_to","screen":"dashboard"}
     "go to glucose"→{"tool":"navigate_to","screen":"glucose"}
     "open biomarkers"→{"tool":"navigate_to","screen":"biomarkers"}
+    "is it okay to take fish oil on an empty stomach"→Fish oil is generally fine with or without food, though some prefer taking it with meals.
+    "should I take creatine before or after workout"→Either works — post-workout is slightly favored but timing matters less than consistency.
     "log lunch"→What did you have for lunch?
     "add my dinner"→What did you have for dinner?
     "hi"→Hi! How can I help?

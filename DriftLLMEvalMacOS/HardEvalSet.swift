@@ -443,6 +443,21 @@ enum HardEvalSet {
                  responseRubric: .contains("marked"), category: .supplement,
                  description: "'Stack' = multiple supplements", isTrainSet: true),
 
+        HardCase(input: "is it okay to take fish oil on an empty stomach", history: nil,
+                 expectedTool: "chat", expectedParamHints: [:],
+                 responseRubric: .containsNot(must: [], not: ["marked", "logged"]),
+                 category: .supplement, description: "Advice question about supplement timing — not an intake log", isTrainSet: true),
+
+        HardCase(input: "should I take creatine before or after workout", history: nil,
+                 expectedTool: "chat", expectedParamHints: [:],
+                 responseRubric: .containsNot(must: [], not: ["marked", "logged"]),
+                 category: .supplement, description: "Supplement advice question, not intake", isTrainSet: true),
+
+        HardCase(input: "can I mix vitamin C with my protein shake", history: nil,
+                 expectedTool: "chat", expectedParamHints: [:],
+                 responseRubric: .containsNot(must: [], not: ["marked", "logged"]),
+                 category: .supplement, description: "Supplement combination advice — not a log", isTrainSet: true),
+
         // Held-out
         HardCase(input: "Zinc and magnesium done for tonight", history: nil,
                  expectedTool: "mark_supplement", expectedParamHints: ["name": "zinc"],
@@ -458,6 +473,16 @@ enum HardEvalSet {
                  expectedTool: "chat", expectedParamHints: [:],
                  responseRubric: .containsNot(must: [], not: ["marked", "logged creatine"]),
                  category: .supplement, description: "Skipped = did NOT take", isTrainSet: false),
+
+        HardCase(input: "does vitamin D help with sleep", history: nil,
+                 expectedTool: "chat", expectedParamHints: [:],
+                 responseRubric: .containsNot(must: [], not: ["marked", "logged"]),
+                 category: .supplement, description: "Health benefit question — not an intake log", isTrainSet: false),
+
+        HardCase(input: "what's the best time to take magnesium", history: nil,
+                 expectedTool: "chat", expectedParamHints: [:],
+                 responseRubric: .containsNot(must: [], not: ["marked", "logged"]),
+                 category: .supplement, description: "Supplement timing advice — not intake", isTrainSet: false),
     ]
 
     // MARK: - Navigation — 8 cases
