@@ -21,6 +21,7 @@ struct FoodSearchView: View {
     @State private var editingRecipe: SavedFood?
     @State private var rebuildingRecipe: SavedFood?
     @State private var isFoodFavorite = false
+    @State private var comboToLog: Food? = nil
     @State private var onlineResults: [Food] = []
     @State private var isSearchingOnline = false
     @State private var onlineSearchTask: Task<Void, Never>?
@@ -96,6 +97,12 @@ struct FoodSearchView: View {
                 ManualFoodEntrySheet(viewModel: viewModel) { loggedCount += 1 }
             }
             .sheet(isPresented: $showingRecipeBuilder) { QuickAddView(viewModel: viewModel) }
+            .sheet(item: $comboToLog) { combo in
+                ComboLogSheet(combo: combo, viewModel: viewModel) {
+                    viewModel.loadSuggestions()
+                    dismiss()
+                }
+            }
             .fullScreenCover(isPresented: $showingScanner) { BarcodeLookupView(viewModel: viewModel) }
             .onChange(of: showingRecipeBuilder) { _, showing in if !showing { viewModel.loadSuggestions() } }
             .onChange(of: showingScanner) { _, showing in if !showing { viewModel.loadSuggestions() } }
@@ -157,6 +164,30 @@ struct FoodSearchView: View {
                     }.buttonStyle(.bordered).tint(Theme.accent)
                 }
                 .padding(.horizontal, 16)
+
+                // Combos & recipes
+                if !viewModel.combos.isEmpty {
+                    suggestionSection("COMBOS") {
+                        ForEach(viewModel.combos) { combo in
+                            let totalCal = combo.recipeItems?.reduce(0) { $0 + $1.calories } ?? combo.calories
+                            let itemCount = combo.recipeItems?.count ?? 0
+                            Button { comboToLog = combo } label: {
+                                HStack {
+                                    Image(systemName: "fork.knife").font(.caption).foregroundStyle(Theme.accent)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text(combo.name).font(.subheadline.weight(.medium))
+                                        Text(itemCount > 0 ? "\(itemCount) items · \(Int(totalCal)) cal" : "\(Int(totalCal)) cal")
+                                            .font(.caption).foregroundStyle(.secondary)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary)
+                                }
+                                .padding(.vertical, 4)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
 
                 // User favorites (starred items)
                 if !viewModel.favoriteFoods.isEmpty {
