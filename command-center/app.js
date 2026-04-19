@@ -238,6 +238,7 @@ async function getSprintPlan() {
       classification: i.labels.some(l => l.name === 'SENIOR') || i.labels.some(l => l.name === 'P0') ? 'SENIOR (Opus)' : 'JUNIOR (Sonnet)',
       priority: i.labels.find(l => ['P0','P1','P2'].includes(l.name))?.name || '',
       isPermanent: i.labels.some(l => l.name === 'permanent-task'),
+      isBug: i.labels.some(l => l.name === 'bug'),
       isSenior: i.labels.some(l => l.name === 'SENIOR'),
       isRequested: i.labels.some(l => l.name === 'requested'),
       hasPlan: i.labels.some(l => l.name === 'plan-posted'),
@@ -246,9 +247,11 @@ async function getSprintPlan() {
       comments: i.comments
     });
 
-    // Exclude P0 bugs that already have sprint-task label (they show in Sprint Tasks)
+    // Exclude bugs that already have sprint-task label (they show in Sprint Tasks)
     const sprintNumbers = new Set(sprintOpen.map(i => i.number));
     const dedupedP0 = p0Bugs.filter(i => !sprintNumbers.has(i.number));
+    const dedupedP1 = p1Bugs.filter(i => !sprintNumbers.has(i.number));
+    const dedupedP2 = p2Bugs.filter(i => !sprintNumbers.has(i.number));
 
     // Merge closed sprint-tasks and closed P0 bugs into one completed list, deduped
     const closedNumbers = new Set(sprintClosed.map(i => i.number));
@@ -264,8 +267,8 @@ async function getSprintPlan() {
 
     return {
       p0Bugs: dedupedP0.map(mapIssue),
-      p1Bugs: p1Bugs.map(mapIssue),
-      p2Bugs: p2Bugs.map(mapIssue),
+      p1Bugs: dedupedP1.map(mapIssue),
+      p2Bugs: dedupedP2.map(mapIssue),
       awaitingApproval: awaitingApproval.map(mapIssue),
       sprintTasks: sprintOpen.map(mapIssue),
       completedTasks: allCompleted.map(mapIssue),
