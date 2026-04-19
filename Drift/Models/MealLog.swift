@@ -52,4 +52,36 @@ enum MealType: String, CaseIterable, Codable, Sendable {
         case .snack: "cup.and.saucer"
         }
     }
+
+    /// Resolve meal type from recent logs + current time.
+    /// If the most recent entry is within `inheritWindow` of `now` AND its meal type is
+    /// breakfast/lunch/dinner, inherit it — lets a second bowl at 10am after a 7am breakfast
+    /// stay `breakfast`. Otherwise fall back to hour ranges.
+    static func resolve(now: Date = Date(), recentEntries: [FoodEntry],
+                        inheritWindow: TimeInterval = 3 * 3600) -> MealType {
+        let iso = DateFormatters.iso8601
+        let sqlite = DateFormatters.sqliteDatetime
+        let sorted = recentEntries.compactMap { entry -> (FoodEntry, Date)? in
+            guard let d = iso.date(from: entry.loggedAt) ?? sqlite.date(from: entry.loggedAt) else { return nil }
+            return (entry, d)
+        }.sorted { $0.1 > $1.1 }
+
+        if let (prev, prevDate) = sorted.first {
+            let delta = now.timeIntervalSince(prevDate)
+            if delta >= 0, delta < inheritWindow,
+               let rawType = prev.mealType,
+               let meal = MealType(rawValue: rawType),
+               meal != .snack {
+                return meal
+            }
+        }
+
+        let hour = Calendar.current.component(.hour, from: now)
+        switch hour {
+        case 5..<11: return .breakfast
+        case 11..<15: return .lunch
+        case 15..<21: return .dinner
+        default: return .snack
+        }
+    }
 }

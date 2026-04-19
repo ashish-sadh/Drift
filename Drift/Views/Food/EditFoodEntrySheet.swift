@@ -16,6 +16,7 @@ struct EditFoodEntrySheet: View {
     @State private var editF: String
     @State private var editFb: String
     @State private var editName: String
+    @State private var editMealType: MealType
     @State private var overrideMacros = false
 
     init(entry: FoodEntry, viewModel: FoodLogViewModel, onCopiedToToday: @escaping (String) -> Void, onDone: @escaping () -> Void) {
@@ -46,6 +47,7 @@ struct EditFoodEntrySheet: View {
         _editF = State(initialValue: "\(Int(entry.fatG))")
         _editFb = State(initialValue: "\(Int(entry.fiberG))")
         _editName = State(initialValue: entry.foodName)
+        _editMealType = State(initialValue: MealType(rawValue: entry.mealType ?? "") ?? .snack)
     }
 
     private var hasServingSize: Bool { entry.servingSizeG > 0 }
@@ -103,6 +105,26 @@ struct EditFoodEntrySheet: View {
                         Image(systemName: "clock").font(.caption).foregroundStyle(.tertiary)
                         DatePicker("", selection: $editEntryTime, displayedComponents: .hourAndMinute)
                             .labelsHidden()
+                    }
+
+                    // Meal-type picker
+                    HStack(spacing: 6) {
+                        ForEach(MealType.allCases, id: \.self) { meal in
+                            Button {
+                                editMealType = meal
+                            } label: {
+                                HStack(spacing: 4) {
+                                    Image(systemName: meal.icon).font(.caption2)
+                                    Text(meal.displayName).font(.caption.weight(.medium))
+                                }
+                                .foregroundStyle(editMealType == meal ? .white : .secondary)
+                                .padding(.horizontal, 10).padding(.vertical, 6)
+                                .background(editMealType == meal ? Theme.accent.opacity(0.7) : Theme.cardBackgroundElevated,
+                                            in: Capsule())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Set meal to \(meal.displayName)")
+                        }
                     }
 
                     // Serving input for DB foods
@@ -242,6 +264,9 @@ struct EditFoodEntrySheet: View {
                             let newLoggedAt = DateFormatters.iso8601.string(from: editEntryTime)
                             if newLoggedAt != entry.loggedAt {
                                 viewModel.updateEntryLoggedAt(id: id, loggedAt: newLoggedAt)
+                            }
+                            if editMealType.rawValue != entry.mealType {
+                                viewModel.updateEntryMealType(id: id, mealType: editMealType)
                             }
                             onDone()
                         }

@@ -21,10 +21,11 @@ struct FoodTabView: View {
     @State private var showingCopyAllAlert = false
 
     enum FoodSortMode: String, CaseIterable {
-        case time, protein, carbs, fat, fiber, plantPoints
+        case time, meal, protein, carbs, fat, fiber, plantPoints
         var label: String {
             switch self {
             case .time: "🕐"
+            case .meal: "🍽"
             case .protein: "P"
             case .carbs: "C"
             case .fat: "F"
@@ -37,6 +38,7 @@ struct FoodTabView: View {
     private var sortedEntries: [FoodEntry] {
         switch foodSortMode {
         case .time: viewModel.todayEntries
+        case .meal: viewModel.todayEntries  // rendering splits into sections, not a flat sort
         case .protein: viewModel.todayEntries.sorted { $0.totalProtein > $1.totalProtein }
         case .carbs: viewModel.todayEntries.sorted { $0.totalCarbs > $1.totalCarbs }
         case .fat: viewModel.todayEntries.sorted { $0.totalFat > $1.totalFat }
@@ -46,6 +48,18 @@ struct FoodTabView: View {
             let b = PlantPointsService.classify($1.foodName) != .notPlant
             return a && !b
         }
+        }
+    }
+
+    /// Entries grouped by meal type, ordered breakfast → lunch → dinner → snack.
+    /// Only used when `foodSortMode == .meal`.
+    private var mealGroups: [(mealType: MealType, entries: [FoodEntry])] {
+        let buckets: [MealType: [FoodEntry]] = Dictionary(grouping: viewModel.todayEntries) { entry in
+            MealType(rawValue: entry.mealType ?? "") ?? .snack
+        }
+        return MealType.allCases.compactMap { meal in
+            guard let entries = buckets[meal], !entries.isEmpty else { return nil }
+            return (meal, entries)
         }
     }
 
@@ -468,10 +482,21 @@ struct FoodTabView: View {
 
                 Divider().padding(.vertical, 2)
 
-                ForEach(Array(sortedEntries.enumerated()), id: \.element.id) { index, entry in
-                    entryRow(entry)
-                    if index < sortedEntries.count - 1 {
-                        Divider().padding(.leading, 0)
+                if foodSortMode == .meal {
+                    ForEach(Array(mealGroups.enumerated()), id: \.element.mealType) { groupIdx, group in
+                        mealSectionHeader(group.mealType, entries: group.entries)
+                        ForEach(Array(group.entries.enumerated()), id: \.element.id) { idx, entry in
+                            entryRow(entry)
+                            if idx < group.entries.count - 1 { Divider() }
+                        }
+                        if groupIdx < mealGroups.count - 1 { Divider().padding(.vertical, 4) }
+                    }
+                } else {
+                    ForEach(Array(sortedEntries.enumerated()), id: \.element.id) { index, entry in
+                        entryRow(entry)
+                        if index < sortedEntries.count - 1 {
+                            Divider().padding(.leading, 0)
+                        }
                     }
                 }
             }
@@ -479,9 +504,33 @@ struct FoodTabView: View {
         .card()
     }
 
+    private func mealSectionHeader(_ meal: MealType, entries: [FoodEntry]) -> some View {
+        let totalCal = entries.reduce(0) { $0 + $1.totalCalories }
+        let times = entries.compactMap { parseTimestamp($0.loggedAt) }
+        let timeRange: String? = {
+            guard let earliest = times.min(), let latest = times.max() else { return nil }
+            let fmt = DateFormatters.shortTime
+            return earliest == latest ? fmt.string(from: earliest) : "\(fmt.string(from: earliest))–\(fmt.string(from: latest))"
+        }()
+        return HStack(spacing: 6) {
+            Image(systemName: meal.icon).font(.caption2).foregroundStyle(Theme.accent)
+            Text(meal.displayName).font(.caption.weight(.semibold))
+            if let timeRange {
+                Text("· \(timeRange)").font(.caption2).foregroundStyle(.tertiary)
+            }
+            Spacer()
+            Text("\(Int(totalCal)) cal").font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 6)
+    }
+
     private func entryRow(_ entry: FoodEntry) -> some View {
         let dayTotal = max(viewModel.todayNutrition.calories, 1)
         let fraction = min(entry.totalCalories / dayTotal, 1.0)
+        // Show meal badge in any flat-sort mode EXCEPT .time (time is chronological, meal is implicit)
+        // and .meal (already grouped).
+        let showMealBadge = foodSortMode != .time && foodSortMode != .meal
+        let mealType = MealType(rawValue: entry.mealType ?? "")
 
         return HStack(alignment: .center, spacing: 8) {
             // Calorie proportion bar
@@ -490,7 +539,15 @@ struct FoodTabView: View {
                 .frame(width: 3, height: 28)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(entry.foodName).font(.subheadline).lineLimit(1)
+                HStack(spacing: 4) {
+                    Text(entry.foodName).font(.subheadline).lineLimit(1)
+                    if showMealBadge, let mealType {
+                        Image(systemName: mealType.icon)
+                            .font(.caption2)
+                            .foregroundStyle(Theme.accent.opacity(0.7))
+                            .accessibilityLabel(mealType.displayName)
+                    }
+                }
                 HStack(spacing: 4) {
                     if let time = entryTimeString(entry) {
                         HStack(spacing: 3) {

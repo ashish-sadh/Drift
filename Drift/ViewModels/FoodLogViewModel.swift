@@ -23,15 +23,10 @@ final class FoodLogViewModel {
         DateFormatters.dateOnly.string(from: selectedDate)
     }
 
-    /// Auto-assign meal type based on time of day (used internally, hidden from UI).
+    /// Auto-assign meal type: inherit from a recent entry logged within 3h (so a second bowl at
+    /// 10am after a 7am breakfast stays `breakfast`), else fall back to hour ranges.
     var autoMealType: MealType {
-        let hour = Calendar.current.component(.hour, from: Date())
-        switch hour {
-        case 5..<11: return .breakfast
-        case 11..<15: return .lunch
-        case 15..<21: return .dinner
-        default: return .snack
-        }
+        MealType.resolve(now: Date(), recentEntries: todayEntries)
     }
 
     init(database: AppDatabase = .shared) {

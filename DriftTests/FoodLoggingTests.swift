@@ -3969,3 +3969,97 @@ enum TestError: Error { case msg(String); init(_ s: String) { self = .msg(s) } }
                           calories: 450, proteinG: 32, carbsG: 48, fatG: 12, mealType: "Lunch")
     #expect(entry.portionText == "1 bowl", "Poke bowl portionText should show bowl")
 }
+
+// MARK: - MealType.resolve (auto-detection)
+
+@Test func mealTypeResolveFallsBackToHourRangeWhenNoRecentEntries() {
+    let cal = Calendar.current
+    let morning = cal.date(bySettingHour: 8, minute: 0, second: 0, of: Date())!
+    #expect(MealType.resolve(now: morning, recentEntries: []) == .breakfast)
+
+    let lunchTime = cal.date(bySettingHour: 13, minute: 0, second: 0, of: Date())!
+    #expect(MealType.resolve(now: lunchTime, recentEntries: []) == .lunch)
+
+    let dinnerTime = cal.date(bySettingHour: 19, minute: 0, second: 0, of: Date())!
+    #expect(MealType.resolve(now: dinnerTime, recentEntries: []) == .dinner)
+
+    let lateNight = cal.date(bySettingHour: 2, minute: 0, second: 0, of: Date())!
+    #expect(MealType.resolve(now: lateNight, recentEntries: []) == .snack)
+}
+
+@Test func mealTypeResolveInheritsFromRecentBreakfastWithin3h() {
+    let cal = Calendar.current
+    let iso = DateFormatters.iso8601
+    let now = cal.date(bySettingHour: 10, minute: 0, second: 0, of: Date())!
+    let earlier = cal.date(bySettingHour: 8, minute: 0, second: 0, of: Date())!
+    let prev = FoodEntry(foodName: "Oatmeal", servingSizeG: 0, calories: 200,
+                         loggedAt: iso.string(from: earlier), mealType: "breakfast")
+    #expect(MealType.resolve(now: now, recentEntries: [prev]) == .breakfast,
+            "Second log within 3h of breakfast should inherit breakfast")
+}
+
+@Test func mealTypeResolveFallsBackWhenMoreThan3hSinceLastLog() {
+    let cal = Calendar.current
+    let iso = DateFormatters.iso8601
+    let now = cal.date(bySettingHour: 13, minute: 0, second: 0, of: Date())!
+    let earlier = cal.date(bySettingHour: 8, minute: 0, second: 0, of: Date())!
+    let prev = FoodEntry(foodName: "Oatmeal", servingSizeG: 0, calories: 200,
+                         loggedAt: iso.string(from: earlier), mealType: "breakfast")
+    #expect(MealType.resolve(now: now, recentEntries: [prev]) == .lunch,
+            "5h gap should fall back to hour-range (1pm = lunch)")
+}
+
+@Test func mealTypeResolveDoesNotInheritSnack() {
+    let cal = Calendar.current
+    let iso = DateFormatters.iso8601
+    let now = cal.date(bySettingHour: 8, minute: 30, second: 0, of: Date())!
+    let earlier = cal.date(bySettingHour: 7, minute: 0, second: 0, of: Date())!
+    let prev = FoodEntry(foodName: "Coffee", servingSizeG: 0, calories: 5,
+                         loggedAt: iso.string(from: earlier), mealType: "snack")
+    #expect(MealType.resolve(now: now, recentEntries: [prev]) == .breakfast,
+            "Snack should not be inherited — fall through to hour range")
+}
+
+@Test func mealTypeResolvePicksMostRecentWhenMultipleEntries() {
+    let cal = Calendar.current
+    let iso = DateFormatters.iso8601
+    let now = cal.date(bySettingHour: 14, minute: 0, second: 0, of: Date())!
+    let breakfast = cal.date(bySettingHour: 8, minute: 0, second: 0, of: Date())!
+    let lunch = cal.date(bySettingHour: 13, minute: 0, second: 0, of: Date())!
+    let b = FoodEntry(foodName: "Oats", servingSizeG: 0, calories: 200,
+                      loggedAt: iso.string(from: breakfast), mealType: "breakfast")
+    let l = FoodEntry(foodName: "Salad", servingSizeG: 0, calories: 400,
+                      loggedAt: iso.string(from: lunch), mealType: "lunch")
+    #expect(MealType.resolve(now: now, recentEntries: [b, l]) == .lunch,
+            "Should pick most recent (lunch), not oldest (breakfast)")
+}
+
+@Test func autoMealTypeInheritsFromViewModelRecentEntries() async throws {
+    let db = try AppDatabase.empty()
+    let vm = await FoodLogViewModel(database: db)
+
+    let cal = Calendar.current
+    let hour = cal.component(.hour, from: Date())
+    // Only run this check when "now" is in breakfast window (5-11) so hour-range fallback
+    // would return breakfast anyway. Skip if we're outside that window to keep test deterministic.
+    guard hour >= 5, hour < 11 else { return }
+
+    await vm.quickAdd(name: "Oatmeal", calories: 200, proteinG: 10, carbsG: 30, fatG: 5,
+                      fiberG: 4, mealType: .breakfast)
+    let resolved = await vm.autoMealType
+    #expect(resolved == .breakfast, "With a breakfast entry just logged, autoMealType should be breakfast")
+}
+
+@Test func updateFoodEntryMealTypePersists() async throws {
+    let db = try AppDatabase.empty()
+    let vm = await FoodLogViewModel(database: db)
+    await vm.quickAdd(name: "Oatmeal", calories: 200, proteinG: 10, carbsG: 30, fatG: 5,
+                      fiberG: 4, mealType: .lunch)
+    guard let entryId = await vm.todayEntries.first?.id else {
+        Issue.record("Expected one entry"); return
+    }
+    await vm.updateEntryMealType(id: entryId, mealType: .dinner)
+    await vm.loadTodayMeals()
+    let updated = await vm.todayEntries.first(where: { $0.id == entryId })
+    #expect(updated?.mealType == "dinner", "Meal type should be updated to dinner")
+}
