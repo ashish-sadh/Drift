@@ -4050,6 +4050,28 @@ enum TestError: Error { case msg(String); init(_ s: String) { self = .msg(s) } }
     #expect(resolved == .breakfast, "With a breakfast entry just logged, autoMealType should be breakfast")
 }
 
+// MARK: - South Indian food DB coverage (#188)
+
+@Test func southIndianFoodDBHasKeyRegionalDishes() throws {
+    let db = try AppDatabase.empty()
+    try db.seedFoodsFromJSON()
+    let keyDishes = ["Puliyodarai", "Mor Kuzhambu", "Fish Moilee", "Puttu Kadala",
+                     "Bisi Bele Bath (Karnataka)", "Adai Dosa", "Paruppu Rasam",
+                     "Chana Sundal", "Cabbage Poriyal", "Kerala Halwa"]
+    for dish in keyDishes {
+        let results = try db.searchFoods(query: dish)
+        #expect(results.contains(where: { $0.name == dish }),
+                "Expected '\(dish)' in food DB — missing regional coverage")
+    }
+}
+
+@Test func southIndianPuttuSearchReturnsVariants() throws {
+    let db = try AppDatabase.empty()
+    try db.seedFoodsFromJSON()
+    let results = try db.searchFoods(query: "puttu")
+    #expect(results.count >= 2, "Expected at least 2 puttu variants (Puttu + Puttu Kadala), got \(results.count)")
+}
+
 @Test func updateFoodEntryMealTypePersists() async throws {
     let db = try AppDatabase.empty()
     let vm = await FoodLogViewModel(database: db)
