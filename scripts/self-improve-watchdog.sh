@@ -398,12 +398,14 @@ elif [[ "$STATE" == "DRAIN" ]]; then
             if is_log_stale_seconds "$DRAIN_STALE"; then
                 log "DRAIN: no log output in ${DRAIN_STALE}s — killing stalled process."
                 kill_claude
-                run_compliance "stall"
                 cleanup_dirty_state
-                break
+                run_compliance "stall"
+                log "DRAIN: done. Exiting."
+                exit 0
             fi
         done
-        if is_claude_alive; then
+        # Session finished naturally — check log for crash vs normal exit
+        if [[ -n "$CURRENT_LOG" ]] && grep -q '"type":"result"' "$CURRENT_LOG" 2>/dev/null; then
             run_compliance "normal"
         else
             run_compliance "crash"
