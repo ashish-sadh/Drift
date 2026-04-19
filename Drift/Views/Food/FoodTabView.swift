@@ -21,13 +21,14 @@ struct FoodTabView: View {
     @State private var showingCopyAllAlert = false
 
     enum FoodSortMode: String, CaseIterable {
-        case time, protein, carbs, fat, plantPoints
+        case time, protein, carbs, fat, fiber, plantPoints
         var label: String {
             switch self {
             case .time: "🕐"
             case .protein: "P"
             case .carbs: "C"
             case .fat: "F"
+            case .fiber: "Fb"
             case .plantPoints: "🌱"
             }
         }
@@ -39,6 +40,7 @@ struct FoodTabView: View {
         case .protein: viewModel.todayEntries.sorted { $0.totalProtein > $1.totalProtein }
         case .carbs: viewModel.todayEntries.sorted { $0.totalCarbs > $1.totalCarbs }
         case .fat: viewModel.todayEntries.sorted { $0.totalFat > $1.totalFat }
+        case .fiber: viewModel.todayEntries.sorted { $0.totalFiber > $1.totalFiber }
         case .plantPoints: viewModel.todayEntries.sorted {
             let a = PlantPointsService.classify($0.foodName) != .notPlant
             let b = PlantPointsService.classify($1.foodName) != .notPlant
@@ -350,14 +352,7 @@ struct FoodTabView: View {
                     macroProgressRow("P", eaten: n.proteinG, target: t.proteinG, color: Theme.proteinRed)
                     macroProgressRow("C", eaten: n.carbsG, target: t.carbsG, color: Theme.carbsGreen)
                     macroProgressRow("F", eaten: n.fatG, target: t.fatG, color: Theme.fatYellow)
-                    // Fiber — no target, just show amount
-                    if n.fiberG > 0 {
-                        HStack(spacing: 6) {
-                            Text("Fb").font(.caption2.weight(.semibold)).foregroundStyle(Theme.fiberBrown).frame(width: 14)
-                            Text("\(Int(n.fiberG))g").font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
-                            Spacer()
-                        }
-                    }
+                    macroProgressRow("Fb", eaten: n.fiberG, target: t.fiberG, color: Theme.fiberBrown)
                 }
                 .contentShape(Rectangle())
                 .onTapGesture { showingGoalSetup = true }
@@ -367,7 +362,7 @@ struct FoodTabView: View {
                     macroPill("P", value: n.proteinG, color: Theme.proteinRed)
                     macroPill("C", value: n.carbsG, color: Theme.carbsGreen)
                     macroPill("F", value: n.fatG, color: Theme.fatYellow)
-                    macroPill("Fiber", value: n.fiberG, color: Theme.fiberBrown)
+                    macroPill("Fb", value: n.fiberG, color: Theme.fiberBrown)
                 }
                 .contentShape(Rectangle())
                 .onTapGesture { showingGoalSetup = true }
@@ -513,7 +508,7 @@ struct FoodTabView: View {
                         Text(entry.portionText).font(.caption2).foregroundStyle(.tertiary)
                         Text("\u{00B7}").font(.caption2).foregroundStyle(.quaternary)
                     }
-                    Text("\(Int(entry.totalProtein))P \(Int(entry.totalCarbs))C \(Int(entry.totalFat))F")
+                    Text("\(Int(entry.totalProtein))P \(Int(entry.totalCarbs))C \(Int(entry.totalFat))F \(Int(entry.totalFiber))Fb")
                         .font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
                 }
             }
@@ -532,7 +527,7 @@ struct FoodTabView: View {
         .padding(.vertical, 6)
         .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("\(entry.foodName), \(Int(entry.totalCalories)) calories, \(Int(entry.totalProtein)) protein, \(Int(entry.totalCarbs)) carbs, \(Int(entry.totalFat)) fat")
+        .accessibilityLabel("\(entry.foodName), \(Int(entry.totalCalories)) calories, \(Int(entry.totalProtein)) protein, \(Int(entry.totalCarbs)) carbs, \(Int(entry.totalFat)) fat, \(Int(entry.totalFiber)) fiber")
         .onTapGesture {
             editingEntry = entry
         }

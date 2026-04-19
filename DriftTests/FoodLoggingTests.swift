@@ -1573,6 +1573,41 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     #expect(withTDEE != nil, "With TDEE, targets should compute")
 }
 
+@Test func macroTargetsIncludesFiberUsingUSDAFormula() async throws {
+    // 2000 kcal → 14 * 2000/1000 = 28 → round up to 30 g
+    let goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 85, calorieTargetOverride: 2000)
+    let targets = goal.macroTargets()!
+    #expect(targets.fiberG == 30, "2000 kcal should yield 30 g fiber target, got \(targets.fiberG)")
+}
+
+@Test func macroTargetsFiberTargetRespectsFloor() async throws {
+    // 1200 kcal → 14 * 1.2 = 16.8 → rounds up to 20, but floor is 25 g
+    let goal = WeightGoal(targetWeightKg: 60, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 70, calorieTargetOverride: 1200)
+    let targets = goal.macroTargets()!
+    #expect(targets.fiberG == 25, "Fiber floor of 25 g should apply, got \(targets.fiberG)")
+}
+
+@Test func macroTargetsFiberWithAllMacrosSet() async throws {
+    // Even when all 3 macros are overridden, fiber target should still be computed.
+    var goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 85, calorieTargetOverride: 2000)
+    goal.proteinTargetG = 180
+    goal.fatTargetG = 60
+    goal.carbsTargetG = 200
+    let targets = goal.macroTargets()!
+    #expect(targets.fiberG > 0, "Fiber target should always be present")
+    // 180*4 + 200*4 + 60*9 = 720 + 800 + 540 = 2060 kcal → 14*2.06=28.84 → rounds up to 30
+    #expect(targets.fiberG == 30, "Expected 30 g fiber for ~2060 kcal, got \(targets.fiberG)")
+}
+
+@Test func defaultFiberGRoundsUpToNearestFive() async throws {
+    // 1500 kcal → 14 * 1.5 = 21, rounds up to 25 (which also happens to be the floor)
+    #expect(WeightGoal.defaultFiberG(calories: 1500) == 25)
+    // 2200 kcal → 14 * 2.2 = 30.8, rounds up to 35
+    #expect(WeightGoal.defaultFiberG(calories: 2200) == 35)
+    // 3000 kcal → 14 * 3 = 42, rounds up to 45
+    #expect(WeightGoal.defaultFiberG(calories: 3000) == 45)
+}
+
 @Test func goalResolvedCalorieTargetUsesSoftCap() async throws {
     // Heavy person: off-main-thread fallback should use computeBase (with soft cap)
     let goal = WeightGoal(targetWeightKg: 100, monthsToAchieve: 6, startDate: "2026-01-01", startWeightKg: 120)

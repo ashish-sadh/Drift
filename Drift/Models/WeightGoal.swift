@@ -170,6 +170,7 @@ struct WeightGoal: Codable, Sendable {
             let fat = max(f, fatFloor)
             let calTarget = p * 4 + c * 4 + fat * 9
             return MacroTargets(proteinG: p, carbsG: c, fatG: fat,
+                                fiberG: Self.defaultFiberG(calories: calTarget),
                                 calorieTarget: calTarget, isLosing: isLosing, preference: pref,
                                 fatWasClamped: fat > f)
         }
@@ -204,14 +205,24 @@ struct WeightGoal: Codable, Sendable {
         // Always report what the user will actually eat, not the TDEE anchor.
         let effectiveCal = protein * 4 + carbs * 4 + fat * 9
         return MacroTargets(proteinG: protein, carbsG: carbs, fatG: fat,
+                            fiberG: Self.defaultFiberG(calories: effectiveCal),
                             calorieTarget: effectiveCal, isLosing: isLosing, preference: pref,
                             fatWasClamped: userSetFat != nil && fat > userSetFat!)
+    }
+
+    /// Default fiber target: USDA 14 g per 1000 kcal, rounded up to the nearest 5 g,
+    /// with a hard floor of 25 g (ICMR/ADA consensus minimum).
+    static func defaultFiberG(calories: Double) -> Double {
+        let raw = calories * 14 / 1000
+        let rounded = (raw / 5).rounded(.up) * 5
+        return max(25, rounded)
     }
 
     struct MacroTargets: Sendable {
         let proteinG: Double
         let carbsG: Double
         let fatG: Double
+        let fiberG: Double
         let calorieTarget: Double
         let isLosing: Bool
         let preference: DietPreference
