@@ -1464,5 +1464,15 @@
       "fix(testflight): 3h timer now marks due in watchdog and fires on next commit",
       "feat(hooks): role-specific session output for senior, junior, and planning sessions"
     ]
+  },
+  {
+    "build": 138,
+    "date": "2026-04-18T22:00:00-07:00",
+    "description": "chore: TestFlight build 138 — drift-control watchdog launch + infra backfill",
+    "features": [],
+    "fixes": [
+      "chore: backfill P0 bug labels and overhead GitHub label for watchdog routing",
+      "chore: product review cycle 368 sync"
+    ]
   }
 ]
