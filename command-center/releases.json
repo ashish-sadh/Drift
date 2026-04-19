@@ -1488,5 +1488,24 @@
       "fix(food-log): #189 EditFoodEntrySheet now has a 4-chip meal-type picker (Breakfast/Lunch/Dinner/Snack) — users can change an entry's meal after logging",
       "fix(food-log): #189 auto meal detection now inherits from a recent log (within 3h) instead of only using hour ranges — second bowl at 10am after a 7am breakfast correctly stays breakfast"
     ]
+  },
+  {
+    "build": 140,
+    "date": "2026-04-19T03:55:00-07:00",
+    "description": "AI quality sprint: nutrition cards, time-aware pills, meal-period detection, streamed labels, +45 foods",
+    "features": [
+      "Nutrition lookup card — 'calories in X' queries now show structured macro breakdown card (#196)",
+      "Time-aware suggestion pills with per-meal tracking — pills adapt to time of day and what's already been logged (#200)",
+      "Meal-period auto-detect in food parser — AI correctly infers breakfast/lunch/dinner from time context (#201)",
+      "Streamed stage-label indicator during info queries — users see 'Looking up...' label while AI fetches data (#202)",
+      "Implicit food intent coverage — 23 new routing cases for natural phrasing without 'log' keyword (#183)",
+      "Multi-turn regression suite — 25 sequential query chains for reliability testing (#199)",
+      "Food DB +45 South Indian regional dishes (#188)"
+    ],
+    "fixes": [
+      "Coffee/liquid quick-add now defaults to full serving size instead of 1g (#195)",
+      "AI intent routing: simpler classifier prompt improves routing from 44/47 to 46/47 (+4.3%)",
+      "Auto-research optimizer: +2.0% held-out score improvement"
+    ]
   }
 ]
