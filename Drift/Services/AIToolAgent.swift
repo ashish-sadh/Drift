@@ -7,6 +7,11 @@ struct AgentOutput: Sendable {
     let text: String                  // User-facing message
     let action: ToolAction?           // Optional UI action (open sheet, etc.)
     let toolsCalled: [String]         // For debugging/logging
+    /// Present when the agent stopped on a genuinely-ambiguous input and
+    /// the user must pick one of the offered options before we proceed.
+    /// The VM attaches these as tappable chips and sets
+    /// `ConversationState.phase = .awaitingClarification(options:)`. #226.
+    var clarificationOptions: [ClarificationOption]? = nil
 }
 
 // MARK: - AI Tool Agent
@@ -55,6 +60,20 @@ enum AIToolAgent {
             return await executeTool(toolCall)
         }
 
+        // ── Phase 2a: Ask-don't-guess clarification (pre-classifier) ──
+        // Genuinely-ambiguous inputs ("biryani", "creatine", bare numbers)
+        // divert to a tappable clarifier BEFORE spending an LLM call. Keeps
+        // gold sets stable — narrow detection by design. #226.
+        if isLargeModel, let options = ClarificationBuilder.buildOptions(for: normalized),
+           options.count >= 2 {
+            Log.app.info("Clarification: offering \(options.count) options for '\(message)'")
+            return AgentOutput(
+                text: ClarificationBuilder.promptText(options),
+                action: nil, toolsCalled: ["clarifier"],
+                clarificationOptions: options
+            )
+        }
+
         // ── Phase 2: LLM Intent Classification (Gemma only) ──
         // Handles: intent detection, typo fixing, word numbers, pronoun resolution — all in one call
         if isLargeModel {
@@ -66,10 +85,19 @@ enum AIToolAgent {
                 logTiming("Phase 2 (classify)", start: classifyStart)
                 switch result {
                 case .toolCall(let intent):
-                    // Low-confidence routing observability — surfaces ask-vs-guess miscalibration
-                    // without changing behavior. Text-branch handles explicit clarifying questions.
+                    // Low-confidence route → offer clarifier if Swift can
+                    // synthesize options. Falls through to guess otherwise
+                    // (logged for observability).
                     if intent.confidence.lowercased() == "low" {
                         Log.app.info("IntentClassifier: low-confidence route → \(intent.tool) for '\(message)'")
+                        if let opts = ClarificationBuilder.buildOptions(for: normalized),
+                           opts.count >= 2 {
+                            return AgentOutput(
+                                text: ClarificationBuilder.promptText(opts),
+                                action: nil, toolsCalled: ["clarifier"],
+                                clarificationOptions: opts
+                            )
+                        }
                     }
                     // Strip parentheses from tool name (LLM quirk: "food_info()" → "food_info")
                     let toolName = intent.tool.replacingOccurrences(of: "()", with: "")

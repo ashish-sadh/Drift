@@ -227,6 +227,9 @@ extension AIChatViewModel {
         if handleDeleteFood(lower) { return }
         if handleSmartWorkout(lower) { return }
         if handleTemplateStart(lower) { return }
+        // Phase 4b: Ask-don't-guess clarification resolution (#226) —
+        // runs before multi-turn so "1"/"first" can't be mis-parsed.
+        if handleClarificationResponse(lower) { return }
         // Phase 5: Multi-turn conversation state
         if handleMultiTurnState(lower, originalText: normalized) { return }
         // Phase 6: Planning triggers (split builder, meal planning)
@@ -995,6 +998,117 @@ extension AIChatViewModel {
         return true
     }
 
+    /// Phase 4b: When the assistant has offered 2-3 options ("Did you mean:
+    /// 1. Log chicken as food / 2. Look up calories in chicken"), parse the
+    /// user's reply against them. Numeric ("1"/"2"), ordinal ("first"),
+    /// keyword ("log it"/"calories"), or literal label match resolves to an
+    /// option. Cancel phrases reset. Unrecognized input clears the phase
+    /// and falls through so the user isn't stuck. #226.
+    func handleClarificationResponse(_ lower: String) -> Bool {
+        guard case .awaitingClarification(let options) = convState.phase else { return false }
+        let cancel: Set<String> = ["nevermind", "never mind", "cancel", "stop",
+                                   "neither", "none", "skip", "forget it"]
+        if cancel.contains(lower) {
+            convState.cancelPending()
+            messages.append(ChatMessage(role: .assistant,
+                text: "No problem — ask again anytime."))
+            return true
+        }
+        guard let picked = Self.resolveClarificationPick(lower, options: options) else {
+            // Unrecognized — drop the phase so the next turn re-classifies
+            // naturally. Prevents a stuck "Did you mean" loop.
+            convState.phase = .idle
+            return false
+        }
+        convState.phase = .idle
+        executePickedClarification(picked)
+        return true
+    }
+
+    /// Internal for tests — the resolution logic is deterministic and
+    /// worth exercising without the async tool-execution roundtrip.
+    static func resolveClarificationPick(
+        _ lower: String, options: [ClarificationOption]
+    ) -> ClarificationOption? {
+        // Numeric: "1", "2", "3" — primary chip UX.
+        if let idx = Int(lower), let match = options.first(where: { $0.id == idx }) {
+            return match
+        }
+        // Ordinal words.
+        let ordinals: [String: Int] = [
+            "first": 1, "1st": 1, "one": 1,
+            "second": 2, "2nd": 2, "two": 2,
+            "third": 3, "3rd": 3, "three": 3
+        ]
+        if let idx = ordinals[lower], let match = options.first(where: { $0.id == idx }) {
+            return match
+        }
+        // Literal label match (case-insensitive) — happens when the user
+        // taps a chip; the label is sent as a new user message.
+        if let match = options.first(where: { $0.label.lowercased() == lower }) {
+            return match
+        }
+        // Keyword containment — "log it"/"log chicken"/"calories"/"check"
+        // map to the option whose label contains the same verb/topic.
+        if lower.contains("log") || lower.contains("add") || lower.contains("track") {
+            if let match = options.first(where: { $0.tool == "log_food" || $0.tool == "log_activity" || $0.tool == "mark_supplement" || $0.tool == "log_weight" }) {
+                return match
+            }
+        }
+        if lower.contains("calor") || lower.contains("info") || lower.contains("nutrition")
+            || lower.contains("check") || lower.contains("look") {
+            if let match = options.first(where: { $0.tool == "food_info" || $0.tool == "supplements" }) {
+                return match
+            }
+        }
+        return nil
+    }
+
+    private func executePickedClarification(_ option: ClarificationOption) {
+        Task {
+            let call = ToolCall(tool: option.tool, params: ToolCallParams(values: option.params))
+            let result = await ToolRegistry.shared.execute(call)
+            switch result {
+            case .text(let text):
+                messages.append(ChatMessage(role: .assistant, text: text))
+            case .action(let action):
+                dispatchToolAction(action)
+            case .error(let msg):
+                messages.append(ChatMessage(role: .assistant,
+                    text: "Couldn't run that — \(msg.lowercased())."))
+            }
+        }
+    }
+
+    /// Map a UI-action tool result to the VM's side-effectful state. Subset
+    /// of handleAIPipeline's action dispatch — kept local so the
+    /// clarification execution doesn't pull the full pipeline plumbing.
+    private func dispatchToolAction(_ action: ToolAction) {
+        switch action {
+        case .openFoodSearch(let query, let servings):
+            foodSearchQuery = query
+            foodSearchServings = servings
+            showingFoodSearch = true
+        case .navigate(let tab):
+            let (label, icon) = Self.tabMeta(tab)
+            let card = NavigationCardData(destination: label, icon: icon, tab: tab)
+            messages.append(ChatMessage(role: .assistant,
+                text: "Opening \(label)...", navigationCard: card))
+            NotificationCenter.default.post(name: .navigateToTab,
+                object: nil, userInfo: ["tab": tab])
+        case .openBarcodeScanner:
+            showingBarcodeScanner = true
+        case .openManualFoodEntry(let name, let calories, let proteinG, let carbsG, let fatG):
+            pendingManualFoodEntry = AIChatViewModel.ManualFoodPrefill(
+                name: name, calories: calories, proteinG: proteinG, carbsG: carbsG, fatG: fatG)
+            showingManualFoodEntry = true
+        case .openWeightEntry, .openRecipeBuilder, .openWorkout:
+            // Options we don't currently emit from clarification picks —
+            // fall through silently.
+            break
+        }
+    }
+
     private func handleCheatMeal(_ lower: String) -> Bool {
         let cheatPhrases = ["cheat meal", "cheat day", "ate out", "went off plan", "off track", "binge"]
         guard cheatPhrases.contains(where: { lower.contains($0) }) else { return false }
@@ -1103,8 +1217,14 @@ extension AIChatViewModel {
                     messages.remove(at: idx)
                 } else {
                     messages[idx].text = output.text
+                    messages[idx].clarificationOptions = output.clarificationOptions
                     attachToolCards(to: &messages[idx], toolsCalled: output.toolsCalled)
                 }
+            }
+            // Ask-don't-guess: enter the waiting phase so the next turn is
+            // resolved against the options rather than re-classified. #226.
+            if let options = output.clarificationOptions {
+                convState.phase = .awaitingClarification(options: options)
             }
 
             // Handle UI actions from tool results

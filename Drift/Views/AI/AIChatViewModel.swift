@@ -112,6 +112,10 @@ final class AIChatViewModel {
         var sleepCard: SleepCardData?
         var glucoseCard: GlucoseCardData?
         var biomarkerCard: BiomarkerCardData?
+        /// When the assistant asked "Did you mean X or Y?" — each option
+        /// rendered as a tappable chip. Tapping sends the label as a new
+        /// user message; the VM resolves it against the active phase. #226.
+        var clarificationOptions: [ClarificationOption]?
         let createdAt = Date()
         enum Role { case user, assistant }
     }

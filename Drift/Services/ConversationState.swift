@@ -202,6 +202,9 @@ final class ConversationState {
         case planningMeals(mealName: String, iteration: Int)
         /// Iterative workout split builder: designing a multi-day program
         case planningWorkout(splitType: String, currentDay: Int, totalDays: Int)
+        /// Asked "Did you mean X or Y?" for a genuinely-ambiguous intent —
+        /// waiting for the user to pick one of the offered options. #226.
+        case awaitingClarification(options: [ClarificationOption])
     }
 
     var phase: Phase = .idle
@@ -289,10 +292,10 @@ final class ConversationState {
 
 extension ConversationState.Phase: Codable {
     private enum Tag: String, Codable {
-        case idle, awaitingMealItems, awaitingExercises, planningMeals, planningWorkout
+        case idle, awaitingMealItems, awaitingExercises, planningMeals, planningWorkout, awaitingClarification
     }
     private enum Keys: String, CodingKey {
-        case tag, mealName, splitType, iteration, currentDay, totalDays
+        case tag, mealName, splitType, iteration, currentDay, totalDays, options
     }
 
     public init(from decoder: Decoder) throws {
@@ -313,6 +316,9 @@ extension ConversationState.Phase: Codable {
                 splitType: try c.decode(String.self, forKey: .splitType),
                 currentDay: try c.decode(Int.self, forKey: .currentDay),
                 totalDays: try c.decode(Int.self, forKey: .totalDays))
+        case .awaitingClarification:
+            self = .awaitingClarification(
+                options: try c.decode([ClarificationOption].self, forKey: .options))
         }
     }
 
@@ -335,6 +341,9 @@ extension ConversationState.Phase: Codable {
             try c.encode(split, forKey: .splitType)
             try c.encode(day, forKey: .currentDay)
             try c.encode(total, forKey: .totalDays)
+        case .awaitingClarification(let options):
+            try c.encode(Tag.awaitingClarification, forKey: .tag)
+            try c.encode(options, forKey: .options)
         }
     }
 
@@ -346,6 +355,7 @@ extension ConversationState.Phase: Codable {
         case .awaitingExercises: return "logging your workout"
         case .planningMeals(let mealName, _): return "planning your \(mealName)"
         case .planningWorkout: return "building your workout split"
+        case .awaitingClarification: return "that clarification"
         }
     }
 }
