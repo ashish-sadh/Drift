@@ -28,6 +28,7 @@ build/
 *.tmp
 *.log
 *.gguf
+*.db
 command-center/worker/.wrangler/
 *.xcuserstate
 
