@@ -101,17 +101,26 @@ async function listReports() {
     }
   }
 
-  // Append any files not covered by a PR (oldest fallback, sorted by cycle desc)
+  // Files not covered by a PR — derive date from filename where possible
   const remaining = contents
     .filter(f => f.name.endsWith('.md') && !seen.has(f.name))
-    .sort((a, b) => {
-      const numA = a.name.match(/cycle-(\d+)/)?.[1];
-      const numB = b.name.match(/cycle-(\d+)/)?.[1];
-      if (numA && numB) return parseInt(numB) - parseInt(numA);
-      return b.name.localeCompare(a.name);
+    .map(f => {
+      const dateMatch = f.name.match(/(\d{4}-\d{2}-\d{2})/);
+      return { ...f, _date: dateMatch ? `${dateMatch[1]}T00:00:00Z` : null };
     });
 
-  return [...result, ...remaining];
+  // Sort combined list newest-first; cycle-only files (no date) fall to bottom by cycle desc
+  const combined = [...result, ...remaining];
+  combined.sort((a, b) => {
+    if (a._date && b._date) return b._date.localeCompare(a._date);
+    if (a._date) return -1;
+    if (b._date) return 1;
+    const numA = a.name.match(/cycle-(\d+)/)?.[1];
+    const numB = b.name.match(/cycle-(\d+)/)?.[1];
+    if (numA && numB) return parseInt(numB) - parseInt(numA);
+    return b.name.localeCompare(a.name);
+  });
+  return combined;
 }
 
 async function getReportContent(path) {
