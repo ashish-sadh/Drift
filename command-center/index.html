@@ -1186,27 +1186,11 @@
         </div>`;
       }
 
-      // P0 Bugs (highest priority, shown first)
-      if (data.p0Bugs && data.p0Bugs.length > 0) {
-        html += `<div style="background:var(--surface);border:1px solid rgba(248,81,73,0.3);border-radius:12px;padding:16px 20px;margin-bottom:12px;">
-          <h3 style="margin:0 0 8px;font-size:14px;color:var(--red);text-transform:uppercase;letter-spacing:0.5px;">P0 Bugs</h3>
-          ${data.p0Bugs.map(renderTask).join('')}
-        </div>`;
-      }
-
-      // P1 Bugs
-      if (data.p1Bugs && data.p1Bugs.length > 0) {
-        html += `<div style="background:var(--surface);border:1px solid rgba(210,153,34,0.2);border-radius:12px;padding:16px 20px;margin-bottom:12px;">
-          <h3 style="margin:0 0 8px;font-size:14px;color:var(--yellow);text-transform:uppercase;letter-spacing:0.5px;">P1 Bugs</h3>
-          ${data.p1Bugs.map(renderTask).join('')}
-        </div>`;
-      }
-
-      // P2 Bugs
-      if (data.p2Bugs && data.p2Bugs.length > 0) {
-        html += `<div style="background:var(--surface);border:1px solid rgba(139,148,158,0.2);border-radius:12px;padding:16px 20px;margin-bottom:12px;">
-          <h3 style="margin:0 0 8px;font-size:14px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">P2 Bugs</h3>
-          ${data.p2Bugs.map(renderTask).join('')}
+      // Open bugs not yet in sprint
+      if (data.openBugs && data.openBugs.length > 0) {
+        html += `<div style="background:var(--surface);border:1px solid rgba(248,81,73,0.2);border-radius:12px;padding:16px 20px;margin-bottom:12px;">
+          <h3 style="margin:0 0 8px;font-size:14px;color:var(--red);text-transform:uppercase;letter-spacing:0.5px;">Open Bugs</h3>
+          ${data.openBugs.map(renderTask).join('')}
         </div>`;
       }
 

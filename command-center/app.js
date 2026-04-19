@@ -247,11 +247,17 @@ async function getSprintPlan() {
       comments: i.comments
     });
 
-    // Exclude bugs that already have sprint-task label (they show in Sprint Tasks)
+    // All open bugs not yet in sprint (deduped against sprint-task issues)
     const sprintNumbers = new Set(sprintOpen.map(i => i.number));
-    const dedupedP0 = p0Bugs.filter(i => !sprintNumbers.has(i.number));
-    const dedupedP1 = p1Bugs.filter(i => !sprintNumbers.has(i.number));
-    const dedupedP2 = p2Bugs.filter(i => !sprintNumbers.has(i.number));
+    const seenBugIds = new Set();
+    const openBugs = [...p0Bugs, ...p1Bugs, ...p2Bugs]
+      .filter(i => !sprintNumbers.has(i.number) && !seenBugIds.has(i.number) && seenBugIds.add(i.number))
+      .sort((a, b) => {
+        const rank = { P0: 0, P1: 1, P2: 2 };
+        const pa = a.labels.find(l => ['P0','P1','P2'].includes(l.name))?.name || 'P2';
+        const pb = b.labels.find(l => ['P0','P1','P2'].includes(l.name))?.name || 'P2';
+        return (rank[pa] ?? 3) - (rank[pb] ?? 3);
+      });
 
     // Merge closed sprint-tasks and closed P0 bugs into one completed list, deduped
     const closedNumbers = new Set(sprintClosed.map(i => i.number));
@@ -266,9 +272,7 @@ async function getSprintPlan() {
     );
 
     return {
-      p0Bugs: dedupedP0.map(mapIssue),
-      p1Bugs: dedupedP1.map(mapIssue),
-      p2Bugs: dedupedP2.map(mapIssue),
+      openBugs: openBugs.map(mapIssue),
       awaitingApproval: awaitingApproval.map(mapIssue),
       sprintTasks: sprintOpen.map(mapIssue),
       completedTasks: allCompleted.map(mapIssue),
