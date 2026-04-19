@@ -227,24 +227,24 @@ final class FoodLoggingGoldSetTests: XCTestCase {
     // MARK: - Amount Extraction Accuracy
 
     func testAmountExtractionGoldSet() {
-        let cases: [(String, Double, String?)] = [
-            // (query, expected servings, expected unit or nil for default)
-            ("log 2 eggs", 2.0, nil),
-            ("had 100g chicken", 100.0, "g"),
-            ("ate 200 gram rice", 200.0, "g"),
-            ("log 1.5 cups of oatmeal", 1.5, "cup"),
-            ("had half an avocado", 0.5, nil),
-            ("ate a quarter cup of almonds", 0.25, "cup"),
-            ("log 3 scoops of protein", 3.0, "scoop"),
-            ("had 2 slices of pizza", 2.0, "slice"),
-            ("ate 2 to 3 bananas", 3.0, nil), // takes higher
-            ("had a couple of rotis", 2.0, nil),
+        // (query, expected amount, isGramAmount — true means check gramAmount, false means check servings)
+        let cases: [(String, Double, Bool)] = [
+            ("log 2 eggs", 2.0, false),
+            ("had 100g chicken", 100.0, true),
+            ("ate 200 gram rice", 200.0, true),
+            ("log 1.5 cups of oatmeal", 1.5, false),
+            ("had half an avocado", 0.5, false),
+            ("ate a quarter cup of almonds", 0.25, false),
+            ("log 3 scoops of protein", 3.0, false),
+            ("had 2 slices of pizza", 2.0, false),
+            ("ate 2 to 3 bananas", 3.0, false), // takes higher
+            ("had a couple of rotis", 2.0, false),
         ]
         var correct = 0
-        for (query, expectedAmt, _) in cases {
+        for (query, expectedAmt, isGramAmount) in cases {
             let normalized = InputNormalizer.normalize(query).lowercased()
             if let intent = AIActionExecutor.parseFoodIntent(normalized) {
-                let actual = intent.servings ?? 1.0
+                let actual = isGramAmount ? (intent.gramAmount ?? 1.0) : (intent.servings ?? 1.0)
                 if abs(actual - expectedAmt) < 0.01 {
                     correct += 1
                 } else {
@@ -255,7 +255,7 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             }
         }
         print("📊 Amount extraction: \(correct)/\(cases.count)")
-        XCTAssertGreaterThanOrEqual(correct, cases.count - 3, "Amount extraction: ≥70% accuracy")
+        XCTAssertGreaterThanOrEqual(correct, cases.count - 1, "Amount extraction: ≥90% accuracy")
     }
 
     // MARK: - Normalizer + ToolRanker Integration
