@@ -6,7 +6,7 @@
 
 **Why simulator?** Test target is `bundle.unit-test` for iOS. Tests use `@testable import Drift` which targets iOS. Can't run without simulator.
 
-**LLM eval tests** (LLMToolCallingEval, LLMGemma4Eval, LLMQwen3Eval, LLMIntegrationTest) check for model files at `/tmp/*.gguf` and **skip gracefully** if not found. They do NOT download models. These are opt-in — run separately when model is pre-staged.
+**LLM eval tests** (LLMToolCallingEval, LLMGemma4Eval, LLMQwen3Eval, LLMIntegrationTest, MultiTurnEvalTests) check for model files at `/tmp/*.gguf` or `~/drift-state/models/` and **skip gracefully** if not found. They do NOT download models. These are opt-in — run separately when model is pre-staged.
 
 **Expected timing:** ~2-3 min for all 729+ tests (simulator already booted). If it takes longer, you probably have stale xcodebuild processes — kill them.
 
@@ -31,7 +31,13 @@ xcodebuild test -project Drift.xcodeproj -scheme Drift \
 # LLM tool-calling eval (needs model on simulator — 100 queries)
 xcodebuild test -project Drift.xcodeproj -scheme Drift \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -only-testing:'DriftTests/LLMToolCallingEval'
+  -only-testing:'DriftLLMEvalTests/LLMToolCallingEval'
+
+# Multi-turn regression suite (5 scenarios × 5 turns, needs Gemma 4 in ~/drift-state/models/)
+pkill -9 -f xcodebuild 2>/dev/null; sleep 2
+xcodebuild test -project Drift.xcodeproj -scheme Drift \
+  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+  -only-testing:'DriftLLMEvalTests/MultiTurnEvalTests' 2>&1 | grep -E "📊|❌|✔"
 
 # Specific test class
 xcodebuild test ... -only-testing:DriftTests/WorkoutTests
@@ -45,6 +51,7 @@ xcodebuild test ... -only-testing:DriftTests/WorkoutTests
 | `AIEvalHarness.swift` | 212+ methods | Food/weight/workout intent, routing, response quality, tools, JSON parsing |
 | `LLMToolCallingEval.swift` | 100 queries | Real model inference: food logging, questions, weight, exercise, sleep, no-tool |
 | `LLMGemma4Eval.swift` | — | Gemma 4 comparison eval |
+| `MultiTurnEvalTests.swift` | 5 scenarios × 5 turns | Multi-turn conversation chain routing |
 | `WorkoutTests.swift` | 68+ | Workouts, CSV import, recovery, templates |
 | `WorkoutPersistenceTests.swift` | 40+ | Session save/load, exercise persistence |
 | `UIFlowTests.swift` | 49 | DB CRUD: weight, food, supplements, DEXA, glucose |
