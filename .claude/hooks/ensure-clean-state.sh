@@ -43,13 +43,16 @@ if [ "$DRIFT_CONTROL" = "RUN" ] && [ "$SESSION_TYPE" = "planning" ]; then
   if [ "$CYCLE_COUNT" -eq "$LAST_REVIEW" ] && [ "$CYCLE_COUNT" -gt 0 ]; then
     DESIGNER_FILE="${CLAUDE_PROJECT_DIR:-.}/Docs/personas/product-designer.md"
     ENGINEER_FILE="${CLAUDE_PROJECT_DIR:-.}/Docs/personas/principal-engineer.md"
-    LAST_COMMIT_TIME=$(git log -1 --format=%ct 2>/dev/null || echo "0")
+    NOW=$(date +%s)
 
     for PFILE in "$DESIGNER_FILE" "$ENGINEER_FILE"; do
       if [ -f "$PFILE" ]; then
-        PMOD=$(stat -f %m "$PFILE" 2>/dev/null || echo "0")
-        if [ "$PMOD" -lt "$LAST_COMMIT_TIME" ]; then
-          ISSUES="${ISSUES}Persona file not updated after product review: $(basename $PFILE)\n\n"
+        # Check when this file was last committed (not file mtime — mtime is always
+        # older than commit timestamp, making the old PMOD < LAST_COMMIT_TIME check
+        # a false positive after every correct update).
+        LAST_PERSONA_COMMIT=$(git log -1 --format="%ct" -- "$PFILE" 2>/dev/null || echo "0")
+        if [ "$(( NOW - LAST_PERSONA_COMMIT ))" -gt 86400 ]; then
+          ISSUES="${ISSUES}Persona file not committed in 24h after product review: $(basename $PFILE)\n\n"
         fi
       fi
     done
