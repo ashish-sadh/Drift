@@ -130,7 +130,7 @@ struct AIChatView: View {
             .animation(.easeInOut(duration: 0.3), value: vm.speechService.isRecording)
             .padding(.horizontal, 8).padding(.bottom, 4)
         }
-        .sheet(isPresented: $vm.showingFoodSearch) {
+        .sheet(isPresented: $vm.showingFoodSearch, onDismiss: { vm.mealLogRevision += 1 }) {
             NavigationStack {
                 FoodSearchView(viewModel: FoodLogViewModel(), initialQuery: vm.foodSearchQuery, initialServings: vm.foodSearchServings, initialMealType: vm.foodSearchMealType)
             }

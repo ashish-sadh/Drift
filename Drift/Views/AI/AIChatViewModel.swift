@@ -29,6 +29,8 @@ final class AIChatViewModel {
     var pendingManualFoodEntry: ManualFoodPrefill? = nil
 
     var isGenerating: Bool { generatingState != .idle }
+    /// Bumped when a food logging sheet dismisses so suggestion pills re-evaluate.
+    var mealLogRevision = 0
 
     /// Injectable for tests; production uses the shared singleton.
     let persistence: ConversationStatePersistence

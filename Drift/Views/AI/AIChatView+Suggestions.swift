@@ -9,37 +9,58 @@ extension AIChatViewModel {
         if case .planningMeals = convState.phase {
             return ["1", "2", "3", "More options", "Done planning"]
         }
-
         // During workout split building, show split-specific pills
         if case .planningWorkout = convState.phase {
             return ["All", "1 2 3", "Skip", "Done"]
         }
 
-        var pills: [String] = []
+        // mealLogRevision is read here so SwiftUI re-evaluates after food logging.
+        _ = mealLogRevision
+
         let totals = FoodService.getDailyTotals()
         let hour = Calendar.current.component(.hour, from: Date())
+        let loggedMeals = Set(FoodService.fetchMealLogs(for: DateFormatters.todayString).map { $0.mealType.lowercased() })
+        let today = DateFormatters.todayString
+        let workoutToday = (try? WorkoutService.fetchWorkouts(limit: 5))?.contains { $0.date == today } == true
         let screen = screenTracker.currentScreen
 
-        // --- Universal pills (always shown, regardless of screen) ---
+        return Self.pillsForTimeAndMeals(
+            hour: hour, loggedMeals: loggedMeals,
+            totals: totals, workoutToday: workoutToday, screen: screen
+        )
+    }
 
-        // Food: time-aware meal logging or calorie check
-        if totals.eaten == 0 {
+    /// Pure helper — all inputs injected so tests can cover every time/state combo without mocking.
+    static func pillsForTimeAndMeals(
+        hour: Int,
+        loggedMeals: Set<String>,
+        totals: DailyTotals,
+        workoutToday: Bool,
+        screen: AIScreen
+    ) -> [String] {
+        var pills: [String] = []
+
+        // --- Time-aware meal pill ---
+        if hour >= 6 && hour < 10 && !loggedMeals.contains("breakfast") {
+            pills.append("Log breakfast")
+            pills.append("What should I eat")
+        } else if hour >= 11 && hour < 14 && !loggedMeals.contains("lunch") {
+            pills.append("Log lunch")
+            pills.append("Calories left")
+        } else if hour >= 17 && hour < 20 && !loggedMeals.contains("dinner") {
+            pills.append("Log dinner")
+            pills.append("Plan my dinner")
+        } else if hour >= 20 && workoutToday {
+            pills.append("Daily summary")
+            pills.append("How's my protein?")
+        } else if totals.eaten == 0 {
             pills.append(hour < 11 ? "Log breakfast" : hour < 15 ? "Log lunch" : "Log dinner")
         } else {
             pills.append("Calories left")
-        }
-
-        // Exercise: smart workout on all screens
-        pills.append("Start smart workout")
-
-        // Insight: cross-domain
-        if hour >= 20 || (hour >= 18 && totals.eaten > 0) {
-            pills.append("Daily summary")
-        } else {
             pills.append("How am I doing?")
         }
 
-        // --- Screen-specific pills (1-2 extras for current context) ---
+        // --- Screen-specific pills ---
         switch screen {
         case .weight, .goal:
             pills.append("Am I on track?")
@@ -55,9 +76,6 @@ extension AIChatViewModel {
             if totals.proteinG < 80 && hour > 14 {
                 pills.append("How's my protein?")
             }
-            if hour >= 17 && hour <= 21 {
-                pills.append("What should I eat for dinner?")
-            }
         case .bodyRhythm:
             pills.append("How'd I sleep?")
         case .glucose:
@@ -71,11 +89,15 @@ extension AIChatViewModel {
         case .bodyComposition:
             pills.append("How's my body comp?")
         default:
-            // Weekly on weekends or end of day
             let weekday = Calendar.current.component(.weekday, from: Date())
             if weekday == 1 || weekday == 7 || hour >= 20 {
                 pills.append("Weekly summary")
             }
+        }
+
+        // Ensure smart workout is always available outside the exercise screen
+        if screen != .exercise {
+            pills.append("Start smart workout")
         }
 
         return pills
