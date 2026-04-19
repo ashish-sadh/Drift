@@ -120,6 +120,7 @@ final class AIChatViewModel {
         let carbsG: Int
         let fatG: Int
         let servingText: String
+        var mealType: MealType = .snack
     }
 
     struct WeightCardData {

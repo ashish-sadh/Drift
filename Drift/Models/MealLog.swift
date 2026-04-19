@@ -84,4 +84,17 @@ enum MealType: String, CaseIterable, Codable, Sendable {
         default: return .snack
         }
     }
+
+    /// Detect meal type from hour alone (no recent-entry inheritance).
+    /// Used by AI chat parser when user doesn't specify a meal keyword.
+    /// Ranges: 5–10 breakfast, 10–15 lunch, 15–18 snack, 18–22 dinner, else snack.
+    static func fromHour(_ hour: Int = Calendar.current.component(.hour, from: Date())) -> MealType {
+        switch hour {
+        case 5..<10: return .breakfast
+        case 10..<15: return .lunch
+        case 15..<18: return .snack
+        case 18..<22: return .dinner
+        default: return .snack
+        }
+    }
 }

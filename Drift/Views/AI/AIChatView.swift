@@ -365,8 +365,25 @@ struct AIChatView: View {
                     .font(.caption.weight(.semibold))
                     .lineLimit(1)
                 Spacer()
-                Text(card.servingText)
-                    .font(.caption2).foregroundStyle(.tertiary)
+                // Meal type picker — tapping cycles through options
+                Menu {
+                    ForEach(MealType.allCases, id: \.self) { meal in
+                        Button {
+                            vm.foodSearchMealType = meal
+                            vm.showingFoodSearch = true
+                        } label: {
+                            Label(meal.displayName, systemImage: meal.icon)
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 3) {
+                        Image(systemName: card.mealType.icon)
+                        Text(card.mealType.displayName)
+                        Image(systemName: "chevron.down")
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(Theme.accent.opacity(0.8))
+                }
             }
 
             HStack(spacing: 0) {

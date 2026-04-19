@@ -586,7 +586,8 @@ extension AIChatViewModel {
         guard let intent = AIActionExecutor.parseFoodIntent(resolved) else { return false }
         foodSearchQuery = intent.query
         foodSearchServings = intent.servings
-        foodSearchMealType = intent.mealHint.flatMap { MealType(rawValue: $0) }
+        let detectedMeal = intent.mealHint.flatMap { MealType(rawValue: $0) } ?? MealType.fromHour()
+        foodSearchMealType = detectedMeal
         if let match = AIActionExecutor.findFood(query: intent.query, servings: intent.servings, gramAmount: intent.gramAmount) {
             let f = match.food
             let s = match.servings
@@ -595,7 +596,8 @@ extension AIChatViewModel {
             let card = FoodCardData(
                 name: f.name, calories: Int(f.calories * s),
                 proteinG: Int(f.proteinG * s), carbsG: Int(f.carbsG * s),
-                fatG: Int(f.fatG * s), servingText: servingText)
+                fatG: Int(f.fatG * s), servingText: servingText,
+                mealType: detectedMeal)
             messages.append(ChatMessage(role: .assistant, text: "Opening to confirm...", foodCard: card))
         } else {
             messages.append(ChatMessage(role: .assistant, text: "Searching for \(intent.query)..."))
