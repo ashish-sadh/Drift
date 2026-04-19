@@ -9,12 +9,13 @@ final class USDAFallbackEval: XCTestCase {
 
     // MARK: - Coverage eval
 
+    @MainActor
     func testUSDA_top50Coverage() async throws {
         guard ProcessInfo.processInfo.environment["DRIFT_USDA_EVAL"] == "1" else {
             throw XCTSkip("Set DRIFT_USDA_EVAL=1 to run USDA coverage eval")
         }
 
-        let foods = loadFixtureFoods().prefix(50).map(String.init)
+        let foods: [String] = Array(loadFixtureFoods().prefix(50))
         guard !foods.isEmpty else {
             XCTFail("fixture empty — run from Drift workspace root")
             return
@@ -45,6 +46,7 @@ final class USDAFallbackEval: XCTestCase {
         )
     }
 
+    @MainActor
     func testUSDA_indianFoodsCoverage() async throws {
         guard ProcessInfo.processInfo.environment["DRIFT_USDA_EVAL"] == "1" else {
             throw XCTSkip("Set DRIFT_USDA_EVAL=1 to run USDA coverage eval")
