@@ -1,0 +1,14 @@
+{
+  "single_item": [
+    {"id": "single_apple", "query": "log an apple"},
+    {"id": "single_eggs", "query": "had 2 eggs"}
+  ],
+  "multi_item": [
+    {"id": "multi_chicken_rice_broccoli", "query": "log chicken rice and broccoli"},
+    {"id": "multi_eggs_toast_coffee", "query": "had eggs toast and coffee for breakfast"},
+    {"id": "multi_rotis_paneer_dal", "query": "2 rotis paneer curry dal"},
+    {"id": "multi_rice_lentils_salad", "query": "I ate rice lentils and salad for dinner"},
+    {"id": "multi_oats_banana_milk", "query": "log oats banana and milk for breakfast"},
+    {"id": "multi_roti_sabzi_yogurt", "query": "had roti sabzi and yogurt for lunch"}
+  ]
+}

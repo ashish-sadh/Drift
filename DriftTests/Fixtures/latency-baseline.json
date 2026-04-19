@@ -1,0 +1,13 @@
+{
+  "gate_multiplier": 1.3,
+  "model_tag": "smollm2-360m",
+  "recorded_at": "uncalibrated",
+  "measurements": {
+    "multi_chicken_rice_broccoli": {"ttft_ms": 0.0, "completion_ms": 0.0},
+    "multi_eggs_toast_coffee": {"ttft_ms": 0.0, "completion_ms": 0.0},
+    "multi_oats_banana_milk": {"ttft_ms": 0.0, "completion_ms": 0.0},
+    "multi_rice_lentils_salad": {"ttft_ms": 0.0, "completion_ms": 0.0},
+    "multi_roti_sabzi_yogurt": {"ttft_ms": 0.0, "completion_ms": 0.0},
+    "multi_rotis_paneer_dal": {"ttft_ms": 0.0, "completion_ms": 0.0}
+  }
+}
