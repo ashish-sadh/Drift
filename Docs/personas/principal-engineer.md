@@ -203,6 +203,13 @@
 - Sprint queue jumped to ~21 items (10 carry-over + 8 new + 3 P1 bug promotions). Senior budget is 5/session so full drain is ~4 senior sessions. Keep future planning sessions honest — don't pile on if the queue isn't drained.
 - Product focus directive explicitly forbids new StaticOverrides/keyword rules — every new AI task must improve the LLM prompt, pipeline stage, or tool set. This session's 8 new tasks all comply (new tools, new card types, prompt threading, eval expansion, persistence). Reinforces the "static overrides are a symptom, not a cure" lesson from Review #42.
 
+### What I Learned — Planning Cycle 1159 (2026-04-19)
+- AI chat depth list from cycle 341 is mostly closed in one sprint: time-aware pills, meal-period auto-detect, streamed stage labels, nutrition lookup card, 25-turn multi-turn regression all shipped. The three remaining items (pipeline threading, edit_meal, session-persistent state) are the hardest — they touch architecture, not just prompts/eval. Budgeting 4 senior sessions for them.
+- Routing win came from a *simpler* intent prompt (44/47 → 46/47, +4.3%). Reinforces the "smaller focused prompts outperform larger multi-task prompts" lesson from Review #41. Next prompt shrink (task #214) should continue the direction — less is more on a 2B model.
+- Context window doubled 2048→4096 tokens and long-context eval added (#176). This unblocks pipeline threading (task #208) without token panic — last 3 turns now fit comfortably with the classifier prompt.
+- Progressive multi-item disclosure (#178) is the first pipeline-level UX win from streaming per-item resolution. Perceived latency dropped materially; the pattern should extend to multi-step confirmations (edit_meal result, workout split builder).
+- The "no new StaticOverrides" directive continues to shape task design — every AI task this sprint is prompt/stage/tool-level, not keyword-rule. Confidence calibration (#209) is the natural next layer: the LLM should admit uncertainty rather than be force-routed by overrides.
+
 ## Preferences & Approach
 - Prefer boring, proven solutions over clever abstractions
 - Prefer fixing patterns over fixing instances (fix the stale-preference pattern, not just one ViewModel)

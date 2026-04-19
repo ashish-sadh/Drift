@@ -38,7 +38,8 @@ What's not: Color palette feels disjointed (dark blue/purple + bright rings), no
 
 ### Now
 - ~~**AI Chat reliability (P0)**~~ DONE — 6-stage pipeline shipped: input normalization, LLM intent classifier, domain extraction, Swift validation, streaming presentation. 55-query gold set at 100% baseline.
-- **AI Chat depth (P0, cycle 341 sprint)** — Pipeline threading (last 3 turns into LLM context), `edit_meal` tool for multi-item mutations via chat, session-persistent conversation state across app relaunch, time-aware suggestion pills, meal-period auto-detect in food parser, streamed stage-label indicator, nutrition-lookup structured card, 25-turn multi-turn regression suite. All tasks must preserve FoodLoggingGoldSet at 100%. No new StaticOverrides.
+- ~~**AI Chat depth (P0, cycle 341 sprint)**~~ MOSTLY DONE — Time-aware pills, meal-period auto-detect, streamed stage-label indicator, nutrition-lookup card, 25-turn multi-turn regression suite all shipped. Context window doubled 2048→4096 with long-context eval. Prompt token audit 16% compression. Routing +4.3% from simpler intent prompt.
+- **AI Chat depth — final three (P0, cycle 1159 sprint)** — Pipeline threading (last 3 turns into LLM context, #208), `edit_meal` tool for multi-item mutations via chat (#207), session-persistent conversation state across app relaunch (#210). Plus intent confidence calibration (#209) and per-stage isolated LLM eval (#212). All must preserve FoodLoggingGoldSet at 100%. No new StaticOverrides — tools, prompt, and pipeline stages only.
 
 ### Next
 - ~~**USDA API Phase 1**~~ DONE — Opt-in toggle, rate limiting, searchWithFallback, privacy notice. Behind toggle (default OFF).

@@ -191,7 +191,12 @@
 - #188 South Indian cuisine is a recurring signal. Our Indian base is the target audience; any gap vs MFP is a direct competitive loss. Prioritize 20–30 specific dishes (idli varieties, dosa types, sambar, rasam, kuzhambu, thoran, aviyal, puliyogare) over breadth across other cuisines.
 - New sprint intentionally has zero "photo food" or "widgets" items — product focus is pure AI chat quality this cycle. Resist surface expansion until current chat polish (context threading, edit_meal tool, persistent state, multi-turn eval) is shipped.
 
-## Preferences & Style
+### What I Learned — Planning Cycle 1159 (2026-04-19)
+- Streaming per-item resolution (#178) is a real UX leap. Users typing "eggs, toast, coffee" see each resolve live instead of a long wait. Extend the pattern to any chat action that takes > 1s — the perceived-latency win is bigger than any model speedup.
+- Time-aware suggestion pills + meal-period auto-detect together mean "had oatmeal" at 8am becomes a 1-tap log without any explicit meal name. This is the AI-first promise made concrete — remove every friction the model can infer.
+- Nutrition lookup card (#196) is the first structured info-only card (no logging involved). Gives users an instant answer without forcing a commit. Build more read-only cards for "how many steps today", "weight trend this month", etc. — conversational glanceable answers.
+- User hasn't filed new bugs this cycle despite 14 feature commits since cycle 341. Either dogfooding paused or the recent fixes stuck. Next cycle, proactively solicit feedback — don't assume silence = satisfaction.
+- `edit_meal` tool is the most overdue chat capability. Today a user who logs the wrong item must leave chat and edit in the diary — breaking the chat-first promise on the most common mutation.
 - Prefer opinionated design over configurability — make good defaults, don't add settings
 - Prefer chat-first interactions — every feature should be reachable from conversation
 - Prefer clean, scannable dashboards over dense data displays
