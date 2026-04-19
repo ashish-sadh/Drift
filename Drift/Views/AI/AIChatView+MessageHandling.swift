@@ -106,46 +106,63 @@ extension AIChatViewModel {
     }
 
     /// Parse freeform food text into recipe items and open the recipe builder.
+    /// Streams each resolved item progressively so the user sees progress before the builder opens.
     /// Used by both pending-meal flow and single-message "log breakfast 2 eggs and toast".
     func buildMealFromText(_ text: String, mealName: String) {
         let items = splitFoodItems(text)
-        var recipeItems: [QuickAddView.RecipeItem] = []
-        var notFound: [String] = []
+        messages.append(ChatMessage(role: .assistant,
+            text: "Looking up \(items.count) item\(items.count == 1 ? "" : "s") for \(mealName)..."))
+        let statusIdx = messages.count - 1
 
-        for item in items {
-            let trimmed = item.trimmingCharacters(in: .whitespaces)
-            if let recipe = resolveRecipeItem(trimmed) {
-                recipeItems.append(recipe)
-            } else if trimmed.lowercased().contains(" with ") {
-                // "coffee with 2% milk with protein powder" → ["coffee", "2% milk", "protein powder"]
-                let subItems = trimmed.components(separatedBy: " with ")
-                    .map { $0.trimmingCharacters(in: .whitespaces) }
-                    .filter { !$0.isEmpty }
-                for sub in subItems {
-                    if let recipe = resolveRecipeItem(sub) {
-                        recipeItems.append(recipe)
-                    } else {
-                        notFound.append(sub)
+        Task {
+            var recipeItems: [QuickAddView.RecipeItem] = []
+            var notFound: [String] = []
+
+            for item in items {
+                let trimmed = item.trimmingCharacters(in: .whitespaces)
+                if let recipe = resolveRecipeItem(trimmed) {
+                    recipeItems.append(recipe)
+                } else if trimmed.lowercased().contains(" with ") {
+                    // "coffee with 2% milk with protein powder" → ["coffee", "2% milk", "protein powder"]
+                    for sub in trimmed.components(separatedBy: " with ")
+                            .map({ $0.trimmingCharacters(in: .whitespaces) })
+                            .filter({ !$0.isEmpty }) {
+                        if let recipe = resolveRecipeItem(sub) {
+                            recipeItems.append(recipe)
+                        } else {
+                            notFound.append(sub)
+                        }
                     }
+                } else {
+                    notFound.append(trimmed)
                 }
-            } else {
-                notFound.append(trimmed)
-            }
-        }
 
-        if recipeItems.isEmpty {
-            foodSearchQuery = text
-            showingFoodSearch = true
-            messages.append(ChatMessage(role: .assistant, text: "Searching for \(text)..."))
-        } else {
-            var msg = "Building \(mealName): \(recipeItems.map { "\($0.name) (\(Int($0.calories)) cal)" }.joined(separator: ", "))."
-            if !notFound.isEmpty {
-                msg += " Couldn't find: \(notFound.joined(separator: ", ")) — add them manually."
+                // Progressive update: show each resolved item before the next lookup
+                guard statusIdx < messages.count else { continue }
+                let resolved = items.count - recipeItems.count - notFound.count
+                if !recipeItems.isEmpty {
+                    let found = recipeItems.map { "\($0.name) (\(Int($0.calories)) cal)" }.joined(separator: ", ")
+                    messages[statusIdx] = ChatMessage(role: .assistant,
+                        text: resolved > 0 ? "Found \(found) — looking up \(resolved) more..." : "Found \(found)")
+                }
+                await Task.yield()
             }
-            messages.append(ChatMessage(role: .assistant, text: msg))
-            pendingRecipeItems = recipeItems
-            pendingRecipeName = mealName.capitalized
-            showingRecipeBuilder = true
+
+            guard statusIdx < messages.count else { return }
+            if recipeItems.isEmpty {
+                messages[statusIdx] = ChatMessage(role: .assistant, text: "Searching for \(text)...")
+                foodSearchQuery = text
+                showingFoodSearch = true
+            } else {
+                var msg = "Building \(mealName): \(recipeItems.map { "\($0.name) (\(Int($0.calories)) cal)" }.joined(separator: ", "))."
+                if !notFound.isEmpty {
+                    msg += " Couldn't find: \(notFound.joined(separator: ", ")) — add them manually."
+                }
+                messages[statusIdx] = ChatMessage(role: .assistant, text: msg)
+                pendingRecipeItems = recipeItems
+                pendingRecipeName = mealName.capitalized
+                showingRecipeBuilder = true
+            }
         }
     }
 
