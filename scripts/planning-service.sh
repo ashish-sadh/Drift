@@ -91,7 +91,10 @@ cmd_validate() {
     local FAILURES=""
 
     # review_merged — mechanical: check git log
-    if ! git -C "$WORK_DIR" log main --oneline --since="7 hours ago" | grep -qE "review[-/]cycle" 2>/dev/null; then
+    # Note: capture to variable first — pipefail + grep -q causes SIGPIPE on git log
+    local REVIEW_LOG
+    REVIEW_LOG=$(git -C "$WORK_DIR" log main --oneline --since="7 hours ago" 2>/dev/null || true)
+    if ! echo "$REVIEW_LOG" | grep -qE "review[-/]cycle"; then
         FAILURES="${FAILURES}review_merged: no review-cycle commit found on main in last 7 hours\n"
     fi
 
