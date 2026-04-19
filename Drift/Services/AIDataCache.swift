@@ -24,6 +24,8 @@ final class AIDataCache {
     private(set) var sleep: SleepData?
     private(set) var cycle: CycleData?
     private var lastRefresh: Date?
+    /// Set by food_info tool handler when a lookup resolves; consumed by attachToolCards.
+    nonisolated(unsafe) var lastFoodLookupFood: Food?
 
     func refreshIfNeeded() async {
         if let last = lastRefresh, Date().timeIntervalSince(last) < 300 { return }

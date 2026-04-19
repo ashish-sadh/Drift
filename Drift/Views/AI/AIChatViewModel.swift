@@ -104,6 +104,7 @@ final class AIChatViewModel {
         let role: Role
         var text: String
         var foodCard: FoodCardData?
+        var nutritionCard: NutritionLookupCardData?
         var weightCard: WeightCardData?
         var workoutCard: WorkoutCardData?
         var navigationCard: NavigationCardData?
@@ -113,6 +114,20 @@ final class AIChatViewModel {
         var biomarkerCard: BiomarkerCardData?
         let createdAt = Date()
         enum Role { case user, assistant }
+    }
+
+    struct NutritionLookupCardData {
+        let name: String
+        let calories100g: Int
+        let proteinG100g: Int
+        let carbsG100g: Int
+        let fatG100g: Int
+        let servingSize: Int
+        let servingUnit: String
+        let servingCalories: Int
+        let servingProteinG: Int
+        let servingCarbsG: Int
+        let servingFatG: Int
     }
 
     struct FoodCardData {

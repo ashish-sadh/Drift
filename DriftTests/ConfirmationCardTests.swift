@@ -141,6 +141,53 @@ import Testing
 
 // MARK: - Muscle Group Filter Logic
 
+// MARK: - Nutrition Lookup Card Tests
+
+@Test func nutritionCardPer100gCalculatesCorrectly() {
+    // banana: 89 cal per 100g serving
+    let card = AIChatViewModel.NutritionLookupCardData(
+        name: "Banana", calories100g: 89, proteinG100g: 1, carbsG100g: 23, fatG100g: 0,
+        servingSize: 100, servingUnit: "g",
+        servingCalories: 89, servingProteinG: 1, servingCarbsG: 23, servingFatG: 0
+    )
+    #expect(card.calories100g == 89)
+    #expect(card.carbsG100g == 23)
+    #expect(card.proteinG100g == 1)
+}
+
+@Test func nutritionCardServingScalesDifferentSize() {
+    // chicken breast: 165 cal per 100g, serving = 200g → 330 cal per serving
+    let card = AIChatViewModel.NutritionLookupCardData(
+        name: "Chicken Breast", calories100g: 165, proteinG100g: 31, carbsG100g: 0, fatG100g: 4,
+        servingSize: 200, servingUnit: "g",
+        servingCalories: 330, servingProteinG: 62, servingCarbsG: 0, servingFatG: 8
+    )
+    #expect(card.servingCalories == 330)
+    #expect(card.servingProteinG == 62)
+    #expect(card.servingSize == 200)
+}
+
+@Test func nutritionCardNamePreserved() {
+    let card = AIChatViewModel.NutritionLookupCardData(
+        name: "Brown Rice", calories100g: 123, proteinG100g: 3, carbsG100g: 26, fatG100g: 1,
+        servingSize: 185, servingUnit: "g",
+        servingCalories: 227, servingProteinG: 5, servingCarbsG: 48, servingFatG: 2
+    )
+    #expect(card.name == "Brown Rice")
+    #expect(card.servingUnit == "g")
+}
+
+@Test func nutritionCardZeroFatFood() {
+    let card = AIChatViewModel.NutritionLookupCardData(
+        name: "Apple", calories100g: 52, proteinG100g: 0, carbsG100g: 14, fatG100g: 0,
+        servingSize: 182, servingUnit: "g",
+        servingCalories: 95, servingProteinG: 0, servingCarbsG: 25, servingFatG: 0
+    )
+    #expect(card.fatG100g == 0)
+    #expect(card.servingFatG == 0)
+    #expect(card.servingCalories == 95)
+}
+
 @Test func muscleGroupFilterExcludesFullBody() {
     // The card creation logic filters out "Full Body" and "Other"
     let bodyPart = "Full Body"

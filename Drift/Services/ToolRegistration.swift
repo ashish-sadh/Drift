@@ -172,10 +172,12 @@ enum ToolRegistration {
 
                     if !isDiaryQuery {
                         if !foodName.isEmpty, let result = FoodService.getNutrition(name: foodName) {
+                            AIDataCache.shared.lastFoodLookupFood = result.food
                             return .text("\(result.perServing) Say 'log \(result.food.name.lowercased())' to add it.")
                         }
                         // Also try the raw query as food name
                         if let result = FoodService.getNutrition(name: query) {
+                            AIDataCache.shared.lastFoodLookupFood = result.food
                             return .text("\(result.perServing) Say 'log \(result.food.name.lowercased())' to add it.")
                         }
                         // Try USDA/OpenFoodFacts if enabled and not found locally (5s timeout)

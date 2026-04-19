@@ -1130,6 +1130,25 @@ extension AIChatViewModel {
     private func attachToolCards(to message: inout ChatMessage, toolsCalled: [String]) {
         let tools = Set(toolsCalled)
 
+        // Nutrition lookup card — food_info resolved a specific food
+        if tools.contains("food_info"), let food = AIDataCache.shared.lastFoodLookupFood {
+            AIDataCache.shared.lastFoodLookupFood = nil
+            let s = food.servingSize
+            message.nutritionCard = NutritionLookupCardData(
+                name: food.name,
+                calories100g: Int(food.calories / s * 100),
+                proteinG100g: Int(food.proteinG / s * 100),
+                carbsG100g: Int(food.carbsG / s * 100),
+                fatG100g: Int(food.fatG / s * 100),
+                servingSize: Int(s),
+                servingUnit: food.servingUnit,
+                servingCalories: Int(food.calories),
+                servingProteinG: Int(food.proteinG),
+                servingCarbsG: Int(food.carbsG),
+                servingFatG: Int(food.fatG)
+            )
+        }
+
         // Supplement card — for status, mark, or add
         if !tools.isDisjoint(with: ["supplements", "mark_supplement", "add_supplement"]) {
             let today = DateFormatters.todayString

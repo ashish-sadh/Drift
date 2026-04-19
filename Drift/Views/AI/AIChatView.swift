@@ -323,6 +323,9 @@ struct AIChatView: View {
                 if let card = msg.foodCard {
                     foodConfirmationCard(card)
                 }
+                if let card = msg.nutritionCard {
+                    nutritionLookupCard(card)
+                }
                 if let card = msg.weightCard {
                     weightConfirmationCard(card)
                 }
@@ -352,6 +355,64 @@ struct AIChatView: View {
             }
         }
         .padding(.horizontal, 10)
+    }
+
+    // MARK: - Nutrition Lookup Card
+
+    private func nutritionLookupCard(_ card: AIChatViewModel.NutritionLookupCardData) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: "chart.bar.fill")
+                    .font(.caption).foregroundStyle(Theme.calorieBlue)
+                Text(card.name)
+                    .font(.caption.weight(.semibold))
+                    .lineLimit(1)
+                Spacer()
+                Text("per \(card.servingSize)\(card.servingUnit)")
+                    .font(.caption2).foregroundStyle(.secondary)
+            }
+
+            // Per-serving row
+            HStack(spacing: 0) {
+                ForEach([
+                    (value: card.servingCalories, label: "cal",     color: Theme.calorieBlue),
+                    (value: card.servingProteinG, label: "protein",  color: Theme.proteinRed),
+                    (value: card.servingCarbsG,   label: "carbs",    color: Theme.carbsGreen),
+                    (value: card.servingFatG,      label: "fat",      color: Theme.fatYellow),
+                ], id: \.label) { item in
+                    VStack(spacing: 2) {
+                        Text(item.label == "cal" ? "\(item.value)" : "\(item.value)g")
+                            .font(.caption.weight(.bold).monospacedDigit())
+                            .foregroundStyle(item.color)
+                        Text(item.label).font(.system(size: 9)).foregroundStyle(.tertiary)
+                    }
+                    .frame(maxWidth: .infinity)
+                }
+            }
+
+            // Per-100g row
+            HStack {
+                Text("per 100g:")
+                    .font(.system(size: 9)).foregroundStyle(.tertiary)
+                Text("\(card.calories100g) cal · \(card.proteinG100g)g P · \(card.carbsG100g)g C · \(card.fatG100g)g F")
+                    .font(.system(size: 9)).foregroundStyle(.secondary)
+            }
+
+            Button {
+                vm.inputText = "log \(card.name.lowercased())"
+                Task { await vm.sendMessage() }
+            } label: {
+                Label("Log it", systemImage: "plus.circle")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Theme.calorieBlue)
+            }
+        }
+        .padding(10)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Theme.calorieBlue.opacity(0.2), lineWidth: 0.5)
+        )
     }
 
     // MARK: - Food Confirmation Card
