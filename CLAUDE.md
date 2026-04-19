@@ -35,7 +35,6 @@ See `program.md` for autopilot instructions, sprint lifecycle, and control comma
 | `Docs/reports/` | Exec reports and product review reports (published as GitHub PRs) |
 | `Docs/testing.md` | How to run tests, eval harness |
 | `Docs/develop.md` | Dev setup, architecture, adding features |
-| `Docs/human-reported-bugs.md` | User bug reports — fix these first |
 | `Docs/improvement-log.md` | Loop cycle log |
 | `Docs/principles/` | Code quality reference cards (Clean Code, Design Patterns, DDD, SwiftUI) |
 | `program.md` | **Drift Autopilot** — the single autonomous loop program |

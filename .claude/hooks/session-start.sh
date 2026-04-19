@@ -43,6 +43,7 @@ echo "Cycle count: $COUNT"
 echo "Last product review: cycle $LAST_REVIEW"
 echo "Next product review due: cycle $NEXT_REVIEW"
 echo "Read Docs/roadmap.md first to understand product direction."
+echo "Read program.md for your operating instructions (autopilot loop, sprint lifecycle, commands)."
 
 # Sprint service status (shows queue + in-progress at session start)
 SPRINT_STATUS=$("${CLAUDE_PROJECT_DIR:-.}/scripts/sprint-service.sh" status 2>/dev/null || echo "Sprint service not initialized")
