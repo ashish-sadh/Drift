@@ -38282,7 +38282,12 @@
     "carbs_g": 34.3,
     "fat_g": 0.1,
     "fiber_g": 0.3,
-    "ingredients": ["corn", "sugar", "malt flavor", "niacinamide"],
+    "ingredients": [
+      "corn",
+      "sugar",
+      "malt flavor",
+      "niacinamide"
+    ],
     "nova_group": 4
   },
   {
@@ -38295,7 +38300,12 @@
     "carbs_g": 29.0,
     "fat_g": 0.3,
     "fiber_g": 0.3,
-    "ingredients": ["rice", "sugar", "salt", "malt flavor"],
+    "ingredients": [
+      "rice",
+      "sugar",
+      "salt",
+      "malt flavor"
+    ],
     "nova_group": 4
   },
   {
@@ -38308,7 +38318,13 @@
     "carbs_g": 25.0,
     "fat_g": 1.5,
     "fiber_g": 1.5,
-    "ingredients": ["whole grain wheat", "sugar", "rice flour", "oats", "honey"],
+    "ingredients": [
+      "whole grain wheat",
+      "sugar",
+      "rice flour",
+      "oats",
+      "honey"
+    ],
     "nova_group": 4
   },
   {
@@ -38321,7 +38337,12 @@
     "carbs_g": 45.9,
     "fat_g": 1.1,
     "fiber_g": 7.4,
-    "ingredients": ["whole grain wheat", "raisins", "wheat bran", "sugar"],
+    "ingredients": [
+      "whole grain wheat",
+      "raisins",
+      "wheat bran",
+      "sugar"
+    ],
     "nova_group": 4
   },
   {
@@ -38334,7 +38355,11 @@
     "carbs_g": 24.0,
     "fat_g": 0.5,
     "fiber_g": 5.3,
-    "ingredients": ["whole grain wheat bran", "sugar", "malt"],
+    "ingredients": [
+      "whole grain wheat bran",
+      "sugar",
+      "malt"
+    ],
     "nova_group": 4
   },
   {
@@ -38347,7 +38372,12 @@
     "carbs_g": 34.7,
     "fat_g": 9.8,
     "fiber_g": 3.3,
-    "ingredients": ["rolled oats", "honey", "sugar", "oil"],
+    "ingredients": [
+      "rolled oats",
+      "honey",
+      "sugar",
+      "oil"
+    ],
     "nova_group": 4
   },
   {
@@ -38360,7 +38390,12 @@
     "carbs_g": 35.8,
     "fat_g": 4.1,
     "fiber_g": 4.2,
-    "ingredients": ["rolled oats", "vegetables", "spices", "salt"],
+    "ingredients": [
+      "rolled oats",
+      "vegetables",
+      "spices",
+      "salt"
+    ],
     "nova_group": 4
   },
   {
@@ -38373,7 +38408,14 @@
     "carbs_g": 31.5,
     "fat_g": 2.0,
     "fiber_g": 4.8,
-    "ingredients": ["broken wheat", "onion", "tomato", "vegetables", "oil", "spices"],
+    "ingredients": [
+      "broken wheat",
+      "onion",
+      "tomato",
+      "vegetables",
+      "oil",
+      "spices"
+    ],
     "nova_group": 2
   },
   {
@@ -38386,7 +38428,13 @@
     "carbs_g": 2.5,
     "fat_g": 0.5,
     "fiber_g": 0.5,
-    "ingredients": ["egg whites", "onion", "tomatoes", "green chili", "spices"],
+    "ingredients": [
+      "egg whites",
+      "onion",
+      "tomatoes",
+      "green chili",
+      "spices"
+    ],
     "nova_group": 2
   },
   {
@@ -38399,7 +38447,11 @@
     "carbs_g": 22.3,
     "fat_g": 2.2,
     "fiber_g": 6.3,
-    "ingredients": ["chickpeas", "salt", "spices"],
+    "ingredients": [
+      "chickpeas",
+      "salt",
+      "spices"
+    ],
     "nova_group": 2
   },
   {
@@ -38412,7 +38464,16 @@
     "carbs_g": 49.6,
     "fat_g": 9.2,
     "fiber_g": 4.0,
-    "ingredients": ["bread", "potato", "onion", "cucumber", "tomato", "green chutney", "butter", "chaat masala"],
+    "ingredients": [
+      "bread",
+      "potato",
+      "onion",
+      "cucumber",
+      "tomato",
+      "green chutney",
+      "butter",
+      "chaat masala"
+    ],
     "nova_group": 3
   },
   {
@@ -38425,7 +38486,14 @@
     "carbs_g": 24.2,
     "fat_g": 2.0,
     "fiber_g": 5.1,
-    "ingredients": ["mixed sprouts", "onion", "tomato", "coriander", "lemon", "chaat masala"],
+    "ingredients": [
+      "mixed sprouts",
+      "onion",
+      "tomato",
+      "coriander",
+      "lemon",
+      "chaat masala"
+    ],
     "nova_group": 2
   },
   {
@@ -38438,7 +38506,11 @@
     "carbs_g": 37.8,
     "fat_g": 0.9,
     "fiber_g": 1.0,
-    "ingredients": ["rice flour", "water", "salt"],
+    "ingredients": [
+      "rice flour",
+      "water",
+      "salt"
+    ],
     "nova_group": 1
   },
   {
@@ -38451,7 +38523,14 @@
     "carbs_g": 31.8,
     "fat_g": 6.4,
     "fiber_g": 1.2,
-    "ingredients": ["rice flour", "banana", "jaggery", "coconut", "cardamom", "sesame seeds"],
+    "ingredients": [
+      "rice flour",
+      "banana",
+      "jaggery",
+      "coconut",
+      "cardamom",
+      "sesame seeds"
+    ],
     "nova_group": 2
   },
   {
@@ -38464,7 +38543,11 @@
     "carbs_g": 43.8,
     "fat_g": 2.4,
     "fiber_g": 4.6,
-    "ingredients": ["ragi flour", "water", "salt"],
+    "ingredients": [
+      "ragi flour",
+      "water",
+      "salt"
+    ],
     "nova_group": 1
   },
   {
@@ -38477,7 +38560,14 @@
     "carbs_g": 47.8,
     "fat_g": 9.7,
     "fiber_g": 2.1,
-    "ingredients": ["rice", "paneer", "vegetables", "soy sauce", "oil", "spices"],
+    "ingredients": [
+      "rice",
+      "paneer",
+      "vegetables",
+      "soy sauce",
+      "oil",
+      "spices"
+    ],
     "nova_group": 3
   },
   {
@@ -38490,7 +38580,13 @@
     "carbs_g": 36.7,
     "fat_g": 3.9,
     "fiber_g": 10.2,
-    "ingredients": ["black chickpeas", "onion", "tomato", "spices", "oil"],
+    "ingredients": [
+      "black chickpeas",
+      "onion",
+      "tomato",
+      "spices",
+      "oil"
+    ],
     "nova_group": 2
   },
   {
@@ -38503,7 +38599,9 @@
     "carbs_g": 16.5,
     "fat_g": 0.4,
     "fiber_g": 1.3,
-    "ingredients": ["lychee"],
+    "ingredients": [
+      "lychee"
+    ],
     "nova_group": 1
   },
   {
@@ -38516,7 +38614,9 @@
     "carbs_g": 19.9,
     "fat_g": 1.1,
     "fiber_g": 5.3,
-    "ingredients": ["sapodilla"],
+    "ingredients": [
+      "sapodilla"
+    ],
     "nova_group": 1
   },
   {
@@ -38529,7 +38629,9 @@
     "carbs_g": 15.6,
     "fat_g": 0.2,
     "fiber_g": 0.6,
-    "ingredients": ["java plum"],
+    "ingredients": [
+      "java plum"
+    ],
     "nova_group": 1
   },
   {
@@ -38542,7 +38644,9 @@
     "carbs_g": 8.9,
     "fat_g": 0.5,
     "fiber_g": 2.6,
-    "ingredients": ["fresh coconut water"],
+    "ingredients": [
+      "fresh coconut water"
+    ],
     "nova_group": 1
   },
   {
@@ -38555,7 +38659,12 @@
     "carbs_g": 52.8,
     "fat_g": 10.4,
     "fiber_g": 2.1,
-    "ingredients": ["noodles", "broth", "seasonings", "palm oil"],
+    "ingredients": [
+      "noodles",
+      "broth",
+      "seasonings",
+      "palm oil"
+    ],
     "nova_group": 4
   },
   {
@@ -38568,7 +38677,9 @@
     "carbs_g": 26.2,
     "fat_g": 0.9,
     "fiber_g": 2.5,
-    "ingredients": ["ground corn"],
+    "ingredients": [
+      "ground corn"
+    ],
     "nova_group": 1
   },
   {
@@ -38581,7 +38692,9 @@
     "carbs_g": 33.5,
     "fat_g": 1.0,
     "fiber_g": 4.5,
-    "ingredients": ["buckwheat"],
+    "ingredients": [
+      "buckwheat"
+    ],
     "nova_group": 1
   },
   {
@@ -38594,7 +38707,9 @@
     "carbs_g": 23.2,
     "fat_g": 2.1,
     "fiber_g": 2.6,
-    "ingredients": ["amaranth"],
+    "ingredients": [
+      "amaranth"
+    ],
     "nova_group": 1
   },
   {
@@ -38607,7 +38722,12 @@
     "carbs_g": 29.2,
     "fat_g": 0.1,
     "fiber_g": 0.0,
-    "ingredients": ["cornstarch", "sugar", "rosewater", "pistachios"],
+    "ingredients": [
+      "cornstarch",
+      "sugar",
+      "rosewater",
+      "pistachios"
+    ],
     "nova_group": 3
   },
   {
@@ -38620,7 +38740,13 @@
     "carbs_g": 44.6,
     "fat_g": 6.8,
     "fiber_g": 2.9,
-    "ingredients": ["rice", "mixed vegetables", "soy sauce", "oil", "spices"],
+    "ingredients": [
+      "rice",
+      "mixed vegetables",
+      "soy sauce",
+      "oil",
+      "spices"
+    ],
     "nova_group": 3
   },
   {
@@ -38633,7 +38759,12 @@
     "carbs_g": 30.0,
     "fat_g": 30.0,
     "fiber_g": 1.0,
-    "ingredients": ["english muffin", "pork sausage patty", "egg", "american cheese"],
+    "ingredients": [
+      "english muffin",
+      "pork sausage patty",
+      "egg",
+      "american cheese"
+    ],
     "nova_group": 4
   },
   {
@@ -38646,7 +38777,13 @@
     "carbs_g": 26.0,
     "fat_g": 20.0,
     "fiber_g": 2.0,
-    "ingredients": ["pita", "lamb", "tzatziki", "tomato", "onion"],
+    "ingredients": [
+      "pita",
+      "lamb",
+      "tzatziki",
+      "tomato",
+      "onion"
+    ],
     "nova_group": 3
   },
   {
@@ -38659,7 +38796,628 @@
     "carbs_g": 44.0,
     "fat_g": 6.0,
     "fiber_g": 5.0,
-    "ingredients": ["oats", "soy protein", "chocolate chips", "cane syrup", "tapioca syrup"],
+    "ingredients": [
+      "oats",
+      "soy protein",
+      "chocolate chips",
+      "cane syrup",
+      "tapioca syrup"
+    ],
     "nova_group": 4
+  },
+  {
+    "name": "Osso Buco (Braised Veal Shanks)",
+    "category": "Italian",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 34.0,
+    "carbs_g": 12.0,
+    "fat_g": 19.0,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "veal shank",
+      "onion",
+      "carrot",
+      "celery",
+      "white wine",
+      "tomatoes",
+      "gremolata"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Saltimbocca alla Romana",
+    "category": "Italian",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 295,
+    "protein_g": 32.0,
+    "carbs_g": 2.0,
+    "fat_g": 18.0,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "veal scallopini",
+      "prosciutto",
+      "sage",
+      "butter",
+      "white wine"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Eggplant Parmigiana",
+    "category": "Italian",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 10.0,
+    "carbs_g": 18.0,
+    "fat_g": 16.0,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "eggplant",
+      "marinara sauce",
+      "mozzarella",
+      "parmesan",
+      "breadcrumbs",
+      "olive oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Pasta e Fagioli",
+    "category": "Italian",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 14.0,
+    "carbs_g": 52.0,
+    "fat_g": 7.0,
+    "fiber_g": 8.0,
+    "ingredients": [
+      "pasta",
+      "cannellini beans",
+      "pancetta",
+      "tomatoes",
+      "broth",
+      "garlic",
+      "rosemary"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Panzanella (Tuscan Bread Salad)",
+    "category": "Italian",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 5.0,
+    "carbs_g": 32.0,
+    "fat_g": 9.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "stale bread",
+      "tomatoes",
+      "cucumber",
+      "basil",
+      "red onion",
+      "olive oil",
+      "red wine vinegar"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Yukgaejang (Spicy Beef Soup)",
+    "category": "Korean",
+    "serving_size": 450,
+    "serving_unit": "g",
+    "calories": 285,
+    "protein_g": 24.0,
+    "carbs_g": 14.0,
+    "fat_g": 14.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "beef brisket",
+      "fernbrake (gosari)",
+      "green onion",
+      "egg",
+      "gochugaru",
+      "sesame oil",
+      "garlic"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Galbi (Korean BBQ Short Ribs)",
+    "category": "Korean",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 335,
+    "protein_g": 25.0,
+    "carbs_g": 8.0,
+    "fat_g": 22.0,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "beef short ribs",
+      "soy sauce",
+      "garlic",
+      "ginger",
+      "pear",
+      "sesame oil",
+      "sugar",
+      "green onion"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Galbijjim (Braised Short Ribs)",
+    "category": "Korean",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 390,
+    "protein_g": 28.0,
+    "carbs_g": 18.0,
+    "fat_g": 22.0,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "beef short ribs",
+      "soy sauce",
+      "garlic",
+      "ginger",
+      "carrots",
+      "mushrooms",
+      "chestnuts"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Gamja Tang (Pork Bone Soup)",
+    "category": "Korean",
+    "serving_size": 500,
+    "serving_unit": "g",
+    "calories": 440,
+    "protein_g": 35.0,
+    "carbs_g": 20.0,
+    "fat_g": 22.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "pork back bones",
+      "potato",
+      "perilla leaves",
+      "green onion",
+      "gochujang",
+      "fermented shrimp",
+      "garlic"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Tteok Mandu Guk (Rice Cake Dumpling Soup)",
+    "category": "Korean",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 420,
+    "protein_g": 18.0,
+    "carbs_g": 62.0,
+    "fat_g": 10.0,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "rice cake slices",
+      "dumplings",
+      "beef broth",
+      "egg",
+      "green onion",
+      "soy sauce",
+      "garlic"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Agedashi Tofu",
+    "category": "Japanese",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 150,
+    "protein_g": 8.0,
+    "carbs_g": 14.0,
+    "fat_g": 7.0,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "silken tofu",
+      "potato starch",
+      "dashi broth",
+      "mirin",
+      "soy sauce",
+      "bonito flakes",
+      "ginger"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Gyudon (Beef Rice Bowl)",
+    "category": "Japanese",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 580,
+    "protein_g": 26.0,
+    "carbs_g": 78.0,
+    "fat_g": 16.0,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "white rice",
+      "thinly sliced beef",
+      "onion",
+      "dashi",
+      "soy sauce",
+      "mirin",
+      "sake"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Oyakodon (Chicken Egg Rice Bowl)",
+    "category": "Japanese",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 530,
+    "protein_g": 30.0,
+    "carbs_g": 70.0,
+    "fat_g": 12.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "white rice",
+      "chicken thigh",
+      "egg",
+      "dashi",
+      "soy sauce",
+      "mirin",
+      "onion"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Tonkatsu (Breaded Pork Cutlet)",
+    "category": "Japanese",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 370,
+    "protein_g": 28.0,
+    "carbs_g": 22.0,
+    "fat_g": 20.0,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "pork loin",
+      "panko breadcrumbs",
+      "egg",
+      "flour",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Pain au Chocolat",
+    "category": "Bakery",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 6.0,
+    "carbs_g": 38.0,
+    "fat_g": 19.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "flour",
+      "butter",
+      "dark chocolate",
+      "milk",
+      "yeast",
+      "sugar",
+      "salt"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Apple Turnover",
+    "category": "Bakery",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 290,
+    "protein_g": 4.0,
+    "carbs_g": 38.0,
+    "fat_g": 14.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "puff pastry",
+      "apple filling",
+      "cinnamon",
+      "sugar",
+      "butter"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Almond Croissant",
+    "category": "Bakery",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 410,
+    "protein_g": 8.0,
+    "carbs_g": 42.0,
+    "fat_g": 24.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "croissant dough",
+      "almond cream",
+      "almond flour",
+      "butter",
+      "sugar",
+      "sliced almonds"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Cheese Danish",
+    "category": "Bakery",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 6.0,
+    "carbs_g": 36.0,
+    "fat_g": 17.0,
+    "fiber_g": 0.8,
+    "ingredients": [
+      "pastry dough",
+      "cream cheese",
+      "sugar",
+      "egg",
+      "vanilla"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Kouign Amann (Breton Butter Cake)",
+    "category": "Bakery",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 5.0,
+    "carbs_g": 44.0,
+    "fat_g": 21.0,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "flour",
+      "butter",
+      "sugar",
+      "yeast",
+      "salt"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Muhammara (Roasted Red Pepper Dip)",
+    "category": "Middle Eastern",
+    "serving_size": 50,
+    "serving_unit": "g",
+    "calories": 110,
+    "protein_g": 2.0,
+    "carbs_g": 8.0,
+    "fat_g": 8.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "roasted red peppers",
+      "walnuts",
+      "pomegranate molasses",
+      "cumin",
+      "olive oil",
+      "breadcrumbs"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Fatayer (Spinach Pastry, 2 pieces)",
+    "category": "Middle Eastern",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 210,
+    "protein_g": 6.0,
+    "carbs_g": 28.0,
+    "fat_g": 9.0,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "dough",
+      "spinach",
+      "onion",
+      "sumac",
+      "lemon juice",
+      "olive oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Maqluba (Upside Down Rice)",
+    "category": "Middle Eastern",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 480,
+    "protein_g": 22.0,
+    "carbs_g": 64.0,
+    "fat_g": 14.0,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "rice",
+      "chicken",
+      "eggplant",
+      "tomato",
+      "onion",
+      "turmeric",
+      "cumin",
+      "allspice"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Mansaf (Jordanian Lamb Rice)",
+    "category": "Middle Eastern",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 620,
+    "protein_g": 38.0,
+    "carbs_g": 68.0,
+    "fat_g": 22.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "lamb",
+      "rice",
+      "jameed (dried yogurt)",
+      "almonds",
+      "pine nuts",
+      "turmeric",
+      "bay leaf"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Dukkah (Egyptian Nut & Spice Mix)",
+    "category": "Middle Eastern",
+    "serving_size": 20,
+    "serving_unit": "g",
+    "calories": 90,
+    "protein_g": 3.0,
+    "carbs_g": 4.0,
+    "fat_g": 7.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "hazelnuts",
+      "sesame seeds",
+      "coriander",
+      "cumin",
+      "black pepper",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Gazpacho (Cold Tomato Soup)",
+    "category": "Soups",
+    "serving_size": 240,
+    "serving_unit": "ml",
+    "calories": 90,
+    "protein_g": 2.0,
+    "carbs_g": 14.0,
+    "fat_g": 3.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "tomatoes",
+      "cucumber",
+      "bell pepper",
+      "garlic",
+      "olive oil",
+      "red wine vinegar",
+      "bread"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Borscht (Ukrainian Beet Soup)",
+    "category": "Soups",
+    "serving_size": 240,
+    "serving_unit": "ml",
+    "calories": 85,
+    "protein_g": 3.0,
+    "carbs_g": 14.0,
+    "fat_g": 2.0,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "beets",
+      "cabbage",
+      "potato",
+      "carrot",
+      "onion",
+      "beef broth",
+      "tomato paste",
+      "sour cream"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Stracciatella (Italian Egg Drop Soup)",
+    "category": "Soups",
+    "serving_size": 300,
+    "serving_unit": "ml",
+    "calories": 110,
+    "protein_g": 9.0,
+    "carbs_g": 8.0,
+    "fat_g": 5.0,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "chicken broth",
+      "eggs",
+      "parmesan",
+      "semolina",
+      "nutmeg",
+      "parsley"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Mochi Ice Cream (1 piece)",
+    "category": "Japanese",
+    "serving_size": 45,
+    "serving_unit": "g",
+    "calories": 100,
+    "protein_g": 1.0,
+    "carbs_g": 17.0,
+    "fat_g": 3.0,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "sweet rice flour",
+      "ice cream",
+      "sugar",
+      "cornstarch"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Loukoumades (Greek Honey Puffs)",
+    "category": "Mediterranean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 310,
+    "protein_g": 5.0,
+    "carbs_g": 42.0,
+    "fat_g": 14.0,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "flour",
+      "yeast",
+      "honey",
+      "cinnamon",
+      "oil",
+      "sugar",
+      "water"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Vegetable Samosa (2 pieces)",
+    "category": "Indian Street Food",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 210,
+    "protein_g": 4.0,
+    "carbs_g": 28.0,
+    "fat_g": 9.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "pastry dough",
+      "potato",
+      "peas",
+      "onion",
+      "coriander",
+      "cumin",
+      "ginger",
+      "oil"
+    ],
+    "nova_group": 3
   }
 ]
