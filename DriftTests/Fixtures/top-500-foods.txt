@@ -1,0 +1,254 @@
+# Top common foods — US, Indian, and global
+# One food per line. Used by USDAFallbackEval and USDAFallbackTests.
+
+# Fruits
+apple
+banana
+orange
+strawberry
+blueberry
+grape
+watermelon
+pineapple
+mango
+avocado
+peach
+pear
+cherry
+raspberry
+cantaloupe
+kiwi
+pomegranate
+lemon
+lime
+papaya
+
+# Vegetables
+broccoli
+spinach
+kale
+lettuce
+cucumber
+tomato
+carrot
+onion
+bell pepper
+potato
+sweet potato
+corn
+zucchini
+cauliflower
+celery
+green beans
+peas
+asparagus
+mushroom
+garlic
+
+# Dairy & Eggs
+whole milk
+skim milk
+yogurt
+greek yogurt
+butter
+cheddar cheese
+mozzarella cheese
+cottage cheese
+cream cheese
+sour cream
+egg
+scrambled eggs
+hard boiled egg
+fried egg
+
+# Grains & Bread
+white rice
+brown rice
+oatmeal
+whole wheat bread
+white bread
+sourdough bread
+bagel
+tortilla
+pasta
+spaghetti
+penne
+macaroni
+granola
+quinoa
+barley
+
+# Meat & Poultry
+chicken breast
+grilled chicken
+chicken thigh
+ground beef
+beef steak
+salmon
+tuna
+tilapia
+shrimp
+pork chop
+turkey breast
+ham
+bacon
+lamb
+cod
+
+# Legumes & Nuts
+peanut butter
+almond butter
+almonds
+cashews
+walnuts
+peanuts
+black beans
+kidney beans
+lentils
+chickpeas
+edamame
+tofu
+
+# Snacks & Sweets
+chocolate
+ice cream
+cookies
+cake
+granola bar
+protein bar
+chips
+popcorn
+
+# Fast Food & Meals
+pizza
+cheeseburger
+hot dog
+fried chicken
+french fries
+burrito
+taco
+sandwich
+
+# Beverages
+orange juice
+apple juice
+coffee
+green tea
+milk tea
+sports drink
+protein shake
+coconut water
+
+# Indian Foods
+biryani
+chicken biryani
+vegetable biryani
+dal
+dal tadka
+dal makhani
+rajma
+chole
+palak paneer
+paneer butter masala
+chicken tikka masala
+butter chicken
+tandoori chicken
+chicken curry
+fish curry
+prawn curry
+mutton curry
+roti
+chapati
+naan
+garlic naan
+paratha
+aloo paratha
+idli
+dosa
+masala dosa
+sambhar
+vada
+upma
+poha
+khichdi
+rice and dal
+paneer
+aloo sabzi
+bhindi masala
+mixed vegetable curry
+chole bhature
+pav bhaji
+biryani rice
+kadai chicken
+saag paneer
+malai kofta
+shahi paneer
+korma
+rogan josh
+
+# Indian Snacks & Sweets
+samosa
+pakora
+bhel puri
+pani puri
+dahi vada
+gulab jamun
+kheer
+halwa
+ladoo
+barfi
+rasgulla
+jalebi
+chai
+masala chai
+lassi
+mango lassi
+
+# Global Foods
+sushi
+ramen
+miso soup
+tempura
+gyoza
+pad thai
+fried rice
+spring roll
+kimchi
+bibimbap
+pho
+banh mi
+shawarma
+falafel
+hummus
+pita bread
+kebab
+croissant
+baguette
+crepe
+paella
+tacos al pastor
+enchiladas
+nachos
+guacamole
+burrito bowl
+caesar salad
+greek salad
+caprese salad
+
+# Common Prepared Foods
+chicken noodle soup
+tomato soup
+vegetable soup
+grilled cheese sandwich
+BLT sandwich
+turkey sandwich
+egg salad
+tuna salad
+macaroni and cheese
+beef stew
+stir fry
+fried egg sandwich
+oatmeal with milk
+banana pancakes
+French toast
+waffles

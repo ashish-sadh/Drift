@@ -101,6 +101,7 @@ targets:
       - path: Drift/Services/LlamaCppBackend.swift
       - path: Drift/Services/AIBackend.swift
       - path: Drift/Services/InputNormalizer.swift
+      - path: Drift/Services/USDAFoodService.swift
       - path: Drift/Utilities/Log.swift
     dependencies:
       - framework: Frameworks/llama.xcframework
