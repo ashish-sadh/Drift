@@ -5098,7 +5098,7 @@
     "nova_group": 3
   },
   {
-    "name": "Açaí Bowl (medium)",
+    "name": "A\u00e7a\u00ed Bowl (medium)",
     "category": "US Staples",
     "serving_size": 300,
     "serving_unit": "g",
@@ -5108,7 +5108,7 @@
     "fat_g": 18,
     "fiber_g": 8,
     "ingredients": [
-      "Açaí Bowl (medium)"
+      "A\u00e7a\u00ed Bowl (medium)"
     ],
     "nova_group": 3
   },
@@ -9788,7 +9788,7 @@
     "nova_group": 3
   },
   {
-    "name": "Costco Açaí Bowl (food court)",
+    "name": "Costco A\u00e7a\u00ed Bowl (food court)",
     "category": "Costco",
     "serving_size": 355,
     "serving_unit": "g",
@@ -9798,7 +9798,7 @@
     "fat_g": 19,
     "fiber_g": 7,
     "ingredients": [
-      "Costco Açaí Bowl (food court)"
+      "Costco A\u00e7a\u00ed Bowl (food court)"
     ],
     "nova_group": 3
   },
@@ -10493,7 +10493,7 @@
     "nova_group": 4
   },
   {
-    "name": "Starbucks Caffè Latte (Grande, 2% milk)",
+    "name": "Starbucks Caff\u00e8 Latte (Grande, 2% milk)",
     "category": "Beverages",
     "serving_size": 473,
     "serving_unit": "ml",
@@ -10503,7 +10503,7 @@
     "fat_g": 7,
     "fiber_g": 0,
     "ingredients": [
-      "Starbucks Caffè Latte (Grande, 2% milk)"
+      "Starbucks Caff\u00e8 Latte (Grande, 2% milk)"
     ],
     "nova_group": 3
   },
@@ -25155,7 +25155,7 @@
     "ingredients": [
       "fries",
       "cheese sauce",
-      "jalapeños",
+      "jalape\u00f1os",
       "sour cream"
     ],
     "nova_group": 4
@@ -28726,7 +28726,7 @@
       "beef",
       "onion",
       "tomato",
-      "jalapeño",
+      "jalape\u00f1o",
       "rosemary",
       "Ethiopian spices",
       "butter"
@@ -39430,7 +39430,12 @@
     "carbs_g": 52,
     "fat_g": 18,
     "fiber_g": 2,
-    "ingredients": ["pasta", "cheddar cheese", "butter", "milk"],
+    "ingredients": [
+      "pasta",
+      "cheddar cheese",
+      "butter",
+      "milk"
+    ],
     "nova_group": 2
   },
   {
@@ -39443,7 +39448,11 @@
     "carbs_g": 34,
     "fat_g": 21,
     "fiber_g": 2,
-    "ingredients": ["bread", "cheddar cheese", "butter"],
+    "ingredients": [
+      "bread",
+      "cheddar cheese",
+      "butter"
+    ],
     "nova_group": 2
   },
   {
@@ -39456,7 +39465,13 @@
     "carbs_g": 42,
     "fat_g": 11,
     "fiber_g": 2,
-    "ingredients": ["bread", "egg", "milk", "butter", "cinnamon"],
+    "ingredients": [
+      "bread",
+      "egg",
+      "milk",
+      "butter",
+      "cinnamon"
+    ],
     "nova_group": 2
   },
   {
@@ -39469,7 +39484,13 @@
     "carbs_g": 38,
     "fat_g": 6,
     "fiber_g": 1.5,
-    "ingredients": ["flour", "egg", "milk", "butter", "baking powder"],
+    "ingredients": [
+      "flour",
+      "egg",
+      "milk",
+      "butter",
+      "baking powder"
+    ],
     "nova_group": 2
   },
   {
@@ -39482,7 +39503,11 @@
     "carbs_g": 12,
     "fat_g": 14,
     "fiber_g": 0.5,
-    "ingredients": ["pork shoulder", "bbq sauce", "spices"],
+    "ingredients": [
+      "pork shoulder",
+      "bbq sauce",
+      "spices"
+    ],
     "nova_group": 3
   },
   {
@@ -39495,7 +39520,12 @@
     "carbs_g": 45,
     "fat_g": 29,
     "fiber_g": 2,
-    "ingredients": ["biscuit", "sausage gravy", "flour", "milk"],
+    "ingredients": [
+      "biscuit",
+      "sausage gravy",
+      "flour",
+      "milk"
+    ],
     "nova_group": 3
   },
   {
@@ -39508,7 +39538,12 @@
     "carbs_g": 40,
     "fat_g": 24,
     "fiber_g": 3,
-    "ingredients": ["chicken", "pie crust", "vegetables", "cream sauce"],
+    "ingredients": [
+      "chicken",
+      "pie crust",
+      "vegetables",
+      "cream sauce"
+    ],
     "nova_group": 3
   },
   {
@@ -39521,7 +39556,13 @@
     "carbs_g": 18,
     "fat_g": 9,
     "fiber_g": 1,
-    "ingredients": ["clams", "potatoes", "cream", "onion", "bacon"],
+    "ingredients": [
+      "clams",
+      "potatoes",
+      "cream",
+      "onion",
+      "bacon"
+    ],
     "nova_group": 2
   },
   {
@@ -39534,7 +39575,9 @@
     "carbs_g": 4.1,
     "fat_g": 19.6,
     "fiber_g": 2,
-    "ingredients": ["walnut"],
+    "ingredients": [
+      "walnut"
+    ],
     "nova_group": 1
   },
   {
@@ -39547,7 +39590,9 @@
     "carbs_g": 9.2,
     "fat_g": 13.1,
     "fiber_g": 0.9,
-    "ingredients": ["cashew"],
+    "ingredients": [
+      "cashew"
+    ],
     "nova_group": 1
   },
   {
@@ -39560,7 +39605,9 @@
     "carbs_g": 4.2,
     "fat_g": 14.5,
     "fiber_g": 1.8,
-    "ingredients": ["pumpkin seeds"],
+    "ingredients": [
+      "pumpkin seeds"
+    ],
     "nova_group": 1
   },
   {
@@ -39573,7 +39620,9 @@
     "carbs_g": 6.5,
     "fat_g": 14.1,
     "fiber_g": 2.4,
-    "ingredients": ["sunflower seeds"],
+    "ingredients": [
+      "sunflower seeds"
+    ],
     "nova_group": 1
   },
   {
@@ -39586,7 +39635,9 @@
     "carbs_g": 2.6,
     "fat_g": 13.8,
     "fiber_g": 1.2,
-    "ingredients": ["hemp seeds"],
+    "ingredients": [
+      "hemp seeds"
+    ],
     "nova_group": 1
   },
   {
@@ -39599,7 +39650,14 @@
     "carbs_g": 52,
     "fat_g": 16,
     "fiber_g": 5,
-    "ingredients": ["flour tortilla", "chicken", "rice", "beans", "cheese", "sour cream"],
+    "ingredients": [
+      "flour tortilla",
+      "chicken",
+      "rice",
+      "beans",
+      "cheese",
+      "sour cream"
+    ],
     "nova_group": 3
   },
   {
@@ -39612,7 +39670,13 @@
     "carbs_g": 28,
     "fat_g": 18,
     "fiber_g": 3,
-    "ingredients": ["corn tortilla", "ground beef", "cheese", "lettuce", "tomato"],
+    "ingredients": [
+      "corn tortilla",
+      "ground beef",
+      "cheese",
+      "lettuce",
+      "tomato"
+    ],
     "nova_group": 3
   },
   {
@@ -39625,7 +39689,11 @@
     "carbs_g": 34,
     "fat_g": 24,
     "fiber_g": 2,
-    "ingredients": ["flour tortilla", "cheddar cheese", "butter"],
+    "ingredients": [
+      "flour tortilla",
+      "cheddar cheese",
+      "butter"
+    ],
     "nova_group": 2
   },
   {
@@ -39638,7 +39706,13 @@
     "carbs_g": 5.2,
     "fat_g": 8.6,
     "fiber_g": 3.5,
-    "ingredients": ["avocado", "lime juice", "cilantro", "onion", "tomato"],
+    "ingredients": [
+      "avocado",
+      "lime juice",
+      "cilantro",
+      "onion",
+      "tomato"
+    ],
     "nova_group": 1
   },
   {
@@ -39651,7 +39725,11 @@
     "carbs_g": 40,
     "fat_g": 20,
     "fiber_g": 3,
-    "ingredients": ["tortilla chips", "cheddar cheese sauce", "jalapeño"],
+    "ingredients": [
+      "tortilla chips",
+      "cheddar cheese sauce",
+      "jalape\u00f1o"
+    ],
     "nova_group": 4
   },
   {
@@ -39664,7 +39742,13 @@
     "carbs_g": 3.5,
     "fat_g": 0.1,
     "fiber_g": 1,
-    "ingredients": ["tomato", "onion", "cilantro", "jalapeño", "lime"],
+    "ingredients": [
+      "tomato",
+      "onion",
+      "cilantro",
+      "jalape\u00f1o",
+      "lime"
+    ],
     "nova_group": 1
   },
   {
@@ -39677,7 +39761,12 @@
     "carbs_g": 38,
     "fat_g": 16,
     "fiber_g": 4,
-    "ingredients": ["corn tortilla", "chicken", "enchilada sauce", "cheese"],
+    "ingredients": [
+      "corn tortilla",
+      "chicken",
+      "enchilada sauce",
+      "cheese"
+    ],
     "nova_group": 3
   },
   {
@@ -39690,7 +39779,12 @@
     "carbs_g": 3.8,
     "fat_g": 0,
     "fiber_g": 0.1,
-    "ingredients": ["tomato", "vinegar", "sugar", "salt"],
+    "ingredients": [
+      "tomato",
+      "vinegar",
+      "sugar",
+      "salt"
+    ],
     "nova_group": 3
   },
   {
@@ -39703,7 +39797,11 @@
     "carbs_g": 0.4,
     "fat_g": 10.3,
     "fiber_g": 0,
-    "ingredients": ["soybean oil", "egg yolk", "vinegar"],
+    "ingredients": [
+      "soybean oil",
+      "egg yolk",
+      "vinegar"
+    ],
     "nova_group": 3
   },
   {
@@ -39716,7 +39814,12 @@
     "carbs_g": 0.3,
     "fat_g": 0.2,
     "fiber_g": 0.1,
-    "ingredients": ["mustard seeds", "vinegar", "water", "salt"],
+    "ingredients": [
+      "mustard seeds",
+      "vinegar",
+      "water",
+      "salt"
+    ],
     "nova_group": 2
   },
   {
@@ -39729,7 +39832,11 @@
     "carbs_g": 0.8,
     "fat_g": 0,
     "fiber_g": 0.1,
-    "ingredients": ["soybean", "wheat", "salt"],
+    "ingredients": [
+      "soybean",
+      "wheat",
+      "salt"
+    ],
     "nova_group": 2
   },
   {
@@ -39742,7 +39849,11 @@
     "carbs_g": 0.3,
     "fat_g": 0,
     "fiber_g": 0.1,
-    "ingredients": ["chili peppers", "vinegar", "salt"],
+    "ingredients": [
+      "chili peppers",
+      "vinegar",
+      "salt"
+    ],
     "nova_group": 2
   },
   {
@@ -39755,7 +39866,12 @@
     "carbs_g": 30,
     "fat_g": 5,
     "fiber_g": 0.3,
-    "ingredients": ["khoya", "flour", "sugar syrup", "ghee"],
+    "ingredients": [
+      "khoya",
+      "flour",
+      "sugar syrup",
+      "ghee"
+    ],
     "nova_group": 3
   },
   {
@@ -39768,7 +39884,12 @@
     "carbs_g": 42,
     "fat_g": 4,
     "fiber_g": 0.5,
-    "ingredients": ["maida", "sugar syrup", "ghee", "saffron"],
+    "ingredients": [
+      "maida",
+      "sugar syrup",
+      "ghee",
+      "saffron"
+    ],
     "nova_group": 3
   },
   {
@@ -39781,7 +39902,13 @@
     "carbs_g": 35,
     "fat_g": 6,
     "fiber_g": 0.5,
-    "ingredients": ["milk", "rice", "sugar", "cardamom", "nuts"],
+    "ingredients": [
+      "milk",
+      "rice",
+      "sugar",
+      "cardamom",
+      "nuts"
+    ],
     "nova_group": 2
   },
   {
@@ -39794,7 +39921,11 @@
     "carbs_g": 22,
     "fat_g": 6,
     "fiber_g": 0.2,
-    "ingredients": ["khoya", "sugar", "cardamom"],
+    "ingredients": [
+      "khoya",
+      "sugar",
+      "cardamom"
+    ],
     "nova_group": 3
   },
   {
@@ -39807,7 +39938,569 @@
     "carbs_g": 26,
     "fat_g": 8.5,
     "fiber_g": 1.5,
-    "ingredients": ["chickpea flour", "ghee", "sugar", "cardamom"],
+    "ingredients": [
+      "chickpea flour",
+      "ghee",
+      "sugar",
+      "cardamom"
+    ],
     "nova_group": 3
+  },
+  {
+    "name": "Jollof Rice (Nigerian)",
+    "category": "African",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 300,
+    "protein_g": 7,
+    "carbs_g": 55,
+    "fat_g": 6,
+    "fiber_g": 2,
+    "ingredients": [
+      "rice",
+      "tomato",
+      "onion",
+      "pepper",
+      "palm oil",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Egusi Soup",
+    "category": "African",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 360,
+    "protein_g": 18,
+    "carbs_g": 10,
+    "fat_g": 28,
+    "fiber_g": 3,
+    "ingredients": [
+      "melon seeds",
+      "palm oil",
+      "leafy greens",
+      "fish",
+      "meat",
+      "onion"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Suya (spiced grilled meat)",
+    "category": "African",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 215,
+    "protein_g": 26,
+    "carbs_g": 5,
+    "fat_g": 10,
+    "fiber_g": 1,
+    "ingredients": [
+      "beef",
+      "groundnut powder",
+      "spices",
+      "ginger",
+      "pepper"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Pounded Yam",
+    "category": "African",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 265,
+    "protein_g": 3,
+    "carbs_g": 62,
+    "fat_g": 0.5,
+    "fiber_g": 4,
+    "ingredients": [
+      "yam"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Fufu (cassava)",
+    "category": "African",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 270,
+    "protein_g": 2,
+    "carbs_g": 65,
+    "fat_g": 0.3,
+    "fiber_g": 2,
+    "ingredients": [
+      "cassava"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Banga Soup (palm nut)",
+    "category": "African",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 14,
+    "carbs_g": 8,
+    "fat_g": 22,
+    "fiber_g": 3,
+    "ingredients": [
+      "palm nut",
+      "fish",
+      "spices",
+      "onion",
+      "crayfish"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Kare-Kare (oxtail stew)",
+    "category": "Filipino",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 420,
+    "protein_g": 32,
+    "carbs_g": 18,
+    "fat_g": 24,
+    "fiber_g": 3,
+    "ingredients": [
+      "oxtail",
+      "peanut sauce",
+      "banana blossom",
+      "eggplant",
+      "string beans"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Dinuguan (pork blood stew)",
+    "category": "Filipino",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 24,
+    "carbs_g": 8,
+    "fat_g": 24,
+    "fiber_g": 1,
+    "ingredients": [
+      "pork",
+      "pork blood",
+      "vinegar",
+      "garlic",
+      "chili"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Laing (taro in coconut milk)",
+    "category": "Filipino",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 290,
+    "protein_g": 6,
+    "carbs_g": 12,
+    "fat_g": 24,
+    "fiber_g": 4,
+    "ingredients": [
+      "taro leaves",
+      "coconut milk",
+      "pork",
+      "shrimp paste",
+      "chili"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Arroz Caldo (rice porridge)",
+    "category": "Filipino",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 18,
+    "carbs_g": 40,
+    "fat_g": 5,
+    "fiber_g": 1,
+    "ingredients": [
+      "rice",
+      "chicken",
+      "ginger",
+      "garlic",
+      "fish sauce",
+      "egg"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Pancit Bihon (rice noodles)",
+    "category": "Filipino",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 310,
+    "protein_g": 18,
+    "carbs_g": 46,
+    "fat_g": 5,
+    "fiber_g": 2,
+    "ingredients": [
+      "rice noodles",
+      "chicken",
+      "vegetables",
+      "soy sauce",
+      "fish sauce"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Bibingka (rice cake)",
+    "category": "Filipino",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 230,
+    "protein_g": 5,
+    "carbs_g": 38,
+    "fat_g": 7,
+    "fiber_g": 1,
+    "ingredients": [
+      "rice flour",
+      "coconut milk",
+      "egg",
+      "sugar",
+      "butter"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Bun Bo Hue (spicy beef noodle soup)",
+    "category": "Vietnamese",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 370,
+    "protein_g": 28,
+    "carbs_g": 42,
+    "fat_g": 9,
+    "fiber_g": 2,
+    "ingredients": [
+      "rice noodles",
+      "beef",
+      "pork",
+      "lemongrass",
+      "chili",
+      "shrimp paste"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Banh Cuon (steamed rice rolls)",
+    "category": "Vietnamese",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 270,
+    "protein_g": 14,
+    "carbs_g": 40,
+    "fat_g": 6,
+    "fiber_g": 1,
+    "ingredients": [
+      "rice flour",
+      "minced pork",
+      "wood ear mushroom",
+      "shallot",
+      "fish sauce"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Ca Kho To (caramelized fish)",
+    "category": "Vietnamese",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 28,
+    "carbs_g": 12,
+    "fat_g": 6,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "catfish",
+      "caramel",
+      "fish sauce",
+      "ginger",
+      "chili"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Bun Rieu (crab noodle soup)",
+    "category": "Vietnamese",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 22,
+    "carbs_g": 44,
+    "fat_g": 6,
+    "fiber_g": 2,
+    "ingredients": [
+      "rice noodles",
+      "crab",
+      "tomato",
+      "tofu",
+      "shrimp paste"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Che Ba Mau (three-color dessert)",
+    "category": "Vietnamese",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 4,
+    "carbs_g": 52,
+    "fat_g": 5,
+    "fiber_g": 3,
+    "ingredients": [
+      "mung beans",
+      "red beans",
+      "pandan jelly",
+      "coconut milk",
+      "sugar"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Khao Pad (Thai fried rice)",
+    "category": "Thai",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 370,
+    "protein_g": 14,
+    "carbs_g": 52,
+    "fat_g": 12,
+    "fiber_g": 2,
+    "ingredients": [
+      "jasmine rice",
+      "egg",
+      "fish sauce",
+      "oyster sauce",
+      "vegetables",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Tom Kha Gai (coconut chicken soup)",
+    "category": "Thai",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 22,
+    "carbs_g": 10,
+    "fat_g": 18,
+    "fiber_g": 1,
+    "ingredients": [
+      "chicken",
+      "coconut milk",
+      "galangal",
+      "lemongrass",
+      "kaffir lime",
+      "mushroom"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Larb (minced meat salad)",
+    "category": "Thai",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 26,
+    "carbs_g": 12,
+    "fat_g": 12,
+    "fiber_g": 2,
+    "ingredients": [
+      "minced pork",
+      "fish sauce",
+      "lime juice",
+      "rice powder",
+      "mint",
+      "chili"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Nam Prik (Thai chili dip)",
+    "category": "Thai",
+    "serving_size": 50,
+    "serving_unit": "g",
+    "calories": 60,
+    "protein_g": 2,
+    "carbs_g": 8,
+    "fat_g": 2,
+    "fiber_g": 1,
+    "ingredients": [
+      "chili",
+      "garlic",
+      "shrimp paste",
+      "lime juice",
+      "fish sauce"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Mango Sticky Rice",
+    "category": "Thai",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 5,
+    "carbs_g": 68,
+    "fat_g": 6,
+    "fiber_g": 2,
+    "ingredients": [
+      "sticky rice",
+      "mango",
+      "coconut milk",
+      "sugar",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Pupusa (stuffed masa patty)",
+    "category": "Latin American",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 240,
+    "protein_g": 9,
+    "carbs_g": 38,
+    "fat_g": 6,
+    "fiber_g": 3,
+    "ingredients": [
+      "masa",
+      "cheese",
+      "refried beans",
+      "pork",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Ceviche (fish, lime)",
+    "category": "Latin American",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 130,
+    "protein_g": 20,
+    "carbs_g": 8,
+    "fat_g": 2,
+    "fiber_g": 1,
+    "ingredients": [
+      "white fish",
+      "lime juice",
+      "red onion",
+      "cilantro",
+      "chili",
+      "tomato"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Lomo Saltado (Peruvian stir fry)",
+    "category": "Latin American",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 520,
+    "protein_g": 32,
+    "carbs_g": 48,
+    "fat_g": 20,
+    "fiber_g": 4,
+    "ingredients": [
+      "beef",
+      "potato fries",
+      "tomato",
+      "onion",
+      "soy sauce",
+      "vinegar"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Arepa (corn patty)",
+    "category": "Latin American",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 190,
+    "protein_g": 4,
+    "carbs_g": 38,
+    "fat_g": 2.5,
+    "fiber_g": 2,
+    "ingredients": [
+      "precooked cornmeal",
+      "water",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Flan (caramel custard)",
+    "category": "Latin American",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 215,
+    "protein_g": 5,
+    "carbs_g": 34,
+    "fat_g": 6,
+    "fiber_g": 0,
+    "ingredients": [
+      "egg",
+      "milk",
+      "sugar",
+      "vanilla",
+      "caramel"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Ghee",
+    "category": "Oils & Fats",
+    "serving_size": 14,
+    "serving_unit": "g",
+    "calories": 123,
+    "protein_g": 0,
+    "carbs_g": 0,
+    "fat_g": 14,
+    "fiber_g": 0,
+    "ingredients": [
+      "butter"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Coconut Cream",
+    "category": "Oils & Fats",
+    "serving_size": 60,
+    "serving_unit": "g",
+    "calories": 192,
+    "protein_g": 2,
+    "carbs_g": 3,
+    "fat_g": 20,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "coconut"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Lard",
+    "category": "Oils & Fats",
+    "serving_size": 13,
+    "serving_unit": "g",
+    "calories": 115,
+    "protein_g": 0,
+    "carbs_g": 0,
+    "fat_g": 12.8,
+    "fiber_g": 0,
+    "ingredients": [
+      "pork fat"
+    ],
+    "nova_group": 1
   }
 ]
