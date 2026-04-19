@@ -456,7 +456,7 @@ while true; do
                 log "PAUSE requested. Setting override and waiting for graceful exit..."
                 sed -i '' 's/_Override:_ CONTINUE/_Override:_ STOP/' "$WORK_DIR/program.md" 2>/dev/null || true
                 PAUSE_WAIT=0
-                PAUSE_TIMEOUT=300
+                PAUSE_TIMEOUT=900
                 while is_claude_alive && (( PAUSE_WAIT < PAUSE_TIMEOUT )); do
                     sleep 10
                     (( PAUSE_WAIT += 10 ))

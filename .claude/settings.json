@@ -33,6 +33,10 @@
         ]
       },
       {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": ".claude/hooks/pause-gate.sh", "timeout": 5 }]
+      },
+      {
         "matcher": "Glob|Grep",
         "hooks": [
           {
