@@ -56,6 +56,15 @@ cmd_need_review() {
         exit 1
     fi
 
+    # Admin-filed bugs don't need approval — add sprint-task directly
+    local AUTHOR
+    AUTHOR=$(gh issue view "$N" --json author --jq '.author.login' 2>/dev/null || echo "")
+    if [ "$AUTHOR" = "ashish-sadh" ]; then
+        gh issue edit "$N" --add-label sprint-task 2>/dev/null || true
+        echo "Issue #$N filed by admin — added sprint-task directly (no review needed)"
+        return
+    fi
+
     # Ensure needs-review label exists
     gh label list --json name --jq '.[].name' 2>/dev/null | grep -q "needs-review" || \
         gh label create "needs-review" --color "#e4e669" --description "Awaiting human review before proceeding" 2>/dev/null || true
