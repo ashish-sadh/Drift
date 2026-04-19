@@ -712,6 +712,66 @@ final class IntentRoutingEval: XCTestCase {
         await assertRoutes("my sleep efficiency this week", to: "sleep_recovery")
     }
 
+    // MARK: - Long Context (>2048 tokens, requires 4096 n_ctx)
+
+    /// Simulates a long multi-turn session whose history exceeds the old 2048-token
+    /// context limit. The final query is a pronoun-based follow-up that only makes sense
+    /// with >2048 tokens of prior context — verifies the expanded window is actually used.
+    func testMultiTurn_longContextFollowUp() async {
+        // Build ~2200 tokens of realistic conversation history (≈8800 chars at ~4 chars/token)
+        let longHistory = """
+        User: log oatmeal and banana for breakfast
+        Assistant: Logged oatmeal (150 cal, 27g carbs, 5g protein) and banana (89 cal, 23g carbs, 1g protein) for breakfast. Total: 239 cal.
+        User: how many calories do I have left
+        Assistant: You've used 239 of 2000 calories today. 1761 calories remaining.
+        User: log grilled chicken and brown rice for lunch
+        Assistant: Logged grilled chicken (165 cal, 31g protein, 3g fat) and brown rice (216 cal, 45g carbs, 5g protein) for lunch. Total: 381 cal.
+        User: what's my protein so far
+        Assistant: You have 42g of protein so far today. Your goal is 150g — 108g remaining.
+        User: I weigh 182 lbs today
+        Assistant: Weight logged: 182 lbs. You're down 1 lb from last week — great progress!
+        User: how close am I to my goal
+        Assistant: You're 22 lbs from your 160 lb goal. At your current rate of ~1 lb/week, you'll reach it in about 22 weeks.
+        User: did yoga for 45 minutes
+        Assistant: Logged yoga for 45 minutes. That burns roughly 180 calories — nice active recovery day!
+        User: how'd I sleep last night
+        Assistant: You slept 7h 12m last night with 94 min deep sleep and 81 min REM. Recovery score: 78/100.
+        User: took my fish oil this morning
+        Assistant: Logged fish oil supplement for today.
+        User: did I take my vitamins
+        Assistant: You've taken fish oil today. Vitamin D and magnesium are still unchecked.
+        User: log almonds and greek yogurt for afternoon snack
+        Assistant: Logged almonds (164 cal, 6g protein, 14g fat) and greek yogurt (100 cal, 17g protein, 0g fat) for snack. Total: 264 cal.
+        User: what's my fat intake today
+        Assistant: You've had 17g of fat today. Your daily target is 65g — 48g remaining.
+        User: how's my muscle recovery
+        Assistant: Based on your yoga session and 7h sleep, your muscle recovery looks solid. HRV is within normal range.
+        User: start push day
+        Assistant: Starting push day workout. Don't forget to log your sets when done!
+        User: log protein shake after workout
+        Assistant: Logged protein shake (150 cal, 25g protein, 5g carbs) post-workout.
+        User: what's my total protein now
+        Assistant: You're at 90g protein today — 60g to go to hit your 150g goal.
+        User: log salmon and roasted veggies for dinner
+        Assistant: Logged salmon (208 cal, 28g protein, 12g fat) and roasted vegetables (85 cal, 3g protein, 5g fat) for dinner. Total: 293 cal.
+        User: any glucose spikes today
+        Assistant: No significant glucose spikes detected. Your post-lunch reading was 118 mg/dL — within normal range.
+        User: show my biomarkers
+        Assistant: Latest biomarkers: HbA1c 5.2% (normal), LDL 98 mg/dL (optimal), ferritin 45 ng/mL (normal), vitamin D 42 ng/mL (good).
+        User: how am I doing overall today
+        Assistant: Great day! You've hit 1477 cal (74% of goal), 118g protein (79%), 7h sleep, and completed a push workout. Well balanced.
+        User: what about yesterday
+        Assistant: Yesterday: 1850 cal, 142g protein, 6h 45m sleep. Slightly under on sleep but solid nutrition.
+        """
+
+        // Final follow-up that requires the full long history to route correctly:
+        // "what about last week" after a sleep/recovery context should → sleep_recovery
+        await assertRoutes("what about last week", to: "sleep_recovery", history: longHistory)
+
+        // "same for breakfast tomorrow" after a dinner log context should → log_food
+        await assertRoutes("log the same dinner again", to: "log_food", history: longHistory)
+    }
+
     // MARK: - Summary
 
     func testPrintRoutingSummary() async {

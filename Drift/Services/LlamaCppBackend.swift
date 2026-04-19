@@ -58,8 +58,8 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
         // Create context — CPU optimized
         var ctxParams = llama_context_default_params()
         let trainCtx = llama_model_n_ctx_train(m)
-        ctxParams.n_ctx = min(2048, UInt32(trainCtx))
-        ctxParams.n_batch = min(2048, UInt32(trainCtx))
+        ctxParams.n_ctx = min(4096, UInt32(trainCtx))
+        ctxParams.n_batch = min(4096, UInt32(trainCtx))
 
         // Dynamic thread count based on device cores (or explicit override for parallel eval)
         let coreCount = ProcessInfo.processInfo.activeProcessorCount
@@ -177,7 +177,7 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
         var tokens = tokenize(text: fullPrompt, addBos: true)
         guard !tokens.isEmpty else { return "" }
 
-        let maxPromptTokens = 2048 - 256 - 16 // context - generation - safety margin
+        let maxPromptTokens = 4096 - 512 - 16 // context - generation - safety margin
         if tokens.count > maxPromptTokens {
             Log.app.info("AI: prompt truncated \(tokens.count) → \(maxPromptTokens) tokens")
             tokens = Array(tokens.prefix(maxPromptTokens))
@@ -197,7 +197,7 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
 
         // Generate token by token
         var outputBuf: [CChar] = []
-        let maxNewTokens = 256
+        let maxNewTokens = 512
         let vocab = llama_model_get_vocab(model)
         let eosToken = llama_vocab_eos(vocab)
         let eotToken = llama_vocab_eot(vocab)
