@@ -341,12 +341,12 @@ enum ToolRegistration {
 
         r.register(ToolSchema(
             id: "food.edit_meal", name: "edit_meal", service: "food",
-            description: "User wants to MODIFY a food entry inside a specific meal — e.g. 'remove rice from lunch', 'change chicken to 2 servings', 'update oatmeal to 200g'. Use when a specific meal (breakfast/lunch/dinner/snack) or food quantity is referenced.",
+            description: "User wants to MODIFY a food entry inside a specific meal — e.g. 'remove rice from lunch', 'change chicken to 2 servings', 'update oatmeal to 200g', 'replace rice with quinoa in lunch'. Use when a specific meal (breakfast/lunch/dinner/snack) is referenced or when swapping/replacing one food with another.",
             parameters: [
                 ToolParam("meal_period", "string", "Which meal: breakfast | lunch | dinner | snack", required: false),
-                ToolParam("action", "string", "remove or update_quantity"),
+                ToolParam("action", "string", "remove | update_quantity | replace"),
                 ToolParam("target_food", "string", "Name of the food to edit"),
-                ToolParam("new_value", "string", "New quantity (e.g. '2', '1.5', '200g') — required for update_quantity", required: false)
+                ToolParam("new_value", "string", "For update_quantity: new quantity ('2', '1.5', '200g'). For replace: the replacement food name.", required: false)
             ],
             handler: { params in
                 let mealPeriod = params.string("meal_period")

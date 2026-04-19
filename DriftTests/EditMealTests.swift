@@ -100,3 +100,91 @@ private func cleanupMeal(_ id: Int64?) {
     )
     #expect(result.contains("Missing") || result.contains("quantity"))
 }
+
+// MARK: Replace
+
+/// Helper — seeds a unique food in the local DB so replace lookup has a hit.
+@MainActor
+@discardableResult
+private func seedFoodDB(name: String, calories: Double = 120, proteinG: Double = 4) -> Int64? {
+    var food = Food(
+        name: name, category: "grain",
+        servingSize: 100, servingUnit: "g",
+        calories: calories, proteinG: proteinG, carbsG: 22, fatG: 2, fiberG: 3,
+        source: "scanned"
+    )
+    return FoodService.saveScannedFood(&food)?.id
+}
+
+@Test @MainActor func editMealReplaceFoundInDB() {
+    // Seed replacement in DB (unique token so searchFood matches it).
+    let replacementId = seedFoodDB(name: "TestQuinoaReplace9876", calories: 222, proteinG: 8)
+    defer { if let id = replacementId { FoodService.deleteScannedFood(id: id, name: "TestQuinoaReplace9876") } }
+
+    let mlId = seedTodayMeal(mealType: "lunch", foodName: "TestRice4Replace", calories: 260, proteinG: 5)
+    defer { cleanupMeal(mlId) }
+
+    let result = FoodService.editMealEntry(
+        mealPeriod: "lunch", targetFood: "TestRice4Replace",
+        action: "replace", newValue: "TestQuinoaReplace9876"
+    )
+    #expect(result.contains("Replaced"))
+    #expect(result.contains("TestQuinoaReplace9876"))
+    #expect(result.contains("lunch"))
+}
+
+@Test @MainActor func editMealReplaceNotFoundInDB() {
+    let mlId = seedTodayMeal(mealType: "breakfast", foodName: "TestOats4ReplaceMiss")
+    defer { cleanupMeal(mlId) }
+
+    let result = FoodService.editMealEntry(
+        mealPeriod: "breakfast", targetFood: "TestOats4ReplaceMiss",
+        action: "replace", newValue: "zzznonexistent_food_for_test_12345"
+    )
+    #expect(result.contains("Couldn't find") || result.contains("manually"))
+}
+
+@Test @MainActor func editMealReplaceMissingNewValue() {
+    let mlId = seedTodayMeal(mealType: "dinner", foodName: "TestDinnerFor4Replace")
+    defer { cleanupMeal(mlId) }
+
+    let result = FoodService.editMealEntry(
+        mealPeriod: "dinner", targetFood: "TestDinnerFor4Replace",
+        action: "replace", newValue: nil
+    )
+    #expect(result.contains("Missing replacement"))
+}
+
+// MARK: Cross-Cutting Edge Cases
+
+@Test @MainActor func editMealCaseInsensitiveMatch() {
+    let mlId = seedTodayMeal(mealType: "lunch", foodName: "TestMixedCaseItem")
+    defer { cleanupMeal(mlId) }
+
+    // Query in lowercase — match should still succeed.
+    let result = FoodService.editMealEntry(
+        mealPeriod: "lunch", targetFood: "testmixedcaseitem",
+        action: "remove", newValue: nil
+    )
+    #expect(result.contains("Removed"))
+}
+
+@Test @MainActor func editMealUnknownAction() {
+    let mlId = seedTodayMeal(mealType: "lunch", foodName: "TestUnknownActionFood")
+    defer { cleanupMeal(mlId) }
+
+    let result = FoodService.editMealEntry(
+        mealPeriod: "lunch", targetFood: "TestUnknownActionFood",
+        action: "teleport", newValue: nil
+    )
+    #expect(result.contains("Unknown edit action"))
+}
+
+@Test @MainActor func editMealNoMealLoggedYet() {
+    // Do NOT seed — asking for an empty day.
+    let result = FoodService.editMealEntry(
+        mealPeriod: "lunch", targetFood: "anything",
+        action: "remove", newValue: nil
+    )
+    #expect(result.contains("No food"))
+}

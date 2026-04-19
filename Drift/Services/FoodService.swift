@@ -423,9 +423,12 @@ enum FoodService {
     // MARK: - Edit Meal
 
     /// Edit a food entry within a specific meal (or today overall when meal is nil).
-    /// `action` is "remove" or "update_quantity". For update, `newValue` is servings
-    /// (e.g. "2") or grams ("200g") — grams convert back to servings using the
-    /// entry's stored servingSizeG.
+    /// Actions:
+    ///   - "remove" / "delete" — delete the matched entry
+    ///   - "update_quantity" / "update" — newValue is servings ("2") or grams ("200g");
+    ///     grams convert back to servings using the entry's servingSizeG.
+    ///   - "replace" — newValue is the replacement food name; looks it up in the
+    ///     local food DB, updates name + per-serving macros, keeps meal + servings.
     static func editMealEntry(
         mealPeriod: String?,
         targetFood: String,
@@ -487,6 +490,26 @@ enum FoodService {
                 ? "\(Int(servings))"
                 : String(format: "%.1f", servings)
             return "Updated \(found.entry.foodName) to \(formatted) serving\(servings == 1 ? "" : "s") in \(found.meal)."
+
+        case "replace", "swap":
+            guard let raw = newValue?.trimmingCharacters(in: .whitespaces), !raw.isEmpty else {
+                return "Missing replacement food for \(found.entry.foodName)."
+            }
+            let candidates = searchFood(query: raw)
+            guard let replacement = candidates.first else {
+                return "Couldn't find '\(raw)' in the food DB — try logging it manually."
+            }
+            updateFoodEntryName(id: entryId, name: replacement.name)
+            updateFoodEntryMacros(
+                id: entryId,
+                calories: replacement.calories,
+                proteinG: replacement.proteinG,
+                carbsG: replacement.carbsG,
+                fatG: replacement.fatG,
+                fiberG: replacement.fiberG
+            )
+            WidgetDataProvider.refreshWidgetData()
+            return "Replaced \(found.entry.foodName) with \(replacement.name) in \(found.meal)."
 
         default:
             return "Unknown edit action '\(action)'."

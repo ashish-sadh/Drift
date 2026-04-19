@@ -77,6 +77,8 @@ final class IntentRoutingEval: XCTestCase {
     "delete last"→{"tool":"delete_food"}
     "remove rice from lunch"→{"tool":"edit_meal","meal_period":"lunch","action":"remove","target_food":"rice"}
     "update oatmeal in breakfast to 200g"→{"tool":"edit_meal","meal_period":"breakfast","action":"update_quantity","target_food":"oatmeal","new_value":"200g"}
+    "replace rice with quinoa in lunch"→{"tool":"edit_meal","meal_period":"lunch","action":"replace","target_food":"rice","new_value":"quinoa"}
+    "swap chicken for tofu in dinner"→{"tool":"edit_meal","meal_period":"dinner","action":"replace","target_food":"chicken","new_value":"tofu"}
     "show me my weight chart"→{"tool":"navigate_to","screen":"weight"}
     "go to food tab"→{"tool":"navigate_to","screen":"food"}
     "open exercise"→{"tool":"navigate_to","screen":"exercise"}
@@ -423,11 +425,16 @@ final class IntentRoutingEval: XCTestCase {
     // MARK: - Edit Meal (edit_meal — specific-meal / quantity edits)
 
     func testEditMeal_routing() async {
+        // Remove / quantity paths
         await assertRoutes("remove rice from lunch", to: "edit_meal")
         await assertRoutes("take out the chicken from dinner", to: "edit_meal")
         await assertRoutes("change chicken to 2 servings", to: "edit_meal")
         await assertRoutes("update oatmeal in breakfast to 200g", to: "edit_meal")
         await assertRoutes("set rice in lunch to 1.5 servings", to: "edit_meal")
+        // Replace / swap paths
+        await assertRoutes("replace rice with quinoa in lunch", to: "edit_meal")
+        await assertRoutes("swap chicken for tofu in dinner", to: "edit_meal")
+        await assertRoutes("change the rice in dinner to brown rice", to: "edit_meal")
     }
 
     // MARK: - Exercise Info (exercise_info edge cases)
