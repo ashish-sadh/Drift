@@ -210,15 +210,22 @@ struct AIChatView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 TypingDotsView()
-                switch vm.generatingState {
-                case .thinking(let step):
-                    Text(step).font(.caption2).foregroundStyle(.tertiary)
-                case .generating:
-                    Text("Writing response...").font(.caption2).foregroundStyle(.tertiary)
-                case .idle:
-                    EmptyView()
+                let stageLabel: String = switch vm.generatingState {
+                case .thinking(let step): step
+                case .generating: "Writing response..."
+                case .idle: ""
+                }
+                if !stageLabel.isEmpty {
+                    Text(stageLabel)
+                        .font(.caption2).foregroundStyle(.tertiary)
+                        .id(stageLabel)
+                        .transition(.asymmetric(
+                            insertion: .opacity.combined(with: .move(edge: .bottom)),
+                            removal: .opacity
+                        ))
                 }
             }
+            .animation(.easeInOut(duration: 0.2), value: vm.generatingState)
             .padding(.horizontal, 14).padding(.vertical, 10)
             .background(Theme.cardBackground, in: UnevenRoundedRectangle(
                 topLeadingRadius: 16, bottomLeadingRadius: 4,

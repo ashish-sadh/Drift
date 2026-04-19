@@ -75,17 +75,26 @@ enum AIToolAgent {
                     let rawCall = ToolCall(tool: toolName, params: ToolCallParams(values: intent.params))
                     // Stage 3b: Validate LLM-extracted params with Swift checks
                     let call = validateExtraction(rawCall, message: message)
-                    onStep(toolStepMessage(for: call.tool))
                     if isInfoTool(toolName) {
+                        // Stage label 1: show query-specific lookup label before tool execute
+                        onStep(toolLookupMessage(for: call, query: message))
+                        let stageStart = CFAbsoluteTimeGetCurrent()
                         let toolResult = await ToolRegistry.shared.execute(call)
+                        // Guarantee ≥300ms on the lookup stage so users can read it
+                        let elapsed = CFAbsoluteTimeGetCurrent() - stageStart
+                        if elapsed < 0.3 {
+                            try? await Task.sleep(nanoseconds: UInt64((0.3 - elapsed) * 1_000_000_000))
+                        }
                         if case .text(let data) = toolResult, !data.isEmpty {
                             ConversationState.shared.captureToolSummary(data)
-                            onStep("Preparing answer...")
+                            // Stage label 2: data ready, starting presentation
+                            onStep(toolFoundMessage(for: toolName))
                             return await streamPresentation(
                                 query: message, toolData: data, screen: screen, history: history, onToken: onToken
                             )
                         }
                     } else {
+                        onStep(toolStepMessage(for: call.tool))
                         return await executeTool(call)
                     }
                 case .text(let response):
@@ -501,6 +510,43 @@ enum AIToolAgent {
         if lower.contains("plan") && lower.contains("meal") { return "Planning meals..." }
         if ["how", "what", "show", "calories", "weight", "sleep"].contains(where: { lower.contains($0) }) { return "Checking your data..." }
         return "Looking that up..."
+    }
+
+    /// Stage 1 label: shown while the info tool is executing. Uses the actual query subject when available.
+    static func toolLookupMessage(for call: ToolCall, query: String) -> String {
+        switch call.tool {
+        case "food_info":
+            let subject = call.params.values["name"]
+                ?? call.params.values["query"]
+                ?? query.components(separatedBy: " ").filter { $0.count > 3 }.first
+            if let subject, !subject.isEmpty { return "Looking up \(subject)..." }
+            return "Looking up nutrition..."
+        case "weight_info": return "Looking up your weight..."
+        case "sleep_recovery": return "Looking up your sleep..."
+        case "exercise_info": return "Looking up your workouts..."
+        case "supplements": return "Looking up supplements..."
+        case "glucose": return "Looking up glucose data..."
+        case "biomarkers": return "Looking up lab results..."
+        case "body_comp": return "Looking up body composition..."
+        case "explain_calories": return "Looking up calorie data..."
+        default: return "Looking that up..."
+        }
+    }
+
+    /// Stage 2 label: shown after data is retrieved, while the presentation LLM warms up.
+    static func toolFoundMessage(for toolName: String) -> String {
+        switch toolName {
+        case "food_info": return "Finding macros..."
+        case "weight_info": return "Reading your trends..."
+        case "sleep_recovery": return "Checking your recovery..."
+        case "exercise_info": return "Reviewing your history..."
+        case "supplements": return "Checking supplement status..."
+        case "glucose": return "Analysing glucose data..."
+        case "biomarkers": return "Reviewing lab results..."
+        case "body_comp": return "Reading body composition..."
+        case "explain_calories": return "Calculating your calories..."
+        default: return "Putting it together..."
+        }
     }
 
     /// Tool-specific step message for when a classified tool is about to execute.
