@@ -41,7 +41,7 @@ final class IntentRoutingEval: XCTestCase {
 
     static let systemPrompt = """
     Health app. Reply JSON tool call or short text. Fix typos, word numbers, slang — understand messy input.
-    Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) supplements() set_goal(target,unit?) delete_food(query?) body_comp() glucose() biomarkers() navigate_to(screen)
+    Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) supplements() set_goal(target,unit?) delete_food(query?) edit_meal(meal_period?,action,target_food,new_value?) body_comp() glucose() biomarkers() navigate_to(screen)
     RULES: NEVER generate health data from memory — ALWAYS call a tool. "calories in X" → food_info (NOT log_food). Use log_food only when user ate/had/logged. "log lunch"/"log breakfast"/"log dinner" alone (no food named) → ask what they had, do NOT call log_food. "daily summary"/"weekly summary" → food_info. "weight trend"/"weight history" → weight_info. "body fat/lean mass/DEXA/body composition" → body_comp. "blood sugar/blood glucose" → glucose. "fat intake/sugar intake/carb intake" → food_info. "lab results/blood work/biomarkers/cholesterol" → biomarkers. "go to [screen]"/"open [screen]" → navigate_to. supplements() queries supplement tracking — ALWAYS call supplements() for any supplement status/history question, NEVER respond with text. mark_supplement(name) logs intake when user says they TOOK/HAD something. HRV/heart rate variability → sleep_recovery.
     "daily summary"→{"tool":"food_info","query":"daily summary"}
     "weekly summary"→{"tool":"food_info","query":"weekly summary"}
@@ -80,6 +80,9 @@ final class IntentRoutingEval: XCTestCase {
     "how's my muscle recovery"→{"tool":"exercise_info","query":"muscle recovery"}
     "set my goal to one sixty"→{"tool":"set_goal","target":"160","unit":"lbs"}
     "delete last"→{"tool":"delete_food"}
+    "remove rice from lunch"→{"tool":"edit_meal","meal_period":"lunch","action":"remove","target_food":"rice"}
+    "change chicken to 2 servings"→{"tool":"edit_meal","action":"update_quantity","target_food":"chicken","new_value":"2"}
+    "update oatmeal in breakfast to 200g"→{"tool":"edit_meal","meal_period":"breakfast","action":"update_quantity","target_food":"oatmeal","new_value":"200g"}
     "show me my weight chart"→{"tool":"navigate_to","screen":"weight"}
     "go to food tab"→{"tool":"navigate_to","screen":"food"}
     "open exercise"→{"tool":"navigate_to","screen":"exercise"}
@@ -380,6 +383,16 @@ final class IntentRoutingEval: XCTestCase {
         await assertRoutes("undo last food entry", to: "delete_food")
         // "undo that food log" — returns text without explicit undo example; 2B limitation
         await assertRoutes("delete what I just added", to: "delete_food")
+    }
+
+    // MARK: - Edit Meal (edit_meal — specific-meal / quantity edits)
+
+    func testEditMeal_routing() async {
+        await assertRoutes("remove rice from lunch", to: "edit_meal")
+        await assertRoutes("take out the chicken from dinner", to: "edit_meal")
+        await assertRoutes("change chicken to 2 servings", to: "edit_meal")
+        await assertRoutes("update oatmeal in breakfast to 200g", to: "edit_meal")
+        await assertRoutes("set rice in lunch to 1.5 servings", to: "edit_meal")
     }
 
     // MARK: - Exercise Info (exercise_info edge cases)

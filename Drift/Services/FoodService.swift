@@ -353,6 +353,93 @@ enum FoodService {
         return "Removed \(found.foodName) (\(Int(found.entry.calories)) cal)."
     }
 
+    // MARK: - Edit Meal
+
+    /// Edit a food entry within a specific meal (or today overall when meal is nil).
+    /// `action` is "remove" or "update_quantity". For update, `newValue` is servings
+    /// (e.g. "2") or grams ("200g") — grams convert back to servings using the
+    /// entry's stored servingSizeG.
+    static func editMealEntry(
+        mealPeriod: String?,
+        targetFood: String,
+        action: String,
+        newValue: String?
+    ) -> String {
+        let today = DateFormatters.todayString
+        guard let mealLogs = try? AppDatabase.shared.fetchMealLogs(for: today), !mealLogs.isEmpty else {
+            return "No food logged today."
+        }
+
+        // Filter by meal period when provided.
+        let wantedMeal = mealPeriod?.lowercased()
+        let filtered = wantedMeal.map { mt in mealLogs.filter { $0.mealType.lowercased() == mt } } ?? mealLogs
+        if filtered.isEmpty, let mt = wantedMeal {
+            return "No \(mt) logged today."
+        }
+
+        // Gather candidate entries across matching meals (newest last).
+        var candidates: [(entry: FoodEntry, meal: String)] = []
+        for ml in filtered {
+            guard let mlId = ml.id,
+                  let entries = try? AppDatabase.shared.fetchFoodEntries(forMealLog: mlId) else { continue }
+            for entry in entries {
+                candidates.append((entry: entry, meal: ml.mealType))
+            }
+        }
+        if candidates.isEmpty {
+            if let mt = wantedMeal { return "No entries found in \(mt)." }
+            return "No food entries today."
+        }
+
+        let query = targetFood.lowercased()
+        let match = candidates.last(where: { $0.entry.foodName.lowercased() == query })
+            ?? candidates.last(where: { $0.entry.foodName.lowercased().contains(query) })
+        guard let found = match, let entryId = found.entry.id else {
+            let where_ = wantedMeal.map { " in \($0)" } ?? ""
+            return "Couldn't find '\(targetFood)'\(where_)."
+        }
+
+        switch action.lowercased() {
+        case "remove", "delete":
+            try? AppDatabase.shared.deleteFoodEntry(id: entryId)
+            WidgetDataProvider.refreshWidgetData()
+            let cal = Int(found.entry.calories * found.entry.servings)
+            return "Removed \(found.entry.foodName) from \(found.meal) (\(cal) cal)."
+
+        case "update_quantity", "update":
+            guard let rawValue = newValue, !rawValue.isEmpty else {
+                return "Missing new quantity for \(found.entry.foodName)."
+            }
+            let newServings = parseServings(rawValue, servingSizeG: found.entry.servingSizeG)
+            guard let servings = newServings, servings > 0 else {
+                return "Couldn't parse '\(rawValue)' as a quantity."
+            }
+            try? AppDatabase.shared.updateFoodEntryServings(id: entryId, servings: servings)
+            WidgetDataProvider.refreshWidgetData()
+            let formatted = servings == Double(Int(servings))
+                ? "\(Int(servings))"
+                : String(format: "%.1f", servings)
+            return "Updated \(found.entry.foodName) to \(formatted) serving\(servings == 1 ? "" : "s") in \(found.meal)."
+
+        default:
+            return "Unknown edit action '\(action)'."
+        }
+    }
+
+    /// Parse a quantity string into servings. Supports plain numbers ("2", "1.5")
+    /// and gram suffixes ("200g") — grams divide by the entry's serving size.
+    private static func parseServings(_ raw: String, servingSizeG: Double) -> Double? {
+        let trimmed = raw.trimmingCharacters(in: .whitespaces).lowercased()
+        if trimmed.hasSuffix("g"), servingSizeG > 0 {
+            let numPart = String(trimmed.dropLast())
+            if let grams = Double(numPart), grams > 0 {
+                return grams / servingSizeG
+            }
+            return nil
+        }
+        return Double(trimmed)
+    }
+
     // MARK: - Copy Yesterday
 
     /// Preview yesterday's food entries without copying. Returns summary for confirmation.

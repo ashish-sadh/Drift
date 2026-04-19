@@ -338,6 +338,31 @@ enum ToolRegistration {
         ))
 
         r.register(ToolSchema(
+            id: "food.edit_meal", name: "edit_meal", service: "food",
+            description: "User wants to MODIFY a food entry inside a specific meal — e.g. 'remove rice from lunch', 'change chicken to 2 servings', 'update oatmeal to 200g'. Use when a specific meal (breakfast/lunch/dinner/snack) or food quantity is referenced.",
+            parameters: [
+                ToolParam("meal_period", "string", "Which meal: breakfast | lunch | dinner | snack", required: false),
+                ToolParam("action", "string", "remove or update_quantity"),
+                ToolParam("target_food", "string", "Name of the food to edit"),
+                ToolParam("new_value", "string", "New quantity (e.g. '2', '1.5', '200g') — required for update_quantity", required: false)
+            ],
+            handler: { params in
+                let mealPeriod = params.string("meal_period")
+                let action = params.string("action") ?? "remove"
+                guard let target = params.string("target_food"), !target.isEmpty else {
+                    return .error("Missing target_food")
+                }
+                let newValue = params.string("new_value")
+                return .text(FoodService.editMealEntry(
+                    mealPeriod: mealPeriod,
+                    targetFood: target,
+                    action: action,
+                    newValue: newValue
+                ))
+            }
+        ))
+
+        r.register(ToolSchema(
             id: "food.explain_calories", name: "explain_calories", service: "food",
             description: "User asks HOW calories are calculated, what TDEE means, or why their target is a certain number.",
             parameters: [],
