@@ -100,7 +100,8 @@ struct FoodSearchView: View {
             .sheet(item: $rebuildingRecipe) { recipe in
                 QuickAddView(viewModel: viewModel,
                              initialItems: recipe.recipeItems ?? [],
-                             initialName: recipe.name)
+                             initialName: recipe.name,
+                             editingRecipeID: recipe.id)
             }
             .onAppear {
                 viewModel.loadSuggestions()

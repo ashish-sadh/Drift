@@ -155,6 +155,39 @@ enum FoodService {
         }
     }
 
+    /// Update a saved recipe in place: rewrites the ingredients JSON and
+    /// recomputes per-serving macros from the items sum. Used by the recipe
+    /// builder when editing an existing recipe (#192) — avoids the duplicate
+    /// row that `saveRecipe` would otherwise create.
+    static func updateRecipe(id: Int64, name: String, items: [QuickAddView.RecipeItem], servings: Double = 1) {
+        let safeServings = max(servings, 0.1)
+        let totals = items.reduce(into: (cal: 0.0, p: 0.0, c: 0.0, f: 0.0, fb: 0.0)) { acc, item in
+            acc.cal += item.calories
+            acc.p += item.proteinG
+            acc.c += item.carbsG
+            acc.f += item.fatG
+            acc.fb += item.fiberG
+        }
+        let ingredientsJson = (try? JSONEncoder().encode(items))
+            .flatMap { String(data: $0, encoding: .utf8) } ?? ""
+        try? AppDatabase.shared.writer.write { db in
+            try db.execute(sql: """
+                UPDATE food SET name = ?, calories = ?, protein_g = ?,
+                carbs_g = ?, fat_g = ?, fiber_g = ?, ingredients = ?,
+                is_recipe = 1 WHERE id = ?
+                """, arguments: [
+                    name,
+                    totals.cal / safeServings,
+                    totals.p / safeServings,
+                    totals.c / safeServings,
+                    totals.f / safeServings,
+                    totals.fb / safeServings,
+                    ingredientsJson,
+                    id
+                ])
+        }
+    }
+
     // MARK: - Search with Online Fallback
 
     /// Search locally first, then fall back to USDA + OpenFoodFacts if enabled and local results < threshold.

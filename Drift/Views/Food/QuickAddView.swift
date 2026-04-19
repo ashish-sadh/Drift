@@ -6,6 +6,10 @@ struct QuickAddView: View {
     @Bindable var viewModel: FoodLogViewModel
     var initialItems: [RecipeItem] = []   // pre-populated ingredients (from AI chat)
     var initialName: String = ""          // pre-set recipe name (e.g., "Lunch")
+    /// When set, the sheet is editing an existing recipe row in-place (#192)
+    /// rather than creating a new one. Save updates the row and dismisses —
+    /// no new food-log entry is written.
+    var editingRecipeID: Int64? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var recipeName = ""
     @State private var items: [RecipeItem] = []
@@ -131,7 +135,8 @@ struct QuickAddView: View {
                             saveAndLogRecipe()
                             dismiss()
                         } label: {
-                            Text("Log").font(.headline).frame(maxWidth: .infinity)
+                            Text(editingRecipeID == nil ? "Log" : "Save Changes")
+                                .font(.headline).frame(maxWidth: .infinity)
                         }
                         .buttonStyle(.borderedProminent).tint(Theme.accent)
                     }
@@ -183,9 +188,18 @@ struct QuickAddView: View {
     }
 
     private func saveAndLogRecipe() {
-        let t = total
         let servings = max(Double(recipeServings) ?? 1, 0.1)
         let name = recipeName.isEmpty ? (items.count == 1 ? items[0].name : "Recipe") : recipeName
+
+        // Edit mode (#192): update the existing recipe row in place and
+        // dismiss — the user is modifying, not re-logging.
+        if let editingID = editingRecipeID {
+            FoodService.updateRecipe(id: editingID, name: name, items: items, servings: servings)
+            return
+        }
+
+        // Create mode: new recipe + log it.
+        let t = total
         // Store full ingredient data as JSON for recipe rebuilding
         let ingredientsJson = (try? JSONEncoder().encode(items))
             .flatMap { String(data: $0, encoding: .utf8) }

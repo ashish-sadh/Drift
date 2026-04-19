@@ -177,6 +177,97 @@ import Testing
 
 // MARK: Fetch by ID
 
+// MARK: - Recipe Editing (#192)
+
+@Test @MainActor func foodServiceUpdateRecipePersistsIngredientsAndMacros() {
+    // Create a 2-ingredient recipe via the normal save path, then edit it
+    // through updateRecipe and verify the row is updated in place.
+    let baseName = "test-recipe-192-\(UUID().uuidString.prefix(8))"
+    let first = QuickAddView.RecipeItem(
+        name: "chicken", portionText: "100g",
+        calories: 165, proteinG: 31, carbsG: 0, fatG: 3.6, fiberG: 0, servingSizeG: 100)
+    let second = QuickAddView.RecipeItem(
+        name: "rice", portionText: "100g",
+        calories: 130, proteinG: 2.7, carbsG: 28, fatG: 0.3, fiberG: 0.4, servingSizeG: 100)
+    let initialJson = (try? JSONEncoder().encode([first, second]))
+        .flatMap { String(data: $0, encoding: .utf8) }
+    var recipe = SavedFood(
+        name: baseName,
+        calories: 295, proteinG: 33.7, carbsG: 28, fatG: 3.9, fiberG: 0.4,
+        isRecipe: true, ingredients: initialJson)
+    FoodService.saveRecipe(&recipe)
+    guard let id = recipe.id else {
+        Issue.record("saveRecipe failed to assign an ID")
+        return
+    }
+
+    // Edit: add a third ingredient and rename.
+    let third = QuickAddView.RecipeItem(
+        name: "olive oil", portionText: "1 tbsp",
+        calories: 119, proteinG: 0, carbsG: 0, fatG: 13.5, fiberG: 0, servingSizeG: 15)
+    let newName = baseName + "-edited"
+    FoodService.updateRecipe(id: id, name: newName, items: [first, second, third], servings: 1)
+
+    // Reload and verify.
+    let reloaded = FoodService.fetchFoodById(id)
+    #expect(reloaded != nil)
+    #expect(reloaded?.name == newName)
+    #expect(reloaded?.isRecipe == true)
+    // Totals = chicken + rice + olive oil = 414 cal, 33.7 P, 28 C, 17.4 F, 0.4 Fb
+    #expect((reloaded?.calories ?? 0) == 414)
+    #expect(abs((reloaded?.fatG ?? 0) - 17.4) < 0.01)
+    // Ingredients JSON should have 3 items now.
+    let items = reloaded?.recipeItems ?? []
+    #expect(items.count == 3)
+    #expect(items.contains(where: { $0.name == "olive oil" }))
+}
+
+@Test @MainActor func foodServiceUpdateRecipeRemovesIngredient() {
+    // Create 3-ingredient recipe, remove one, verify totals and ingredients updated.
+    let baseName = "test-recipe-remove-\(UUID().uuidString.prefix(8))"
+    let a = QuickAddView.RecipeItem(name: "egg", portionText: "1", calories: 72, proteinG: 6, carbsG: 0, fatG: 5, fiberG: 0, servingSizeG: 50)
+    let b = QuickAddView.RecipeItem(name: "toast", portionText: "1 slice", calories: 80, proteinG: 3, carbsG: 15, fatG: 1, fiberG: 1, servingSizeG: 30)
+    let c = QuickAddView.RecipeItem(name: "butter", portionText: "1 tsp", calories: 34, proteinG: 0, carbsG: 0, fatG: 4, fiberG: 0, servingSizeG: 5)
+    let initialJson = (try? JSONEncoder().encode([a, b, c])).flatMap { String(data: $0, encoding: .utf8) }
+    var recipe = SavedFood(
+        name: baseName,
+        calories: 186, proteinG: 9, carbsG: 15, fatG: 10, fiberG: 1,
+        isRecipe: true, ingredients: initialJson)
+    FoodService.saveRecipe(&recipe)
+    guard let id = recipe.id else { Issue.record("saveRecipe failed"); return }
+
+    // Remove butter.
+    FoodService.updateRecipe(id: id, name: baseName, items: [a, b], servings: 1)
+
+    let reloaded = FoodService.fetchFoodById(id)
+    let items = reloaded?.recipeItems ?? []
+    #expect(items.count == 2)
+    #expect(!items.contains(where: { $0.name == "butter" }))
+    // Totals = egg + toast = 152 cal, 9 P, 15 C, 6 F, 1 Fb
+    #expect(reloaded?.calories == 152)
+    #expect(reloaded?.fatG == 6)
+}
+
+@Test @MainActor func foodServiceUpdateRecipeRespectsServings() {
+    // Per-serving macros should be totals/servings when servings > 1.
+    let baseName = "test-recipe-servings-\(UUID().uuidString.prefix(8))"
+    let item = QuickAddView.RecipeItem(
+        name: "pasta", portionText: "400g",
+        calories: 800, proteinG: 20, carbsG: 160, fatG: 4, fiberG: 8, servingSizeG: 400)
+    var recipe = SavedFood(
+        name: baseName,
+        calories: 800, proteinG: 20, carbsG: 160, fatG: 4, fiberG: 8,
+        isRecipe: true, ingredients: nil)
+    FoodService.saveRecipe(&recipe)
+    guard let id = recipe.id else { Issue.record("saveRecipe failed"); return }
+
+    // Edit with servings=4 → per-serving cal should be 200.
+    FoodService.updateRecipe(id: id, name: baseName, items: [item], servings: 4)
+    let reloaded = FoodService.fetchFoodById(id)
+    #expect(reloaded?.calories == 200)
+    #expect(reloaded?.carbsG == 40)
+}
+
 @Test @MainActor func foodServiceFetchFoodByIdNonexistent() {
     let food = FoodService.fetchFoodById(Int64.max)
     #expect(food == nil)
