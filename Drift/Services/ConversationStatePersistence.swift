@@ -9,7 +9,8 @@ final class ConversationStatePersistence {
     static let shared = ConversationStatePersistence()
 
     /// Persisted state older than this is treated as expired and discarded on load.
-    static let maxAge: TimeInterval = 60 * 60           // 60 min
+    /// 30 min matches typical meal duration — stale pending flows from yesterday shouldn't hijack today.
+    static let maxAge: TimeInterval = 30 * 60           // 30 min
 
     /// A non-idle state older than this shows a "picking up where we left off" banner on restore.
     static let resumeBannerMinAge: TimeInterval = 5 * 60 // 5 min

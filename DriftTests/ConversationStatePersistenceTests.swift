@@ -226,4 +226,28 @@ struct ConversationStateVMIntegration {
         vm.saveConversationState()
         #expect(persistence.loadRaw() == nil)
     }
+
+    /// DriftApp → NotificationCenter → VM save path is the only guarantee that state captured by
+    /// async handlers (which run after sendMessage's defer) survives app kill. Guarding it.
+    @Test func viewModelPersistsOnSceneBackgroundNotification() async {
+        ConversationState.shared.reset()
+        let persistence = makeTempPersistence()
+        defer { persistence.clear(); ConversationState.shared.reset() }
+
+        let vm = AIChatViewModel(persistence: persistence)
+        // Simulate state set by an async tool handler after sendMessage already returned.
+        vm.convState.phase = .awaitingMealItems(mealName: "dinner")
+        vm.convState.lastTopic = .food
+        #expect(persistence.loadRaw() == nil)
+
+        // DriftApp posts this on .background/.inactive scene phase.
+        NotificationCenter.default.post(name: .saveConversationState, object: nil)
+        // Observer hops through a Task { @MainActor in ... }, so yield until it lands.
+        for _ in 0..<20 {
+            if persistence.loadRaw() != nil { break }
+            await Task.yield()
+        }
+        let loaded = persistence.loadRaw()
+        #expect(loaded?.phase == .awaitingMealItems(mealName: "dinner"))
+    }
 }
