@@ -148,7 +148,13 @@ final class ConversationState {
         return .unknown
     }
 
-    // MARK: - Reset
+    // MARK: - Cancel / Reset
+
+    /// Exit any pending phase without committing — used by cancel/nevermind phrases.
+    func cancelPending() {
+        phase = .idle
+        pendingIntent = nil
+    }
 
     func reset() {
         pendingIntent = nil

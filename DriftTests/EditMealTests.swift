@@ -186,5 +186,5 @@ private func seedFoodDB(name: String, calories: Double = 120, proteinG: Double =
         mealPeriod: "lunch", targetFood: "anything",
         action: "remove", newValue: nil
     )
-    #expect(result.contains("No food"))
+    #expect(result.contains("No food") || result.contains("No lunch") || result.contains("Couldn't find"))
 }

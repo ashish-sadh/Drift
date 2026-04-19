@@ -85,6 +85,15 @@ enum StaticOverrides {
 
         // Meal suggestions, general status, weight progress → routed through AIToolAgent for LLM presentation
 
+        // Cancel pending state — only fires when a multi-turn phase is active (not idle).
+        // "undo last" in pending = cancel (idle case falls through to undo manager below).
+        let cancelPhrases: Set<String> = ["cancel", "nevermind", "never mind", "scratch that", "forget it"]
+        if ConversationState.shared.phase != .idle
+            && (cancelPhrases.contains(lower) || lower == "undo last") {
+            ConversationState.shared.cancelPending()
+            return .response("Cancelled.")
+        }
+
         // Undo: "undo", "undo that", "undo last" — uses lastWriteAction when available
         if lower == "undo" || lower == "undo that" || lower == "undo last" {
             return .handler {
