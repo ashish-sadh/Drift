@@ -398,10 +398,18 @@ elif [[ "$STATE" == "DRAIN" ]]; then
             if is_log_stale_seconds "$DRAIN_STALE"; then
                 log "DRAIN: no log output in ${DRAIN_STALE}s — killing stalled process."
                 kill_claude
+                run_compliance "stall"
+                cleanup_dirty_state
                 break
             fi
         done
+        if is_claude_alive; then
+            run_compliance "normal"
+        else
+            run_compliance "crash"
+        fi
     fi
+    cleanup_dirty_state
     log "DRAIN: done. Exiting."
     exit 0
 fi
@@ -472,15 +480,21 @@ while true; do
                     if is_log_stale_seconds "$DRAIN_STALE"; then
                         log "DRAIN: no log output in ${DRAIN_STALE}s — killing stalled process."
                         kill_claude
-                        break
+                        cleanup_dirty_state
+                        run_compliance "stall"
+                        log "DRAIN: killed stalled session. Exiting."
+                        exit 0
                     fi
                 done
-                log "DRAIN: session finished. Exiting."
-                exit 0
+                # Session finished naturally
+                run_compliance "normal"
+                cleanup_dirty_state
             else
-                log "DRAIN: session already finished. Exiting."
-                exit 0
+                log "DRAIN: session already finished."
+                cleanup_dirty_state
             fi
+            log "DRAIN: done. Exiting."
+            exit 0
             ;;
         RUN)
             # Ensure override is CONTINUE

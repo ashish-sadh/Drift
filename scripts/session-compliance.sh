@@ -25,11 +25,14 @@ TODAY=$(date '+%Y-%m-%d')
 
 # Close overhead tracking issue (created by session-start.sh hook at session start)
 OVERHEAD_N=$(cat "$STATE_DIR/current-overhead-issue" 2>/dev/null | tr -d '[:space:]')
-if [[ -n "$OVERHEAD_N" ]]; then
+if [[ -n "$OVERHEAD_N" ]] && [[ "$OVERHEAD_N" =~ ^[0-9]+$ ]]; then
     LAST_COMMIT=$(cd "$WORK_DIR" && git rev-parse HEAD 2>/dev/null || echo "no-commit")
     gh issue comment "$OVERHEAD_N" \
       --body "Session ended ($EXIT_REASON). Last commit: $LAST_COMMIT" 2>/dev/null || true
     gh issue close "$OVERHEAD_N" 2>/dev/null || true
+    rm -f "$STATE_DIR/current-overhead-issue"
+elif [[ -n "$OVERHEAD_N" ]]; then
+    echo "[$TS] session-compliance: WARNING invalid overhead issue number '$OVERHEAD_N' — skipping close" >&2
     rm -f "$STATE_DIR/current-overhead-issue"
 fi
 
@@ -45,6 +48,8 @@ try:
     if ip:
         title = next((t["title"] for t in d.get("tasks", []) if t["number"] == ip), "")
         print(f"#{ip} {title}")
+except json.JSONDecodeError as e:
+    print(f"WARNING: state file corrupted ({e}) — interrupted task unknown", file=sys.stderr)
 except Exception:
     pass
 PYEOF

@@ -110,8 +110,10 @@ cmd_drain_feedback() {
         echo "No process feedback pending."
         return 0
     fi
-    cat "$FEEDBACK_LOG"
-    > "$FEEDBACK_LOG"  # truncate (preserve file)
+    local CONTENT
+    CONTENT=$(cat "$FEEDBACK_LOG") || return 1
+    echo "$CONTENT"
+    : > "$FEEDBACK_LOG"  # truncate only after successful read
 }
 
 # ── Dispatch ──────────────────────────────────────────────────────────────────
