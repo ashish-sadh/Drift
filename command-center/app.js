@@ -277,20 +277,18 @@ async function getSprintPlan() {
   }
 }
 
-// Approve a bug for implementation (adds sprint-task + SENIOR for P1/P2, removes needs-review)
-// P1/P2 bugs always need senior judgment — add SENIOR so they route to senior session, not junior
+// Approve a bug for implementation (adds sprint-task only, removes needs-review)
+// Any session (senior or junior) can pick up approved bugs based on priority queue order
 async function approveBug(num, priority = '') {
   if (!isOwner()) { alert('Sign in as admin to approve'); return; }
   try {
-    const labelsToAdd = ['sprint-task'];
-    if (priority === 'P1' || priority === 'P2') labelsToAdd.push('SENIOR');
     await api(`/repos/${OWNER}/${REPO}/issues/${num}/labels`, {
       method: 'POST',
       headers: { ...headers(), 'Content-Type': 'application/json' },
-      body: JSON.stringify({ labels: labelsToAdd })
+      body: JSON.stringify({ labels: ['sprint-task'] })
     });
     await api(`/repos/${OWNER}/${REPO}/issues/${num}/labels/needs-review`, { method: 'DELETE' });
-    alert(`Issue #${num} approved — added to sprint queue${priority === 'P1' || priority === 'P2' ? ' (SENIOR)' : ''}.`);
+    alert(`Issue #${num} approved — added to sprint queue.`);
     if (typeof loadSprint === 'function') loadSprint();
   } catch (e) {
     alert(`Failed: ${e.message}`);

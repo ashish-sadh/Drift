@@ -23,8 +23,13 @@ CONTROL_FILE="$HOME/drift-control.txt"
 LOG_DIR="$HOME/drift-self-improve-logs"
 WATCHDOG_LOG="$LOG_DIR/watchdog.log"
 PID_FILE="$LOG_DIR/claude.pid"
-CHECK_INTERVAL=300  # 5 minutes
-STALE_THRESHOLD=600  # 10 minutes (in seconds)
+CHECK_INTERVAL=60   # 1 minute — heartbeat: sprint refresh + health check
+STALE_THRESHOLD=600  # 10 minutes — no log output = definitely dead
+# Per-session stall thresholds (no commits/progress before nudge)
+STALL_PLANNING=3600  # 1 hour
+STALL_SENIOR=1800    # 30 minutes
+STALL_JUNIOR=1800    # 30 minutes
+NUDGE_WAIT=300       # 5 minutes after nudge before killing
 KILL_WAIT=10
 CRASH_FILE="$HOME/drift-state/consecutive-crashes"
 MONITOR_PID=""
@@ -496,20 +501,34 @@ while true; do
                 start_claude
             else
                 log "Autopilot running normally (PID $CLAUDE_PID)."
-                # Refresh compliance cache for the PreToolUse hook to read
+                # Refresh sprint state + compliance cache every heartbeat
+                "$WORK_DIR/scripts/sprint-service.sh" refresh 2>/dev/null || true
                 refresh_compliance_cache
 
-                # P0 interrupt: if a new P0 appears mid-session (any non-planning), restart as senior
-                # Uses compliance cache (updated every CHECK_INTERVAL) — not stale state file
+                # Check per-session stall threshold (no commits/progress)
+                # Nudge first, then kill after NUDGE_WAIT seconds
                 CURRENT_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "junior")
-                if [[ "$CURRENT_TYPE" != "planning" ]]; then
-                    NEW_P0=$(grep -c "^#" "$HOME/drift-state/cache-p0-bugs" 2>/dev/null || echo "0")
-                    if [[ "$NEW_P0" -gt 0 ]]; then
-                        log "P0 detected mid-${CURRENT_TYPE}-session — interrupting to handle P0"
+                case "$CURRENT_TYPE" in
+                    planning) SESSION_STALL=$STALL_PLANNING ;;
+                    senior)   SESSION_STALL=$STALL_SENIOR ;;
+                    *)        SESSION_STALL=$STALL_JUNIOR ;;
+                esac
+                NUDGE_FILE="$HOME/drift-state/watchdog-nudge-${CLAUDE_PID}"
+                if is_log_stale_seconds "$SESSION_STALL"; then
+                    if [[ ! -f "$NUDGE_FILE" ]]; then
+                        log "Session appears stalled (no output in ${SESSION_STALL}s, type=$CURRENT_TYPE) — giving ${NUDGE_WAIT}s before restart."
+                        touch "$NUDGE_FILE"
+                    elif is_log_stale_seconds $(( SESSION_STALL + NUDGE_WAIT )); then
+                        log "Session still stalled after nudge window — killing and restarting."
+                        rm -f "$NUDGE_FILE"
                         kill_claude
                         cleanup_dirty_state
                         start_claude
+                    else
+                        log "Nudge window active — waiting for session to respond (type=$CURRENT_TYPE)."
                     fi
+                else
+                    rm -f "$NUDGE_FILE" 2>/dev/null || true
                 fi
             fi
             ;;

@@ -216,52 +216,87 @@ run_priority() {
 echo ""
 echo "══ Priority Ordering ═══════════════════════════════════════════════════"
 
-# 2.1 P0 bug beats everything
+# 2.1 Admin-approved P0 bug (has sprint-task) beats everything
 write_state_with_tasks "null" \
     "$(task 10 'Sprint task' pending sprint-task)" \
-    "$(task 20 'P0 Bug' pending bug P0)" \
+    "$(task 20 'P0 Bug admin' pending bug P0 sprint-task)" \
     "$(task 30 'Permanent' permanent permanent-task)"
 OUT=$(sprint_service next --junior)
-assert_eq "P0 bug is Priority 1 for junior" "20 P0 Bug" "$OUT"
-
+assert_eq "admin P0 bug (sprint-task) is Priority 1 for junior" "20 P0 Bug admin" "$OUT"
 OUT=$(sprint_service next --senior)
-assert_eq "P0 bug is Priority 1 for senior" "20 P0 Bug" "$OUT"
+assert_eq "admin P0 bug (sprint-task) is Priority 1 for senior" "20 P0 Bug admin" "$OUT"
 
-# 2.2 P1 bug only for senior
+# 2.1b Non-admin P0 bug (no sprint-task) is NOT in queue — needs investigation, then approval
 write_state_with_tasks "null" \
     "$(task 10 'Sprint task' pending sprint-task)" \
-    "$(task 20 'P1 Bug' pending bug P1)"
+    "$(task 21 'P0 Bug non-admin' pending bug P0)"
 OUT=$(sprint_service next --junior)
-assert_eq "P1 bug NOT returned for --junior" "10 Sprint task" "$OUT"
+assert_eq "non-admin P0 bug (no sprint-task) not in junior queue" "10 Sprint task" "$OUT"
 OUT=$(sprint_service next --senior)
-assert_eq "P1 bug returned for --senior" "20 P1 Bug" "$OUT"
+assert_eq "non-admin P0 bug (no sprint-task) not in senior queue" "none" "$OUT"
 
-# 2.3 SENIOR sprint task beats P2 bug
+# 2.2 P1/P2 bugs: only approved (sprint-task) bugs are in queue; both sessions can handle them
+# Unapproved P1 (no sprint-task) → not in queue, just triggers watchdog routing via count --bugs
+write_state_with_tasks "null" \
+    "$(task 10 'Regular sprint' pending sprint-task)" \
+    "$(task 20 'P1 Bug unapproved' pending bug P1)"
+OUT=$(sprint_service next --junior)
+assert_eq "unapproved P1 bug NOT in junior queue (gets sprint task)" "10 Regular sprint" "$OUT"
+OUT=$(sprint_service next --senior)
+assert_eq "unapproved P1 bug NOT in senior queue" "none" "$OUT"
+
+# Approved P1 bug (sprint-task) is in BOTH queues at Priority 3
+write_state_with_tasks "null" \
+    "$(task 10 'Regular sprint' pending sprint-task)" \
+    "$(task 20 'P1 Bug approved' pending bug P1 sprint-task)"
+OUT=$(sprint_service next --junior)
+assert_eq "approved P1 bug in junior queue at Priority 3 (after regular sprint)" "10 Regular sprint" "$OUT"
+OUT=$(sprint_service next --senior)
+assert_eq "approved P1 bug in senior queue at Priority 3" "20 P1 Bug approved" "$OUT"
+
+# With no sprint tasks, junior also picks up the approved P1 bug
+write_state_with_tasks "null" \
+    "$(task 20 'P1 Bug approved' pending bug P1 sprint-task)"
+OUT=$(sprint_service next --junior)
+assert_eq "approved P1 bug returned for junior when no sprint tasks remain" "20 P1 Bug approved" "$OUT"
+
+# 2.3 SENIOR sprint task beats P1/P2 bugs for senior (Priority 2 vs Priority 3)
 write_state_with_tasks "null" \
     "$(task 10 'SENIOR sprint' pending sprint-task SENIOR)" \
-    "$(task 20 'P2 Bug' pending bug P2)"
+    "$(task 20 'P2 Bug approved' pending bug P2 sprint-task)"
 OUT=$(sprint_service next --senior)
-assert_eq "SENIOR sprint beats P2 bug (Priority 4 vs 5)" "10 SENIOR sprint" "$OUT"
+assert_eq "SENIOR sprint beats approved P2 bug for senior" "10 SENIOR sprint" "$OUT"
 
-# 2.4 needs-review tasks skipped
-# Note: --senior only returns P0/P1/P2/SENIOR-sprint tasks; regular sprint-task (no SENIOR) is junior-only
+# 2.4 needs-review tasks skipped by all sessions
 write_state_with_tasks "null" \
-    "$(task 10 'Needs review bug' pending bug P1 needs-review)" \
+    "$(task 10 'Needs review bug' pending bug P1 needs-review sprint-task)" \
     "$(task 20 'Normal sprint' pending sprint-task)" \
     "$(task 21 'SENIOR sprint' pending sprint-task SENIOR)"
 OUT=$(sprint_service next --senior)
-assert_eq "needs-review task skipped for senior (gets SENIOR sprint instead)" "21 SENIOR sprint" "$OUT"
+assert_eq "needs-review bug skipped for senior (gets SENIOR sprint instead)" "21 SENIOR sprint" "$OUT"
 OUT=$(sprint_service next --junior)
-assert_eq "needs-review task skipped for junior (gets normal sprint)" "20 Normal sprint" "$OUT"
+assert_eq "needs-review bug skipped for junior (gets normal sprint)" "20 Normal sprint" "$OUT"
 
-# 2.5 requested permanent task beats regular sprint tasks (Priority 5.5)
+# 2.5 Regular sprint task beats requested permanent (regular sprint = Priority 2, requested perm = Priority 4)
 write_state_with_tasks "null" \
     "$(task 10 'Regular sprint' pending sprint-task)" \
     "$(task 20 'Requested perm' permanent permanent-task requested)"
 OUT=$(sprint_service next --junior)
-assert_eq "requested permanent beats regular sprint" "20 Requested perm" "$OUT"
+assert_eq "regular sprint beats requested permanent for junior" "10 Regular sprint" "$OUT"
 
-# 2.6 regular permanent task only when no sprint tasks remain
+# Requested non-SENIOR perm returned by junior when no sprint tasks
+write_state_with_tasks "null" \
+    "$(task 20 'Requested perm' permanent permanent-task requested)"
+OUT=$(sprint_service next --junior)
+assert_eq "requested non-SENIOR perm returned for junior when no sprint" "20 Requested perm" "$OUT"
+
+# Requested SENIOR perm returned for senior (needs SENIOR label)
+write_state_with_tasks "null" \
+    "$(task 21 'Requested SENIOR perm' permanent permanent-task requested SENIOR)"
+OUT=$(sprint_service next --senior)
+assert_eq "requested SENIOR perm returned for senior" "21 Requested SENIOR perm" "$OUT"
+
+# 2.6 Regular permanent task only when no sprint tasks remain
 write_state_with_tasks "null" \
     "$(task 10 'Regular sprint' pending sprint-task)" \
     "$(task 20 'Regular perm' permanent permanent-task)"
@@ -273,7 +308,7 @@ write_state_with_tasks "null" \
 OUT=$(sprint_service next --junior)
 assert_eq "regular perm returned when no sprint tasks" "20 Regular perm" "$OUT"
 
-# 2.7 count --bugs: P1/P2 without sprint-task and without needs-review
+# 2.7 count --bugs: P1/P2 without sprint-task and without needs-review (watchdog trigger)
 write_state_with_tasks "null" \
     "$(task 10 'P1 bug no approval' pending bug P1)" \
     "$(task 11 'P2 bug needs-review' pending bug P2 needs-review)" \
@@ -409,13 +444,20 @@ assert_eq "perm task returned when no sprint tasks" "100 Improve food DB" "$OUT"
 OUT=$(sprint_service next --senior)
 assert_eq "perm task NOT returned for --senior (no filter match)" "none" "$OUT"
 
-# 5.3 Requested perm task returned for all sessions
+# 5.3 Requested perm: non-SENIOR → junior only; SENIOR → senior only
 write_state_with_tasks "null" \
     "$(task 101 'Requested perm' permanent permanent-task requested)"
 OUT=$(sprint_service next --junior)
-assert_eq "requested perm returned for junior" "101 Requested perm" "$OUT"
+assert_eq "non-SENIOR requested perm returned for junior" "101 Requested perm" "$OUT"
 OUT=$(sprint_service next --senior)
-assert_eq "requested perm returned for senior" "101 Requested perm" "$OUT"
+assert_eq "non-SENIOR requested perm NOT returned for senior" "none" "$OUT"
+
+write_state_with_tasks "null" \
+    "$(task 102 'Requested SENIOR perm' permanent permanent-task requested SENIOR)"
+OUT=$(sprint_service next --senior)
+assert_eq "SENIOR requested perm returned for senior" "102 Requested SENIOR perm" "$OUT"
+OUT=$(sprint_service next --junior)
+assert_eq "SENIOR requested perm NOT returned for junior" "none" "$OUT"
 
 # 5.4 After session-done, perm task not returned again this session
 write_state_with_tasks "101" \
@@ -424,7 +466,72 @@ sprint_service session-done 101 2>/dev/null || true
 OUT=$(sprint_service next --junior)
 assert_eq "after session-done perm not returned" "none" "$OUT"
 
-# 5.5 Two permanent tasks: oldest updatedAt returned first
+# 5.5 Senior permanent task: session-done sets sprint_done, blocks re-selection for senior
+write_state_with_tasks "null" \
+    "$(task 110 'SENIOR perm' permanent permanent-task SENIOR)"
+# Simulate: senior claims and session-done's it
+python3 -c "
+import json
+d = json.load(open('$STATE_FILE'))
+for t in d['tasks']:
+    if t['number'] == 110:
+        t['status'] = 'in_progress'
+d['in_progress'] = 110
+json.dump(d, open('$STATE_FILE', 'w'), indent=2)
+"
+sprint_service session-done 110 2>/dev/null || true
+OUT=$(sprint_service next --senior)
+assert_eq "SENIOR perm blocked for senior after session-done (sprint_done)" "none" "$OUT"
+
+# 5.5b Junior ignores sprint_done — still picks up the permanent task
+OUT=$(sprint_service next --junior)
+assert_eq "junior ignores sprint_done and picks up permanent task" "none" "$OUT"
+# (returns none because SENIOR perm is senior-only; junior can't see SENIOR permanent tasks)
+
+# 5.5c After reset-sprint-done, senior can pick it up again
+sprint_service reset-sprint-done 2>/dev/null || true
+# reset only resets sprint_done flag; status is still "done" locally (next refresh fixes it)
+# Manually restore status to simulate post-refresh state
+python3 -c "
+import json
+d = json.load(open('$STATE_FILE'))
+for t in d['tasks']:
+    if t['number'] == 110:
+        t['status'] = 'permanent'
+json.dump(d, open('$STATE_FILE', 'w'), indent=2)
+"
+OUT=$(sprint_service next --senior)
+assert_eq "SENIOR perm available for senior again after reset-sprint-done" "110 SENIOR perm" "$OUT"
+
+# 5.5d Non-SENIOR permanent: session-done + sprint_done, but junior ignores it and loops
+write_state_with_tasks "null" \
+    "$(task 120 'Junior perm' permanent permanent-task)"
+python3 -c "
+import json
+d = json.load(open('$STATE_FILE'))
+for t in d['tasks']:
+    if t['number'] == 120:
+        t['status'] = 'in_progress'
+d['in_progress'] = 120
+json.dump(d, open('$STATE_FILE', 'w'), indent=2)
+"
+sprint_service session-done 120 2>/dev/null || true
+# After session-done, status="done" locally — junior skips it this session
+OUT=$(sprint_service next --junior)
+assert_eq "junior perm blocked within-session after session-done" "none" "$OUT"
+# But sprint_done is set; next refresh would reset status to "permanent" (simulated here)
+python3 -c "
+import json
+d = json.load(open('$STATE_FILE'))
+for t in d['tasks']:
+    if t['number'] == 120:
+        t['status'] = 'permanent'  # simulates what refresh does
+json.dump(d, open('$STATE_FILE', 'w'), indent=2)
+"
+OUT=$(sprint_service next --junior)
+assert_eq "junior perm available again after refresh (loops, ignores sprint_done)" "120 Junior perm" "$OUT"
+
+# 5.6 Two permanent tasks: oldest updatedAt returned first
 write_state_with_tasks "null" \
     "$(cat <<EOF
 {"number": 200, "title": "Old perm", "labels": ["permanent-task"], "status": "permanent", "updatedAt": "2026-01-01T00:00:00Z"}
@@ -661,7 +768,7 @@ assert_eq "cycle: junior gets permanent task after all sprint exhausted" "200 On
 python3 -c "
 import json
 d = json.load(open('$STATE_FILE'))
-d['tasks'].insert(0, {'number': 999, 'title': 'Crash on launch P0', 'labels': ['bug', 'P0'], 'status': 'pending', 'updatedAt': '2026-01-01T00:00:00Z'})
+d['tasks'].insert(0, {'number': 999, 'title': 'Crash on launch P0', 'labels': ['bug', 'P0', 'sprint-task'], 'status': 'pending', 'updatedAt': '2026-01-01T00:00:00Z'})
 json.dump(d, open('$STATE_FILE', 'w'), indent=2)
 "
 # Both senior and junior should see P0 first
