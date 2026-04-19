@@ -682,6 +682,36 @@ final class IntentRoutingEval: XCTestCase {
         await assertNotFood("woke up feeling awful")
     }
 
+    // MARK: - Glucose (edge cases: post-meal, fasting, trend)
+
+    func testGlucose_edgeCases() async {
+        await assertRoutes("what was my fasting glucose this morning", to: "glucose")
+        await assertRoutes("did I spike after lunch", to: "glucose")
+        await assertRoutes("my sugar levels have been high", to: "glucose")
+        await assertRoutes("how long did my glucose spike last", to: "glucose")
+        await assertRoutes("is my blood sugar stable today", to: "glucose")
+    }
+
+    // MARK: - Biomarkers (edge cases: HbA1c, ferritin, thyroid)
+
+    func testBiomarkers_edgeCases() async {
+        await assertRoutes("what's my HbA1c", to: "biomarkers")
+        await assertRoutes("check my ferritin", to: "biomarkers")
+        await assertRoutes("how's my thyroid", to: "biomarkers")
+        await assertRoutes("show me my blood panel", to: "biomarkers")
+        await assertRoutes("my creatinine levels", to: "biomarkers")
+    }
+
+    // MARK: - Sleep (deep dive: REM, stages, quality questions)
+
+    func testSleep_qualityQueries() async {
+        await assertRoutes("how much deep sleep did I get", to: "sleep_recovery")
+        await assertRoutes("what was my sleep quality last night", to: "sleep_recovery")
+        await assertRoutes("show my REM sleep", to: "sleep_recovery")
+        await assertRoutes("did I sleep enough for recovery", to: "sleep_recovery")
+        await assertRoutes("my sleep efficiency this week", to: "sleep_recovery")
+    }
+
     // MARK: - Summary
 
     func testPrintRoutingSummary() async {
