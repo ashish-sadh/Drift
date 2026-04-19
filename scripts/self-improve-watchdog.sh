@@ -214,7 +214,7 @@ start_claude() {
 
     # 0. Resume interrupted planning session (crash recovery — takes priority over all routing)
     local EXISTING_PLAN
-    EXISTING_PLAN=$(cat "$HOME/drift-state/planning-issue" 2>/dev/null | tr -d '[:space:]')
+    EXISTING_PLAN=$(cat "$HOME/drift-state/planning-issue" 2>/dev/null | tr -d '[:space:]' || true)
     if [[ -n "$EXISTING_PLAN" ]]; then
         local PLAN_STATE
         PLAN_STATE=$(gh issue view "$EXISTING_PLAN" --json state --jq '.state' 2>/dev/null || echo "CLOSED")
