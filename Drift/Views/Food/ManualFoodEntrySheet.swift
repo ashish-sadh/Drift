@@ -40,7 +40,7 @@ struct ManualFoodEntrySheet: View {
                     TextField("Food name", text: $name)
                         .font(.body)
                         .padding(12)
-                        .background(Color.white.opacity(0.12), in: RoundedRectangle(cornerRadius: 10))
+                        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 10))
 
                     // Calories — hero
                     VStack(spacing: 4) {

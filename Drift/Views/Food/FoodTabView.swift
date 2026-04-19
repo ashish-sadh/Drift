@@ -90,6 +90,7 @@ struct FoodTabView: View {
                     Button { showingSearch = true } label: {
                         Image(systemName: "plus").font(.body.weight(.semibold)).foregroundStyle(Theme.accent)
                     }
+                    .accessibilityLabel("Add food")
                 }
             }
             .fullScreenCover(isPresented: $showingScanner) { BarcodeLookupView(viewModel: viewModel) }
@@ -99,7 +100,7 @@ struct FoodTabView: View {
                         .font(.subheadline.weight(.medium))
                         .foregroundStyle(.white)
                         .padding(.horizontal, 16).padding(.vertical, 10)
-                        .background(.green.opacity(0.9), in: Capsule())
+                        .background(Theme.deficit.opacity(0.9), in: Capsule())
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                         .padding(.bottom, 20)
                 }
