@@ -242,7 +242,13 @@ extension AIChatViewModel {
 
     /// Phase 1: Dispatch static override results (greetings, thanks, help, emoji, rule engine).
     private func dispatchStaticOverride(_ lower: String) -> Bool {
+        let phaseBefore = convState.phase
         guard let staticResult = StaticOverrides.match(lower) else { return false }
+        if phaseBefore != .idle && convState.phase == .idle {
+            pendingRecipeItems = []
+            pendingRecipeName = ""
+            pendingExercises = []
+        }
         switch staticResult {
         case .response(let text):
             messages.append(ChatMessage(role: .assistant, text: text))
