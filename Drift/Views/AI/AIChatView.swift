@@ -85,6 +85,7 @@ struct AIChatView: View {
                             .font(.title2)
                             .foregroundStyle(Theme.surplus)
                     }
+                    .accessibilityLabel("Stop recording")
 
                     Button {
                         vm.speechService.gracefulStop()
@@ -93,6 +94,7 @@ struct AIChatView: View {
                             .font(.title2)
                             .foregroundStyle(Theme.accent)
                     }
+                    .accessibilityLabel("Send message")
                 } else {
                     Button {
                         vm.speechService.toggleRecording(
@@ -109,12 +111,14 @@ struct AIChatView: View {
                             .font(.system(size: 18))
                             .foregroundStyle(.secondary)
                     }
+                    .accessibilityLabel("Voice input")
                     .disabled(vm.isGenerating)
 
                     Button { vm.sendMessage() } label: {
                         Image(systemName: "arrow.up.circle.fill").font(.title2)
                             .foregroundStyle(vm.inputText.isEmpty ? Color.secondary.opacity(0.5) : Theme.accent)
                     }
+                    .accessibilityLabel("Send message")
                     .disabled(vm.inputText.isEmpty || vm.isGenerating)
                 }
             }

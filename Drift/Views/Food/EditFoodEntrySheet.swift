@@ -252,6 +252,7 @@ struct EditFoodEntrySheet: View {
                         Image(systemName: editEntryIsFav ? "star.fill" : "star")
                             .foregroundStyle(editEntryIsFav ? Theme.fatYellow : .secondary)
                     }
+                    .accessibilityLabel(editEntryIsFav ? "Remove from favorites" : "Add to favorites")
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {

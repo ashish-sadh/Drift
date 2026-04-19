@@ -52,6 +52,7 @@ struct CombosView: View {
                     Button { editingCombo = nil; showingBuilder = true } label: {
                         Image(systemName: "plus")
                     }
+                    .accessibilityLabel("Add combo")
                 }
             }
             .sheet(isPresented: $showingBuilder, onDismiss: { viewModel.loadSuggestions() }) {

@@ -84,7 +84,9 @@ struct QuickAddView: View {
                                 Spacer()
                                 Button { items.remove(at: i) } label: {
                                     Image(systemName: "xmark.circle.fill").font(.caption).foregroundStyle(.tertiary)
-                                }.buttonStyle(.plain)
+                                }
+                                .accessibilityLabel("Remove ingredient")
+                                .buttonStyle(.plain)
                             }
                             .padding(.vertical, 5)
                             .contentShape(Rectangle())

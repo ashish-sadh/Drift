@@ -228,7 +228,9 @@ struct FoodSearchView: View {
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
             } label: {
                 Image(systemName: "plus.circle.fill").foregroundStyle(Theme.accent)
-            }.buttonStyle(.plain).padding(.leading, 6)
+            }
+            .accessibilityLabel("Log food")
+            .buttonStyle(.plain).padding(.leading, 6)
         }
         .padding(.horizontal, 16).padding(.vertical, 4)
         .contextMenu {
@@ -291,7 +293,9 @@ struct FoodSearchView: View {
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
             } label: {
                 Image(systemName: "plus.circle.fill").foregroundStyle(Theme.accent)
-            }.buttonStyle(.plain).padding(.leading, 6)
+            }
+            .accessibilityLabel("Log food")
+            .buttonStyle(.plain).padding(.leading, 6)
         }
         .padding(.horizontal, 16).padding(.vertical, 4)
         .contextMenu {
@@ -636,6 +640,7 @@ struct FoodSearchView: View {
                         Image(systemName: isFoodFavorite ? "star.fill" : "star")
                             .foregroundStyle(isFoodFavorite ? Theme.fatYellow : .secondary)
                     }
+                    .accessibilityLabel(isFoodFavorite ? "Remove from favorites" : "Add to favorites")
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Log") {
