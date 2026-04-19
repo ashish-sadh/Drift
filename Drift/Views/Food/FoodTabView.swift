@@ -506,7 +506,7 @@ struct FoodTabView: View {
                 if mealGrouped {
                     ForEach(Array(mealGroups.enumerated()), id: \.element.mealType) { groupIdx, group in
                         mealSectionHeader(group.mealType, entries: group.entries)
-                        ForEach(Array(group.entries.enumerated()), id: \.element.id) { idx, entry in
+                        ForEach(Array(group.entries.enumerated()), id: \.offset) { idx, entry in
                             entryRow(entry)
                             if idx < group.entries.count - 1 { Divider() }
                         }
@@ -638,8 +638,8 @@ struct FoodTabView: View {
                     Label("Copy to Today", systemImage: "doc.on.doc")
                 }
             }
-            // Reorder (only in time sort mode)
-            if foodSortMode == .time {
+            // Reorder (only in flat time-sorted view — grouped view uses section ordering)
+            if foodSortMode == .time && !mealGrouped {
                 if let entryIndex = sortedEntries.firstIndex(where: { $0.id == entry.id }) {
                     if entryIndex > 0 {
                         Button {
