@@ -113,4 +113,26 @@ enum Preferences {
         get { UserDefaults.standard.bool(forKey: chatTelemetryEnabledKey) }
         set { UserDefaults.standard.set(newValue, forKey: chatTelemetryEnabledKey) }
     }
+
+    private static let photoLogEnabledKey = "drift_photo_log_enabled"
+    private static let photoLogProviderKey = "drift_photo_log_provider"
+
+    /// Photo Log Beta opt-in. When OFF (default), camera entry points are
+    /// hidden everywhere. When ON, chat/food sheets show a camera button and
+    /// AIToolAgent registers `photo_log`. First cloud path in the app —
+    /// keep it off by default. #224 / #266.
+    static var photoLogEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: photoLogEnabledKey) }
+        set { UserDefaults.standard.set(newValue, forKey: photoLogEnabledKey) }
+    }
+
+    /// Currently active cloud provider for Photo Log. The key for the other
+    /// provider stays in Keychain if the user switches back.
+    static var photoLogProvider: CloudVisionProvider {
+        get {
+            let raw = UserDefaults.standard.string(forKey: photoLogProviderKey) ?? ""
+            return CloudVisionProvider(rawValue: raw) ?? .anthropic
+        }
+        set { UserDefaults.standard.set(newValue.rawValue, forKey: photoLogProviderKey) }
+    }
 }

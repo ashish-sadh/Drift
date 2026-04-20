@@ -459,6 +459,30 @@ struct SettingsView: View {
                     Text("Removes all recorded chat-turn telemetry from this device. User data (weight, food, workouts) is not affected.")
                 }
 
+                // Photo Log (Beta) — BYOK cloud vision. #224 / #266.
+                NavigationLink {
+                    PhotoLogBetaSettingsView()
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "camera.viewfinder")
+                            .foregroundStyle(Theme.accent).frame(width: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 6) {
+                                Text("Photo Log").font(.subheadline.weight(.medium))
+                                Text("BETA").font(.caption2.weight(.bold))
+                                    .padding(.horizontal, 6).padding(.vertical, 2)
+                                    .background(Theme.accent.opacity(0.2)).clipShape(Capsule())
+                            }
+                            Text("Snap a meal, get calories · BYOK cloud AI")
+                                .font(.caption2).foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
+                    }
+                    .padding(.vertical, 10)
+                }
+                .card()
+
                 // Algorithm
                 NavigationLink {
                     AlgorithmSettingsView()

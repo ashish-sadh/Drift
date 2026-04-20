@@ -51,13 +51,35 @@ struct AnthropicVisionClient: CloudVisionClient {
     }
 
     func analyze(image: Data, prompt: String) async throws -> PhotoLogResponse {
+        let body = try Self.body(model: model, image: image, prompt: prompt)
+        let data = try await send(body: body)
+        return try Self.parseResponse(data)
+    }
+
+    /// Tiny text-only ping to validate the API key. Hits the Messages
+    /// endpoint with a 1-token output cap so it's essentially free. Returns
+    /// normally on any 2xx, throws the same `CloudVisionError` set on
+    /// failure. Used by Settings [Test Connection]. #266.
+    func ping() async throws {
+        let body: [String: Any] = [
+            "model": model,
+            "max_tokens": 1,
+            "messages": [["role": "user", "content": "ping"]]
+        ]
+        _ = try await send(body: try JSONSerialization.data(withJSONObject: body))
+    }
+
+    /// Shared request/response wrapper for both `analyze` and `ping`. Sets
+    /// the required Anthropic headers, applies the 20s timeout, and maps all
+    /// network / HTTP failures into `CloudVisionError`.
+    private func send(body: Data) async throws -> Data {
         var request = URLRequest(url: endpoint)
         request.httpMethod = "POST"
         request.timeoutInterval = Self.timeoutSeconds
         request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
         request.setValue(Self.apiVersion, forHTTPHeaderField: "anthropic-version")
         request.setValue("application/json", forHTTPHeaderField: "content-type")
-        request.httpBody = try Self.body(model: model, image: image, prompt: prompt)
+        request.httpBody = body
 
         let (data, response): (Data, URLResponse)
         do {
@@ -71,14 +93,10 @@ struct AnthropicVisionClient: CloudVisionClient {
             throw CloudVisionError.badResponse(-1)
         }
         switch http.statusCode {
-        case 200..<300:
-            return try Self.parseResponse(data)
-        case 401:
-            throw CloudVisionError.unauthorized
-        case 429:
-            throw CloudVisionError.rateLimited
-        default:
-            throw CloudVisionError.badResponse(http.statusCode)
+        case 200..<300: return data
+        case 401: throw CloudVisionError.unauthorized
+        case 429: throw CloudVisionError.rateLimited
+        default: throw CloudVisionError.badResponse(http.statusCode)
         }
     }
 
