@@ -414,8 +414,8 @@ final class FoodLogViewModel {
     func yesterdayCalories() -> Double? {
         guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: selectedDate) else { return nil }
         let dateStr = DateFormatters.dateOnly.string(from: yesterday)
-        let totals = FoodService.getDailyTotals(date: dateStr)
-        return totals.eaten > 0 ? Double(totals.eaten) : nil
+        let nutrition = (try? database.fetchDailyNutrition(for: dateStr)) ?? .zero
+        return nutrition.calories > 0 ? nutrition.calories : nil
     }
 
     func copyFromYesterday() {

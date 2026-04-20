@@ -404,15 +404,16 @@ struct ActiveWorkoutView: View {
             }
 
             // Sets
-            ForEach(exercises[ei].sets.indices, id: \.self) { si in
+            ForEach($exercises[ei].sets) { $set in
+                let si = exercises[ei].sets.firstIndex(where: { $0.id == set.id }) ?? 0
                 VStack(spacing: 0) {
                     HStack(spacing: 0) {
                         Button {
-                            exercises[ei].sets[si].isWarmup.toggle()
+                            $set.isWarmup.wrappedValue.toggle()
                         } label: {
-                            Text(exercises[ei].sets[si].isWarmup || exercises[ei].isWarmupExercise ? "W" : "\(si + 1)")
+                            Text(set.isWarmup || exercises[ei].isWarmupExercise ? "W" : "\(si + 1)")
                                 .font(.caption.weight(.bold))
-                                .foregroundStyle(exercises[ei].sets[si].isWarmup || exercises[ei].isWarmupExercise ? Theme.fatYellow : .secondary)
+                                .foregroundStyle(set.isWarmup || exercises[ei].isWarmupExercise ? Theme.fatYellow : .secondary)
                         }.buttonStyle(.plain).frame(width: 28, alignment: .leading)
 
                         // Previous
@@ -421,44 +422,42 @@ struct ActiveWorkoutView: View {
 
                         // Weight
                         TextField(si < exercises[ei].previousSets.count ? prevWeight(exercises[ei].previousSets[si]) : "0",
-                                  text: $exercises[ei].sets[si].weight)
+                                  text: $set.weight)
                             .keyboardType(.decimalPad).font(.subheadline.monospacedDigit())
                             .multilineTextAlignment(.center).frame(width: 55)
                             .padding(.vertical, 4)
-                            .background(exercises[ei].sets[si].done ? Theme.deficit.opacity(0.1) : Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 4))
+                            .background(set.done ? Theme.deficit.opacity(0.1) : Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 4))
 
                         // Reps or Time
                         TextField(isDuration ? "sec" : (si < exercises[ei].previousSets.count ? prevReps(exercises[ei].previousSets[si]) : "0"),
-                                  text: $exercises[ei].sets[si].reps)
+                                  text: $set.reps)
                             .keyboardType(.numberPad).font(.subheadline.monospacedDigit())
                             .multilineTextAlignment(.center).frame(width: 50)
                             .padding(.vertical, 4).padding(.leading, 4)
-                            .background(exercises[ei].sets[si].done ? Theme.deficit.opacity(0.1) : Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 4))
+                            .background(set.done ? Theme.deficit.opacity(0.1) : Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 4))
 
                         Spacer()
 
                         // Done button
                         Button {
-                            exercises[ei].sets[si].done.toggle()
-                            if exercises[ei].sets[si].done {
+                            let nowDone = !set.done
+                            $set.done.wrappedValue = nowDone
+                            if nowDone {
                                 startRest(exerciseIndex: ei, setIndex: si, duration: exercises[ei].restTime)
-                                // Auto-add next set prefilled with same weight/reps (copy to next)
-                                if si == exercises[ei].sets.count - 1 {
-                                    let s = exercises[ei].sets[si]
-                                    if !s.weight.isEmpty || !s.reps.isEmpty {
-                                        exercises[ei].sets.append(ActiveSet(weight: s.weight, reps: s.reps))
-                                    }
+                                // Auto-add next set prefilled with same weight/reps
+                                if si == exercises[ei].sets.count - 1 && (!set.weight.isEmpty || !set.reps.isEmpty) {
+                                    exercises[ei].sets.append(ActiveSet(weight: set.weight, reps: set.reps))
                                 }
                             }
                         } label: {
-                            Image(systemName: exercises[ei].sets[si].done ? "checkmark.circle.fill" : "circle")
+                            Image(systemName: set.done ? "checkmark.circle.fill" : "circle")
                                 .font(.title3)
-                                .foregroundStyle(exercises[ei].sets[si].done ? Theme.deficit : .secondary)
+                                .foregroundStyle(set.done ? Theme.deficit : .secondary)
                         }.frame(width: 30)
 
                         // Inline delete button
                         Button {
-                            exercises[ei].sets.remove(at: si)
+                            exercises[ei].sets.removeAll(where: { $0.id == set.id })
                             if exercises[ei].sets.isEmpty { exercises.remove(at: ei) }
                         } label: {
                             Image(systemName: "xmark").font(.system(size: 10)).foregroundStyle(.quaternary)
@@ -467,10 +466,8 @@ struct ActiveWorkoutView: View {
                     .padding(.vertical, 2)
                     .contextMenu {
                         Button(role: .destructive) {
-                            exercises[ei].sets.remove(at: si)
-                            if exercises[ei].sets.isEmpty {
-                                exercises.remove(at: ei)
-                            }
+                            exercises[ei].sets.removeAll(where: { $0.id == set.id })
+                            if exercises[ei].sets.isEmpty { exercises.remove(at: ei) }
                         } label: {
                             Label("Delete Set", systemImage: "trash")
                         }
