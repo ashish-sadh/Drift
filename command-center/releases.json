@@ -1568,5 +1568,19 @@
       "P0: replaced ForEach(indices) with element-based ForEach in DashboardView to prevent list-reorder crashes",
       "Combos: clear autopilot-generated auto-detected combos on migration so fresh users don't inherit seed data"
     ]
+  },
+  {
+    "build": 149,
+    "date": "2026-04-19T22:40:00-07:00",
+    "description": "AI quality — intent confidence v2, cross-domain pronoun resolution, auto-retry extraction",
+    "features": [
+      "Intent confidence v2 — positive-signal gates prevent over-clarification on clear food/weight queries (#242)",
+      "Cross-domain pronoun resolution — 'I had chicken, how many calories does it have?' correctly links pronoun to food log (#241)",
+      "Auto-retry intent classify — empty/incomplete extraction retries with literal hint for better accuracy"
+    ],
+    "fixes": [
+      "Weekly summary chip no longer fuzzy-matches to a random food item",
+      "Gemma 4 download hardened — retry on failure, size validation, pinned revision (#238)"
+    ]
   }
 ]
