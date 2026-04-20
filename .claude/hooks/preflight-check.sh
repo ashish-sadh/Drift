@@ -85,11 +85,21 @@ else
   echo "  [5/5] No reverts" >&2
 fi
 
-# 6. Check for open P0 bug issues
+# 6. Check for open P0 bug issues — FAIL-CLOSED: treat API errors as "bugs present".
+# Also cross-check the watchdog's cache-p0-bugs file so a transient gh flake can't
+# silently skip the guard. Build 152 (2026-04-20) shipped with #271 open because the
+# previous version silently treated empty gh output as "no bugs."
 echo "  [6/6] No P0 bugs..." >&2
-P0_BUGS=$(gh issue list --state open --label bug --label P0 --json number,title 2>/dev/null | jq -r '.[].title' | head -3)
-if [ -n "$P0_BUGS" ]; then
-  FAILURES="${FAILURES}\n- OPEN P0 BUGS (fix before publishing):\n${P0_BUGS}"
+P0_RAW=$(gh issue list --state open --label bug --label P0 --json number,title 2>&1)
+GH_EXIT=$?
+CACHE_P0=$(cat "$HOME/drift-state/cache-p0-bugs" 2>/dev/null || true)
+if [ "$GH_EXIT" -ne 0 ]; then
+  FAILURES="${FAILURES}\n- gh api failed verifying P0 status (exit $GH_EXIT). Watchdog cache says:\n${CACHE_P0:-(empty)}\n${P0_RAW}"
+elif [ -n "$P0_RAW" ] && echo "$P0_RAW" | jq -e 'length > 0' >/dev/null 2>&1; then
+  P0_TITLES=$(echo "$P0_RAW" | jq -r '.[].title' | head -3)
+  FAILURES="${FAILURES}\n- OPEN P0 BUGS (fix before publishing):\n${P0_TITLES}"
+elif [ -n "$CACHE_P0" ]; then
+  FAILURES="${FAILURES}\n- Watchdog cache-p0-bugs is still non-empty (label race). Clear it before publishing:\n${CACHE_P0}"
 else
   echo "  [6/6] No P0 bugs" >&2
 fi
