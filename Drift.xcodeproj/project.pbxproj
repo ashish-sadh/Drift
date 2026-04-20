@@ -202,6 +202,7 @@
 		C7666848928C7210A8CE6BD6 /* PromptOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBF19C358E700091486400DD /* PromptOptimizer.swift */; };
 		C78684F2133F07AAAC383EDB /* GoalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3258B6E91169170587AAB02B /* GoalView.swift */; };
 		C7DCB089BF4DCF1916C4B0E5 /* GoalView+Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B8EAC57A3A10193855A81F /* GoalView+Profile.swift */; };
+		CA3F2052B0B3E9E56D7AF064 /* WeeklySummaryRoutingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 550B90AE65B6BF4C31B62382 /* WeeklySummaryRoutingTests.swift */; };
 		CBACE89C978AA0377081831E /* WeightServiceAPITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BED47C488D5D052F183327F8 /* WeightServiceAPITests.swift */; };
 		CC5B581BFDDE48FB00D4E442 /* StaticOverrides.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F915E1ECAEF188959934E07 /* StaticOverrides.swift */; };
 		CF5BB4A5266F949DA9DEE006 /* LabReportUploadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D747073BCD9310AB76B496 /* LabReportUploadView.swift */; };
@@ -395,6 +396,7 @@
 		4902DF0863C6F54F0D1BC3BA /* HealthKitService+Sleep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HealthKitService+Sleep.swift"; sourceTree = "<group>"; };
 		491E711DE9CBB80FC1BF1AE9 /* GlucoseReading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlucoseReading.swift; sourceTree = "<group>"; };
 		4E0022FC1B24E4951EB7E807 /* ClarificationFalsePositiveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClarificationFalsePositiveTests.swift; sourceTree = "<group>"; };
+		550B90AE65B6BF4C31B62382 /* WeeklySummaryRoutingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeeklySummaryRoutingTests.swift; sourceTree = "<group>"; };
 		552F5AE6789DA294DDB91E8B /* Drift.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Drift.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		55F24D93872F919F1A8CB319 /* BarcodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScannerView.swift; sourceTree = "<group>"; };
 		5893DE4C163CA3CF50E74C1A /* DEXAOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DEXAOverviewView.swift; sourceTree = "<group>"; };
@@ -726,6 +728,7 @@
 				40634DDEB9C53BD0146A628A /* TDEEEstimatorTests.swift */,
 				E1A5DA3E3543A99260250279 /* UIFlowTests.swift */,
 				EDAD5133BD684B10BEDC1131 /* USDAFallbackTests.swift */,
+				550B90AE65B6BF4C31B62382 /* WeeklySummaryRoutingTests.swift */,
 				BED47C488D5D052F183327F8 /* WeightServiceAPITests.swift */,
 				3F51E9EC49412B4F96068D35 /* WeightTrendCalculatorTests.swift */,
 				FA0DCFCDAFF06DBAD3CA13DB /* WidgetDataTests.swift */,
@@ -1470,6 +1473,7 @@
 				923230686AD033F5F7025F94 /* TDEEEstimatorTests.swift in Sources */,
 				98FF97CFE71A6BBCFF976259 /* UIFlowTests.swift in Sources */,
 				11DB8618758D582670EBF2F8 /* USDAFallbackTests.swift in Sources */,
+				CA3F2052B0B3E9E56D7AF064 /* WeeklySummaryRoutingTests.swift in Sources */,
 				CBACE89C978AA0377081831E /* WeightServiceAPITests.swift in Sources */,
 				DF025680665178535364944C /* WeightTrendCalculatorTests.swift in Sources */,
 				B8CAE0734166CD113EE590E8 /* WidgetDataTests.swift in Sources */,

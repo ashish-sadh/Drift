@@ -169,8 +169,16 @@ enum ToolRegistration {
                         (foodName.hasPrefix("how many") && !foodName.contains(" in ") && !foodName.contains(" for ")) ||
                         (foodName.hasPrefix("how much") && !foodName.contains(" in ") && !foodName.contains(" for ")) ||
                         foodName.contains("how am i") || foodName.contains("on track") || foodName.contains("so far")
+                    // Summary/period queries ("weekly summary", "daily summary", "today",
+                    // "yesterday") from suggestion chips were being fuzzy-matched to foods
+                    // like "Mix secos y arandanos - Weekly!" by the online fallback. Route
+                    // these straight to the period-summary branch below. #249.
+                    let isSummaryQuery = foodName.contains("summary") ||
+                        foodName == "today" || foodName == "yesterday" ||
+                        foodName == "weekly" || foodName == "this week" ||
+                        foodName == "daily"
 
-                    if !isDiaryQuery {
+                    if !isDiaryQuery && !isSummaryQuery {
                         if !foodName.isEmpty, let result = FoodService.getNutrition(name: foodName) {
                             AIDataCache.shared.lastFoodLookupFood = result.food
                             return .text("\(result.perServing) Say 'log \(result.food.name.lowercased())' to add it.")
