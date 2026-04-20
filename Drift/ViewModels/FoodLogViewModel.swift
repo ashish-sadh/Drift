@@ -151,6 +151,10 @@ final class FoodLogViewModel {
         combos = (try? database.fetchCombos()) ?? []
         Task.detached(priority: .background) { [weak self] in
             try? await Task.sleep(nanoseconds: 500_000_000)
+            if !UserDefaults.standard.bool(forKey: "didClearAutopilotSeedV1") {
+                try? AppDatabase.shared.clearAutopilotSeedData()
+                UserDefaults.standard.set(true, forKey: "didClearAutopilotSeedV1")
+            }
             try? AppDatabase.shared.detectAndSaveCombos()
             await MainActor.run { self?.combos = (try? AppDatabase.shared.fetchCombos()) ?? [] }
         }

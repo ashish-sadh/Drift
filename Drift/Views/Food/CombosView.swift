@@ -6,6 +6,7 @@ struct CombosView: View {
     @State private var searchQuery = ""
     @State private var editingCombo: Food? = nil
     @State private var showingBuilder = false
+    @State private var comboToLog: Food? = nil
 
     private var filtered: [Food] {
         guard !searchQuery.isEmpty else { return viewModel.combos }
@@ -55,6 +56,11 @@ struct CombosView: View {
                     .accessibilityLabel("Add combo")
                 }
             }
+            .sheet(item: $comboToLog) { combo in
+                ComboLogSheet(combo: combo, viewModel: viewModel) {
+                    viewModel.loadSuggestions()
+                }
+            }
             .sheet(isPresented: $showingBuilder, onDismiss: { viewModel.loadSuggestions() }) {
                 if let combo = editingCombo {
                     QuickAddView(viewModel: viewModel,
@@ -86,8 +92,7 @@ struct CombosView: View {
             }
             Spacer()
             Button {
-                viewModel.logCombo(combo)
-                dismiss()
+                comboToLog = combo
             } label: {
                 Text("+ Log")
                     .font(.caption.weight(.semibold))

@@ -313,6 +313,36 @@ extension AppDatabase {
     }
 
     /// Insert sample food entries across the past 5 days for testing history grouping.
+    /// One-time cleanup: removes food entries and combos inserted by autopilot seed.
+    /// Safe to call repeatedly — guarded by UserDefaults flag at call site.
+    func clearAutopilotSeedData() throws {
+        // Foods the user confirmed they never logged — safe to delete entirely
+        let distinctlySeeded = ["Dosa", "Sambar", "Dal Tadka", "Roti"]
+        // Generic foods seeded with exact calorie values — match by name + cal
+        let genericSeeded: [String: Double] = [
+            "Egg": 72, "Milk (2%)": 122, "Protein Powder": 120, "Chole": 269, "Rice": 206
+        ]
+        // Auto-detected combo names generated from the seeded clusters
+        let seededComboNames = [
+            "dosa + sambar", "chole + rice", "dal tadka + roti",
+            "egg + milk (2%) + protein powder", "egg + milk + protein powder"
+        ]
+        try writer.write { db in
+            for name in distinctlySeeded {
+                try db.execute(sql: "DELETE FROM food_entry WHERE food_name = ?", arguments: [name])
+                try db.execute(sql: "DELETE FROM food_usage WHERE food_name = ?", arguments: [name])
+            }
+            for (name, cal) in genericSeeded {
+                try db.execute(sql: "DELETE FROM food_entry WHERE food_name = ? AND ABS(calories - ?) < 0.5",
+                               arguments: [name, cal])
+            }
+            for name in seededComboNames {
+                try db.execute(sql: "DELETE FROM food WHERE LOWER(name) = ? AND source = 'recipe'",
+                               arguments: [name])
+            }
+        }
+    }
+
     func seedTestData() throws {
         struct SeedItem {
             let name: String, cal: Double, p: Double, c: Double, f: Double, ss: Double, meal: String
