@@ -106,6 +106,12 @@ final class ToolRegistry {
         tools[tool.name] = tool
     }
 
+    /// Remove a tool by name. No-op if not registered. Used by conditional
+    /// tools (e.g. Photo Log) whose availability can flip at runtime.
+    func unregister(name: String) {
+        tools.removeValue(forKey: name)
+    }
+
     func tool(named name: String) -> ToolSchema? {
         tools[name]
     }

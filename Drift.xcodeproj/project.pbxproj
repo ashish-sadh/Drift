@@ -15,6 +15,7 @@
 		08A036DA58D553363E9D412E /* MultiTurnContextEval.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D0EF86656667CEF40EB779 /* MultiTurnContextEval.swift */; };
 		0BECBF8EA607FB3FE10DC3FE /* DriftWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 145534F72860C9C345156102 /* DriftWidget.swift */; };
 		0E9D1FE15EFC96D35A4D6CBC /* ConfirmationCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0BFC0D10ECB1BBDADD1D1CCB /* ConfirmationCardTests.swift */; };
+		0FBD78DE2C75146EE2AA13AB /* PhotoLogToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBD371873F1D148C190AA7DB /* PhotoLogToolTests.swift */; };
 		10C86149C159122F1E150EBC /* ConversationStatePersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87905A31DE15D664CC66E343 /* ConversationStatePersistence.swift */; };
 		11AFD9A7915929FB480CFE99 /* CycleCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6C02FCD909BDE67D229EC1 /* CycleCalculationTests.swift */; };
 		11DB8618758D582670EBF2F8 /* USDAFallbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDAD5133BD684B10BEDC1131 /* USDAFallbackTests.swift */; };
@@ -91,6 +92,7 @@
 		4C31E5F32057829ABAA0840A /* DriftApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6712FB46945A6FE1AAB0E0 /* DriftApp.swift */; };
 		4C8D307CC64DADDCE400F45B /* DEXARegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE42BE067CE617760E08B051 /* DEXARegion.swift */; };
 		510B0EC55CDC176805887710 /* DefaultFoods.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B410A7B058246A1F98F46E9 /* DefaultFoods.swift */; };
+		51943F743F3F4638E4D7EBAA /* PhotoLogTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC05282764E0169FEFB3D88 /* PhotoLogTool.swift */; };
 		51D36C1D00F25F64F54D70BF /* HealthKitService+Sleep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4902DF0863C6F54F0D1BC3BA /* HealthKitService+Sleep.swift */; };
 		5284981F1135EBAFC55F5BFE /* llama.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4101CD9171B652C6B8D1BB4E /* llama.xcframework */; };
 		5A5C3B121A517C9F07A31C5A /* CycleCalculations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37D1FB1A43791483D88EC4BC /* CycleCalculations.swift */; };
@@ -491,6 +493,7 @@
 		A5437789EE3514EE1191D392 /* LabReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabReport.swift; sourceTree = "<group>"; };
 		A81CB6F88CC852F18E7809C8 /* ToolRanker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolRanker.swift; sourceTree = "<group>"; };
 		A835CA7572E629657044C111 /* PhotoLogServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogServiceTests.swift; sourceTree = "<group>"; };
+		AAC05282764E0169FEFB3D88 /* PhotoLogTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogTool.swift; sourceTree = "<group>"; };
 		AB2998A31AEC29094C6F4062 /* WorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutView.swift; sourceTree = "<group>"; };
 		AB907D183F2E9999A4BC3915 /* AIContextBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIContextBuilder.swift; sourceTree = "<group>"; };
 		AC27830A40DBACACBC571BF9 /* PipelineLLMEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PipelineLLMEval.swift; sourceTree = "<group>"; };
@@ -587,6 +590,7 @@
 		FA48E87D458B74FDF0FC6C8B /* DomainExtractorGoldSetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainExtractorGoldSetTests.swift; sourceTree = "<group>"; };
 		FAE5B42E1108785AF7EEA041 /* PronounResolverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PronounResolverTests.swift; sourceTree = "<group>"; };
 		FAF40DC8990B1C6D8A2C89E3 /* PerToolReliabilityEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerToolReliabilityEval.swift; sourceTree = "<group>"; };
+		FBD371873F1D148C190AA7DB /* PhotoLogToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogToolTests.swift; sourceTree = "<group>"; };
 		FCBE3BA3D70586AC0F3ED34E /* DebugSeedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSeedData.swift; sourceTree = "<group>"; };
 		FD5DFCD5C5ED2C0D7E5CD8EF /* WeightTrendCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightTrendCalculator.swift; sourceTree = "<group>"; };
 		FD7026C3D8745999EED9478E /* foods.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = foods.json; sourceTree = "<group>"; };
@@ -745,6 +749,7 @@
 				1575030FD9A7BEF5BC9E0612 /* NutritionOCRTests.swift */,
 				92DFDDFA5C14E5C409B99B08 /* PhotoLogBetaSettingsTests.swift */,
 				A835CA7572E629657044C111 /* PhotoLogServiceTests.swift */,
+				FBD371873F1D148C190AA7DB /* PhotoLogToolTests.swift */,
 				5CCD0417471E3FC0DED921F5 /* PlantPointsServiceTests.swift */,
 				FAE5B42E1108785AF7EEA041 /* PronounResolverTests.swift */,
 				E63B0B98A699C56CBC8944B1 /* RecentEntriesWindowTests.swift */,
@@ -1029,6 +1034,7 @@
 				7ED878D9FF93287B41B67503 /* NotificationService.swift */,
 				418816F51F38F19F65BC3D77 /* NutritionLabelOCR.swift */,
 				9887274AA907DE6C5349B2D1 /* OpenFoodFactsService.swift */,
+				AAC05282764E0169FEFB3D88 /* PhotoLogTool.swift */,
 				39A9E88135361C3B6F2AE538 /* PlantPointsService.swift */,
 				40D78A4B18D50A149F0D6C08 /* PronounResolver.swift */,
 				CB475E92982AD4F8897D5D8E /* RecoveryEstimator.swift */,
@@ -1401,6 +1407,7 @@
 				8BDC3E97569416FD2931FF40 /* PhotoLogBetaSettingsView.swift in Sources */,
 				40EA07ABE50FDFF7F6F85899 /* PhotoLogResponse.swift in Sources */,
 				874EFD308E2D9EB4A66A47C8 /* PhotoLogService.swift in Sources */,
+				51943F743F3F4638E4D7EBAA /* PhotoLogTool.swift in Sources */,
 				30C7E754FFFD0B3E4FD62CC6 /* PlantPointsCardView.swift in Sources */,
 				5DB274604E30B658591C0CC9 /* PlantPointsService.swift in Sources */,
 				3A8891D28662FAF11B59B577 /* PronounResolver.swift in Sources */,
@@ -1517,6 +1524,7 @@
 				FC725819F735636B40300619 /* NutritionOCRTests.swift in Sources */,
 				36AEDBC6C45859D3CE71E45D /* PhotoLogBetaSettingsTests.swift in Sources */,
 				4319EDE7F6B2147FAB72CBDD /* PhotoLogServiceTests.swift in Sources */,
+				0FBD78DE2C75146EE2AA13AB /* PhotoLogToolTests.swift in Sources */,
 				80D8EEFDC7564433E3DEC4E3 /* PlantPointsServiceTests.swift in Sources */,
 				A592C18083AA9D22A8F9B503 /* PronounResolverTests.swift in Sources */,
 				1843A7BA95D85443BE51CC32 /* RecentEntriesWindowTests.swift in Sources */,

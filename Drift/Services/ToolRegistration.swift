@@ -711,5 +711,10 @@ enum ToolRegistration {
                 return .action(.navigate(tab: entry.tab))
             }
         ))
+
+        // MARK: - Conditional Tools
+        // Photo Log is gated on the beta flag AND a stored cloud-vision key.
+        // Keeping this last so the gated call is the single conditional hop.
+        PhotoLogTool.syncRegistration(registry: r)
     }
 }
