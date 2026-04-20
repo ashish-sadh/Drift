@@ -63,6 +63,7 @@
 		36A8BBAC1CDCF9BEE7FDAB6A /* MultiTurnRegressionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EAD396A0ED458F8F26650FA /* MultiTurnRegressionTests.swift */; };
 		36AEDBC6C45859D3CE71E45D /* PhotoLogBetaSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 92DFDDFA5C14E5C409B99B08 /* PhotoLogBetaSettingsTests.swift */; };
 		37AE19FE7D95B7FA8B8477DE /* DailyNutrition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1053BB3F19E5D50A27C74DDE /* DailyNutrition.swift */; };
+		38883B6796A4390C33BBA04D /* PhotoLogEntry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14B31FF0A1CB79C0732FB849 /* PhotoLogEntry.swift */; };
 		3A1B5CCC6960BB3FE2AD5B2C /* WidgetDataProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0966429FFAED4C7FF2D68C11 /* WidgetDataProvider.swift */; };
 		3A45CB30EFB91DF5C4E468AD /* QuickAddView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20576FEB4A7F0371596D08E6 /* QuickAddView.swift */; };
 		3A8891D28662FAF11B59B577 /* PronounResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D78A4B18D50A149F0D6C08 /* PronounResolver.swift */; };
@@ -108,6 +109,7 @@
 		6327143E6A1E3CD8CFEEB252 /* ExercisePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EDFC1B5E83F6D2661A50BA65 /* ExercisePickerView.swift */; };
 		64BFF27391CC32B927344BA1 /* ChatSuggestionPillsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E9FA0E48A2845CFA85AB7395 /* ChatSuggestionPillsTests.swift */; };
 		64CD23436486963A92900597 /* CloudVisionClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 967917DDF4130B1A30B42ABA /* CloudVisionClient.swift */; };
+		67E322F91310675FCBBC062C /* PhotoLogEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA072B74254D7004020703A /* PhotoLogEntryTests.swift */; };
 		67E6DD4C4837E4F4EB971CB2 /* WeightTrendService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AF522FED101388047FEE98FD /* WeightTrendService.swift */; };
 		6805E46813F436A37E4F3B2E /* latency-queries.json in Resources */ = {isa = PBXBuildFile; fileRef = B42BDAF88B654D1EE5C4C403 /* latency-queries.json */; };
 		685C24962B2912E5B124EB60 /* BodyMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5286E0309471AF898D70E3C /* BodyMapView.swift */; };
@@ -244,6 +246,7 @@
 		E220B46BAB957B8242ABA44A /* IntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24EBC73AF46E92F7FF6A10FF /* IntegrationTests.swift */; };
 		E312846BA4FBD129108D7C82 /* ExerciseBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21311CD0AE82F339C988BDD2 /* ExerciseBrowserView.swift */; };
 		E5611698773A5EEF24F10014 /* EditFoodEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30EC2EF2E12E44F63B37582 /* EditFoodEntrySheet.swift */; };
+		E5C9ACF7CCAED656F70B23F9 /* PhotoLogReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A19A30BB3C9CCE28A9A758EF /* PhotoLogReviewView.swift */; };
 		E63F9BB35572B3EF11BF9DE5 /* HardEvalSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DEC3049742676C1201A6847 /* HardEvalSet.swift */; };
 		E6E1DE6BA746282A5C0CD9A7 /* IntentRoutingEvalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1326C008D33A0DC556787428 /* IntentRoutingEvalTests.swift */; };
 		E6E3CDEEDB31D50E82EB4AEF /* ChatTelemetryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1901726AE786A1A885C03F7E /* ChatTelemetryServiceTests.swift */; };
@@ -265,12 +268,14 @@
 		F6746A0A13DC1D820EE372CC /* ToolRouterEval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FF1A03F6A7AD74047A466B9 /* ToolRouterEval.swift */; };
 		F76EFB1E0CD3A82C570B9475 /* USDAFoodService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EEA23E4C1755C342030C667 /* USDAFoodService.swift */; };
 		F7AAF9024EB0E5FDC7108D99 /* AIChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE2EAA783326D96D5029FC28 /* AIChatViewModel.swift */; };
+		F9A7A697125A7E41FA3606F8 /* PhotoLogCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2662F38D09EED0C1C9415508 /* PhotoLogCaptureView.swift */; };
 		F9B44B0CA0EB70D90AFF6AA0 /* LlamaCppBackend.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7392F1C1953721F1AD362662 /* LlamaCppBackend.swift */; };
 		FB1D2AF65F10F935076969F6 /* LocalAIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5ABF9F3D40318CC0238A796 /* LocalAIService.swift */; };
 		FC725819F735636B40300619 /* NutritionOCRTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1575030FD9A7BEF5BC9E0612 /* NutritionOCRTests.swift */; };
 		FD04469D134154054159AA4C /* ToolRanker.swift in Sources */ = {isa = PBXBuildFile; fileRef = A81CB6F88CC852F18E7809C8 /* ToolRanker.swift */; };
 		FD8D0C6963EAD881D678A148 /* AIModelManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30537026EE533EE546180AB3 /* AIModelManagerTests.swift */; };
 		FE2EC2B62CB693DA85CD1544 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2565511DFA43570D0CE9EA /* DashboardView.swift */; };
+		FEF6119337EB90E188499D3B /* PhotoLogFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E7A1FEC035003AE448E5C65 /* PhotoLogFlowView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -355,6 +360,7 @@
 		121C8FBB3776A9AE57FDF244 /* PerStageEvalSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerStageEvalSupport.swift; sourceTree = "<group>"; };
 		1326C008D33A0DC556787428 /* IntentRoutingEvalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentRoutingEvalTests.swift; sourceTree = "<group>"; };
 		145534F72860C9C345156102 /* DriftWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriftWidget.swift; sourceTree = "<group>"; };
+		14B31FF0A1CB79C0732FB849 /* PhotoLogEntry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogEntry.swift; sourceTree = "<group>"; };
 		155E590DFD0A95014B993B9D /* BiomarkerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomarkerDetailView.swift; sourceTree = "<group>"; };
 		1575030FD9A7BEF5BC9E0612 /* NutritionOCRTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionOCRTests.swift; sourceTree = "<group>"; };
 		163C4017D9AEE2E0927DC907 /* CycleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleView.swift; sourceTree = "<group>"; };
@@ -378,6 +384,7 @@
 		237FC00B086CC3785B482588 /* AIRuleEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIRuleEngine.swift; sourceTree = "<group>"; };
 		24385DF0FF7F89584AE40020 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		24EBC73AF46E92F7FF6A10FF /* IntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationTests.swift; sourceTree = "<group>"; };
+		2662F38D09EED0C1C9415508 /* PhotoLogCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogCaptureView.swift; sourceTree = "<group>"; };
 		2A19AD32FF007540A79C20BC /* AppDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDatabase.swift; sourceTree = "<group>"; };
 		2CFE343BFAFCD99118098211 /* AIToolAgent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIToolAgent.swift; sourceTree = "<group>"; };
 		2D4B47196E8598EB15359D7C /* SupplementService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementService.swift; sourceTree = "<group>"; };
@@ -455,6 +462,7 @@
 		7858A979E074F294B4374C4F /* EditMealTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditMealTests.swift; sourceTree = "<group>"; };
 		790C2D3452366D6B473DE2B1 /* Supplement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Supplement.swift; sourceTree = "<group>"; };
 		7B9BADD02A9760A82C60DE4E /* SavedFood.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SavedFood.swift; sourceTree = "<group>"; };
+		7E7A1FEC035003AE448E5C65 /* PhotoLogFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogFlowView.swift; sourceTree = "<group>"; };
 		7ED878D9FF93287B41B67503 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		7F42EA4B9416215EFE670984 /* ToolRegistration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolRegistration.swift; sourceTree = "<group>"; };
 		7F4C6870115BE53081FA0CDE /* AISetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISetupView.swift; sourceTree = "<group>"; };
@@ -479,6 +487,7 @@
 		99C89E28D8FBE125273FB677 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
 		9A4575ED692EF5D3BFDBC775 /* AIChatInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIChatInsightsView.swift; sourceTree = "<group>"; };
 		9B410A7B058246A1F98F46E9 /* DefaultFoods.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultFoods.swift; sourceTree = "<group>"; };
+		9BA072B74254D7004020703A /* PhotoLogEntryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogEntryTests.swift; sourceTree = "<group>"; };
 		9BE85182415E10B646F68DA4 /* ParallelLLMEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParallelLLMEval.swift; sourceTree = "<group>"; };
 		9C87F6B55BFF5055B77C57C1 /* NormalizerGoldSetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NormalizerGoldSetTests.swift; sourceTree = "<group>"; };
 		9F9F051926CE39DF3E0A47DA /* BodySpecPDFParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodySpecPDFParser.swift; sourceTree = "<group>"; };
@@ -486,6 +495,7 @@
 		9FDCCAED76696ACF2A89F445 /* Migrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Migrations.swift; sourceTree = "<group>"; };
 		A039993077E4BE9F83149249 /* WeightInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightInsightsView.swift; sourceTree = "<group>"; };
 		A048685BCBAD258ADEEB3E22 /* IntentRoutingEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentRoutingEval.swift; sourceTree = "<group>"; };
+		A19A30BB3C9CCE28A9A758EF /* PhotoLogReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogReviewView.swift; sourceTree = "<group>"; };
 		A1AB1D48F6D71EC9854629ED /* DriftTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriftTests.swift; sourceTree = "<group>"; };
 		A411F4544692EA6196F07C9C /* MacroRingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroRingsView.swift; sourceTree = "<group>"; };
 		A434AE755701CCB89A111516 /* PipelineE2EEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PipelineE2EEval.swift; sourceTree = "<group>"; };
@@ -748,6 +758,7 @@
 				F86B648E00469832A2C8FB56 /* NotificationServiceTests.swift */,
 				1575030FD9A7BEF5BC9E0612 /* NutritionOCRTests.swift */,
 				92DFDDFA5C14E5C409B99B08 /* PhotoLogBetaSettingsTests.swift */,
+				9BA072B74254D7004020703A /* PhotoLogEntryTests.swift */,
 				A835CA7572E629657044C111 /* PhotoLogServiceTests.swift */,
 				FBD371873F1D148C190AA7DB /* PhotoLogToolTests.swift */,
 				5CCD0417471E3FC0DED921F5 /* PlantPointsServiceTests.swift */,
@@ -826,6 +837,7 @@
 				79C427A9E8C6F8EEFCEEA012 /* Dashboard */,
 				1E13B73313706E9254470E88 /* Food */,
 				FA9DF84BE5D84C9597FCFFA3 /* Glucose */,
+				6976E40BC90E10838E79A444 /* PhotoLog */,
 				EC70F8F8DC436EB14CAB3F97 /* Settings */,
 				48E205BFDDA2A32A8B8879CA /* Shared */,
 				0722BA8BD8D3FCE6E6A0257D /* Supplements */,
@@ -849,6 +861,16 @@
 			);
 			name = LLMEval;
 			path = DriftTests/LLMEval;
+			sourceTree = "<group>";
+		};
+		6976E40BC90E10838E79A444 /* PhotoLog */ = {
+			isa = PBXGroup;
+			children = (
+				2662F38D09EED0C1C9415508 /* PhotoLogCaptureView.swift */,
+				7E7A1FEC035003AE448E5C65 /* PhotoLogFlowView.swift */,
+				A19A30BB3C9CCE28A9A758EF /* PhotoLogReviewView.swift */,
+			);
+			path = PhotoLog;
 			sourceTree = "<group>";
 		};
 		79C427A9E8C6F8EEFCEEA012 /* Dashboard */ = {
@@ -949,6 +971,7 @@
 				491E711DE9CBB80FC1BF1AE9 /* GlucoseReading.swift */,
 				A5437789EE3514EE1191D392 /* LabReport.swift */,
 				C182889F4730B18DE0244F02 /* MealLog.swift */,
+				14B31FF0A1CB79C0732FB849 /* PhotoLogEntry.swift */,
 				7B9BADD02A9760A82C60DE4E /* SavedFood.swift */,
 				AFCD031A1C605FBFFDF1B7D0 /* ServingUnit.swift */,
 				790C2D3452366D6B473DE2B1 /* Supplement.swift */,
@@ -1405,7 +1428,11 @@
 				900DFB12EECDD2D618FEC253 /* OpenFoodFactsService.swift in Sources */,
 				27536FF4DD83AB95ADECF5AB /* Persistence.swift in Sources */,
 				8BDC3E97569416FD2931FF40 /* PhotoLogBetaSettingsView.swift in Sources */,
+				F9A7A697125A7E41FA3606F8 /* PhotoLogCaptureView.swift in Sources */,
+				38883B6796A4390C33BBA04D /* PhotoLogEntry.swift in Sources */,
+				FEF6119337EB90E188499D3B /* PhotoLogFlowView.swift in Sources */,
 				40EA07ABE50FDFF7F6F85899 /* PhotoLogResponse.swift in Sources */,
+				E5C9ACF7CCAED656F70B23F9 /* PhotoLogReviewView.swift in Sources */,
 				874EFD308E2D9EB4A66A47C8 /* PhotoLogService.swift in Sources */,
 				51943F743F3F4638E4D7EBAA /* PhotoLogTool.swift in Sources */,
 				30C7E754FFFD0B3E4FD62CC6 /* PlantPointsCardView.swift in Sources */,
@@ -1523,6 +1550,7 @@
 				2CF22C2420F9E22D2F989C70 /* NotificationServiceTests.swift in Sources */,
 				FC725819F735636B40300619 /* NutritionOCRTests.swift in Sources */,
 				36AEDBC6C45859D3CE71E45D /* PhotoLogBetaSettingsTests.swift in Sources */,
+				67E322F91310675FCBBC062C /* PhotoLogEntryTests.swift in Sources */,
 				4319EDE7F6B2147FAB72CBDD /* PhotoLogServiceTests.swift in Sources */,
 				0FBD78DE2C75146EE2AA13AB /* PhotoLogToolTests.swift in Sources */,
 				80D8EEFDC7564433E3DEC4E3 /* PlantPointsServiceTests.swift in Sources */,

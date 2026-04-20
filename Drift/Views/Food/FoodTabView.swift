@@ -22,7 +22,14 @@ struct FoodTabView: View {
     @State private var searchMealType: MealType? = nil
     @State private var showingCombos = false
     @State private var comboToLog: Food? = nil
+    @State private var showingPhotoLog = false
     @AppStorage("foodDiaryMealGrouped") private var mealGrouped = true
+
+    /// Beta-gated: Photo Log entry point only appears when the user has
+    /// opted in AND stored a cloud-vision key for the selected provider.
+    private var photoLogAvailable: Bool {
+        Preferences.photoLogEnabled && CloudVisionKey.has(provider: Preferences.photoLogProvider)
+    }
 
     enum FoodSortMode: String, CaseIterable {
         case time, meal, protein, carbs, fat, fiber, plantPoints
@@ -89,13 +96,27 @@ struct FoodTabView: View {
             .toolbarColorScheme(.dark, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button { showingSearch = true } label: {
-                        Image(systemName: "plus").font(.body.weight(.semibold)).foregroundStyle(Theme.accent)
+                    HStack(spacing: 16) {
+                        if photoLogAvailable {
+                            Button { showingPhotoLog = true } label: {
+                                Image(systemName: "camera.metering.matrix")
+                                    .font(.body.weight(.semibold))
+                                    .foregroundStyle(Theme.accent)
+                            }
+                            .accessibilityLabel("Photo log meal")
+                        }
+                        Button { showingSearch = true } label: {
+                            Image(systemName: "plus").font(.body.weight(.semibold)).foregroundStyle(Theme.accent)
+                        }
+                        .accessibilityLabel("Add food")
                     }
-                    .accessibilityLabel("Add food")
                 }
             }
             .fullScreenCover(isPresented: $showingScanner) { BarcodeLookupView(viewModel: viewModel) }
+            .sheet(isPresented: $showingPhotoLog) {
+                PhotoLogFlowView(foodLog: viewModel)
+                    .onDisappear { reload() }
+            }
             .overlay(alignment: .bottom) {
                 if let name = copiedToTodayName {
                     Text("Added \(name) to today")
