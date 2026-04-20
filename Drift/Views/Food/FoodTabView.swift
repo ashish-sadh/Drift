@@ -23,6 +23,7 @@ struct FoodTabView: View {
     @State private var showingCombos = false
     @State private var comboToLog: Food? = nil
     @State private var showingPhotoLog = false
+    @State private var suggestionFoodToLog: Food? = nil
     @AppStorage("foodDiaryMealGrouped") private var mealGrouped = true
 
     /// Beta-gated: Photo Log entry point only appears when the user has
@@ -116,6 +117,13 @@ struct FoodTabView: View {
             .sheet(isPresented: $showingPhotoLog) {
                 PhotoLogFlowView(foodLog: viewModel)
                     .onDisappear { reload() }
+            }
+            .sheet(item: $suggestionFoodToLog) { food in
+                FoodLogSheet(food: food, foodLog: viewModel) {
+                    copiedToTodayName = food.name
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copiedToTodayName = nil }
+                    reload()
+                }
             }
             .overlay(alignment: .bottom) {
                 if let name = copiedToTodayName {
@@ -531,11 +539,7 @@ struct FoodTabView: View {
                     let comboNames = Set(viewModel.combos.map { $0.name.lowercased() })
                     ForEach(viewModel.recentFoods.prefix(6).filter { !comboNames.contains($0.name.lowercased()) }) { food in
                         Button {
-                            confirmPrefill = AIChatViewModel.ManualFoodPrefill(
-                                name: food.name, calories: Int(food.calories),
-                                proteinG: food.proteinG, carbsG: food.carbsG,
-                                fatG: food.fatG, fiberG: food.fiberG)
-                            showingConfirmLog = true
+                            suggestionFoodToLog = food
                         } label: {
                             recentChip(name: food.name, calories: Int(food.calories))
                         }.buttonStyle(.plain)
