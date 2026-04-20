@@ -10,5 +10,19 @@
     {"id": "multi_rice_lentils_salad", "query": "I ate rice lentils and salad for dinner"},
     {"id": "multi_oats_banana_milk", "query": "log oats banana and milk for breakfast"},
     {"id": "multi_roti_sabzi_yogurt", "query": "had roti sabzi and yogurt for lunch"}
+  ],
+  "confirmation_card": [
+    {"id": "card_banana", "query": "had a banana"},
+    {"id": "card_walking_30min", "query": "logged 30 minutes of walking"},
+    {"id": "card_idli_sambar", "query": "had idli sambar for breakfast"},
+    {"id": "card_poha_bowl", "query": "ate a bowl of poha"},
+    {"id": "card_curd_rice", "query": "had curd rice for lunch"}
+  ],
+  "clarify_round_trip": [
+    {"id": "clarify_rice_amount", "query": "I had rice", "followup": "200g of cooked white rice"},
+    {"id": "clarify_coffee_type", "query": "had some coffee", "followup": "black coffee with no sugar"},
+    {"id": "clarify_curry_type", "query": "had a curry", "followup": "chicken curry one bowl"},
+    {"id": "clarify_juice_type", "query": "drank juice", "followup": "orange juice one glass"},
+    {"id": "clarify_pasta_size", "query": "ate pasta", "followup": "pasta with tomato sauce one serving"}
   ]
 }

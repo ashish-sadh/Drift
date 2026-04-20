@@ -12,7 +12,7 @@ AI-first local health tracker. AI chat is the primary interface — every data e
 - **Exercises:** 960 (free-exercise-db)
 - **Biomarkers:** 65 across 9 categories
 - **AI Tools:** 20 registered tools
-- **TTFT Benchmark:** ChatLatencyBenchmark (10 queries × 3 runs, 1.3× regression threshold, opt-in via DRIFT_LATENCY_BENCH=1)
+- **TTFT Benchmark:** ChatLatencyBenchmark (20 queries × 3 runs, 1.3× regression threshold, opt-in via DRIFT_LATENCY_BENCH=1) — 4 scenarios: single-item, multi-item (gates TTFT), confirmation-card (gates completion_ms), clarify-round-trip (gates turn1+turn2 total)
 - **AI Chat Features:** 25+ (see `Docs/ai-parity.md`)
 - **Confirmation Cards:** 8 types (food, weight, workout, navigation, supplement, sleep, glucose, biomarker)
 

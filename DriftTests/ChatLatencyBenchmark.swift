@@ -36,9 +36,23 @@ final class ChatLatencyBenchmark: XCTestCase {
         let query: String
     }
 
+    private struct ClarifySpec: Decodable {
+        let id: String
+        let query: String
+        let followup: String
+    }
+
     private struct QuerySet: Decodable {
         let single_item: [QuerySpec]
         let multi_item: [QuerySpec]
+        let confirmation_card: [QuerySpec]
+        let clarify_round_trip: [ClarifySpec]
+    }
+
+    private struct ClarifyMeasurement {
+        let turn1_ms: Double
+        let turn2_ms: Double
+        var total_ms: Double { turn1_ms + turn2_ms }
     }
 
     private struct BaselineEntry: Codable {
@@ -159,6 +173,107 @@ final class ChatLatencyBenchmark: XCTestCase {
         print("")
     }
 
+    /// Measures LLM completion time for clear log queries.
+    /// Card renders ~1 frame (16ms) after completion, so completion_ms is the binding latency.
+    func testConfirmationCardLatency() async throws {
+        guard Self.isEnabled else { throw XCTSkip("Set DRIFT_LATENCY_BENCH=1 to run") }
+        guard let _ = Self.backend else {
+            throw XCTSkip("Model not found at \(Self.modelPath)")
+        }
+
+        let querySet = try loadQueries()
+        let baseline = loadBaseline()
+
+        print("\n=== ChatLatencyBenchmark: confirmation-card render (3 runs, median) ===")
+        let header = String(format: "%-40s %9s %9s  %@", "Query ID", "TTFT ms", "Done ms", "Status")
+        print(header)
+        print(String(repeating: "-", count: 75))
+
+        var allPassed = true
+        var newBaseline: [String: BaselineEntry] = [:]
+
+        for spec in querySet.confirmation_card {
+            let m = await measureStreaming(query: spec.query)
+            newBaseline[spec.id] = BaselineEntry(ttft_ms: m.ttft_ms, completion_ms: m.completion_ms)
+
+            let status: String
+            if let bl = baseline?.measurements[spec.id], bl.completion_ms > 0 {
+                let limit = bl.completion_ms * (baseline?.gate_multiplier ?? 1.3)
+                if m.completion_ms > limit {
+                    status = "❌ Done \(Int(m.completion_ms))ms > gate \(Int(limit))ms"
+                    allPassed = false
+                } else {
+                    status = "✔"
+                }
+            } else {
+                status = "(no baseline)"
+            }
+
+            print(String(format: "%-40s %9.1f %9.1f  %@",
+                         spec.id, m.ttft_ms, m.completion_ms, status))
+        }
+        print("")
+
+        if isRebaseline {
+            writeBaseline(newBaseline)
+            print("Baseline written to /tmp/latency-baseline.json")
+            print("Copy it to DriftTests/Fixtures/latency-baseline.json and commit.")
+        } else {
+            XCTAssertTrue(allPassed, "One or more card queries exceeded 1.3× baseline completion. See output above.")
+        }
+    }
+
+    /// Measures full round-trip: ambiguous query (turn 1) + clarify follow-up (turn 2).
+    /// Simulates user tapping a clarify chip. Gate is on total_ms (turn1 + turn2).
+    func testClarifyRoundTripLatency() async throws {
+        guard Self.isEnabled else { throw XCTSkip("Set DRIFT_LATENCY_BENCH=1 to run") }
+        guard let _ = Self.backend else {
+            throw XCTSkip("Model not found at \(Self.modelPath)")
+        }
+
+        let querySet = try loadQueries()
+        let baseline = loadBaseline()
+
+        print("\n=== ChatLatencyBenchmark: clarify round-trip (3 runs, median) ===")
+        let header = String(format: "%-40s %9s %9s %9s  %@", "Query ID", "Turn1 ms", "Turn2 ms", "Total ms", "Status")
+        print(header)
+        print(String(repeating: "-", count: 85))
+
+        var allPassed = true
+        var newBaseline: [String: BaselineEntry] = [:]
+
+        for spec in querySet.clarify_round_trip {
+            let m = await measureClarifyRoundTrip(spec: spec)
+            // Store total in completion_ms; ttft not meaningful for round-trip
+            newBaseline[spec.id] = BaselineEntry(ttft_ms: 0, completion_ms: m.total_ms)
+
+            let status: String
+            if let bl = baseline?.measurements[spec.id], bl.completion_ms > 0 {
+                let limit = bl.completion_ms * (baseline?.gate_multiplier ?? 1.3)
+                if m.total_ms > limit {
+                    status = "❌ Total \(Int(m.total_ms))ms > gate \(Int(limit))ms"
+                    allPassed = false
+                } else {
+                    status = "✔"
+                }
+            } else {
+                status = "(no baseline)"
+            }
+
+            print(String(format: "%-40s %9.1f %9.1f %9.1f  %@",
+                         spec.id, m.turn1_ms, m.turn2_ms, m.total_ms, status))
+        }
+        print("")
+
+        if isRebaseline {
+            writeBaseline(newBaseline)
+            print("Baseline written to /tmp/latency-baseline.json")
+            print("Copy it to DriftTests/Fixtures/latency-baseline.json and commit.")
+        } else {
+            XCTAssertTrue(allPassed, "One or more clarify round-trips exceeded 1.3× baseline total. See output above.")
+        }
+    }
+
     // MARK: - Measurement
 
     private static let benchSystemPrompt = """
@@ -195,6 +310,20 @@ final class ChatLatencyBenchmark: XCTestCase {
             ttft_ms: ttfts.isEmpty ? 0 : median(ttfts),
             completion_ms: median(completions)
         )
+    }
+
+    private func measureClarifyRoundTrip(spec: ClarifySpec, runs: Int = 3) async -> ClarifyMeasurement {
+        var turn1s: [Double] = []
+        var turn2s: [Double] = []
+
+        for _ in 0..<runs {
+            let m1 = await measureStreaming(query: spec.query, runs: 1)
+            let m2 = await measureStreaming(query: spec.followup, runs: 1)
+            turn1s.append(m1.completion_ms)
+            turn2s.append(m2.completion_ms)
+        }
+
+        return ClarifyMeasurement(turn1_ms: median(turn1s), turn2_ms: median(turn2s))
     }
 
     private func median(_ values: [Double]) -> Double {
