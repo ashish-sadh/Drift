@@ -30,11 +30,43 @@ enum ClarificationBuilder {
         let lower = message.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         guard !lower.isEmpty, lower.count <= 60 else { return nil }
 
+        // Positive-signal gate: if the message carries a quantifier, meal-time,
+        // or explicit question cue, the extractor has enough structure to
+        // classify without asking — silently proceed. #242.
+        if hasConcreteStructure(lower) { return nil }
+
         if let opts = bareFoodNounOptions(lower) { return opts }
         if let opts = bareSupplementOptions(lower) { return opts }
         if let opts = bareWeightValueOptions(lower) { return opts }
         if let opts = ambiguousLogOptions(lower) { return opts }
         return nil
+    }
+
+    /// Returns true when LLM-extracted params are complete enough to execute
+    /// the tool directly, so callers can skip a clarification prompt even on
+    /// `confidence: "low"` routing. #242.
+    ///
+    /// - For `log_food`: need a name + at least one quantity signal.
+    /// - For `log_weight`: need a value + unit.
+    /// - For `log_activity`: need a name + duration or distance.
+    /// - For info/lookup tools: any non-empty `query` or `name` is enough.
+    static func hasCompleteParams(tool: String, params: [String: String]) -> Bool {
+        func nonEmpty(_ key: String) -> Bool {
+            (params[key]?.trimmingCharacters(in: .whitespaces).isEmpty == false)
+        }
+        switch tool {
+        case "log_food":
+            let hasQty = nonEmpty("servings") || nonEmpty("amount") || nonEmpty("grams") || nonEmpty("quantity")
+            return nonEmpty("name") && hasQty
+        case "log_weight":
+            return nonEmpty("value") && nonEmpty("unit")
+        case "log_activity":
+            return nonEmpty("name") && (nonEmpty("duration_min") || nonEmpty("duration") || nonEmpty("distance"))
+        case "food_info", "supplements", "nutrition_lookup":
+            return nonEmpty("query") || nonEmpty("name")
+        default:
+            return false
+        }
     }
 
     /// Format options into a "Did you mean: …" prompt. One line per option
@@ -133,6 +165,38 @@ enum ClarificationBuilder {
     }
 
     // MARK: - Heuristics
+
+    /// Positive signals that mean the message already has enough structure
+    /// for the extractor — bypass clarification entirely. Covers:
+    /// - Quantifiers: numbers, optionally with food/supplement units
+    ///   (`100g`, `5g creatine`, `2 eggs`, `vitamin d 2000iu`).
+    /// - Meal-time hints that anchor a food-log intent.
+    /// - Question cues that anchor an info-lookup intent.
+    private static func hasConcreteStructure(_ lower: String) -> Bool {
+        if containsQuestionCue(lower) { return true }
+        if containsMealTime(lower) { return true }
+        if containsQuantifier(lower) { return true }
+        return false
+    }
+
+    /// Matches "100g", "5 g", "2 eggs", "150 lbs", "2000 iu" — any digit
+    /// standalone or followed by a unit/food word.
+    private static func containsQuantifier(_ lower: String) -> Bool {
+        // Reject pure-numeric single tokens — bareWeightValueOptions handles
+        // those (20-500 triggers a weight/goal clarify). Outside that range
+        // a bare number isn't a structural signal either.
+        if Double(lower) != nil { return false }
+        for scalar in lower.unicodeScalars where CharacterSet.decimalDigits.contains(scalar) {
+            return true
+        }
+        return false
+    }
+
+    private static func containsMealTime(_ lower: String) -> Bool {
+        let hints = ["breakfast", "lunch", "dinner", "snack", "brunch",
+                     "pre-workout", "post-workout", "midnight snack"]
+        return hints.contains(where: { lower.contains($0) })
+    }
 
     private static func startsWithActionVerb(_ lower: String) -> Bool {
         let verbs = ["log ", "track ", "add ", "ate ", "had ", "i had ", "i ate ",

@@ -85,12 +85,19 @@ enum AIToolAgent {
                 logTiming("Phase 2 (classify)", start: classifyStart)
                 switch result {
                 case .toolCall(let intent):
-                    // Low-confidence route → offer clarifier if Swift can
-                    // synthesize options. Falls through to guess otherwise
-                    // (logged for observability).
+                    // Low-confidence route → clarify only when the extractor
+                    // didn't already produce complete params. Positive signal
+                    // (complete params) beats keyword ambiguity — otherwise
+                    // we'd prompt on "log 3 eggs" just because "log" is a
+                    // bare verb. #242.
                     if intent.confidence.lowercased() == "low" {
                         Log.app.info("IntentClassifier: low-confidence route → \(intent.tool) for '\(message)'")
-                        if let opts = ClarificationBuilder.buildOptions(for: normalized),
+                        let extractorComplete = ClarificationBuilder.hasCompleteParams(
+                            tool: intent.tool.replacingOccurrences(of: "()", with: ""),
+                            params: intent.params
+                        )
+                        if !extractorComplete,
+                           let opts = ClarificationBuilder.buildOptions(for: normalized),
                            opts.count >= 2 {
                             return AgentOutput(
                                 text: ClarificationBuilder.promptText(opts),
