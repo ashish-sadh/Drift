@@ -103,4 +103,14 @@ enum Preferences {
         }
         set { UserDefaults.standard.set(newValue, forKey: conversationHistoryEnabledKey) }
     }
+
+    private static let chatTelemetryEnabledKey = "drift_chat_telemetry_enabled"
+
+    /// When enabled, AI chat turns are logged locally (fingerprint + intent +
+    /// outcome + latency) so we can surface real failure patterns. Raw query
+    /// text is never persisted. Default: OFF. #261.
+    static var chatTelemetryEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: chatTelemetryEnabledKey) }
+        set { UserDefaults.standard.set(newValue, forKey: chatTelemetryEnabledKey) }
+    }
 }

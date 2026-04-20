@@ -70,6 +70,7 @@
 		3CBCA14174F0E620F084EBF2 /* FoodSearchGoldSetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDE71BF0C372B5CFED15E2CF /* FoodSearchGoldSetTests.swift */; };
 		3CFAC4ABCCF2DD477733214E /* EntryReferenceResolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86925D3A552412270FE48794 /* EntryReferenceResolutionTests.swift */; };
 		3D01268D3E9F35381A819628 /* foods.db in Resources */ = {isa = PBXBuildFile; fileRef = 58B1281AF3BA620161F30716 /* foods.db */; };
+		3DAE20FBF0F571D1C26DFD59 /* AIChatInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A4575ED692EF5D3BFDBC775 /* AIChatInsightsView.swift */; };
 		3EF98591577370706EFB2940 /* GlucoseReading.swift in Sources */ = {isa = PBXBuildFile; fileRef = 491E711DE9CBB80FC1BF1AE9 /* GlucoseReading.swift */; };
 		40D9D335AB3F15A1CCB643E9 /* RecoveryEstimator.swift in Sources */ = {isa = PBXBuildFile; fileRef = CB475E92982AD4F8897D5D8E /* RecoveryEstimator.swift */; };
 		421D57520E9C09C88A6A0B6B /* AlgorithmSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE2D9672D96D6738FA36D4F2 /* AlgorithmSettingsView.swift */; };
@@ -137,6 +138,7 @@
 		87D41671B48C76809CA2ACB0 /* ConversationHistoryBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97443F553C4834DE8344C9F8 /* ConversationHistoryBuilder.swift */; };
 		88C39BC23EC131562257B528 /* BodyComposition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F9EB82B9906D11C092B3111 /* BodyComposition.swift */; };
 		897722DC29F4AAF58BDA1CCF /* ActiveWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22F8386EAF9FBD18F89C8C60 /* ActiveWorkoutView.swift */; };
+		8A7201AC4ADB2A915B648FAB /* ChatTelemetryService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F8C0457514C26F34AFF908D /* ChatTelemetryService.swift */; };
 		8A8CF11C6A7AF26DCABECF6A /* CSVParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D6B07DD56345F8A5F5448BC /* CSVParserTests.swift */; };
 		8B4A3B20843E58F584398C79 /* LabReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5437789EE3514EE1191D392 /* LabReport.swift */; };
 		8BE56F9D4E9AE9064CCC8E15 /* BehaviorInsightService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B60966C6BE6E90750550B2F7 /* BehaviorInsightService.swift */; };
@@ -233,6 +235,7 @@
 		E5611698773A5EEF24F10014 /* EditFoodEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30EC2EF2E12E44F63B37582 /* EditFoodEntrySheet.swift */; };
 		E63F9BB35572B3EF11BF9DE5 /* HardEvalSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DEC3049742676C1201A6847 /* HardEvalSet.swift */; };
 		E6E1DE6BA746282A5C0CD9A7 /* IntentRoutingEvalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1326C008D33A0DC556787428 /* IntentRoutingEvalTests.swift */; };
+		E6E3CDEEDB31D50E82EB4AEF /* ChatTelemetryServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1901726AE786A1A885C03F7E /* ChatTelemetryServiceTests.swift */; };
 		EA08170013B8F2A7481FF81F /* Workout.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE56F885D3FD4E44B8999557 /* Workout.swift */; };
 		EA461A149CE8C537C738BF00 /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 8D44ABA58001AC21A70DEA3A /* GRDB */; };
 		EB2A292ED2019794749E4839 /* AppDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A19AD32FF007540A79C20BC /* AppDatabase.swift */; };
@@ -345,6 +348,7 @@
 		163C4017D9AEE2E0927DC907 /* CycleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleView.swift; sourceTree = "<group>"; };
 		16A8D46F9E08C1960010A695 /* CGMImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CGMImportService.swift; sourceTree = "<group>"; };
 		188A69D621CC2DF63ADFB21F /* AIChatView+Suggestions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIChatView+Suggestions.swift"; sourceTree = "<group>"; };
+		1901726AE786A1A885C03F7E /* ChatTelemetryServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatTelemetryServiceTests.swift; sourceTree = "<group>"; };
 		19E7517E5B4779CBBE1C7284 /* AITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITests.swift; sourceTree = "<group>"; };
 		1A884AC137C46CE932FEE1C9 /* WorkoutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutTests.swift; sourceTree = "<group>"; };
 		1ABDC86BA4516AA3699FE080 /* WeightChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightChartView.swift; sourceTree = "<group>"; };
@@ -382,6 +386,7 @@
 		3F480CCAF91EFD799E6B5B8C /* DriftLLMEvalMacOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DriftLLMEvalMacOS.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F51E9EC49412B4F96068D35 /* WeightTrendCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightTrendCalculatorTests.swift; sourceTree = "<group>"; };
 		3F7B91A7052D8347083F577A /* ComposedFoodParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposedFoodParserTests.swift; sourceTree = "<group>"; };
+		3F8C0457514C26F34AFF908D /* ChatTelemetryService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatTelemetryService.swift; sourceTree = "<group>"; };
 		40634DDEB9C53BD0146A628A /* TDEEEstimatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TDEEEstimatorTests.swift; sourceTree = "<group>"; };
 		40D78A4B18D50A149F0D6C08 /* PronounResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PronounResolver.swift; sourceTree = "<group>"; };
 		4101CD9171B652C6B8D1BB4E /* llama.xcframework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcframework; name = llama.xcframework; path = Frameworks/llama.xcframework; sourceTree = "<group>"; };
@@ -455,6 +460,7 @@
 		97443F553C4834DE8344C9F8 /* ConversationHistoryBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationHistoryBuilder.swift; sourceTree = "<group>"; };
 		9887274AA907DE6C5349B2D1 /* OpenFoodFactsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenFoodFactsService.swift; sourceTree = "<group>"; };
 		99C89E28D8FBE125273FB677 /* Log.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log.swift; sourceTree = "<group>"; };
+		9A4575ED692EF5D3BFDBC775 /* AIChatInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIChatInsightsView.swift; sourceTree = "<group>"; };
 		9B410A7B058246A1F98F46E9 /* DefaultFoods.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultFoods.swift; sourceTree = "<group>"; };
 		9BE85182415E10B646F68DA4 /* ParallelLLMEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParallelLLMEval.swift; sourceTree = "<group>"; };
 		9C87F6B55BFF5055B77C57C1 /* NormalizerGoldSetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NormalizerGoldSetTests.swift; sourceTree = "<group>"; };
@@ -687,6 +693,7 @@
 				3406F79A46B85F01DC0010FB /* AIToolAgentStageTests.swift */,
 				0F40084353223A2C822198D7 /* ChatLatencyBenchmark.swift */,
 				E9FA0E48A2845CFA85AB7395 /* ChatSuggestionPillsTests.swift */,
+				1901726AE786A1A885C03F7E /* ChatTelemetryServiceTests.swift */,
 				B8539D3790BD7DC92854081A /* ClarificationBuilderTests.swift */,
 				4E0022FC1B24E4951EB7E807 /* ClarificationFalsePositiveTests.swift */,
 				F86480D874FB7BC3461695E4 /* ClarificationFlowTests.swift */,
@@ -827,6 +834,7 @@
 		8D9C2B3F7F76C8B5E0F18C57 /* AI */ = {
 			isa = PBXGroup;
 			children = (
+				9A4575ED692EF5D3BFDBC775 /* AIChatInsightsView.swift */,
 				9FA2C56E731BE5610FDC5B12 /* AIChatView.swift */,
 				483437CB4AFE28505FCFE44A /* AIChatView+MessageHandling.swift */,
 				188A69D621CC2DF63ADFB21F /* AIChatView+Suggestions.swift */,
@@ -959,6 +967,7 @@
 				F36D548F9FA62D8D7E53B1C7 /* BiomarkerService.swift */,
 				9F9F051926CE39DF3E0A47DA /* BodySpecPDFParser.swift */,
 				16A8D46F9E08C1960010A695 /* CGMImportService.swift */,
+				3F8C0457514C26F34AFF908D /* ChatTelemetryService.swift */,
 				6555D6D451618B6209B5B3CC /* ClarificationBuilder.swift */,
 				8E0A2C87F8D529FFB6B0A2E2 /* ComposedFoodParser.swift */,
 				97443F553C4834DE8344C9F8 /* ConversationHistoryBuilder.swift */,
@@ -1249,6 +1258,7 @@
 				86899F322EA3AB5164995C09 /* AIActionParser.swift in Sources */,
 				98FBDD66D792C10086005407 /* AIBackend.swift in Sources */,
 				EBB7CC6399A751DB3037402E /* AIChainOfThought.swift in Sources */,
+				3DAE20FBF0F571D1C26DFD59 /* AIChatInsightsView.swift in Sources */,
 				F3F76111AABE3827018AE984 /* AIChatView+MessageHandling.swift in Sources */,
 				96B6BBB4C02D93E14F28C043 /* AIChatView+Suggestions.swift in Sources */,
 				E16388BC43C225F2C6B7368A /* AIChatView.swift in Sources */,
@@ -1282,6 +1292,7 @@
 				BFA019F024F4E73B203B8975 /* BodySpecPDFParser.swift in Sources */,
 				33EC5B66DF492493925C24CA /* CGMImportService.swift in Sources */,
 				B8666DFAC44BA801AF626FE7 /* CSVParser.swift in Sources */,
+				8A7201AC4ADB2A915B648FAB /* ChatTelemetryService.swift in Sources */,
 				97B0E67FCE238066500D1E13 /* ClarificationBuilder.swift in Sources */,
 				BA70FAADF8E436B8FD334D6C /* ComboLogSheet.swift in Sources */,
 				5A6FF40412DE467AB6BDAF6D /* CombosView.swift in Sources */,
@@ -1433,6 +1444,7 @@
 				8A8CF11C6A7AF26DCABECF6A /* CSVParserTests.swift in Sources */,
 				9F37F2ED3EE2286472FF19E4 /* ChatLatencyBenchmark.swift in Sources */,
 				64BFF27391CC32B927344BA1 /* ChatSuggestionPillsTests.swift in Sources */,
+				E6E3CDEEDB31D50E82EB4AEF /* ChatTelemetryServiceTests.swift in Sources */,
 				779925254F50CA7114ADA1C6 /* ClarificationBuilderTests.swift in Sources */,
 				0194A479D68AA854B74E417F /* ClarificationFalsePositiveTests.swift in Sources */,
 				15E39B1D0294AB6762CE9EE8 /* ClarificationFlowTests.swift in Sources */,

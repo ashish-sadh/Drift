@@ -210,6 +210,10 @@ struct SettingsView: View {
     @State private var showingFactoryReset = false
     @State private var resetDone = false
     @State private var syncStatus: String?
+    @State private var telemetryEnabled: Bool = Preferences.chatTelemetryEnabled
+    @State private var telemetryCount: Int = 0
+    @State private var showingTelemetryDeleteConfirm = false
+    @State private var telemetryShareURL: URL?
 
     var body: some View {
         ScrollView {
@@ -385,6 +389,76 @@ struct SettingsView: View {
                 }
                 .card()
 
+                // AI Chat Telemetry (opt-in, local only) — #261
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "chart.bar.doc.horizontal")
+                            .foregroundStyle(Theme.accent).frame(width: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("AI Chat Telemetry").font(.subheadline.weight(.medium))
+                            Text("Stored on your device only. Helps improve AI chat routing.")
+                                .font(.caption2).foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        Toggle("", isOn: $telemetryEnabled)
+                            .labelsHidden().tint(Theme.accent)
+                            .onChange(of: telemetryEnabled) { _, on in
+                                Preferences.chatTelemetryEnabled = on
+                                if !on { ChatTelemetryService.shared.deleteAll() }
+                                telemetryCount = ChatTelemetryService.shared.count()
+                            }
+                    }
+                    if telemetryEnabled {
+                        Text("Only a short hash of each query — never the raw text — is stored, along with the routed tool and outcome.")
+                            .font(.caption2).foregroundStyle(.tertiary)
+                            .padding(.leading, 36)
+
+                        HStack(spacing: 12) {
+                            NavigationLink {
+                                AIChatInsightsView()
+                            } label: {
+                                Label("View insights", systemImage: "chart.line.uptrend.xyaxis")
+                                    .font(.caption)
+                            }
+                            Spacer()
+                            Text("\(telemetryCount) turns")
+                                .font(.caption2).foregroundStyle(.tertiary).monospacedDigit()
+                        }
+                        .padding(.leading, 36)
+                        .padding(.top, 4)
+
+                        HStack(spacing: 14) {
+                            Button {
+                                if let data = ChatTelemetryService.shared.exportJSON() {
+                                    telemetryShareURL = writeTelemetryExport(data)
+                                    if let url = telemetryShareURL { shareFile(url) }
+                                }
+                            } label: {
+                                Label("Export JSON", systemImage: "square.and.arrow.up").font(.caption)
+                            }
+                            Button(role: .destructive) {
+                                showingTelemetryDeleteConfirm = true
+                            } label: {
+                                Label("Delete all", systemImage: "trash").font(.caption)
+                            }
+                            Spacer()
+                        }
+                        .padding(.leading, 36)
+                        .padding(.top, 2)
+                    }
+                }
+                .card()
+                .onAppear { telemetryCount = ChatTelemetryService.shared.count() }
+                .alert("Delete telemetry?", isPresented: $showingTelemetryDeleteConfirm) {
+                    Button("Delete", role: .destructive) {
+                        ChatTelemetryService.shared.deleteAll()
+                        telemetryCount = 0
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text("Removes all recorded chat-turn telemetry from this device. User data (weight, food, workouts) is not affected.")
+                }
+
                 // Algorithm
                 NavigationLink {
                     AlgorithmSettingsView()
@@ -532,6 +606,20 @@ struct SettingsView: View {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("drift_food_logs.csv")
         try? csv.write(to: url, atomically: true, encoding: .utf8)
         return url
+    }
+
+    /// Write exported telemetry JSON to a temp file for the share sheet. #261.
+    private func writeTelemetryExport(_ data: Data) -> URL? {
+        let dateStr = DateFormatters.dateOnly.string(from: Date())
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("drift_chat_telemetry_\(dateStr).json")
+        do {
+            try data.write(to: url, options: .atomic)
+            return url
+        } catch {
+            Log.app.error("Telemetry export write failed: \(error.localizedDescription)")
+            return nil
+        }
     }
 }
 

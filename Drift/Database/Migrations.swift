@@ -510,5 +510,22 @@ enum Migrations {
                 t.add(column: "expand_on_log", .boolean).notNull().defaults(to: false)
             }
         }
+
+        // v32: AI chat local telemetry (opt-in, on-device only). #261
+        // Stores hashed fingerprint (not raw text), routed intent, tool, outcome,
+        // and latency so we can surface real failure categories. 5k-row ring buffer.
+        migrator.registerMigration("v32_chat_telemetry") { db in
+            try db.create(table: "chat_turn") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("timestamp", .text).notNull()
+                t.column("query_fingerprint", .text).notNull()
+                t.column("intent_label", .text)
+                t.column("tool_called", .text)
+                t.column("outcome", .text).notNull()
+                t.column("latency_ms", .integer).notNull().defaults(to: 0)
+                t.column("turn_index", .integer).notNull().defaults(to: 0)
+            }
+            try db.create(index: "idx_chat_turn_timestamp", on: "chat_turn", columns: ["timestamp"])
+        }
     }
 }

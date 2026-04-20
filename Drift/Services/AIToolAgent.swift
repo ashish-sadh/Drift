@@ -93,6 +93,56 @@ enum AIToolAgent {
         onStep: (String) -> Void,
         onToken: @escaping @Sendable (String) -> Void
     ) async -> AgentOutput {
+        let telemetryStart = CFAbsoluteTimeGetCurrent()
+        let output = await runInner(
+            message: message, screen: screen, history: history,
+            isLargeModel: isLargeModel, onStep: onStep, onToken: onToken
+        )
+        // #261 — opt-in gate is inside the service; this call is a no-op by default.
+        let latencyMs = Int((CFAbsoluteTimeGetCurrent() - telemetryStart) * 1000)
+        ChatTelemetryService.shared.record(
+            query: message,
+            intent: telemetryIntent(for: output),
+            tool: output.toolsCalled.first,
+            outcome: telemetryOutcome(for: output),
+            latencyMs: latencyMs,
+            turnIndex: ConversationState.shared.turnCount
+        )
+        return output
+    }
+
+    /// Classify the pipeline outcome into a telemetry `IntentLabel`. Ordering
+    /// matters: clarifications surface before tool labels because a clarifier
+    /// result includes no tool in `toolsCalled`.
+    private static func telemetryIntent(for output: AgentOutput) -> ChatTelemetryService.IntentLabel? {
+        if output.clarificationOptions?.isEmpty == false { return .clarification }
+        let first = output.toolsCalled.first ?? ""
+        switch first {
+        case "timeout":     return .timeout
+        case "classifier":  return .text
+        case "clarifier":   return .clarification
+        case "":            return nil
+        default:            return .toolCall
+        }
+    }
+
+    /// Map output → telemetry outcome. `failed`/`timeout` are distinct so we
+    /// can tell "user needed clarification" from "pipeline couldn't cope."
+    private static func telemetryOutcome(for output: AgentOutput) -> ChatTelemetryService.Outcome {
+        let first = output.toolsCalled.first ?? ""
+        if first == "timeout" { return .timeout }
+        if output.clarificationOptions?.isEmpty == false { return .clarified }
+        return .success
+    }
+
+    private static func runInner(
+        message: String,
+        screen: AIScreen,
+        history: String,
+        isLargeModel: Bool,
+        onStep: (String) -> Void,
+        onToken: @escaping @Sendable (String) -> Void
+    ) async -> AgentOutput {
 
         let pipelineStart = CFAbsoluteTimeGetCurrent()
 

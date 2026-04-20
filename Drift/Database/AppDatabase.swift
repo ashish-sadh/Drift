@@ -54,6 +54,7 @@ extension AppDatabase {
             try db.execute(sql: "DELETE FROM saved_food")  // legacy table (may be empty after v25)
             try db.execute(sql: "DELETE FROM food WHERE source != 'database' AND source IS NOT NULL")
             try db.execute(sql: "DELETE FROM food_usage")
+            try? db.execute(sql: "DELETE FROM chat_turn")
         }
         // Re-seed default foods
         try seedFoodsFromJSON()
@@ -662,4 +663,79 @@ extension AppDatabase {
             return rows.map { (query: $0["query"] as String? ?? "", count: Int(exactly: $0["miss_count"] as Int64? ?? 0) ?? 0) }
         }
     }
+}
+
+// MARK: - Chat Telemetry (opt-in, #261)
+
+extension AppDatabase {
+    /// Insert one telemetry record. Caller is responsible for the opt-in gate.
+    func insertChatTurn(_ row: ChatTurnRow) throws {
+        try dbWriter.write { db in
+            try db.execute(sql: """
+                INSERT INTO chat_turn
+                (timestamp, query_fingerprint, intent_label, tool_called, outcome, latency_ms, turn_index)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, arguments: [
+                    row.timestamp, row.queryFingerprint, row.intentLabel,
+                    row.toolCalled, row.outcome, row.latencyMs, row.turnIndex
+                ])
+        }
+    }
+
+    /// Evict oldest rows past `cap`. No-op if total row count is ≤ cap.
+    func evictChatTurnsOver(cap: Int) throws {
+        try dbWriter.write { db in
+            let count = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM chat_turn") ?? 0
+            guard count > cap else { return }
+            let excess = count - cap
+            try db.execute(sql: """
+                DELETE FROM chat_turn WHERE id IN
+                (SELECT id FROM chat_turn ORDER BY id ASC LIMIT ?)
+                """, arguments: [excess])
+        }
+    }
+
+    func fetchChatTurns(limit: Int = 5000) throws -> [ChatTurnRow] {
+        try dbWriter.read { db in
+            let rows = try Row.fetchAll(db, sql: """
+                SELECT timestamp, query_fingerprint, intent_label, tool_called, outcome, latency_ms, turn_index
+                FROM chat_turn ORDER BY id DESC LIMIT ?
+                """, arguments: [limit])
+            return rows.map { r in
+                ChatTurnRow(
+                    timestamp: r["timestamp"] as String? ?? "",
+                    queryFingerprint: r["query_fingerprint"] as String? ?? "",
+                    intentLabel: r["intent_label"] as String?,
+                    toolCalled: r["tool_called"] as String?,
+                    outcome: r["outcome"] as String? ?? "",
+                    latencyMs: Int(r["latency_ms"] as Int64? ?? 0),
+                    turnIndex: Int(r["turn_index"] as Int64? ?? 0)
+                )
+            }
+        }
+    }
+
+    func chatTurnCount() throws -> Int {
+        try dbWriter.read { db in
+            try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM chat_turn") ?? 0
+        }
+    }
+
+    func deleteAllChatTurns() throws {
+        try dbWriter.write { db in
+            try db.execute(sql: "DELETE FROM chat_turn")
+        }
+    }
+}
+
+/// Transport struct for chat telemetry rows. Not a GRDB `Record` — intentionally
+/// plain so tests and service code can construct rows without DB setup.
+struct ChatTurnRow: Equatable, Codable, Sendable {
+    var timestamp: String
+    var queryFingerprint: String
+    var intentLabel: String?
+    var toolCalled: String?
+    var outcome: String
+    var latencyMs: Int
+    var turnIndex: Int
 }
