@@ -226,6 +226,14 @@
 - P0 bug #238 (Gemma 4 download failure) filed by user mid-planning — real user is hitting a first-run blocker. Senior must investigate as first task post-planning. This is why the sprint-task + P0 auto-labeling matters — no routing delay.
 - Crash hardening landed twice in 2 cycles (ForEach(indices) + force-unwraps). Pattern to watch: SwiftUI ForEach over mutable collections without stable IDs. Worth a boy-scout rule: grep for `ForEach.*indices` quarterly.
 
+### What I Learned — Planning Cycle 3585 (2026-04-20)
+- Watchdog commit-rate detector (3h / 0 commits → kill) shipped cleanly — 1 downstream "exited via stall" feedback entry observed post-ship, which is the detector *working*, not a regression. Silent non-productive sessions are worse than crashes; this closes that failure mode.
+- Telemetry (#261) is live but still open-loop until the daily-summary aggregation ticket (#281) lands. A signal without a consumption path is shelfware. Any new telemetry emission should ship with its reader in the same sprint.
+- Test infrastructure is now at 4-layer maturity: FoodLoggingGoldSetTests (intent), PerToolReliabilityEval (tool selection), MultiTurnRegressionTests (state machine), ChatLatencyBenchmark (perf). The two gaps this planning session addressed: no cross-model parity eval (new #286) and latency smoke is opt-in, not default (#287). Default-path coverage matters — opt-in gates get skipped.
+- Photolog ships via BYOK cloud vision — architecturally this is the first feature that uses an *off-device* model. The privacy story still holds because the user brings their own key, but we now have to care about outage modes we didn't have before (rate limits, user's key revoked, vendor API change). Needs its own per-category accuracy eval (covered implicitly by #276 — the eval gold set).
+- Voice transcription misrecognition of health terms (metformin, creatine, whey) is a deterministic post-processing problem, not a model quality problem. Fixing at the string level (dictionary pass on final transcript) is the right layer — cheaper than trying to train or fine-tune SpeechRecognizer.
+- Queue depth: entered cycle at 16 pending tasks, closed at ~26 post-planning. The 5-senior-task budget means full drain is ~5 sessions. Honest capacity signal — don't pile on next cycle unless queue drops.
+
 ## Preferences & Approach
 - Prefer boring, proven solutions over clever abstractions
 - Prefer fixing patterns over fixing instances (fix the stale-preference pattern, not just one ViewModel)
