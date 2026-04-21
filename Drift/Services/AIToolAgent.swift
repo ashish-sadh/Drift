@@ -219,19 +219,24 @@ enum AIToolAgent {
                 logTiming("Phase 2 (classify)", start: classifyStart)
                 switch result {
                 case .toolCall(let intent):
-                    // Low-confidence route → clarify only when the extractor
-                    // didn't already produce complete params. Positive signal
-                    // (complete params) beats keyword ambiguity — otherwise
-                    // we'd prompt on "log 3 eggs" just because "log" is a
-                    // bare verb. #242.
-                    if intent.confidence.lowercased() == "low" {
-                        Log.app.info("IntentClassifier: low-confidence route → \(intent.tool) for '\(message)'")
-                        let extractorComplete = ClarificationBuilder.hasCompleteParams(
-                            tool: intent.tool.replacingOccurrences(of: "()", with: ""),
-                            params: intent.params
-                        )
-                        if !extractorComplete,
-                           let opts = ClarificationBuilder.buildOptions(for: normalized),
+                    // Strip parentheses from tool name (LLM quirk: "food_info()" → "food_info")
+                    let toolName = intent.tool.replacingOccurrences(of: "()", with: "")
+                    // Clarify-vs-proceed is delegated to `IntentThresholds`,
+                    // which encodes the per-domain policy (food leans toward
+                    // proceed, meta/navigate_to demands high confidence, etc.).
+                    // Complete params still beat keyword ambiguity — we don't
+                    // prompt on "log 3 eggs" because `log` is a bare verb. #302.
+                    let extractorComplete = ClarificationBuilder.hasCompleteParams(
+                        tool: toolName, params: intent.params
+                    )
+                    let decision = IntentThresholds.shouldClarify(
+                        tool: toolName,
+                        confidence: intent.confidence,
+                        hasCompleteParams: extractorComplete
+                    )
+                    if decision == .clarify {
+                        Log.app.info("IntentThresholds: clarify → \(intent.tool) for '\(message)' (confidence: \(intent.confidence))")
+                        if let opts = ClarificationBuilder.buildOptions(for: normalized),
                            opts.count >= 2 {
                             return AgentOutput(
                                 text: ClarificationBuilder.promptText(opts),
@@ -240,8 +245,6 @@ enum AIToolAgent {
                             )
                         }
                     }
-                    // Strip parentheses from tool name (LLM quirk: "food_info()" → "food_info")
-                    let toolName = intent.tool.replacingOccurrences(of: "()", with: "")
                     let rawCall = ToolCall(tool: toolName, params: ToolCallParams(values: intent.params))
                     // Stage 3b: Validate LLM-extracted params with Swift checks
                     let call = validateExtraction(rawCall, message: message)
