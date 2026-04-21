@@ -156,7 +156,11 @@ extension AppDatabase {
         }
     }
 
-    /// Search foods ranked by usage frequency, then prefix match, then alphabetical.
+    /// Search foods ranked by match quality (exact → prefix → phrase), then
+    /// usage frequency as a tiebreaker. Match quality dominates so a
+    /// generic food ("Pizza") always outranks an unrelated specific item
+    /// with the same term ("Pizza Logs"), even if the specific item has
+    /// been logged many times (#271).
     func searchFoodsRanked(query: String, limit: Int = 50) throws -> [Food] {
         try reader.read { db in
             if query.isEmpty { return [] }
@@ -165,11 +169,11 @@ extension AppDatabase {
 
             let whereClauses = words.map { _ in "LOWER(f.name) LIKE ? ESCAPE '\\'" }.joined(separator: " AND ")
             let patterns: [DatabaseValueConvertible] = words.map { "%\(Self.escapeLike($0))%" }
+            let exactPattern: DatabaseValueConvertible = query.lowercased()
             let prefixPattern: DatabaseValueConvertible = "\(Self.escapeLike(query.lowercased()))%"
-            let allArgs: [DatabaseValueConvertible] = patterns + [prefixPattern, limit]
-
-            let queryEscaped: DatabaseValueConvertible = "%\(Self.escapeLike(query.lowercased()))%"
-            let allArgsWithPhrase: [DatabaseValueConvertible] = patterns + [prefixPattern, queryEscaped, limit]
+            let phrasePattern: DatabaseValueConvertible = "%\(Self.escapeLike(query.lowercased()))%"
+            let orderArgs: [DatabaseValueConvertible] = [exactPattern, prefixPattern, phrasePattern, limit]
+            let allArgs: [DatabaseValueConvertible] = patterns + orderArgs
 
             return try Food.fetchAll(db, sql: """
                 SELECT f.* FROM food f
@@ -178,13 +182,14 @@ extension AppDatabase {
                 GROUP BY f.id
                 ORDER BY
                     COALESCE(fu.is_favorite, 0) DESC,
+                    CASE WHEN LOWER(f.name) = ? THEN 0 ELSE 1 END,
+                    CASE WHEN LOWER(f.name) LIKE ? ESCAPE '\\' THEN 0 ELSE 1 END,
+                    CASE WHEN LOWER(f.name) LIKE ? ESCAPE '\\' THEN 0 ELSE 1 END,
                     COALESCE(fu.use_count, 0) DESC,
-                    CASE WHEN LOWER(f.name) LIKE ? ESCAPE '\\' THEN 0 ELSE 1 END,
-                    CASE WHEN LOWER(f.name) LIKE ? ESCAPE '\\' THEN 0 ELSE 1 END,
                     LENGTH(f.name),
                     f.name
                 LIMIT ?
-                """, arguments: StatementArguments(allArgsWithPhrase))
+                """, arguments: StatementArguments(allArgs))
         }
     }
 

@@ -836,6 +836,25 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     #expect(ranked.first?.name == firstDal.name, "Most-used dal should appear first in ranked search")
 }
 
+/// Regression for #271. A generic food named exactly like the query must
+/// rank above an unrelated specific item with higher use_count. Without
+/// this ordering, "Pizza Logs" (use_count=5) beats "Pizza" (use_count=0)
+/// when the user types "pizza".
+@Test func rankedSearchExactMatchBeatsUseCount() async throws {
+    let db = try AppDatabase.empty()
+    var pizza = Food(name: "Pizza", category: "Test", servingSize: 100, servingUnit: "g",
+                     calories: 270, proteinG: 11, carbsG: 33, fatG: 10)
+    var pizzaLogs = Food(name: "Pizza Logs", category: "Test", servingSize: 100, servingUnit: "g",
+                         calories: 260, proteinG: 12, carbsG: 35, fatG: 7)
+    try db.saveScannedFood(&pizza)
+    try db.saveScannedFood(&pizzaLogs)
+    // Simulate the user having logged "Pizza Logs" many times.
+    for _ in 0..<5 { try db.trackFoodUsage(name: "Pizza Logs", foodId: pizzaLogs.id, servings: 1) }
+    let ranked = try db.searchFoodsRanked(query: "pizza")
+    #expect(ranked.first?.name == "Pizza",
+            "Exact-match 'Pizza' must rank above 'Pizza Logs' despite higher use_count; got \(ranked.prefix(3).map(\.name))")
+}
+
 @Test func searchPrefixMatchFindsFullWord() async throws {
     let db = try AppDatabase.empty()
     try db.seedFoodsFromJSON()
