@@ -288,7 +288,7 @@ struct BarcodeLookupView: View {
                         mpill("\(Int(food.proteinG * multiplier))g", label: "P", color: Theme.proteinRed)
                         mpill("\(Int(food.carbsG * multiplier))g", label: "C", color: Theme.carbsGreen)
                         mpill("\(Int(food.fatG * multiplier))g", label: "F", color: Theme.fatYellow)
-                        mpill("\(Int(food.fiberG * multiplier))g", label: "Fiber", color: Theme.fiberBrown)
+                        mpill("\(MacroFormatter.fiber(food.fiberG * multiplier))g", label: "Fiber", color: Theme.fiberBrown)
                     }
                 }.card()
 

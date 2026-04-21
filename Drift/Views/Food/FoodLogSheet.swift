@@ -111,7 +111,7 @@ struct FoodLogSheet: View {
                 macroChip("F", value: food.fatG * multiplier, color: Theme.fatYellow)
             }
             if food.fiberG > 0 {
-                Text("\(Int(food.fiberG * multiplier))g fiber")
+                Text("\(MacroFormatter.fiber(food.fiberG * multiplier))g fiber")
                     .font(.caption).foregroundStyle(.secondary)
             }
         }

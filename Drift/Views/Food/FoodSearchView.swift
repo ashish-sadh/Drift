@@ -628,7 +628,7 @@ struct FoodSearchView: View {
                         }
 
                         if food.fiberG > 0 {
-                            Text("\(Int(food.fiberG * multiplier))g fiber")
+                            Text("\(MacroFormatter.fiber(food.fiberG * multiplier))g fiber")
                                 .font(.caption).foregroundStyle(.secondary)
                         }
                     }

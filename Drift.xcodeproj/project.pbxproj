@@ -180,6 +180,7 @@
 		9C01C0F24CCB9341148D4C71 /* AIResponseCleanerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8B0FF829D1EAEEF0257163CC /* AIResponseCleanerTests.swift */; };
 		9CBCD31AD1998B4E5237C1A6 /* Units.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88A19640FB19F5628DC8B824 /* Units.swift */; };
 		9E576FCB247BD6516612E63F /* ManualFoodEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4683CA86D3045B1534504B0 /* ManualFoodEntrySheet.swift */; };
+		9EDB57CB44E85C5F10064836 /* MacroFormattersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F6585ACE94D5E5C51F74AE7 /* MacroFormattersTests.swift */; };
 		9F09FCD3472B6C02FEC11B48 /* llama.xcframework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4101CD9171B652C6B8D1BB4E /* llama.xcframework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		9F37F2ED3EE2286472FF19E4 /* ChatLatencyBenchmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0F40084353223A2C822198D7 /* ChatLatencyBenchmark.swift */; };
 		A1BCD9E578BA6D939E4F078B /* top-500-foods.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3120313481E2B0C45C1B573A /* top-500-foods.txt */; };
@@ -203,6 +204,7 @@
 		B8CAE0734166CD113EE590E8 /* WidgetDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA0DCFCDAFF06DBAD3CA13DB /* WidgetDataTests.swift */; };
 		BA4A49D33CF87342C8F00DCD /* SupplementLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3E0BC3660040DBB4942437D /* SupplementLog.swift */; };
 		BA70FAADF8E436B8FD334D6C /* ComboLogSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4909BB9427381E10328CBA9 /* ComboLogSheet.swift */; };
+		BAA2123B037D3EE61EE2AAA1 /* MacroFormatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BAC0D08FFC4D462DA5BA571 /* MacroFormatters.swift */; };
 		BE6B98B254C7B200F8428F01 /* AIRuleEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 237FC00B086CC3785B482588 /* AIRuleEngine.swift */; };
 		BEAFE882B09BA211628205D9 /* ServingUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFCD031A1C605FBFFDF1B7D0 /* ServingUnit.swift */; };
 		BED961B980821487CA56AD51 /* HealthKitService+Cycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36BB15B5D3A14E0D9940B118 /* HealthKitService+Cycle.swift */; };
@@ -406,6 +408,7 @@
 		377CCA5F9E895164E95EC65E /* AIModelManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIModelManager.swift; sourceTree = "<group>"; };
 		37D1FB1A43791483D88EC4BC /* CycleCalculations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleCalculations.swift; sourceTree = "<group>"; };
 		39A9E88135361C3B6F2AE538 /* PlantPointsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPointsService.swift; sourceTree = "<group>"; };
+		3BAC0D08FFC4D462DA5BA571 /* MacroFormatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroFormatters.swift; sourceTree = "<group>"; };
 		3F480CCAF91EFD799E6B5B8C /* DriftLLMEvalMacOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DriftLLMEvalMacOS.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F51E9EC49412B4F96068D35 /* WeightTrendCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightTrendCalculatorTests.swift; sourceTree = "<group>"; };
 		3F7B91A7052D8347083F577A /* ComposedFoodParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposedFoodParserTests.swift; sourceTree = "<group>"; };
@@ -494,6 +497,7 @@
 		9BA072B74254D7004020703A /* PhotoLogEntryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogEntryTests.swift; sourceTree = "<group>"; };
 		9BE85182415E10B646F68DA4 /* ParallelLLMEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParallelLLMEval.swift; sourceTree = "<group>"; };
 		9C87F6B55BFF5055B77C57C1 /* NormalizerGoldSetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NormalizerGoldSetTests.swift; sourceTree = "<group>"; };
+		9F6585ACE94D5E5C51F74AE7 /* MacroFormattersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacroFormattersTests.swift; sourceTree = "<group>"; };
 		9F9F051926CE39DF3E0A47DA /* BodySpecPDFParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodySpecPDFParser.swift; sourceTree = "<group>"; };
 		9FA2C56E731BE5610FDC5B12 /* AIChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIChatView.swift; sourceTree = "<group>"; };
 		9FDCCAED76696ACF2A89F445 /* Migrations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Migrations.swift; sourceTree = "<group>"; };
@@ -758,6 +762,7 @@
 				64C160A33FFEF2C185DA06ED /* IntentClassifierGoldSetTests.swift */,
 				1326C008D33A0DC556787428 /* IntentRoutingEvalTests.swift */,
 				5D1E187818C8B9D2196B4B9D /* LabReportOCRTests.swift */,
+				9F6585ACE94D5E5C51F74AE7 /* MacroFormattersTests.swift */,
 				358B9AF32E9AE57D1A7DF354 /* MealTypeDetectionTests.swift */,
 				48395DCDA65A417FF1BCC401 /* MultiTurnContextTests.swift */,
 				9C87F6B55BFF5055B77C57C1 /* NormalizerGoldSetTests.swift */,
@@ -1137,6 +1142,7 @@
 				35CA37F54FABF8B93BB278BB /* DateFormatters.swift */,
 				FCBE3BA3D70586AC0F3ED34E /* DebugSeedData.swift */,
 				99C89E28D8FBE125273FB677 /* Log.swift */,
+				3BAC0D08FFC4D462DA5BA571 /* MacroFormatters.swift */,
 				24385DF0FF7F89584AE40020 /* Theme.swift */,
 				88A19640FB19F5628DC8B824 /* Units.swift */,
 			);
@@ -1425,6 +1431,7 @@
 				F9B44B0CA0EB70D90AFF6AA0 /* LlamaCppBackend.swift in Sources */,
 				FB1D2AF65F10F935076969F6 /* LocalAIService.swift in Sources */,
 				C4412538AE3E1E269685CB2A /* Log.swift in Sources */,
+				BAA2123B037D3EE61EE2AAA1 /* MacroFormatters.swift in Sources */,
 				7AD6304B58DBD8DA0BE88BC3 /* MacroRingsView.swift in Sources */,
 				9E576FCB247BD6516612E63F /* ManualFoodEntrySheet.swift in Sources */,
 				EE7CBD2147B65BED5FC0047C /* MealLog.swift in Sources */,
@@ -1552,6 +1559,7 @@
 				33E700814E964120B5BDDBC9 /* IntentClassifierGoldSetTests.swift in Sources */,
 				E6E1DE6BA746282A5C0CD9A7 /* IntentRoutingEvalTests.swift in Sources */,
 				92F6CD33F11BF82738AAF81C /* LabReportOCRTests.swift in Sources */,
+				9EDB57CB44E85C5F10064836 /* MacroFormattersTests.swift in Sources */,
 				24FB59FA8518C99125C773FC /* MealTypeDetectionTests.swift in Sources */,
 				6F12940B946478A79A718648 /* MultiTurnContextTests.swift in Sources */,
 				7136ECEEF216184765516FE5 /* NormalizerGoldSetTests.swift in Sources */,

@@ -365,9 +365,12 @@ struct EditFoodEntrySheet: View {
     // MARK: - Helpers
 
     private func macroChip(_ label: String, value: Double, color: Color) -> some View {
-        HStack(spacing: 2) {
+        // Fiber keeps one decimal for sub-10g totals so small portions (75g
+        // strawberry → 1.5g) don't truncate to "0g". #282.
+        let display = label == "Fb" ? MacroFormatter.fiber(value) : "\(Int(value))"
+        return HStack(spacing: 2) {
             RoundedRectangle(cornerRadius: 1).fill(color).frame(width: 2, height: 10)
-            Text("\(Int(value))g \(label)").font(.caption2.weight(.medium).monospacedDigit())
+            Text("\(display)g \(label)").font(.caption2.weight(.medium).monospacedDigit())
         }
         .padding(.horizontal, 8).padding(.vertical, 4)
         .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 6))

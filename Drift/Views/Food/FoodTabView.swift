@@ -748,7 +748,7 @@ struct FoodTabView: View {
                         Text(entry.portionText).font(.caption2).foregroundStyle(.tertiary)
                         Text("\u{00B7}").font(.caption2).foregroundStyle(.quaternary)
                     }
-                    Text("\(Int(entry.totalProtein))P \(Int(entry.totalCarbs))C \(Int(entry.totalFat))F \(Int(entry.totalFiber))Fb")
+                    Text("\(Int(entry.totalProtein))P \(Int(entry.totalCarbs))C \(Int(entry.totalFat))F \(MacroFormatter.fiber(entry.totalFiber))Fb")
                         .font(.caption2.monospacedDigit()).foregroundStyle(.secondary)
                 }
             }
