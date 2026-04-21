@@ -9,7 +9,9 @@
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>Drift does not write to Apple Health. This permission is not requested.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Drift uses the camera to scan food barcodes for nutrition lookup.</string>
+	<string>Drift uses the camera to scan food barcodes and snap meal photos for Photo Log identification.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Drift needs access to your photo library so you can pick a meal photo for Photo Log identification. Photos are only sent to the cloud AI provider you configured; Drift never sees them.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>Drift needs microphone access for voice input in AI chat. Audio is processed on-device and never leaves your phone.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
