@@ -43,6 +43,57 @@ final class IntentClassifierGoldSetTests: XCTestCase {
         XCTAssertEqual(correct, cases.count, "All log_food JSON should parse correctly")
     }
 
+    /// Regression for #277 / root cause of #271: "log <food>" without a quantity
+    /// must parse as log_food. The prompt must produce this JSON; here we pin
+    /// that the parser maps it correctly when it does.
+    func testParseResponse_LogBareFood() {
+        let cases: [(json: String, expectedName: String)] = [
+            (#"{"tool":"log_food","name":"pizza"}"#, "pizza"),
+            (#"{"tool":"log_food","name":"sandwich"}"#, "sandwich"),
+            (#"{"tool":"log_food","name":"rice"}"#, "rice"),
+            (#"{"tool":"log_food","name":"chicken"}"#, "chicken"),
+            (#"{"tool":"log_food","name":"salad"}"#, "salad"),
+        ]
+        var correct = 0
+        for (json, expectedName) in cases {
+            guard let intent = IntentClassifier.parseResponse(json) else {
+                print("MISS (log bare food): \(json)")
+                continue
+            }
+            if intent.tool == "log_food" && intent.params["name"] == expectedName {
+                correct += 1
+            } else {
+                print("WRONG (log bare food): got tool=\(intent.tool) name=\(intent.params["name"] ?? "nil"), expected log_food/\(expectedName)")
+            }
+        }
+        print("📊 parseResponse log bare food: \(correct)/\(cases.count)")
+        XCTAssertEqual(correct, cases.count, "All bare 'log <food>' JSON must map to log_food (#277)")
+    }
+
+    /// Opposite-direction anchor: search-intent phrasings must route to food_info,
+    /// not log_food. Protects against over-correcting the #277 widening.
+    func testParseResponse_SearchFoodHistory() {
+        let cases: [(json: String, expectedQuery: String)] = [
+            (#"{"tool":"food_info","query":"pizza"}"#, "pizza"),
+            (#"{"tool":"food_info","query":"rice"}"#, "rice"),
+            (#"{"tool":"food_info","query":"when did I last have pasta"}"#, "when did I last have pasta"),
+        ]
+        var correct = 0
+        for (json, expectedQuery) in cases {
+            guard let intent = IntentClassifier.parseResponse(json) else {
+                print("MISS (search food history): \(json)")
+                continue
+            }
+            if intent.tool == "food_info" && intent.params["query"] == expectedQuery {
+                correct += 1
+            } else {
+                print("WRONG (search food history): got tool=\(intent.tool) query=\(intent.params["query"] ?? "nil"), expected food_info/\(expectedQuery)")
+            }
+        }
+        print("📊 parseResponse search food history: \(correct)/\(cases.count)")
+        XCTAssertEqual(correct, cases.count, "Search-intent JSON must map to food_info, not log_food")
+    }
+
     func testParseResponse_FoodInfo() {
         let cases: [(json: String, expectedQuery: String)] = [
             (#"{"tool":"food_info","query":"daily summary"}"#, "daily summary"),

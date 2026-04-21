@@ -26,7 +26,7 @@ enum IntentClassifier {
     Health app. Reply JSON tool call or short text. Fix typos, word numbers, slang.
     Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) supplements() set_goal(target,unit?) delete_food(entry_id?,name?) edit_meal(entry_id?,meal_period?,action,target_food?,new_value?) body_comp() glucose() biomarkers() navigate_to(screen)
     When <recent_entries> is shown and user refers to a row (by ordinal, calories, meal, or "the one I just logged"), pass its id as entry_id. Otherwise use name/target_food.
-    Rules: never invent health data — call a tool. "calories in X"→food_info (not log_food). log_food only when user ate/had. Bare "log lunch/breakfast/dinner" (no food)→ask what they had. summary/intake/macros→food_info. weight trend→weight_info. body fat/lean mass/DEXA→body_comp. blood sugar/glucose spike→glucose. lab results/biomarkers/cholesterol→biomarkers. HRV→sleep_recovery. "go to X"/"open X"→navigate_to. supplements() for any supplement status question (never text). mark_supplement when user took/had one.
+    Rules: never invent health data — call a tool. "calories in X"→food_info (not log_food). log_food when user ate/had OR said log/add/track/record with a named food. Bare "log lunch/breakfast/dinner" (no food)→ask what they had. "search/find X in my logs"→food_info, not log_food. summary/intake/macros→food_info. weight trend→weight_info. body fat/lean mass/DEXA→body_comp. blood sugar/glucose spike→glucose. lab results/biomarkers/cholesterol→biomarkers. HRV→sleep_recovery. "go to X"/"open X"→navigate_to. supplements() for any supplement status question (never text). mark_supplement when user took/had one.
     Ask vs guess: if user names a concrete food/supplement/exercise/weight/screen, act. Only ask when query has no object (bare "log", "track", "add") or two tools fit equally.
     "daily summary"→{"tool":"food_info","query":"daily summary"}
     "weekly summary"→{"tool":"food_info","query":"weekly summary"}
@@ -40,6 +40,9 @@ enum IntentClassifier {
     "calories in samosa"→{"tool":"food_info","query":"calories in samosa"}
     "how am I doing"→{"tool":"food_info","query":"daily summary"}
     "log 2 eggs"→{"tool":"log_food","name":"egg","servings":"2"}
+    "log pizza"→{"tool":"log_food","name":"pizza"}
+    "log a sandwich"→{"tool":"log_food","name":"sandwich"}
+    "search pizza in my logs"→{"tool":"food_info","query":"pizza"}
     "I weigh 75 kg"→{"tool":"log_weight","value":"75","unit":"kg"}
     "start push day"→{"tool":"start_workout","name":"push day"}
     "did yoga for like half an hour"→{"tool":"log_activity","name":"yoga","duration":"30"}
@@ -64,6 +67,7 @@ enum IntentClassifier {
     "show dashboard"→{"tool":"navigate_to","screen":"dashboard"}
     "is it okay to take fish oil on an empty stomach"→Fish oil is generally fine with or without food.
     "log lunch"→What did you have for lunch?
+    "log my breakfast"→What did you have for breakfast?
     "hi"→Hi! How can I help?
     "i just love breakfast"→That's great! What did you have?
     "log"→What would you like to log — food, weight, or a workout?

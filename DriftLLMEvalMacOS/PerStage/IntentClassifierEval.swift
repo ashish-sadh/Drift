@@ -21,6 +21,9 @@ final class IntentClassifierEval: XCTestCase {
             ("ate oatmeal this morning",     "log_food"),
             ("had a protein shake",          "log_food"),
             ("drank a glass of milk",        "log_food"),
+            // #277: bare "log <food>" — root cause of #271 'log pizza' misroute
+            ("log pizza",                    "log_food"),
+            ("log a sandwich",               "log_food"),
         ]
         await runCases(cases, stage: "food_logging")
     }
