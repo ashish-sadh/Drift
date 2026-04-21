@@ -30,6 +30,8 @@ STALL_PLANNING=3600  # 1 hour
 STALL_SENIOR=1800    # 30 minutes
 STALL_JUNIOR=1800    # 30 minutes
 NUDGE_WAIT=300       # 5 minutes after nudge before killing
+# Commit-rate stall: senior/junior that has produced 0 commits to main this long = stuck
+COMMIT_STALL=10800   # 3 hours — genuinely-hard bugs sometimes take this long, but 0 commits past this is a tarpit
 KILL_WAIT=10
 CRASH_FILE="$HOME/drift-state/consecutive-crashes"
 MONITOR_PID=""
@@ -571,6 +573,27 @@ while true; do
                     fi
                 else
                     rm -f "$NUDGE_FILE" 2>/dev/null || true
+                fi
+
+                # Commit-rate stall: busy-but-unproductive sessions (tool calls but no
+                # shipped work). Planning sessions exempt — they create issues, not commits.
+                # Only kicks in after COMMIT_STALL (3h) so genuinely hard bug hunts still finish.
+                if [[ "$CURRENT_TYPE" != "planning" ]] && [[ -n "$CURRENT_LOG" ]] && [[ -f "$CURRENT_LOG" ]]; then
+                    # Log filename is session_{type}_{epoch}.log
+                    SESSION_EPOCH=$(basename "$CURRENT_LOG" | sed -E 's/^session_[a-z]+_([0-9]+)\.log$/\1/')
+                    if [[ "$SESSION_EPOCH" =~ ^[0-9]+$ ]]; then
+                        SESSION_AGE=$(( $(date +%s) - SESSION_EPOCH ))
+                        if (( SESSION_AGE > COMMIT_STALL )); then
+                            COMMITS_SINCE_START=$(cd "$WORK_DIR" && git log --oneline --since="@$SESSION_EPOCH" main 2>/dev/null | wc -l | tr -d ' ')
+                            if [[ "$COMMITS_SINCE_START" == "0" ]]; then
+                                log "PRODUCTIVITY STALL: $CURRENT_TYPE session age ${SESSION_AGE}s, 0 commits since start. Killing for fresh restart."
+                                kill_claude
+                                run_compliance "stall"
+                                cleanup_dirty_state
+                                start_claude
+                            fi
+                        fi
+                    fi
                 fi
             fi
             ;;
