@@ -247,9 +247,11 @@
 		E0F86EB4273E7AC079F525CE /* LabReportOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = E342C8090873CF9612C8A63E /* LabReportOCR.swift */; };
 		E10A3A33C9E718C1D077AC02 /* WeightEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217B3F5DA6C6AA9BB267D9F3 /* WeightEntryView.swift */; };
 		E16388BC43C225F2C6B7368A /* AIChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA2C56E731BE5610FDC5B12 /* AIChatView.swift */; };
+		E19A1D1FE5326EACA1C51253 /* VoiceTranscriptionPostFixerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5AA88C83E11DABCCFDAF6C4 /* VoiceTranscriptionPostFixerTests.swift */; };
 		E220B46BAB957B8242ABA44A /* IntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24EBC73AF46E92F7FF6A10FF /* IntegrationTests.swift */; };
 		E312846BA4FBD129108D7C82 /* ExerciseBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21311CD0AE82F339C988BDD2 /* ExerciseBrowserView.swift */; };
 		E3CEF38E5F1D8E62C22B5543 /* FoodLogSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 029FE8C8F52268339F742BFA /* FoodLogSheet.swift */; };
+		E4974A05B377874B21A75D5D /* VoiceTranscriptionPostFixer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 63172D2C1A90AA26AF409CEA /* VoiceTranscriptionPostFixer.swift */; };
 		E5611698773A5EEF24F10014 /* EditFoodEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30EC2EF2E12E44F63B37582 /* EditFoodEntrySheet.swift */; };
 		E5C9ACF7CCAED656F70B23F9 /* PhotoLogReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A19A30BB3C9CCE28A9A758EF /* PhotoLogReviewView.swift */; };
 		E63F9BB35572B3EF11BF9DE5 /* HardEvalSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DEC3049742676C1201A6847 /* HardEvalSet.swift */; };
@@ -446,6 +448,7 @@
 		5DAC7F3DE02D237C91936A3C /* FoodServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodServiceTests.swift; sourceTree = "<group>"; };
 		5F6D2AA89F46A33EAE39DEAC /* MoreTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreTabView.swift; sourceTree = "<group>"; };
 		62E7E108AC25A8262DC23EB7 /* AppDatabase+FoodUsage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDatabase+FoodUsage.swift"; sourceTree = "<group>"; };
+		63172D2C1A90AA26AF409CEA /* VoiceTranscriptionPostFixer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTranscriptionPostFixer.swift; sourceTree = "<group>"; };
 		647116F9E4F78CE702CB870C /* RobustnessTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RobustnessTests.swift; sourceTree = "<group>"; };
 		64BFDDB952907C50869B4078 /* AIBackend.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIBackend.swift; sourceTree = "<group>"; };
 		64C160A33FFEF2C185DA06ED /* IntentClassifierGoldSetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentClassifierGoldSetTests.swift; sourceTree = "<group>"; };
@@ -582,6 +585,7 @@
 		E38FF7C7D3E9C7AED0CC8F83 /* WeightServiceAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightServiceAPI.swift; sourceTree = "<group>"; };
 		E4B60275240AEDD1A676B282 /* ConversationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationState.swift; sourceTree = "<group>"; };
 		E4BD88646DFE4A17724D4407 /* AddSupplementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddSupplementView.swift; sourceTree = "<group>"; };
+		E5AA88C83E11DABCCFDAF6C4 /* VoiceTranscriptionPostFixerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceTranscriptionPostFixerTests.swift; sourceTree = "<group>"; };
 		E63B0B98A699C56CBC8944B1 /* RecentEntriesWindowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentEntriesWindowTests.swift; sourceTree = "<group>"; };
 		E6B95CCD0C984C915051F482 /* sample_lingo_export.csv */ = {isa = PBXFileReference; path = sample_lingo_export.csv; sourceTree = "<group>"; };
 		E6C4AF4636637C2EF46CD085 /* ConversationStatePersistenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationStatePersistenceTests.swift; sourceTree = "<group>"; };
@@ -787,6 +791,7 @@
 				40634DDEB9C53BD0146A628A /* TDEEEstimatorTests.swift */,
 				E1A5DA3E3543A99260250279 /* UIFlowTests.swift */,
 				EDAD5133BD684B10BEDC1131 /* USDAFallbackTests.swift */,
+				E5AA88C83E11DABCCFDAF6C4 /* VoiceTranscriptionPostFixerTests.swift */,
 				550B90AE65B6BF4C31B62382 /* WeeklySummaryRoutingTests.swift */,
 				BED47C488D5D052F183327F8 /* WeightServiceAPITests.swift */,
 				3F51E9EC49412B4F96068D35 /* WeightTrendCalculatorTests.swift */,
@@ -1085,6 +1090,7 @@
 				7F42EA4B9416215EFE670984 /* ToolRegistration.swift */,
 				C170D4FEDFB68CA8A61E1D03 /* ToolSchema.swift */,
 				1EEA23E4C1755C342030C667 /* USDAFoodService.swift */,
+				63172D2C1A90AA26AF409CEA /* VoiceTranscriptionPostFixer.swift */,
 				E38FF7C7D3E9C7AED0CC8F83 /* WeightServiceAPI.swift */,
 				FD5DFCD5C5ED2C0D7E5CD8EF /* WeightTrendCalculator.swift */,
 				AF522FED101388047FEE98FD /* WeightTrendService.swift */,
@@ -1479,6 +1485,7 @@
 				07703998EC9E02AD418576E8 /* TypingDotsView.swift in Sources */,
 				B47A39B47130D32625A50BE0 /* USDAFoodService.swift in Sources */,
 				9CBCD31AD1998B4E5237C1A6 /* Units.swift in Sources */,
+				E4974A05B377874B21A75D5D /* VoiceTranscriptionPostFixer.swift in Sources */,
 				DFFA7CC42D60E67CB40222E8 /* WeightChartView.swift in Sources */,
 				7BDC02B8C99F8B719546A8A1 /* WeightEntry.swift in Sources */,
 				E10A3A33C9E718C1D077AC02 /* WeightEntryView.swift in Sources */,
@@ -1585,6 +1592,7 @@
 				923230686AD033F5F7025F94 /* TDEEEstimatorTests.swift in Sources */,
 				98FF97CFE71A6BBCFF976259 /* UIFlowTests.swift in Sources */,
 				11DB8618758D582670EBF2F8 /* USDAFallbackTests.swift in Sources */,
+				E19A1D1FE5326EACA1C51253 /* VoiceTranscriptionPostFixerTests.swift in Sources */,
 				CA3F2052B0B3E9E56D7AF064 /* WeeklySummaryRoutingTests.swift in Sources */,
 				CBACE89C978AA0377081831E /* WeightServiceAPITests.swift in Sources */,
 				DF025680665178535364944C /* WeightTrendCalculatorTests.swift in Sources */,
@@ -1721,7 +1729,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = DriftWidget/DriftWidget.entitlements;
-				CURRENT_PROJECT_VERSION = 155;
+				CURRENT_PROJECT_VERSION = 156;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				INFOPLIST_FILE = DriftWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1741,7 +1749,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = DriftWidget/DriftWidget.entitlements;
-				CURRENT_PROJECT_VERSION = 155;
+				CURRENT_PROJECT_VERSION = 156;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				INFOPLIST_FILE = DriftWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1799,7 +1807,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Drift/Drift.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 155;
+				CURRENT_PROJECT_VERSION = 156;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1932,7 +1940,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Drift/Drift.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 155;
+				CURRENT_PROJECT_VERSION = 156;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

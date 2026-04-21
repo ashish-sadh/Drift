@@ -102,7 +102,7 @@ struct AIChatView: View {
                                 self.vm.inputText = text
                             },
                             onDone: { finalText in
-                                self.vm.inputText = finalText
+                                self.vm.inputText = VoiceTranscriptionPostFixer.fix(finalText)
                                 self.vm.sendMessage()
                             }
                         )
