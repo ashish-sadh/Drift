@@ -1,6 +1,16 @@
 import XCTest
 import Foundation
 
+/// Shared baseline reader for both the 3-run bench and the single-item smoke.
+/// Returns `[query: medianTTFTSeconds]` written by `ChatLatencyBenchmark.saveBaseline`.
+fileprivate func loadLatencyBaseline(at url: URL) -> [String: Double]? {
+    guard let data = try? Data(contentsOf: url),
+          let dict = try? JSONDecoder().decode([String: Double].self, from: data) else {
+        return nil
+    }
+    return dict
+}
+
 /// Measures time-to-first-token (TTFT) for AI chat queries on a warm Gemma 4 model.
 ///
 /// Guards against prompt or context changes that silently regress latency.
@@ -79,9 +89,7 @@ final class ChatLatencyBenchmark: XCTestCase {
     }
 
     private func loadBaseline() -> [String: Double]? {
-        guard let data = try? Data(contentsOf: Self.baselinePath),
-              let dict = try? JSONDecoder().decode([String: Double].self, from: data) else { return nil }
-        return dict
+        loadLatencyBaseline(at: Self.baselinePath)
     }
 
     private func saveBaseline(_ baseline: [String: Double]) {
@@ -168,5 +176,106 @@ final class ChatLatencyBenchmark: XCTestCase {
         print(String(format: "📊 Bloat demo — normal: %.3fs, bloated: %.3fs, ratio: %.2f×", normalMedian, bloatedMedian, ratio))
         XCTAssertGreaterThan(bloatedMedian, normalMedian,
             "Bloated prompt (\(String(format: "%.3f", bloatedMedian))s) should be slower than normal (\(String(format: "%.3f", normalMedian))s)")
+    }
+}
+
+/// Cheap TTFT smoke — runs in the default `DriftLLMEvalMacOS` phase (no opt-in env var).
+///
+/// Guards against catastrophic TTFT regressions on every commit, unlike the 3-run statistical
+/// bench above which stays behind `DRIFT_LATENCY_BENCH=1`. One scenario, one run, two gates:
+///   1. Hard 30s budget — catches hangs or multi-minute cliffs.
+///   2. 1.5× baseline median — catches ~50% regression, loose enough to not flap.
+///
+/// Skips cleanly when the Gemma 4 model isn't present so CI without the model doesn't break.
+/// Baseline is the same `~/drift-state/latency-baseline.json` written by `testTTFT_baseline`.
+final class SingleItemSmokeTest: XCTestCase {
+
+    // MARK: - Constants
+
+    static let regressionMultiplier: Double = 1.5
+    static let hardBudgetSeconds: TimeInterval = 30.0
+    // Use the same query string that exists in ChatLatencyBenchmark.queries, so the baseline
+    // written by the 3-run bench is directly reusable for this smoke's regression gate.
+    static let smokeQuery = "log 2 eggs for breakfast"
+    static let baselinePath = ChatLatencyBenchmark.baselinePath
+    static let gemmaPath = ChatLatencyBenchmark.gemmaPath
+
+    // MARK: - Model (loaded once per class)
+
+    nonisolated(unsafe) static var backend: LlamaCppBackend?
+
+    override class func setUp() {
+        super.setUp()
+        guard FileManager.default.fileExists(atPath: gemmaPath.path) else {
+            print("⏭  SingleItemSmokeTest: Gemma 4 model missing at \(gemmaPath.path) — will skip")
+            return
+        }
+        let b = LlamaCppBackend(modelPath: gemmaPath, threads: 6)
+        try? b.loadSync()
+        guard b.isLoaded else {
+            print("⏭  SingleItemSmokeTest: Gemma 4 load failed — will skip")
+            return
+        }
+        backend = b
+        print("✅ SingleItemSmokeTest: Gemma 4 loaded")
+    }
+
+    // MARK: - Smoke
+
+    func testSingleItemTTFTSmoke() async throws {
+        guard let backend = Self.backend else {
+            throw XCTSkip("Gemma 4 model not available at \(Self.gemmaPath.path)")
+        }
+
+        // One warmup to amortize cold-path costs (mmap page-in, KV-cache init).
+        _ = await backend.respond(to: "hi", systemPrompt: IntentRoutingEval.systemPrompt)
+
+        // Single TTFT measurement.
+        let start = Date()
+        nonisolated(unsafe) var firstTokenTime: TimeInterval = 0
+        nonisolated(unsafe) var received = false
+        _ = await backend.respondStreaming(
+            to: Self.smokeQuery,
+            systemPrompt: IntentRoutingEval.systemPrompt
+        ) { _ in
+            if !received {
+                received = true
+                firstTokenTime = Date().timeIntervalSince(start)
+            }
+        }
+        let ttft = received ? firstTokenTime : Date().timeIntervalSince(start)
+
+        XCTAssertTrue(received, "No tokens received within measurement window")
+
+        // Gate 1: hard 30s budget. Trips on hangs / multi-minute cliffs.
+        XCTAssertLessThanOrEqual(ttft, Self.hardBudgetSeconds,
+            String(format: "TTFT %.2fs exceeds %.0fs hard budget — catastrophic regression",
+                   ttft, Self.hardBudgetSeconds))
+
+        // Gate 2: baseline-relative regression (1.5× median). Only applied when a baseline
+        // exists — otherwise the smoke still validates the pipeline runs end-to-end.
+        if let baseline = loadLatencyBaseline(at: Self.baselinePath),
+           let base = baseline[Self.smokeQuery], base > 0 {
+            let threshold = base * Self.regressionMultiplier
+            print(String(format: "📊 SingleItemSmokeTest: %.3fs (baseline %.3fs, gate %.3fs)",
+                         ttft, base, threshold))
+            XCTAssertLessThanOrEqual(ttft, threshold,
+                String(format: "TTFT %.3fs > %.3fs (%.0f%% of baseline × %.1f)",
+                       ttft, threshold, ttft / base * 100, Self.regressionMultiplier))
+        } else {
+            print(String(format: "📊 SingleItemSmokeTest: %.3fs (no baseline — run DRIFT_LATENCY_BENCH=1 ChatLatencyBenchmark/testTTFT_baseline to establish)", ttft))
+        }
+    }
+
+    // Guard: the smoke must stay cheap — one measurement scenario. If someone adds
+    // more scenarios here by accident, the default test phase balloons. Anyone adding
+    // a real benchmark should extend `ChatLatencyBenchmark` (opt-in) instead.
+    func testSmokeStaysSingleScenario() {
+        // `defaultTestSuite.testCaseCount` reflects the live count of test methods
+        // on this class, so this assertion fails the moment someone adds a third.
+        let count = Self.defaultTestSuite.testCaseCount
+        XCTAssertLessThanOrEqual(count, 2,
+            "SingleItemSmokeTest has \(count) test methods — must remain single-scenario. " +
+            "Add new latency scenarios to ChatLatencyBenchmark (opt-in via DRIFT_LATENCY_BENCH=1) instead.")
     }
 }
