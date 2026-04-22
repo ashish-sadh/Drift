@@ -26,6 +26,9 @@ struct PhotoLogItem: Codable, Equatable {
     var proteinG: Double
     var carbsG: Double
     var fatG: Double
+    /// Dietary fiber in grams. Optional — older LLM responses don't have it.
+    /// Decoder defaults to 0 when missing so macro rescale math stays valid.
+    var fiberG: Double
     var confidence: Confidence
     /// LLM-suggested serving unit (g/oz/cup/tbsp/piece/slice). Optional —
     /// older responses and fallback paths won't have it. When present, we use
@@ -45,6 +48,7 @@ struct PhotoLogItem: Codable, Equatable {
         case proteinG = "protein_g"
         case carbsG = "carbs_g"
         case fatG = "fat_g"
+        case fiberG = "fiber_g"
         case servingUnit = "serving_unit"
         case servingAmount = "serving_amount"
     }
@@ -56,6 +60,7 @@ struct PhotoLogItem: Codable, Equatable {
         proteinG: Double,
         carbsG: Double,
         fatG: Double,
+        fiberG: Double = 0,
         confidence: Confidence,
         servingUnit: String? = nil,
         servingAmount: Double? = nil,
@@ -67,6 +72,7 @@ struct PhotoLogItem: Codable, Equatable {
         self.proteinG = proteinG
         self.carbsG = carbsG
         self.fatG = fatG
+        self.fiberG = fiberG
         self.confidence = confidence
         self.servingUnit = servingUnit
         self.servingAmount = servingAmount
@@ -81,6 +87,7 @@ struct PhotoLogItem: Codable, Equatable {
         proteinG = try c.decodeIfPresent(Double.self, forKey: .proteinG) ?? 0
         carbsG = try c.decodeIfPresent(Double.self, forKey: .carbsG) ?? 0
         fatG = try c.decodeIfPresent(Double.self, forKey: .fatG) ?? 0
+        fiberG = try c.decodeIfPresent(Double.self, forKey: .fiberG) ?? 0
         confidence = try c.decodeIfPresent(Confidence.self, forKey: .confidence) ?? .low
         servingUnit = try c.decodeIfPresent(String.self, forKey: .servingUnit)
         servingAmount = try c.decodeIfPresent(Double.self, forKey: .servingAmount)

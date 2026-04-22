@@ -194,19 +194,20 @@ struct PhotoLogReviewView: View {
         dismiss()
     }
 
-    /// Build a Food from the LLM's answer — LLM-first, no matching against
-    /// the local food DB. Curated DB rows were giving users calories for a
-    /// different portion than what the photo showed, which was confusing.
-    /// Ingredients come from the LLM too (food_log schema extension) and are
-    /// attached to the Food struct so plant-points picks them up via the
-    /// existing name-join fallback in fetchFoodItemsForPlantPoints.
+    /// Build a Food from the LLM's answer — LLM-first for macros (no curated
+    /// overrides), but persist a `source="photo_log"` row when the name is
+    /// new so the ingredients JSON survives for plant-points joins.
+    /// `saveScannedFood` is a no-op when a Food with that name already
+    /// exists, so we don't pollute the DB with duplicates; in that case
+    /// food_id stays nil on the FoodEntry and plant-points name-fallbacks
+    /// to the existing curated Food's ingredients.
     private func photoLogFood(for item: PhotoLogEditableItem) -> Food {
         let ingredientsJSON: String? = {
             guard !item.ingredients.isEmpty else { return nil }
             let data = try? JSONEncoder().encode(item.ingredients)
             return data.flatMap { String(data: $0, encoding: .utf8) }
         }()
-        return Food(
+        var food = Food(
             name: item.name,
             category: "Photo Log",
             servingSize: max(item.grams, 1),
@@ -215,9 +216,16 @@ struct PhotoLogReviewView: View {
             proteinG: item.proteinG,
             carbsG: item.carbsG,
             fatG: item.fatG,
+            fiberG: item.fiberG,
             ingredients: ingredientsJSON,
             source: "photo_log"
         )
+        // Persist only if the name is new — otherwise the existing curated
+        // Food wins (its own ingredients feed plant-points via the name-
+        // fallback join). Macros we pass to logFood are ALWAYS the LLM's;
+        // food_entry.calories = food.calories, so curated macros never leak.
+        _ = FoodService.saveScannedFood(&food)
+        return food
     }
 
     private func confidenceBadge(for confidence: Confidence, big: Bool = false) -> some View {
@@ -238,9 +246,11 @@ private struct PhotoLogItemRow: View {
     @Binding var item: PhotoLogEditableItem
     @FocusState private var amountFocused: Bool
     @State private var amountText: String = ""
+    @State private var expanded: Bool = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
+        VStack(alignment: .leading, spacing: 10) {
+            // Top row — checkbox, name, amount+unit picker.
             HStack(alignment: .center, spacing: 12) {
                 Button {
                     item.selected.toggle()
@@ -261,8 +271,13 @@ private struct PhotoLogItemRow: View {
                                 .font(.caption2)
                                 .foregroundStyle(Theme.surplus)
                         }
+                        if item.macrosManuallyEdited {
+                            Image(systemName: "pencil.circle.fill")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.accent)
+                        }
                     }
-                    Text("\(Int(item.calories.rounded())) cal · \(Int(item.proteinG.rounded()))P / \(Int(item.carbsG.rounded()))C / \(Int(item.fatG.rounded()))F · \(Int(item.grams.rounded()))g")
+                    Text("\(Int(item.calories.rounded())) cal · \(Int(item.grams.rounded()))g")
                         .font(.caption2)
                         .foregroundStyle(.secondary)
                 }
@@ -271,6 +286,16 @@ private struct PhotoLogItemRow: View {
 
                 amountField
                 unitPicker
+            }
+
+            // Macro boxes — always visible. Tapping any box opens a decimal
+            // editor so the user can correct what the LLM got wrong.
+            macroBoxes
+
+            // Plant badge surfaces the LLM's ingredient list so users can see
+            // what counts toward plant points for this item.
+            if !item.ingredients.isEmpty {
+                plantBadge
             }
         }
         .opacity(item.selected ? 1.0 : 0.45)
@@ -325,6 +350,82 @@ private struct PhotoLogItemRow: View {
             .foregroundStyle(.secondary)
             .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 8))
         }
+    }
+
+    // MARK: - Macro boxes
+
+    /// Five-up editable macro grid (Cal / P / C / F / Fb) — mirrors the
+    /// manual food log sheet so users have the same editing affordance for
+    /// LLM-detected items as for manually-entered ones.
+    private var macroBoxes: some View {
+        HStack(spacing: 6) {
+            macroBox("Cal", value: item.calories, field: .calories, color: Theme.textPrimary)
+            macroBox("P",   value: item.proteinG, field: .protein,  color: Theme.proteinRed)
+            macroBox("C",   value: item.carbsG,   field: .carbs,    color: Theme.carbsGreen)
+            macroBox("F",   value: item.fatG,     field: .fat,      color: Theme.fatYellow)
+            macroBox("Fb",  value: item.fiberG,   field: .fiber,    color: Theme.textSecondary)
+        }
+    }
+
+    private func macroBox(_ label: String,
+                          value: Double,
+                          field: PhotoLogEditableItem.MacroField,
+                          color: Color) -> some View {
+        VStack(spacing: 2) {
+            Text(label).font(.caption2).foregroundStyle(color)
+            TextField("0", text: macroBinding(for: field))
+                .keyboardType(.decimalPad)
+                .multilineTextAlignment(.center)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Theme.textPrimary)
+                .padding(.vertical, 4)
+                .padding(.horizontal, 2)
+                .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 6))
+        }
+    }
+
+    /// TextField binding per macro — parses decimals, commits via `setMacro`
+    /// so per-gram rates get re-derived and future amount changes still reflow
+    /// proportionally from the corrected baseline.
+    private func macroBinding(for field: PhotoLogEditableItem.MacroField) -> Binding<String> {
+        Binding(
+            get: {
+                let v = currentValue(for: field)
+                return v == floor(v) ? String(Int(v.rounded())) : String(format: "%.1f", v)
+            },
+            set: { newValue in
+                guard let parsed = Double(newValue) else { return }
+                if abs(parsed - currentValue(for: field)) > 1e-6 {
+                    item.setMacro(field, to: parsed)
+                }
+            }
+        )
+    }
+
+    private func currentValue(for field: PhotoLogEditableItem.MacroField) -> Double {
+        switch field {
+        case .calories: return item.calories
+        case .protein:  return item.proteinG
+        case .carbs:    return item.carbsG
+        case .fat:      return item.fatG
+        case .fiber:    return item.fiberG
+        }
+    }
+
+    // MARK: - Plant badge
+
+    private var plantBadge: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "leaf.fill")
+                .font(.caption2)
+                .foregroundStyle(Theme.deficit)
+            Text(item.ingredients.joined(separator: ", "))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+            Spacer()
+        }
+        .padding(.horizontal, 4)
     }
 
     // MARK: - Text sync

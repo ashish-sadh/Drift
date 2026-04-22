@@ -95,6 +95,7 @@ struct PhotoLogEditableItem: Identifiable, Equatable {
     var proteinG: Double
     var carbsG: Double
     var fatG: Double
+    var fiberG: Double
     var confidence: Confidence
     var selected: Bool
     var servingUnit: PhotoLogServingUnit
@@ -105,13 +106,21 @@ struct PhotoLogEditableItem: Identifiable, Equatable {
     /// when the model didn't return it — callers fall back to `name` for
     /// plant classification.
     var ingredients: [String]
+    /// User-initiated edit of a macro field (e.g. "actually this pizza has
+    /// 15g protein not 12"). When set, subsequent amount/unit changes still
+    /// rescale macros proportionally, but from the user's corrected baseline
+    /// rather than the LLM's. Resets the per-gram rates so future reflows
+    /// respect the correction.
+    var macrosManuallyEdited: Bool
 
-    /// Original per-gram rates cached on init. All edit scaling is against
-    /// these so repeated grams edits don't drift via rounding.
-    let caloriesPerGram: Double
-    let proteinPerGram: Double
-    let carbsPerGram: Double
-    let fatPerGram: Double
+    /// Per-gram rates — stored as `var` so `setMacros` can update them when
+    /// the user hand-corrects one macro. Amount/unit reflows multiply these
+    /// by the current grams to keep the row consistent.
+    var caloriesPerGram: Double
+    var proteinPerGram: Double
+    var carbsPerGram: Double
+    var fatPerGram: Double
+    var fiberPerGram: Double
 
     /// LLM's original grams for this food — used as the 1-piece / 1-slice
     /// baseline weight when the user picks `.pieces` or `.slices`.
@@ -125,18 +134,22 @@ struct PhotoLogEditableItem: Identifiable, Equatable {
         self.proteinG = max(item.proteinG, 0)
         self.carbsG = max(item.carbsG, 0)
         self.fatG = max(item.fatG, 0)
+        self.fiberG = max(item.fiberG, 0)
         self.confidence = item.confidence
         self.selected = true
+        self.macrosManuallyEdited = false
         if self.grams > 0 {
             self.caloriesPerGram = self.calories / self.grams
             self.proteinPerGram = self.proteinG / self.grams
             self.carbsPerGram = self.carbsG / self.grams
             self.fatPerGram = self.fatG / self.grams
+            self.fiberPerGram = self.fiberG / self.grams
         } else {
             self.caloriesPerGram = 0
             self.proteinPerGram = 0
             self.carbsPerGram = 0
             self.fatPerGram = 0
+            self.fiberPerGram = 0
         }
         self.originalGrams = self.grams
         self.ingredients = item.ingredients ?? []
@@ -199,6 +212,39 @@ struct PhotoLogEditableItem: Identifiable, Equatable {
         proteinG = proteinPerGram * g
         carbsG = carbsPerGram * g
         fatG = fatPerGram * g
+        fiberG = fiberPerGram * g
+    }
+
+    /// Apply a user-entered macro value at the current grams. Re-derives the
+    /// per-gram rate so a later amount change reflows proportionally from
+    /// the corrected baseline. Example: user sets protein 12→15 for their
+    /// 120 g pizza slice → `proteinPerGram` becomes 0.125 so a 1→2 slice
+    /// change now gives 30 g protein, not the original 24.
+    mutating func setMacro(_ field: MacroField, to value: Double) {
+        let v = max(value, 0)
+        let g = max(grams, 0)
+        switch field {
+        case .calories:
+            calories = v
+            caloriesPerGram = g > 0 ? v / g : 0
+        case .protein:
+            proteinG = v
+            proteinPerGram = g > 0 ? v / g : 0
+        case .carbs:
+            carbsG = v
+            carbsPerGram = g > 0 ? v / g : 0
+        case .fat:
+            fatG = v
+            fatPerGram = g > 0 ? v / g : 0
+        case .fiber:
+            fiberG = v
+            fiberPerGram = g > 0 ? v / g : 0
+        }
+        macrosManuallyEdited = true
+    }
+
+    enum MacroField {
+        case calories, protein, carbs, fat, fiber
     }
 }
 

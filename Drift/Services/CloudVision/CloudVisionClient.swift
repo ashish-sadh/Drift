@@ -214,6 +214,7 @@ struct AnthropicVisionClient: CloudVisionClient {
                             "protein_g": ["type": "number"],
                             "carbs_g": ["type": "number"],
                             "fat_g": ["type": "number"],
+                            "fiber_g": ["type": "number", "description": "Dietary fiber in grams (often underestimated — include if reasonably confident)"],
                             "serving_unit": [
                                 "type": "string",
                                 "enum": ["grams", "ounces", "cups", "tablespoons", "pieces", "slices"],

@@ -144,6 +144,52 @@ private func sampleItem(name: String = "dal",
     #expect(item.ingredients == [])
 }
 
+// MARK: - Macro editing + fiber
+
+@Test func fiberDecodesAndRescalesLikeOtherMacros() {
+    // Fiber joins the pack — scales linearly with grams/amount just like P/C/F.
+    var item = PhotoLogEditableItem(from: PhotoLogItem(
+        name: "Mixed vegetables", grams: 100, calories: 50,
+        proteinG: 2, carbsG: 10, fatG: 0, fiberG: 4, confidence: .medium
+    ))
+    #expect(item.fiberG == 4)
+    item.setAmount(200)  // .grams unit → direct grams edit
+    #expect(item.grams == 200)
+    #expect(abs(item.fiberG - 8) < 1e-9)
+}
+
+@Test func setMacroRescalesFromUserCorrectedBaseline() {
+    // LLM said pizza slice has 12g protein. User bumps to 15g. A later
+    // amount-double should now scale from 15, not 12 (per-gram rate updated).
+    var item = PhotoLogEditableItem(from: PhotoLogItem(
+        name: "Pizza slice", grams: 120, calories: 280,
+        proteinG: 12, carbsG: 30, fatG: 12, fiberG: 2, confidence: .high
+    ))
+    item.setMacro(.protein, to: 15)
+    #expect(item.proteinG == 15)
+    #expect(item.macrosManuallyEdited == true)
+    // Switch to pieces (1 piece = 120g), double to 2 pieces → 240g.
+    #expect(item.servingUnit == .slices)   // name matches heuristic
+    item.setAmount(2)
+    #expect(abs(item.grams - 240) < 1e-9)
+    #expect(abs(item.proteinG - 30) < 1e-9)  // 15 × 2, not 12 × 2
+}
+
+@Test func setMacroCaloriesAppliesIndependentlyFromOtherMacros() {
+    // Correcting calories shouldn't shift P/C/F/Fb (they each have their
+    // own per-gram rate).
+    var item = PhotoLogEditableItem(from: PhotoLogItem(
+        name: "Lasagna", grams: 250, calories: 400,
+        proteinG: 20, carbsG: 40, fatG: 18, fiberG: 3, confidence: .medium
+    ))
+    item.setMacro(.calories, to: 500)
+    #expect(item.calories == 500)
+    #expect(item.proteinG == 20)
+    #expect(item.carbsG == 40)
+    #expect(item.fatG == 18)
+    #expect(item.fiberG == 3)
+}
+
 @Test func rescaleScalesAllMacrosLinearly() {
     var item = PhotoLogEditableItem(from: sampleItem(grams: 100, calories: 200, proteinG: 10, carbsG: 20, fatG: 6))
     item.grams = 150
