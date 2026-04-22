@@ -1697,5 +1697,12 @@
       "Photo Log now requests NSPhotoLibraryUsageDescription so users can pick photos on first launch (#310)",
       "Photo Log: picking a photo no longer dismisses the whole sheet (#310)"
     ]
+  },
+  {
+    "build": 160,
+    "date": "2026-04-21T18:18:49-0700",
+    "description": "Cadence build — sprint planning checkpoint (cycle 4247); no user-visible changes",
+    "features": [],
+    "fixes": []
   }
 ]
