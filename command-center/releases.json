@@ -1749,5 +1749,21 @@
     "fixes": [
       "Coffee/milk/tea/other liquid-primary-unit foods no longer default to '1' (interpreted as 1ml \u2192 0.25 cal \u2192 displayed 0 cal) when logging from the Food-tab suggestion strip, recent-food tap, or re-log-from-diary. FoodLogSheet now wires FoodUnit.defaultAmount at init time so every entry point defaults to the full serving (e.g. 240ml for a cup of coffee)."
     ]
+  },
+  {
+    "build": 165,
+    "date": "2026-04-22T08:30:00-07:00",
+    "description": "Daily exec report + sprint planning \u2014 failing-query category fixes queued",
+    "features": [
+      "9 new sprint tasks created targeting all 5 open failing-query categories (micronutrient queries, correction-as-replacement, historical date queries, non-weight goal setting, macro goal progress)",
+      "USDA FoodData Central API integration task created \u2014 free API, closes food DB gap vs MFP",
+      "Latin American food DB expansion (+30 dishes) queued: carnitas, tamales, pupusas, arepas, feijoada and more",
+      "Multi-turn regression tests +8 for correction chains, date-relative follow-ups, and goal-setting dialogue"
+    ],
+    "fixes": [
+      "Exec report published for 2026-04-22 with USDA API decision flag raised to admin",
+      "Admin feedback on USDA API (PR #333) replied \u2014 confirmed free API, sprint task created",
+      "Build bump to 165 \u2014 no code changes, planning-only build"
+    ]
   }
 ]
