@@ -25,11 +25,48 @@ enum CloudVisionProvider: String, CaseIterable, Codable, Sendable {
     var pricingLine: String {
         switch self {
         case .anthropic:
-            return "~$0.008/photo · Claude Sonnet 4.6 · paid only"
+            return "Paid only · default Claude Sonnet 4.6"
         case .openai:
-            return "~$0.0003/photo · GPT-4o-mini · paid only"
+            return "Paid only · default GPT-4o-mini"
         case .gemini:
-            return "Free (up to 500 photos/day, 10/min) · Gemini 2.5 Flash"
+            return "Free tier on Flash (500 photos/day, 10/min). Pro requires billing."
+        }
+    }
+
+    /// Model IDs offered in the per-provider model picker. First entry is
+    /// the recommended default (sticky unless the user picks another). Pair
+    /// with `modelDescription(_:)` for a one-line explainer in the UI.
+    var availableModels: [String] {
+        switch self {
+        case .anthropic:
+            return ["claude-sonnet-4-6", "claude-opus-4-7", "claude-haiku-4-5-20251001"]
+        case .openai:
+            return ["gpt-4o-mini", "gpt-4o"]
+        case .gemini:
+            return ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.5-pro"]
+        }
+    }
+
+    /// Default model used when the user hasn't picked anything yet. Must be
+    /// one of `availableModels`.
+    var defaultModel: String { availableModels[0] }
+
+    /// Short, shoppable description shown under each model in the picker.
+    /// Keeps tradeoffs visible (cost vs quality vs tier eligibility).
+    static func modelDescription(_ model: String) -> String {
+        switch model {
+        // Anthropic
+        case "claude-sonnet-4-6":          return "Balanced quality · ~$0.008/photo"
+        case "claude-opus-4-7":            return "Highest quality · ~$0.04/photo"
+        case "claude-haiku-4-5-20251001":  return "Fastest · ~$0.002/photo"
+        // OpenAI
+        case "gpt-4o-mini":                return "Cheap · ~$0.0003/photo"
+        case "gpt-4o":                     return "High quality · ~$0.005/photo"
+        // Gemini
+        case "gemini-2.5-flash":           return "Free tier (500/day) · default"
+        case "gemini-2.5-flash-lite":      return "Free tier, lowest latency"
+        case "gemini-2.5-pro":             return "Paid tier only · highest quality"
+        default:                           return model
         }
     }
 }

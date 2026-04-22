@@ -39,9 +39,10 @@ enum PhotoLogServingUnit: String, CaseIterable, Codable, Sendable {
         }
     }
 
-    /// Best-guess default unit for a food name. Keyword-matched so the LLM
-    /// doesn't have to return a unit — the user still sees a sensible
-    /// starting point in the picker. Overridable manually.
+    /// Keyword fallback used only when the LLM didn't return a `serving_unit`
+    /// (older responses, malformed payloads, or when the model declined).
+    /// Primary source is the AI — food_log tool schema asks for it. This
+    /// table stays short and covers the common English dish keywords.
     static func suggested(forName name: String) -> PhotoLogServingUnit {
         let n = name.lowercased()
         if ["slice", "pizza", "toast", "bread", "cake", "pie"].contains(where: n.contains) {
@@ -60,6 +61,24 @@ enum PhotoLogServingUnit: String, CaseIterable, Codable, Sendable {
             return .tablespoons
         }
         return .grams
+    }
+
+    /// Parse an LLM-returned serving unit string, tolerating common variants
+    /// ("piece" vs "pieces", "gram"/"g", "ml" as volume fallback). Returns
+    /// nil when the string doesn't map to a supported unit so callers can
+    /// fall back to the keyword heuristic.
+    static func parse(_ raw: String?) -> PhotoLogServingUnit? {
+        guard let raw, !raw.isEmpty else { return nil }
+        let normalized = raw.lowercased().trimmingCharacters(in: .whitespaces)
+        switch normalized {
+        case "grams", "gram", "g":                             return .grams
+        case "ounces", "ounce", "oz":                          return .ounces
+        case "cups", "cup", "c":                               return .cups
+        case "tablespoons", "tablespoon", "tbsp", "tbs", "tb": return .tablespoons
+        case "pieces", "piece", "pc", "unit", "units", "each": return .pieces
+        case "slices", "slice":                                return .slices
+        default:                                               return nil
+        }
     }
 }
 
@@ -82,6 +101,10 @@ struct PhotoLogEditableItem: Identifiable, Equatable {
     /// User-visible amount in `servingUnit`. Changing this recomputes `grams`
     /// via `gramsPerServingUnit` and rescales macros.
     var servingAmount: Double
+    /// Ingredient list surfaced from the LLM for plant-points counting. Empty
+    /// when the model didn't return it — callers fall back to `name` for
+    /// plant classification.
+    var ingredients: [String]
 
     /// Original per-gram rates cached on init. All edit scaling is against
     /// these so repeated grams edits don't drift via rounding.
@@ -116,15 +139,29 @@ struct PhotoLogEditableItem: Identifiable, Equatable {
             self.fatPerGram = 0
         }
         self.originalGrams = self.grams
-        let suggested = PhotoLogServingUnit.suggested(forName: item.name)
-        self.servingUnit = suggested
-        // servingAmount derived from current grams in the suggested unit so
-        // the picker opens at a sensible whole-ish number (e.g. "1 piece", "1 cup").
-        if let gpu = suggested.fixedGramsPerUnit {
-            self.servingAmount = gpu > 0 ? self.grams / gpu : 0
+        self.ingredients = item.ingredients ?? []
+
+        // Prefer LLM-returned serving_unit + serving_amount. The LLM sees
+        // the photo and knows "1.5 slices of pizza" vs "0.75 cup rice" is
+        // more natural than the Swift keyword guess. Fall back to the
+        // keyword heuristic if the model didn't return anything.
+        if let aiUnit = PhotoLogServingUnit.parse(item.servingUnit) {
+            self.servingUnit = aiUnit
+            if let aiAmount = item.servingAmount, aiAmount > 0 {
+                self.servingAmount = aiAmount
+            } else if let gpu = aiUnit.fixedGramsPerUnit, gpu > 0 {
+                self.servingAmount = self.grams / gpu
+            } else {
+                self.servingAmount = self.originalGrams > 0 ? 1 : 0
+            }
         } else {
-            // pieces/slices: 1 unit = originalGrams, so default amount = 1.
-            self.servingAmount = self.originalGrams > 0 ? 1 : 0
+            let suggested = PhotoLogServingUnit.suggested(forName: item.name)
+            self.servingUnit = suggested
+            if let gpu = suggested.fixedGramsPerUnit {
+                self.servingAmount = gpu > 0 ? self.grams / gpu : 0
+            } else {
+                self.servingAmount = self.originalGrams > 0 ? 1 : 0
+            }
         }
     }
 

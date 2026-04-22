@@ -139,4 +139,26 @@ enum Preferences {
         }
         set { UserDefaults.standard.set(newValue.rawValue, forKey: photoLogProviderKey) }
     }
+
+    /// Model override per provider. Stored as a separate UserDefaults key so
+    /// each provider remembers its last pick (switching providers doesn't
+    /// reset the other's model). Returns provider's `defaultModel` when no
+    /// value stored OR when stored value is no longer in `availableModels`
+    /// (defensive — handles model rename/deprecation).
+    static func photoLogModel(for provider: CloudVisionProvider) -> String {
+        let key = photoLogModelKey(for: provider)
+        let raw = UserDefaults.standard.string(forKey: key) ?? ""
+        if !raw.isEmpty, provider.availableModels.contains(raw) {
+            return raw
+        }
+        return provider.defaultModel
+    }
+
+    static func setPhotoLogModel(_ model: String, for provider: CloudVisionProvider) {
+        UserDefaults.standard.set(model, forKey: photoLogModelKey(for: provider))
+    }
+
+    private static func photoLogModelKey(for provider: CloudVisionProvider) -> String {
+        "drift_photo_log_model_\(provider.rawValue)"
+    }
 }

@@ -8,6 +8,7 @@ import UIKit
 struct PhotoLogBetaSettingsView: View {
     @State private var enabled: Bool = Preferences.photoLogEnabled
     @State private var provider: CloudVisionProvider = Preferences.photoLogProvider
+    @State private var model: String = Preferences.photoLogModel(for: Preferences.photoLogProvider)
     @State private var keyInput: String = ""
     @State private var storedKeyMasked: String? = nil
     @State private var status: StatusMessage? = nil
@@ -27,6 +28,7 @@ struct PhotoLogBetaSettingsView: View {
                 privacyBanner
                 enabledToggle
                 providerPicker
+                modelPicker
                 keySection
                 actionSection
                 if let status {
@@ -82,6 +84,9 @@ struct PhotoLogBetaSettingsView: View {
                     Button {
                         provider = p
                         Preferences.photoLogProvider = p
+                        // Reload model for the new provider — it remembers
+                        // its own last-picked model independently.
+                        model = Preferences.photoLogModel(for: p)
                         refreshStoredKey()
                         status = nil
                     } label: {
@@ -108,6 +113,53 @@ struct PhotoLogBetaSettingsView: View {
             Text(provider.pricingLine)
                 .font(.caption).foregroundStyle(.secondary)
             Text("Keys for the other providers stay saved — switching back keeps you signed in.")
+                .font(.caption2).foregroundStyle(.tertiary)
+        }
+        .card()
+    }
+
+    /// Second-tier picker for the specific model within the selected
+    /// provider. Lets users pick paid-tier models (Opus, GPT-4o, Gemini
+    /// Pro) once billing is set up without editing code. The picker uses
+    /// the same Menu style as the provider picker for visual parity.
+    private var modelPicker: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("Model").font(.subheadline.weight(.medium))
+                Spacer()
+                Text("\(provider.availableModels.count) available")
+                    .font(.caption2).foregroundStyle(.tertiary)
+            }
+            Menu {
+                ForEach(provider.availableModels, id: \.self) { m in
+                    Button {
+                        model = m
+                        Preferences.setPhotoLogModel(m, for: provider)
+                        status = nil
+                    } label: {
+                        if m == model {
+                            Label("\(m) — \(CloudVisionProvider.modelDescription(m))",
+                                  systemImage: "checkmark")
+                        } else {
+                            Text("\(m) — \(CloudVisionProvider.modelDescription(m))")
+                        }
+                    }
+                }
+            } label: {
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(model).font(.subheadline.weight(.semibold))
+                        Text(CloudVisionProvider.modelDescription(model))
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Image(systemName: "chevron.up.chevron.down")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+                .padding(.vertical, 10).padding(.horizontal, 12)
+                .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 10))
+            }
+            Text("Paid-tier models (Claude Opus, GPT-4o, Gemini 2.5 Pro) require billing on the provider. Test Connection below surfaces the provider's actual error — quota exhaustion, key scope, or model-not-available — verbatim.")
                 .font(.caption2).foregroundStyle(.tertiary)
         }
         .card()
@@ -217,16 +269,17 @@ struct PhotoLogBetaSettingsView: View {
                 status = .error("No key stored.")
                 return
             }
+            let model = Preferences.photoLogModel(for: provider)
             switch provider {
             case .anthropic:
-                try await AnthropicVisionClient(apiKey: key).ping()
-                status = .success("Connection OK.")
+                try await AnthropicVisionClient(apiKey: key, model: model).ping()
+                status = .success("Connection OK — \(model).")
             case .openai:
-                try await OpenAIVisionClient(apiKey: key).ping()
-                status = .success("Connection OK.")
+                try await OpenAIVisionClient(apiKey: key, model: model).ping()
+                status = .success("Connection OK — \(model).")
             case .gemini:
-                try await GeminiVisionClient(apiKey: key).ping()
-                status = .success("Connection OK.")
+                try await GeminiVisionClient(apiKey: key, model: model).ping()
+                status = .success("Connection OK — \(model).")
             }
         } catch let error as CloudVisionError {
             // LocalizedError conformance gives actionable copy per case.

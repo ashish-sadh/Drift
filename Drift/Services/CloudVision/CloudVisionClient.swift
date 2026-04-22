@@ -192,6 +192,13 @@ struct AnthropicVisionClient: CloudVisionClient {
 
     /// JSON schema for the `food_log` tool Anthropic forces the model to
     /// fill. Computed each call to stay Sendable-clean without a lock.
+    ///
+    /// `serving_unit` / `serving_amount` / `ingredients` are optional — the
+    /// model returns them when it can, and Swift falls back to a keyword
+    /// heuristic (unit) or the item name (ingredients/plant points) when
+    /// they're missing. Asking the model keeps unit suggestions
+    /// food-intelligent (it knows "1 slice of pizza" is natural) without
+    /// us maintaining a keyword table.
     static var foodLogToolSchema: [String: Any] {
         [
             "type": "object",
@@ -201,12 +208,26 @@ struct AnthropicVisionClient: CloudVisionClient {
                     "items": [
                         "type": "object",
                         "properties": [
-                            "name": ["type": "string"],
-                            "grams": ["type": "number"],
+                            "name": ["type": "string", "description": "Dish or ingredient name, e.g. 'Grilled salmon'"],
+                            "grams": ["type": "number", "description": "Total grams on the plate"],
                             "calories": ["type": "number"],
                             "protein_g": ["type": "number"],
                             "carbs_g": ["type": "number"],
                             "fat_g": ["type": "number"],
+                            "serving_unit": [
+                                "type": "string",
+                                "enum": ["grams", "ounces", "cups", "tablespoons", "pieces", "slices"],
+                                "description": "Natural serving unit for this food — e.g. 'pieces' for an apple, 'slices' for pizza, 'cups' for rice"
+                            ],
+                            "serving_amount": [
+                                "type": "number",
+                                "description": "Amount in the chosen serving_unit — e.g. 1.5 for 1.5 slices of pizza"
+                            ],
+                            "ingredients": [
+                                "type": "array",
+                                "items": ["type": "string"],
+                                "description": "Lowercase plant and ingredient names for plant-points counting — e.g. ['tomato','basil','garlic','pasta']. Exclude oils, salt, sugar."
+                            ],
                             "confidence": ["type": "string", "enum": ["low", "medium", "high"]]
                         ],
                         "required": ["name", "confidence"]

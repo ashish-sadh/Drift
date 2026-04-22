@@ -235,11 +235,12 @@ enum PhotoLogFlowService {
         guard let key = try await CloudVisionKey.get(for: provider) else {
             throw CloudVisionKey.StorageError.notFound
         }
+        let model = Preferences.photoLogModel(for: provider)
         let client: CloudVisionClient
         switch provider {
-        case .anthropic: client = AnthropicVisionClient(apiKey: key)
-        case .openai:    client = OpenAIVisionClient(apiKey: key)
-        case .gemini:    client = GeminiVisionClient(apiKey: key)
+        case .anthropic: client = AnthropicVisionClient(apiKey: key, model: model)
+        case .openai:    client = OpenAIVisionClient(apiKey: key, model: model)
+        case .gemini:    client = GeminiVisionClient(apiKey: key, model: model)
         }
         let service = PhotoLogService(client: client)
         return try await service.analyze(image: image, prompt: PhotoLogTool.defaultPrompt)

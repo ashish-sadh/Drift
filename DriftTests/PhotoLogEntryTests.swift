@@ -81,6 +81,69 @@ private func sampleItem(name: String = "dal",
     #expect(abs(item.calories - 190) < 1e-9)
 }
 
+// MARK: - LLM-returned serving hints + ingredients
+
+@Test func aiReturnedServingUnitAndAmountOverrideHeuristic() {
+    // "Mixed vegetables" keyword would default to .grams — but the LLM said
+    // it's best represented as 1.5 cups. Trust the LLM.
+    let raw = PhotoLogItem(
+        name: "Mixed vegetables", grams: 360, calories: 200,
+        proteinG: 8, carbsG: 40, fatG: 2, confidence: .high,
+        servingUnit: "cups", servingAmount: 1.5
+    )
+    let item = PhotoLogEditableItem(from: raw)
+    #expect(item.servingUnit == .cups)
+    #expect(item.servingAmount == 1.5)
+}
+
+@Test func aiReturnedUnitAliasesParseLeniently() {
+    // The model sometimes singularizes ("piece") or abbreviates ("tbsp").
+    #expect(PhotoLogServingUnit.parse("piece") == .pieces)
+    #expect(PhotoLogServingUnit.parse("tbsp") == .tablespoons)
+    #expect(PhotoLogServingUnit.parse("OZ") == .ounces)
+    #expect(PhotoLogServingUnit.parse("cup") == .cups)
+    #expect(PhotoLogServingUnit.parse("G") == .grams)
+    #expect(PhotoLogServingUnit.parse("slice") == .slices)
+    #expect(PhotoLogServingUnit.parse("bushels") == nil)   // unknown → caller falls back
+    #expect(PhotoLogServingUnit.parse("") == nil)
+    #expect(PhotoLogServingUnit.parse(nil) == nil)
+}
+
+@Test func aiUnknownUnitFallsBackToHeuristic() {
+    // Model returned a bogus unit — we should still produce a usable row
+    // via the keyword heuristic rather than dropping the item.
+    let raw = PhotoLogItem(
+        name: "Pizza slice", grams: 120, calories: 280,
+        proteinG: 12, carbsG: 30, fatG: 12, confidence: .high,
+        servingUnit: "bushels", servingAmount: 1
+    )
+    let item = PhotoLogEditableItem(from: raw)
+    #expect(item.servingUnit == .slices)  // heuristic picked up "pizza"/"slice"
+}
+
+@Test func ingredientsDecodeAndExposeOnItem() {
+    // Plant-points needs the ingredient list; we surface it on the
+    // editable item so the log flow can feed it into PlantPointsService.
+    let raw = PhotoLogItem(
+        name: "Pasta primavera", grams: 280, calories: 420,
+        proteinG: 14, carbsG: 62, fatG: 10, confidence: .medium,
+        ingredients: ["pasta", "tomato", "bell pepper", "basil", "garlic"]
+    )
+    let item = PhotoLogEditableItem(from: raw)
+    #expect(item.ingredients == ["pasta", "tomato", "bell pepper", "basil", "garlic"])
+}
+
+@Test func missingIngredientsAreEmptyNotNil() {
+    // Older payloads (or a declining model) omit the field. We default to
+    // [] so downstream plant-points code can iterate without optional-unwrap.
+    let raw = PhotoLogItem(
+        name: "Banana", grams: 118, calories: 105,
+        proteinG: 1, carbsG: 27, fatG: 0, confidence: .high
+    )
+    let item = PhotoLogEditableItem(from: raw)
+    #expect(item.ingredients == [])
+}
+
 @Test func rescaleScalesAllMacrosLinearly() {
     var item = PhotoLogEditableItem(from: sampleItem(grams: 100, calories: 200, proteinG: 10, carbsG: 20, fatG: 6))
     item.grams = 150
