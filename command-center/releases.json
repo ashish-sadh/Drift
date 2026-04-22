@@ -1689,9 +1689,9 @@
   {
     "build": 159,
     "date": "2026-04-21T15:00:00-0700",
-    "description": "Photo Log hardening — photo library permission prompt + sheet no longer dismisses after pick; domain-aware intent clarify policy",
+    "description": "Photo Log hardening \u2014 photo library permission prompt + sheet no longer dismisses after pick; domain-aware intent clarify policy",
     "features": [
-      "Intent classifier: domain-aware clarify policy via IntentThresholds — separate confidence thresholds per domain reduce false clarifications (#302)"
+      "Intent classifier: domain-aware clarify policy via IntentThresholds \u2014 separate confidence thresholds per domain reduce false clarifications (#302)"
     ],
     "fixes": [
       "Photo Log now requests NSPhotoLibraryUsageDescription so users can pick photos on first launch (#310)",
@@ -1701,8 +1701,27 @@
   {
     "build": 160,
     "date": "2026-04-21T18:18:49-0700",
-    "description": "Cadence build — sprint planning checkpoint (cycle 4247); no user-visible changes",
+    "description": "Cadence build \u2014 sprint planning checkpoint (cycle 4247); no user-visible changes",
     "features": [],
     "fixes": []
+  },
+  {
+    "build": 161,
+    "date": "2026-04-21T19:58:00-07:00",
+    "description": "Photo Log UX overhaul \u2014 editable macros, AI-driven serving units, ingredients, per-provider model picker",
+    "features": [
+      "Settings \u2192 Photo Log (Beta): provider Menu picker (fixes truncated labels) + per-provider model sub-picker \u2014 paid-tier models (Claude Opus, GPT-4o, Gemini 2.5 Pro) selectable once billing is enabled on the provider",
+      "Default provider is now Google (Gemini 2.5 Flash) \u2014 free tier, up to 500 photos/day on a keyed project, so new users can try Photo Log without billing",
+      "Review sheet per-item: amount + unit picker (g / oz / cup / tbsp / piece / slice) with AI-driven defaults when the LLM returns serving_unit/serving_amount",
+      "Review sheet per-item: 5 editable macro boxes (Cal / P / C / F / Fb). Manual edits update the per-gram rate so later amount/unit changes scale proportionally from the corrected baseline \u2014 pencil icon marks edited rows.",
+      "Plant badge under each detected item shows the LLM-returned ingredients \u2014 these flow into plant-points counting (new food_log tool schema field: `ingredients: [string]`).",
+      "Settings Test Connection now surfaces the provider's verbatim error message (credit exhausted, invalid key, model-not-available, etc.) instead of hiding behind a generic HTTP code."
+    ],
+    "fixes": [
+      "Photo Log: switched to LLM-first macros \u2014 no longer matches against curated local food DB, so calories reflect the actual photo, not a generic food record",
+      "Photo Log: `NSPhotoLibraryUsageDescription` added to Info.plist \u2014 fixes silent picker failures on some iOS configurations",
+      "cross_domain_insight AI tool for correlational queries (#317) \u2014 shipped with build 160, fully exercised in this build",
+      "Autopilot model default: all sessions (planning/senior/junior) now use Sonnet 4.6 \u2014 faster turnaround per sprint task vs Opus"
+    ]
   }
 ]
