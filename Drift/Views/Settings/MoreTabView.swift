@@ -209,6 +209,7 @@ struct SettingsView: View {
     @State private var weightUnit: WeightUnit = Preferences.weightUnit
     @State private var showingFactoryReset = false
     @State private var resetDone = false
+    @State private var foodsRefreshedAt: Date? = nil
     @State private var syncStatus: String?
     @State private var telemetryEnabled: Bool = Preferences.chatTelemetryEnabled
     @State private var telemetryCount: Int = 0
@@ -526,6 +527,37 @@ struct SettingsView: View {
                         Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
                     }
                     .padding(.vertical, 10)
+                }
+                .card()
+
+                // Food database refresh — for users who report stale
+                // calorie values after an update. Hash-gated reseed runs on
+                // every app update, but this gives a manual escape hatch
+                // if the automatic path missed (e.g. bundle cached).
+                VStack(alignment: .leading, spacing: 6) {
+                    Button {
+                        UserDefaults.standard.removeObject(forKey: "drift_foods_json_hash")
+                        do {
+                            try AppDatabase.shared.seedFoodsFromJSON()
+                            foodsRefreshedAt = Date()
+                        } catch {
+                            foodsRefreshedAt = nil
+                        }
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.clockwise").foregroundStyle(Theme.accent)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Refresh food database").foregroundStyle(Theme.textPrimary)
+                                Text(foodsRefreshedAt != nil
+                                     ? "Refreshed just now"
+                                     : "Reload calories + macros from the bundled list. Use if you see stale values.")
+                                    .font(.caption2).foregroundStyle(.tertiary)
+                            }
+                            Spacer()
+                        }
+                        .padding(.vertical, 6)
+                    }
+                    .buttonStyle(.plain)
                 }
                 .card()
 

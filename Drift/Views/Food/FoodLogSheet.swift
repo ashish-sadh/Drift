@@ -12,11 +12,23 @@ struct FoodLogSheet: View {
     let onLogged: () -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @State private var amount: String = "1"
+    @State private var amount: String
     @State private var selectedUnitIndex: Int = 0
     @State private var logTime: Date = Date()
     @State private var mealType: MealType = .snack
     @State private var mealTypeResolved = false
+
+    init(food: Food, foodLog: FoodLogViewModel, onLogged: @escaping () -> Void) {
+        self.food = food
+        self.foodLog = foodLog
+        self.onLogged = onLogged
+        // Default "1" on a ml/g primary unit turned into 0.004 of a serving
+        // for coffee (240ml) → 0.25 cal → displayed 0 cal. FoodUnit.defaultAmount
+        // already existed for this exact reason but wasn't wired here; this
+        // sheet re-opens from the Food tab suggestion strip, recents, and
+        // re-log from diary so it hits the same coffee/milk zero-cal path.
+        _amount = State(initialValue: FoodUnit.defaultAmount(for: food))
+    }
 
     private var units: [FoodUnit] { FoodUnit.smartUnits(for: food) }
 

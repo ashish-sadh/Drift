@@ -502,11 +502,20 @@ extension AppDatabase {
         // production cold start from ~2.5k SQL queries into a single
         // ~50µs SHA-256 hash + tiny COUNT(*) when nothing changed.
         //
+        // The hash includes CFBundleVersion so every TestFlight bump forces
+        // a one-time reseed even when foods.json bytes are unchanged. Users
+        // reporting stale values ("Coffee with milk 0 cal") after an update
+        // was the signal — JSON byte equality alone isn't enough since we
+        // sometimes fix downstream code that affects how JSON is interpreted.
+        //
         // The `foodCount > 0` guard matters for tests (each in-memory
         // `AppDatabase.empty()` gets a fresh food table, so without this
         // check the UserDefaults hash set by an earlier test would make
         // later tests skip seeding and see an empty DB).
-        let currentHash = SHA256.hash(data: data)
+        let bundleVersion = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? ""
+        var hashInput = Data(bundleVersion.utf8)
+        hashInput.append(data)
+        let currentHash = SHA256.hash(data: hashInput)
             .map { String(format: "%02x", $0) }
             .joined()
         let lastHash = UserDefaults.standard.string(forKey: Self.foodsJSONHashKey) ?? ""
