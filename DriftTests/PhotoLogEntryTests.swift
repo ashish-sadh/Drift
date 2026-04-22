@@ -28,6 +28,59 @@ private func sampleItem(name: String = "dal",
     #expect(item.proteinPerGram == 0)
 }
 
+// MARK: - Serving unit picker
+
+@Test func suggestedUnitMatchesKeywords() {
+    #expect(PhotoLogServingUnit.suggested(forName: "Slice of pizza") == .slices)
+    #expect(PhotoLogServingUnit.suggested(forName: "Medium apple") == .pieces)
+    #expect(PhotoLogServingUnit.suggested(forName: "Bowl of rice") == .cups)
+    #expect(PhotoLogServingUnit.suggested(forName: "Peanut butter") == .tablespoons)
+    #expect(PhotoLogServingUnit.suggested(forName: "Mixed vegetables") == .grams)
+}
+
+@Test func editableItemDefaultsToSuggestedUnit() {
+    // "apple" → .pieces, 1 piece = originalGrams (182 g), so amount defaults to 1.
+    let item = PhotoLogEditableItem(from: sampleItem(name: "Apple", grams: 182, calories: 95))
+    #expect(item.servingUnit == .pieces)
+    #expect(item.servingAmount == 1)
+    #expect(item.originalGrams == 182)
+}
+
+@Test func editableItemVolumeUnitReflectsCurrentGrams() {
+    // A 180g bowl of rice → default unit .cups, amount = 180 / 240 = 0.75
+    let item = PhotoLogEditableItem(from: sampleItem(name: "Bowl of rice", grams: 180, calories: 230))
+    #expect(item.servingUnit == .cups)
+    #expect(abs(item.servingAmount - 0.75) < 1e-9)
+}
+
+@Test func setAmountRescalesMacros() {
+    // Mixed vegetables → .grams unit. Double the amount → macros double.
+    var item = PhotoLogEditableItem(from: sampleItem(name: "Mixed vegetables", grams: 100, calories: 180, proteinG: 12))
+    #expect(item.servingUnit == .grams)
+    item.setAmount(200)
+    #expect(item.grams == 200)
+    #expect(item.calories == 360)
+    #expect(item.proteinG == 24)
+}
+
+@Test func setUnitPreservesGramsAndConvertsAmount() {
+    // Switching from grams to oz keeps grams but shows 180 g as ≈6.35 oz.
+    var item = PhotoLogEditableItem(from: sampleItem(name: "Mixed vegetables", grams: 180, calories: 220))
+    #expect(item.servingUnit == .grams)
+    item.setUnit(.ounces)
+    #expect(item.grams == 180)
+    #expect(abs(item.servingAmount - (180.0 / 28.3495)) < 1e-6)
+}
+
+@Test func setAmountInPiecesUsesOriginalWeight() {
+    // LLM says "1 apple = 182 g". 2 pieces → 364 g, calories double.
+    var item = PhotoLogEditableItem(from: sampleItem(name: "Apple", grams: 182, calories: 95))
+    #expect(item.servingUnit == .pieces)
+    item.setAmount(2)
+    #expect(abs(item.grams - 364) < 1e-9)
+    #expect(abs(item.calories - 190) < 1e-9)
+}
+
 @Test func rescaleScalesAllMacrosLinearly() {
     var item = PhotoLogEditableItem(from: sampleItem(grams: 100, calories: 200, proteinG: 10, carbsG: 20, fatG: 6))
     item.grams = 150

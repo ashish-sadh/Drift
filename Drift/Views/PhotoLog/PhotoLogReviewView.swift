@@ -221,60 +221,108 @@ struct PhotoLogReviewView: View {
 
 private struct PhotoLogItemRow: View {
     @Binding var item: PhotoLogEditableItem
-    @FocusState private var gramsFocused: Bool
-    @State private var gramsText: String = ""
+    @FocusState private var amountFocused: Bool
+    @State private var amountText: String = ""
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
-            Button {
-                item.selected.toggle()
-            } label: {
-                Image(systemName: item.selected ? "checkmark.circle.fill" : "circle")
-                    .font(.title3)
-                    .foregroundStyle(item.selected ? Theme.accent : Theme.textTertiary)
-            }
-            .buttonStyle(.plain)
-
-            VStack(alignment: .leading, spacing: 4) {
-                HStack {
-                    Text(item.name)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Theme.textPrimary)
-                    if item.confidence == .low {
-                        Image(systemName: "exclamationmark.triangle.fill")
-                            .font(.caption2)
-                            .foregroundStyle(Theme.surplus)
-                    }
+        VStack(alignment: .leading, spacing: 6) {
+            HStack(alignment: .center, spacing: 12) {
+                Button {
+                    item.selected.toggle()
+                } label: {
+                    Image(systemName: item.selected ? "checkmark.circle.fill" : "circle")
+                        .font(.title3)
+                        .foregroundStyle(item.selected ? Theme.accent : Theme.textTertiary)
                 }
-                Text("\(Int(item.calories.rounded())) cal · \(Int(item.proteinG.rounded()))P / \(Int(item.carbsG.rounded()))C / \(Int(item.fatG.rounded()))F")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            }
+                .buttonStyle(.plain)
 
-            Spacer(minLength: 8)
-
-            HStack(spacing: 4) {
-                TextField("0", text: $gramsText)
-                    .keyboardType(.numberPad)
-                    .multilineTextAlignment(.trailing)
-                    .focused($gramsFocused)
-                    .frame(width: 52)
-                    .padding(.vertical, 6)
-                    .padding(.horizontal, 8)
-                    .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 8))
-                    .onChange(of: gramsText) { _, newValue in
-                        let parsed = Double(newValue) ?? 0
-                        if parsed != item.grams {
-                            item.grams = parsed
-                            item.rescale()
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack {
+                        Text(item.name)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                        if item.confidence == .low {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.caption2)
+                                .foregroundStyle(Theme.surplus)
                         }
                     }
-                Text("g").font(.caption).foregroundStyle(.secondary)
+                    Text("\(Int(item.calories.rounded())) cal · \(Int(item.proteinG.rounded()))P / \(Int(item.carbsG.rounded()))C / \(Int(item.fatG.rounded()))F · \(Int(item.grams.rounded()))g")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+
+                Spacer(minLength: 8)
+
+                amountField
+                unitPicker
             }
         }
         .opacity(item.selected ? 1.0 : 0.45)
-        .onAppear {
-            gramsText = String(Int(item.grams.rounded()))
+        .onAppear { syncAmountText() }
+        .onChange(of: item.servingUnit) { _, _ in syncAmountText() }
+    }
+
+    // MARK: - Amount field
+
+    /// Step-friendly decimal input. Accepts "1", "1.5", "0.5" etc. so pieces
+    /// like "1.5 slices of pizza" or "0.5 cup rice" feel natural.
+    private var amountField: some View {
+        TextField("0", text: $amountText)
+            .keyboardType(.decimalPad)
+            .multilineTextAlignment(.trailing)
+            .focused($amountFocused)
+            .frame(width: 56)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 8)
+            .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 8))
+            .onChange(of: amountText) { _, newValue in
+                // Allow trailing "." so the user can type "1.5" without the
+                // field nuking partial input. Only commit when parseable.
+                if let parsed = Double(newValue), abs(parsed - item.servingAmount) > 1e-6 {
+                    item.setAmount(parsed)
+                }
+            }
+    }
+
+    // MARK: - Unit picker
+
+    private var unitPicker: some View {
+        Menu {
+            ForEach(PhotoLogServingUnit.allCases, id: \.self) { u in
+                Button {
+                    item.setUnit(u)
+                } label: {
+                    if u == item.servingUnit {
+                        Label(u.label, systemImage: "checkmark")
+                    } else {
+                        Text(u.label)
+                    }
+                }
+            }
+        } label: {
+            HStack(spacing: 2) {
+                Text(item.servingUnit.label).font(.caption.weight(.medium))
+                Image(systemName: "chevron.down").font(.caption2)
+            }
+            .padding(.vertical, 6)
+            .padding(.horizontal, 8)
+            .foregroundStyle(.secondary)
+            .background(Color.white.opacity(0.05), in: RoundedRectangle(cornerRadius: 8))
+        }
+    }
+
+    // MARK: - Text sync
+
+    /// Keep the TextField's string representation in sync with the underlying
+    /// double so unit changes and external mutations reflect immediately.
+    /// Integer units render without a trailing ".0" for cleaner UX.
+    private func syncAmountText() {
+        let v = item.servingAmount
+        if v == floor(v) {
+            amountText = String(Int(v.rounded()))
+        } else {
+            amountText = String(format: "%.1f", v)
         }
     }
 }

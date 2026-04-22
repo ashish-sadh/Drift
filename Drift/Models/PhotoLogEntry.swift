@@ -1,10 +1,73 @@
 import Foundation
 
+// MARK: - Serving unit (Photo Log specific)
+
+/// Serving units shown in the Photo Log review picker. Intentionally separate
+/// from the codebase-wide `ServingUnit` because that one requires a
+/// `RawIngredient` for conversion and Photo Log items are free-form text the
+/// LLM returns.
+///
+/// Conversion philosophy: grams is the canonical field (macros scale against
+/// grams). `gramsPerUnit` is a display-time multiplier. For piece/slice we
+/// use the LLM's original gram count as the "1-unit" baseline — "1 apple" from
+/// the LLM's 182 g answer means 1 piece = 182 g — so switching to pieces and
+/// editing the amount still produces sensible macros.
+enum PhotoLogServingUnit: String, CaseIterable, Codable, Sendable {
+    case grams, ounces, cups, tablespoons, pieces, slices
+
+    var label: String {
+        switch self {
+        case .grams: return "g"
+        case .ounces: return "oz"
+        case .cups: return "cup"
+        case .tablespoons: return "tbsp"
+        case .pieces: return "piece"
+        case .slices: return "slice"
+        }
+    }
+
+    /// Grams per 1 unit for fixed-weight conversions. `piece`/`slice` return
+    /// 0 here — callers must substitute the LLM's original grams as the
+    /// 1-unit weight (see `PhotoLogEditableItem.gramsPerServingUnit`).
+    var fixedGramsPerUnit: Double? {
+        switch self {
+        case .grams: return 1
+        case .ounces: return 28.3495
+        case .cups: return 240        // water / liquid baseline, close enough for mixed plates
+        case .tablespoons: return 15
+        case .pieces, .slices: return nil
+        }
+    }
+
+    /// Best-guess default unit for a food name. Keyword-matched so the LLM
+    /// doesn't have to return a unit — the user still sees a sensible
+    /// starting point in the picker. Overridable manually.
+    static func suggested(forName name: String) -> PhotoLogServingUnit {
+        let n = name.lowercased()
+        if ["slice", "pizza", "toast", "bread", "cake", "pie"].contains(where: n.contains) {
+            return .slices
+        }
+        if ["apple", "banana", "orange", "egg", "cookie", "bar", "muffin", "samosa", "dosa", "idli", "burger", "taco", "dumpling"]
+            .contains(where: n.contains) {
+            return .pieces
+        }
+        if ["rice", "soup", "curry", "salad", "oats", "yogurt", "cereal", "dal", "smoothie", "stew"]
+            .contains(where: n.contains) {
+            return .cups
+        }
+        if ["oil", "butter", "ghee", "honey", "syrup", "peanut butter", "dressing"]
+            .contains(where: n.contains) {
+            return .tablespoons
+        }
+        return .grams
+    }
+}
+
 /// Mutable editing state for a single `PhotoLogItem` in the review sheet.
-/// Users can check/uncheck items and tweak the grams before logging. Calories
-/// and macros scale linearly with grams so the summary stays accurate during
-/// edits. Separate from `PhotoLogItem` (which is decode-only) so we can keep
-/// the wire format immutable. #224 / #267.
+/// Users can check/uncheck items, pick a friendlier serving unit, and edit
+/// the amount. Calories and macros scale linearly with grams so the summary
+/// stays accurate during edits. Separate from `PhotoLogItem` (which is
+/// decode-only) so we can keep the wire format immutable. #224 / #267.
 struct PhotoLogEditableItem: Identifiable, Equatable {
     let id: UUID
     var name: String
@@ -15,6 +78,10 @@ struct PhotoLogEditableItem: Identifiable, Equatable {
     var fatG: Double
     var confidence: Confidence
     var selected: Bool
+    var servingUnit: PhotoLogServingUnit
+    /// User-visible amount in `servingUnit`. Changing this recomputes `grams`
+    /// via `gramsPerServingUnit` and rescales macros.
+    var servingAmount: Double
 
     /// Original per-gram rates cached on init. All edit scaling is against
     /// these so repeated grams edits don't drift via rounding.
@@ -22,6 +89,10 @@ struct PhotoLogEditableItem: Identifiable, Equatable {
     let proteinPerGram: Double
     let carbsPerGram: Double
     let fatPerGram: Double
+
+    /// LLM's original grams for this food — used as the 1-piece / 1-slice
+    /// baseline weight when the user picks `.pieces` or `.slices`.
+    let originalGrams: Double
 
     init(from item: PhotoLogItem, id: UUID = UUID()) {
         self.id = id
@@ -44,6 +115,42 @@ struct PhotoLogEditableItem: Identifiable, Equatable {
             self.carbsPerGram = 0
             self.fatPerGram = 0
         }
+        self.originalGrams = self.grams
+        let suggested = PhotoLogServingUnit.suggested(forName: item.name)
+        self.servingUnit = suggested
+        // servingAmount derived from current grams in the suggested unit so
+        // the picker opens at a sensible whole-ish number (e.g. "1 piece", "1 cup").
+        if let gpu = suggested.fixedGramsPerUnit {
+            self.servingAmount = gpu > 0 ? self.grams / gpu : 0
+        } else {
+            // pieces/slices: 1 unit = originalGrams, so default amount = 1.
+            self.servingAmount = self.originalGrams > 0 ? 1 : 0
+        }
+    }
+
+    /// Grams per 1 unit of the currently-selected serving unit.
+    /// `fixedGramsPerUnit` handles weight/volume conversions; pieces/slices
+    /// use the LLM's `originalGrams` as the per-unit weight.
+    var gramsPerServingUnit: Double {
+        if let gpu = servingUnit.fixedGramsPerUnit { return gpu }
+        // pieces / slices: one unit = the LLM's original weight for this food.
+        return originalGrams > 0 ? originalGrams : 100
+    }
+
+    /// Update `servingAmount` and reflow `grams` + macros.
+    mutating func setAmount(_ newAmount: Double) {
+        servingAmount = max(newAmount, 0)
+        grams = servingAmount * gramsPerServingUnit
+        rescale()
+    }
+
+    /// Switch the displayed serving unit, keeping the current grams the same.
+    /// `servingAmount` is recomputed so the user's macros don't jump when
+    /// they change from "180 g" to "oz" (they see "6.4 oz" instead).
+    mutating func setUnit(_ newUnit: PhotoLogServingUnit) {
+        servingUnit = newUnit
+        let gpu = gramsPerServingUnit
+        servingAmount = gpu > 0 ? grams / gpu : 0
     }
 
     /// Re-derive calories+macros after `grams` is edited. Callers mutate
