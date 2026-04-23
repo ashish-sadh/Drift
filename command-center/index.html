@@ -239,23 +239,19 @@
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:12px;flex-wrap:wrap;">
           <h2 style="margin:0;font-size:20px;">Session Activity</h2>
           <div style="display:flex;align-items:center;gap:12px;">
-            <div id="activity-meta" style="color:var(--text-muted);font-size:12px;">Loading...</div>
-            <button id="activity-refresh" onclick="loadActivity()" class="btn" style="padding:4px 10px;font-size:12px;">Refresh</button>
+            <div id="activity-updated" style="color:var(--text-muted);font-size:12px;"></div>
+            <button onclick="loadActivity()" class="btn" style="padding:4px 10px;font-size:12px;">Refresh</button>
           </div>
         </div>
-        <p style="color:var(--text-muted);font-size:13px;margin:0 0 16px;">24-hour heatmap, each row is one hour, each cell is a 5-minute bucket. Brighter cells = more tool calls. Cell hue reflects the dominant session type; corner dots mark session lifecycle events.</p>
-        <div id="activity-chart" style="width:100%;min-height:220px;background:var(--bg);border-radius:8px;border:1px solid var(--border);padding:16px;overflow:auto;"></div>
-        <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;color:var(--text-muted);flex-wrap:wrap;">
-          <div><span style="display:inline-block;width:10px;height:10px;background:#58a6ff;border-radius:2px;margin-right:4px;vertical-align:middle;"></span>planning</div>
-          <div><span style="display:inline-block;width:10px;height:10px;background:#f85149;border-radius:2px;margin-right:4px;vertical-align:middle;"></span>senior</div>
-          <div><span style="display:inline-block;width:10px;height:10px;background:#3fb950;border-radius:2px;margin-right:4px;vertical-align:middle;"></span>junior</div>
-          <div><span style="display:inline-block;width:10px;height:10px;background:#1c2128;border:1px solid #30363d;border-radius:2px;margin-right:4px;vertical-align:middle;"></span>idle</div>
-          <div style="color:#3fb950;">● start</div>
-          <div style="color:#f85149;">● stall</div>
-          <div style="color:#da3633;">● crash</div>
-          <div style="color:#d29922;">● pause</div>
-          <div style="color:#8b949e;">● exit</div>
+        <div id="activity-stats" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:16px;"></div>
+        <div id="activity-chart" style="width:100%;background:var(--bg);border-radius:8px;border:1px solid var(--border);padding:16px 12px;"></div>
+        <div style="display:flex;gap:14px;margin-top:8px;font-size:11px;color:var(--text-muted);flex-wrap:wrap;">
+          <span><span style="display:inline-block;width:10px;height:10px;background:#58a6ff;border-radius:2px;margin-right:4px;vertical-align:middle;"></span>planning</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:#f85149;border-radius:2px;margin-right:4px;vertical-align:middle;"></span>senior</span>
+          <span><span style="display:inline-block;width:10px;height:10px;background:#3fb950;border-radius:2px;margin-right:4px;vertical-align:middle;"></span>junior</span>
         </div>
+        <h3 style="margin:24px 0 8px;font-size:14px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">Recent events</h3>
+        <div id="activity-events" style="background:var(--bg);border:1px solid var(--border);border-radius:8px;max-height:280px;overflow:auto;"></div>
       </div>
     </div>
   </div>
@@ -1474,8 +1470,11 @@
 
     async function loadActivity() {
       const chart = document.getElementById('activity-chart');
-      const meta = document.getElementById('activity-meta');
+      const stats = document.getElementById('activity-stats');
+      const events = document.getElementById('activity-events');
+      const updated = document.getElementById('activity-updated');
       chart.innerHTML = '<div style="color:var(--text-muted);padding:20px;text-align:center;">Loading…</div>';
+      stats.innerHTML = ''; events.innerHTML = ''; updated.textContent = '';
       let data;
       try {
         // Local copy first (served from the same folder during localhost dev),
@@ -1490,125 +1489,111 @@
         }
       } catch (e) {
         chart.innerHTML = `<div style="color:var(--red);padding:20px;text-align:center;">Couldn't load heartbeat.json: ${e.message}</div>`;
-        meta.textContent = '';
         return;
       }
 
       const buckets = data.buckets || [];
-      const events = data.events || [];
-      if (buckets.length === 0) {
-        chart.innerHTML = '<div style="color:var(--text-muted);padding:20px;text-align:center;">No heartbeat activity logged yet — waiting for the next session to tick.</div>';
-        meta.textContent = `generated ${new Date(data.generated_at * 1000).toLocaleTimeString()}`;
-        return;
-      }
+      const evList = data.events || [];
+      const now = Math.floor(Date.now() / 1000);
+      updated.textContent = `updated ${new Date(data.generated_at * 1000).toLocaleTimeString()}`;
 
-      const total = buckets.reduce((s, b) => s + b.count, 0);
-      const activeBuckets = buckets.filter(b => b.count > 0).length;
-
-      // Heatmap geometry: 1 row per hour (24 rows), 12 cells per row (5-min
-      // buckets). Cells are sized generously so hover + click feel easy.
-      const CELL = 28;
-      const GAP = 2;
-      const LABEL_W = 56;
-      const COLS = Math.round(3600 / data.bucket_seconds); // normally 12
-      const INNER_W = COLS * (CELL + GAP);
-      const W = LABEL_W + INNER_W + 10;
-
-      // Index buckets by absolute hour so rows line up on clock boundaries
-      // regardless of when the window started.
-      const bucketByT = new Map(buckets.map(b => [b.t, b]));
-      const hourBuckets = new Map();
-      for (const b of buckets) {
-        const hour = Math.floor(b.t / 3600) * 3600;
-        if (!hourBuckets.has(hour)) hourBuckets.set(hour, []);
-        hourBuckets.get(hour).push(b);
-      }
-      const sortedHours = [...hourBuckets.keys()].sort((a, b) => a - b);
-
-      const maxCount = Math.max(1, ...buckets.map(b => b.count));
-      // Log-ish intensity so a single tool call still shows, but a busy
-      // burst doesn't make everything else look black.
-      const intensityFor = c => {
-        if (c <= 0) return 0;
-        return Math.min(1, Math.log2(c + 1) / Math.log2(maxCount + 1));
-      };
       const hueFor = t => ({ planning: '#58a6ff', senior: '#f85149', junior: '#3fb950' }[t] || '#6e7681');
-      const mix = (hex, alpha) => {
-        // Cell color = idle base + tinted overlay at `alpha`. Keeps idle
-        // cells readable as a dark grid, active cells glow in type color.
-        const n = parseInt(hex.slice(1), 16);
-        const r = (n >> 16) & 0xff, g = (n >> 8) & 0xff, b = n & 0xff;
-        const base = 28, baseAlpha = 1 - alpha;
-        const mr = Math.round(base * baseAlpha + r * alpha);
-        const mg = Math.round(base * baseAlpha + g * alpha);
-        const mb = Math.round(base * baseAlpha + b * alpha);
-        return `rgb(${mr},${mg},${mb})`;
-      };
-
-      const H = sortedHours.length * (CELL + GAP) + 30;
-
-      // Event index by bucket so we can corner-dot the right cell
-      const eventsByBucket = new Map();
-      for (const ev of events) {
-        const key = Math.floor(ev.t / data.bucket_seconds) * data.bucket_seconds;
-        if (!eventsByBucket.has(key)) eventsByBucket.set(key, []);
-        eventsByBucket.get(key).push(ev);
-      }
       const eventColor = { start: '#3fb950', stall: '#f85149', crash: '#da3633', pause: '#d29922', exit: '#8b949e' };
 
-      let svg = '';
-      sortedHours.forEach((hour, rowIdx) => {
-        const y = rowIdx * (CELL + GAP) + 20;
-        const hh = String(new Date(hour * 1000).getHours()).padStart(2, '0');
-        svg += `<text x="${LABEL_W - 10}" y="${y + CELL / 2 + 4}" font-size="11" fill="#6e7681" text-anchor="end">${hh}:00</text>`;
+      // ── Stat cards ────────────────────────────────────────────────────
+      const lastStart = [...evList].reverse().find(e => e.kind === 'start');
+      const lastExit = [...evList].reverse().find(e => e.kind === 'exit' || e.kind === 'stall' || e.kind === 'crash');
+      const activeNow = lastStart && (!lastExit || lastExit.t < lastStart.t);
+      const total24 = buckets.reduce((s, b) => s + b.count, 0);
+      const last4hStart = now - 4 * 3600;
+      const total4h = buckets.filter(b => b.t >= last4hStart).reduce((s, b) => s + b.count, 0);
+      const stallCount = evList.filter(e => e.kind === 'stall' || e.kind === 'crash').length;
+      const fmtAge = s => {
+        if (s < 60) return `${s}s ago`;
+        if (s < 3600) return `${Math.floor(s / 60)}m ago`;
+        if (s < 86400) return `${Math.floor(s / 3600)}h ago`;
+        return `${Math.floor(s / 86400)}d ago`;
+      };
+      const statCard = (label, value, accent) => `<div style="background:var(--bg);border:1px solid var(--border);border-left:3px solid ${accent};border-radius:8px;padding:10px 12px;">
+        <div style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px;">${label}</div>
+        <div style="font-size:16px;font-weight:600;">${value}</div>
+      </div>`;
 
-        for (let c = 0; c < COLS; c++) {
-          const bucketT = hour + c * data.bucket_seconds;
-          const b = bucketByT.get(bucketT);
-          const x = LABEL_W + c * (CELL + GAP);
-          const count = b ? b.count : 0;
-          const type = b && count > 0 ? b.type : 'idle';
-          const color = count > 0 ? mix(hueFor(type), 0.15 + 0.85 * intensityFor(count)) : '#1c2128';
-          const stroke = count > 0 ? hueFor(type) : '#30363d';
-          const strokeOp = count > 0 ? 0.4 : 0.3;
-          const stamp = new Date(bucketT * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          const tip = count > 0
-            ? `${stamp} · ${count} call${count === 1 ? '' : 's'} · ${type}`
-            : `${stamp} · idle`;
-          svg += `<rect x="${x}" y="${y}" width="${CELL}" height="${CELL}" rx="4" fill="${color}" stroke="${stroke}" stroke-opacity="${strokeOp}"><title>${tip}</title></rect>`;
+      const statusValue = activeNow
+        ? `<span style="color:${hueFor(lastStart.session)};">● ${lastStart.session}${lastStart.model ? ` (${lastStart.model})` : ''}</span>`
+        : `<span style="color:var(--text-muted);">● idle</span>`;
+      const sinceLabel = activeNow
+        ? `running ${fmtAge(now - lastStart.t).replace(' ago', '')}`
+        : lastExit ? `last ran ${fmtAge(now - lastExit.t)}` : 'no activity yet';
 
-          // Event corner dot on bucket that contains the event
-          const evs = eventsByBucket.get(bucketT) || [];
-          if (evs.length > 0) {
-            // Pick the highest-severity event in this bucket for the dot color
-            const severity = { crash: 5, stall: 4, pause: 3, start: 2, exit: 1 };
-            evs.sort((a, b) => (severity[b.kind] || 0) - (severity[a.kind] || 0));
-            const top = evs[0];
-            const dotColor = eventColor[top.kind] || '#8b949e';
-            const evTip = evs.map(e => {
-              const ts = new Date(e.t * 1000).toLocaleTimeString();
-              return e.kind === 'start'
-                ? `${ts} start ${e.session || ''}${e.model ? ` (${e.model})` : ''}`
-                : `${ts} ${e.kind}`;
-            }).join('\n');
-            svg += `<circle cx="${x + CELL - 5}" cy="${y + 5}" r="3.5" fill="${dotColor}" stroke="#0d1117" stroke-width="1"><title>${evTip}</title></circle>`;
-          }
-        }
-      });
+      stats.innerHTML = [
+        statCard('Status', statusValue, activeNow ? hueFor(lastStart.session) : '#6e7681'),
+        statCard('Since', sinceLabel, '#8b949e'),
+        statCard('Tool calls (4h)', total4h.toLocaleString(), '#3fb950'),
+        statCard('Tool calls (24h)', total24.toLocaleString(), '#3fb950'),
+        statCard('Stalls / crashes (24h)', stallCount, stallCount ? '#f85149' : '#6e7681'),
+      ].join('');
 
-      // Column-header minute marks (:00, :15, :30, :45)
-      for (let c = 0; c < COLS; c++) {
-        const mins = c * (data.bucket_seconds / 60);
-        if (mins % 15 === 0) {
-          const x = LABEL_W + c * (CELL + GAP) + CELL / 2;
-          svg += `<text x="${x}" y="14" font-size="10" fill="#6e7681" text-anchor="middle">:${String(mins).padStart(2, '0')}</text>`;
-        }
+      // ── Compact single-row timeline ───────────────────────────────────
+      if (buckets.length === 0) {
+        chart.innerHTML = '<div style="color:var(--text-muted);padding:20px;text-align:center;">No heartbeat activity logged yet.</div>';
+      } else {
+        const maxCount = Math.max(1, ...buckets.map(b => b.count));
+        const intensityFor = c => c <= 0 ? 0 : Math.min(1, Math.log2(c + 1) / Math.log2(maxCount + 1));
+        const mix = (hex, alpha) => {
+          const n = parseInt(hex.slice(1), 16);
+          const r = (n >> 16) & 0xff, g = (n >> 8) & 0xff, b = n & 0xff;
+          const base = 22, baseA = 1 - alpha;
+          return `rgb(${Math.round(base * baseA + r * alpha)},${Math.round(base * baseA + g * alpha)},${Math.round(base * baseA + b * alpha)})`;
+        };
+
+        // Single horizontal strip of cells, 24h wide. Cells are flex
+        // divs so the row stretches to fit the card width without
+        // horizontal scroll.
+        const cells = buckets.map(b => {
+          const color = b.count > 0 ? mix(hueFor(b.type), 0.25 + 0.75 * intensityFor(b.count)) : '#161b22';
+          const stamp = new Date(b.t * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const tip = b.count > 0 ? `${stamp} · ${b.count} call${b.count === 1 ? '' : 's'} · ${b.type}` : `${stamp} · idle`;
+          return `<div title="${tip}" style="flex:1;height:40px;background:${color};border-radius:2px;"></div>`;
+        }).join('');
+
+        // Time axis labels under the strip
+        const axisLabels = [0, 6, 12, 18, 24].map(h => {
+          const t = buckets[0].t + h * 3600;
+          const d = new Date(t * 1000);
+          const hh = String(d.getHours()).padStart(2, '0');
+          return `<span>${hh}:00</span>`;
+        }).join('');
+
+        chart.innerHTML = `
+          <div style="display:flex;gap:2px;width:100%;align-items:stretch;">${cells}</div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--text-muted);">${axisLabels}</div>
+        `;
       }
 
-      chart.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="display:block;">${svg}</svg>`;
-      const eventCounts = events.reduce((acc, e) => { acc[e.kind] = (acc[e.kind] || 0) + 1; return acc; }, {});
-      const eventSummary = Object.entries(eventCounts).map(([k, v]) => `${v} ${k}`).join(' · ');
-      meta.textContent = `${total} tool calls · ${activeBuckets}/${buckets.length} active${eventSummary ? ' · ' + eventSummary : ''} · generated ${new Date(data.generated_at * 1000).toLocaleTimeString()}`;
+      // ── Event log (newest first) ──────────────────────────────────────
+      if (evList.length === 0) {
+        events.innerHTML = '<div style="color:var(--text-muted);padding:16px;text-align:center;font-size:13px;">No lifecycle events logged yet.</div>';
+      } else {
+        const kindLabel = k => ({ start: 'Started', stall: 'Stalled', crash: 'Crashed', pause: 'Paused', exit: 'Exited' }[k] || k);
+        const rows = [...evList].reverse().map(ev => {
+          const d = new Date(ev.t * 1000);
+          const hh = String(d.getHours()).padStart(2, '0');
+          const mm = String(d.getMinutes()).padStart(2, '0');
+          const color = eventColor[ev.kind] || '#8b949e';
+          const detail = ev.kind === 'start'
+            ? `${ev.session || ''}${ev.model ? ` · ${ev.model}` : ''}`
+            : '';
+          return `<div style="display:grid;grid-template-columns:64px 20px 120px 1fr 80px;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);font-size:12px;">
+            <span style="color:var(--text-muted);font-variant-numeric:tabular-nums;">${hh}:${mm}</span>
+            <span style="color:${color};">●</span>
+            <span style="font-weight:500;">${kindLabel(ev.kind)}</span>
+            <span style="color:var(--text-muted);">${detail}</span>
+            <span style="color:var(--text-muted);text-align:right;">${fmtAge(now - ev.t)}</span>
+          </div>`;
+        }).join('');
+        events.innerHTML = rows;
+      }
     }
   </script>
 </body>
