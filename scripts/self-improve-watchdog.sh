@@ -632,6 +632,13 @@ while true; do
 
     STATE=$(read_control)
 
+    # Snapshot runs every tick regardless of state so the activity graph
+    # keeps advancing even while paused — flatlining is then a signal
+    # that nothing is running, not that the snapshot is stale. The commit
+    # + push stays RUN-only (see commit_heartbeat_if_due) so paused time
+    # doesn't spam the remote.
+    "$WORK_DIR/scripts/heartbeat-snapshot.sh" 2>/dev/null || true
+
     # React to STOP/PAUSE/DRAIN immediately (every 30s)
     if [[ "$STATE" != "RUN" ]]; then
         log "Check cycle — control: $STATE, autopilot PID: ${CLAUDE_PID:-none}"
@@ -713,7 +720,6 @@ while true; do
             sync_stamps_from_main
             reconcile_in_progress
             sweep_stale_in_progress_labels
-            "$WORK_DIR/scripts/heartbeat-snapshot.sh" 2>/dev/null || true
             commit_heartbeat_if_due
             # Check if autopilot is dead
             if ! is_claude_alive; then
