@@ -269,6 +269,65 @@ sweep_stale_in_progress_labels() {
     done
 }
 
+# Commit heartbeat.json on a hybrid schedule:
+#   a) every 10 min if the file changed
+#   b) immediately if main HEAD advanced via some other commit (piggyback —
+#      since we're pushing anyway, ride along)
+# Skipped when autopilot is alive so we never race a session's own commit.
+commit_heartbeat_if_due() {
+    local hb="$WORK_DIR/command-center/heartbeat.json"
+    [[ -f "$hb" ]] || return
+    is_claude_alive && return
+
+    cd "$WORK_DIR" || return
+
+    local SD="$HOME/drift-state"
+    local stamp_ts="$SD/last-heartbeat-commit"
+    local stamp_head="$SD/last-heartbeat-head"
+
+    local now
+    now=$(date +%s)
+    local last_commit
+    last_commit=$(cat "$stamp_ts" 2>/dev/null || echo "0")
+    local elapsed=$(( now - last_commit ))
+
+    local cur_head last_head
+    cur_head=$(git rev-parse HEAD 2>/dev/null || echo "")
+    last_head=$(cat "$stamp_head" 2>/dev/null || echo "")
+
+    local head_moved=0
+    [[ -n "$last_head" && -n "$cur_head" && "$last_head" != "$cur_head" ]] && head_moved=1
+
+    # Neither rule triggered — wait for the next tick.
+    if (( elapsed < 600 )) && (( head_moved == 0 )); then
+        [[ -n "$cur_head" ]] && echo "$cur_head" > "$stamp_head"
+        return
+    fi
+
+    # Nothing actually changed in the file — just refresh stamps so we
+    # don't keep retrying.
+    if git diff --quiet -- command-center/heartbeat.json 2>/dev/null; then
+        echo "$now" > "$stamp_ts"
+        [[ -n "$cur_head" ]] && echo "$cur_head" > "$stamp_head"
+        return
+    fi
+
+    git add command-center/heartbeat.json 2>/dev/null || return
+    if git commit -m "chore: heartbeat snapshot" >/dev/null 2>&1; then
+        if git push origin main >/dev/null 2>&1; then
+            local new_head
+            new_head=$(git rev-parse HEAD 2>/dev/null || echo "$cur_head")
+            echo "$now" > "$stamp_ts"
+            echo "$new_head" > "$stamp_head"
+            log "Heartbeat snapshot committed + pushed (elapsed=${elapsed}s, piggyback=${head_moved})"
+        else
+            # Push failed (e.g. behind remote) — undo the commit so we retry cleanly next tick.
+            git reset --soft HEAD~1 >/dev/null 2>&1 || true
+            git reset -- command-center/heartbeat.json >/dev/null 2>&1 || true
+        fi
+    fi
+}
+
 refresh_compliance_cache() {
     local SD="$HOME/drift-state"
     cd "$WORK_DIR"
@@ -655,6 +714,7 @@ while true; do
             reconcile_in_progress
             sweep_stale_in_progress_labels
             "$WORK_DIR/scripts/heartbeat-snapshot.sh" 2>/dev/null || true
+            commit_heartbeat_if_due
             # Check if autopilot is dead
             if ! is_claude_alive; then
                 stop_monitor

@@ -48,7 +48,7 @@ graphify-out/graph.html
 *.anthropic-key
 /tmp/drift-test-*
 
-# Live heartbeat snapshot — regenerated every watchdog tick, meaningful
-# only when the Command Center is served from this working tree. Would
-# otherwise spam commits at 60s cadence.
-command-center/heartbeat.json
+# Heartbeat snapshot is committed by the watchdog on a rate-limited
+# schedule (max once per 10 min, plus piggybacking on any new commit on
+# main), so no gitignore — keep it in-tree so the deployed Pages view
+# can read it.
