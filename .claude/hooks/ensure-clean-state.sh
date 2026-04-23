@@ -15,8 +15,10 @@ fi
 DRIFT_CONTROL=$(cat "$HOME/drift-control.txt" 2>/dev/null | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')
 SESSION_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "")
 
-# Check for uncommitted changes (staged or unstaged)
-DIRTY=$(git status --porcelain 2>/dev/null | grep -v '^??' | head -5)
+# Check for uncommitted changes (staged or unstaged). Skip the live
+# heartbeat snapshot — the watchdog rewrites it every 30s and commits it
+# on its own hybrid schedule, so it's normal for it to show dirty here.
+DIRTY=$(git status --porcelain 2>/dev/null | grep -v '^??' | grep -v 'command-center/heartbeat.json' | head -5)
 UNTRACKED=$(git status --porcelain 2>/dev/null | grep '^??' | grep -v '.claude/' | head -5)
 
 # Check for unpushed commits
