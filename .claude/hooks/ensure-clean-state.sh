@@ -14,6 +14,11 @@ fi
 
 DRIFT_CONTROL=$(cat "$HOME/drift-control.txt" 2>/dev/null | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')
 SESSION_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "")
+# DRIFT_AUTONOMOUS is set by the watchdog on spawn — only autopilot sessions
+# have it. Interactive sessions (takeovers, dev work) see SESSION_TYPE from
+# the cache file that reflects the running autopilot, not their own role,
+# so role-specific gates below must key off this flag instead.
+IS_AUTONOMOUS="${DRIFT_AUTONOMOUS:-0}"
 
 # Check for uncommitted changes (staged or unstaged). Skip the live
 # heartbeat snapshot — the watchdog rewrites it every 30s and commits it
@@ -39,7 +44,7 @@ if [ -n "$UNPUSHED" ]; then
 fi
 
 # Check if persona files were updated after a product review (planning sessions only)
-if [ "$DRIFT_CONTROL" = "RUN" ] && [ "$SESSION_TYPE" = "planning" ]; then
+if [ "$DRIFT_CONTROL" = "RUN" ] && [ "$SESSION_TYPE" = "planning" ] && [ "$IS_AUTONOMOUS" = "1" ]; then
   CYCLE_COUNT=$(cat "$HOME/drift-state/cycle-counter" 2>/dev/null || echo "0")
   LAST_REVIEW=$(cat "$HOME/drift-state/last-review-cycle" 2>/dev/null || echo "0")
   if [ "$CYCLE_COUNT" -eq "$LAST_REVIEW" ] && [ "$CYCLE_COUNT" -gt 0 ]; then
@@ -88,7 +93,7 @@ if [ -n "$ISSUES" ]; then
 fi
 
 # Check for in-progress issues that weren't closed (autonomous sessions only)
-if [ "$DRIFT_CONTROL" = "RUN" ]; then
+if [ "$DRIFT_CONTROL" = "RUN" ] && [ "$IS_AUTONOMOUS" = "1" ]; then
   IN_PROGRESS=$(gh issue list --state open --label in-progress --json number,title --jq '.[] | "#\(.number) \(.title)"' 2>/dev/null || true)
   if [ -n "$IN_PROGRESS" ]; then
     echo -e "BLOCKED: Issues still in-progress. Verify work is done (build + tests pass), then close with comment:\n\n${IN_PROGRESS}\n\nFor each: gh issue close N --comment 'Done: {what was done} (commit {hash})'\nOr remove in-progress if unfinished: gh issue edit N --remove-label in-progress" >&2
@@ -97,7 +102,7 @@ if [ "$DRIFT_CONTROL" = "RUN" ]; then
 fi
 
 # Senior session Stop gate — check design doc and bug plan hygiene
-if [ "$SESSION_TYPE" = "senior" ] && [ "$DRIFT_CONTROL" = "RUN" ]; then
+if [ "$SESSION_TYPE" = "senior" ] && [ "$DRIFT_CONTROL" = "RUN" ] && [ "$IS_AUTONOMOUS" = "1" ]; then
   # Design docs in-review: if any PR has unreplied comments, block
   DESIGN_UNREPLIED=$("${CLAUDE_PROJECT_DIR:-.}/scripts/design-service.sh" in-review 2>/dev/null || echo "")
   if [ -n "$DESIGN_UNREPLIED" ] && [ "$DESIGN_UNREPLIED" != "none" ]; then
@@ -132,7 +137,7 @@ if [ "$SESSION_TYPE" = "senior" ] && [ "$DRIFT_CONTROL" = "RUN" ]; then
 fi
 
 # Planning session validation — only for autonomous planning sessions (watchdog sets both)
-if [ "$SESSION_TYPE" = "planning" ] && [ "$DRIFT_CONTROL" = "RUN" ]; then
+if [ "$SESSION_TYPE" = "planning" ] && [ "$DRIFT_CONTROL" = "RUN" ] && [ "$IS_AUTONOMOUS" = "1" ]; then
   PLAN_ISSUES=""
 
   # Were open feature requests reviewed and triaged?
