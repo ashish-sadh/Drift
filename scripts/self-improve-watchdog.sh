@@ -24,7 +24,7 @@ LOG_DIR="$HOME/drift-self-improve-logs"
 WATCHDOG_LOG="$LOG_DIR/watchdog.log"
 PID_FILE="$LOG_DIR/claude.pid"
 CHECK_INTERVAL=60   # 1 minute — heartbeat: sprint refresh + health check
-STALE_THRESHOLD=600  # 10 minutes — no log output = definitely dead
+STALE_THRESHOLD=1800  # 30 minutes — no heartbeat/log output = definitely dead
 # Per-session stall thresholds (no commits/progress before nudge)
 STALL_PLANNING=3600  # 1 hour
 STALL_SENIOR=1800    # 30 minutes
