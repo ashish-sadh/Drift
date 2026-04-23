@@ -268,6 +268,14 @@ enum AIToolAgent {
                         }
                     } else {
                         onStep(toolStepMessage(for: call.tool))
+                        // #178: multi-item food → stream per-item results before recipe builder
+                        if toolName == "log_food",
+                           let name = call.params.values["name"],
+                           name.contains(",") {
+                            return await executeMultiItemFoodDisclosure(
+                                name: name, mealHint: call.params.values["meal"], onToken: onToken
+                            )
+                        }
                         return await executeTool(call)
                     }
                 case .text(let response):
@@ -356,6 +364,45 @@ enum AIToolAgent {
             }
             return handleTextResponse(response, screen: screen)
         }
+    }
+
+    // MARK: - Multi-Item Food Disclosure (#178)
+
+    /// For "rice, dal" inputs: look up each item in the local DB sequentially and stream
+    /// each result via onToken as it resolves. Returns the recipe-builder action alongside
+    /// a text summary so the chat bubble persists after the sheet opens.
+    static func executeMultiItemFoodDisclosure(
+        name: String,
+        mealHint: String?,
+        onToken: @escaping @Sendable (String) -> Void
+    ) async -> AgentOutput {
+        let items = name.components(separatedBy: ",")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+        guard items.count > 1 else {
+            return await executeTool(ToolCall(tool: "log_food", params: ToolCallParams(values: ["name": name])))
+        }
+
+        var resolvedNames: [String] = []
+        var summaryLines: [String] = []
+        for item in items {
+            if let match = AIActionExecutor.findFood(query: item, servings: nil, gramAmount: nil) {
+                let cal = Int(match.food.calories * match.servings)
+                let line = "\(match.food.name) — \(cal) cal"
+                onToken(line + "\n")
+                resolvedNames.append(match.food.name)
+                summaryLines.append(line)
+            } else {
+                onToken("\(item.capitalized) — looking up\n")
+                resolvedNames.append(item)
+                summaryLines.append(item.capitalized)
+            }
+        }
+
+        let summary = resolvedNames.joined(separator: ", ")
+        ConversationState.shared.captureToolSummary("Multi-item log: \(summary)")
+        let action = ToolAction.openRecipeBuilder(items: resolvedNames, mealName: mealHint)
+        return AgentOutput(text: summaryLines.joined(separator: "\n"), action: action, toolsCalled: ["log_food"])
     }
 
     // MARK: - Tool-First Execution
