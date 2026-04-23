@@ -47,3 +47,8 @@ graphify-out/graph.html
 .drift-secrets/
 *.anthropic-key
 /tmp/drift-test-*
+
+# Live heartbeat snapshot — regenerated every watchdog tick, meaningful
+# only when the Command Center is served from this working tree. Would
+# otherwise spam commits at 60s cadence.
+command-center/heartbeat.json

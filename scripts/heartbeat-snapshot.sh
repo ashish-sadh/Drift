@@ -12,6 +12,7 @@
 set -e
 
 LOG="$HOME/drift-state/session-heartbeat.log"
+WATCHDOG_LOG="$HOME/drift-self-improve-logs/watchdog.log"
 OUT="/Users/ashishsadh/workspace/Drift/command-center/heartbeat.json"
 WINDOW_HOURS=24
 BUCKET_SECONDS=300   # 5-minute buckets → 288 points over 24h
@@ -19,44 +20,39 @@ BUCKET_SECONDS=300   # 5-minute buckets → 288 points over 24h
 NOW=$(date +%s)
 WINDOW_START=$(( NOW - WINDOW_HOURS * 3600 ))
 
-if [ ! -f "$LOG" ]; then
-    # Emit an empty snapshot so the dashboard can render "no activity".
-    python3 -c "
-import json, time
-print(json.dumps({
-    'generated_at': $NOW,
-    'window_hours': $WINDOW_HOURS,
-    'bucket_seconds': $BUCKET_SECONDS,
-    'buckets': []
-}))
-" > "$OUT"
-    exit 0
-fi
+HB_ARG="$LOG"
+[ -f "$LOG" ] || HB_ARG=""
+WD_ARG="$WATCHDOG_LOG"
+[ -f "$WATCHDOG_LOG" ] || WD_ARG=""
 
-python3 - "$LOG" "$WINDOW_START" "$NOW" "$BUCKET_SECONDS" <<'PY' > "$OUT"
-import json, sys, time
+python3 - "$HB_ARG" "$WD_ARG" "$WINDOW_START" "$NOW" "$BUCKET_SECONDS" <<'PY' > "$OUT"
+import json, re, sys, time
 from collections import defaultdict, Counter
+from datetime import datetime
 
-log_path, window_start, now, bucket_s = sys.argv[1:5]
+hb_path, wd_path, window_start, now, bucket_s = sys.argv[1:6]
 window_start = int(window_start)
 now = int(now)
 bucket_s = int(bucket_s)
 
+# ── Heartbeat buckets ─────────────────────────────────────────────────────
 buckets = defaultdict(Counter)
-with open(log_path) as f:
-    for line in f:
-        parts = line.strip().split(None, 1)
-        if not parts or not parts[0].isdigit():
-            continue
-        ts = int(parts[0])
-        session_type = parts[1] if len(parts) > 1 else "unknown"
-        if ts < window_start or ts > now:
-            continue
-        bucket = (ts // bucket_s) * bucket_s
-        buckets[bucket][session_type] += 1
+if hb_path:
+    try:
+        with open(hb_path) as f:
+            for line in f:
+                parts = line.strip().split(None, 1)
+                if not parts or not parts[0].isdigit():
+                    continue
+                ts = int(parts[0])
+                session_type = parts[1] if len(parts) > 1 else "unknown"
+                if ts < window_start or ts > now:
+                    continue
+                bucket = (ts // bucket_s) * bucket_s
+                buckets[bucket][session_type] += 1
+    except FileNotFoundError:
+        pass
 
-# Emit a row per bucket in the window so the UI can draw a full timeline
-# including idle gaps.
 rows = []
 first_bucket = (window_start // bucket_s) * bucket_s
 last_bucket = (now // bucket_s) * bucket_s
@@ -72,10 +68,56 @@ while b <= last_bucket:
     rows.append({"t": b, "count": total, "type": dominant})
     b += bucket_s
 
+# ── Watchdog events (start / stall / crash / exit) ────────────────────────
+events = []
+if wd_path:
+    ts_re = re.compile(r"^\[([\d\-]+ [\d:]+)\] (.*)$")
+    start_re = re.compile(r"Starting autopilot \((\w+), model=(\w+)")
+    stall_re = re.compile(r"Autopilot stalled")
+    crash_re = re.compile(r"Autopilot CRASHED")
+    exit_re = re.compile(r"(session exited gracefully|Autopilot completed normally)")
+    pause_re = re.compile(r"PAUSE requested")
+
+    def to_epoch(stamp):
+        try:
+            return int(datetime.strptime(stamp, "%Y-%m-%d %H:%M:%S").timestamp())
+        except ValueError:
+            return None
+
+    try:
+        with open(wd_path) as f:
+            for line in f:
+                m = ts_re.match(line)
+                if not m:
+                    continue
+                ts = to_epoch(m.group(1))
+                if ts is None or ts < window_start or ts > now:
+                    continue
+                msg = m.group(2)
+                sm = start_re.search(msg)
+                if sm:
+                    events.append({"t": ts, "kind": "start",
+                                    "session": sm.group(1), "model": sm.group(2)})
+                    continue
+                if stall_re.search(msg):
+                    events.append({"t": ts, "kind": "stall"})
+                    continue
+                if crash_re.search(msg):
+                    events.append({"t": ts, "kind": "crash"})
+                    continue
+                if pause_re.search(msg):
+                    events.append({"t": ts, "kind": "pause"})
+                    continue
+                if exit_re.search(msg):
+                    events.append({"t": ts, "kind": "exit"})
+    except FileNotFoundError:
+        pass
+
 print(json.dumps({
     "generated_at": now,
     "window_hours": int((now - window_start) / 3600),
     "bucket_seconds": bucket_s,
-    "buckets": rows
+    "buckets": rows,
+    "events": events,
 }))
 PY

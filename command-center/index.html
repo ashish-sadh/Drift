@@ -1487,6 +1487,7 @@
       }
 
       const buckets = data.buckets || [];
+      const events = data.events || [];
       if (buckets.length === 0) {
         chart.innerHTML = '<div style="color:var(--text-muted);padding:20px;text-align:center;">No heartbeat activity logged yet — waiting for the next session to tick.</div>';
         meta.textContent = `generated ${new Date(data.generated_at * 1000).toLocaleTimeString()}`;
@@ -1500,6 +1501,10 @@
 
       const W = 1040;
       const H = 200;
+      const t0 = buckets[0].t;
+      const tSpan = Math.max(1, buckets[buckets.length - 1].t + data.bucket_seconds - t0);
+      const xForTime = ts => ((ts - t0) / tSpan) * W;
+
       const barW = W / buckets.length;
       const bars = buckets.map((b, i) => {
         const h = Math.round((b.count / maxCount) * (H - 20));
@@ -1508,6 +1513,29 @@
         const color = b.count === 0 ? '#1c2128' : colorFor(b.type);
         const tip = `${new Date(b.t * 1000).toLocaleTimeString()} — ${b.count} calls${b.count ? ` (${b.type})` : ''}`;
         return `<rect x="${x.toFixed(2)}" y="${y}" width="${Math.max(barW - 1, 0.5).toFixed(2)}" height="${h}" fill="${color}"><title>${tip}</title></rect>`;
+      }).join('');
+
+      // Event markers — vertical line per start/stall/crash/pause/exit.
+      const eventStyle = {
+        start: { color: '#3fb950', dash: '',     marker: 'circle' },
+        stall: { color: '#f85149', dash: '4,3',  marker: 'x' },
+        crash: { color: '#da3633', dash: '2,2',  marker: 'x' },
+        pause: { color: '#d29922', dash: '3,3',  marker: 'pause' },
+        exit:  { color: '#8b949e', dash: '',     marker: 'circle' },
+      };
+      const markers = events.map(ev => {
+        const s = eventStyle[ev.kind] || { color: '#8b949e', dash: '', marker: 'circle' };
+        const x = xForTime(ev.t);
+        if (x < 0 || x > W) return '';
+        const stamp = new Date(ev.t * 1000).toLocaleTimeString();
+        const label = ev.kind === 'start'
+          ? `start ${ev.session || ''}${ev.model ? ` (${ev.model})` : ''}`
+          : ev.kind;
+        const tip = `${stamp} — ${label}`;
+        const line = `<line x1="${x.toFixed(2)}" y1="0" x2="${x.toFixed(2)}" y2="${H}" stroke="${s.color}" stroke-width="1" stroke-dasharray="${s.dash}" opacity="0.7"><title>${tip}</title></line>`;
+        // Top-edge dot so markers are noticeable even when lines overlap the bars
+        const dot = `<circle cx="${x.toFixed(2)}" cy="4" r="3" fill="${s.color}"><title>${tip}</title></circle>`;
+        return line + dot;
       }).join('');
 
       // Faint baseline
@@ -1523,8 +1551,10 @@
         return `<text x="${x}" y="${H + 14}" fill="#6e7681" font-size="10" text-anchor="${anchor}">${hh}:${mm}</text>`;
       }).join('');
 
-      chart.innerHTML = `<svg viewBox="0 0 ${W} ${H + 20}" preserveAspectRatio="none" style="width:100%;height:${H + 20}px;display:block;">${bars}${baseline}${labels}</svg>`;
-      meta.textContent = `${total} tool calls · ${activeBuckets}/${buckets.length} active buckets · generated ${new Date(data.generated_at * 1000).toLocaleTimeString()}`;
+      chart.innerHTML = `<svg viewBox="0 0 ${W} ${H + 20}" preserveAspectRatio="none" style="width:100%;height:${H + 20}px;display:block;">${bars}${markers}${baseline}${labels}</svg>`;
+      const eventCounts = events.reduce((acc, e) => { acc[e.kind] = (acc[e.kind] || 0) + 1; return acc; }, {});
+      const eventSummary = Object.entries(eventCounts).map(([k, v]) => `${v} ${k}`).join(' · ');
+      meta.textContent = `${total} tool calls · ${activeBuckets}/${buckets.length} active buckets${eventSummary ? ' · ' + eventSummary : ''} · generated ${new Date(data.generated_at * 1000).toLocaleTimeString()}`;
     }
   </script>
 </body>
