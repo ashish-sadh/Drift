@@ -256,6 +256,13 @@
 - Telemetry-driven prompt refresh (#326) is the first data-driven prompt improvement in the history of this project. Previous prompt changes were hypothesis-driven (Review #42 example-placement insight). This cycle we have real failing queries persisted (#297). Using them to update examples is the "measure, then optimize" principle in practice.
 - Photo Log review screen complexity is approaching extraction threshold. Four feature additions in two builds (editable macros, serving units, ingredients, plant badge). If #331 (onboarding tip) adds more state to this view, extract PhotoLogReviewViewModel. Keep the threshold rule: 4+ feature-additions to one view = extraction time.
 
+### What I Learned — Planning Cycle 4734 (2026-04-22)
+- state.md is outdated — says build 133, context 2048 tokens, tests 1677+. Actual: build 166, context 4096 (post-#176), foods 2511. Stale docs are worse than no docs — they mislead planning. Junior task: refresh state.md before every product review. This should be part of the planning checklist, not reactive.
+- Five-bug batch (zero-cal, stale DB, photo log review, default amount, key UX) surfaced from real device use, not the test suite. The stale DB and composed-food zero-cal bugs should have been catchable. Quarterly audit: which structural categories of bugs do our 1677+ tests systematically miss? Answer shapes the next test investment.
+- Photo Log review screen is past the extraction threshold — five feature additions total (editable macros, serving units, ingredients, plant badge, and the prior model picker). `PhotoLogReviewViewModel` extraction is now mandatory before any further additions to that view. The threshold rule was 4+ feature-additions; we're at 5.
+- Queue grew to 64 pending / 24 SENIOR. 24 SENIOR ÷ 5 tasks/session = ~5 senior sessions to drain. At 2 senior sessions/day, SENIOR backlog clears in ~3 days if no new SENIOR tasks are added. Cap new SENIOR tasks at ≤2 per planning cycle until SENIOR queue drops below 15.
+- USDA DEMO_KEY in production is a latent risk before App Store launch. 1000 req/hour is fine for TestFlight; public release without a registered key will hit rate limits. Junior task: swap DEMO_KEY for registered key + document the API key setup in dev setup docs.
+
 ## Preferences & Approach
 - Prefer boring, proven solutions over clever abstractions
 - Prefer fixing patterns over fixing instances (fix the stale-preference pattern, not just one ViewModel)
