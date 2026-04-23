@@ -200,6 +200,73 @@ sync_stamps_from_main() {
             log "Self-heal: planning Issue #$plan_issue is CLOSED — stamped last-planning-time and cleared tracking file"
         fi
     fi
+
+    # Most recent TestFlight build commit → last-testflight-publish. Same
+    # pattern as review/exec — the hook's step-5a stamp is fragile, we
+    # derive from git instead.
+    local tf_last
+    tf_last=$(git log origin/main --format='%ct' --grep='^chore: TestFlight build' -1 2>/dev/null || echo "")
+    if [[ -n "$tf_last" ]]; then
+        local tf_stamp
+        tf_stamp=$(cat "$SD/last-testflight-publish" 2>/dev/null || echo "0")
+        if (( tf_last > tf_stamp )); then
+            echo "$tf_last" > "$SD/last-testflight-publish"
+            log "Self-heal: bumped last-testflight-publish $tf_stamp → $tf_last (from TestFlight commit)"
+        fi
+    fi
+}
+
+# Reconcile sprint-state.json against GitHub. If our local in_progress slot
+# points to a task that's already CLOSED on GitHub, the session closed it
+# without calling sprint-service.sh done — the slot stays stuck, blocking
+# the next claim. Running `done` again is safe (idempotent on comment/close/
+# label strip) and also applies the budget increment we missed.
+reconcile_in_progress() {
+    local SD="$HOME/drift-state"
+    local STATE_FILE="$SD/sprint-state.json"
+    [[ -f "$STATE_FILE" ]] || return
+    local IN_PROGRESS
+    IN_PROGRESS=$(jq -r '.in_progress // empty' "$STATE_FILE" 2>/dev/null || echo "")
+    [[ -z "$IN_PROGRESS" || "$IN_PROGRESS" == "null" ]] && return
+
+    local STATE
+    STATE=$(gh issue view "$IN_PROGRESS" --json state --jq '.state' 2>/dev/null || echo "")
+    if [[ "$STATE" == "CLOSED" ]]; then
+        log "Self-heal: in_progress #$IN_PROGRESS is CLOSED on GitHub — reconciling via done"
+        "$WORK_DIR/scripts/sprint-service.sh" done "$IN_PROGRESS" "reconcile" >/dev/null 2>&1 || true
+    fi
+}
+
+# Strip orphan in-progress labels — a closed issue should never carry
+# in-progress (always wrong), and an open sprint-task we're not working on
+# shouldn't either. Planning and design-doc issues have their own lifecycle
+# so we only touch issues labeled sprint-task.
+sweep_stale_in_progress_labels() {
+    local SD="$HOME/drift-state"
+    local current
+    current=$(jq -r '.in_progress // empty' "$SD/sprint-state.json" 2>/dev/null || echo "")
+
+    # Closed issues with in-progress — always stale
+    local closed_stale
+    closed_stale=$(gh issue list --state closed --label in-progress --limit 20 \
+        --json number --jq '.[].number' 2>/dev/null || echo "")
+    for num in $closed_stale; do
+        [[ -n "$num" ]] || continue
+        gh issue edit "$num" --remove-label in-progress >/dev/null 2>&1 \
+            && log "Self-heal: stripped in-progress from closed #$num"
+    done
+
+    # Open sprint-tasks with in-progress that we're not working on
+    local open_stale
+    open_stale=$(gh issue list --state open --label in-progress --label sprint-task --limit 20 \
+        --json number --jq '.[].number' 2>/dev/null || echo "")
+    for num in $open_stale; do
+        [[ -n "$num" ]] || continue
+        if [[ "$num" != "$current" ]]; then
+            gh issue edit "$num" --remove-label in-progress >/dev/null 2>&1 \
+                && log "Self-heal: stripped orphan in-progress from open sprint-task #$num (current=${current:-none})"
+        fi
+    done
 }
 
 refresh_compliance_cache() {
@@ -558,10 +625,12 @@ while true; do
         RUN)
             # Ensure override is CONTINUE
             sed -i '' 's/_Override:_ STOP/_Override:_ CONTINUE/' "$WORK_DIR/program.md" 2>/dev/null || true
-            # Reconcile stamps before spawning any session — prevents the
-            # planning-due / review-due loop if a prior session merged
-            # outside report-service.sh finish.
+            # Reconcile state before touching anything else — catches stamps
+            # that a prior session left stale, GitHub-closed tasks still
+            # locking our in_progress slot, and orphan in-progress labels.
             sync_stamps_from_main
+            reconcile_in_progress
+            sweep_stale_in_progress_labels
             # Check if autopilot is dead
             if ! is_claude_alive; then
                 stop_monitor
