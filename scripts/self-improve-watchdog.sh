@@ -273,11 +273,12 @@ sweep_stale_in_progress_labels() {
 #   a) every 10 min if the file changed
 #   b) immediately if main HEAD advanced via some other commit (piggyback —
 #      since we're pushing anyway, ride along)
-# Skipped when autopilot is alive so we never race a session's own commit.
+# Runs regardless of session liveness so the Pages view doesn't freeze mid-
+# session. `git add <specific-file>` is scoped to heartbeat.json only; if
+# the session races a push we just retry next tick.
 commit_heartbeat_if_due() {
     local hb="$WORK_DIR/command-center/heartbeat.json"
     [[ -f "$hb" ]] || return
-    is_claude_alive && return
 
     cd "$WORK_DIR" || return
 
