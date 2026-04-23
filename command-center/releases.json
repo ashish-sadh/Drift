@@ -1820,5 +1820,12 @@
       "Command-center OAuth error now shows friendlier message when auth code is reused",
       "Watchdog: ensure-clean-state skips live heartbeat snapshot to avoid false dirty-state"
     ]
+  },
+  {
+    "build": 171,
+    "date": "2026-04-23T00:00:00-07:00",
+    "description": "chore: TestFlight build 171 — infrastructure heartbeat snapshots",
+    "features": [],
+    "fixes": []
   }
 ]
