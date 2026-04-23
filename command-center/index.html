@@ -1550,7 +1550,12 @@
       const lastActive = [...buckets].reverse().find(b => b.count > 0);
       const lastCallTs = lastActive ? lastActive.t + data.bucket_seconds : null;
       const lastCallAge = lastCallTs ? now - lastCallTs : null;
-      const isLive = activeNow && lastCallAge !== null && lastCallAge < 180;
+      // "Live" = session running AND a tool call was observed within the
+      // heartbeat snapshot's own freshness window (2 bucket_seconds + grace).
+      // The deployed heartbeat.json lags until the watchdog commits, so a
+      // 6-minute age is still consistent with an actively-running session.
+      const freshnessWindow = data.bucket_seconds * 2 + 300; // 10 min at default
+      const isLive = activeNow && lastCallAge !== null && lastCallAge < freshnessWindow;
 
       const statusDot = activeNow
         ? `<span class="drift-pulse-dot" style="background:${hueFor(lastStart.session)};"></span>`
@@ -1573,9 +1578,17 @@
         pulse.style.display = 'none';
       }
 
+      // Peak 5-min burst in the last hour — shows "it was hammering N
+      // tools/min" as a sign of real activity, not a trickle.
+      const hourStart = now - 3600;
+      const recentBuckets = buckets.filter(b => b.t >= hourStart);
+      const peakBurst = recentBuckets.length ? Math.max(0, ...recentBuckets.map(b => b.count)) : 0;
+      const peakLabel = peakBurst > 0 ? `${peakBurst} / 5min` : 'idle hour';
+
       stats.innerHTML = [
         statCard('Status', statusValue, activeNow ? hueFor(lastStart.session) : '#6e7681'),
         statCard('Last tool call', lastCallLabel, isLive ? hueFor(lastStart.session) : '#6e7681'),
+        statCard('Peak burst (1h)', peakLabel, peakBurst > 0 ? hueFor((lastActive || {type: 'other'}).type) : '#6e7681'),
         statCard('Since', sinceLabel, '#8b949e'),
         statCard('Tool calls (4h)', total4h.toLocaleString(), '#3fb950'),
         statCard('Tool calls (24h)', total24.toLocaleString(), '#3fb950'),
