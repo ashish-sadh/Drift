@@ -4,26 +4,40 @@
 
 ---
 
-Over the seven days before I sat down to write this, a loop I built around a pair of language models pushed **409 commits** into an iOS app's repo. It closed **thirty bug issues** — most filed by real people on TestFlight — resolving the shallower ones in about eleven minutes on average. It wrote **nine product-review PRs**, studying the competition and telling me where the app was losing ground. It shipped **three TestFlight builds**.
+If you know me well, you know I've had a tracking problem for the better part of a decade. Food, workouts, weight, sleep, mood, HRV, glucose when I'm wearing a CGM, a DEXA once a year, annual lab panels. I've cycled through enough apps over the years to easily spend twenty to thirty dollars a month on health tracking alone. The money was never really the problem. The problem was that my data lived in eight different apps and nothing correlated — *did yesterday's carb load actually spike my glucose? does last week's DEXA line up with what the food log says I ate?* — without me sitting down with a spreadsheet.
 
-I wrote none of that code. I read some of the reviews.
+So I did what people on the internet are suddenly doing. I decided to build my own.
 
-The app is called **Drift**. It's an iOS health tracker on twenty-five phones, all by word of mouth — a handful of friends, a couple of teammates, some family. Two of them traded a $20-a-month health-app subscription for a copy of this one. The app runs entirely on their phones; nothing of theirs hits my servers, because I don't have any. My cost to keep it running is zero. In return, they find the subtle bugs I miss and push back on the places where the UI lacks taste.
+Language models have made this new. For the first time in my career, anyone with an outcome in mind can reach a working app over a few weekends. You don't have to be a mobile engineer. (I'm not one.) The question stopped being *"can I build this?"* and started being *"how do I want to build it?"*
+
+I knew I didn't want to build it the interactive way — sitting with Claude Code and vibe-coding until it produced something I liked. That works, and it's also a great time sink, and it doesn't let me sleep. I wanted the thing to be hands-off. I'd heard the pitches — AI teams, AI engineers, OpenClaude, multi-agent orchestrations with judges and tournaments — and they all sounded like more complexity than I needed for a personal app. So I started with the simplest possible thing: a bash `while true` around Claude Code. *Build the app, test it, ship it, repeat.* Geoffrey Huntley calls this a [Ralph loop](https://ghuntley.com/ralph/).
+
+And then, over months, the Ralph loop built its own harness. I steered, nudged, fixed, re-steered. Every time it went off the rails, I added a hook, a reconciliation step, a persona, a check — something that would catch the class of mistake it had just made. The harness stabilized slowly. It is where most of my engineering effort actually went, and it is the thing I'm writing about.
+
+The app — **Drift** — is the visible output. A small language model runs on-device, wrapped in a carefully distilled context layer, with a bring-your-own-key path for the one thing I genuinely need a frontier model for (photo meal logging). Zero server on my end, zero cost to run. Food logging by chat, meal capture by photo, AI chat that correlates data across your history, on-device BI over Apple Health and the sensors that actually matter — DEXA, CGM, lab panels. Built, line by line, by a Ralph loop with me as the steersman.
+
+The harness ships most of Drift's updates while I sleep. In the seven days before I sat down to write this, it pushed **409 commits** into the repo, closed **thirty bug issues** (most from real people on TestFlight, average close time around eleven minutes), ran **nine product reviews** studying competitors, and shipped **three TestFlight builds**. I wrote none of that code. I read some of the reviews.
+
+Twenty-five friends and friends-of-friends use Drift now. That wasn't the plan, but it turned out to matter. Somewhere along the way I realized the real bottleneck on the whole system wasn't compute or context window — it was *human attention, and the memory of taste that attention leaves behind*. The app improves when a real person tells me *"this reply was wrong"* or *"this UI feels off."* That kind of signal is rare, and there is only one of me. The twenty-five are how I scale taste; their bug reports and reactions are what the Ralph loop now listens to. Scaling that further — without the inbox of bug reports becoming the only steering signal — is the thing I'm still learning.
 
 Two things sit side by side in this story, and it's worth naming them right now:
 
 - **Drift** is the iOS app. The thing users touch. It lives on my friends' phones.
-- **Drift Control** is the *autonomous development loop* that builds Drift. The supervisor script, the Claude Code sessions, the hooks, the personas, the dashboard — all the scaffolding I wired around the language models so that the paragraph above is a boring Tuesday. I touch this. Users don't.
+- **Drift Control** is the *autonomous development loop* that builds Drift. The supervisor script, the Claude Code sessions, the hooks, the personas, the dashboard — all the scaffolding that turned a bash `while true` into something I trust to run for weeks without me at the wheel. I touch this. Users don't.
 
 Drift is the dish. Drift Control is the kitchen. This post is mostly about the kitchen.
 
-The inner loop of Drift Control is what Geoffrey Huntley calls a [Ralph loop](https://ghuntley.com/ralph/): a `while true` around an AI coding agent, one task per pass, progress persisted in git rather than in the model's memory. Ralph is the engine. This post is about everything you have to build *around* the engine so it keeps running honestly for weeks without you watching.
+What surprised me, building Drift Control, is how much it ended up *replicating the structural development cycle you'd find in any engineering org* — planning, execution, review, retrospective, the disciplines that keep quality honest and add rigor — just with the humans mostly replaced by language models and a handful of mechanical gates I built to keep them from drifting. Five patterns do the load-bearing work:
 
-It isn't news at this point that a language model will write a pile of working code if you few-shot it hard enough. That part is easy. What I find interesting — and what I think actually took the engineering — is what happens when you let the process run unattended for *months*, not minutes. What runs out first, in that mode, isn't compute or context window. It's **human attention**, and the taste that attention encodes. Most of what follows is machinery for making that scarce resource go further — scaffolding that ends up carrying what you'd normally call product judgment.
+1. **Ground truth, not memory.** Reconcile every tick against the durable store — git log, GitHub API, the filesystem. Never against what an earlier session claimed.
+2. **Hooks, not prose.** The rules the agent must not break are enforced by code that refuses the tool call, not by instructions in a Markdown file.
+3. **Atomic claim or nothing.** Peek-without-claim is a race; no `Edit` or `Write` fires unless the session is holding a GitHub issue marked `in-progress`.
+4. **Tool calls are the pulse.** A dedicated heartbeat — the piece I'm probably proudest of inventing in this whole setup — keeps the Ralph loop honest, stops the watchdog from killing sessions mid-thought, and lets me know from my phone at 11pm whether the line is moving.
+5. **The loop that fixes itself.** Personas that accumulate taste across fifty-four product reviews and steer it back on track when an LLM starts wandering; a process-feedback drain that turns systemic problems into infra tasks; a steering dial with six settings from *"don't touch it"* to *"take the wheel and chat 1:1 with the model myself."*
 
 (Claude Code is the agent runtime I happen to use. You could run the same pattern around Aider or OpenCode or Cursor's agent mode with some re-plumbing. The harness is what's load-bearing, not the runtime.)
 
-The harness, in my experience, is the more interesting engineering.
+The rest of this post is those five in detail, with stories. Then a week in the loop's life as a picture, the dial, the unresolved bits, and the zip file.
 
 ---
 
