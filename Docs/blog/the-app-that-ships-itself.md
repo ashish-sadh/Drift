@@ -4,7 +4,7 @@
 
 ---
 
-If you've known me for a few years, you've watched me cycle through every health tracker on the App Store, fill out too many spreadsheets, and explain my HRV at dinner to people who didn't ask. **Drift**, the iOS app I eventually built to replace all of that, is the natural endpoint.
+If you've known me for a few years, you've watched me cycle through many health trackers on the App Store and explain my HRV at dinner to people who didn't ask. **Drift**, the iOS app I eventually built to replace all of that, is the natural endpoint — a personal app that a few friends ended up getting invested in too. They'd seen me geek out long enough about how sleep, heart rate, CGM glucose, and DEXA body-comp numbers correlate, and they trusted that if I was going to build a health app, I'd be obsessed enough to make it good. With language models democratizing the power of software to almost anyone, I couldn't not build it. A couple of friends adopted it as their primary tracker and each saved themselves a ~$20-a-month subscription elsewhere; since Drift runs entirely on the user's phone, my cost to keep any of it running is zero. In return, they find the subtle bugs I miss, push back on the places where the UI lacks taste, and every fix lands back as an improvement for all of us.
 
 This post isn't really about Drift, though — or it is, in the way a post about a restaurant is about the kitchen. What I want to write about is the *kitchen*: the autonomous development loop I wired around a pair of language models to actually ship Drift, one iOS build at a time, without me at the stove.
 
