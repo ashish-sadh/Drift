@@ -14,9 +14,13 @@ It's on twenty-five phones now, all by word of mouth.
 
 This post isn't really about Drift, though — or it is, in the way a post about a restaurant is about the kitchen. What I want to write about is the *kitchen*: the autonomous development loop I wired around a pair of language models to actually ship Drift, mostly at the table while the kitchen ran itself.
 
-Which is to say: tinkering in spare hours, I can ship a production app by putting almost all of my engineering attention not on the app itself but on the **harness** — the scaffolding that directs the language models, catches their mistakes, keeps their work visible, and lets a human spend attention only on the things that need it.
+It isn't news at this point that a language model will write a pile of working code if you few-shot it hard enough. That part is easy. What I find interesting — and what I think actually took the engineering — is what happens when you let the process run unattended for *months*, not minutes. The inner loop at the center of Drift Control is what Geoffrey Huntley named a [Ralph loop](https://ghuntley.com/ralph/): a `while true` around an AI coding agent, one task per pass, progress persisted in git, not in the model's memory. Ralph is the engine. The question this essay is really about is what you have to build *around* the engine so the whole thing keeps running honestly without you watching.
 
-The harness, in my experience, is the more interesting engineering.
+What runs out first, in that unattended mode, isn't compute or context window. It's **human attention** — and the taste that attention encodes. Most of what follows is machinery for making that scarce resource go further: scaffolding that ends up carrying what you'd normally call product judgment.
+
+(Claude Code is the agent runtime I happen to use. You could run the same pattern around a different one — Aider, OpenCode, Cursor's agent mode — with some re-plumbing. The harness is what's load-bearing here, not the runtime.)
+
+The harness, in my experience, is the more interesting engineering. Tinkering in spare hours, I can ship a production app to real users by putting almost all of my engineering attention not on the app itself but on the scaffolding that directs the language models, catches their mistakes, and lets a human spend attention only on the things that need it.
 
 ---
 
@@ -24,9 +28,7 @@ The harness, in my experience, is the more interesting engineering.
 
 **Taste lives in the scaffolding, and human attention is what it spends.**
 
-If you've followed agentic coding at all, you've seen [Geoffrey Huntley's Ralph loop](https://ghuntley.com/ralph/) — a tiny bash loop that re-runs an AI coding agent until its task list is empty. A minimal `while true` that picks one task from a file, does it, exits, and starts a fresh process. Progress persists in git and files, not in the model's memory. It is elegant, and it has shipped real work overnight. Ralph is the engine.
-
-What I'm about to describe, **Drift Control**, is Ralph grown up. The inner loop is still a simple while-true. But around it is a layer of scaffolding — a supervisor tree, a domain-specific state machine, enforcement hooks, personas that accumulate taste, a dashboard I can read on my phone — that lets the loop run unattended not for hours, but for *weeks*. If Ralph is the engine, Drift Control is the engine plus the dashboard, the oil light, and the seatbelt.
+**Drift Control**, as I said above, is Ralph grown up. The inner loop is still a simple while-true. Around it is a layer of scaffolding — a supervisor tree, a domain-specific state machine, enforcement hooks, personas that accumulate taste, a dashboard I can read on my phone — that lets the loop run unattended not for hours, but for *weeks*. If Ralph is the engine, Drift Control is the engine plus the dashboard, the oil light, and the seatbelt.
 
 Two observations became obvious after a few months of running this.
 
