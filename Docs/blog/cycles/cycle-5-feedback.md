@@ -35,3 +35,5 @@
 6. **Add a funny line about Drift** in the opening / early part of the essay — something that lands as humor, not brag. (Context: user asked for "brief but complete intro and funny line from drift".)
 
 7. **Crisp, small, solid — no reader gets lost.** The post should be short and dense with signal, not sprawling. Every section has to earn its place. Reader should never be confused about what they're reading or why.
+
+8. **Don't say "thesis."** Use a more natural word — "the point," "the idea," "what I've come to believe," etc.
