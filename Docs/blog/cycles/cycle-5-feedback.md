@@ -9,3 +9,5 @@
 2. **Cut "No server to hold your data hostage."** Dramatic phrasing. Find a neutral alternative or drop the line.
 
 3. **Add "open source" to the "free for everyone" line.** Drift is free AND open source. Make that explicit in the opening.
+
+4. **Time-window phrasing:** change any "hours and days" framing → **"months"**. The loop has been running for months, not hours/days.
