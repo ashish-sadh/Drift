@@ -8,7 +8,7 @@ If you've known me for a few years, you've watched me cycle through many health 
 
 This post isn't really about Drift, though — or it is, in the way a post about a restaurant is about the kitchen. What I want to write about is the *kitchen*: the autonomous development loop I wired around a pair of language models to actually ship Drift, one iOS build at a time, without me at the stove.
 
-Over the seven days before I sat down to write this, that loop pushed **409 commits** into Drift's repo. It shipped **nine user-visible features**. It closed **thirty distinct bug issues** — most of them filed by real beta users — resolving the shallower ones in an average of roughly eleven minutes. It published **six daily exec reports** as merged pull requests. It ran **nine full product reviews**, studying competitors and telling me, the developer, where I was falling behind. And it shipped **three TestFlight builds**.
+Over the seven days before I sat down to write this, that loop pushed **409 commits** into Drift's repo. It shipped **nine features**. It closed **thirty distinct bug issues** — most of them filed by real beta users — resolving the shallower ones in an average of roughly eleven minutes. It ran **nine full product reviews**, studying competitors and telling me, the human, where I was falling behind. And it shipped **three TestFlight builds**.
 
 I wrote none of that code. I read some of the reviews.
 
@@ -243,9 +243,8 @@ Every principle above is distilled from actual traces the harness left behind. W
   Drift Control · last 7 days
   ─────────────────────────────────────────────
     409   commits pushed (0 written by me)
-      9   user-visible features shipped
+      9   features shipped
      30   distinct bug issues closed (most from beta users)
-      6   daily exec reports merged as PRs
       9   product reviews (competitor studies)
       3   TestFlight builds published
 
