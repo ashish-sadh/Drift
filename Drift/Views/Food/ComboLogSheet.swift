@@ -186,17 +186,14 @@ struct ComboLogSheet: View {
                                fatG: combo.fatG, fiberG: combo.fiberG,
                                mealType: mealType, servingSizeG: combo.servingSize, servings: 1)
         } else {
-            for item in checkedItems {
-                viewModel.quickAdd(name: item.recipeItem.name,
-                                   calories: item.totalCal,
-                                   proteinG: item.totalP,
-                                   carbsG: item.totalC,
-                                   fatG: item.totalF,
-                                   fiberG: item.recipeItem.fiberG * item.servings,
-                                   mealType: mealType,
-                                   servingSizeG: item.recipeItem.servingSizeG,
-                                   servings: item.servings)
-            }
+            // Shared helper: one FoodEntry per checked item, scaled by the
+            // per-item stepper. AI chat's QuickAddView expand path uses the
+            // same helper so the diary rows match.
+            let perItem = Dictionary(uniqueKeysWithValues:
+                checkedItems.map { ($0.recipeItem.id, $0.servings) })
+            viewModel.logRecipeItems(checkedItems.map { $0.recipeItem },
+                                     perItemServings: perItem,
+                                     mealType: mealType)
         }
         try? AppDatabase.shared.trackFoodUsage(name: combo.name, foodId: combo.id, servings: 1,
                                                calories: combo.calories, proteinG: combo.proteinG,

@@ -270,6 +270,34 @@ final class FoodLogViewModel {
         logFood(food, servings: lastUsed, mealType: autoMealType)
     }
 
+    /// Log each RecipeItem as its own FoodEntry — one row per ingredient.
+    /// Shared helper so AI-chat "log breakfast avocado toast and coffee"
+    /// (QuickAddView) and Food-tab re-log of a saved combo (ComboLogSheet)
+    /// produce the same diary rows. `perItemServings` lets ComboLogSheet pass
+    /// per-checkbox servings; `recipeServings` lets QuickAddView scale the
+    /// whole stack. Callers that don't need either just pass `items` and
+    /// `mealType`.
+    func logRecipeItems(_ items: [QuickAddView.RecipeItem],
+                        recipeServings: Double = 1,
+                        perItemServings: [UUID: Double] = [:],
+                        mealType: MealType,
+                        loggedAt: String? = nil) {
+        for item in items {
+            let s = (perItemServings[item.id] ?? 1) * recipeServings
+            guard s > 0 else { continue }
+            quickAdd(name: item.name,
+                     calories: item.calories * s,
+                     proteinG: item.proteinG * s,
+                     carbsG: item.carbsG * s,
+                     fatG: item.fatG * s,
+                     fiberG: item.fiberG * s,
+                     mealType: mealType,
+                     loggedAt: loggedAt,
+                     servingSizeG: item.servingSizeG * s,
+                     servings: 1)
+        }
+    }
+
     func quickAdd(name: String, calories: Double, proteinG: Double, carbsG: Double, fatG: Double, fiberG: Double, mealType: MealType, loggedAt: String? = nil, servingSizeG: Double = 0, servings: Double = 1, date: String? = nil) {
         do {
             let date = date ?? dateString

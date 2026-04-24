@@ -175,7 +175,16 @@ struct QuickAddView: View {
                     items = initialItems
                     recipeName = initialName
                 }
-                expandOnLog = initialExpandOnLog
+                // For NEW multi-item logs (from AI chat), default to expanding
+                // each ingredient into its own diary entry — matches
+                // ComboLogSheet behaviour and prevents the "logged breakfast
+                // with 2 items, only saw one in diary" surprise. Editing a
+                // saved recipe uses whatever `initialExpandOnLog` passed in.
+                if editingRecipeID != nil {
+                    expandOnLog = initialExpandOnLog
+                } else {
+                    expandOnLog = initialExpandOnLog || initialItems.count > 1
+                }
             }
             .sheet(isPresented: $showingIngredientPicker) {
                 IngredientPickerView { item in items.append(item) }
@@ -240,23 +249,14 @@ struct QuickAddView: View {
         let totalServing = items.reduce(0.0) { $0 + $1.servingSizeG }
         let loggedAtStr = ISO8601DateFormatter().string(from: recipeLogTime)
 
-        // If expandOnLog: insert one entry per ingredient × servings.
-        // Otherwise: existing aggregated behavior.
+        // If expandOnLog: insert one entry per ingredient × servings —
+        // same helper ComboLogSheet uses, so the diary rows match across
+        // entry points. Otherwise: aggregated single entry.
         if effectiveExpand {
-            for item in items {
-                viewModel.quickAdd(
-                    name: item.name,
-                    calories: item.calories * servings,
-                    proteinG: item.proteinG * servings,
-                    carbsG: item.carbsG * servings,
-                    fatG: item.fatG * servings,
-                    fiberG: item.fiberG * servings,
-                    mealType: viewModel.autoMealType,
-                    loggedAt: loggedAtStr,
-                    servingSizeG: item.servingSizeG * servings,
-                    servings: 1
-                )
-            }
+            viewModel.logRecipeItems(items,
+                                     recipeServings: servings,
+                                     mealType: viewModel.autoMealType,
+                                     loggedAt: loggedAtStr)
         } else {
             viewModel.quickAdd(name: name, calories: perServingCal, proteinG: perServingP,
                                carbsG: perServingC, fatG: perServingF, fiberG: perServingFb,

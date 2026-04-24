@@ -80,17 +80,35 @@ struct CombosView: View {
         let totalP = items.reduce(0) { $0 + $1.proteinG }
 
         return HStack(spacing: 12) {
-            VStack(alignment: .leading, spacing: 3) {
-                HStack(spacing: 4) {
-                    if isPinned(combo) {
-                        Image(systemName: "pin.fill").font(.caption2).foregroundStyle(.orange)
+            // Tap the label area → edit. Keeps the iOS convention of row-tap =
+            // detail/edit, trailing accessory = primary action. Swipe still
+            // works for power users.
+            Button { edit(combo) } label: {
+                VStack(alignment: .leading, spacing: 3) {
+                    HStack(spacing: 4) {
+                        if isPinned(combo) {
+                            Image(systemName: "pin.fill").font(.caption2).foregroundStyle(.orange)
+                        }
+                        Text(combo.name).font(.subheadline.weight(.medium)).lineLimit(1)
                     }
-                    Text(combo.name).font(.subheadline.weight(.medium)).lineLimit(1)
+                    Text(items.isEmpty ? combo.macroSummary : "\(items.count) items · \(Int(totalCal)) cal · \(Int(totalP))g P")
+                        .font(.caption).foregroundStyle(.secondary)
                 }
-                Text(items.isEmpty ? combo.macroSummary : "\(items.count) items · \(Int(totalCal)) cal · \(Int(totalP))g P")
-                    .font(.caption).foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contentShape(Rectangle())
             }
-            Spacer()
+            .buttonStyle(.plain)
+
+            Button { edit(combo) } label: {
+                Image(systemName: "pencil")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+                    .padding(8)
+                    .background(Theme.cardBackgroundElevated, in: Circle())
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Edit \(combo.name)")
+
             Button {
                 comboToLog = combo
             } label: {
