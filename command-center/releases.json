@@ -1843,5 +1843,12 @@
       "USDAFoodService stops discarding foodPortions from API responses — per-unit gram weights from USDA now propagate into Food so online fallback foods get correct piece/cup/tbsp.",
       "OpenFoodFacts `piecesPerServing` now flows through to Food.pieceSizeG (was dropped at the adapter seam)."
     ]
+  },
+  {
+    "build": 173,
+    "date": "2026-04-24T11:30:00-07:00",
+    "description": "TestFlight build 173 — sprint planning cycle 5965 (no code changes, version bump)",
+    "features": [],
+    "fixes": []
   }
 ]
