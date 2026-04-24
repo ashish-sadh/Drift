@@ -71,6 +71,31 @@ A small model is not a smart model, but it doesn't need to be. Small models are 
 
 So I broke Drift down into roughly twenty tools. Each tool sits on top of one slice of your data — food logs, weight history, workouts, Apple Health (weight, workouts, CGM glucose), a goal-projection calculator, a cross-domain correlation query, a trend projector — and runs the analytics itself, in Swift, deterministically. The small model's job isn't to *do* the analysis; it's to read the query, pick the right tool, fill its parameters, and route the structured result back to the UI. Almost all of Drift's perceived intelligence is really the tools underneath doing the real work, with the model acting as router.
 
+```mermaid
+flowchart TD
+    U["user query<br/>'log biryani 300g' · 'does rice spike my glucose?'"] --> CTX
+    subgraph CTX["context layer — on-device"]
+        T0["tier 0: deterministic rules"]
+        T1["tier 1: normalize input"]
+        T2["tier 2: pick 1 of 20 tools"]
+        T3["tier 3: compose answer"]
+        T0 --> T1 --> T2 --> T3
+    end
+    CTX --> LLM["small local LLM"]
+    CTX --> TOOLS
+    subgraph TOOLS["on-device tools"]
+        X1["food DB"]
+        X2["analytics service"]
+        X3["Apple Health: weight,<br/>CGM, workouts"]
+        X4["goal projection"]
+        X5["cross-domain correlation"]
+    end
+    LLM --> OUT["structured result<br/>→ UI confirmation card"]
+    TOOLS --> OUT
+    P["photo of plate"] -. "BYOK (optional)" .-> REM["frontier model via<br/>your Anthropic / OpenAI /<br/>Google key"]
+    REM -. macros .-> CTX
+```
+
 The context layer wrapping the model is four tiers deep. Tier 0 handles instant, deterministic queries — the kind a regex can answer. Tier 1 normalizes the input: synonyms, abbreviations, units. Tier 2 picks the right tool from the twenty. Tier 3 composes the answer and streams it back. Most queries get answered by tiers 0–2 without the model seeing anything. By the time the model runs, the hard work of deciding *what* to look up is already done.
 
 That's why this works. A small model given the right five facts at the right moment behaves beautifully. A small model given twenty thousand tokens of noise does not, and no amount of clever prompting will save it. The scaffolding saves it.
@@ -84,6 +109,32 @@ There is one place in Drift where the tradeoff favors a frontier model: **photo 
 ## same pattern, dev loop edition
 
 The harness around Claude Code is not an elaborate multi-agent orchestration with judges and tournaments. It's ordinary language-model sessions, firing sequentially on my laptop — no sandboxes, no parallel worktrees — wrapped in enough scaffolding that ordinary sessions do real work and correct themselves before the problems reach me.
+
+```mermaid
+flowchart TB
+    L["launchd<br/>(macOS)<br/>KeepAlive = true"] --> W
+    subgraph WD["Drift Control — one laptop"]
+        W["watchdog<br/>(~30s tick)"]
+        W --> PS["planning session<br/>(every 6h)"]
+        W --> SS["senior session<br/>(complex work)"]
+        W --> JS["junior session<br/>(simple work)"]
+    end
+    subgraph GH["GitHub — durable state"]
+        ISSUES[("sprint-task queue<br/>labels: P0, in-progress,<br/>design-doc, report, …")]
+        PRS[("PRs: features, bug fixes,<br/>exec reports, product reviews")]
+    end
+    PS -. drain / triage .-> ISSUES
+    SS -. claim → code → PR .-> ISSUES
+    JS -. claim → code → PR .-> ISSUES
+    SS -. opens .-> PRS
+    JS -. opens .-> PRS
+    PS -. opens .-> PRS
+    W -- heartbeat snapshot --> DASH["Command Center<br/>(GitHub Pages)"]
+    H["PreToolUse / PostToolUse hooks<br/>require-claim · sprint-cap ·<br/>session-heartbeat · guard-testflight · pause-gate"]
+    PS -.- H
+    SS -.- H
+    JS -.- H
+```
 
 The scaffolding is made of five patterns, each learned the hard way.
 
