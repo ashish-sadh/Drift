@@ -538,5 +538,20 @@ enum Migrations {
                 t.add(column: "response_text", .text)
             }
         }
+
+        // v34: Per-food unit-override gram weights. When set, ServingUnit.swift
+        // uses these measured values instead of synthesizing piece/cup/tbsp/scoop/bowl
+        // from servingSize — see Docs/audits/unit-conversions-audit-2026-04-24.md.
+        // All nullable; absence keeps legacy behaviour (and, for `piece`, now gates
+        // the unit off instead of faking it from servingSize).
+        migrator.registerMigration("v34_food_unit_overrides") { db in
+            try db.alter(table: "food") { t in
+                t.add(column: "piece_size_g", .double)
+                t.add(column: "cup_size_g", .double)
+                t.add(column: "tbsp_size_g", .double)
+                t.add(column: "scoop_size_g", .double)
+                t.add(column: "bowl_size_g", .double)
+            }
+        }
     }
 }

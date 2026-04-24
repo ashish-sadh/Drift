@@ -15,6 +15,28 @@ enum USDAFoodService {
         let fatG: Double
         let fiberG: Double
         let servingSizeG: Double
+        /// Per-unit gram weights extracted from USDA's `foodPortions` array.
+        /// Drops the 100g-synthesised defaults that caused the strawberry bug
+        /// (audit 2026-04-24): when USDA returns `1 medium = 12g`, we honour
+        /// that instead of forcing `ServingUnit` to invent `piece = 100g`.
+        let pieceSizeG: Double?
+        let cupSizeG: Double?
+        let tbspSizeG: Double?
+
+        init(name: String, calories: Double, proteinG: Double, carbsG: Double,
+             fatG: Double, fiberG: Double, servingSizeG: Double,
+             pieceSizeG: Double? = nil, cupSizeG: Double? = nil, tbspSizeG: Double? = nil) {
+            self.name = name
+            self.calories = calories
+            self.proteinG = proteinG
+            self.carbsG = carbsG
+            self.fatG = fatG
+            self.fiberG = fiberG
+            self.servingSizeG = servingSizeG
+            self.pieceSizeG = pieceSizeG
+            self.cupSizeG = cupSizeG
+            self.tbspSizeG = tbspSizeG
+        }
     }
 
     private static let maxRequestsPerSession = 50
@@ -61,7 +83,10 @@ enum USDAFoodService {
 
             guard cal > 0 else { return nil }
 
-            // USDA gives per 100g; use 100g as serving
+            let portions = (food["foodPortions"] as? [[String: Any]]) ?? []
+            let (piece, cup, tbsp) = extractUnitWeights(from: portions)
+
+            // USDA nutrients are per 100g; use 100g as the normalised serving.
             return FoodItem(
                 name: name.capitalized,
                 calories: cal,
@@ -69,8 +94,43 @@ enum USDAFoodService {
                 carbsG: carbs,
                 fatG: fat,
                 fiberG: fiber,
-                servingSizeG: 100
+                servingSizeG: 100,
+                pieceSizeG: piece,
+                cupSizeG: cup,
+                tbspSizeG: tbsp
             )
         }
+    }
+
+    /// Pull per-unit gram weights out of USDA's `foodPortions` array.
+    /// Example for strawberries:
+    ///   [{"amount":1,"modifier":"cup, sliced","gramWeight":166},
+    ///    {"amount":1,"modifier":"medium (1-1/4\" dia)","gramWeight":12}, ...]
+    /// Returns `(pieceG, cupG, tbspG)` as nil when no sensible portion matches.
+    nonisolated static func extractUnitWeights(from portions: [[String: Any]]) -> (Double?, Double?, Double?) {
+        func weight(for predicate: (String) -> Bool) -> Double? {
+            for p in portions {
+                guard let mod = (p["modifier"] as? String)?.lowercased() else { continue }
+                let amount = (p["amount"] as? Double) ?? 1
+                let g = (p["gramWeight"] as? Double) ?? 0
+                guard amount > 0, g > 0, predicate(mod) else { continue }
+                return g / amount
+            }
+            return nil
+        }
+
+        let piece = weight(for: { mod in
+            mod.contains("medium") || mod == "each" || mod.contains(" each") ||
+            mod.hasPrefix("1 ") || mod.contains("whole") || mod.contains("berry")
+        })
+        let cup = weight(for: { mod in
+            // Prefer "cup, sliced" / "cup, chopped" over "1 cup" to avoid
+            // duplicate matches; the simpler "cup" comparator still works.
+            mod.contains("cup")
+        })
+        let tbsp = weight(for: { mod in
+            mod.contains("tbsp") || mod.contains("tablespoon")
+        })
+        return (piece, cup, tbsp)
     }
 }

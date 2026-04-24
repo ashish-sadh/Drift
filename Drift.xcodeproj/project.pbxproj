@@ -53,6 +53,7 @@
 		2CCF5E1D415E462AE9997DD4 /* DashboardViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0C555B3F9005A7C75FAAD51 /* DashboardViewModel.swift */; };
 		2CF22C2420F9E22D2F989C70 /* NotificationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86B648E00469832A2C8FB56 /* NotificationServiceTests.swift */; };
 		2DDEA9907FA6338488A8E1CD /* AITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E7517E5B4779CBBE1C7284 /* AITests.swift */; };
+		2F25E1E95107ADEC87765F7B /* UnitConversionEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 722CE8B3925ADAFCD540ED0C /* UnitConversionEndToEndTests.swift */; };
 		307CDADBBCCE0A3FD121817C /* DefaultTemplates.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5D4BF27A41CD9659EFF50036 /* DefaultTemplates.swift */; };
 		30C7E754FFFD0B3E4FD62CC6 /* PlantPointsCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC7D489024FD036D6FA417EA /* PlantPointsCardView.swift */; };
 		30F7D3160F146CA92713AD13 /* MoreTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F6D2AA89F46A33EAE39DEAC /* MoreTabView.swift */; };
@@ -477,6 +478,7 @@
 		6F84469D20EBBA0BD037FBCA /* WorkoutService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutService.swift; sourceTree = "<group>"; };
 		706EF63B663E60DF825752E3 /* DEXAService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DEXAService.swift; sourceTree = "<group>"; };
 		71EB5C65191BD3C3D1168D29 /* SupplementServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementServiceTests.swift; sourceTree = "<group>"; };
+		722CE8B3925ADAFCD540ED0C /* UnitConversionEndToEndTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitConversionEndToEndTests.swift; sourceTree = "<group>"; };
 		72ADCE850F5C06D2C23A57DC /* SpeechRecognitionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognitionService.swift; sourceTree = "<group>"; };
 		733818AD9667283F81C5D1C5 /* DashboardView+Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DashboardView+Cards.swift"; sourceTree = "<group>"; };
 		734A43F9D7C58B37BC8B6C07 /* ChatLatencyBenchmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatLatencyBenchmark.swift; sourceTree = "<group>"; };
@@ -810,6 +812,7 @@
 				71EB5C65191BD3C3D1168D29 /* SupplementServiceTests.swift */,
 				40634DDEB9C53BD0146A628A /* TDEEEstimatorTests.swift */,
 				E1A5DA3E3543A99260250279 /* UIFlowTests.swift */,
+				722CE8B3925ADAFCD540ED0C /* UnitConversionEndToEndTests.swift */,
 				EDAD5133BD684B10BEDC1131 /* USDAFallbackTests.swift */,
 				E5AA88C83E11DABCCFDAF6C4 /* VoiceTranscriptionPostFixerTests.swift */,
 				550B90AE65B6BF4C31B62382 /* WeeklySummaryRoutingTests.swift */,
@@ -1631,6 +1634,7 @@
 				923230686AD033F5F7025F94 /* TDEEEstimatorTests.swift in Sources */,
 				98FF97CFE71A6BBCFF976259 /* UIFlowTests.swift in Sources */,
 				11DB8618758D582670EBF2F8 /* USDAFallbackTests.swift in Sources */,
+				2F25E1E95107ADEC87765F7B /* UnitConversionEndToEndTests.swift in Sources */,
 				E19A1D1FE5326EACA1C51253 /* VoiceTranscriptionPostFixerTests.swift in Sources */,
 				CA3F2052B0B3E9E56D7AF064 /* WeeklySummaryRoutingTests.swift in Sources */,
 				CBACE89C978AA0377081831E /* WeightServiceAPITests.swift in Sources */,
@@ -1769,7 +1773,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = DriftWidget/DriftWidget.entitlements;
-				CURRENT_PROJECT_VERSION = 169;
+				CURRENT_PROJECT_VERSION = 171;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				INFOPLIST_FILE = DriftWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1789,7 +1793,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = DriftWidget/DriftWidget.entitlements;
-				CURRENT_PROJECT_VERSION = 169;
+				CURRENT_PROJECT_VERSION = 171;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				INFOPLIST_FILE = DriftWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1847,7 +1851,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Drift/Drift.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 169;
+				CURRENT_PROJECT_VERSION = 171;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1980,7 +1984,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Drift/Drift.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 169;
+				CURRENT_PROJECT_VERSION = 171;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

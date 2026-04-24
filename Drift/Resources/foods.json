@@ -1249,7 +1249,8 @@
     "ingredients": [
       "Grapes"
     ],
-    "nova_group": 1
+    "nova_group": 1,
+    "piece_size_g": 5
   },
   {
     "name": "Papaya",
@@ -1294,7 +1295,8 @@
     "ingredients": [
       "Blueberries"
     ],
-    "nova_group": 1
+    "nova_group": 1,
+    "piece_size_g": 1.5
   },
   {
     "name": "Strawberries",
@@ -1309,7 +1311,8 @@
     "ingredients": [
       "Strawberries"
     ],
-    "nova_group": 1
+    "nova_group": 1,
+    "piece_size_g": 12
   },
   {
     "name": "Dates (2 pieces)",
@@ -2738,7 +2741,8 @@
     "ingredients": [
       "Raspberries"
     ],
-    "nova_group": 1
+    "nova_group": 1,
+    "piece_size_g": 2.5
   },
   {
     "name": "Cherries",
@@ -2753,7 +2757,8 @@
     "ingredients": [
       "Cherries"
     ],
-    "nova_group": 1
+    "nova_group": 1,
+    "piece_size_g": 8
   },
   {
     "name": "Dates (medjool)",
@@ -5098,7 +5103,7 @@
     "nova_group": 3
   },
   {
-    "name": "A\u00e7a\u00ed Bowl (medium)",
+    "name": "Açaí Bowl (medium)",
     "category": "US Staples",
     "serving_size": 300,
     "serving_unit": "g",
@@ -5108,7 +5113,7 @@
     "fat_g": 18,
     "fiber_g": 8,
     "ingredients": [
-      "A\u00e7a\u00ed Bowl (medium)"
+      "Açaí Bowl (medium)"
     ],
     "nova_group": 3
   },
@@ -7169,7 +7174,8 @@
     "ingredients": [
       "Strawberries, Fresh"
     ],
-    "nova_group": 3
+    "nova_group": 3,
+    "piece_size_g": 12
   },
   {
     "name": "Sugar",
@@ -7589,7 +7595,8 @@
     "ingredients": [
       "Cherry Tomatoes (1 cup)"
     ],
-    "nova_group": 1
+    "nova_group": 1,
+    "piece_size_g": 17
   },
   {
     "name": "Grapes (1 cup)",
@@ -7604,7 +7611,8 @@
     "ingredients": [
       "Grapes (1 cup)"
     ],
-    "nova_group": 1
+    "nova_group": 1,
+    "piece_size_g": 5
   },
   {
     "name": "Watermelon (diced, 1 cup)",
@@ -9125,7 +9133,8 @@
     "ingredients": [
       "Frozen Mixed Berries (1 cup)"
     ],
-    "nova_group": 1
+    "nova_group": 1,
+    "piece_size_g": 2
   },
   {
     "name": "Dried Cranberries (1/4 cup)",
@@ -9788,7 +9797,7 @@
     "nova_group": 3
   },
   {
-    "name": "Costco A\u00e7a\u00ed Bowl (food court)",
+    "name": "Costco Açaí Bowl (food court)",
     "category": "Costco",
     "serving_size": 355,
     "serving_unit": "g",
@@ -9798,7 +9807,7 @@
     "fat_g": 19,
     "fiber_g": 7,
     "ingredients": [
-      "Costco A\u00e7a\u00ed Bowl (food court)"
+      "Costco Açaí Bowl (food court)"
     ],
     "nova_group": 3
   },
@@ -10493,7 +10502,7 @@
     "nova_group": 4
   },
   {
-    "name": "Starbucks Caff\u00e8 Latte (Grande, 2% milk)",
+    "name": "Starbucks Caffè Latte (Grande, 2% milk)",
     "category": "Beverages",
     "serving_size": 473,
     "serving_unit": "ml",
@@ -10503,7 +10512,7 @@
     "fat_g": 7,
     "fiber_g": 0,
     "ingredients": [
-      "Starbucks Caff\u00e8 Latte (Grande, 2% milk)"
+      "Starbucks Caffè Latte (Grande, 2% milk)"
     ],
     "nova_group": 3
   },
@@ -12582,7 +12591,8 @@
     "ingredients": [
       "Blackberries"
     ],
-    "nova_group": 1
+    "nova_group": 1,
+    "piece_size_g": 4.5
   },
   {
     "name": "Cantaloupe (cubed)",
@@ -21536,7 +21546,8 @@
     "ingredients": [
       "blueberries"
     ],
-    "nova_group": 1
+    "nova_group": 1,
+    "piece_size_g": 1.5
   },
   {
     "name": "Strawberries (1 cup)",
@@ -25155,7 +25166,7 @@
     "ingredients": [
       "fries",
       "cheese sauce",
-      "jalape\u00f1os",
+      "jalapeños",
       "sour cream"
     ],
     "nova_group": 4
@@ -28726,7 +28737,7 @@
       "beef",
       "onion",
       "tomato",
-      "jalape\u00f1o",
+      "jalapeño",
       "rosemary",
       "Ethiopian spices",
       "butter"
@@ -39728,7 +39739,7 @@
     "ingredients": [
       "tortilla chips",
       "cheddar cheese sauce",
-      "jalape\u00f1o"
+      "jalapeño"
     ],
     "nova_group": 4
   },
@@ -39746,7 +39757,7 @@
       "tomato",
       "onion",
       "cilantro",
-      "jalape\u00f1o",
+      "jalapeño",
       "lime"
     ],
     "nova_group": 1
@@ -40931,7 +40942,7 @@
       "onions",
       "garlic",
       "rosemary",
-      "jalape\u00f1o"
+      "jalapeño"
     ],
     "nova_group": 1
   },
@@ -41222,7 +41233,7 @@
     "nova_group": 2
   },
   {
-    "name": "Smorrebr\u00f8d",
+    "name": "Smorrebrød",
     "category": "Scandinavian",
     "serving_size": 120,
     "serving_unit": "g",

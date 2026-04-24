@@ -546,6 +546,10 @@ struct FoodSearchView: View {
         // OpenFoodFacts results
         for p in products {
             let servingG = p.servingSizeG ?? 100
+            let piece: Double? = {
+                if let n = p.piecesPerServing, n > 0 { return servingG / Double(n) }
+                return nil
+            }()
             var food = Food(
                 name: [p.name, p.brand].compactMap { $0 }.joined(separator: " - "),
                 category: "Online",
@@ -555,7 +559,8 @@ struct FoodSearchView: View {
                 proteinG: p.proteinG * servingG / 100,
                 carbsG: p.carbsG * servingG / 100,
                 fatG: p.fatG * servingG / 100,
-                fiberG: p.fiberG * servingG / 100
+                fiberG: p.fiberG * servingG / 100,
+                pieceSizeG: piece
             )
             if let saved = FoodService.saveScannedFood(&food) {
                 newFoods.append(saved)
@@ -573,7 +578,10 @@ struct FoodSearchView: View {
                 proteinG: item.proteinG,
                 carbsG: item.carbsG,
                 fatG: item.fatG,
-                fiberG: item.fiberG
+                fiberG: item.fiberG,
+                pieceSizeG: item.pieceSizeG,
+                cupSizeG: item.cupSizeG,
+                tbspSizeG: item.tbspSizeG
             )
             if let saved = FoodService.saveScannedFood(&food) {
                 newFoods.append(saved)

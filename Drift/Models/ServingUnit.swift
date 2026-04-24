@@ -166,6 +166,12 @@ extension ServingUnit {
 struct FoodUnit: Hashable {
     let label: String
     let gramsEquivalent: Double
+    /// True when `gramsEquivalent` comes from a flat-constant guess or an
+    /// ss-derived synthesis rather than a measured source (USDA foodPortions,
+    /// pieceGramsIfKnown, Food.*SizeG override). UI should render the gram
+    /// figure with "≈" so users see the difference between a known 240ml cup
+    /// and a guessed 15g tbsp. Audit 2026-04-24.
+    var isEstimate: Bool = false
 
     /// Default amount to prefill when a user selects this food in a picker.
     /// For fine-grained units (ml, g) a "1" default renders as 0 calories; prefill the
@@ -197,20 +203,30 @@ struct FoodUnit: Hashable {
                         "rajma", "chole", "paneer", "tofu", "quinoa", "pasta", "beans",
                         "peas", "corn", "yogurt", "curd", "poha", "upma", "khichdi"]
         if cupFoods.contains(where: { lower.contains($0) }) && primary.label != "cup" {
-            units.append(FoodUnit(label: "cup", gramsEquivalent: cupGrams(for: lower)))
+            let cupWeight = food.cupSizeG ?? cupGramsIfKnown(for: lower) ?? 240
+            units.append(FoodUnit(label: "cup", gramsEquivalent: cupWeight))
         }
 
         let tbspFoods = ["sauce", "chutney", "ketchup", "mayo", "dressing", "syrup",
                          "jam", "peanut butter", "almond butter", "honey", "mustard"]
         if tbspFoods.contains(where: { lower.contains($0) }) && primary.label != "tbsp" {
-            units.append(FoodUnit(label: "tbsp", gramsEquivalent: 15))
+            // `tbsp = 15g` is correct for oils and thin sauces, wrong for honey (~21g)
+            // and peanut butter (~32g). Prefer the per-food override when present.
+            let isOverride = food.tbspSizeG != nil
+            units.append(FoodUnit(label: "tbsp", gramsEquivalent: food.tbspSizeG ?? 15,
+                                  isEstimate: !isOverride))
         }
 
-        // Protein powder / supplements — add "scoop"
+        // Protein powder / supplements — add "scoop".
+        // `scoop = servingSize` is only right if the seed ss *is* one scoop;
+        // prefer an explicit override otherwise (whey tubs often seed ss = 100g).
         let scoopFoods = ["protein", "whey", "casein", "isolate", "creatine", "collagen",
                           "powder", "supplement", "pre-workout", "bcaa"]
         if scoopFoods.contains(where: { lower.contains($0) }) && !units.contains(where: { $0.label == "scoop" }) {
-            units.append(FoodUnit(label: "scoop", gramsEquivalent: food.servingSize > 0 ? food.servingSize : 30))
+            let scoopWeight = food.scoopSizeG ?? (food.servingSize > 0 ? food.servingSize : 30)
+            let isOverride = food.scoopSizeG != nil
+            units.append(FoodUnit(label: "scoop", gramsEquivalent: scoopWeight,
+                                  isEstimate: !isOverride))
         }
 
         // Coffee / tea — add "cup" (240ml)
@@ -232,7 +248,9 @@ struct FoodUnit: Hashable {
         // Oils — add spray, ml, tsp alongside tbsp (word boundary: "boiled" contains "oil")
         if words.contains("oil") || words.contains("ghee") {
             if !units.contains(where: { $0.label == "spray" }) {
-                units.append(FoodUnit(label: "spray", gramsEquivalent: 0.25)) // ~1 cal per spray
+                // Real sprays measure 0.2–0.5g with huge bottle-to-bottle variance;
+                // 0.25g is a guess, not a measurement — flag it.
+                units.append(FoodUnit(label: "spray", gramsEquivalent: 0.25, isEstimate: true))
             }
             if !units.contains(where: { $0.label == "tsp" }) {
                 units.append(FoodUnit(label: "tsp", gramsEquivalent: 5))
@@ -285,9 +303,19 @@ struct FoodUnit: Hashable {
             units.append(FoodUnit(label: "half", gramsEquivalent: 2.5))
         }
 
-        // Universal: include "piece" for foods where a "piece" makes sense
+        // Universal: include "piece" for foods where a "piece" makes sense.
         // Skip for: bulk foods (nuts, grains, powder, flour, oil, butter, rice, oats)
-        // and foods that already have a per-item unit (almond, cashew, egg, banana, etc.)
+        // and foods that already have a per-item unit (almond, cashew, egg, banana, etc.).
+        //
+        // GATING (audit 2026-04-24): previously this fallback synthesised
+        // `piece = food.servingSize`, which silently invented a gram weight
+        // whenever `servingSize` actually meant per-cup/per-bowl (e.g.
+        // Strawberries, Fresh at 150g = 1 cup → 5 "pieces" = 750g). We now
+        // only offer `piece` when the weight is backed by a trusted source:
+        //   1. `Food.pieceSizeG` override (nutritionist-/USDA-sourced), or
+        //   2. `pieceGramsIfKnown` dictionary match (fixed canonical produce).
+        // Otherwise no `piece` unit is offered — the user gets `g` / `cup`
+        // / `serving` instead of a fake.
         let countableLabels: Set<String> = ["piece", "egg", "banana", "apple", "orange", "meatball",
                                              "slice", "almond", "cashew", "pistachio", "half"]
         let bulkFoods = ["almond", "cashew", "pistachio", "walnut", "peanut", "nut", "seed",
@@ -298,11 +326,39 @@ struct FoodUnit: Hashable {
                          "hummus", "pesto", "jam", "honey", "syrup", "mayo"]
         let isBulk = bulkFoods.contains(where: { lower.contains($0) })
         if !isBulk && !units.contains(where: { countableLabels.contains($0.label) }) {
-            let pieceWeight = food.servingSize > 0 ? food.servingSize : 100
-            units.append(FoodUnit(label: "piece", gramsEquivalent: pieceWeight))
+            let trustedPieceWeight = food.pieceSizeG ?? pieceGramsIfKnown(for: lower)
+            if let pieceWeight = trustedPieceWeight, pieceWeight > 0 {
+                units.append(FoodUnit(label: "piece", gramsEquivalent: pieceWeight))
+            }
+            // else: no trusted source → do not offer `piece`.
         }
 
-        return units
+        // Post-hoc reconciliation: primaryUnit() has 117 `gramsEquivalent: ss`
+        // sites that don't know about the per-food overrides. Replace any
+        // matching unit with the override value so pieceSizeG/cupSizeG/
+        // tbspSizeG/scoopSizeG/bowlSizeG win regardless of which upstream
+        // branch fired. Audit 2026-04-24, Fix 2 wiring.
+        return units.map { reconcile($0, with: food) }
+    }
+
+    private static func reconcile(_ unit: FoodUnit, with food: Food) -> FoodUnit {
+        func overridden(_ value: Double) -> FoodUnit {
+            FoodUnit(label: unit.label, gramsEquivalent: value, isEstimate: false)
+        }
+        switch unit.label {
+        case "piece":
+            if let v = food.pieceSizeG, v > 0 { return overridden(v) }
+        case "cup":
+            if let v = food.cupSizeG, v > 0 { return overridden(v) }
+        case "tbsp":
+            if let v = food.tbspSizeG, v > 0 { return overridden(v) }
+        case "scoop":
+            if let v = food.scoopSizeG, v > 0 { return overridden(v) }
+        case "bowl":
+            if let v = food.bowlSizeG, v > 0 { return overridden(v) }
+        default: break
+        }
+        return unit
     }
 
     private static func primaryUnit(for name: String, servingSize: Double, words: Set<String> = []) -> FoodUnit {
@@ -581,11 +637,16 @@ struct FoodUnit: Hashable {
            name.contains("balsamic vinegar") || name.contains("yellow mustard") ||
            name.contains("labneh") || name.contains("harissa") ||
            name.contains("dressing") {
-            return FoodUnit(label: "tbsp", gramsEquivalent: 15)
+            // 15g is typical for thin sauces; thicker sauces (BBQ ≈17g, mayo
+            // ≈15g, ranch ≈15g) vary enough to warrant an estimate flag. Use
+            // tbspSizeG override on the food for precise values.
+            return FoodUnit(label: "tbsp", gramsEquivalent: 15, isEstimate: true)
         }
 
         // Tablespoon items (word boundaries: "boiled" contains "oil", "butternut" contains "butter")
-        if words.contains("oil") || words.contains("ghee") { return FoodUnit(label: "tbsp", gramsEquivalent: 15) }
+        // Oils vary little (15g), but flagging keeps UI honest that this is
+        // a constant, not a per-brand measurement.
+        if words.contains("oil") || words.contains("ghee") { return FoodUnit(label: "tbsp", gramsEquivalent: 15, isEstimate: true) }
         // Exclude "butter chicken" — it's a dish (bowl), not a fat/spread (tbsp)
         if words.contains("butter") && !name.contains("peanut") && !name.contains("almond") &&
            !name.contains("paneer") && !name.contains("chicken") {
@@ -1247,7 +1308,11 @@ struct FoodUnit: Hashable {
         return FoodUnit(label: "serving", gramsEquivalent: ss)
     }
 
-    private static func pieceGrams(for name: String) -> Double {
+    /// Known per-piece gram weights keyed by name substring.
+    /// Returns `nil` when no entry matches — the caller decides whether to
+    /// offer a `piece` unit at all. The legacy `pieceGrams` wrapper below
+    /// preserves callers that want the "100g default" behaviour.
+    private static func pieceGramsIfKnown(for name: String) -> Double? {
         if name.contains("capsicum") || name.contains("bell pepper") { return 150 }
         if name.contains("onion") { return 110 }
         if name.contains("tomato") { return 120 }
@@ -1268,10 +1333,17 @@ struct FoodUnit: Hashable {
         if name.contains("beet") { return 80 }
         if name.contains("radish") { return 15 }
         if name.contains("turnip") { return 120 }
-        return 100 // default piece weight
+        return nil
     }
 
-    private static func cupGrams(for name: String) -> Double {
+    /// Backwards-compatible default. Prefer `pieceGramsIfKnown` at new call
+    /// sites — synthesising 100g for unknowns is the exact anti-pattern that
+    /// caused the strawberry 4× overcount.
+    private static func pieceGrams(for name: String) -> Double {
+        pieceGramsIfKnown(for: name) ?? 100
+    }
+
+    private static func cupGramsIfKnown(for name: String) -> Double? {
         if name.contains("rice") { return 185 }
         if name.contains("quinoa") { return 185 }
         if name.contains("risotto") { return 185 }
@@ -1289,6 +1361,10 @@ struct FoodUnit: Hashable {
         if name.contains("paneer") { return 150 }
         if name.contains("yogurt") || name.contains("curd") || name.contains("dahi") { return 245 }
         if name.contains("poha") { return 60 }
-        return 240
+        return nil
+    }
+
+    private static func cupGrams(for name: String) -> Double {
+        cupGramsIfKnown(for: name) ?? 240
     }
 }

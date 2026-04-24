@@ -23,6 +23,16 @@ struct Food: Identifiable, Codable, Sendable {
     /// treat a recipe as a named meal "group" (e.g. coffee + protein + creatine).
     var expandOnLog: Bool = false
 
+    // Per-food unit-override gram weights. When set, `smartUnits` uses these
+    // measured values instead of synthesizing from `servingSize`. Keeping them
+    // nullable preserves the "fall back to pieceGrams()/cupGrams() / skip the
+    // unit entirely" gating in ServingUnit.swift — see audit 2026-04-24.
+    var pieceSizeG: Double?
+    var cupSizeG: Double?
+    var tbspSizeG: Double?
+    var scoopSizeG: Double?
+    var bowlSizeG: Double?
+
     enum CodingKeys: String, CodingKey {
         case id, name, category, calories, ingredients, source
         case isRecipe = "is_recipe"
@@ -36,6 +46,11 @@ struct Food: Identifiable, Codable, Sendable {
         case carbsG = "carbs_g"
         case fatG = "fat_g"
         case fiberG = "fiber_g"
+        case pieceSizeG = "piece_size_g"
+        case cupSizeG = "cup_size_g"
+        case tbspSizeG = "tbsp_size_g"
+        case scoopSizeG = "scoop_size_g"
+        case bowlSizeG = "bowl_size_g"
     }
 
     init(
@@ -55,7 +70,12 @@ struct Food: Identifiable, Codable, Sendable {
         sortOrder: Int = 0,
         defaultServings: Double = 1,
         novaGroup: Int? = nil,
-        expandOnLog: Bool = false
+        expandOnLog: Bool = false,
+        pieceSizeG: Double? = nil,
+        cupSizeG: Double? = nil,
+        tbspSizeG: Double? = nil,
+        scoopSizeG: Double? = nil,
+        bowlSizeG: Double? = nil
     ) {
         self.id = id
         self.name = name
@@ -74,6 +94,11 @@ struct Food: Identifiable, Codable, Sendable {
         self.defaultServings = defaultServings
         self.novaGroup = novaGroup
         self.expandOnLog = expandOnLog
+        self.pieceSizeG = pieceSizeG
+        self.cupSizeG = cupSizeG
+        self.tbspSizeG = tbspSizeG
+        self.scoopSizeG = scoopSizeG
+        self.bowlSizeG = bowlSizeG
     }
 
     init(from decoder: Decoder) throws {
@@ -100,6 +125,11 @@ struct Food: Identifiable, Codable, Sendable {
         defaultServings = try c.decodeIfPresent(Double.self, forKey: .defaultServings) ?? 1
         novaGroup = try c.decodeIfPresent(Int.self, forKey: .novaGroup)
         expandOnLog = try c.decodeIfPresent(Bool.self, forKey: .expandOnLog) ?? false
+        pieceSizeG = try c.decodeIfPresent(Double.self, forKey: .pieceSizeG)
+        cupSizeG = try c.decodeIfPresent(Double.self, forKey: .cupSizeG)
+        tbspSizeG = try c.decodeIfPresent(Double.self, forKey: .tbspSizeG)
+        scoopSizeG = try c.decodeIfPresent(Double.self, forKey: .scoopSizeG)
+        bowlSizeG = try c.decodeIfPresent(Double.self, forKey: .bowlSizeG)
     }
 
     /// Compact macro string like "165cal 31P 0C 4F"

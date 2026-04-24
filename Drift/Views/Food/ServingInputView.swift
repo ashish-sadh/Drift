@@ -62,9 +62,12 @@ struct ServingInputView: View {
                 }
             }
 
-            // Gram equivalence — always visible unless unit is already g/ml
+            // Gram equivalence — always visible unless unit is already g/ml.
+            // Prefix "≈" for estimated units (spray, flat-constant tbsp) so the
+            // UI doesn't advertise a guessed gram figure as ground truth.
             if unit.label != "g" && unit.label != "ml" && totalGrams > 0 {
-                Text("= \(totalGrams < 10 ? String(format: "%.1f", totalGrams) : "\(Int(totalGrams))")g")
+                let gramPrefix = unit.isEstimate ? "≈ " : "= "
+                Text("\(gramPrefix)\(totalGrams < 10 ? String(format: "%.1f", totalGrams) : "\(Int(totalGrams))")g")
                     .font(.caption.monospacedDigit())
                     .foregroundStyle(.secondary)
             }

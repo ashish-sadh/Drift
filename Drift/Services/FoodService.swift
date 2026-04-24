@@ -246,7 +246,10 @@ enum FoodService {
                 name: item.name, category: "Online",
                 servingSize: item.servingSizeG, servingUnit: "g",
                 calories: item.calories, proteinG: item.proteinG,
-                carbsG: item.carbsG, fatG: item.fatG, fiberG: item.fiberG
+                carbsG: item.carbsG, fatG: item.fatG, fiberG: item.fiberG,
+                pieceSizeG: item.pieceSizeG,
+                cupSizeG: item.cupSizeG,
+                tbspSizeG: item.tbspSizeG
             )
             if let saved = saveScannedFood(&food) { online.append(saved) }
         }
@@ -255,12 +258,20 @@ enum FoodService {
             let name = [p.name, p.brand].compactMap { $0 }.joined(separator: " - ")
             guard !localNames.contains(name.lowercased()) else { continue }
             let servingG = p.servingSizeG ?? 100
+            // OpenFoodFacts gives "3 pieces (85g)" → pieces=3, servingG=85.
+            // piece weight = 85 / 3 = ~28g. Propagate so ServingUnit stops
+            // inventing pieceSizeG from the whole 85g serving.
+            let piece: Double? = {
+                if let n = p.piecesPerServing, n > 0 { return servingG / Double(n) }
+                return nil
+            }()
             var food = Food(
                 name: name, category: "Online",
                 servingSize: servingG, servingUnit: "g",
                 calories: p.calories * servingG / 100, proteinG: p.proteinG * servingG / 100,
                 carbsG: p.carbsG * servingG / 100, fatG: p.fatG * servingG / 100,
-                fiberG: p.fiberG * servingG / 100
+                fiberG: p.fiberG * servingG / 100,
+                pieceSizeG: piece
             )
             if let saved = saveScannedFood(&food) { online.append(saved) }
         }

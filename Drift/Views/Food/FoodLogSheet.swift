@@ -102,9 +102,13 @@ struct FoodLogSheet: View {
                 guard food.servingSize > 0, currentLabel != "g", currentLabel != "ml" else { return 1.0 }
                 return unit.gramsEquivalent / food.servingSize
             }()
+            // Prefix the gram figure with "≈" when the unit is an estimate
+            // (spray=0.25g, tbsp=15g flat, synthesized scoops) so the UI doesn't
+            // advertise a guessed number as ground truth. Audit 2026-04-24.
+            let gramPrefix = unit.isEstimate ? "≈" : ""
             let perText = (currentLabel == "g" || currentLabel == "ml")
                 ? "\(food.macroSummary) per \(Int(food.servingSize))\(food.servingUnit)"
-                : "\(Int(food.calories * scale))cal \(Int(food.proteinG * scale))P \(Int(food.carbsG * scale))C \(Int(food.fatG * scale))F per 1 \(currentLabel) (\(Int(unit.gramsEquivalent))g)"
+                : "\(Int(food.calories * scale))cal \(Int(food.proteinG * scale))P \(Int(food.carbsG * scale))C \(Int(food.fatG * scale))F per 1 \(currentLabel) (\(gramPrefix)\(Int(unit.gramsEquivalent))g)"
             Text(perText).font(.caption).foregroundStyle(.secondary)
         }
         .padding(.top, 8)

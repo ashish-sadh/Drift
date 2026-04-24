@@ -562,13 +562,20 @@ extension AppDatabase {
                             serving_size = ?,
                             serving_unit = ?,
                             ingredients = COALESCE(?, ingredients),
-                            nova_group = COALESCE(?, nova_group)
+                            nova_group = COALESCE(?, nova_group),
+                            piece_size_g = ?,
+                            cup_size_g = ?,
+                            tbsp_size_g = ?,
+                            scoop_size_g = ?,
+                            bowl_size_g = ?
                         WHERE LOWER(name) = ?
                           AND (source IS NULL OR source = 'database')
                         """, arguments: [
                             food.calories, food.proteinG, food.carbsG, food.fatG, food.fiberG,
                             food.servingSize, food.servingUnit,
                             food.ingredients, food.novaGroup,
+                            food.pieceSizeG, food.cupSizeG, food.tbspSizeG,
+                            food.scoopSizeG, food.bowlSizeG,
                             food.name.lowercased()
                         ])
                 }
