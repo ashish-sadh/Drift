@@ -4,7 +4,7 @@ This folder holds the writing and code bundle for the **"app that ships itself"*
 
 | File | Purpose |
 |---|---|
-| [`the-app-that-ships-itself.md`](./the-app-that-ships-itself.md) | Medium-style long-form post (~2800 words) on the Drift autopilot / harness engineering |
+| [`the-app-that-ships-itself.md`](./the-app-that-ships-itself.md) | Medium-style long-form post on the Drift app, the autopilot harness, the four patterns that matter, and the higher-level lessons underneath them |
 | [`linkedin-summary.md`](./linkedin-summary.md) | ~230-word executive summary for LinkedIn |
 | [`drift-command-center-replicate/`](./drift-command-center-replicate/) | Working copy of every script, hook, and dashboard file needed to replicate the harness |
 | [`drift-command-center-replicate.zip`](./drift-command-center-replicate.zip) | Same as the folder, zipped for one-click download |

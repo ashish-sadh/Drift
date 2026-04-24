@@ -1,18 +1,20 @@
-# LinkedIn version (~230 words)
+# LinkedIn version (~240 words)
 
-I built an iOS app called **Drift** — a privacy-first health tracker with an on-device LLM, no cloud, Indian food coverage. That's the product.
+I built an iOS app called **Drift** — an all-in-one health app with analytics on top of Apple Health, behavior logging for food and exercise, a small on-device LLM for conversational logging (private data never touches the network), and bring-your-own-key support for heavier remote work: plug in your existing Anthropic / OpenAI / Gemini key, it lives in iOS Keychain, you pay the provider directly. No accounts, no subscription, no server. That's the product.
 
-The part I want to write about is *how* it gets built. Drift ships itself, most days. A supervised autonomous loop — Claude Code + a shell-based watchdog + `launchd` — plans sprints, picks tickets, writes code, runs tests, publishes TestFlight builds, and files daily reports into a GitHub repo. I watch a dashboard. I course-correct when something looks off.
+The part I want to write about is *how* it gets built. Drift ships itself, most days. A supervised autonomous loop — think Geoffrey Huntley's [Ralph loop](https://ghuntley.com/ralph/) grown up: the inner `while true` is still there, wrapped in a supervisor tree, a domain-specific state machine (GitHub issues + labels), enforcement hooks, and a live dashboard. It plans sprints, picks tickets, writes code, runs tests, does design reviews, publishes TestFlight builds, files its own product reviews, updates its own personas and roadmap, and drains its own process-feedback into the next cycle. I watch a dashboard. I course-correct when something looks off.
 
-Four patterns turned out to be non-negotiable, and each came from an embarrassing failure:
+Deliberately *not* a general-purpose personal agent. What makes this tractable is that it's narrow — one app, one repo, one job (ship it) — with ground truth you can reconcile against (git, GitHub, `xcodebuild`). A "do anything" agent wouldn't have that.
 
-1. **Reconcile with ground truth every tick** — don't trust any state a session wrote, because sessions die mid-stamp.
-2. **Make work visible, atomically** — `next --claim` is one operation; hooks refuse to let code get written without a held claim.
+Four patterns turned out to be non-negotiable, each from a specific, embarrassing failure:
+
+1. **Reconcile with ground truth every tick** — don't trust state a session wrote, because sessions die mid-stamp. Read from git log and GitHub instead.
+2. **Make work visible, atomically** — `next --claim` as one operation; hooks refuse to let code get written without a held claim.
 3. **Liveness needs its own signal** — tool-call heartbeats, not log-file mtime (which lies during long generations).
 4. **Every supervisor needs a supervisor** — `launchd` watches the watchdog.
 
-OpenAI recently named this discipline [harness engineering](https://openai.com/index/harness-engineering) — the scaffolding around AI agents matters at least as much as the agents themselves. My small contribution: it **scales down**. A solo dev with bash and a GitHub repo can build a harness correct enough to run without them.
+The higher-level takeaway: the agent is not the product you own. The model will change; the scaffolding around it compounds. A solo dev with bash and a GitHub repo can build something correct enough to run without them.
 
 Full post + zip of every hook, script, and dashboard wire so you can replicate it: [link to blog post]
 
-#iOSDevelopment #AgenticEngineering #HarnessEngineering #SoloDev #BuildInPublic
+#iOSDevelopment #AgenticEngineering #SoloDev #BuildInPublic
