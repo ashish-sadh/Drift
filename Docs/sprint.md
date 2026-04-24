@@ -18,7 +18,7 @@ _(pick from Ready)_
 
 - [ ] **#167 Prompt token audit** — Measure current IntentClassifier prompt token count. Compress examples that are too similar. Target: same or better routing accuracy with ≤15% fewer prompt tokens. Measure before/after with IntentRoutingEval.
 
-- [ ] **#176 Context window expansion** — Test 4096-token context in llama.cpp (currently 2048). Profile Gemma 4 E2B memory on A17 Pro. If overhead ≤200MB and no latency regression, ship: recalculate max_prompt (currently 1776) and max_generation (currently 256) proportionally. Enables longer multi-turn history. Add multi-turn eval case that requires >2048 tokens of context.
+- [x] **#176 Context window expansion** — Already shipped: n_ctx=min(4096,trainCtx), maxPromptTokens=4096-512-16=3568, maxNewTokens=512. testMultiTurn_longContextFollowUp validates >2048 token history. No action needed.
 
 - [ ] **#177 LLM eval milestone: 175 cases** — IntentRoutingEval is at ~145 cases. Add 20–30 new cases targeting under-covered domains: sleep edge cases, glucose queries, supplement advice vs status, implicit intent phrasings. Run auto-research after expanding. Eval case count must never decrease.
 
