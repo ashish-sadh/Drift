@@ -31,9 +31,7 @@ The harness, in my experience, is the more interesting engineering.
 
 **Taste lives in the scaffolding, and human attention is what it spends.**
 
-**Drift Control**, as I said above, is Ralph grown up. The inner loop is still a simple while-true. Around it is a layer of scaffolding — a supervisor tree, a domain-specific state machine, enforcement hooks, personas that accumulate taste, a dashboard I can read on my phone — that lets the loop run unattended not for hours, but for *weeks*. If Ralph is the engine, Drift Control is the engine plus the dashboard, the oil light, and the seatbelt.
-
-Two observations became obvious after a few months of running this.
+Two observations became obvious after two weeks of running this.
 
 The first is that **the agent is not the product you own.** Models change. What persists is the harness: the queue, the hooks, the reconciliation, the dashboards, the test suite, the personas. If you pour your craft into clever prompts, you've invested in something a model update will replace. If you pour it into the harness, it compounds. The model gets swapped out; the scaffolding is what you keep.
 
