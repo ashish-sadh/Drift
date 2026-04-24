@@ -4,4 +4,4 @@
 
 ## Cycle-5 feedback items
 
-*(nothing yet — waiting for input)*
+1. **Opening paragraph — mention it's a personal hobby project.** Currently reads *"If you know me, you know how much I geek out about health metrics — whether you asked or not. Drift is the app I built because of it."* Add framing that Drift is a personal hobby project (not a startup / not a product I'm trying to sell).
