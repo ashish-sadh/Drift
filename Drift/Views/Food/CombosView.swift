@@ -1,4 +1,5 @@
 import SwiftUI
+import DriftCore
 
 struct CombosView: View {
     @State var viewModel: FoodLogViewModel

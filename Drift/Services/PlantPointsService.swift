@@ -1,4 +1,5 @@
 import Foundation
+import DriftCore
 
 /// Tracks plant diversity using the "30 plants per week" framework.
 /// 1 point per unique plant food, 0.25 per unique herb/spice.

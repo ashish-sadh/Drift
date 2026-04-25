@@ -1,37 +1,37 @@
 import Foundation
 import GRDB
 
-struct Food: Identifiable, Codable, Sendable {
-    var id: Int64?
-    var name: String
-    var category: String
-    var servingSize: Double
-    var servingUnit: String
-    var calories: Double
-    var proteinG: Double
-    var carbsG: Double
-    var fatG: Double
-    var fiberG: Double
-    var ingredients: String?  // JSON array of ingredient names, e.g. '["rice","onion","turmeric"]'
-    var source: String?       // "database", "recipe", "barcode", "custom". nil = database (legacy)
-    var isRecipe: Bool = false
-    var sortOrder: Int = 0
-    var defaultServings: Double = 1
-    var novaGroup: Int?       // NOVA 1-4: processing level for plant points
+public struct Food: Identifiable, Codable, Sendable {
+    public var id: Int64?
+    public var name: String
+    public var category: String
+    public var servingSize: Double
+    public var servingUnit: String
+    public var calories: Double
+    public var proteinG: Double
+    public var carbsG: Double
+    public var fatG: Double
+    public var fiberG: Double
+    public var ingredients: String?  // JSON array of ingredient names, e.g. '["rice","onion","turmeric"]'
+    public var source: String?       // "database", "recipe", "barcode", "custom". nil = database (legacy)
+    public var isRecipe: Bool = false
+    public var sortOrder: Int = 0
+    public var defaultServings: Double = 1
+    public var novaGroup: Int?       // NOVA 1-4: processing level for plant points
     /// When true (recipes only), logging this recipe inserts one FoodEntry
     /// per ingredient instead of a single aggregated entry — lets users
     /// treat a recipe as a named meal "group" (e.g. coffee + protein + creatine).
-    var expandOnLog: Bool = false
+    public var expandOnLog: Bool = false
 
     // Per-food unit-override gram weights. When set, `smartUnits` uses these
     // measured values instead of synthesizing from `servingSize`. Keeping them
     // nullable preserves the "fall back to pieceGrams()/cupGrams() / skip the
     // unit entirely" gating in ServingUnit.swift — see audit 2026-04-24.
-    var pieceSizeG: Double?
-    var cupSizeG: Double?
-    var tbspSizeG: Double?
-    var scoopSizeG: Double?
-    var bowlSizeG: Double?
+    public var pieceSizeG: Double?
+    public var cupSizeG: Double?
+    public var tbspSizeG: Double?
+    public var scoopSizeG: Double?
+    public var bowlSizeG: Double?
 
     enum CodingKeys: String, CodingKey {
         case id, name, category, calories, ingredients, source
@@ -53,7 +53,7 @@ struct Food: Identifiable, Codable, Sendable {
         case bowlSizeG = "bowl_size_g"
     }
 
-    init(
+    public init(
         id: Int64? = nil,
         name: String,
         category: String,
@@ -101,7 +101,7 @@ struct Food: Identifiable, Codable, Sendable {
         self.bowlSizeG = bowlSizeG
     }
 
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         id = try c.decodeIfPresent(Int64.self, forKey: .id)
         name = try c.decode(String.self, forKey: .name)
@@ -133,36 +133,15 @@ struct Food: Identifiable, Codable, Sendable {
     }
 
     /// Compact macro string like "165cal 31P 0C 4F"
-    var macroSummary: String {
+    public var macroSummary: String {
         "\(Int(calories))cal \(Int(proteinG))P \(Int(carbsG))C \(Int(fatG))F"
-    }
-
-    /// Parsed ingredient names. Handles both legacy ["name"] and new [{...}] formats.
-    var ingredientList: [String] {
-        guard let json = ingredients, let data = json.data(using: .utf8) else { return [name] }
-        // Try new format first (array of objects with "name" key)
-        if let items = try? JSONDecoder().decode([QuickAddView.RecipeItem].self, from: data) {
-            let names = items.map(\.name)
-            return names.isEmpty ? [name] : names
-        }
-        // Legacy format (array of strings)
-        if let arr = try? JSONDecoder().decode([String].self, from: data) {
-            return arr.isEmpty ? [name] : arr
-        }
-        return [name]
-    }
-
-    /// Full recipe items with per-ingredient macros. Returns nil for non-recipe or legacy format.
-    var recipeItems: [QuickAddView.RecipeItem]? {
-        guard let json = ingredients, let data = json.data(using: .utf8) else { return nil }
-        return try? JSONDecoder().decode([QuickAddView.RecipeItem].self, from: data)
     }
 }
 
 extension Food: FetchableRecord, PersistableRecord {
-    static let databaseTableName = "food"
+    public static let databaseTableName = "food"
 
-    mutating func didInsert(_ inserted: InsertionSuccess) {
+    public mutating func didInsert(_ inserted: InsertionSuccess) {
         id = inserted.rowID
     }
 }

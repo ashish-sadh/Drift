@@ -1,4 +1,5 @@
 import Foundation
+import DriftCore
 
 /// Caches async HealthKit data (sleep, cycle) so synchronous context builders can use it.
 /// Refreshed when the AI chat opens. 5-minute TTL.

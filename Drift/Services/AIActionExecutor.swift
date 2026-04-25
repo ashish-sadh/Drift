@@ -1,4 +1,5 @@
 import Foundation
+import DriftCore
 
 /// Parses user messages for food/weight/workout intent and extracts parameters.
 /// Used to pre-fill and launch native app views from the AI assistant.

@@ -1,4 +1,5 @@
 import Foundation
+import DriftCore
 
 /// SavedFood is now a typealias for Food — all food types live in one table.
 /// Use source="recipe" for recipes, source="custom" for user-created entries.

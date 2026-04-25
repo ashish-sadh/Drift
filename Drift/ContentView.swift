@@ -1,4 +1,5 @@
 import SwiftUI
+import DriftCore
 
 struct ContentView: View {
     @Binding var syncComplete: Bool
