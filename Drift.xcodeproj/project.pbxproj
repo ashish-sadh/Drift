@@ -185,7 +185,6 @@
 		AA43792497E2FC36FF55F58C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 08E33CA6BE80D735A37ED745 /* Assets.xcassets */; };
 		ABD8DD6A5F55642129836B7B /* AIToolAgentStageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3406F79A46B85F01DC0010FB /* AIToolAgentStageTests.swift */; };
 		AD32A3FE644C22A43CA474EF /* DebugSeedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCBE3BA3D70586AC0F3ED34E /* DebugSeedData.swift */; };
-		ADFD099AC0AEB4154AF6063B /* WeightTrendCalculator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD5DFCD5C5ED2C0D7E5CD8EF /* WeightTrendCalculator.swift */; };
 		AE471C946CA1823B1985EDA9 /* PipelineE2EEval.swift in Sources */ = {isa = PBXBuildFile; fileRef = A434AE755701CCB89A111516 /* PipelineE2EEval.swift */; };
 		B1A5192F28B88B54A43209B3 /* SpellCorrectServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 336137D03363020741FFC5BA /* SpellCorrectServiceTests.swift */; };
 		B2654B50471C75496A1AA0D7 /* NutritionLabelOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418816F51F38F19F65BC3D77 /* NutritionLabelOCR.swift */; };
@@ -588,7 +587,6 @@
 		FAF40DC8990B1C6D8A2C89E3 /* PerToolReliabilityEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerToolReliabilityEval.swift; sourceTree = "<group>"; };
 		FBD371873F1D148C190AA7DB /* PhotoLogToolTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogToolTests.swift; sourceTree = "<group>"; };
 		FCBE3BA3D70586AC0F3ED34E /* DebugSeedData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSeedData.swift; sourceTree = "<group>"; };
-		FD5DFCD5C5ED2C0D7E5CD8EF /* WeightTrendCalculator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightTrendCalculator.swift; sourceTree = "<group>"; };
 		FD7026C3D8745999EED9478E /* foods.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = foods.json; sourceTree = "<group>"; };
 		FE8784E04AE612EE26E7AFE5 /* RecoveryEstimatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecoveryEstimatorTests.swift; sourceTree = "<group>"; };
 		FF0DB0809C7110E3644208F2 /* Drift.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Drift.entitlements; sourceTree = "<group>"; };
@@ -1073,7 +1071,6 @@
 				1EEA23E4C1755C342030C667 /* USDAFoodService.swift */,
 				63172D2C1A90AA26AF409CEA /* VoiceTranscriptionPostFixer.swift */,
 				E38FF7C7D3E9C7AED0CC8F83 /* WeightServiceAPI.swift */,
-				FD5DFCD5C5ED2C0D7E5CD8EF /* WeightTrendCalculator.swift */,
 				AF522FED101388047FEE98FD /* WeightTrendService.swift */,
 				0966429FFAED4C7FF2D68C11 /* WidgetDataProvider.swift */,
 				6F84469D20EBBA0BD037FBCA /* WorkoutService.swift */,
@@ -1468,7 +1465,6 @@
 				12608375BDCD57D211C64849 /* WeightLogListView.swift in Sources */,
 				4595A34B3A929843D9FBA307 /* WeightServiceAPI.swift in Sources */,
 				0884D534B3ADDE47643801F8 /* WeightTabView.swift in Sources */,
-				ADFD099AC0AEB4154AF6063B /* WeightTrendCalculator.swift in Sources */,
 				C91A4CC8AC42557332AB117B /* WeightTrendPredictionTool.swift in Sources */,
 				67E6DD4C4837E4F4EB971CB2 /* WeightTrendService.swift in Sources */,
 				6A4AC25199199579681FCAD4 /* WeightViewModel.swift in Sources */,
