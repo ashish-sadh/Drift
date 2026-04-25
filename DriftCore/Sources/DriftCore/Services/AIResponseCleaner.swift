@@ -2,9 +2,9 @@ import Foundation
 
 /// Cleans LLM output before displaying to the user.
 /// Removes artifacts, deduplicates sentences, strips disclaimers, and truncates.
-enum AIResponseCleaner {
+public enum AIResponseCleaner {
 
-    static func clean(_ response: String) -> String {
+    public static func clean(_ response: String) -> String {
         var text = response
 
         // Remove ChatML and Gemma special tokens
@@ -96,7 +96,7 @@ enum AIResponseCleaner {
     }
 
     /// Check if a response is too generic/unhelpful and should be replaced.
-    static func isLowQuality(_ response: String) -> Bool {
+    public static func isLowQuality(_ response: String) -> Bool {
         let lower = response.lowercased()
         let trimmed = lower.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -147,7 +147,7 @@ enum AIResponseCleaner {
 
     /// Check if response contains hallucinated numbers (not from context).
     /// Returns true if suspicious numbers found.
-    static func hasHallucinatedNumbers(_ response: String, context: String) -> Bool {
+    public static func hasHallucinatedNumbers(_ response: String, context: String) -> Bool {
         // Extract all numbers from response
         let responseNums = extractNumbers(response)
         guard !responseNums.isEmpty else { return false }  // No numbers = can't hallucinate

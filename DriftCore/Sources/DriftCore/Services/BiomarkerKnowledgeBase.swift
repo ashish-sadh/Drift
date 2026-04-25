@@ -2,10 +2,10 @@ import Foundation
 import DriftCore
 
 /// Provides access to the bundled biomarker definitions.
-enum BiomarkerKnowledgeBase {
+public enum BiomarkerKnowledgeBase {
 
     /// All 65 biomarker definitions, loaded from biomarkers.json.
-    static let all: [BiomarkerDefinition] = {
+    public static let all: [BiomarkerDefinition] = {
         guard let url = Bundle.main.url(forResource: "biomarkers", withExtension: "json"),
               let data = try? Data(contentsOf: url),
               let defs = try? JSONDecoder().decode([BiomarkerDefinition].self, from: data) else {
@@ -16,12 +16,12 @@ enum BiomarkerKnowledgeBase {
     }()
 
     /// Lookup by ID.
-    static let byId: [String: BiomarkerDefinition] = {
+    public static let byId: [String: BiomarkerDefinition] = {
         Dictionary(uniqueKeysWithValues: all.map { ($0.id, $0) })
     }()
 
     /// All unique categories in display order.
-    static let categories: [String] = {
+    public static let categories: [String] = {
         var seen = Set<String>()
         var result: [String] = []
         let order = ["Heart Health", "Metabolic Health", "Hormones", "Thyroid",
@@ -42,12 +42,12 @@ enum BiomarkerKnowledgeBase {
     }()
 
     /// Biomarkers grouped by category.
-    static let byCategory: [String: [BiomarkerDefinition]] = {
+    public static let byCategory: [String: [BiomarkerDefinition]] = {
         Dictionary(grouping: all, by: \.category)
     }()
 
     /// All unique impact categories across all biomarkers.
-    static let impactCategories: [String] = {
+    public static let impactCategories: [String] = {
         var seen = Set<String>()
         var result: [String] = []
         for def in all {
@@ -61,7 +61,7 @@ enum BiomarkerKnowledgeBase {
 
     /// Unit conversion table for normalizing different lab formats.
     /// Key: (biomarker_id, source_unit) -> multiplier to convert to standard unit.
-    static let unitConversions: [String: [String: Double]] = [
+    public static let unitConversions: [String: [String: Double]] = [
         // Cholesterol: mmol/L -> mg/dL (multiply by 38.67)
         "total_cholesterol": ["mmol/L": 38.67, "mmol/l": 38.67],
         "hdl_cholesterol": ["mmol/L": 38.67, "mmol/l": 38.67],
@@ -92,7 +92,7 @@ enum BiomarkerKnowledgeBase {
     ]
 
     /// Normalize a value from source unit to the standard unit for a biomarker.
-    static func normalize(biomarkerId: String, value: Double, fromUnit: String) -> (value: Double, unit: String) {
+    public static func normalize(biomarkerId: String, value: Double, fromUnit: String) -> (value: Double, unit: String) {
         guard let def = byId[biomarkerId] else { return (value, fromUnit) }
 
         // Already in standard unit

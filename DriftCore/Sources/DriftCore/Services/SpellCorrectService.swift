@@ -3,7 +3,7 @@ import DriftCore
 
 /// Spell correction using food DB names + hardcoded fallback.
 /// Corrects user input before passing to LLM or food search.
-enum SpellCorrectService {
+public enum SpellCorrectService {
 
     /// Cached food names from DB for fuzzy matching
     nonisolated(unsafe) private static var foodNames: [String] = {
@@ -181,7 +181,7 @@ enum SpellCorrectService {
     ]
 
     /// Expand query with synonyms. Returns expanded query if any word has a synonym.
-    static func expandSynonyms(_ text: String) -> String {
+    public static func expandSynonyms(_ text: String) -> String {
         let words = text.lowercased().split(separator: " ").map(String.init)
         var expanded = words
         var changed = false
@@ -205,7 +205,7 @@ enum SpellCorrectService {
     }
 
     /// Correct spelling. Checks hardcoded first, then fuzzy-matches against food DB.
-    static func correct(_ text: String) -> String {
+    public static func correct(_ text: String) -> String {
         let words = text.components(separatedBy: " ")
         var result: [String] = []
         var changed = false
@@ -315,7 +315,7 @@ private struct AnyCodable: Codable {
         else { value = "" }
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         if let s = value as? String { try container.encode(s) }
         else if let d = value as? Double { try container.encode(d) }

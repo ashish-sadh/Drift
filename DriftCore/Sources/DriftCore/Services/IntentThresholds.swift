@@ -9,7 +9,7 @@ import Foundation
 /// clarifies in a domain feel the same regardless of which tool routed.
 /// Bucketing also keeps the policy table small enough to reason about at
 /// review time.
-enum IntentDomain: String, Sendable, CaseIterable {
+public enum IntentDomain: String, Sendable, CaseIterable {
     /// log_food, food_info, edit_meal, delete_food, copy_yesterday, explain_calories
     case food
     /// log_weight, weight_info, set_goal
@@ -28,7 +28,7 @@ enum IntentDomain: String, Sendable, CaseIterable {
 
     /// Map a tool name to its domain. Keep in sync with the tool list in
     /// `IntentClassifier.systemPrompt`.
-    static func of(tool: String) -> IntentDomain {
+    public static func of(tool: String) -> IntentDomain {
         let name = tool.replacingOccurrences(of: "()", with: "").lowercased()
         switch name {
         case "log_food", "food_info", "edit_meal", "delete_food",
@@ -63,7 +63,7 @@ enum IntentDomain: String, Sendable, CaseIterable {
 ///
 /// This struct encodes the domain-specific tradeoffs as a small truth table
 /// so future drift is visible to tests rather than buried inline.
-enum IntentThresholds {
+public enum IntentThresholds {
 
     /// Confidence label emitted by the classifier, normalized. Any unknown
     /// value is treated as `high` — matches the default path in
@@ -85,7 +85,7 @@ enum IntentThresholds {
     /// - `.clarify`: route to `ClarificationBuilder.buildOptions`. If the
     ///   builder declines (no concrete alternatives), caller falls through
     ///   to proceed — matches the pre-existing fallback behavior.
-    enum Decision: Equatable, Sendable { case proceed, clarify }
+    public enum Decision: Equatable, Sendable { case proceed, clarify }
 
     /// The single decision function. Pure, `nonisolated`, and small enough
     /// to unit-test exhaustively.
@@ -119,7 +119,7 @@ enum IntentThresholds {
     ///   "show calories today". Demand `high` to proceed; otherwise clarify.
     ///   Sensitivity: downgrading this to `proceed on medium` breaks the
     ///   dedicated meta test in `IntentConfidenceCalibrationTests`.
-    nonisolated static func shouldClarify(
+    public nonisolated static func shouldClarify(
         tool: String,
         confidence: String,
         hasCompleteParams: Bool
