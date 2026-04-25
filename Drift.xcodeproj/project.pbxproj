@@ -71,7 +71,6 @@
 		5A6FF40412DE467AB6BDAF6D /* CombosView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6164BEC39C20085C879296 /* CombosView.swift */; };
 		5D799CB56178B7DEF0087C56 /* NormalizerEval.swift in Sources */ = {isa = PBXBuildFile; fileRef = AC5F3236EF7B5CE9409448BD /* NormalizerEval.swift */; };
 		5D88D4133DC583D407E81955 /* FoodLoggingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3D6A44D7C25BC4956132FE8 /* FoodLoggingTests.swift */; };
-		5DB274604E30B658591C0CC9 /* PlantPointsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39A9E88135361C3B6F2AE538 /* PlantPointsService.swift */; };
 		5F4476C2F1B7DC3E662A1DBC /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24385DF0FF7F89584AE40020 /* Theme.swift */; };
 		5FBFC1E9BE6863AAC3771C04 /* SpeechRecognitionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 72ADCE850F5C06D2C23A57DC /* SpeechRecognitionService.swift */; };
 		6191E6C9B6E6F21E8BE507EF /* CreateTemplateView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 58A17CA98BD8D443868D1794 /* CreateTemplateView.swift */; };
@@ -107,7 +106,6 @@
 		86211210D2E5528F57C90AEF /* WorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB2998A31AEC29094C6F4062 /* WorkoutView.swift */; };
 		8654AE043059BFC4EC8620DF /* SmartUnitsGoldSetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C2EAE9B8D0E2BC6A63BD6ED /* SmartUnitsGoldSetTests.swift */; };
 		874EFD308E2D9EB4A66A47C8 /* PhotoLogService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C61E461D3E4A0FA092F2C3 /* PhotoLogService.swift */; };
-		87D41671B48C76809CA2ACB0 /* ConversationHistoryBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97443F553C4834DE8344C9F8 /* ConversationHistoryBuilder.swift */; };
 		896886745EB2603EB44D2228 /* AIToolAgentTelemetryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 79933DCD44BD469E32826413 /* AIToolAgentTelemetryTests.swift */; };
 		897722DC29F4AAF58BDA1CCF /* ActiveWorkoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22F8386EAF9FBD18F89C8C60 /* ActiveWorkoutView.swift */; };
 		8A8CF11C6A7AF26DCABECF6A /* CSVParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6D6B07DD56345F8A5F5448BC /* CSVParserTests.swift */; };
@@ -331,7 +329,6 @@
 		3406F79A46B85F01DC0010FB /* AIToolAgentStageTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIToolAgentStageTests.swift; sourceTree = "<group>"; };
 		358B9AF32E9AE57D1A7DF354 /* MealTypeDetectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MealTypeDetectionTests.swift; sourceTree = "<group>"; };
 		36BB15B5D3A14E0D9940B118 /* HealthKitService+Cycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HealthKitService+Cycle.swift"; sourceTree = "<group>"; };
-		39A9E88135361C3B6F2AE538 /* PlantPointsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlantPointsService.swift; sourceTree = "<group>"; };
 		3F480CCAF91EFD799E6B5B8C /* DriftLLMEvalMacOS.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = DriftLLMEvalMacOS.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		3F51E9EC49412B4F96068D35 /* WeightTrendCalculatorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightTrendCalculatorTests.swift; sourceTree = "<group>"; };
 		3F7B91A7052D8347083F577A /* ComposedFoodParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposedFoodParserTests.swift; sourceTree = "<group>"; };
@@ -390,7 +387,6 @@
 		92DFDDFA5C14E5C409B99B08 /* PhotoLogBetaSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogBetaSettingsTests.swift; sourceTree = "<group>"; };
 		9317E4AADEC72D6DC385E722 /* LabReportDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabReportDetailView.swift; sourceTree = "<group>"; };
 		967917DDF4130B1A30B42ABA /* CloudVisionClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudVisionClient.swift; sourceTree = "<group>"; };
-		97443F553C4834DE8344C9F8 /* ConversationHistoryBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationHistoryBuilder.swift; sourceTree = "<group>"; };
 		9A4575ED692EF5D3BFDBC775 /* AIChatInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIChatInsightsView.swift; sourceTree = "<group>"; };
 		9BA072B74254D7004020703A /* PhotoLogEntryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogEntryTests.swift; sourceTree = "<group>"; };
 		9BE85182415E10B646F68DA4 /* ParallelLLMEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParallelLLMEval.swift; sourceTree = "<group>"; };
@@ -902,7 +898,6 @@
 			isa = PBXGroup;
 			children = (
 				9F9F051926CE39DF3E0A47DA /* BodySpecPDFParser.swift */,
-				97443F553C4834DE8344C9F8 /* ConversationHistoryBuilder.swift */,
 				B45542A3C86D7B44E55451F5 /* FoodService+Logging.swift */,
 				F57B8BA8C0B119CF10614F14 /* HealthKitService.swift */,
 				36BB15B5D3A14E0D9940B118 /* HealthKitService+Cycle.swift */,
@@ -912,7 +907,6 @@
 				7ED878D9FF93287B41B67503 /* NotificationService.swift */,
 				418816F51F38F19F65BC3D77 /* NutritionLabelOCR.swift */,
 				AAC05282764E0169FEFB3D88 /* PhotoLogTool.swift */,
-				39A9E88135361C3B6F2AE538 /* PlantPointsService.swift */,
 				72ADCE850F5C06D2C23A57DC /* SpeechRecognitionService.swift */,
 				0966429FFAED4C7FF2D68C11 /* WidgetDataProvider.swift */,
 				2889549AA73E3A32EEEEB96B /* CloudVision */,
@@ -1197,7 +1191,6 @@
 				BA70FAADF8E436B8FD334D6C /* ComboLogSheet.swift in Sources */,
 				5A6FF40412DE467AB6BDAF6D /* CombosView.swift in Sources */,
 				9ACECC13D2365A3DF7F2C28C /* ContentView.swift in Sources */,
-				87D41671B48C76809CA2ACB0 /* ConversationHistoryBuilder.swift in Sources */,
 				6191E6C9B6E6F21E8BE507EF /* CreateTemplateView.swift in Sources */,
 				D8DCF736FEE3123E530756CA /* CycleView.swift in Sources */,
 				8224D8220B6D9328EDDDB648 /* DEXAOverviewView.swift in Sources */,
@@ -1241,7 +1234,6 @@
 				874EFD308E2D9EB4A66A47C8 /* PhotoLogService.swift in Sources */,
 				51943F743F3F4638E4D7EBAA /* PhotoLogTool.swift in Sources */,
 				30C7E754FFFD0B3E4FD62CC6 /* PlantPointsCardView.swift in Sources */,
-				5DB274604E30B658591C0CC9 /* PlantPointsService.swift in Sources */,
 				ADA6493D219411505EF2DA36 /* Preferences+PhotoLog.swift in Sources */,
 				3A45CB30EFB91DF5C4E468AD /* QuickAddView.swift in Sources */,
 				D1F92D043D241D539585C068 /* ServingInputView.swift in Sources */,

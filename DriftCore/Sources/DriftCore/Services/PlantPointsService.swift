@@ -1,30 +1,35 @@
 import Foundation
-import DriftCore
 
 /// Tracks plant diversity using the "30 plants per week" framework.
 /// 1 point per unique plant food, 0.25 per unique herb/spice.
-enum PlantPointsService {
+public enum PlantPointsService {
 
     // MARK: - Public API
 
-    struct PlantPoints {
-        let uniquePlants: [String]       // full-point plant names
-        let uniqueHerbsSpices: [String]  // quarter-point herb/spice names
-        var fullPoints: Double { Double(uniquePlants.count) }
-        var quarterPoints: Double { Double(uniqueHerbsSpices.count) * 0.25 }
-        var total: Double { fullPoints + quarterPoints }
-        var plantCount: Int { uniquePlants.count + uniqueHerbsSpices.count }
+    public struct PlantPoints {
+        public let uniquePlants: [String]       // full-point plant names
+        public let uniqueHerbsSpices: [String]  // quarter-point herb/spice names
+
+        public init(uniquePlants: [String], uniqueHerbsSpices: [String]) {
+            self.uniquePlants = uniquePlants
+            self.uniqueHerbsSpices = uniqueHerbsSpices
+        }
+
+        public var fullPoints: Double { Double(uniquePlants.count) }
+        public var quarterPoints: Double { Double(uniqueHerbsSpices.count) * 0.25 }
+        public var total: Double { fullPoints + quarterPoints }
+        public var plantCount: Int { uniquePlants.count + uniqueHerbsSpices.count }
     }
 
     /// Top-level type lives in DriftCore so AppDatabase can return it.
-    typealias FoodItem = PlantPointsFoodItem
+    public typealias FoodItem = PlantPointsFoodItem
 
     /// Classify food items into plant points with NOVA-aware logic.
     /// - NOVA 1-2: count directly
     /// - NOVA 3: skip food name, count ingredients individually
     /// - NOVA 4: skip entirely (food + ingredients)
     /// - No ingredients + no NOVA: classify by name (backwards compat)
-    static func calculate(from items: [FoodItem]) -> PlantPoints {
+    public static func calculate(from items: [FoodItem]) -> PlantPoints {
         var plants: Set<String> = []
         var herbsSpices: Set<String> = []
 
@@ -63,16 +68,16 @@ enum PlantPointsService {
     }
 
     /// Legacy: classify a list of plain food names (backwards compat for tests/simple callers).
-    static func calculate(from foodNames: [String]) -> PlantPoints {
+    public static func calculate(from foodNames: [String]) -> PlantPoints {
         calculate(from: foodNames.map { FoodItem(name: $0, ingredients: nil, novaGroup: nil) })
     }
 
     /// Classify a single food name.
-    enum PlantCategory {
+    public enum PlantCategory {
         case plant, herbSpice, notPlant
     }
 
-    static func classify(_ foodName: String) -> PlantCategory {
+    public static func classify(_ foodName: String) -> PlantCategory {
         let n = normalize(foodName)
         if isHerbOrSpice(n) { return .herbSpice }
         if isPlantFood(n) { return .plant }

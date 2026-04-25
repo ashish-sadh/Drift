@@ -43,7 +43,10 @@ extension AIChatViewModel {
         // Gemma gets the full 400-token budget; SmolLM stays tighter at 150
         // because its attention on distant tokens is less reliable.
         let maxTokens = aiService.isLargeModel ? 400 : 150
-        return ConversationHistoryBuilder.build(messages: messages, maxTokens: maxTokens)
+        let turns = messages.map { msg in
+            HistoryTurn(role: msg.role == .user ? .user : .assistant, text: msg.text)
+        }
+        return ConversationHistoryBuilder.build(turns: turns, maxTokens: maxTokens)
     }
 
     /// Detect meal context from conversation history.

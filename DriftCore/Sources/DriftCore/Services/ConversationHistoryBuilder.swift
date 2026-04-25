@@ -1,45 +1,48 @@
 import Foundation
-import DriftCore
+
+/// Minimal chat turn shape the history builder needs. iOS Drift's
+/// `AIChatViewModel.ChatMessage` maps to this at the call boundary.
+public struct HistoryTurn: Sendable {
+    public enum Role: Sendable { case user, assistant }
+    public let role: Role
+    public let text: String
+
+    public init(role: Role, text: String) {
+        self.role = role
+        self.text = text
+    }
+}
 
 /// Serializes recent chat turns into a token-budgeted "Q: … / A: …" string
 /// that AIToolAgent injects into Stage 2 (IntentClassifier), Stage 3
 /// (presentation), and Stage 5 (ToolRanker.buildPrompt).
-///
-/// Centralizing this means the budget is enforced once and each consumer
-/// truncates a shared, deterministic string instead of duplicating logic.
-enum ConversationHistoryBuilder {
+public enum ConversationHistoryBuilder {
 
     /// Approximate chars-per-token ratio for Gemma/SmolLM tokenizers.
-    static let charsPerToken = 4
+    public static let charsPerToken = 4
 
     /// Per-message cap — keeps a single verbose assistant answer from
     /// consuming the whole budget. 60 tokens ≈ 240 chars.
-    static let perMessageTokens = 60
+    public static let perMessageTokens = 60
 
-    /// How many trailing turns to consider. 3 user + 3 assistant pairs is
-    /// enough for "same for dinner" / "what about last week" follow-ups.
-    static let maxTurnWindow = 6
+    /// How many trailing turns to consider.
+    public static let maxTurnWindow = 6
 
-    /// Chars reserved for the `[LAST ACTION: …]` prefix so it never steals
-    /// the entire budget from the Q/A turns.
-    static let lastActionTokens = 100
+    /// Chars reserved for the `[LAST ACTION: …]` prefix.
+    public static let lastActionTokens = 100
 
     /// Build a Q/A formatted history string within `maxTokens`.
-    /// Walks newest → oldest and drops older turns first when the budget
-    /// runs out. Returns "" when the feature flag is off or no turns fit.
-    /// When `ConversationState` has a fresh tool summary (captured during
-    /// the current or previous user turn, #184), prepends a `[LAST ACTION: …]`
-    /// line so follow-ups like "how many calories was that?" have the
-    /// concrete tool-result data the Assistant presentation may have dropped.
+    /// When `ConversationState` has a fresh tool summary, prepends
+    /// `[LAST ACTION: …]` so follow-ups have the concrete data.
     @MainActor
-    static func build(
-        messages: [AIChatViewModel.ChatMessage],
+    public static func build(
+        turns: [HistoryTurn],
         maxTokens: Int = 400
     ) -> String {
-        guard Preferences.conversationHistoryEnabled, !messages.isEmpty else { return "" }
+        guard Preferences.conversationHistoryEnabled, !turns.isEmpty else { return "" }
 
         let perMsgChars = perMessageTokens * charsPerToken
-        let window = messages.suffix(maxTurnWindow)
+        let window = turns.suffix(maxTurnWindow)
 
         let toolLine: String? = {
             guard let summary = ConversationState.shared.freshToolSummary() else { return nil }
