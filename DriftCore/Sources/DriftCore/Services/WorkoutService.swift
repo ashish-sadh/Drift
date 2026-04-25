@@ -3,12 +3,12 @@ import DriftCore
 import GRDB
 
 /// Workout data operations and Strong CSV import.
-enum WorkoutService {
+public enum WorkoutService {
     private static let db = AppDatabase.shared
 
     // MARK: - CRUD
 
-    static func saveWorkout(_ workout: inout Workout) throws {
+    public static func saveWorkout(_ workout: inout Workout) throws {
         try db.writer.write { [workout] dbConn in
             var m = workout
             try m.save(dbConn)
@@ -19,7 +19,7 @@ enum WorkoutService {
         } ?? workout
     }
 
-    static func updateSet(id: Int64, weightLbs: Double?, reps: Int?, durationSec: Int? = nil) throws {
+    public static func updateSet(id: Int64, weightLbs: Double?, reps: Int?, durationSec: Int? = nil) throws {
         try db.writer.write { dbConn in
             try dbConn.execute(
                 sql: "UPDATE workout_set SET weight_lbs = ?, reps = ?, duration_sec = ? WHERE id = ?",
@@ -27,13 +27,13 @@ enum WorkoutService {
         }
     }
 
-    static func deleteSet(id: Int64) throws {
+    public static func deleteSet(id: Int64) throws {
         try db.writer.write { dbConn in
             _ = try WorkoutSet.deleteOne(dbConn, id: id)
         }
     }
 
-    static func updateWorkout(id: Int64, name: String, notes: String?) throws {
+    public static func updateWorkout(id: Int64, name: String, notes: String?) throws {
         try db.writer.write { dbConn in
             try dbConn.execute(
                 sql: "UPDATE workout SET name = ?, notes = ? WHERE id = ?",
@@ -41,19 +41,19 @@ enum WorkoutService {
         }
     }
 
-    static func saveSets(_ sets: [WorkoutSet]) throws {
+    public static func saveSets(_ sets: [WorkoutSet]) throws {
         try db.writer.write { dbConn in
             for var s in sets { try s.insert(dbConn) }
         }
     }
 
-    static func fetchWorkouts(limit: Int = 100) throws -> [Workout] {
+    public static func fetchWorkouts(limit: Int = 100) throws -> [Workout] {
         try db.reader.read { dbConn in
             try Workout.order(Column("date").desc).limit(limit).fetchAll(dbConn)
         }
     }
 
-    static func fetchSets(forWorkout workoutId: Int64) throws -> [WorkoutSet] {
+    public static func fetchSets(forWorkout workoutId: Int64) throws -> [WorkoutSet] {
         try db.reader.read { dbConn in
             try WorkoutSet.filter(Column("workout_id") == workoutId)
                 .order(Column("exercise_order"), Column("set_order"))
@@ -61,52 +61,52 @@ enum WorkoutService {
         }
     }
 
-    static func deleteWorkout(id: Int64) throws {
+    public static func deleteWorkout(id: Int64) throws {
         try db.writer.write { dbConn in
             _ = try Workout.deleteOne(dbConn, id: id)
         }
     }
 
-    static func totalWorkoutCount() throws -> Int {
+    public static func totalWorkoutCount() throws -> Int {
         try db.reader.read { dbConn in
             try Workout.fetchCount(dbConn)
         }
     }
 
-    static func fetchTemplates() throws -> [WorkoutTemplate] {
+    public static func fetchTemplates() throws -> [WorkoutTemplate] {
         try db.reader.read { dbConn in
             try WorkoutTemplate.order(Column("is_favorite").desc, Column("created_at").desc).fetchAll(dbConn)
         }
     }
 
-    static func toggleFavorite(id: Int64) throws {
+    public static func toggleFavorite(id: Int64) throws {
         try db.writer.write { dbConn in
             try dbConn.execute(sql: "UPDATE workout_template SET is_favorite = NOT is_favorite WHERE id = ?", arguments: [id])
         }
     }
 
-    static func saveTemplate(_ template: inout WorkoutTemplate) throws {
+    public static func saveTemplate(_ template: inout WorkoutTemplate) throws {
         try db.writer.write { [template] dbConn in
             var m = template
             try m.save(dbConn)
         }
     }
 
-    static func renameTemplate(id: Int64, name: String) {
+    public static func renameTemplate(id: Int64, name: String) {
         try? db.writer.write { dbConn in
             try dbConn.execute(sql: "UPDATE workout_template SET name = ? WHERE id = ?",
                                arguments: [name, id])
         }
     }
 
-    static func updateTemplate(id: Int64, name: String, exercisesJson: String) {
+    public static func updateTemplate(id: Int64, name: String, exercisesJson: String) {
         try? db.writer.write { dbConn in
             try dbConn.execute(sql: "UPDATE workout_template SET name = ?, exercises_json = ? WHERE id = ?",
                                arguments: [name, exercisesJson, id])
         }
     }
 
-    static func deleteTemplate(id: Int64) {
+    public static func deleteTemplate(id: Int64) {
         try? db.writer.write { dbConn in
             _ = try WorkoutTemplate.deleteOne(dbConn, id: id)
         }
@@ -115,7 +115,7 @@ enum WorkoutService {
     // MARK: - History & PRs
 
     /// Get all sets for an exercise, most recent first.
-    static func fetchExerciseHistory(name: String) throws -> [WorkoutSet] {
+    public static func fetchExerciseHistory(name: String) throws -> [WorkoutSet] {
         try db.reader.read { dbConn in
             try WorkoutSet.filter(Column("exercise_name") == name)
                 .order(Column("id").desc)
@@ -124,13 +124,13 @@ enum WorkoutService {
     }
 
     /// Personal record (heaviest 1RM estimate) for an exercise.
-    static func fetchPR(for exerciseName: String) throws -> Double? {
+    public static func fetchPR(for exerciseName: String) throws -> Double? {
         let sets = try fetchExerciseHistory(name: exerciseName)
         return sets.compactMap(\.estimated1RM).max()
     }
 
     /// Last weight used for an exercise.
-    static func lastWeight(for exerciseName: String) throws -> Double? {
+    public static func lastWeight(for exerciseName: String) throws -> Double? {
         try db.reader.read { dbConn in
             try WorkoutSet.filter(Column("exercise_name") == exerciseName)
                 .filter(Column("is_warmup") == false)
@@ -140,7 +140,7 @@ enum WorkoutService {
     }
 
     /// Build workout summary for display.
-    static func buildSummary(for workout: Workout) throws -> WorkoutSummary {
+    public static func buildSummary(for workout: Workout) throws -> WorkoutSummary {
         guard let wid = workout.id else {
             return WorkoutSummary(workout: workout, exercises: [], totalSets: 0, totalVolume: 0, prs: 0, bestSets: [])
         }
@@ -165,14 +165,14 @@ enum WorkoutService {
     }
 
     /// Unique exercise names from all workouts.
-    static func allExerciseNames() throws -> [String] {
+    public static func allExerciseNames() throws -> [String] {
         try db.reader.read { dbConn in
             try String.fetchAll(dbConn, sql: "SELECT DISTINCT exercise_name FROM workout_set ORDER BY exercise_name")
         }
     }
 
     /// Workouts per week for last N weeks.
-    static func weeklyWorkoutCounts(weeks: Int = 12) throws -> [(weekStart: Date, count: Int)] {
+    public static func weeklyWorkoutCounts(weeks: Int = 12) throws -> [(weekStart: Date, count: Int)] {
         let workouts = try fetchWorkouts(limit: 500)
         let cal = Calendar.current
         let now = Date()
@@ -192,7 +192,7 @@ enum WorkoutService {
     }
 
     /// Calculate workout streak: consecutive weeks with at least 1 workout.
-    static func workoutStreak() throws -> (current: Int, longest: Int) {
+    public static func workoutStreak() throws -> (current: Int, longest: Int) {
         let counts = try weeklyWorkoutCounts(weeks: 52)
         var current = 0
         var longest = 0
@@ -217,18 +217,18 @@ enum WorkoutService {
 
     private static let exerciseFavoritesKey = "drift_exercise_favorites"
 
-    static var exerciseFavorites: Set<String> {
+    public static var exerciseFavorites: Set<String> {
         Set(UserDefaults.standard.stringArray(forKey: exerciseFavoritesKey) ?? [])
     }
 
-    static func toggleExerciseFavorite(_ name: String) {
+    public static func toggleExerciseFavorite(_ name: String) {
         var favs = exerciseFavorites
         if favs.contains(name) { favs.remove(name) } else { favs.insert(name) }
         UserDefaults.standard.set(Array(favs), forKey: exerciseFavoritesKey)
     }
 
     /// Most recently used exercises (by last workout date), limited to N.
-    static func recentExerciseNames(limit: Int = 15) throws -> [String] {
+    public static func recentExerciseNames(limit: Int = 15) throws -> [String] {
         try db.reader.read { dbConn in
             try String.fetchAll(dbConn, sql: """
                 SELECT exercise_name FROM workout_set
@@ -244,34 +244,55 @@ enum WorkoutService {
 
     private static let sessionKey = "drift_active_workout_session"
 
-    struct SavedSession: Codable {
-        let workoutName: String
-        let startTime: Date
-        let exercises: [SessionExercise]
+    public struct SavedSession: Codable {
+        public let workoutName: String
+        public let startTime: Date
+        public let exercises: [SessionExercise]
 
-        struct SessionExercise: Codable {
-            let name: String
-            let isWarmup: Bool
-            let notes: String?
-            let restTime: Int
-            let sets: [SessionSet]
+        public init(workoutName: String, startTime: Date, exercises: [SessionExercise]) {
+            self.workoutName = workoutName
+            self.startTime = startTime
+            self.exercises = exercises
         }
 
-        struct SessionSet: Codable {
-            let weight: String
-            let reps: String
-            let done: Bool
-            let isWarmup: Bool
+        public struct SessionExercise: Codable {
+            public let name: String
+            public let isWarmup: Bool
+            public let notes: String?
+            public let restTime: Int
+            public let sets: [SessionSet]
+
+            public init(name: String, isWarmup: Bool, notes: String?, restTime: Int, sets: [SessionSet]) {
+                self.name = name
+                self.isWarmup = isWarmup
+                self.notes = notes
+                self.restTime = restTime
+                self.sets = sets
+            }
+        }
+
+        public struct SessionSet: Codable {
+            public let weight: String
+            public let reps: String
+            public let done: Bool
+            public let isWarmup: Bool
+
+            public init(weight: String, reps: String, done: Bool, isWarmup: Bool) {
+                self.weight = weight
+                self.reps = reps
+                self.done = done
+                self.isWarmup = isWarmup
+            }
         }
     }
 
-    static func saveSession(_ session: SavedSession) {
+    public static func saveSession(_ session: SavedSession) {
         if let data = try? JSONEncoder().encode(session) {
             UserDefaults.standard.set(data, forKey: sessionKey)
         }
     }
 
-    static func loadSession() -> SavedSession? {
+    public static func loadSession() -> SavedSession? {
         guard let data = UserDefaults.standard.data(forKey: sessionKey),
               let session = try? JSONDecoder().decode(SavedSession.self, from: data) else { return nil }
         // Expire after 5 hours
@@ -282,20 +303,20 @@ enum WorkoutService {
         return session
     }
 
-    static func clearSession() {
+    public static func clearSession() {
         UserDefaults.standard.removeObject(forKey: sessionKey)
     }
 
-    static var hasActiveSession: Bool {
+    public static var hasActiveSession: Bool {
         loadSession() != nil
     }
 
     // MARK: - Strong CSV Import
 
-    struct ImportResult: Sendable {
-        let workouts: Int
-        let sets: Int
-        let exercises: Int
+    public struct ImportResult: Sendable {
+        public let workouts: Int
+        public let sets: Int
+        public let exercises: Int
     }
 
     enum ImportError: LocalizedError {
@@ -304,7 +325,7 @@ enum WorkoutService {
     }
 
     /// Import from Strong or Hevy CSV (auto-detected by column names).
-    static func importStrongCSV(url: URL) throws -> ImportResult {
+    public static func importStrongCSV(url: URL) throws -> ImportResult {
         guard url.startAccessingSecurityScopedResource() else { throw ImportError.fileAccessDenied }
         defer { url.stopAccessingSecurityScopedResource() }
 

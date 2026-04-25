@@ -4,15 +4,15 @@ import DriftCore
 /// Unified exercise/workout service — used by both UI views and AI tool calls.
 /// Wraps WorkoutService + ExerciseDatabase + adds smart builder and progressive overload.
 @MainActor
-enum ExerciseService {
+public enum ExerciseService {
 
     /// Reasoning for the last smart session built. Read after calling buildSmartSession().
-    static var lastSessionReasoning: String?
+    public static var lastSessionReasoning: String?
 
     // MARK: - Template Start
 
     /// Find a template by name (fuzzy match). Returns nil if no match.
-    static func startTemplate(name: String) -> WorkoutTemplate? {
+    public static func startTemplate(name: String) -> WorkoutTemplate? {
         guard let templates = try? WorkoutService.fetchTemplates() else { return nil }
         let lower = name.lowercased()
         return templates.first { $0.name.lowercased().contains(lower) }
@@ -22,7 +22,7 @@ enum ExerciseService {
 
     /// Build a smart workout session: max 5 exercises, popular first, with reasoning notes.
     /// If user has history, prioritize their exercises. Otherwise use popular defaults.
-    static func buildSmartSession(muscleGroup: String? = nil) -> WorkoutTemplate? {
+    public static func buildSmartSession(muscleGroup: String? = nil) -> WorkoutTemplate? {
         var exercises: [WorkoutTemplate.TemplateExercise] = []
         let userExerciseSet = Set((try? WorkoutService.recentExerciseNames(limit: 50)) ?? [])
 
@@ -103,7 +103,7 @@ enum ExerciseService {
     // MARK: - Workout Suggestion
 
     /// Suggest what to train based on recent history.
-    static func suggestWorkout() -> String {
+    public static func suggestWorkout() -> String {
         let parts = recentBodyParts()
         let allParts = ["Chest", "Back", "Legs", "Shoulders", "Arms", "Core"]
         let neglected = allParts.filter { !parts.contains($0) }
@@ -134,7 +134,7 @@ enum ExerciseService {
 
     /// Check if user is in progressive overload for an exercise.
     /// Compares estimated 1RM across last 4 sessions.
-    static func getProgressiveOverload(exercise: String) -> ProgressiveOverloadInfo? {
+    public static func getProgressiveOverload(exercise: String) -> ProgressiveOverloadInfo? {
         let sets = (try? WorkoutService.fetchExerciseHistory(name: exercise)) ?? []
         let workingSets = sets.filter { !$0.isWarmup && $0.weightLbs != nil && $0.reps != nil }
         guard workingSets.count >= 4 else {
@@ -189,7 +189,7 @@ enum ExerciseService {
 
     /// Resolve a short/informal exercise name to its canonical DB name.
     /// Prefers exercises the user has actually done over generic matches.
-    static func resolveExerciseName(_ query: String) -> String? {
+    public static func resolveExerciseName(_ query: String) -> String? {
         let results = ExerciseDatabase.search(query: query)
         guard !results.isEmpty else { return nil }
         // Prefer exercises the user has history with
@@ -220,7 +220,7 @@ enum ExerciseService {
     // MARK: - Workout Split Builder
 
     /// Known split types with their day→body-part mappings.
-    static let splitDefinitions: [String: [(name: String, parts: [String])]] = [
+    public static let splitDefinitions: [String: [(name: String, parts: [String])]] = [
         "ppl": [
             (name: "Push", parts: ["Chest", "Shoulders", "Arms"]),
             (name: "Pull", parts: ["Back", "Arms"]),
@@ -243,7 +243,7 @@ enum ExerciseService {
     ]
 
     /// Resolve a user phrase to a known split type key.
-    static func resolveSplitType(_ input: String) -> String? {
+    public static func resolveSplitType(_ input: String) -> String? {
         let lower = input.lowercased()
         if lower.contains("ppl") || lower.contains("push pull leg") { return "ppl" }
         if lower.contains("upper") && lower.contains("lower") { return "upper/lower" }
@@ -254,7 +254,7 @@ enum ExerciseService {
 
     /// Suggest exercises for a given day of a split.
     /// Returns 4-6 exercises: user history prioritized, then DB exercises for the target body parts.
-    static func suggestForSplitDay(splitType: String, dayIndex: Int) -> [ExerciseDatabase.ExerciseInfo] {
+    public static func suggestForSplitDay(splitType: String, dayIndex: Int) -> [ExerciseDatabase.ExerciseInfo] {
         guard let days = splitDefinitions[splitType], dayIndex < days.count else { return [] }
         let dayParts = days[dayIndex].parts
         let userExercises = Set((try? WorkoutService.recentExerciseNames(limit: 100)) ?? [])
@@ -280,7 +280,7 @@ enum ExerciseService {
     }
 
     /// Build a WorkoutTemplate from a list of exercise names.
-    static func buildSplitTemplate(name: String, exerciseNames: [String]) -> WorkoutTemplate? {
+    public static func buildSplitTemplate(name: String, exerciseNames: [String]) -> WorkoutTemplate? {
         let exercises = exerciseNames.map { exerciseName in
             let lastWeight = (try? WorkoutService.lastWeight(for: exerciseName)).flatMap { $0 }
             var notes: String? = nil
@@ -319,7 +319,7 @@ enum ExerciseService {
     }
 
     /// One-line form tip for common exercises. Matched by keyword in exercise name.
-    static func formTip(for exercise: String) -> String? {
+    public static func formTip(for exercise: String) -> String? {
         let e = exercise.lowercased()
         // Chest
         if e.contains("bench press") && !e.contains("close") { return "Drive feet into floor, retract shoulder blades" }
@@ -364,7 +364,7 @@ enum ExerciseService {
     }
 
     /// Formatted exercise instructions from the DB: form tip, muscles, equipment, level.
-    static func exerciseInstructions(_ exercise: ExerciseDatabase.ExerciseInfo) -> String {
+    public static func exerciseInstructions(_ exercise: ExerciseDatabase.ExerciseInfo) -> String {
         var lines: [String] = []
         lines.append("**\(exercise.name)** (\(exercise.category), \(exercise.level))")
 
@@ -404,13 +404,13 @@ enum ExerciseService {
 
 // MARK: - Data Types
 
-enum OverloadStatus: String, Sendable {
+public enum OverloadStatus: String, Sendable {
     case improving, stalling, declining, insufficientData
 }
 
-struct ProgressiveOverloadInfo: Sendable {
-    let exercise: String
-    let status: OverloadStatus
-    let sessions: [Double]  // estimated 1RM per session
-    let trend: String       // natural language description
+public struct ProgressiveOverloadInfo: Sendable {
+    public let exercise: String
+    public let status: OverloadStatus
+    public let sessions: [Double]
+    public let trend: String
 }

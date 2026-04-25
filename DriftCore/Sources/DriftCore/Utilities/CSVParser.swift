@@ -1,20 +1,20 @@
 import Foundation
 
 /// Simple CSV parser for importing Lingo CGM data.
-enum CSVParser {
-    struct ParseResult: Sendable {
-        let headers: [String]
-        let rows: [[String: String]]
+public enum CSVParser {
+    public struct ParseResult: Sendable {
+        public let headers: [String]
+        public let rows: [[String: String]]
     }
 
     /// Parse a CSV file at the given URL.
-    static func parse(url: URL) throws -> ParseResult {
+    public static func parse(url: URL) throws -> ParseResult {
         let content = try String(contentsOf: url, encoding: .utf8)
         return parse(content: content)
     }
 
     /// Parse CSV content string.
-    static func parse(content: String) -> ParseResult {
+    public static func parse(content: String) -> ParseResult {
         let lines = content.components(separatedBy: .newlines).filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
         guard let headerLine = lines.first else {
             return ParseResult(headers: [], rows: [])

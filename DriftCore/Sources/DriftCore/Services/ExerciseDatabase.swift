@@ -1,23 +1,23 @@
 import Foundation
 
 /// 873 exercises from free-exercise-db with muscle groups and equipment.
-enum ExerciseDatabase {
-    struct ExerciseInfo: Codable, Sendable, Identifiable {
-        var id: String { name }
-        let name: String
-        let bodyPart: String
-        let primaryMuscles: [String]
-        let secondaryMuscles: [String]
-        let equipment: String
-        let category: String
-        let level: String
-        var imageUrl: String? = nil
-        var youtubeUrl: String? = nil
+public enum ExerciseDatabase {
+    public struct ExerciseInfo: Codable, Sendable, Identifiable {
+        public var id: String { name }
+        public let name: String
+        public let bodyPart: String
+        public let primaryMuscles: [String]
+        public let secondaryMuscles: [String]
+        public let equipment: String
+        public let category: String
+        public let level: String
+        public var imageUrl: String? = nil
+        public var youtubeUrl: String? = nil
     }
 
     nonisolated(unsafe) private static var _exercises: [ExerciseInfo]?
 
-    static var all: [ExerciseInfo] {
+    public static var all: [ExerciseInfo] {
         if let cached = _exercises { return cached }
         guard let url = Bundle.main.url(forResource: "exercises", withExtension: "json"),
               let data = try? Data(contentsOf: url),
@@ -28,7 +28,7 @@ enum ExerciseDatabase {
         return decoded
     }
 
-    static func search(query: String) -> [ExerciseInfo] {
+    public static func search(query: String) -> [ExerciseInfo] {
         let source = allWithCustom
         if query.isEmpty { return source }
         let queryLower = query.lowercased()
@@ -77,7 +77,7 @@ enum ExerciseDatabase {
         return decoded
     }
 
-    static func addCustomExercise(name: String, bodyPart: String) {
+    public static func addCustomExercise(name: String, bodyPart: String) {
         var customs = customExercises
         guard !customs.contains(where: { $0.name.lowercased() == name.lowercased() }) else { return }
         customs.append(ExerciseInfo(name: name, bodyPart: bodyPart, primaryMuscles: [bodyPart.lowercased()],
@@ -89,26 +89,26 @@ enum ExerciseDatabase {
     }
 
     // Include custom exercises in all searches, deduplicating by name
-    static var allWithCustom: [ExerciseInfo] {
+    public static var allWithCustom: [ExerciseInfo] {
         let base = all
         let baseNames = Set(base.map { $0.name.lowercased() })
         let unique = customExercises.filter { !baseNames.contains($0.name.lowercased()) }
         return base + unique
     }
 
-    static func byBodyPart(_ part: String) -> [ExerciseInfo] {
+    public static func byBodyPart(_ part: String) -> [ExerciseInfo] {
         allWithCustom.filter { $0.bodyPart == part }
     }
 
-    static func info(for name: String) -> ExerciseInfo? {
+    public static func info(for name: String) -> ExerciseInfo? {
         allWithCustom.first { $0.name.lowercased() == name.lowercased() }
     }
 
-    static func bodyPart(for name: String) -> String {
+    public static func bodyPart(for name: String) -> String {
         info(for: name)?.bodyPart ?? guessBodyPart(name)
     }
 
-    static func guessBodyPart(_ name: String) -> String {
+    public static func guessBodyPart(_ name: String) -> String {
         let e = name.lowercased()
         // Check more specific patterns first to avoid false matches (e.g., "lateral" matching "lat")
         if e.contains("lateral raise") || e.contains("shoulder") || e.contains("overhead press") || e.contains("face pull") || e.contains("military") || e.contains("shrug") { return "Shoulders" }
