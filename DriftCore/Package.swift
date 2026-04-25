@@ -1,0 +1,30 @@
+// swift-tools-version: 5.9
+import PackageDescription
+
+let package = Package(
+    name: "DriftCore",
+    platforms: [
+        .iOS(.v17),
+        .macOS(.v14),
+    ],
+    products: [
+        .library(name: "DriftCore", targets: ["DriftCore"]),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/groue/GRDB.swift.git", from: "7.0.0"),
+    ],
+    targets: [
+        .target(
+            name: "DriftCore",
+            dependencies: [
+                .product(name: "GRDB", package: "GRDB.swift"),
+            ],
+            path: "Sources/DriftCore"
+        ),
+        .testTarget(
+            name: "DriftCoreTests",
+            dependencies: ["DriftCore"],
+            path: "Tests/DriftCoreTests"
+        ),
+    ]
+)
