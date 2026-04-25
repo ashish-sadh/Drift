@@ -57,6 +57,40 @@ See `program.md` for autopilot instructions, sprint lifecycle, and control comma
 - Red (Theme.surplus) = against goal
 - Default: assume losing weight
 
+## Module Layout
+
+The codebase is split into a multi-platform `DriftCore` Swift package + the iOS Drift app target.
+
+**`DriftCore/Sources/DriftCore/`** — cross-platform domain logic. Builds on iOS AND macOS. No `import UIKit/SwiftUI/HealthKit/WidgetKit/AVFoundation/Speech/Photos/AppIntents`.
+- `Models/` — data types (Food, FoodEntry, WeightEntry, RecipeItem, etc.)
+- `Persistence/` — AppDatabase + GRDB extensions
+- `Adapters/` — DriftPlatform registry + protocols (HealthDataProvider, WidgetRefresher) for iOS-only seams
+- `Utilities/` — DateFormatters, Log, MacroFormatters, Preferences (UserDefaults), CSVParser
+- `Domain/{Food,Weight,Workout,Health}/` — domain services (FoodService, WorkoutService, etc.)
+- `AI/{Parsing,Classification,Tools,Pipeline,LLM}/` — AI pipeline (InputNormalizer, IntentClassifier, ToolRanker, AIToolAgent, StaticOverrides, LlamaCppBackend, ...)
+
+**`Drift/`** — iOS app shell. Owns Views, ViewModels, and only the genuinely iOS-bound services:
+- `HealthKitService` (+ extensions) — conforms to `HealthDataProvider`
+- `WidgetDataProvider` + `WidgetCenterRefresher` — conforms to `WidgetRefresher`
+- `NotificationService`, `SpeechRecognitionService`
+- `BodySpecPDFParser`, `LabReportOCR`, `NutritionLabelOCR` — Vision/PDFKit
+- `CloudVision/*`, `PhotoLogTool` — iOS Keychain + cloud OCR
+- `FoodService+Logging` — uses `FoodLogViewModel`
+- `Views/`, `ViewModels/`, `Resources/`, `DriftApp.swift`
+
+**`DriftApp.init()`** wires the seams: `DriftPlatform.health = HealthKitService.shared` + `DriftPlatform.widget = WidgetCenterRefresher()`.
+
+## Test Workflow — match the test command to what you touched
+
+| Touched code | Command | Wall time |
+|---|---|---|
+| Pure logic in `DriftCore/Sources/DriftCore/` | `cd DriftCore && swift test` | <1s warm |
+| AI pipeline (LLM eval) | `xcodebuild test -scheme DriftLLMEvalMacOS -destination 'platform=macOS'` | 30s deterministic per-stage / ~5min full |
+| iOS UI / HealthKit / Widget integration | `xcodebuild test -scheme Drift -destination 'iOS Simulator,name=iPhone 17 Pro' -only-testing:DriftTests` | ~10s |
+| Pre-TestFlight | run all of the above |  |
+
+If you touch a file that's only Swift logic (no SwiftUI / HealthKit / WidgetKit / etc), it almost certainly belongs in DriftCore — keep the iOS target lean.
+
 ## Build & Test
 
 **CRITICAL: Never run multiple `xcodebuild test` in parallel.** They fight for the simulator and deadlock. Always kill stale processes first.
