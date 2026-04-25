@@ -1,16 +1,15 @@
 import Foundation
-import DriftCore
 import GRDB
 
 /// Unified food service — used by both UI views and AI tool calls.
 /// Wraps AppDatabase food methods + adds computed insights.
 @MainActor
-enum FoodService {
+public enum FoodService {
 
     // MARK: - Search
 
     /// Search foods by name. Returns ranked results (usage, relevance, time-of-day boost).
-    static func searchFood(query: String) -> [Food] {
+    public static func searchFood(query: String) -> [Food] {
         let corrected = SpellCorrectService.correct(query)
         var results = (try? AppDatabase.shared.searchFoodsRanked(query: corrected)) ?? []
 
@@ -52,38 +51,38 @@ enum FoodService {
     }
 
     /// Search saved recipes by name.
-    static func searchRecipes(query: String) -> [SavedFood] {
+    public static func searchRecipes(query: String) -> [SavedFood] {
         (try? AppDatabase.shared.searchRecipes(query: query)) ?? []
     }
 
     /// Check if a food is favorited.
-    static func isFavorite(name: String) -> Bool {
+    public static func isFavorite(name: String) -> Bool {
         (try? AppDatabase.shared.isFoodFavorite(name: name)) ?? false
     }
 
     /// Toggle favorite status for a food.
-    static func toggleFavorite(name: String, foodId: Int64?) {
+    public static func toggleFavorite(name: String, foodId: Int64?) {
         try? AppDatabase.shared.toggleFoodFavorite(name: name, foodId: foodId)
     }
 
     /// Delete a favorite by ID.
-    static func deleteFavorite(id: Int64) {
+    public static func deleteFavorite(id: Int64) {
         try? AppDatabase.shared.deleteFavorite(id: id)
     }
 
     /// Save a scanned food (from barcode or online search).
-    static func saveScannedFood(_ food: inout Food) -> Food? {
+    public static func saveScannedFood(_ food: inout Food) -> Food? {
         try? AppDatabase.shared.saveScannedFood(&food)
         return (try? AppDatabase.shared.searchFoods(query: food.name))?.first
     }
 
     /// Fetch a single food by name (best match).
-    static func findByName(_ name: String) -> Food? {
+    public static func findByName(_ name: String) -> Food? {
         (try? AppDatabase.shared.searchFoods(query: name, limit: 1))?.first
     }
 
     /// Delete a user-added (scanned) food and its usage tracking.
-    static func deleteScannedFood(id: Int64, name: String) {
+    public static func deleteScannedFood(id: Int64, name: String) {
         try? AppDatabase.shared.writer.write { db in
             _ = try Food.deleteOne(db, id: id)
             try db.execute(sql: "DELETE FROM food_usage WHERE food_name = ?", arguments: [name])
@@ -91,63 +90,63 @@ enum FoodService {
     }
 
     /// Fetch recently used foods.
-    static func fetchRecentFoods(limit: Int = 10) -> [Food] {
+    public static func fetchRecentFoods(limit: Int = 10) -> [Food] {
         (try? AppDatabase.shared.fetchRecentFoods(limit: limit)) ?? []
     }
 
     /// Fetch foods by category.
-    static func fetchFoodsByCategory(_ category: String) -> [Food] {
+    public static func fetchFoodsByCategory(_ category: String) -> [Food] {
         (try? AppDatabase.shared.fetchFoodsByCategory(category)) ?? []
     }
 
     /// Save a recipe/favorite.
-    static func saveRecipe(_ fav: inout SavedFood) {
+    public static func saveRecipe(_ fav: inout SavedFood) {
         try? AppDatabase.shared.saveFavorite(&fav)
     }
 
     /// Fetch a cached barcode product.
-    static func fetchCachedBarcode(_ barcode: String) -> BarcodeCache? {
+    public static func fetchCachedBarcode(_ barcode: String) -> BarcodeCache? {
         try? AppDatabase.shared.fetchCachedBarcode(barcode)
     }
 
     /// Cache a barcode product for future lookups.
-    static func cacheBarcodeProduct(_ cache: BarcodeCache) {
+    public static func cacheBarcodeProduct(_ cache: BarcodeCache) {
         try? AppDatabase.shared.cacheBarcodeProduct(cache)
     }
 
     /// Fetch meal logs for a date.
-    static func fetchMealLogs(for date: String) -> [MealLog] {
+    public static func fetchMealLogs(for date: String) -> [MealLog] {
         (try? AppDatabase.shared.fetchMealLogs(for: date)) ?? []
     }
 
     /// Fetch food entries for a meal log.
-    static func fetchFoodEntries(forMealLog id: Int64) -> [FoodEntry] {
+    public static func fetchFoodEntries(forMealLog id: Int64) -> [FoodEntry] {
         (try? AppDatabase.shared.fetchFoodEntries(forMealLog: id)) ?? []
     }
 
     /// Fetch food items for plant points calculation.
-    static func fetchFoodItemsForPlantPoints(from startDate: String, to endDate: String) -> [PlantPointsService.FoodItem] {
+    public static func fetchFoodItemsForPlantPoints(from startDate: String, to endDate: String) -> [PlantPointsFoodItem] {
         (try? AppDatabase.shared.fetchFoodItemsForPlantPoints(from: startDate, to: endDate)) ?? []
     }
 
     /// Fetch a food by its database ID.
-    static func fetchFoodById(_ id: Int64) -> Food? {
+    public static func fetchFoodById(_ id: Int64) -> Food? {
         try? AppDatabase.shared.reader.read { db in try Food.fetchOne(db, id: id) }
     }
 
     /// Update a food entry's name by entry ID.
-    static func updateFoodEntryName(id: Int64, name: String) {
+    public static func updateFoodEntryName(id: Int64, name: String) {
         try? AppDatabase.shared.updateFoodEntryName(id: id, name: name)
     }
 
     /// Update a food entry's macros by entry ID.
-    static func updateFoodEntryMacros(id: Int64, calories: Double, proteinG: Double, carbsG: Double, fatG: Double, fiberG: Double) {
+    public static func updateFoodEntryMacros(id: Int64, calories: Double, proteinG: Double, carbsG: Double, fatG: Double, fiberG: Double) {
         try? AppDatabase.shared.updateFoodEntryMacros(id: id, calories: calories, proteinG: proteinG, carbsG: carbsG, fatG: fatG, fiberG: fiberG)
-        WidgetDataProvider.refreshWidgetData()
+        DriftPlatform.widget?.refresh()
     }
 
     /// Update a food's name and macros by ID.
-    static func updateFood(id: Int64, name: String, calories: Double, proteinG: Double, carbsG: Double, fatG: Double, fiberG: Double) {
+    public static func updateFood(id: Int64, name: String, calories: Double, proteinG: Double, carbsG: Double, fatG: Double, fiberG: Double) {
         try? AppDatabase.shared.writer.write { db in
             try db.execute(sql: """
                 UPDATE food SET name = ?, calories = ?, protein_g = ?,
@@ -160,7 +159,7 @@ enum FoodService {
     /// recomputes per-serving macros from the items sum. Used by the recipe
     /// builder when editing an existing recipe (#192) — avoids the duplicate
     /// row that `saveRecipe` would otherwise create.
-    static func updateRecipe(id: Int64, name: String, items: [QuickAddView.RecipeItem], servings: Double = 1, expandOnLog: Bool = false) {
+    public static func updateRecipe(id: Int64, name: String, items: [RecipeItem], servings: Double = 1, expandOnLog: Bool = false) {
         let safeServings = max(servings, 0.1)
         let totals = items.reduce(into: (cal: 0.0, p: 0.0, c: 0.0, f: 0.0, fb: 0.0)) { acc, item in
             acc.cal += item.calories
@@ -190,44 +189,14 @@ enum FoodService {
         }
     }
 
-    /// Log a recipe: aggregated single entry, or expanded (one entry per ingredient)
-    /// when `recipe.expandOnLog == true` and ingredient items are available.
-    /// Returns true if expanded (caller can decide feedback text).
-    @discardableResult
-    static func logRecipe(_ recipe: Food, servings: Double, mealType: MealType,
-                          loggedAt: String? = nil, viewModel: FoodLogViewModel) -> Bool {
-        if recipe.expandOnLog, let items = recipe.recipeItems, !items.isEmpty {
-            for item in items {
-                viewModel.quickAdd(
-                    name: item.name,
-                    calories: item.calories * servings,
-                    proteinG: item.proteinG * servings,
-                    carbsG: item.carbsG * servings,
-                    fatG: item.fatG * servings,
-                    fiberG: item.fiberG * servings,
-                    mealType: mealType,
-                    loggedAt: loggedAt,
-                    servingSizeG: item.servingSizeG * servings,
-                    servings: 1
-                )
-            }
-            return true
-        }
-        viewModel.quickAdd(
-            name: recipe.name, calories: recipe.calories * servings,
-            proteinG: recipe.proteinG * servings, carbsG: recipe.carbsG * servings,
-            fatG: recipe.fatG * servings, fiberG: recipe.fiberG * servings,
-            mealType: mealType, loggedAt: loggedAt,
-            servingSizeG: recipe.servingSize, servings: 1
-        )
-        return false
-    }
+    // logRecipe lives in `Drift/Services/FoodService+Logging.swift` because it
+    // dispatches through `FoodLogViewModel`, an iOS-only ViewModel.
 
     // MARK: - Search with Online Fallback
 
     /// Search locally first, then fall back to USDA + OpenFoodFacts if enabled and local results < threshold.
     /// Used by AI chat when resolving food names that aren't in the local DB.
-    static func searchWithFallback(query: String, localThreshold: Int = 3) async -> [Food] {
+    public static func searchWithFallback(query: String, localThreshold: Int = 3) async -> [Food] {
         let local = searchFood(query: query)
         guard local.count < localThreshold, Preferences.onlineFoodSearchEnabled else { return local }
 
@@ -283,7 +252,7 @@ enum FoodService {
     // MARK: - Nutrition Lookup
 
     /// Get nutrition for a food by name. Returns best match or nil.
-    static func getNutrition(name: String) -> (food: Food, perServing: String)? {
+    public static func getNutrition(name: String) -> (food: Food, perServing: String)? {
         let corrected = SpellCorrectService.correct(name)
         guard let results = try? AppDatabase.shared.searchFoodsRanked(query: corrected),
               let food = results.first else { return nil }
@@ -294,7 +263,7 @@ enum FoodService {
     // MARK: - Daily Totals
 
     /// Single source of truth for daily calorie target. All calorie "remaining" displays should use this.
-    static func resolvedCalorieTarget() -> Int {
+    public static func resolvedCalorieTarget() -> Int {
         let currentKg = WeightTrendService.shared.latestWeightKg ?? 80
         if let goalTarget = WeightGoal.load()?.macroTargets(currentWeightKg: currentKg)?.calorieTarget {
             return max(1200, Int(goalTarget))
@@ -305,7 +274,7 @@ enum FoodService {
     }
 
     /// Get today's nutrition totals with target and remaining.
-    static func getDailyTotals(date: String? = nil) -> DailyTotals {
+    public static func getDailyTotals(date: String? = nil) -> DailyTotals {
         let dateStr = date ?? DateFormatters.todayString
         let nutrition = (try? AppDatabase.shared.fetchDailyNutrition(for: dateStr)) ?? .zero
         let target = resolvedCalorieTarget()
@@ -342,7 +311,7 @@ enum FoodService {
 
     /// Formats a macro-goal-progress line: "Protein: 87g / 120g goal — 73% (33g to go)".
     /// Pure — no I/O. Returns percent of target (capped at 999 to avoid absurd values on bad input).
-    nonisolated static func macroProgressLine(label: String, currentG: Int, targetG: Int, unit: String = "g") -> String {
+    public nonisolated static func macroProgressLine(label: String, currentG: Int, targetG: Int, unit: String = "g") -> String {
         let c = max(0, currentG)
         let t = max(0, targetG)
         guard t > 0 else { return "\(label): \(c)\(unit)." }
@@ -361,7 +330,7 @@ enum FoodService {
 
     /// High-protein foods the user actually eats, that fit remaining calories.
     /// Falls back to DB top-protein if no user history.
-    static func topProteinFoods(limit: Int = 5) -> [Food] {
+    public static func topProteinFoods(limit: Int = 5) -> [Food] {
         let totals = getDailyTotals()
         let calBudget = max(0, totals.remaining)
 
@@ -387,7 +356,7 @@ enum FoodService {
     }
 
     /// Suggest foods that fit remaining calorie/protein budget.
-    static func suggestMeal(caloriesLeft: Int? = nil, proteinNeeded: Int? = nil) -> [Food] {
+    public static func suggestMeal(caloriesLeft: Int? = nil, proteinNeeded: Int? = nil) -> [Food] {
         let totals = getDailyTotals()
         let calBudget = caloriesLeft ?? max(0, totals.remaining)
         let protBudget = proteinNeeded ?? {
@@ -413,7 +382,7 @@ enum FoodService {
     /// Delete by stable entry id (preferred path when the AI resolves a multi-turn
     /// reference to a specific row via the recentEntries window). Verifies the id
     /// belongs to today so a stale reference can't nuke an unrelated row.
-    static func deleteEntry(id: Int64) -> String? {
+    public static func deleteEntry(id: Int64) -> String? {
         let today = DateFormatters.todayString
         guard let mealLogs = try? AppDatabase.shared.fetchMealLogs(for: today) else { return nil }
         for ml in mealLogs {
@@ -421,7 +390,7 @@ enum FoodService {
                   let entries = try? AppDatabase.shared.fetchFoodEntries(forMealLog: mlId) else { continue }
             if let entry = entries.first(where: { $0.id == id }) {
                 try? AppDatabase.shared.deleteFoodEntry(id: id)
-                WidgetDataProvider.refreshWidgetData()
+                DriftPlatform.widget?.refresh()
                 ConversationState.shared.dropRecentEntry(id: id)
                 return "Removed \(entry.foodName) (\(Int(entry.calories)) cal)."
             }
@@ -430,7 +399,7 @@ enum FoodService {
     }
 
     /// Delete the most recent food entry matching a name. Returns confirmation or error.
-    static func deleteEntry(matching name: String) -> String {
+    public static func deleteEntry(matching name: String) -> String {
         let today = DateFormatters.todayString
         guard let mealLogs = try? AppDatabase.shared.fetchMealLogs(for: today) else {
             return "No food logged today."
@@ -458,14 +427,14 @@ enum FoodService {
                     return "No food entries today."
                 }
                 try? AppDatabase.shared.deleteFoodEntry(id: lastId)
-                WidgetDataProvider.refreshWidgetData()
+                DriftPlatform.widget?.refresh()
                 ConversationState.shared.dropRecentEntry(id: lastId)
                 return "Removed \(last.foodName) (\(Int(last.entry.calories)) cal)."
             }
             return "Couldn't find '\(name)' in today's food log."
         }
         try? AppDatabase.shared.deleteFoodEntry(id: entryId)
-        WidgetDataProvider.refreshWidgetData()
+        DriftPlatform.widget?.refresh()
         ConversationState.shared.dropRecentEntry(id: entryId)
         return "Removed \(found.foodName) (\(Int(found.entry.calories)) cal)."
     }
@@ -482,7 +451,7 @@ enum FoodService {
     ///
     /// When `entryId` is provided AND matches a today-dated row, bypass name
     /// search entirely — this is the multi-turn reference path (#227).
-    static func editMealEntry(
+    public static func editMealEntry(
         mealPeriod: String?,
         targetFood: String,
         action: String,
@@ -560,7 +529,7 @@ enum FoodService {
         switch action.lowercased() {
         case "remove", "delete":
             try? AppDatabase.shared.deleteFoodEntry(id: entryId)
-            WidgetDataProvider.refreshWidgetData()
+            DriftPlatform.widget?.refresh()
             ConversationState.shared.dropRecentEntry(id: entryId)
             let cal = Int(entry.calories * entry.servings)
             return "Removed \(entry.foodName) from \(meal) (\(cal) cal)."
@@ -574,7 +543,7 @@ enum FoodService {
                 return "Couldn't parse '\(rawValue)' as a quantity."
             }
             try? AppDatabase.shared.updateFoodEntryServings(id: entryId, servings: servings)
-            WidgetDataProvider.refreshWidgetData()
+            DriftPlatform.widget?.refresh()
             let formatted = servings == Double(Int(servings))
                 ? "\(Int(servings))"
                 : String(format: "%.1f", servings)
@@ -597,7 +566,7 @@ enum FoodService {
                 fatG: replacement.fatG,
                 fiberG: replacement.fiberG
             )
-            WidgetDataProvider.refreshWidgetData()
+            DriftPlatform.widget?.refresh()
             if let mealType = MealType(rawValue: meal) {
                 ConversationState.shared.pushRecentEntry(.init(
                     id: entryId, name: replacement.name, mealType: mealType.rawValue,
@@ -628,7 +597,7 @@ enum FoodService {
     // MARK: - Copy Yesterday
 
     /// Preview yesterday's food entries without copying. Returns summary for confirmation.
-    static func previewYesterday() -> String {
+    public static func previewYesterday() -> String {
         guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) else {
             return "Couldn't determine yesterday's date."
         }
@@ -653,7 +622,7 @@ enum FoodService {
     }
 
     /// Copy all of yesterday's food entries to today. Returns confirmation.
-    static func copyYesterday() -> String {
+    public static func copyYesterday() -> String {
         guard let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date()) else {
             return "Couldn't determine yesterday's date."
         }
@@ -698,14 +667,14 @@ enum FoodService {
         let cal = mealLogs.flatMap { ml in
             (try? AppDatabase.shared.fetchFoodEntries(forMealLog: ml.id ?? 0)) ?? []
         }.reduce(0.0) { $0 + $1.calories }
-        WidgetDataProvider.refreshWidgetData()
+        DriftPlatform.widget?.refresh()
         return "Copied \(copied) items from yesterday (\(Int(cal)) cal total)."
     }
 
     // MARK: - Explain
 
     /// Break down the calories math: TDEE, deficit, target, eaten, remaining.
-    static func explainCalories() -> String {
+    public static func explainCalories() -> String {
         let totals = getDailyTotals()
         let tdee = TDEEEstimator.shared.current?.tdee ?? 2000
         let currentKg = WeightTrendService.shared.latestWeightKg ?? 80
@@ -726,12 +695,12 @@ enum FoodService {
 
 // MARK: - Data Types
 
-struct DailyTotals: Sendable {
-    let eaten: Int
-    let target: Int
-    let remaining: Int
-    let proteinG: Int
-    let carbsG: Int
-    let fatG: Int
-    let fiberG: Int
+public struct DailyTotals: Sendable {
+    public let eaten: Int
+    public let target: Int
+    public let remaining: Int
+    public let proteinG: Int
+    public let carbsG: Int
+    public let fatG: Int
+    public let fiberG: Int
 }

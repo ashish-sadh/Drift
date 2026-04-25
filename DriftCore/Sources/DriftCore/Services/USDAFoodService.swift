@@ -6,23 +6,23 @@ import DriftCore
 /// Rate limited: max 1 request/sec, max 50 per session.
 /// https://fdc.nal.usda.gov/api-guide.html
 @MainActor
-enum USDAFoodService {
+public enum USDAFoodService {
 
-    struct FoodItem: Sendable {
-        let name: String
-        let calories: Double      // per 100g
-        let proteinG: Double
-        let carbsG: Double
-        let fatG: Double
-        let fiberG: Double
-        let servingSizeG: Double
+    public struct FoodItem: Sendable {
+        public let name: String
+        public let calories: Double      // per 100g
+        public let proteinG: Double
+        public let carbsG: Double
+        public let fatG: Double
+        public let fiberG: Double
+        public let servingSizeG: Double
         /// Per-unit gram weights extracted from USDA's `foodPortions` array.
         /// Drops the 100g-synthesised defaults that caused the strawberry bug
         /// (audit 2026-04-24): when USDA returns `1 medium = 12g`, we honour
         /// that instead of forcing `ServingUnit` to invent `piece = 100g`.
-        let pieceSizeG: Double?
-        let cupSizeG: Double?
-        let tbspSizeG: Double?
+        public let pieceSizeG: Double?
+        public let cupSizeG: Double?
+        public let tbspSizeG: Double?
 
         init(name: String, calories: Double, proteinG: Double, carbsG: Double,
              fatG: Double, fiberG: Double, servingSizeG: Double,
@@ -44,7 +44,7 @@ enum USDAFoodService {
     private static var sessionRequestCount = 0
     private static var lastRequestTime: Date?
 
-    static func search(query: String, limit: Int = 8) async throws -> [FoodItem] {
+    public static func search(query: String, limit: Int = 8) async throws -> [FoodItem] {
         // Rate limiting: max 50 requests per session
         guard sessionRequestCount < maxRequestsPerSession else { return [] }
 

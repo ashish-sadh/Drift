@@ -1,11 +1,8 @@
 import Foundation
-import DriftCore
 
-/// OpenFoodFacts-coupled convenience initializer for BarcodeCache. The data
-/// part of BarcodeCache lives in DriftCore; this initializer references
-/// OpenFoodFactsService.Product (still in the iOS app target) and stays here.
+/// OpenFoodFacts-coupled convenience initializer for BarcodeCache.
 extension BarcodeCache {
-    init(from product: OpenFoodFactsService.Product) {
+    public init(from product: OpenFoodFactsService.Product) {
         self.init(
             barcode: product.barcode,
             name: product.name,

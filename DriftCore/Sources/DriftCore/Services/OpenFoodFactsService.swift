@@ -4,22 +4,32 @@ import DriftCore
 /// Fetches nutrition data from Open Food Facts by barcode.
 /// Free, open-source, no API key needed. ~3M products.
 /// https://world.openfoodfacts.org
-enum OpenFoodFactsService {
+public enum OpenFoodFactsService {
 
-    struct Product: Sendable {
-        let barcode: String
-        let name: String
-        let brand: String?
-        let servingSize: String?
-        let calories: Double      // per 100g
-        let proteinG: Double
-        let carbsG: Double
-        let fatG: Double
-        let fiberG: Double
-        let servingSizeG: Double?  // parsed serving size in grams (total serving, not per-piece)
-        let piecesPerServing: Int? // e.g. "3 pieces (85g)" → 3; nil if not a multi-piece serving
-        let ingredientsText: String?  // raw ingredients string from OpenFoodFacts
-        let novaGroup: Int?           // NOVA 1-4 processing level
+    public struct Product: Sendable {
+        public let barcode: String
+        public let name: String
+        public let brand: String?
+        public let servingSize: String?
+        public let calories: Double      // per 100g
+        public let proteinG: Double
+        public let carbsG: Double
+        public let fatG: Double
+        public let fiberG: Double
+        public let servingSizeG: Double?  // parsed serving size in grams (total serving, not per-piece)
+        public let piecesPerServing: Int? // e.g. "3 pieces (85g)" → 3; nil if not a multi-piece serving
+        public let ingredientsText: String?  // raw ingredients string from OpenFoodFacts
+        public let novaGroup: Int?           // NOVA 1-4 processing level
+
+        public init(barcode: String, name: String, brand: String?, servingSize: String?,
+                    calories: Double, proteinG: Double, carbsG: Double, fatG: Double, fiberG: Double,
+                    servingSizeG: Double?, piecesPerServing: Int?, ingredientsText: String?, novaGroup: Int?) {
+            self.barcode = barcode; self.name = name; self.brand = brand
+            self.servingSize = servingSize; self.calories = calories
+            self.proteinG = proteinG; self.carbsG = carbsG; self.fatG = fatG; self.fiberG = fiberG
+            self.servingSizeG = servingSizeG; self.piecesPerServing = piecesPerServing
+            self.ingredientsText = ingredientsText; self.novaGroup = novaGroup
+        }
     }
 
     enum LookupError: LocalizedError {
@@ -37,7 +47,7 @@ enum OpenFoodFactsService {
     }
 
     /// Look up a product by barcode (EAN/UPC).
-    static func lookup(barcode: String) async throws -> Product {
+    public static func lookup(barcode: String) async throws -> Product {
         let urlString = "https://world.openfoodfacts.org/api/v2/product/\(barcode).json?fields=product_name,brands,serving_size,nutriments,ingredients_text,nova_group"
         guard let url = URL(string: urlString) else {
             throw LookupError.networkError("Invalid URL")
@@ -107,7 +117,7 @@ enum OpenFoodFactsService {
     }
 
     /// Text search for foods by name. Returns up to `limit` products with nutrition data.
-    static func search(query: String, limit: Int = 10) async throws -> [Product] {
+    public static func search(query: String, limit: Int = 10) async throws -> [Product] {
         let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
         let urlString = "https://search.openfoodfacts.org/search?q=\(encoded)&page_size=\(limit)&fields=product_name,brands,serving_size,nutriments,code"
         guard let url = URL(string: urlString) else { return [] }
@@ -149,7 +159,7 @@ enum OpenFoodFactsService {
 
     /// Parse piece/unit count from serving strings like "3 pieces (85g)" → 3, "2 bars (60g)" → 2.
     /// Returns nil if no multi-piece pattern found or count is 1.
-    static func parsePieceCount(_ str: String?) -> Int? {
+    public static func parsePieceCount(_ str: String?) -> Int? {
         guard let str else { return nil }
         let cleaned = str.lowercased()
         let pattern = #"(\d+)\s*(?:pieces?|pcs?|bars?|pastries|cookies?|crackers?|sticks?|slices?|wafers?|biscuits?|rolls?|tablets?|capsules?|scoops?)"#
