@@ -69,16 +69,23 @@ public enum AIRuleEngine {
         let cal = Calendar.current
         guard let yesterday = cal.date(byAdding: .day, value: -1, to: Date()) else { return "Can't load yesterday." }
         let dateStr = DateFormatters.dateOnly.string(from: yesterday)
-        let nutrition = (try? AppDatabase.shared.fetchDailyNutrition(for: dateStr)) ?? .zero
+        return historicalDaySummary(dateStr: dateStr, label: "Yesterday")
+    }
 
-        if nutrition.calories == 0 { return "No food was logged yesterday." }
+    /// Food log for any past date with target comparison.
+    public static func historicalDaySummary(dateStr: String, label: String? = nil) -> String {
+        let nutrition = (try? AppDatabase.shared.fetchDailyNutrition(for: dateStr)) ?? .zero
+        let dayLabel = label ?? {
+            guard let date = DateFormatters.dateOnly.date(from: dateStr) else { return dateStr }
+            return DateFormatters.dayDisplay.string(from: date)
+        }()
+
+        if nutrition.calories == 0 { return "No food was logged on \(dayLabel)." }
 
         let target = FoodService.resolvedCalorieTarget()
         let vsTarget = Int(nutrition.calories) - target
+        var lines = ["\(dayLabel): \(Int(nutrition.calories)) cal (\(vsTarget > 0 ? "+\(vsTarget) over" : "\(abs(vsTarget)) under") target) — \(Int(nutrition.proteinG))P \(Int(nutrition.carbsG))C \(Int(nutrition.fatG))F"]
 
-        var lines = ["Yesterday: \(Int(nutrition.calories)) cal (\(vsTarget > 0 ? "+\(vsTarget) over" : "\(abs(vsTarget)) under") target) — \(Int(nutrition.proteinG))P \(Int(nutrition.carbsG))C \(Int(nutrition.fatG))F"]
-
-        // Compact food list
         var foods: [String] = []
         if let logs = try? AppDatabase.shared.fetchMealLogs(for: dateStr) {
             for log in logs {
@@ -90,6 +97,28 @@ public enum AIRuleEngine {
         }
         if !foods.isEmpty { lines.append(foods.joined(separator: ", ")) }
         return lines.joined(separator: "\n")
+    }
+
+    /// Parse a weekday reference from a query ("last tuesday", "on monday") and return a YYYY-MM-DD string.
+    /// Returns nil if no weekday found or the reference resolves to today.
+    public static func weekdayDateString(from query: String) -> String? {
+        let weekdayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+        guard let matchedIdx = weekdayNames.enumerated().first(where: { query.contains($0.element) })?.offset else { return nil }
+
+        let cal = Calendar.current
+        let today = Date()
+        let todayWeekday = cal.component(.weekday, from: today) // Sun=1 … Sat=7
+        let targetWeekday = matchedIdx + 1
+
+        var daysBack = (todayWeekday - targetWeekday + 7) % 7
+        if daysBack == 0 {
+            // "last friday" when today is friday — go back a full week
+            guard query.contains("last ") || query.contains("past ") else { return nil }
+            daysBack = 7
+        }
+
+        guard let targetDate = cal.date(byAdding: .day, value: -daysBack, to: today) else { return nil }
+        return DateFormatters.dateOnly.string(from: targetDate)
     }
 
     /// Generate a structured daily summary.

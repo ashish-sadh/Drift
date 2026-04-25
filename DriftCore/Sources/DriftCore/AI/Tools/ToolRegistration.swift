@@ -253,6 +253,10 @@ public enum ToolRegistration {
                 if query.contains("yesterday") {
                     return .text(AIRuleEngine.yesterdaySummary())
                 }
+                // Historical weekday queries: "calories last tuesday", "what did I eat on monday"
+                if let historicalDate = AIRuleEngine.weekdayDateString(from: query) {
+                    return .text(AIRuleEngine.historicalDaySummary(dateStr: historicalDate))
+                }
                 // Weekly summary
                 if query.contains("weekly") || query.contains("week") {
                     return .text(AIRuleEngine.weeklySummary())

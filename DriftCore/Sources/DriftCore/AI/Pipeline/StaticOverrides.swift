@@ -329,6 +329,24 @@ public enum StaticOverrides {
             }
         }
 
+        // Set calorie goal: "set my calorie goal to 2000", "calorie target 1800", "my calorie limit is 1500"
+        let calGoalInput = Self.resolveWordNumbers(lower)
+        let calGoalPattern = #"(?:set (?:my )?(?:calorie|cal(?:oric)?) (?:goal|target|limit|budget)|(?:my )?(?:calorie|cal(?:oric)?) (?:goal|target|limit|budget)(?:\s+is)?)\s+(?:to\s+)?(\d{3,4})"#
+        if let calGoalRegex = try? NSRegularExpression(pattern: calGoalPattern),
+           let calGoalMatch = calGoalRegex.firstMatch(in: calGoalInput, range: NSRange(calGoalInput.startIndex..., in: calGoalInput)),
+           let numRange = Range(calGoalMatch.range(at: 1), in: calGoalInput),
+           let calories = Double(String(calGoalInput[numRange])),
+           calories >= 1000 && calories <= 5000 {
+            return .handler {
+                let currentKg = WeightTrendService.shared.latestWeightKg ?? 70
+                var goal = WeightGoal.load() ?? WeightGoal(targetWeightKg: currentKg, monthsToAchieve: 6,
+                    startDate: DateFormatters.todayString, startWeightKg: currentKg)
+                goal.calorieTargetOverride = calories
+                goal.save()
+                return "Calorie goal set to \(Int(calories)) cal/day."
+            }
+        }
+
         // Inline macros: "log 400 cal 30g protein lunch" or "chipotle bowl: 690 cal — 19g protein, 47g carbs, 51g fat"
         let macroPattern = #"(\d+)\s*(?:cal|kcal).*?(\d+)\s*(?:g\s*)?(?:p(?:rotein)?)"#
         if let macroRegex = try? NSRegularExpression(pattern: macroPattern),
