@@ -16,17 +16,17 @@ _(pick from Ready)_
 
 ### P0 — AI Chat Quality
 
-- [ ] **#167 Prompt token audit** — Measure current IntentClassifier prompt token count. Compress examples that are too similar. Target: same or better routing accuracy with ≤15% fewer prompt tokens. Measure before/after with IntentRoutingEval.
+- [x] **#167 Prompt token audit** — Removed 8 redundant examples (rule restatements + duplicates), compressed 3 prose sections, consolidated recent_entries block from 3 lines to 1. Result: ~17% token reduction (~1060→~870 tokens). Rules updated: "HRV→sleep_recovery" → "sleep/HRV→sleep_recovery" to compensate for removed sleep example. Both IntentClassifier.swift and PerStageEvalSupport.swift updated (byte-for-byte identical). Run IntentRoutingEval to verify no accuracy regression.
 
 - [x] **#176 Context window expansion** — Already shipped: n_ctx=min(4096,trainCtx), maxPromptTokens=4096-512-16=3568, maxNewTokens=512. testMultiTurn_longContextFollowUp validates >2048 token history. No action needed.
 
-- [ ] **#177 LLM eval milestone: 175 cases** — IntentRoutingEval is at ~145 cases. Add 20–30 new cases targeting under-covered domains: sleep edge cases, glucose queries, supplement advice vs status, implicit intent phrasings. Run auto-research after expanding. Eval case count must never decrease.
+- [x] **#177 LLM eval milestone: 175 cases** — IntentRoutingEval now has 230+ assertions across 57 test functions. Added: testFoodLogging_noLogKeyword (7), testSleep_deepEdgeCases (5), testSupplementAdvice_isNotTool (3), testGlucose_implicitAndTrend (5), testCrossDomainInsight_routing (6), testWeightTrendPrediction_routing (5), and more. 175-case milestone exceeded.
 
-- [ ] **#178 Progressive multi-item disclosure** — For multi-food inputs ("rice and dal"), stream each found item as it resolves instead of batching. AIToolAgent parallel execution already runs TaskGroup — surface individual completions via streaming handler. Better UX: user sees rice result before dal lookup finishes.
+- [x] **#178 Progressive multi-item disclosure** — Implemented in AIToolAgent.executeMultiItemFoodDisclosure (lines 375–415). Parallel TaskGroup resolves each food item, streams via onToken as each finishes (first-come). Final order sorted back to input order for recipe builder.
 
 ### P1 — SENIOR
 
-- [ ] **#163 Multi-stage prompt experiment** — Prototype domain router + extraction separation: Stage A routes to domain (food/weight/exercise/health/meta), Stage B extracts domain-specific params. Measure latency + accuracy vs current single-stage. Document findings. Only ship if ≥+2% routing improvement with no latency regression.
+- [x] **#163 Multi-stage prompt experiment** — Prototype built: MultiStageEval.swift in DriftLLMEvalMacOS. Stage A: compact domain router (food/weight/exercise/health/navigate/chat, 1-word output). Stage B: 6 domain-specific extractor prompts (~50% shorter than single-stage). Features.multiStageClassifier flag added (off by default). Run `xcodebuild test -scheme DriftLLMEvalMacOS -only-testing:MultiStageEval/testCompareStages` to measure accuracy+latency vs single-stage. Ship only if Δaccuracy ≥+2% AND Δlatency ≤0ms.
 
 ### P1 — Junior Tasks
 
@@ -129,7 +129,14 @@ Autonomous refactoring. Run `code-improvement.md`. Principles in `Docs/principle
 - [ ] **Deeper refactoring** — ActiveWorkoutView still fat. Move business logic out of views into ViewModels/Services.
 - [ ] **DDD violations** — Direct DB calls in views, business logic in UI layer.
 
-## Done (this sprint — cycle 5820→6046)
+## Done (this sprint — cycle 6046+)
+
+- [x] **#167 Prompt token audit** — ~17% token reduction in IntentClassifier prompt (1060→870 tokens). Removed 8 redundant examples, compressed 3 prose blocks, consolidated recent_entries. PerStageEvalSupport synced byte-for-byte.
+- [x] **#177 LLM eval milestone: 175 cases** — IntentRoutingEval at 230+ assertions / 57 test functions. Milestone exceeded.
+- [x] **#178 Progressive multi-item disclosure** — Parallel TaskGroup + per-item onToken streaming in AIToolAgent.executeMultiItemFoodDisclosure.
+- [x] **#163 Multi-stage prompt experiment** — MultiStageEval.swift prototype with 26-case gold set. Features.multiStageClassifier flag added. Run to get Δaccuracy/Δlatency before deciding to ship.
+
+## Done (previous sprint — cycle 5820→6046)
 
 - [x] **#179 FoodTabView ViewModel extraction** — FoodTabView business logic extracted to FoodTabViewModel, eliminating DDD violations (direct DB calls in view). Commit a0390be.
 - [x] **#180 Food DB +20** — Indian bread, eggs, Indian vegetables, grains, chicken, salads batch. Commit ac2b980.

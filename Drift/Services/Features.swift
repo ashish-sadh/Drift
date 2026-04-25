@@ -11,4 +11,9 @@ enum Features {
     /// Adds one extra LLM call ONLY on the retry path; successful first
     /// extractions are unaffected. #240.
     static let autoRetryOnEmpty = true
+
+    /// Two-stage classifier experiment (#163/#451): Stage A routes to domain,
+    /// Stage B extracts tool+params within that domain. Off by default — only
+    /// ship if MultiStageEval shows ≥+2% accuracy with no latency regression.
+    static let multiStageClassifier = false
 }
