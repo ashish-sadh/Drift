@@ -673,7 +673,7 @@ extension AIChatViewModel {
     }
 
     private func handleWeightIntent(_ lower: String) -> Bool {
-        guard let weightIntent = AIActionExecutor.parseWeightIntent(lower) else { return false }
+        guard let weightIntent = AIActionExecutor.parseWeightIntent(lower, defaultUnit: Preferences.weightUnit) else { return false }
         let kg = weightIntent.unit == .kg ? weightIntent.weightValue : weightIntent.weightValue / 2.20462
         var entry = WeightEntry(date: DateFormatters.todayString, weightKg: kg, source: "manual")
         WeightServiceAPI.saveWeightEntry(&entry)

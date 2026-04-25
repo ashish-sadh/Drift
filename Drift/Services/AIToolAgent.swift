@@ -526,7 +526,7 @@ enum AIToolAgent {
         if let valueStr = call.params.values["value"], let value = Double(valueStr),
            value < 20 || value > 500 {
             // LLM extracted nonsense weight — try Swift extraction
-            if let w = AIActionExecutor.parseWeightIntent(message) {
+            if let w = AIActionExecutor.parseWeightIntent(message, defaultUnit: Preferences.weightUnit) {
                 return ToolCall(tool: call.tool, params: ToolCallParams(values: [
                     "value": "\(w.weightValue)",
                     "unit": w.unit == .kg ? "kg" : "lbs"

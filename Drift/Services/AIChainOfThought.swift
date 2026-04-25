@@ -10,13 +10,6 @@ final class AIScreenTracker {
     var currentScreen: AIScreen = .dashboard
 }
 
-/// All screens the AI can be aware of.
-enum AIScreen: String, Sendable {
-    case dashboard, weight, food, exercise
-    case bodyRhythm, cycle, supplements, bodyComposition, glucose, biomarkers
-    case goal, settings, algorithm
-}
-
 // MARK: - Chain of Thought
 
 /// Multi-step reasoning: classifies queries, fetches relevant data, then calls LLM once with enriched context.

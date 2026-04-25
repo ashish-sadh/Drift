@@ -1,4 +1,5 @@
 import Foundation
+import DriftCore
 
 /// Parses composed-food queries: "coffee with milk", "oatmeal with honey and banana".
 /// Splits on additive connectors so each component is logged separately — calories sum correctly.
