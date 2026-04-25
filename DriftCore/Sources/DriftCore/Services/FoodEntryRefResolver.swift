@@ -7,14 +7,14 @@ import DriftCore
 /// name-match in FoodService. Owns the disambiguation logic so the tool
 /// handlers stay thin (#227).
 @MainActor
-enum FoodEntryRefResolver {
+public enum FoodEntryRefResolver {
 
     /// Attempt to resolve a concrete entry id from the LLM-extracted params.
     /// Order of precedence:
     ///   1. `entry_id` numeric param, validated against today's recent window
     ///   2. ordinal phrase in `name` / `target_food` ("first", "last", etc.)
     /// Returns nil when neither applies — callers fall back to name search.
-    static func resolveEntryId(
+    public static func resolveEntryId(
         from params: ToolCallParams,
         phraseKeys: [String] = ["name", "target_food", "query"]
     ) -> Int64? {
@@ -43,8 +43,8 @@ enum FoodEntryRefResolver {
 
 /// Thin adapter: extracts params, resolves id, routes to FoodService.
 @MainActor
-enum DeleteFoodHandler {
-    static func run(params: ToolCallParams) -> String {
+public enum DeleteFoodHandler {
+    public static func run(params: ToolCallParams) -> String {
         if let id = FoodEntryRefResolver.resolveEntryId(from: params),
            let msg = FoodService.deleteEntry(id: id) {
             return msg
@@ -56,8 +56,8 @@ enum DeleteFoodHandler {
 
 /// Thin adapter: extracts params, resolves id, routes to FoodService.
 @MainActor
-enum EditMealHandler {
-    static func run(params: ToolCallParams) -> String {
+public enum EditMealHandler {
+    public static func run(params: ToolCallParams) -> String {
         let action = params.string("action") ?? "remove"
         let newValue = params.string("new_value")
         let mealPeriod = params.string("meal_period")

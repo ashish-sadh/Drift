@@ -2,12 +2,12 @@ import Foundation
 import DriftCore
 
 /// Parses Lingo CGM CSV exports and imports glucose readings.
-enum CGMImportService {
-    struct ImportResult: Sendable {
-        let imported: Int
-        let skipped: Int
-        let errors: Int
-        let batchId: String
+public enum CGMImportService {
+    public struct ImportResult: Sendable {
+        public let imported: Int
+        public let skipped: Int
+        public let errors: Int
+        public let batchId: String
     }
 
     /// Import a Lingo CSV file. Returns import statistics.
@@ -18,7 +18,7 @@ enum CGMImportService {
     /// 2026-02-04T20:33-08:00,101
     /// ```
     /// Also supports generic CSV with "timestamp" and "glucose" columns.
-    static func importLingoCSV(url: URL, database: AppDatabase) throws -> ImportResult {
+    public static func importLingoCSV(url: URL, database: AppDatabase) throws -> ImportResult {
         let content = try String(contentsOf: url, encoding: .utf8)
         let batchId = UUID().uuidString
 

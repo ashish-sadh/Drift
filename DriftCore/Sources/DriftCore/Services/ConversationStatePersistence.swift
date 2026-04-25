@@ -6,8 +6,8 @@ import DriftCore
 ///
 /// All IO serializes on the main actor because writers are all @MainActor VMs.
 @MainActor
-final class ConversationStatePersistence {
-    static let shared = ConversationStatePersistence()
+public final class ConversationStatePersistence {
+    public static let shared = ConversationStatePersistence()
 
     /// Persisted state older than this is treated as expired and discarded on load.
     /// 30 min matches typical meal duration — stale pending flows from yesterday shouldn't hijack today.
@@ -20,7 +20,7 @@ final class ConversationStatePersistence {
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
 
-    init(fileURL: URL? = nil) {
+    public init(fileURL: URL? = nil) {
         if let fileURL {
             self.fileURL = fileURL
         } else {
@@ -38,7 +38,7 @@ final class ConversationStatePersistence {
 
     /// Atomically write the snapshot. Silently ignores write errors so a failing disk
     /// never breaks chat — worst case is losing the ability to restore.
-    func save(_ snapshot: PersistedConversationState) {
+    public func save(_ snapshot: PersistedConversationState) {
         do {
             let data = try encoder.encode(snapshot)
             try data.write(to: fileURL, options: .atomic)
@@ -48,7 +48,7 @@ final class ConversationStatePersistence {
     }
 
     /// Returns the persisted state if present AND not expired. Expired state is cleared.
-    func loadIfFresh(now: Date = Date()) -> PersistedConversationState? {
+    public func loadIfFresh(now: Date = Date()) -> PersistedConversationState? {
         guard let snapshot = loadRaw() else { return nil }
         let age = now.timeIntervalSince(snapshot.savedAt)
         if age < 0 || age >= Self.maxAge {
@@ -59,12 +59,12 @@ final class ConversationStatePersistence {
     }
 
     /// True when a non-idle snapshot is old enough to warrant a visible "picking up" banner.
-    func shouldShowResumeBanner(_ snapshot: PersistedConversationState, now: Date = Date()) -> Bool {
+    public func shouldShowResumeBanner(_ snapshot: PersistedConversationState, now: Date = Date()) -> Bool {
         guard snapshot.isMeaningful else { return false }
         return now.timeIntervalSince(snapshot.savedAt) >= Self.resumeBannerMinAge
     }
 
-    func clear() {
+    public func clear() {
         try? FileManager.default.removeItem(at: fileURL)
     }
 

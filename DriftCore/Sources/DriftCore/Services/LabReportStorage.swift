@@ -3,7 +3,7 @@ import DriftCore
 import CryptoKit
 
 /// Handles encrypted local storage of lab report files using CryptoKit + iOS Data Protection.
-enum LabReportStorage {
+public enum LabReportStorage {
 
     private static let reportsDir: URL = {
         let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
@@ -25,7 +25,7 @@ enum LabReportStorage {
     // MARK: - Public API
 
     /// Encrypt and save file data locally. Returns the SHA256 hash identifier.
-    static func save(data: Data, fileName: String) throws -> String {
+    public static func save(data: Data, fileName: String) throws -> String {
         let hash = SHA256.hash(data: data).compactMap { String(format: "%02x", $0) }.joined()
         let encrypted = try encrypt(data: data)
         let fileURL = reportsDir.appendingPathComponent(hash)
@@ -35,14 +35,14 @@ enum LabReportStorage {
     }
 
     /// Load and decrypt a previously saved file.
-    static func load(hash: String) throws -> Data {
+    public static func load(hash: String) throws -> Data {
         let fileURL = reportsDir.appendingPathComponent(hash)
         let encrypted = try Data(contentsOf: fileURL)
         return try decrypt(data: encrypted)
     }
 
     /// Delete a saved file.
-    static func delete(hash: String) {
+    public static func delete(hash: String) {
         let fileURL = reportsDir.appendingPathComponent(hash)
         try? FileManager.default.removeItem(at: fileURL)
     }

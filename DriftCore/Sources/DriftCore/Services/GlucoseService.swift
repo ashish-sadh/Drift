@@ -3,30 +3,30 @@ import DriftCore
 
 /// Unified glucose service — used by both UI views and AI tool calls.
 @MainActor
-enum GlucoseService {
+public enum GlucoseService {
 
     // MARK: - CRUD
 
     /// Fetch glucose readings for a date range (ISO8601 strings).
-    static func fetchReadings(from startDate: String, to endDate: String) -> [GlucoseReading] {
+    public static func fetchReadings(from startDate: String, to endDate: String) -> [GlucoseReading] {
         (try? AppDatabase.shared.fetchGlucoseReadings(from: startDate, to: endDate)) ?? []
     }
 
     /// Import a Lingo CGM CSV file.
-    static func importLingoCSV(url: URL) throws -> CGMImportService.ImportResult {
+    public static func importLingoCSV(url: URL) throws -> CGMImportService.ImportResult {
         try CGMImportService.importLingoCSV(url: url, database: AppDatabase.shared)
     }
 
     // MARK: - Queries
 
     /// Whether glucose readings exist for today.
-    static func hasDataToday() -> Bool {
+    public static func hasDataToday() -> Bool {
         let today = DateFormatters.todayString
         return ((try? AppDatabase.shared.fetchGlucoseReadings(from: today, to: today))?.isEmpty == false)
     }
 
     /// Get glucose readings summary for today.
-    static func getReadings() -> String {
+    public static func getReadings() -> String {
         let today = DateFormatters.todayString
         guard let readings = try? AppDatabase.shared.fetchGlucoseReadings(from: today, to: today),
               !readings.isEmpty else { return "No glucose data for today." }
@@ -42,7 +42,7 @@ enum GlucoseService {
     }
 
     /// Detect glucose spikes (readings > 140 mg/dL).
-    static func detectSpikes() -> String {
+    public static func detectSpikes() -> String {
         let today = DateFormatters.todayString
         guard let readings = try? AppDatabase.shared.fetchGlucoseReadings(from: today, to: today),
               !readings.isEmpty else { return "No glucose data to check for spikes." }

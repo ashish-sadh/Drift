@@ -3,14 +3,14 @@ import DriftCore
 
 /// Parses composed-food queries: "coffee with milk", "oatmeal with honey and banana".
 /// Splits on additive connectors so each component is logged separately — calories sum correctly.
-enum ComposedFoodParser {
+public enum ComposedFoodParser {
 
     // MARK: - Public API
 
     /// "log coffee with milk" → [FoodIntent("coffee"), FoodIntent("milk")]
     /// "oatmeal with milk and honey" → [FoodIntent("oatmeal"), FoodIntent("milk"), FoodIntent("honey")]
     /// Returns nil when no composition connector is found.
-    static func parse(_ text: String) -> [AIActionExecutor.FoodIntent]? {
+    public static func parse(_ text: String) -> [AIActionExecutor.FoodIntent]? {
         let lower = text.lowercased().trimmingCharacters(in: .whitespaces)
 
         var remainder = stripVerbPrefixes(from: lower)

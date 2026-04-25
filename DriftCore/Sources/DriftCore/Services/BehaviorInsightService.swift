@@ -1,22 +1,19 @@
 import Foundation
-import DriftCore
 
 /// Computes behavior-outcome correlations from existing cross-domain data.
-/// Each insight compares a behavior (workout frequency, protein intake, sleep)
-/// against an outcome (weight trend, recovery score) using simple descriptive stats.
-struct BehaviorInsight: Sendable, Identifiable {
-    let id = UUID()
-    let icon: String
-    let title: String
-    let detail: String
-    let isPositive: Bool
+public struct BehaviorInsight: Sendable, Identifiable {
+    public let id = UUID()
+    public let icon: String
+    public let title: String
+    public let detail: String
+    public let isPositive: Bool
 }
 
 @MainActor
-enum BehaviorInsightService {
+public enum BehaviorInsightService {
 
     /// Compute all available insights from existing data. Returns 0-4 insights.
-    static func computeInsights(sleepHistory: [(date: Date, hours: Double)] = [], recentAppleWorkouts: [Date] = []) -> [BehaviorInsight] {
+    public static func computeInsights(sleepHistory: [(date: Date, hours: Double)] = [], recentAppleWorkouts: [Date] = []) -> [BehaviorInsight] {
         var insights: [BehaviorInsight] = []
         if let workout = workoutFrequencyInsight() { insights.append(workout) }
         if let protein = proteinAdherenceInsight() { insights.append(protein) }
@@ -29,7 +26,7 @@ enum BehaviorInsightService {
 
     /// Urgent, actionable alerts — things that need attention right now.
     /// Different from insights (which are correlations over time).
-    static func computeProactiveAlerts(recentAppleWorkouts: [Date] = []) -> [BehaviorInsight] {
+    public static func computeProactiveAlerts(recentAppleWorkouts: [Date] = []) -> [BehaviorInsight] {
         var alerts: [BehaviorInsight] = []
         if let protein = proteinStreakAlert() { alerts.append(protein) }
         if let supplement = supplementGapAlert() { alerts.append(supplement) }

@@ -10,10 +10,10 @@ import Foundation
 ///
 /// Only invoked on FINAL transcripts (not partials), so we can afford regex work
 /// without UX flicker.
-enum VoiceTranscriptionPostFixer {
+public enum VoiceTranscriptionPostFixer {
 
     /// Apply all rewrites. Idempotent: `fix(fix(x)) == fix(x)`.
-    static func fix(_ text: String) -> String {
+    public static func fix(_ text: String) -> String {
         guard !text.isEmpty else { return text }
         var working = text
         for rule in unambiguousRules {

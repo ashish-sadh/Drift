@@ -4,7 +4,7 @@ import DriftCore
 /// Rule-based health insights — works without the AI model.
 /// Used as fallback when model isn't downloaded, and to enrich AI responses.
 @MainActor
-enum AIRuleEngine {
+public enum AIRuleEngine {
 
     /// Generate a quick insight based on today's data.
     static func quickInsight() -> String? {
@@ -65,7 +65,7 @@ enum AIRuleEngine {
     }
 
     /// Yesterday's food log with target comparison.
-    static func yesterdaySummary() -> String {
+    public static func yesterdaySummary() -> String {
         let cal = Calendar.current
         guard let yesterday = cal.date(byAdding: .day, value: -1, to: Date()) else { return "Can't load yesterday." }
         let dateStr = DateFormatters.dateOnly.string(from: yesterday)
@@ -174,7 +174,7 @@ enum AIRuleEngine {
     }
 
     /// Weekly overview.
-    static func weeklySummary() -> String {
+    public static func weeklySummary() -> String {
         let cal = Calendar.current
         guard let weekStart = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: Date())) else { return "" }
         let from = DateFormatters.dateOnly.string(from: weekStart)

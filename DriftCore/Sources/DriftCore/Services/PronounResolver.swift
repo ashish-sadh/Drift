@@ -16,7 +16,7 @@ import DriftCore
 /// Returns `nil` when no rewrite is needed or safe — callers fall through
 /// to the existing pipeline. Never rewrites action verbs ("log that",
 /// "delete it") — those go through `resolvePronouns()` in the food path.
-enum PronounResolver {
+public enum PronounResolver {
 
     /// Pronouns that indicate a back-reference to the last entry. Ordered
     /// longest-first so "this one" beats "this".
@@ -42,7 +42,7 @@ enum PronounResolver {
 
     /// Rewrite a pronoun-bearing query in-place when a fresh `LastEntryContext`
     /// exists. Returns `nil` otherwise.
-    static func resolve(message: String, context: ConversationState.LastEntryContext?) -> String? {
+    public static func resolve(message: String, context: ConversationState.LastEntryContext?) -> String? {
         guard let context else { return nil }
         let lower = message.lowercased()
 

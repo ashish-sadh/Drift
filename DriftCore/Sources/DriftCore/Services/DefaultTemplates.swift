@@ -2,7 +2,7 @@ import Foundation
 import DriftCore
 
 /// Seeds default workout templates on first launch. Respects user edits - only seeds if no templates exist.
-enum DefaultTemplates {
+public enum DefaultTemplates {
     private static let seededKey = "drift_default_templates_v3"
 
     /// Legacy auto-seed (no longer called from app launch).
@@ -14,7 +14,7 @@ enum DefaultTemplates {
 
     /// Load Drift Curated templates on demand. Skips any that already exist by name.
     @discardableResult
-    static func loadCurated() -> Int {
+    public static func loadCurated() -> Int {
         let existing = Set((try? WorkoutService.fetchTemplates())?.map(\.name) ?? [])
         var added = 0
 
