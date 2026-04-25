@@ -2,17 +2,26 @@
 
 Goal: extract a multi-platform `DriftCore` Swift Package so the heavy regression and LLM-eval tests run on macOS without the iOS Simulator. The Drift iOS app keeps everything platform-bound (UIKit, SwiftUI, HealthKit live integration).
 
-## Status — 2026-04-25
+## Status — 2026-04-25 (after Phase 1c)
 
 | | |
 |---|---|
 | iOS build | ✅ green (`xcodebuild -scheme Drift`) |
 | macOS DriftCore build | ✅ green (`cd DriftCore && swift build`) |
-| Models in Core | 13 of 20 |
+| Models in Core | **19 of 20** (only WeightGoal remains in Drift, blocked on TDEEEstimator + WeightTrendCalculator) |
 | Utilities in Core | 3 of 7 (DateFormatters, Log, MacroFormatters) |
-| Database in Core | 0 of 5 — rolled back; needs Models split first |
+| Database in Core | 0 of 5 — needs PlantPointsService + BodySpecPDFParser + QuickAddView.RecipeItem split first |
 | Services in Core | 0 of 72 |
 | Tests on Core | 0 — `Tests/DriftCoreTests/` exists but empty |
+
+## File splits done (Phase 1c)
+
+| Original | DriftCore (data) | Drift (iOS extension) |
+|---|---|---|
+| `Drift/Models/Food.swift` | `DriftCore/.../Food.swift` (struct, GRDB) | `Drift/Models/Food+RecipeAccessors.swift` (uses `QuickAddView.RecipeItem`) |
+| `Drift/Models/BarcodeCache.swift` | `DriftCore/.../BarcodeCache.swift` (struct, GRDB, displayName) | `Drift/Models/BarcodeCache+OFF.swift` (`init(from product: OpenFoodFactsService.Product)`) |
+| `Drift/Models/PhotoLogEntry.swift` | `DriftCore/.../PhotoLogServingUnit.swift` (just the enum) | rest of `Drift/Models/PhotoLogEntry.swift` stays (PhotoLogEditableItem, PhotoLogViewState, PhotoLogTotals — depend on CloudVision) |
+| `Drift/Models/Workout.swift` | `DriftCore/.../Workout.swift` (Exercise, Workout, WorkoutSet, WorkoutTemplate, TemplateExercise, WorkoutSummary — all data + GRDB) | `Drift/Models/Workout+Display.swift` (`WorkoutSet.display` references `Preferences.weightUnit`) |
 
 ## Why this is harder than the audit suggested
 
