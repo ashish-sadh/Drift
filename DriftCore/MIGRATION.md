@@ -2,6 +2,32 @@
 
 Goal: extract a multi-platform `DriftCore` Swift Package so the heavy regression and LLM-eval tests run on macOS without the iOS Simulator. The Drift iOS app keeps everything platform-bound (UIKit, SwiftUI, HealthKit live integration).
 
+## Status — 2026-04-25 (after Plan B — gold-set on macOS)
+
+**Plan B delivered:** 24 of 26 gold-set tests now run on macOS in **0.019s** (24/26 ≈ 92%; remaining 2 need StaticOverrides + ToolRanker + ToolRegistration).
+
+| | |
+|---|---|
+| `cd DriftCore && swift test` cold | **13.8s** (was 8min on simulator — ~35x speedup) |
+| `cd DriftCore && swift test` warm | **0.7s** (~700x speedup) |
+| Tests passing | **24 / 24 macOS-runnable subset** |
+| iOS DriftRegressionTests | unchanged — still runs the full 26-test suite |
+| iOS app build | ✅ green |
+
+### What now lives in DriftCore (Plan B)
+| Service | Notes |
+|---|---|
+| `InputNormalizer` | pure Foundation |
+| `AIScreen` | enum |
+| `AIActionParser` | regex / JSON parsing |
+| `AIActionExecutor` | parsing methods (parseFoodIntent / parseMultiFoodIntent / parseWeightIntent / extractAmount); iOS-side `findFood`/`findFoodWithAI` extension stays in Drift |
+| `IntentClassifier` | nonisolated parts (parseResponse, mapResponse, buildUserMessage, composeUserMessage, needsRecentEntries, systemPrompt, withTimeout); iOS-side `buildContextualUserMessage`/`classifyFull` extension stays in Drift |
+| `ToolSchema`, `ToolRegistry`, `ToolCall`, `parseToolCallJSON` | type defs + registry; `execute()` lives in Drift via extension (touches `ConversationState`) |
+| `WeightUnit` | enum (moved from Drift/Utilities/Units.swift) |
+
+### Plan A — what's still ahead
+The remaining tests (testExerciseIntents, testNavigationIntents, testHealthIntents, testNormalizerImprovesToolRanking, testVoiceExerciseLogging, testGoldSetSummary) need StaticOverrides + ToolRegistration + ToolRanker on macOS. That requires a `PlatformBackend` protocol layer to inject AppDatabase / HealthKitService / WidgetDataProvider / WeightTrendService into the AI pipeline — invasive but follows the same split-Core/iOS pattern. Plan A delivers the LLM eval on macOS too (llama.cpp runs natively on Apple Silicon).
+
 ## Status — 2026-04-25 (after Phase 1c)
 
 | | |
