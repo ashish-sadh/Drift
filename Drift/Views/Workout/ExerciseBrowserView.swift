@@ -1,4 +1,5 @@
 import SwiftUI
+import DriftCore
 
 // MARK: - Exercise Thumbnail
 

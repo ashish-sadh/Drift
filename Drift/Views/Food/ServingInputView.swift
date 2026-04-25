@@ -1,4 +1,5 @@
 import SwiftUI
+import DriftCore
 
 /// Shared serving input component: amount field + unit pills + gram equivalence + quick-amount buttons.
 /// Used across food search, barcode scan, quick add, and food tab edit.

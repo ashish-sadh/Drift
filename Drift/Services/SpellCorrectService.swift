@@ -1,4 +1,5 @@
 import Foundation
+import DriftCore
 
 /// Spell correction using food DB names + hardcoded fallback.
 /// Corrects user input before passing to LLM or food search.

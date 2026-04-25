@@ -1,4 +1,5 @@
 import Foundation
+import DriftCore
 
 /// Fetches nutrition data from USDA FoodData Central.
 /// Free API, no key required for basic access (~300K foods).

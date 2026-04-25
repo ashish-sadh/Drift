@@ -1,4 +1,5 @@
 import SwiftUI
+import DriftCore
 
 struct TemplatePreviewSheet: View {
     let template: WorkoutTemplate

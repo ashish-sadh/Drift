@@ -1,4 +1,5 @@
 import Foundation
+import DriftCore
 
 /// Parses AI responses for action commands and extracts structured data.
 enum AIActionParser {
