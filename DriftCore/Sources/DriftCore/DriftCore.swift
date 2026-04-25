@@ -8,7 +8,4 @@
 // /Users/ashishsadh/workspace/Drift/DriftCore/MIGRATION.md (when present) for the
 // per-batch plan.
 
-public enum DriftCore {
-    /// Sentinel constant — replaced once the first real type lands here.
-    public static let bootstrap = "ok"
-}
+// Module surface intentionally minimal — types are exported directly.

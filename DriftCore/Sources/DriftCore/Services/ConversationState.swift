@@ -4,24 +4,24 @@ import DriftCore
 /// Persistent multi-turn conversation state. Singleton — survives navigation.
 /// Replaces @State vars in AIChatView for multi-turn tracking.
 @MainActor @Observable
-final class ConversationState {
-    static let shared = ConversationState()
+public final class ConversationState {
+    public static let shared = ConversationState()
 
     // MARK: - Pending Intent (what the LLM was trying to do)
 
-    enum PendingIntent {
+    public enum PendingIntent {
         /// Tool tried to execute but missing a param — waiting for user to provide it
         case awaitingParam(tool: String, missing: String, partialParams: [String: String])
         /// PreHook asked for confirmation — waiting for user to say yes/no
         case awaitingConfirmation(tool: String, message: String, params: [String: String])
     }
 
-    var pendingIntent: PendingIntent?
+    public var pendingIntent: PendingIntent?
 
     // MARK: - Last Executed Tool
 
-    var lastTool: String?
-    var lastParams: [String: String] = [:]
+    public var lastTool: String?
+    public var lastParams: [String: String] = [:]
 
     // MARK: - Last Tool Result (for follow-up context, #184)
 
@@ -29,18 +29,18 @@ final class ConversationState {
     /// thread concrete data (macros, values) into the next turn's LLM context.
     /// Retained for exactly one subsequent user turn — goes stale after that
     /// so questions like "what was that?" can't reach back indefinitely.
-    var lastToolSummary: String?
+    public var lastToolSummary: String?
     /// The `userTurnIndex` at which `lastToolSummary` was captured. Fresh when
     /// captured during the current turn or the immediately preceding one.
-    var lastToolSummaryTurn: Int = -1
+    public var lastToolSummaryTurn: Int = -1
 
     /// Monotonic counter incremented once per user-initiated turn. Distinct
     /// from `turnCount` (which increments on tool execution only) so the
     /// freshness window is measured against the user's perspective.
-    var userTurnIndex: Int = 0
+    public var userTurnIndex: Int = 0
 
     /// Call at the start of every user send to advance the freshness window.
-    func beginUserTurn() {
+    public func beginUserTurn() {
         userTurnIndex += 1
     }
 
@@ -48,7 +48,7 @@ final class ConversationState {
     /// AIToolAgent after every successful tool execution. Empty input is
     /// ignored — actions that produce no text (sheet opens) pass a synthetic
     /// summary so follow-ups still have something to reference.
-    func captureToolSummary(_ text: String) {
+    public func captureToolSummary(_ text: String) {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         lastToolSummary = String(trimmed.prefix(300))
@@ -58,7 +58,7 @@ final class ConversationState {
     /// Returns the summary only when it was captured during the current or
     /// previous user turn — nil otherwise. Prevents stale context from
     /// leaking into unrelated later conversations.
-    func freshToolSummary() -> String? {
+    public func freshToolSummary() -> String? {
         guard let summary = lastToolSummary else { return nil }
         return (userTurnIndex - lastToolSummaryTurn) <= 1 ? summary : nil
     }
@@ -70,12 +70,20 @@ final class ConversationState {
     /// "remove the first one" — so tools operate on the exact row the user
     /// means rather than re-searching by name (which picks wrong rows when
     /// duplicates exist).
-    struct FoodEntryRef: Equatable, Sendable {
-        let id: Int64
-        let name: String
-        let mealType: String   // breakfast | lunch | dinner | snack
-        let calories: Int      // Per-serving calories rounded for display
-        let loggedAt: Date     // Used for TTL eviction and "Nm ago" context
+    public struct FoodEntryRef: Equatable, Sendable {
+        public let id: Int64
+        public let name: String
+        public let mealType: String   // breakfast | lunch | dinner | snack
+        public let calories: Int      // Per-serving calories rounded for display
+        public let loggedAt: Date     // Used for TTL eviction and "Nm ago" context
+
+        public init(id: Int64, name: String, mealType: String, calories: Int, loggedAt: Date) {
+            self.id = id
+            self.name = name
+            self.mealType = mealType
+            self.calories = calories
+            self.loggedAt = loggedAt
+        }
     }
 
     /// Rolling window of today's most recent entries, newest last. Capped at
@@ -83,18 +91,18 @@ final class ConversationState {
     /// on every read/push. Never persisted — IDs may be invalid across app
     /// relaunches if the user manually deletes in the UI, so the window is
     /// rebuilt from writes during the current session only.
-    private(set) var recentEntries: [FoodEntryRef] = []
-    static let recentEntriesCap = 10
+    public private(set) var recentEntries: [FoodEntryRef] = []
+    public static let recentEntriesCap = 10
     /// 2h TTL matches the product-review decision: "just logged" shouldn't
     /// reach back into last night's dinner when the user opens chat in the
     /// morning.
-    static let recentEntriesTTL: TimeInterval = 2 * 60 * 60
+    public static let recentEntriesTTL: TimeInterval = 2 * 60 * 60
 
     /// Push a newly-logged (or edited) entry onto the rolling window. Oldest
     /// entries get evicted when the window exceeds `recentEntriesCap` (LRU).
     /// Duplicate IDs update the existing ref in place — avoids a stale copy
     /// lingering after an edit.
-    func pushRecentEntry(_ ref: FoodEntryRef) {
+    public func pushRecentEntry(_ ref: FoodEntryRef) {
         pruneExpiredRecentEntries()
         recentEntries.removeAll { $0.id == ref.id }
         recentEntries.append(ref)
@@ -108,13 +116,13 @@ final class ConversationState {
 
     /// Drop a ref — called after successful delete/remove so stale IDs can't
     /// re-resolve on a follow-up turn.
-    func dropRecentEntry(id: Int64) {
+    public func dropRecentEntry(id: Int64) {
         recentEntries.removeAll { $0.id == id }
     }
 
     /// Evict entries older than the TTL. Called defensively on every window
     /// read and push.
-    func pruneExpiredRecentEntries(now: Date = Date()) {
+    public func pruneExpiredRecentEntries(now: Date = Date()) {
         let cutoff = now.addingTimeInterval(-Self.recentEntriesTTL)
         recentEntries.removeAll { $0.loggedAt < cutoff }
     }
@@ -122,7 +130,7 @@ final class ConversationState {
     /// Compact prompt-ready view of the window. Includes relative time
     /// ("5m ago") so the LLM can tie references like "the one I just logged"
     /// to the freshest row. Returns nil when the window is empty.
-    func recentEntriesContextBlock(now: Date = Date()) -> String? {
+    public func recentEntriesContextBlock(now: Date = Date()) -> String? {
         pruneExpiredRecentEntries(now: now)
         guard !recentEntries.isEmpty else { return nil }
         let rows = recentEntries.suffix(Self.recentEntriesCap).map { ref -> String in
@@ -137,7 +145,7 @@ final class ConversationState {
     /// the phrase isn't a recognized ordinal or the window is empty.
     /// Ordinal semantics: "first" = oldest in window, "last" = newest. This
     /// matches how a user reads their own diary.
-    func resolveOrdinal(_ phrase: String, now: Date = Date()) -> FoodEntryRef? {
+    public func resolveOrdinal(_ phrase: String, now: Date = Date()) -> FoodEntryRef? {
         pruneExpiredRecentEntries(now: now)
         guard !recentEntries.isEmpty else { return nil }
         let lower = phrase.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
@@ -171,12 +179,12 @@ final class ConversationState {
 
     // MARK: - Topic Tracking
 
-    enum Topic: String, Codable {
+    public enum Topic: String, Codable {
         case food, weight, exercise, sleep, supplements, glucose, biomarkers, bodyComp, unknown
     }
 
-    var lastTopic: Topic = .unknown
-    var turnCount: Int = 0
+    public var lastTopic: Topic = .unknown
+    public var turnCount: Int = 0
 
     // MARK: - Cross-domain pronoun pointer (#241)
 
@@ -184,24 +192,24 @@ final class ConversationState {
     /// pronoun resolution on query-type intents: "how much protein in that"
     /// after a food log, "am I under goal" after a weight log, etc.
     /// Goes stale on the same 2h TTL as `recentEntries`.
-    struct LastEntryContext: Equatable, Sendable {
-        let domain: Topic
-        let summary: String     // "150g chicken" | "180 lbs" | "30min yoga"
-        let loggedAt: Date
+    public struct LastEntryContext: Equatable, Sendable {
+        public let domain: Topic
+        public let summary: String     // "150g chicken" | "180 lbs" | "30min yoga"
+        public let loggedAt: Date
     }
 
-    private(set) var lastAnyEntry: LastEntryContext?
+    public private(set) var lastAnyEntry: LastEntryContext?
 
     /// Record the most-recently-touched entry. Called from `pushRecentEntry`
     /// for food and from non-food log paths (weight, exercise) directly.
-    func recordLastEntry(domain: Topic, summary: String, at when: Date = Date()) {
+    public func recordLastEntry(domain: Topic, summary: String, at when: Date = Date()) {
         let trimmed = summary.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
         lastAnyEntry = LastEntryContext(domain: domain, summary: trimmed, loggedAt: when)
     }
 
     /// Fresh-only accessor: returns `lastAnyEntry` only when within TTL.
-    func freshLastEntry(now: Date = Date()) -> LastEntryContext? {
+    public func freshLastEntry(now: Date = Date()) -> LastEntryContext? {
         guard let entry = lastAnyEntry else { return nil }
         let cutoff = now.addingTimeInterval(-Self.recentEntriesTTL)
         return entry.loggedAt < cutoff ? nil : entry
@@ -209,7 +217,7 @@ final class ConversationState {
 
     // MARK: - Undo (last write action only)
 
-    enum UndoableAction {
+    public enum UndoableAction {
         case foodLogged(entryId: Int64, name: String, calories: Double)
         case weightLogged(entryId: Int64, value: Double)
         case supplementMarked(supplementId: Int64, date: String, name: String)
@@ -218,13 +226,13 @@ final class ConversationState {
         case foodDeleted(entry: FoodEntry)
     }
 
-    var lastWriteAction: UndoableAction?
+    public var lastWriteAction: UndoableAction?
 
     // MARK: - Conversation Phase (state machine for multi-turn)
 
     /// What kind of follow-up input we're expecting from the user.
     /// Replaces scattered pending* booleans/optionals — only one phase at a time.
-    enum Phase: Equatable {
+    public enum Phase: Equatable {
         /// Ready for any input
         case idle
         /// Asked "What did you have for X?" — expecting food list
@@ -240,11 +248,11 @@ final class ConversationState {
         case awaitingClarification(options: [ClarificationOption])
     }
 
-    var phase: Phase = .idle
+    public var phase: Phase = .idle
 
     // MARK: - Topic Classification (deterministic, no LLM)
 
-    func classifyTopic(_ query: String) -> Topic {
+    public func classifyTopic(_ query: String) -> Topic {
         let lower = query.lowercased()
         let words = Set(lower.split(separator: " ").map(String.init))
 
@@ -290,12 +298,12 @@ final class ConversationState {
     // MARK: - Cancel / Reset
 
     /// Exit any pending phase without committing — used by cancel/nevermind phrases.
-    func cancelPending() {
+    public func cancelPending() {
         phase = .idle
         pendingIntent = nil
     }
 
-    func reset() {
+    public func reset() {
         pendingIntent = nil
         lastTool = nil
         lastParams = [:]
@@ -307,7 +315,7 @@ final class ConversationState {
         // Don't reset lastTopic, turnCount, userTurnIndex, or lastWriteAction — those persist across resets
     }
 
-    func recordToolExecution(tool: String, params: [String: String]) {
+    public func recordToolExecution(tool: String, params: [String: String]) {
         lastTool = tool
         lastParams = params
         turnCount += 1
@@ -315,7 +323,7 @@ final class ConversationState {
 
     /// Apply a persisted snapshot to the live singleton.
     /// pendingIntent and lastWriteAction are not persisted (transient / reference DB rows).
-    func apply(_ snapshot: PersistedConversationState) {
+    public func apply(_ snapshot: PersistedConversationState) {
         phase = snapshot.phase
         lastTopic = snapshot.lastTopic
         turnCount = snapshot.turnCount
@@ -397,17 +405,29 @@ extension ConversationState.Phase: Codable {
 // MARK: - Persisted Snapshot
 
 /// Serializable snapshot of conversation state + AIChatViewModel pending fields.
-struct PersistedConversationState: Codable, Equatable {
-    var phase: ConversationState.Phase
-    var lastTopic: ConversationState.Topic
-    var turnCount: Int
-    var pendingRecipeItems: [QuickAddView.RecipeItem]
-    var pendingRecipeName: String
-    var pendingExercises: [AIActionParser.WorkoutExercise]
-    var savedAt: Date
+public struct PersistedConversationState: Codable, Equatable {
+    public var phase: ConversationState.Phase
+    public var lastTopic: ConversationState.Topic
+    public var turnCount: Int
+    public var pendingRecipeItems: [RecipeItem]
+    public var pendingRecipeName: String
+    public var pendingExercises: [AIActionParser.WorkoutExercise]
+    public var savedAt: Date
+
+    public init(phase: ConversationState.Phase, lastTopic: ConversationState.Topic, turnCount: Int,
+                pendingRecipeItems: [RecipeItem], pendingRecipeName: String,
+                pendingExercises: [AIActionParser.WorkoutExercise], savedAt: Date) {
+        self.phase = phase
+        self.lastTopic = lastTopic
+        self.turnCount = turnCount
+        self.pendingRecipeItems = pendingRecipeItems
+        self.pendingRecipeName = pendingRecipeName
+        self.pendingExercises = pendingExercises
+        self.savedAt = savedAt
+    }
 
     /// True when worth restoring (anything meaningful to pick up).
-    var isMeaningful: Bool {
+    public var isMeaningful: Bool {
         phase != .idle || !pendingRecipeItems.isEmpty || !pendingExercises.isEmpty
     }
 }

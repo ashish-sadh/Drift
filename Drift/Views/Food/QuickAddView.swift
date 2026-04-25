@@ -22,17 +22,8 @@ struct QuickAddView: View {
     @State private var recipeServings = "1"
     @State private var expandOnLog = false
 
-    struct RecipeItem: Identifiable, Codable, Equatable {
-        var id = UUID()
-        var name: String
-        var portionText: String
-        var calories: Double
-        var proteinG: Double
-        var carbsG: Double
-        var fatG: Double
-        var fiberG: Double
-        var servingSizeG: Double = 0
-    }
+    /// Top-level type lives in DriftCore so AppDatabase + ConversationState can persist it.
+    typealias RecipeItem = DriftCore.RecipeItem
 
     private var total: (cal: Double, p: Double, c: Double, f: Double, fb: Double) {
         (items.reduce(0) { $0 + $1.calories },

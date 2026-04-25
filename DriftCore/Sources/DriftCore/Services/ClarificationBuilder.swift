@@ -1,19 +1,21 @@
 import Foundation
-import DriftCore
 
 /// One offered alternative when the classifier can't tell between two
 /// reasonable intents. Carries the preview shown to the user AND the
 /// concrete tool call to execute if picked — the dispatcher never
 /// re-classifies on resolution. #226.
-struct ClarificationOption: Equatable, Codable, Sendable, Identifiable {
-    /// 1-based selection index used in UI chips and numeric responses.
-    let id: Int
-    /// User-facing label: "Log chicken as food", "Check calories in chicken".
-    let label: String
-    /// Registered tool to run on pick (e.g. `log_food`, `food_info`).
-    let tool: String
-    /// Extracted params to hand to the tool as-is.
-    let params: [String: String]
+public struct ClarificationOption: Equatable, Codable, Sendable, Identifiable {
+    public let id: Int
+    public let label: String
+    public let tool: String
+    public let params: [String: String]
+
+    public init(id: Int, label: String, tool: String, params: [String: String]) {
+        self.id = id
+        self.label = label
+        self.tool = tool
+        self.params = params
+    }
 }
 
 /// Deterministic option builder — produces 2-3 alternative intents for
@@ -22,12 +24,12 @@ struct ClarificationOption: Equatable, Codable, Sendable, Identifiable {
 /// either (a) the LLM returned `confidence: "low"` or (b) the message
 /// matches a Swift-detected ambiguity pattern. Narrow by design: silence
 /// is better than a bad clarifier on clear inputs.
-enum ClarificationBuilder {
+public enum ClarificationBuilder {
 
     /// Returns 2-3 options only when the input is genuinely ambiguous.
     /// Returns nil for clear intents, gibberish, or single-option cases —
     /// callers fall through to normal classification.
-    static func buildOptions(for message: String) -> [ClarificationOption]? {
+    public static func buildOptions(for message: String) -> [ClarificationOption]? {
         let lower = message.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
         guard !lower.isEmpty, lower.count <= 60 else { return nil }
 
@@ -51,7 +53,7 @@ enum ClarificationBuilder {
     /// - For `log_weight`: need a value + unit.
     /// - For `log_activity`: need a name + duration or distance.
     /// - For info/lookup tools: any non-empty `query` or `name` is enough.
-    static func hasCompleteParams(tool: String, params: [String: String]) -> Bool {
+    public static func hasCompleteParams(tool: String, params: [String: String]) -> Bool {
         func nonEmpty(_ key: String) -> Bool {
             (params[key]?.trimmingCharacters(in: .whitespaces).isEmpty == false)
         }
@@ -73,7 +75,7 @@ enum ClarificationBuilder {
     /// Format options into a "Did you mean: …" prompt. One line per option
     /// with a number — matches how `AIChatViewModel.handleClarification`
     /// parses the user's next turn.
-    static func promptText(_ options: [ClarificationOption]) -> String {
+    public static func promptText(_ options: [ClarificationOption]) -> String {
         var s = "Did you mean:"
         for opt in options {
             s += "\n\(opt.id). \(opt.label)"

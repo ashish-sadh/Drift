@@ -1,4 +1,5 @@
 import Foundation
+import DriftCore
 
 /// Cross-domain pronoun resolution. Rewrites a query-style message that
 /// refers to the last-touched entry ("how much protein in that") into an
