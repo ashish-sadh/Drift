@@ -2,10 +2,10 @@ import Foundation
 import DriftCore
 
 /// Seeds recipe favorites on first launch. Does NOT pre-seed recents.
-enum DefaultFoods {
+public enum DefaultFoods {
     private static let seededKey = "drift_default_foods_seeded_v1"
 
-    static func seedIfNeeded() {
+    public static func seedIfNeeded() {
         guard !UserDefaults.standard.bool(forKey: seededKey) else { return }
         let db = AppDatabase.shared
 

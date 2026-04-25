@@ -3,10 +3,10 @@ import DriftCore
 
 /// Unified supplement service — used by both UI views and AI tool calls.
 @MainActor
-enum SupplementService {
+public enum SupplementService {
 
     /// Get today's supplement status: taken/total + remaining names.
-    static func getStatus() -> String {
+    public static func getStatus() -> String {
         let today = DateFormatters.todayString
         guard let supplements = try? AppDatabase.shared.fetchActiveSupplements(),
               !supplements.isEmpty else { return "No supplements set up." }
@@ -21,7 +21,7 @@ enum SupplementService {
     }
 
     /// Mark a supplement as taken by name.
-    static func markTaken(name: String) -> String {
+    public static func markTaken(name: String) -> String {
         let today = DateFormatters.todayString
         guard let supplements = try? AppDatabase.shared.fetchActiveSupplements() else {
             return "No supplements found."
@@ -36,14 +36,14 @@ enum SupplementService {
     }
 
     /// Delete a supplement by ID.
-    static func deleteSupplement(id: Int64) {
+    public static func deleteSupplement(id: Int64) {
         try? AppDatabase.shared.writer.write { db in
             try Supplement.deleteOne(db, id: id)
         }
     }
 
     /// Update a supplement's properties.
-    static func updateSupplement(id: Int64, name: String, dosage: String?, unit: String?, dailyDoses: Int) {
+    public static func updateSupplement(id: Int64, name: String, dosage: String?, unit: String?, dailyDoses: Int) {
         try? AppDatabase.shared.writer.write { db in
             try db.execute(sql: """
                 UPDATE supplement SET name = ?, dosage = ?, unit = ?, daily_doses = ? WHERE id = ?
@@ -52,7 +52,7 @@ enum SupplementService {
     }
 
     /// Add a new supplement to the stack.
-    static func addSupplement(name: String, dosage: String? = nil) -> String {
+    public static func addSupplement(name: String, dosage: String? = nil) -> String {
         guard let supplements = try? AppDatabase.shared.fetchActiveSupplements() else {
             return "Couldn't access supplements."
         }

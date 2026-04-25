@@ -13,16 +13,16 @@ import CryptoKit
 ///   transmitted when the user taps Export JSON + shares it themselves.
 /// - Fingerprint is kept alongside raw text so aggregates that used it
 ///   (dedupe-by-query) still work after the schema change.
-final class ChatTelemetryService: @unchecked Sendable {
-    static let shared = ChatTelemetryService(db: AppDatabase.shared)
+public final class ChatTelemetryService: @unchecked Sendable {
+    public static let shared = ChatTelemetryService(db: AppDatabase.shared)
 
     /// Hard row cap. Chosen to fit ~months of heavy daily use (~100 turns/day)
     /// while keeping the table small on disk.
-    static let ringBufferLimit = 5000
+    public static let ringBufferLimit = 5000
     /// Fingerprint length in hex characters. 12 hex = 48 bits of entropy —
     /// enough to distinguish distinct queries in aggregates, not enough to
     /// reverse to source text.
-    static let fingerprintHexLength = 12
+    public static let fingerprintHexLength = 12
 
     private let db: AppDatabase
     private let serialQueue = DispatchQueue(label: "drift.chattelemetry", qos: .utility)
@@ -33,14 +33,14 @@ final class ChatTelemetryService: @unchecked Sendable {
 
     // MARK: - Public API
 
-    enum Outcome: String {
+    public enum Outcome: String {
         case success
         case failed
         case clarified
         case timeout
     }
 
-    enum IntentLabel: String {
+    public enum IntentLabel: String {
         case toolCall = "tool_call"
         case text
         case clarification
@@ -54,7 +54,7 @@ final class ChatTelemetryService: @unchecked Sendable {
     /// `response` is the final assistant-facing text. Stored verbatim alongside
     /// the query when opt-in is on so exported transcripts can drive multi-turn
     /// failure analysis. Both raw strings live only in the local DB.
-    func record(
+    public func record(
         query: String,
         response: String? = nil,
         intent: IntentLabel?,
@@ -87,15 +87,15 @@ final class ChatTelemetryService: @unchecked Sendable {
 
     /// Snapshot for the insights view. Safe to call regardless of opt-in state
     /// (returns empty when the table is empty).
-    func fetchRecent(limit: Int = 5000) -> [ChatTurnRow] {
+    public func fetchRecent(limit: Int = 5000) -> [ChatTurnRow] {
         (try? db.fetchChatTurns(limit: limit)) ?? []
     }
 
-    func count() -> Int { (try? db.chatTurnCount()) ?? 0 }
+    public func count() -> Int { (try? db.chatTurnCount()) ?? 0 }
 
     /// Wipe all stored telemetry. Called from Settings [Delete All] or when
     /// the user flips the opt-in toggle off.
-    func deleteAll() {
+    public func deleteAll() {
         do {
             try db.deleteAllChatTurns()
         } catch {
@@ -105,7 +105,7 @@ final class ChatTelemetryService: @unchecked Sendable {
 
     /// Export as pretty-printed JSON. Returns nil if serialization fails or
     /// the table is empty.
-    func exportJSON() -> Data? {
+    public func exportJSON() -> Data? {
         let rows = fetchRecent()
         guard !rows.isEmpty else { return nil }
         let encoder = JSONEncoder()
@@ -118,7 +118,7 @@ final class ChatTelemetryService: @unchecked Sendable {
     /// SHA-256 of the normalized query, truncated to `fingerprintHexLength`.
     /// Normalization: lowercase, collapse whitespace, trim. Empty input yields
     /// the hash of an empty string (stable, consistent).
-    static func fingerprint(for query: String) -> String {
+    public static func fingerprint(for query: String) -> String {
         let normalized = query
             .lowercased()
             .components(separatedBy: .whitespacesAndNewlines)
@@ -143,20 +143,32 @@ final class ChatTelemetryService: @unchecked Sendable {
 // MARK: - Aggregates
 
 extension ChatTelemetryService {
-    struct ToolStat: Equatable {
-        let tool: String
-        let count: Int
-        let failed: Int
+    public struct ToolStat: Equatable {
+        public let tool: String
+        public let count: Int
+        public let failed: Int
+
+        public init(tool: String, count: Int, failed: Int) {
+            self.tool = tool
+            self.count = count
+            self.failed = failed
+        }
     }
 
-    struct LatencyStat: Equatable {
-        let p50: Int
-        let p95: Int
-        let count: Int
+    public struct LatencyStat: Equatable {
+        public let p50: Int
+        public let p95: Int
+        public let count: Int
+
+        public init(p50: Int, p95: Int, count: Int) {
+            self.p50 = p50
+            self.p95 = p95
+            self.count = count
+        }
     }
 
     /// Top-N tools by call count, with failure counts alongside.
-    func topTools(limit: Int = 10) -> [ToolStat] {
+    public func topTools(limit: Int = 10) -> [ToolStat] {
         let rows = fetchRecent()
         var byTool: [String: (count: Int, failed: Int)] = [:]
         for row in rows {
@@ -176,7 +188,7 @@ extension ChatTelemetryService {
     }
 
     /// Top-N failure intents (tool or intent_label) — where users hit a wall.
-    func topFailures(limit: Int = 10) -> [ToolStat] {
+    public func topFailures(limit: Int = 10) -> [ToolStat] {
         let rows = fetchRecent().filter {
             $0.outcome == Outcome.failed.rawValue || $0.outcome == Outcome.timeout.rawValue
         }
@@ -199,7 +211,7 @@ extension ChatTelemetryService {
     /// Filters to `outcome ∈ {failed, timeout}` and groups by tool. Rows with
     /// no tool fall under `intent_label`, then `"unknown"`. Returns `[]` when
     /// opt-in is off (table is empty) or no failures in the window.
-    func recentFailures(hoursBack: Int = 24, limit: Int = 10) -> [ToolStat] {
+    public func recentFailures(hoursBack: Int = 24, limit: Int = 10) -> [ToolStat] {
         let cutoff = Date().addingTimeInterval(-Double(max(0, hoursBack) * 3600))
         let parser = ISO8601DateFormatter()
         parser.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
@@ -222,7 +234,7 @@ extension ChatTelemetryService {
     }
 
     /// Latency percentiles over the recorded sample.
-    func latency() -> LatencyStat {
+    public func latency() -> LatencyStat {
         let rows = fetchRecent().map(\.latencyMs).sorted()
         guard !rows.isEmpty else { return LatencyStat(p50: 0, p95: 0, count: 0) }
         func percentile(_ p: Double) -> Int {

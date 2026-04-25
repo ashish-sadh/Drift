@@ -3,59 +3,59 @@ import DriftCore
 
 /// Unified biomarker service — used by both UI views and AI tool calls.
 @MainActor
-enum BiomarkerService {
+public enum BiomarkerService {
 
     // MARK: - CRUD
 
     /// Fetch all lab reports.
-    static func fetchLabReports() -> [LabReport] {
+    public static func fetchLabReports() -> [LabReport] {
         (try? AppDatabase.shared.fetchLabReports()) ?? []
     }
 
     /// Fetch latest biomarker results across all reports.
-    static func fetchLatestBiomarkerResults() -> [BiomarkerResult] {
+    public static func fetchLatestBiomarkerResults() -> [BiomarkerResult] {
         (try? AppDatabase.shared.fetchLatestBiomarkerResults()) ?? []
     }
 
     /// Fetch biomarker results for a specific report.
-    static func fetchBiomarkerResults(forReportId id: Int64) -> [BiomarkerResult] {
+    public static func fetchBiomarkerResults(forReportId id: Int64) -> [BiomarkerResult] {
         (try? AppDatabase.shared.fetchBiomarkerResults(forReportId: id)) ?? []
     }
 
     /// Fetch all results for a specific biomarker across reports.
-    static func fetchBiomarkerResults(forBiomarkerId id: String) -> [BiomarkerResult] {
+    public static func fetchBiomarkerResults(forBiomarkerId id: String) -> [BiomarkerResult] {
         (try? AppDatabase.shared.fetchBiomarkerResults(forBiomarkerId: id)) ?? []
     }
 
     /// Fetch the report date for a given report ID.
-    static func fetchReportDate(forId id: Int64) -> String {
+    public static func fetchReportDate(forId id: Int64) -> String {
         (try? AppDatabase.shared.fetchReportDate(forId: id)) ?? ""
     }
 
     /// Save a lab report.
-    static func saveLabReport(_ report: inout LabReport) throws {
+    public static func saveLabReport(_ report: inout LabReport) throws {
         try AppDatabase.shared.saveLabReport(&report)
     }
 
     /// Save biomarker results.
-    static func saveBiomarkerResults(_ results: [BiomarkerResult]) throws {
+    public static func saveBiomarkerResults(_ results: [BiomarkerResult]) throws {
         try AppDatabase.shared.saveBiomarkerResults(results)
     }
 
     /// Delete a lab report.
-    static func deleteLabReport(id: Int64) {
+    public static func deleteLabReport(id: Int64) {
         try? AppDatabase.shared.deleteLabReport(id: id)
     }
 
     // MARK: - Queries
 
     /// Whether any biomarker results exist.
-    static func hasResults() -> Bool {
+    public static func hasResults() -> Bool {
         ((try? AppDatabase.shared.fetchLatestBiomarkerResults())?.isEmpty == false)
     }
 
     /// Get out-of-range biomarker results.
-    static func getResults() -> String {
+    public static func getResults() -> String {
         guard let results = try? AppDatabase.shared.fetchLatestBiomarkerResults(),
               !results.isEmpty else { return "No biomarker data. Upload a lab report to get started." }
 
@@ -79,7 +79,7 @@ enum BiomarkerService {
     }
 
     /// Get detail for a specific biomarker.
-    static func getDetail(name: String) -> String {
+    public static func getDetail(name: String) -> String {
         let lower = name.lowercased()
         guard let def = BiomarkerKnowledgeBase.all.first(where: { $0.name.lowercased().contains(lower) }) else {
             return "Biomarker '\(name)' not found."
