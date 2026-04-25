@@ -140,8 +140,6 @@ targets:
     deploymentTarget: "14.0"
     sources:
       - path: DriftLLMEvalMacOS
-      - path: Drift/Services/LlamaCppBackend.swift
-      - path: Drift/Services/AIBackend.swift
     dependencies:
       - framework: Frameworks/llama.xcframework
       - package: DriftCore

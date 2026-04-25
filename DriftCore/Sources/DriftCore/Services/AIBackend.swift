@@ -3,7 +3,7 @@ import Foundation
 // MARK: - AI Backend Protocol
 
 /// Abstraction for on-device LLM inference. Supports both llama.cpp and MLX backends.
-protocol AIBackend: AnyObject, Sendable {
+public protocol AIBackend: AnyObject, Sendable {
     var isLoaded: Bool { get }
     var supportsVision: Bool { get }
 
@@ -23,7 +23,7 @@ protocol AIBackend: AnyObject, Sendable {
 // MARK: - Model Tier
 
 /// Which model to download based on device capabilities.
-enum AIModelTier: Sendable {
+public enum AIModelTier: Sendable {
     case small   // SmolLM2-360M Q8 (~368MB) — 6GB devices
     case large   // Gemma 4 E2B Q4_K_M (~2900MB) — 8GB+ devices, best tool calling
 
@@ -61,21 +61,21 @@ enum AIModelTier: Sendable {
 
 // MARK: - Backend Type
 
-enum AIBackendType: Sendable {
+public enum AIBackendType: Sendable {
     case llamaCpp
     case mlx
 }
 
 // MARK: - Device Capability Detection
 
-enum DeviceCapability {
+public enum DeviceCapability {
     /// Whether this device can run AI at all (6GB+ RAM).
-    static var canRunAI: Bool {
+    public static var canRunAI: Bool {
         ramGB >= 5.5
     }
 
     /// Detect the best model tier + backend for this device.
-    static func detectTier() -> (tier: AIModelTier, backend: AIBackendType) {
+    public static func detectTier() -> (tier: AIModelTier, backend: AIBackendType) {
         // physicalMemory reports total RAM but iOS reserves 1-2GB
         // iPhone 16 Pro (8GB) reports ~7.2-7.8, iPhone 15 (6GB) reports ~5.2-5.8
         if ramGB >= 6.5 {
@@ -89,7 +89,7 @@ enum DeviceCapability {
 
     /// Check if there's enough free disk space for the model.
     /// Ensures at least 2GB remains free after download.
-    static func hasEnoughDiskSpace(for tier: AIModelTier) -> Bool {
+    public static func hasEnoughDiskSpace(for tier: AIModelTier) -> Bool {
         let needed = Int64(tier.downloadSizeMB) * 1024 * 1024 + 2 * 1024 * 1024 * 1024 // model + 2GB buffer
         let docsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         guard let values = try? docsURL.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]),
@@ -98,7 +98,7 @@ enum DeviceCapability {
     }
 
     /// Free disk space in GB.
-    static var freeDiskGB: Double {
+    public static var freeDiskGB: Double {
         let docsURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
         guard let values = try? docsURL.resourceValues(forKeys: [.volumeAvailableCapacityForImportantUsageKey]),
               let available = values.volumeAvailableCapacityForImportantUsage else { return 0 }
@@ -106,7 +106,7 @@ enum DeviceCapability {
     }
 
     /// Device RAM in GB.
-    static var ramGB: Double {
+    public static var ramGB: Double {
         Double(ProcessInfo.processInfo.physicalMemory) / (1024 * 1024 * 1024)
     }
 }

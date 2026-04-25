@@ -4,10 +4,10 @@ import DriftCore
 /// Orchestrates AI inference — picks backend (MLX or llama.cpp) and model tier based on device.
 @MainActor
 @Observable
-final class LocalAIService {
-    static let shared = LocalAIService()
+public final class LocalAIService {
+    public static let shared = LocalAIService()
 
-    enum State: Equatable {
+    public enum State: Equatable {
         case notSetUp       // Model not downloaded
         case downloading(progress: Double)
         case loading        // Loading into memory
@@ -16,13 +16,13 @@ final class LocalAIService {
         case notEnoughSpace(String)
     }
 
-    private(set) var state: State = .notSetUp
+    public private(set) var state: State = .notSetUp
     nonisolated(unsafe) private var backend: AIBackend?
-    let modelManager = AIModelManager.shared
+    public let modelManager = AIModelManager.shared
 
-    var supportsVision: Bool { backend?.supportsVision ?? false }
-    var isModelLoaded: Bool { backend?.isLoaded ?? false }
-    var isLargeModel: Bool { modelManager.currentTier == .large }
+    public var supportsVision: Bool { backend?.supportsVision ?? false }
+    public var isModelLoaded: Bool { backend?.isLoaded ?? false }
+    public var isLargeModel: Bool { modelManager.currentTier == .large }
 
     private var systemPrompt: String {
         let screen = AIScreenTracker.shared.currentScreen.rawValue
@@ -56,7 +56,8 @@ final class LocalAIService {
     }
 
     init() {
-        ToolRegistration.registerAll()
+        // Tool registration is the iOS app's responsibility — DriftApp.init()
+        // calls `ToolRegistration.registerAll()` after wiring DriftPlatform.
         if modelManager.isModelDownloaded {
             state = .ready
         } else if !DeviceCapability.hasEnoughDiskSpace(for: modelManager.currentTier) {
@@ -66,7 +67,7 @@ final class LocalAIService {
 
     // MARK: - Setup
 
-    func downloadModel() async {
+    public func downloadModel() async {
         await modelManager.downloadModel()
         switch modelManager.downloadState {
         case .completed:
@@ -79,7 +80,7 @@ final class LocalAIService {
         }
     }
 
-    func loadModel() {
+    public func loadModel() {
         guard backend == nil else { return }
         state = .loading
 
@@ -154,11 +155,11 @@ final class LocalAIService {
 
     // MARK: - Inference
 
-    func respond(to message: String, context: String = "", history: String = "") async -> String {
+    public func respond(to message: String, context: String = "", history: String = "") async -> String {
         await respondStreaming(to: message, context: context, history: history, onToken: { _ in })
     }
 
-    func respondStreaming(to message: String, context: String = "", history: String = "", onToken: @escaping @Sendable (String) -> Void) async -> String {
+    public func respondStreaming(to message: String, context: String = "", history: String = "", onToken: @escaping @Sendable (String) -> Void) async -> String {
         guard let backend else { return "Model not loaded." }
 
         var parts: [String] = []
@@ -175,12 +176,12 @@ final class LocalAIService {
 
     /// Respond with a custom system prompt, bypassing the built-in systemPrompt.
     /// Used by AIToolAgent so planner/chain/presentation steps don't get double-wrapped with tools.
-    func respondDirect(systemPrompt: String, message: String) async -> String {
+    public func respondDirect(systemPrompt: String, message: String) async -> String {
         guard let backend else { return "Model not loaded." }
         return await backend.respond(to: message, systemPrompt: systemPrompt)
     }
 
-    func respondStreamingDirect(systemPrompt: String, message: String, onToken: @escaping @Sendable (String) -> Void) async -> String {
+    public func respondStreamingDirect(systemPrompt: String, message: String, onToken: @escaping @Sendable (String) -> Void) async -> String {
         guard let backend else { return "Model not loaded." }
         return await backend.respondStreaming(to: message, systemPrompt: systemPrompt, onToken: onToken)
     }
@@ -195,7 +196,7 @@ final class LocalAIService {
 
     /// Unload model from GPU after a delay. Frees ~3GB GPU memory.
     /// Called when user leaves AI chat.
-    func scheduleUnload(delay: TimeInterval = 60) {
+    public func scheduleUnload(delay: TimeInterval = 60) {
         unloadTimer?.invalidate()
         unloadTimer = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
             Task { @MainActor in
@@ -212,7 +213,7 @@ final class LocalAIService {
     }
 
     /// Cancel pending unload — user came back to AI chat.
-    func cancelUnload() {
+    public func cancelUnload() {
         if unloadTimer != nil {
             Log.app.info("AI: unload cancelled (user returned)")
         }
@@ -220,7 +221,7 @@ final class LocalAIService {
         unloadTimer = nil
     }
 
-    func resetChat() {
+    public func resetChat() {
         backend?.unload()
         backend = nil
         if modelManager.isModelDownloaded {
@@ -228,7 +229,7 @@ final class LocalAIService {
         }
     }
 
-    func deleteModel() {
+    public func deleteModel() {
         backend?.unload()
         backend = nil
         modelManager.deleteModel()
@@ -236,7 +237,7 @@ final class LocalAIService {
     }
 
     /// Device info for display.
-    var deviceInfo: String {
+    public var deviceInfo: String {
         let ram = String(format: "%.0f", DeviceCapability.ramGB)
         let free = String(format: "%.1f", DeviceCapability.freeDiskGB)
         let tier = modelManager.currentTier.displayName
@@ -244,7 +245,7 @@ final class LocalAIService {
     }
 
     /// Download size for display.
-    var downloadSizeText: String {
+    public var downloadSizeText: String {
         let mb = modelManager.currentTier.downloadSizeMB
         return mb >= 1024 ? String(format: "%.1f GB", Double(mb) / 1024) : "\(mb) MB"
     }

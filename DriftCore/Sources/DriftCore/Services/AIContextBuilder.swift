@@ -4,11 +4,11 @@ import DriftCore
 /// Builds rich, context-specific prompts for AI interactions.
 /// Each action/page gets tailored data injected into the prompt.
 @MainActor
-enum AIContextBuilder {
+public enum AIContextBuilder {
 
     // MARK: - Base Context (always included)
 
-    static func baseContext() -> String {
+    public static func baseContext() -> String {
         var lines: [String] = []
         let today = DateFormatters.todayString
 
@@ -64,7 +64,7 @@ enum AIContextBuilder {
 
     // MARK: - Food Context
 
-    static func foodContext() -> String {
+    public static func foodContext() -> String {
         var lines: [String] = []
         let today = DateFormatters.todayString
 
@@ -117,7 +117,7 @@ enum AIContextBuilder {
 
     // MARK: - Weight Context
 
-    static func weightContext() -> String {
+    public static func weightContext() -> String {
         var lines: [String] = []
 
         if let trend = WeightTrendService.shared.trend, !WeightTrendService.shared.isStale {
@@ -157,7 +157,7 @@ enum AIContextBuilder {
 
     // MARK: - Full Day Context (for Summary)
 
-    static func fullDayContext() -> String {
+    public static func fullDayContext() -> String {
         var lines: [String] = []
 
         // Include food context
@@ -193,7 +193,7 @@ enum AIContextBuilder {
 
     // MARK: - Workout Context
 
-    static func workoutContext() -> String {
+    public static func workoutContext() -> String {
         var lines: [String] = []
 
         if let workouts = try? WorkoutService.fetchWorkouts(limit: 10) {
@@ -269,7 +269,7 @@ enum AIContextBuilder {
 
     // MARK: - Supplement Context
 
-    static func supplementContext() -> String {
+    public static func supplementContext() -> String {
         let today = DateFormatters.todayString
         guard let supplements = try? AppDatabase.shared.fetchActiveSupplements(),
               !supplements.isEmpty,
@@ -323,7 +323,7 @@ enum AIContextBuilder {
 
     // MARK: - Screen-Aware Context
 
-    static func buildContext(screen: AIScreen) -> String {
+    public static func buildContext(screen: AIScreen) -> String {
         var parts: [String] = [baseContext()]
         parts.append(screenContext(screen: screen))
         return truncateToFit(parts.joined(separator: "\n"), maxTokens: 800)
@@ -364,7 +364,7 @@ enum AIContextBuilder {
 
     // MARK: - App Feature Context (conditionally included for app-about queries)
 
-    static func featureContext() -> String {
+    public static func featureContext() -> String {
         """
         Drift: local-first health tracker, all data on-device. \
         Food: 2400+ foods, barcode scan, "log 2 eggs" or Food tab. \
@@ -378,7 +378,7 @@ enum AIContextBuilder {
     // MARK: - Comparison Context
 
     /// Pre-computed this-week vs last-week comparison for food and weight.
-    static func comparisonContext() -> String {
+    public static func comparisonContext() -> String {
         var lines: [String] = []
         let cal = Calendar.current
         let today = Date()
@@ -417,7 +417,7 @@ enum AIContextBuilder {
     }
 
     /// Truncate context to fit within budget, preserving complete lines.
-    static func truncateToFit(_ context: String, maxTokens: Int = 800) -> String {
+    public static func truncateToFit(_ context: String, maxTokens: Int = 800) -> String {
         guard estimateTokens(context) > maxTokens else { return context }
         let targetChars = maxTokens * 4
         let truncated = String(context.prefix(targetChars))
@@ -429,7 +429,7 @@ enum AIContextBuilder {
 
     // MARK: - Legacy (backward compat)
 
-    static func buildContext() -> String {
+    public static func buildContext() -> String {
         buildContext(screen: .dashboard)
     }
 }

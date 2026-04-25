@@ -3,26 +3,26 @@ import DriftCore
 import llama
 
 /// llama.cpp backend using raw C API — bypasses LLM.swift wrapper which has Metal issues on device.
-final class LlamaCppBackend: AIBackend, @unchecked Sendable {
+public final class LlamaCppBackend: AIBackend, @unchecked Sendable {
     private var model: OpaquePointer?                       // llama_model *
     private var context: OpaquePointer?                     // llama_context *
     private let modelPath: URL
     private var isGemma: Bool = false  // Gemma uses different chat template
     private let threadOverride: Int?  // nil = auto, set lower for parallel eval
 
-    var isLoaded: Bool { model != nil && context != nil }
-    var supportsVision: Bool { false }
+    public var isLoaded: Bool { model != nil && context != nil }
+    public var supportsVision: Bool { false }
 
     init(modelPath: URL, threads: Int? = nil) {
         self.modelPath = modelPath
         self.threadOverride = threads
     }
 
-    func loadSync() throws {
+    public func loadSync() throws {
         try _load()
     }
 
-    func load() async throws {
+    public func load() async throws {
         try _load()
     }
 
@@ -139,24 +139,24 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
     // MARK: - Inference (AIBackend protocol)
 
     /// Protocol conformance: greedy (temp=0) — deterministic, ideal for intent classification.
-    func respond(to prompt: String, systemPrompt: String) async -> String {
+    public func respond(to prompt: String, systemPrompt: String) async -> String {
         await _respondStreaming(to: prompt, systemPrompt: systemPrompt, temperature: 0.0, onToken: { _ in })
     }
 
     /// Protocol conformance: stochastic (temp=0.4) — natural presentation responses.
-    func respondStreaming(to prompt: String, systemPrompt: String, onToken: @escaping @Sendable (String) -> Void) async -> String {
+    public func respondStreaming(to prompt: String, systemPrompt: String, onToken: @escaping @Sendable (String) -> Void) async -> String {
         await _respondStreaming(to: prompt, systemPrompt: systemPrompt, temperature: 0.4, onToken: onToken)
     }
 
     // MARK: - Inference (extended API)
 
     /// Explicit temperature control. Use temperature=0 for greedy/deterministic output.
-    func respond(to prompt: String, systemPrompt: String, temperature: Float) async -> String {
+    public func respond(to prompt: String, systemPrompt: String, temperature: Float) async -> String {
         await _respondStreaming(to: prompt, systemPrompt: systemPrompt, temperature: temperature, onToken: { _ in })
     }
 
     /// Explicit temperature control with streaming.
-    func respondStreaming(to prompt: String, systemPrompt: String, temperature: Float, onToken: @escaping @Sendable (String) -> Void) async -> String {
+    public func respondStreaming(to prompt: String, systemPrompt: String, temperature: Float, onToken: @escaping @Sendable (String) -> Void) async -> String {
         await _respondStreaming(to: prompt, systemPrompt: systemPrompt, temperature: temperature, onToken: onToken)
     }
 
@@ -269,7 +269,7 @@ final class LlamaCppBackend: AIBackend, @unchecked Sendable {
 
     // MARK: - Cleanup
 
-    func unload() {
+    public func unload() {
         if let context { llama_free(context) }
         if let model { llama_model_free(model) }
         context = nil

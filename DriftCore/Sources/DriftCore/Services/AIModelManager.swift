@@ -4,19 +4,19 @@ import DriftCore
 /// Manages AI model download, storage, and deletion.
 @MainActor
 @Observable
-final class AIModelManager {
-    static let shared = AIModelManager()
+public final class AIModelManager {
+    public static let shared = AIModelManager()
 
-    enum DownloadState: Equatable {
+    public enum DownloadState: Equatable {
         case idle
         case downloading(progress: Double)
         case completed
         case error(String)
     }
 
-    private(set) var downloadState: DownloadState = .idle
-    private(set) var currentTier: AIModelTier
-    private(set) var backendType: AIBackendType
+    public private(set) var downloadState: DownloadState = .idle
+    public private(set) var currentTier: AIModelTier
+    public private(set) var backendType: AIBackendType
 
     // Base URL for model downloads — GitHub Releases (primary), HuggingFace (fallback for vision)
     private let baseURL = "https://github.com/ashish-sadh/Drift/releases/download/models-v1"
@@ -50,7 +50,7 @@ final class AIModelManager {
 
     // MARK: - Model Status
 
-    var isModelDownloaded: Bool {
+    public var isModelDownloaded: Bool {
         currentTier.modelFiles.allSatisfy { file in
             FileManager.default.fileExists(atPath: modelsDirectory.appendingPathComponent(file.name).path)
         }
@@ -72,7 +72,7 @@ final class AIModelManager {
 
     // MARK: - Download
 
-    func downloadModel() async {
+    public func downloadModel() async {
         guard !isModelDownloaded else { downloadState = .completed; return }
 
         // Check disk space
@@ -179,7 +179,7 @@ final class AIModelManager {
         return header == Data([0x47, 0x47, 0x55, 0x46]) // "GGUF"
     }
 
-    enum DownloadError: Error {
+    public enum DownloadError: Error {
         case sizeMismatch(expected: Int, actual: Int)
         case invalidGGUF
 
@@ -224,7 +224,7 @@ final class AIModelManager {
 
     // MARK: - Delete
 
-    func deleteModel() {
+    public func deleteModel() {
         try? FileManager.default.removeItem(at: modelsDirectory)
         // Recreate empty directory for next download
         try? FileManager.default.createDirectory(at: modelsDirectory, withIntermediateDirectories: true)
@@ -233,7 +233,7 @@ final class AIModelManager {
     }
 
     /// Size of downloaded model on disk in MB.
-    var modelSizeOnDiskMB: Int {
+    public var modelSizeOnDiskMB: Int {
         let files = currentTier.modelFiles
         var total: Int64 = 0
         for file in files {

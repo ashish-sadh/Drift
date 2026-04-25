@@ -1,4 +1,5 @@
 import SwiftUI
+import DriftCore
 
 /// Entry point for the AI feature — handles download + shows chat when ready.
 struct AIView: View {

@@ -7,7 +7,7 @@ extension AIContextBuilder {
 
     // MARK: - Sleep & Recovery Context
 
-    static func sleepRecoveryContext() -> String {
+    public static func sleepRecoveryContext() -> String {
         guard let data = AIDataCache.shared.sleep else { return "No sleep data available." }
         var lines: [String] = ["Sleep & Recovery:"]
         if data.sleepHours > 0 {
@@ -35,7 +35,7 @@ extension AIContextBuilder {
 
     // MARK: - Glucose Context
 
-    static func glucoseContext() -> String {
+    public static func glucoseContext() -> String {
         let today = DateFormatters.todayString
         guard let tomorrow = Calendar.current.date(byAdding: .day, value: 1, to: Date()) else { return "" }
         let endStr = DateFormatters.dateOnly.string(from: tomorrow)
@@ -60,7 +60,7 @@ extension AIContextBuilder {
 
     // MARK: - Biomarker Context
 
-    static func biomarkerContext() -> String {
+    public static func biomarkerContext() -> String {
         guard let results = try? AppDatabase.shared.fetchLatestBiomarkerResults(),
               !results.isEmpty else { return "No lab results on file." }
 
@@ -95,7 +95,7 @@ extension AIContextBuilder {
 
     // MARK: - DEXA / Body Composition Context
 
-    static func dexaContext() -> String {
+    public static func dexaContext() -> String {
         var lines: [String] = []
 
         // Check body_composition table first (HealthKit + manual entries — more common)
@@ -151,7 +151,7 @@ extension AIContextBuilder {
 
     // MARK: - Cycle Context
 
-    static func cycleContext() -> String {
+    public static func cycleContext() -> String {
         guard let data = AIDataCache.shared.cycle, data.periodCount >= 2 else { return "" }
 
         var lines = ["Cycle:"]

@@ -3,10 +3,10 @@ import DriftCore
 
 /// Unified sleep & recovery service — used by both UI views and AI tool calls.
 @MainActor
-enum SleepRecoveryService {
+public enum SleepRecoveryService {
 
     /// Get last night's sleep data.
-    static func getSleep() -> String {
+    public static func getSleep() -> String {
         guard let data = AIDataCache.shared.sleep else { return "No sleep data available." }
         var lines: [String] = []
         lines.append("Sleep: \(String(format: "%.1f", data.sleepHours)) hours")
@@ -20,7 +20,7 @@ enum SleepRecoveryService {
     }
 
     /// Get recovery score with HRV and RHR.
-    static func getRecovery() -> String {
+    public static func getRecovery() -> String {
         guard let data = AIDataCache.shared.sleep else { return "No recovery data available." }
         var lines: [String] = []
         if data.recoveryScore > 0 { lines.append("Recovery: \(data.recoveryScore)/100") }
@@ -36,7 +36,7 @@ enum SleepRecoveryService {
     }
 
     /// Training readiness based on recovery + sleep.
-    static func getReadiness() -> String {
+    public static func getReadiness() -> String {
         guard let data = AIDataCache.shared.sleep else { return "No data to assess readiness." }
         if data.recoveryScore >= 70 {
             return "Good to train. Recovery: \(data.recoveryScore)/100, \(String(format: "%.1f", data.sleepHours))h sleep."
