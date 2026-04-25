@@ -7,6 +7,8 @@ import DriftCore
 public final class ConversationState {
     public static let shared = ConversationState()
 
+    public init() {}
+
     // MARK: - Pending Intent (what the LLM was trying to do)
 
     public enum PendingIntent {

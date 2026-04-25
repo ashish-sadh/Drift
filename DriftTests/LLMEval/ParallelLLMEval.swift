@@ -1,4 +1,5 @@
 import XCTest
+@testable import DriftCore
 @testable import Drift
 
 /// Runs all 3 model evals in parallel using TaskGroup.

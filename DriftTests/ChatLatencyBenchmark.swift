@@ -1,4 +1,5 @@
 import XCTest
+@testable import DriftCore
 @testable import Drift
 
 private final class FirstTokenCapture: @unchecked Sendable {

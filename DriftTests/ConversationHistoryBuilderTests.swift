@@ -1,4 +1,5 @@
 import Foundation
+@testable import DriftCore
 import Testing
 @testable import Drift
 
@@ -7,7 +8,7 @@ import Testing
 @Test @MainActor func historyBuilderReturnsEmptyForNoMessages() {
     Preferences.conversationHistoryEnabled = true
     ConversationState.shared.reset()
-    let result = ConversationHistoryBuilder.build(messages: [])
+    let result = ConversationHistoryBuilder.build(turns: [])
     #expect(result.isEmpty)
 }
 
@@ -18,20 +19,20 @@ import Testing
     ConversationState.shared.reset()
 
     let msgs = [
-        AIChatViewModel.ChatMessage(role: .user, text: "hi"),
-        AIChatViewModel.ChatMessage(role: .assistant, text: "Hello")
+        HistoryTurn(role: .user, text: "hi"),
+        HistoryTurn(role: .assistant, text: "Hello")
     ]
-    #expect(ConversationHistoryBuilder.build(messages: msgs).isEmpty)
+    #expect(ConversationHistoryBuilder.build(turns: msgs).isEmpty)
 }
 
 @Test @MainActor func historyBuilderFormatsQAPairs() {
     Preferences.conversationHistoryEnabled = true
     ConversationState.shared.reset()
     let msgs = [
-        AIChatViewModel.ChatMessage(role: .user, text: "log lunch"),
-        AIChatViewModel.ChatMessage(role: .assistant, text: "What did you have for lunch?")
+        HistoryTurn(role: .user, text: "log lunch"),
+        HistoryTurn(role: .assistant, text: "What did you have for lunch?")
     ]
-    let result = ConversationHistoryBuilder.build(messages: msgs)
+    let result = ConversationHistoryBuilder.build(turns: msgs)
     #expect(result.contains("Q: log lunch"))
     #expect(result.contains("A: What did you have for lunch?"))
     // Newest turn must appear last so the LLM sees the latest assistant turn
@@ -47,12 +48,12 @@ import Testing
     // 6 turns of 240-char "A:" answers — total well above a 100-token
     // (~400 char) budget. Builder should drop oldest turns.
     let bigText = String(repeating: "x", count: 240)
-    let msgs = (0..<6).map { i -> AIChatViewModel.ChatMessage in
-        AIChatViewModel.ChatMessage(
+    let msgs = (0..<6).map { i -> HistoryTurn in
+        HistoryTurn(
             role: i % 2 == 0 ? .user : .assistant,
             text: "\(i) \(bigText)")
     }
-    let result = ConversationHistoryBuilder.build(messages: msgs, maxTokens: 100)
+    let result = ConversationHistoryBuilder.build(turns: msgs, maxTokens: 100)
     let budgetChars = 100 * ConversationHistoryBuilder.charsPerToken
     #expect(result.count <= budgetChars)
     // Oldest turns dropped: "0 …" should NOT appear, newest "5 …" should.
@@ -66,10 +67,10 @@ import Testing
     // 1000-char assistant answer — per-message cap is 60 tokens ≈ 240 chars.
     let huge = String(repeating: "y", count: 1000)
     let msgs = [
-        AIChatViewModel.ChatMessage(role: .user, text: "tell me"),
-        AIChatViewModel.ChatMessage(role: .assistant, text: huge)
+        HistoryTurn(role: .user, text: "tell me"),
+        HistoryTurn(role: .assistant, text: huge)
     ]
-    let result = ConversationHistoryBuilder.build(messages: msgs, maxTokens: 400)
+    let result = ConversationHistoryBuilder.build(turns: msgs, maxTokens: 400)
     let perMsgChars = ConversationHistoryBuilder.perMessageTokens * ConversationHistoryBuilder.charsPerToken
     // "A: " prefix + truncated body
     let assistantLine = result.components(separatedBy: "\n").last ?? ""
@@ -80,12 +81,12 @@ import Testing
     Preferences.conversationHistoryEnabled = true
     ConversationState.shared.reset()
     // 10 turns: builder only considers the last 6.
-    let msgs = (0..<10).map { i -> AIChatViewModel.ChatMessage in
-        AIChatViewModel.ChatMessage(
+    let msgs = (0..<10).map { i -> HistoryTurn in
+        HistoryTurn(
             role: i % 2 == 0 ? .user : .assistant,
             text: "turn\(i)")
     }
-    let result = ConversationHistoryBuilder.build(messages: msgs, maxTokens: 400)
+    let result = ConversationHistoryBuilder.build(turns: msgs, maxTokens: 400)
     #expect(!result.contains("turn0"))
     #expect(!result.contains("turn3"))
     #expect(result.contains("turn9"))
@@ -95,8 +96,8 @@ import Testing
 @Test @MainActor func historyBuilderSingleShortMessageFits() {
     Preferences.conversationHistoryEnabled = true
     ConversationState.shared.reset()
-    let msgs = [AIChatViewModel.ChatMessage(role: .user, text: "hi")]
-    let result = ConversationHistoryBuilder.build(messages: msgs, maxTokens: 400)
+    let msgs = [HistoryTurn(role: .user, text: "hi")]
+    let result = ConversationHistoryBuilder.build(turns: msgs, maxTokens: 400)
     #expect(result == "Q: hi")
 }
 
@@ -112,10 +113,10 @@ import Testing
     state.beginUserTurn()                                         // turn 2 — asking follow-up
 
     let msgs = [
-        AIChatViewModel.ChatMessage(role: .user, text: "log 200g rice"),
-        AIChatViewModel.ChatMessage(role: .assistant, text: "Logged rice.")
+        HistoryTurn(role: .user, text: "log 200g rice"),
+        HistoryTurn(role: .assistant, text: "Logged rice.")
     ]
-    let result = ConversationHistoryBuilder.build(messages: msgs)
+    let result = ConversationHistoryBuilder.build(turns: msgs)
     #expect(result.contains("[LAST ACTION:"))
     #expect(result.contains("260 cal"))
     #expect(result.contains("56g carbs"))
@@ -138,8 +139,8 @@ import Testing
     state.beginUserTurn()                                         // turn 3
     state.beginUserTurn()                                         // turn 4
 
-    let msgs = [AIChatViewModel.ChatMessage(role: .user, text: "hello")]
-    let result = ConversationHistoryBuilder.build(messages: msgs)
+    let msgs = [HistoryTurn(role: .user, text: "hello")]
+    let result = ConversationHistoryBuilder.build(turns: msgs)
     #expect(!result.contains("[LAST ACTION:"))
     #expect(!result.contains("260 cal"))
 
@@ -152,8 +153,8 @@ import Testing
     state.reset()
     state.beginUserTurn()
 
-    let msgs = [AIChatViewModel.ChatMessage(role: .user, text: "hi")]
-    let result = ConversationHistoryBuilder.build(messages: msgs)
+    let msgs = [HistoryTurn(role: .user, text: "hi")]
+    let result = ConversationHistoryBuilder.build(turns: msgs)
     #expect(!result.contains("[LAST ACTION:"))
     #expect(result == "Q: hi")
 
@@ -170,8 +171,8 @@ import Testing
     state.captureToolSummary(giant)
     state.beginUserTurn()
 
-    let msgs = [AIChatViewModel.ChatMessage(role: .user, text: "hi")]
-    let result = ConversationHistoryBuilder.build(messages: msgs, maxTokens: 400)
+    let msgs = [HistoryTurn(role: .user, text: "hi")]
+    let result = ConversationHistoryBuilder.build(turns: msgs, maxTokens: 400)
     let totalBudgetChars = 400 * ConversationHistoryBuilder.charsPerToken
     #expect(result.count <= totalBudgetChars)
     // Q/A must still fit alongside the prefix — "Q: hi" is in there.

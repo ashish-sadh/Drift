@@ -13,7 +13,7 @@ public final class LlamaCppBackend: AIBackend, @unchecked Sendable {
     public var isLoaded: Bool { model != nil && context != nil }
     public var supportsVision: Bool { false }
 
-    init(modelPath: URL, threads: Int? = nil) {
+    public init(modelPath: URL, threads: Int? = nil) {
         self.modelPath = modelPath
         self.threadOverride = threads
     }

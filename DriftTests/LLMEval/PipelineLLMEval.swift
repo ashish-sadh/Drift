@@ -1,4 +1,5 @@
 import XCTest
+@testable import DriftCore
 @testable import Drift
 
 /// Tests the LLM-dependent parts of the unified pipeline:

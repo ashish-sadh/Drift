@@ -1,4 +1,5 @@
 import XCTest
+@testable import DriftCore
 import UserNotifications
 @testable import Drift
 

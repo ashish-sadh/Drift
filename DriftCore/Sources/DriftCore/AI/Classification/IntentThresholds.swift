@@ -68,10 +68,10 @@ public enum IntentThresholds {
     /// Confidence label emitted by the classifier, normalized. Any unknown
     /// value is treated as `high` — matches the default path in
     /// `IntentClassifier.parseResponse`.
-    enum Confidence: String, Sendable {
+    public enum Confidence: String, Sendable {
         case high, medium, low
 
-        static func parse(_ raw: String) -> Confidence {
+        public static func parse(_ raw: String) -> Confidence {
             switch raw.lowercased() {
             case "low":    return .low
             case "medium": return .medium

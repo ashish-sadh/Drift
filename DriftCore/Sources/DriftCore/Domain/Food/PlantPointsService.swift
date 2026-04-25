@@ -6,7 +6,7 @@ public enum PlantPointsService {
 
     // MARK: - Public API
 
-    public struct PlantPoints {
+    public struct PlantPoints: Sendable {
         public let uniquePlants: [String]       // full-point plant names
         public let uniqueHerbsSpices: [String]  // quarter-point herb/spice names
 

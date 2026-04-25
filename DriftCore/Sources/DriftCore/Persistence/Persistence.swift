@@ -57,7 +57,7 @@ extension AppDatabase {
     }
 
     /// An empty in-memory database for testing and previews.
-    static func empty() throws -> AppDatabase {
+    public static func empty() throws -> AppDatabase {
         let dbQueue = try DatabaseQueue(configuration: makeConfiguration())
         return try AppDatabase(dbQueue)
     }

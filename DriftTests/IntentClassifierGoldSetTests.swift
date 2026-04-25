@@ -1,4 +1,5 @@
 import XCTest
+@testable import DriftCore
 @testable import Drift
 
 /// Isolated gold set for IntentClassifier — sprint task #161.

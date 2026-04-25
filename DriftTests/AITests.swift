@@ -1,4 +1,5 @@
 import Foundation
+@testable import DriftCore
 import Testing
 @testable import Drift
 
@@ -2496,7 +2497,10 @@ import Testing
 
 @Test @MainActor func intentClassifierPromptHasConversationalExamples() {
     let prompt = IntentClassifier.systemPrompt
-    #expect(prompt.contains("i just love breakfast"), "Prompt should include conversational rejection example")
+    // After prompt-tightening, the "i just love breakfast" example was dropped
+    // in favor of a more general "Bare 'log lunch/breakfast/dinner' (no food) → ask
+    // what they had" rule. Both encode the same intent: bare meal mention isn't a log.
+    #expect(prompt.contains("Bare \"log lunch/breakfast/dinner\""), "Prompt should include bare-meal rejection rule")
 }
 
 @Test @MainActor func intentClassifierPromptHasMealFollowUpExample() {

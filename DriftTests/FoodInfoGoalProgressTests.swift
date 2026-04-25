@@ -1,4 +1,5 @@
 import XCTest
+@testable import DriftCore
 @testable import Drift
 
 /// Covers the pure formatter used by food_info when a macro goal is set.

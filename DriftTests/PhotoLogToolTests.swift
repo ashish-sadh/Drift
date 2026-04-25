@@ -1,4 +1,5 @@
 import Foundation
+@testable import DriftCore
 import Testing
 import UIKit
 @testable import Drift
@@ -101,6 +102,7 @@ private func makeImage() -> UIImage {
     try CloudVisionKey.set("fake-key", for: .anthropic)
 
     ToolRegistration.registerAll()
+    PhotoLogTool.syncRegistration(registry: ToolRegistry.shared)  // iOS-side conditional tool
     #expect(ToolRegistry.shared.tool(named: PhotoLogTool.toolName) != nil)
 
     resetState()

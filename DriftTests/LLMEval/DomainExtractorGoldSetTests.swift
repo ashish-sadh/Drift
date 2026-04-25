@@ -1,4 +1,5 @@
 import XCTest
+@testable import DriftCore
 @testable import Drift
 
 /// Isolated DomainExtractor gold set (#239) — 50 queries covering food (25),

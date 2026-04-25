@@ -1,4 +1,5 @@
 import XCTest
+@testable import DriftCore
 @testable import Drift
 
 /// Evaluates Gemma 4 E2B tool-calling vs Qwen2.5-1.5B baseline.

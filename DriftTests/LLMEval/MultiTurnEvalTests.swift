@@ -1,4 +1,5 @@
 import XCTest
+@testable import DriftCore
 @testable import Drift
 
 /// Multi-turn regression suite: 5 conversation chains × 5 turns each = 25 sequential cases.

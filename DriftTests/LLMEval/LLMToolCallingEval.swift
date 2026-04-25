@@ -1,4 +1,5 @@
 import XCTest
+@testable import DriftCore
 @testable import Drift
 
 /// Evaluates whether Qwen2.5-1.5B can reliably select the right tool from a schema list.

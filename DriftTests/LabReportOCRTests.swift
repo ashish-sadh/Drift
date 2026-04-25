@@ -1,4 +1,5 @@
 import Testing
+@testable import DriftCore
 @testable import Drift
 
 // MARK: - Quest Diagnostics Report (anonymized from real PDF)

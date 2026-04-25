@@ -1,4 +1,5 @@
 import Foundation
+@testable import DriftCore
 import Testing
 import UIKit
 import ImageIO

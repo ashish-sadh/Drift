@@ -7,6 +7,13 @@ public struct BehaviorInsight: Sendable, Identifiable {
     public let title: String
     public let detail: String
     public let isPositive: Bool
+
+    public init(icon: String, title: String, detail: String, isPositive: Bool) {
+        self.icon = icon
+        self.title = title
+        self.detail = detail
+        self.isPositive = isPositive
+    }
 }
 
 @MainActor

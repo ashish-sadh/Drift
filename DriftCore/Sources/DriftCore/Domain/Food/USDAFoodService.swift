@@ -108,7 +108,7 @@ public enum USDAFoodService {
     ///   [{"amount":1,"modifier":"cup, sliced","gramWeight":166},
     ///    {"amount":1,"modifier":"medium (1-1/4\" dia)","gramWeight":12}, ...]
     /// Returns `(pieceG, cupG, tbspG)` as nil when no sensible portion matches.
-    nonisolated static func extractUnitWeights(from portions: [[String: Any]]) -> (Double?, Double?, Double?) {
+    public nonisolated static func extractUnitWeights(from portions: [[String: Any]]) -> (Double?, Double?, Double?) {
         func weight(for predicate: (String) -> Bool) -> Double? {
             for p in portions {
                 guard let mod = (p["modifier"] as? String)?.lowercased() else { continue }
