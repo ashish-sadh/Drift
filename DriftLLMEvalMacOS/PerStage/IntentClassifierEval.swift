@@ -1,4 +1,5 @@
 import XCTest
+import DriftCore
 import Foundation
 
 /// Per-stage LLM eval: IntentClassifier in isolation.

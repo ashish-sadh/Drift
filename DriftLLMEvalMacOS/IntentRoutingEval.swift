@@ -1,4 +1,5 @@
 import XCTest
+import DriftCore
 import Foundation
 
 /// macOS-native LLM eval — runs Gemma 4 directly on macOS (no iOS simulator overhead).

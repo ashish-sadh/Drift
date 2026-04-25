@@ -1,4 +1,5 @@
 import XCTest
+import DriftCore
 import Foundation
 
 /// Live USDA coverage eval — queries 100 foods from the top-500-foods.txt fixture

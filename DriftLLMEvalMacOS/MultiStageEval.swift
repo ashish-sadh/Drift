@@ -1,4 +1,5 @@
 import XCTest
+import DriftCore
 import Foundation
 
 /// #163 / #451 Multi-stage classifier experiment.

@@ -1,4 +1,5 @@
 import XCTest
+import DriftCore
 import Foundation
 
 /// Per-tool reliability eval — 10 queries for each of the top-5 tools, totaling 50 queries.

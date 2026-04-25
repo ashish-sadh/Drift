@@ -1,4 +1,5 @@
 import XCTest
+import DriftCore
 import Foundation
 
 /// Hard multi-turn regression suite — 35 scenarios across 8 failure categories:

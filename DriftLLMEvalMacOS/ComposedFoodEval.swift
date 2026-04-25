@@ -1,4 +1,5 @@
 import XCTest
+import DriftCore
 import Foundation
 
 /// LLM eval for composed-food queries — "coffee with milk", "oatmeal with honey".

@@ -1,4 +1,5 @@
 import XCTest
+import DriftCore
 import Foundation
 
 // MARK: - Shared model loader + prompt for per-stage LLM evals

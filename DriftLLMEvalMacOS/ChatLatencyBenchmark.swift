@@ -1,4 +1,5 @@
 import XCTest
+import DriftCore
 import Foundation
 
 /// Shared baseline reader for both the 3-run bench and the single-item smoke.

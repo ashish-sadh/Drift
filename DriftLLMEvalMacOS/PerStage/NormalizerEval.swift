@@ -1,4 +1,5 @@
 import XCTest
+import DriftCore
 import Foundation
 
 /// Deterministic eval for InputNormalizer — no LLM, no model required.

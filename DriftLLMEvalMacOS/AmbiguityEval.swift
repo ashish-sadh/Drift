@@ -1,4 +1,5 @@
 import XCTest
+import DriftCore
 import Foundation
 
 /// Measures "ask vs guess" calibration for the intent classifier.

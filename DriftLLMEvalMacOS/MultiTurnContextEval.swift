@@ -1,4 +1,5 @@
 import XCTest
+import DriftCore
 import Foundation
 
 /// Multi-turn LLM eval — asserts the classifier uses the injected Q/A history to

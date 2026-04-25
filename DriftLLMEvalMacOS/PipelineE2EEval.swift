@@ -1,4 +1,5 @@
 import XCTest
+import DriftCore
 import Foundation
 
 /// End-to-end pipeline simulation with real Gemma 4 LLM.

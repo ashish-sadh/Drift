@@ -1,4 +1,5 @@
 import XCTest
+import DriftCore
 import Foundation
 
 /// Auto-research optimization loop for the full AI pipeline.
