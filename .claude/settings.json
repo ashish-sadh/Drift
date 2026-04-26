@@ -46,7 +46,7 @@
         "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/sprint-cap.sh", "timeout": 10 }]
       },
       {
-        "matcher": "Bash",
+        "matcher": "Bash|Read|Grep|Glob",
         "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/require-claim-before-bash.sh", "timeout": 5 }]
       },
       {
