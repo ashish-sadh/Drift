@@ -1,7 +1,6 @@
 import Foundation
 @testable import DriftCore
 import Testing
-@testable import Drift
 
 /// #282 — plain `Int()` truncation on small fiber values made 1.5g → "1g" and
 /// 0.6g → "0g", which looked like data loss. These tests lock the

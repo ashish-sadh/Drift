@@ -1,7 +1,6 @@
 import Foundation
 @testable import DriftCore
 import Testing
-@testable import Drift
 
 /// End-to-end tests for multi-turn entry reference resolution (#227).
 /// Seeds real DB rows, populates the ConversationState window, routes the

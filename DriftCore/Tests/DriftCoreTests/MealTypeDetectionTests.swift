@@ -1,7 +1,6 @@
 import Foundation
 @testable import DriftCore
 import Testing
-@testable import Drift
 
 // MARK: - MealType.fromHour — time-based detection (8 boundary cases)
 

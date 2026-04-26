@@ -1,7 +1,6 @@
 import Foundation
 @testable import DriftCore
 import Testing
-@testable import Drift
 
 /// Unit tests for the recent-entries rolling window (#227).
 /// Covers: LRU cap, TTL expiry, ordinal resolution, context block format.

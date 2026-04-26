@@ -1,6 +1,5 @@
 import XCTest
 @testable import DriftCore
-@testable import Drift
 
 /// Regression gold set for InputNormalizer — sprint task #164.
 /// Deterministic: no LLM, no network. Must stay at 100%.

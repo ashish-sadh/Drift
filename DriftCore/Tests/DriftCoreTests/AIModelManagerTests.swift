@@ -1,7 +1,6 @@
 import Foundation
 @testable import DriftCore
 import Testing
-@testable import Drift
 
 @Test func gemma4DeclaredSizeMatchesHFFile() async throws {
     // HF file is ~2963 MB — if this drifts, download disk-space check becomes wrong.

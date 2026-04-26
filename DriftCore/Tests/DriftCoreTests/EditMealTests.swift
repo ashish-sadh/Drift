@@ -1,7 +1,6 @@
 import Foundation
 @testable import DriftCore
 import Testing
-@testable import Drift
 
 // MARK: - FoodService.editMealEntry Tests
 // Seeds AppDatabase.shared with today's meal logs, exercises edit paths,

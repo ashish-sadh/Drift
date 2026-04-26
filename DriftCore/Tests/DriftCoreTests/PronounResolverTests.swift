@@ -1,7 +1,6 @@
 import Foundation
 @testable import DriftCore
 import Testing
-@testable import Drift
 
 /// Cross-domain pronoun resolution (#241). Rewrites pronoun-bearing
 /// *queries* (not actions) into explicit references to the last-touched
