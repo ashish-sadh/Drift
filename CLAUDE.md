@@ -41,7 +41,7 @@ See `program.md` for autopilot instructions, sprint lifecycle, and control comma
 
 ## Rules
 - Build and test after every change
-- All 729+ unit tests (DriftTests) must pass before committing
+- All unit tests must pass before committing: ~850 in DriftCoreTests (`swift test`) + ~1200 in iOS DriftTests (`xcodebuild`)
 - Run LLM eval lite after AI changes; deep eval only when asked
 - TestFlight is auto-published every 3 hours via hook (`.claude/hooks/testflight-check.sh`). The hook injects publish instructions after a commit when 3+ hours have passed. Follow the instructions when they appear. Never publish more frequently than every 3 hours.
 - No MacroFactor references anywhere
@@ -84,12 +84,14 @@ The codebase is split into a multi-platform `DriftCore` Swift package + the iOS 
 
 | Touched code | Command | Wall time |
 |---|---|---|
-| Pure logic in `DriftCore/Sources/DriftCore/` | `cd DriftCore && swift test` | <1s warm |
+| Pure logic in `DriftCore/Sources/DriftCore/` | `cd DriftCore && swift test` | ~2s warm (~850 tests) |
 | AI pipeline (LLM eval) | `xcodebuild test -scheme DriftLLMEvalMacOS -destination 'platform=macOS'` | 30s deterministic per-stage / ~5min full |
-| iOS UI / HealthKit / Widget integration | `xcodebuild test -scheme Drift -destination 'iOS Simulator,name=iPhone 17 Pro' -only-testing:DriftTests` | ~10s |
+| iOS UI / HealthKit / Widget integration | `xcodebuild test -scheme Drift -destination 'iOS Simulator,name=iPhone 17 Pro' -only-testing:DriftTests` | ~30s (~1200 tests) |
 | Pre-TestFlight | run all of the above |  |
 
 If you touch a file that's only Swift logic (no SwiftUI / HealthKit / WidgetKit / etc), it almost certainly belongs in DriftCore — keep the iOS target lean.
+
+**New tests:** pure-logic tests live in `DriftCore/Tests/DriftCoreTests/`; reserve `DriftTests/` for tests that genuinely need `@testable import Drift` (Views, ViewModels, HealthKitService, OCR, CloudVisionKey, etc.). The `swift test` loop is ~10× faster than the iOS Simulator boot.
 
 ## Build & Test
 
@@ -101,7 +103,7 @@ cd /Users/ashishsadh/workspace/Drift
 # Build
 xcodebuild build -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 
-# Unit tests (729+ fast tests, ~10s) — ALWAYS kill stale processes first
+# iOS unit tests (~1200 tests, ~30s) — for pure DriftCore logic prefer `cd DriftCore && swift test`. ALWAYS kill stale processes first
 pkill -9 -f xcodebuild 2>/dev/null; sleep 2
 xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:DriftTests
 
