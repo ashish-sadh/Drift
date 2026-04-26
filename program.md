@@ -12,7 +12,7 @@ Follow the section that matches your prompt. The watchdog passes one of:
 
 _Directive:_ **Read `Docs/roadmap.md` to understand product direction. Be bold. The goal is visible, meaningful progress every cycle.**
 
-_Override:_ STOP
+_Override:_ CONTINUE
 
 **How enforcement works:** Hooks and the watchdog enforce what must not be skipped. This file guides decisions that require judgment. If Override says STOP, exit cleanly.
 
@@ -80,7 +80,13 @@ scripts/planning-service.sh remaining
 
 12. **Refresh queue:** `scripts/sprint-service.sh refresh` → `scripts/planning-service.sh checkpoint sprint_refreshed`
 
-13. **Close planning issue:** `gh issue close $N --comment "Planning complete. Created X tasks." && gh issue edit $N --remove-label in-progress`
+13. **Close planning issue + stamp planning-done:**
+    ```bash
+    gh issue close $N --comment "Planning complete. Created X tasks." \
+      && gh issue edit $N --remove-label in-progress \
+      && scripts/sprint-service.sh planning-done
+    ```
+    The `planning-done` call writes `~/drift-state/last-planning-time = now` directly. Without it, the 6h planning cadence depends on the watchdog noticing the issue close on a later cycle — which fails if the watchdog restarts before noticing, leaving the stamp stale and re-firing planning every cycle.
 
 **DOD (ensure-clean-state.sh blocks exit until met):**
 - Either: 8+ NEW sprint-task issues created (NORMAL mode, queue was <60), OR queue closed down to ≤60 (TRIAGE-FIRST mode, queue was ≥80)
