@@ -144,6 +144,13 @@ try:
     existing = json.load(open("$STATE_FILE"))
     state["in_progress"] = existing.get("in_progress")
     state["session_tasks"] = existing.get("session_tasks", 0)
+    # Preserve claim_started — required for stale-claim detection in
+    # self-improve-watchdog. Without this, every watchdog refresh tick
+    # nukes the timestamp and the 1h auto-flag never fires. (Bug
+    # observed 2026-04-26: in_progress=477 had claim_started=null
+    # because refresh dropped it.)
+    if existing.get("claim_started"):
+        state["claim_started"] = existing.get("claim_started")
     # Preserve per-task sprint_done flags across refreshes (senior once-per-sprint budget)
     old_by_num = {t["number"]: t for t in existing.get("tasks", [])}
     for t in state["tasks"]:
