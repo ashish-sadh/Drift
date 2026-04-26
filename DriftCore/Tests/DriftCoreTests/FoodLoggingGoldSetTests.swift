@@ -1,72 +1,39 @@
 import XCTest
 @testable import DriftCore
 
-/// Gold-set regression tests for the pure AI pipeline pieces hosted in DriftCore.
-/// Mirrors the corresponding tests in `DriftRegressionTests/FoodLoggingGoldSetTests.swift`,
-/// but skips the ones that require StaticOverrides + ToolRanker + ToolRegistration
-/// (those still live in the iOS app).
+/// Gold set eval for AI chat pipeline — sprint tasks #79, #116.
+/// Tests the full deterministic pipeline: InputNormalizer → StaticOverrides → AIActionExecutor → ToolRanker.
+/// 50+ queries covering: food, weight, exercise, health, navigation, voice-style, multi-turn.
+/// Measurement framework for design doc #65 — captures baseline before pipeline changes.
 ///
-/// Run on macOS with: `cd DriftCore && swift test`.
+/// Run: `cd DriftCore && swift test --filter FoodLoggingGoldSetTests` (~0.1s warm)
 final class FoodLoggingGoldSetTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
         MainActor.assumeIsolated {
-            registerStubToolsIfNeeded()
-        }
-    }
-
-    /// Register tool stubs so `ToolRanker` can score and rank against them.
-    /// Handlers are no-ops — these tests don't execute tools, only test ranking.
-    @MainActor
-    private func registerStubToolsIfNeeded() {
-        guard ToolRegistry.shared.allTools().isEmpty else { return }
-        let stubHandler: @MainActor (ToolCallParams) async -> ToolResult = { _ in .text("") }
-
-        let toolToService: [(String, String)] = [
-            ("log_food", "food"), ("food_info", "food"),
-            ("copy_yesterday", "food"), ("delete_food", "food"),
-            ("explain_calories", "food"),
-            ("log_weight", "weight"), ("weight_info", "weight"), ("set_goal", "weight"),
-            ("start_workout", "exercise"), ("exercise_info", "exercise"),
-            ("log_activity", "exercise"),
-            ("sleep_recovery", "sleep"),
-            ("supplements", "supplement"), ("mark_supplement", "supplement"),
-            ("add_supplement", "supplement"),
-            ("glucose", "glucose"),
-            ("biomarkers", "biomarker"),
-            ("body_comp", "body_comp"), ("log_body_comp", "body_comp"),
-        ]
-
-        for (name, service) in toolToService {
-            ToolRegistry.shared.register(ToolSchema(
-                id: "stub.\(name)",
-                name: name,
-                service: service,
-                description: "Stub \(name)",
-                parameters: [],
-                handler: stubHandler
-            ))
+            if ToolRegistry.shared.allTools().isEmpty {
+                ToolRegistration.registerAll()
+            }
         }
     }
 
     // MARK: - Domain Detection Helpers
 
-    @MainActor
-    private func ranksLogFood(_ query: String, screen: AIScreen = .food) -> Bool {
+    /// Returns true if the query is detected as a food logging intent.
+    private func detectsFoodIntent(_ query: String) -> Bool {
         let normalized = InputNormalizer.normalize(query).lowercased()
-        let tools = ToolRanker.rank(query: normalized, screen: screen)
-        return tools.first?.name == "log_food"
+        return AIActionExecutor.parseFoodIntent(normalized) != nil
+            || AIActionExecutor.parseMultiFoodIntent(normalized) != nil
     }
 
-    @MainActor
-    private func detectsHealthIntent(_ query: String, screen: AIScreen) -> Bool {
+    /// Returns true if the query is detected as a weight logging intent.
+    private func detectsWeightIntent(_ query: String) -> Bool {
         let normalized = InputNormalizer.normalize(query).lowercased()
-        let tools = ToolRanker.rank(query: normalized, screen: screen)
-        let healthTools: Set<String> = ["sleep_recovery", "mark_supplement", "glucose", "biomarkers", "body_comp"]
-        return healthTools.contains(tools.first?.name ?? "")
+        return AIActionExecutor.parseWeightIntent(normalized) != nil
     }
 
+    /// Returns true if StaticOverrides matches an activity/exercise logging pattern.
     @MainActor
     private func detectsExerciseIntent(_ query: String) -> Bool {
         let normalized = InputNormalizer.normalize(query).lowercased()
@@ -74,18 +41,22 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             if case .response(let text) = result {
                 return text.contains("Log ") && (text.contains("min)") || text.contains("today?"))
             }
+            // Don't fall through to ToolRanker if StaticOverrides matched a non-exercise result
             return false
         }
         let tools = ToolRanker.rank(query: normalized, screen: .exercise)
         return tools.first?.name == "start_workout" || tools.first?.name == "log_activity"
     }
 
+    /// Returns true if StaticOverrides catches this as a non-domain command (greeting, thanks, help, undo, barcode).
+    /// Excludes exercise activity confirmations and navigation — those have their own domains.
     @MainActor
     private func isStaticCommand(_ query: String) -> Bool {
         let normalized = InputNormalizer.normalize(query).lowercased()
         guard let result = StaticOverrides.match(normalized) else { return false }
         switch result {
         case .response(let text):
+            // Exercise activity confirmations: "Log Yoga (30 min) for today?"
             if text.contains("Log ") && text.contains("today?") { return false }
             return true
         case .handler: return true
@@ -96,6 +67,7 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         }
     }
 
+    /// Returns true if StaticOverrides matches a navigation pattern.
     @MainActor
     private func detectsNavigationIntent(_ query: String) -> Bool {
         let normalized = InputNormalizer.normalize(query).lowercased()
@@ -107,24 +79,31 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         return false
     }
 
+    /// Returns true if ToolRanker routes to a health tool (sleep, supplement, glucose, biomarker, body_comp).
     @MainActor
-    private func detectsAnyHealthIntent(_ query: String) -> Bool {
-        let screens: [AIScreen] = [.bodyRhythm, .supplements, .glucose, .biomarkers, .bodyComposition]
-        return screens.contains { detectsHealthIntent(query, screen: $0) }
-    }
-
-    private func detectsFoodIntent(_ query: String) -> Bool {
+    private func detectsHealthIntent(_ query: String, screen: AIScreen) -> Bool {
         let normalized = InputNormalizer.normalize(query).lowercased()
-        return AIActionExecutor.parseFoodIntent(normalized) != nil
-            || AIActionExecutor.parseMultiFoodIntent(normalized) != nil
+        let tools = ToolRanker.rank(query: normalized, screen: screen)
+        let healthTools: Set<String> = ["sleep_recovery", "mark_supplement", "glucose", "biomarkers", "body_comp"]
+        return healthTools.contains(tools.first?.name ?? "")
     }
 
-    private func detectsWeightIntent(_ query: String) -> Bool {
+    /// Returns true if ToolRanker ranks log_food as top tool after normalization.
+    @MainActor
+    private func ranksLogFood(_ query: String, screen: AIScreen = .food) -> Bool {
         let normalized = InputNormalizer.normalize(query).lowercased()
-        return AIActionExecutor.parseWeightIntent(normalized) != nil
+        let tools = ToolRanker.rank(query: normalized, screen: screen)
+        return tools.first?.name == "log_food"
     }
 
-    // MARK: - Voice-Style Input
+    /// Returns true if IntentClassifier parses the query into a log_food tool call.
+    private func classifierDetectsFood(_ query: String) -> Bool {
+        let normalized = InputNormalizer.normalize(query)
+        let msg = IntentClassifier.buildUserMessage(message: normalized, history: "")
+        return !msg.isEmpty
+    }
+
+    // MARK: - Voice-Style Input (no punctuation, fillers, restarts)
 
     func testVoiceFillerWords() {
         let voiceQueries = [
@@ -159,6 +138,7 @@ final class FoodLoggingGoldSetTests: XCTestCase {
     }
 
     func testVoiceRunOn() {
+        // Voice input without punctuation, run-on style
         let runOnQueries = [
             "so I had eggs and toast for breakfast",
             "ok so I ate some biryani for lunch",
@@ -190,7 +170,7 @@ final class FoodLoggingGoldSetTests: XCTestCase {
                 if items.count >= expectedCount { detected += 1 }
                 else { print("PARTIAL (multi): '\(query)' → \(items.count) items (expected \(expectedCount))") }
             } else if AIActionExecutor.parseFoodIntent(normalized) != nil {
-                detected += 1
+                detected += 1 // Single-food parse is acceptable for 2-item queries
             } else {
                 print("MISS (multi): '\(query)' → normalized: '\(normalized)'")
             }
@@ -247,6 +227,7 @@ final class FoodLoggingGoldSetTests: XCTestCase {
     // MARK: - Amount Extraction Accuracy
 
     func testAmountExtractionGoldSet() {
+        // (query, expected amount, isGramAmount — true means check gramAmount, false means check servings)
         let cases: [(String, Double, Bool)] = [
             ("log 2 eggs", 2.0, false),
             ("had 100g chicken", 100.0, true),
@@ -256,7 +237,7 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             ("ate a quarter cup of almonds", 0.25, false),
             ("log 3 scoops of protein", 3.0, false),
             ("had 2 slices of pizza", 2.0, false),
-            ("ate 2 to 3 bananas", 3.0, false),
+            ("ate 2 to 3 bananas", 3.0, false), // takes higher
             ("had a couple of rotis", 2.0, false),
         ]
         var correct = 0
@@ -277,9 +258,35 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(correct, cases.count - 1, "Amount extraction: ≥90% accuracy")
     }
 
+    // MARK: - Normalizer + ToolRanker Integration
+
+    @MainActor
+    func testNormalizerImprovesToolRanking() {
+        // Queries that should route to log_food AFTER normalization
+        let queries = [
+            "umm I had 2 eggs",
+            "so I ate some rice",
+            "ok so log chicken breast",
+            "well I had a banana",
+            "I had I had some toast",
+        ]
+        var correct = 0
+        for query in queries {
+            if ranksLogFood(query) { correct += 1 }
+            else {
+                let normalized = InputNormalizer.normalize(query).lowercased()
+                let tools = ToolRanker.rank(query: normalized, screen: .food)
+                print("WRONG RANK (normalized): '\(query)' → '\(normalized)' → \(tools.first?.name ?? "nil")")
+            }
+        }
+        print("📊 Normalizer+ToolRanker food routing: \(correct)/\(queries.count)")
+        XCTAssertGreaterThanOrEqual(correct, queries.count - 1)
+    }
+
     // MARK: - IntentClassifier Input/Output
 
     func testClassifierResponseParsing() {
+        // Test that IntentClassifier.parseResponse correctly handles food tool calls
         let foodResponses = [
             #"{"tool":"log_food","name":"eggs, toast","servings":"2"}"#,
             #"{"tool":"log_food","name":"chicken breast","servings":"1"}"#,
@@ -298,6 +305,7 @@ final class FoodLoggingGoldSetTests: XCTestCase {
     }
 
     func testClassifierTextResponses() {
+        // Follow-up questions should parse as nil (not tool calls)
         let textResponses = [
             "What did you have for lunch?",
             "How much rice did you eat?",
@@ -311,12 +319,13 @@ final class FoodLoggingGoldSetTests: XCTestCase {
 
     func testClassifierMalformedJSON() {
         let malformed = [
-            #"{"tool":"log_food","name":"eggs""#,
+            #"{"tool":"log_food","name":"eggs""#, // missing closing brace — still finds { to }
             "not json at all",
             "",
             "   ",
         ]
         for response in malformed {
+            // Should not crash
             _ = IntentClassifier.parseResponse(response)
         }
     }
@@ -324,6 +333,7 @@ final class FoodLoggingGoldSetTests: XCTestCase {
     // MARK: - False Positive Prevention
 
     func testNormalizerDoesNotCreateFalsePositives() {
+        // Info/status queries should NOT become food intents after normalization
         let shouldNotLog = [
             "umm how many calories left",
             "like what should I eat for dinner",
@@ -343,32 +353,43 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         XCTAssertLessThanOrEqual(falsePositives, 1, "Normalizer should not create false positives")
     }
 
+    /// Regression gate: these queries must NEVER be detected as food logging intent.
+    /// If any of these fire as food, something broke in the pipeline routing.
     func testNonFoodQueriesMustNotBeFood() {
         let nonFoodQueries = [
+            // Sleep domain
             "how was my sleep last night",
             "how'd I sleep",
             "show me my sleep quality",
+            // Supplement domain
             "did I take my creatine today",
             "did I take my supplements",
+            // Exercise domain
             "how much did I bench last week",
             "how many pushups last week",
             "start push day",
+            // Weight/goal domain
             "what's my weight trend",
             "am I on track for my goal",
             "I weigh 165 lbs",
+            // Health domain
             "how's my body fat",
             "show me my biomarkers",
+            // Meta queries
             "daily summary",
             "weekly summary",
             "how am I doing today",
             "calories left",
+            // Regression: info/macro queries must not be food intents
             "how's my protein today",
             "what's my protein",
             "how many carbs left",
             "show my macros",
+            // #169: Exercise instruction queries must not be food
             "how do I do a deadlift",
             "how to do bench press",
             "form tips for squats",
+            // #169: Protein/nutrition status queries must not log food
             "am I on track for protein",
             "how many calories should I eat",
         ]
@@ -403,118 +424,6 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         }
         print("📊 Weight intent detection: \(detected)/\(shouldLog.count)")
         XCTAssertGreaterThanOrEqual(detected, shouldLog.count - 1)
-    }
-
-    // MARK: - Multi-Turn Scenarios
-
-    func testMultiTurnFoodFollowUp() {
-        let history = "Assistant: What did you have for lunch?"
-        let userMsg = "rice and dal"
-        let fullMsg = IntentClassifier.buildUserMessage(message: userMsg, history: history)
-        XCTAssertTrue(fullMsg.contains("What did you have for lunch"))
-        XCTAssertTrue(fullMsg.contains("rice and dal"))
-
-        let cannedResponse = #"{"tool":"log_food","name":"rice, dal"}"#
-        let result = IntentClassifier.parseResponse(cannedResponse)
-        XCTAssertNotNil(result)
-        XCTAssertEqual(result?.tool, "log_food")
-        XCTAssertEqual(result?.params["name"], "rice, dal")
-    }
-
-    func testMultiTurnQuantityFollowUp() {
-        let history = "User: I had rice\nAssistant: How much rice?"
-        let userMsg = "200 grams"
-        let fullMsg = IntentClassifier.buildUserMessage(message: userMsg, history: history)
-        XCTAssertTrue(fullMsg.contains("How much rice"))
-
-        let cannedResponse = #"{"tool":"log_food","name":"rice","servings":"200","unit":"g"}"#
-        let result = IntentClassifier.parseResponse(cannedResponse)
-        XCTAssertNotNil(result)
-        XCTAssertEqual(result?.tool, "log_food")
-        XCTAssertEqual(result?.params["name"], "rice")
-    }
-
-    func testMultiTurnTopicSwitch() {
-        let history = "User: log 2 eggs\nAssistant: Logged 2 eggs (140 cal)"
-        let userMsg = "I weigh 165 lbs"
-        let fullMsg = IntentClassifier.buildUserMessage(message: userMsg, history: history)
-        XCTAssertTrue(fullMsg.contains("165"))
-
-        let cannedResponse = #"{"tool":"log_weight","value":"165","unit":"lbs"}"#
-        let result = IntentClassifier.parseResponse(cannedResponse)
-        XCTAssertNotNil(result)
-        XCTAssertEqual(result?.tool, "log_weight")
-    }
-
-    func testMultiTurnExerciseChain() {
-        let history = "User: start push day\nAssistant: Starting Push Day workout!"
-        let userMsg = "how's my bench press doing"
-
-        let cannedResponse = #"{"tool":"exercise_info","query":"bench press trend"}"#
-        let result = IntentClassifier.parseResponse(cannedResponse)
-        XCTAssertNotNil(result)
-        XCTAssertEqual(result?.tool, "exercise_info")
-        let fullMsg = IntentClassifier.buildUserMessage(message: userMsg, history: history)
-        XCTAssertTrue(fullMsg.contains("push day"))
-    }
-
-    func testMultiTurnMealContinuation() {
-        let history = "User: log rice and dal for lunch\nAssistant: Logged rice and dal (450 cal)"
-        let userMsg = "also add a roti"
-        let fullMsg = IntentClassifier.buildUserMessage(message: userMsg, history: history)
-        XCTAssertTrue(fullMsg.contains("rice and dal"))
-        XCTAssertTrue(fullMsg.contains("also add a roti"))
-
-        let cannedResponse = #"{"tool":"log_food","name":"roti"}"#
-        let result = IntentClassifier.parseResponse(cannedResponse)
-        XCTAssertNotNil(result)
-        XCTAssertEqual(result?.tool, "log_food")
-        XCTAssertEqual(result?.params["name"], "roti")
-    }
-
-    // MARK: - Normalizer + ToolRanker Integration
-
-    @MainActor
-    func testNormalizerImprovesToolRanking() {
-        let queries = [
-            "umm I had 2 eggs",
-            "so I ate some rice",
-            "ok so log chicken breast",
-            "well I had a banana",
-            "I had I had some toast",
-        ]
-        var correct = 0
-        for query in queries {
-            if ranksLogFood(query) { correct += 1 }
-            else {
-                let normalized = InputNormalizer.normalize(query).lowercased()
-                let tools = ToolRanker.rank(query: normalized, screen: .food)
-                print("WRONG RANK (normalized): '\(query)' → '\(normalized)' → \(tools.first?.name ?? "nil")")
-            }
-        }
-        print("📊 Normalizer+ToolRanker food routing: \(correct)/\(queries.count)")
-        XCTAssertGreaterThanOrEqual(correct, queries.count - 1)
-    }
-
-    // MARK: - Health Intent Detection
-
-    @MainActor
-    func testHealthIntents() {
-        let healthQueries: [(String, AIScreen)] = [
-            ("how'd I sleep", .bodyRhythm),
-            ("sleep quality this week", .bodyRhythm),
-            ("took my creatine", .supplements),
-            ("took vitamin d", .supplements),
-            ("any glucose spikes", .glucose),
-            ("how's my body fat", .bodyComposition),
-        ]
-        var detected = 0
-        for (query, screen) in healthQueries {
-            if detectsHealthIntent(query, screen: screen) { detected += 1 }
-            else { print("MISS (health): '\(query)'") }
-        }
-        print("📊 Health intent detection: \(detected)/\(healthQueries.count)")
-        XCTAssertGreaterThanOrEqual(detected, healthQueries.count - 1)
     }
 
     // MARK: - Exercise Intent Detection
@@ -557,6 +466,101 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(detected, navQueries.count - 1)
     }
 
+    // MARK: - Health Intent Detection
+
+    @MainActor
+    func testHealthIntents() {
+        let healthQueries: [(String, AIScreen)] = [
+            ("how'd I sleep", .bodyRhythm),
+            ("sleep quality this week", .bodyRhythm),
+            ("took my creatine", .supplements),
+            ("took vitamin d", .supplements),
+            ("any glucose spikes", .glucose),
+            ("how's my body fat", .bodyComposition),
+        ]
+        var detected = 0
+        for (query, screen) in healthQueries {
+            if detectsHealthIntent(query, screen: screen) { detected += 1 }
+            else { print("MISS (health): '\(query)'") }
+        }
+        print("📊 Health intent detection: \(detected)/\(healthQueries.count)")
+        XCTAssertGreaterThanOrEqual(detected, healthQueries.count - 1)
+    }
+
+    // MARK: - Multi-Turn Scenarios (canned history + response parsing)
+
+    func testMultiTurnFoodFollowUp() {
+        // Scenario: bot asked "What did you have for lunch?" → user says "rice and dal"
+        let history = "Assistant: What did you have for lunch?"
+        let userMsg = "rice and dal"
+        let fullMsg = IntentClassifier.buildUserMessage(message: userMsg, history: history)
+        XCTAssertTrue(fullMsg.contains("What did you have for lunch"), "History should be included")
+        XCTAssertTrue(fullMsg.contains("rice and dal"), "User message should be included")
+
+        // Simulate LLM response for this context
+        let cannedResponse = #"{"tool":"log_food","name":"rice, dal"}"#
+        let result = IntentClassifier.parseResponse(cannedResponse)
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.tool, "log_food")
+        XCTAssertEqual(result?.params["name"], "rice, dal")
+    }
+
+    func testMultiTurnQuantityFollowUp() {
+        // Scenario: bot asked "How much rice?" → user says "200 grams"
+        let history = "User: I had rice\nAssistant: How much rice?"
+        let userMsg = "200 grams"
+        let fullMsg = IntentClassifier.buildUserMessage(message: userMsg, history: history)
+        XCTAssertTrue(fullMsg.contains("How much rice"), "History context preserved")
+
+        let cannedResponse = #"{"tool":"log_food","name":"rice","servings":"200","unit":"g"}"#
+        let result = IntentClassifier.parseResponse(cannedResponse)
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.tool, "log_food")
+        XCTAssertEqual(result?.params["name"], "rice")
+    }
+
+    func testMultiTurnTopicSwitch() {
+        // Scenario: was talking about food, now switches to weight
+        let history = "User: log 2 eggs\nAssistant: Logged 2 eggs (140 cal)"
+        let userMsg = "I weigh 165 lbs"
+        let fullMsg = IntentClassifier.buildUserMessage(message: userMsg, history: history)
+        XCTAssertTrue(fullMsg.contains("165"), "Weight message included")
+
+        let cannedResponse = #"{"tool":"log_weight","value":"165","unit":"lbs"}"#
+        let result = IntentClassifier.parseResponse(cannedResponse)
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.tool, "log_weight")
+    }
+
+    func testMultiTurnExerciseChain() {
+        // Scenario: multi-step workout logging
+        let history = "User: start push day\nAssistant: Starting Push Day workout!"
+        let userMsg = "how's my bench press doing"
+
+        let cannedResponse = #"{"tool":"exercise_info","query":"bench press trend"}"#
+        let result = IntentClassifier.parseResponse(cannedResponse)
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.tool, "exercise_info")
+        // Verify history is passed
+        let fullMsg = IntentClassifier.buildUserMessage(message: userMsg, history: history)
+        XCTAssertTrue(fullMsg.contains("push day"))
+    }
+
+    func testMultiTurnMealContinuation() {
+        // Scenario: user adds more items to same meal
+        let history = "User: log rice and dal for lunch\nAssistant: Logged rice and dal (450 cal)"
+        let userMsg = "also add a roti"
+        let fullMsg = IntentClassifier.buildUserMessage(message: userMsg, history: history)
+        XCTAssertTrue(fullMsg.contains("rice and dal"), "Prior meal context preserved")
+        XCTAssertTrue(fullMsg.contains("also add a roti"), "Continuation message included")
+
+        let cannedResponse = #"{"tool":"log_food","name":"roti"}"#
+        let result = IntentClassifier.parseResponse(cannedResponse)
+        XCTAssertNotNil(result)
+        XCTAssertEqual(result?.tool, "log_food")
+        XCTAssertEqual(result?.params["name"], "roti")
+    }
+
     // MARK: - Voice-Style Cross-Domain
 
     func testVoiceWeightLogging() {
@@ -575,9 +579,27 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(detected, voiceQueries.count - 1)
     }
 
-    // MARK: - Hard Cases
+    @MainActor
+    func testVoiceExerciseLogging() {
+        let voiceQueries = [
+            "umm I did yoga for like 30 minutes",
+            "so I just finished running",
+            "uh I did push ups today",
+        ]
+        var detected = 0
+        for query in voiceQueries {
+            if detectsExerciseIntent(query) { detected += 1 }
+            else { print("MISS (voice exercise): '\(query)'") }
+        }
+        print("📊 Voice exercise detection: \(detected)/\(voiceQueries.count)")
+        XCTAssertGreaterThanOrEqual(detected, voiceQueries.count - 1)
+    }
+
+    // MARK: - Hard Cases: Implicit Quantity (#243)
 
     func testImplicitQuantityDetection() {
+        // Realistic verb-prefixed inputs with no explicit number.
+        // "lots of" and bare "couple" are known pipeline gaps — tracked as follow-up issues.
         let detectCases = [
             "I had rice",
             "ate some chicken",
@@ -590,6 +612,7 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             else { print("MISS (implicit qty): '\(query)' → '\(InputNormalizer.normalize(query))'") }
         }
 
+        // "had a couple of eggs" → servings ≈ 2
         let coupleQuery = "had a couple of eggs"
         let normalized = InputNormalizer.normalize(coupleQuery).lowercased()
         if let intent = AIActionExecutor.parseFoodIntent(normalized) {
@@ -605,6 +628,8 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         print("📊 Implicit quantity detection: \(detected)/5")
         XCTAssertGreaterThanOrEqual(detected, 3, "Implicit quantity: ≥3/5 — gaps tracked as follow-up issues")
     }
+
+    // MARK: - Hard Cases: Indian Units (#243)
 
     func testIndianUnitDetection() {
         let cases = [
@@ -623,6 +648,10 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(detected, 4, "Indian units: ≥4/5 must be detected")
     }
 
+    // MARK: - Hard Cases: Composed Foods (#243)
+    // "X with Y" parsing is a known pipeline gap — pipeline sees the anchor food but
+    // may not detect the modifier. Tracked as follow-up issues if < 3/5 pass.
+
     func testComposedFoodDetection() {
         let cases = [
             "had coffee with milk",
@@ -639,6 +668,9 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         print("📊 Composed food detection: \(detected)/\(cases.count)")
         XCTAssertGreaterThanOrEqual(detected, 3, "Composed foods: ≥3/5 — 'X with Y' parsing gaps tracked as follow-up issues")
     }
+
+    // MARK: - Hard Cases: Fractional Amounts (#243)
+    // "one third" and unicode fractions are known pipeline gaps — tracked as follow-up issues.
 
     func testFractionalAmountExtraction() {
         let cases: [(String, Double)] = [
@@ -666,74 +698,12 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(correct, 2, "Fractional amounts: ≥2/5 — 'one third' and bareword fractions tracked as follow-up issues")
     }
 
-    @MainActor
-    func testVoiceExerciseLogging() {
-        let voiceQueries = [
-            "umm I did yoga for like 30 minutes",
-            "so I just finished running",
-            "uh I did push ups today",
-        ]
-        var detected = 0
-        for query in voiceQueries {
-            if detectsExerciseIntent(query) { detected += 1 }
-            else { print("MISS (voice exercise): '\(query)'") }
-        }
-        print("📊 Voice exercise detection: \(detected)/\(voiceQueries.count)")
-        XCTAssertGreaterThanOrEqual(detected, voiceQueries.count - 1)
-    }
-
-    @MainActor
-    func testGoldSetSummary() {
-        enum Domain: String { case food, weight, exercise, navigation, health, none }
-
-        let allQueries: [(String, Domain)] = [
-            ("log 2 eggs", .food), ("I had chicken breast", .food),
-            ("ate a banana for breakfast", .food), ("had 200g paneer", .food),
-            ("log rice and dal", .food), ("umm I had 2 eggs and toast", .food),
-            ("I had I had some chicken", .food), ("so I ate biryani for lunch", .food),
-            ("had a couple of rotis", .food), ("ate 3 idli with chutney", .food),
-            ("had a protein shake", .food), ("eating oatmeal", .food),
-            ("I weigh 165 lbs", .weight), ("weight is 75.2 kg", .weight),
-            ("scale says 82 kg", .weight), ("weighed in at 170", .weight),
-            ("i did yoga for 30 minutes", .exercise), ("just did 20 min cardio", .exercise),
-            ("i did push ups", .exercise), ("just finished chest day", .exercise),
-            ("show me my weight chart", .navigation), ("go to food tab", .navigation),
-            ("open exercise", .navigation), ("show me my supplements", .navigation),
-            ("how'd I sleep", .health), ("took my creatine", .health),
-            ("any glucose spikes", .health), ("how's my body fat", .health),
-            ("hello", .none), ("thanks", .none),
-            ("calories in a banana", .none), ("daily summary", .none),
-        ]
-
-        var correct = 0
-        for (query, expected) in allQueries {
-            let detected: Domain
-            if detectsFoodIntent(query) {
-                detected = .food
-            } else if detectsWeightIntent(query) {
-                detected = .weight
-            } else if detectsNavigationIntent(query) {
-                detected = .navigation
-            } else if isStaticCommand(query) {
-                detected = .none
-            } else if detectsExerciseIntent(query) {
-                detected = .exercise
-            } else if detectsAnyHealthIntent(query) {
-                detected = .health
-            } else {
-                detected = .none
-            }
-
-            if detected == expected { correct += 1 }
-            else { print("WRONG: '\(query)' → \(detected.rawValue) (expected \(expected.rawValue))") }
-        }
-
-        let accuracy = Double(correct) / Double(allQueries.count) * 100
-        print("📊 GOLD SET SUMMARY (\(allQueries.count) queries): \(correct)/\(allQueries.count) (\(String(format: "%.0f", accuracy))%)")
-        XCTAssertGreaterThanOrEqual(accuracy, 75, "Overall accuracy ≥75%")
-    }
+    // MARK: - Hard Cases: Abbreviated Units (#243)
+    // Unit abbreviations (TB, tsp, c, oz) are known pipeline gaps — tracked as follow-up issues.
+    // Gram suffix and spelled-out ounces are expected to work.
 
     func testAbbreviatedUnitExtraction() {
+        // Gram amount — expected to work
         let gramQuery = "had 150g paneer"
         let gramNorm = InputNormalizer.normalize(gramQuery).lowercased()
         var correct = 0
@@ -744,6 +714,7 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             print("MISS (abbrev gram): '\(gramQuery)'")
         }
 
+        // Spelled-out units — expected to work
         let spelledCases: [(String, Double, Bool)] = [
             ("had 2 tablespoons of peanut butter", 2.0, false),
             ("had a teaspoon of olive oil", 1.0, false),
@@ -760,10 +731,141 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             }
         }
 
+        // "6 oz" abbreviation — detection only (oz→gram not guaranteed)
         if detectsFoodIntent("had 6 oz chicken") { correct += 1 }
         else { print("MISS (abbrev oz): 'had 6 oz chicken'") }
 
         print("📊 Abbreviated unit extraction: \(correct)/5")
         XCTAssertGreaterThanOrEqual(correct, 2, "Abbreviated units: ≥2/5 — short-form abbreviations (TB/tsp/c) tracked as follow-up issues")
+    }
+
+    // MARK: - Summary Statistics (50+ cross-domain queries)
+
+    @MainActor
+    func testGoldSetSummary() {
+        enum Domain: String { case food, weight, exercise, navigation, health, none }
+
+        // (query, expectedDomain) — 55 queries total
+        let allQueries: [(String, Domain)] = [
+            // --- Food (20 queries) ---
+            ("log 2 eggs", .food),
+            ("I had chicken breast", .food),
+            ("ate a banana for breakfast", .food),
+            ("had 200g paneer", .food),
+            ("log rice and dal", .food),
+            ("umm I had 2 eggs and toast", .food),
+            ("I had I had some chicken", .food),
+            ("so I ate biryani for lunch", .food),
+            ("had a couple of rotis", .food),
+            ("ate 3 idli with chutney", .food),
+            ("log aloo gobi", .food),
+            ("had a protein shake", .food),
+            ("drank a glass of milk", .food),
+            ("eating oatmeal", .food),
+            ("just had some yogurt", .food),
+            ("log 100g chicken for dinner", .food),
+            ("ate chole bhature", .food),
+            ("had dal makhani and naan", .food),
+            ("log 3 scoops of protein", .food),
+            ("I made a smoothie", .food),
+
+            // --- Weight (6 queries) ---
+            ("I weigh 165 lbs", .weight),
+            ("weight is 75.2 kg", .weight),
+            ("scale says 82 kg", .weight),
+            ("weighed in at 170", .weight),
+            ("my weight is 160", .weight),
+            ("log weight 80 kg", .weight),
+
+            // --- Exercise (6 queries) ---
+            ("i did yoga for 30 minutes", .exercise),
+            ("just did 20 min cardio", .exercise),
+            ("i did push ups", .exercise),
+            ("did running for about 45 minutes", .exercise),
+            ("just finished chest day", .exercise),
+            ("i went for a walk", .exercise),
+
+            // --- Navigation (4 queries) ---
+            ("show me my weight chart", .navigation),
+            ("go to food tab", .navigation),
+            ("open exercise", .navigation),
+            ("show me my supplements", .navigation),
+
+            // --- Health (5 queries) ---
+            ("how'd I sleep", .health),
+            ("took my creatine", .health),
+            ("took vitamin d", .health),
+            ("any glucose spikes", .health),
+            ("how's my body fat", .health),
+
+            // --- None / should NOT match any logging intent (14 queries) ---
+            ("how many calories left", .none),
+            ("what should I eat", .none),
+            ("how's my protein", .none),
+            ("daily summary", .none),
+            ("hello", .none),
+            ("thanks", .none),
+            ("calories in a banana", .none),
+            ("weight trend", .none),
+            ("suggest a workout", .none),
+            ("what should I train today", .none),
+            ("how am I doing", .none),
+            ("set goal to 160 lbs", .none),
+            ("help", .none),
+            ("undo", .none),
+            // #169: exercise instruction and protein-status queries
+            ("how do I do a deadlift", .none),
+            ("am I on track for protein", .none),
+        ]
+
+        var correct = 0, total = allQueries.count
+        var domainStats: [Domain: (correct: Int, total: Int)] = [:]
+
+        for (query, expected) in allQueries {
+            let detected: Domain
+            if detectsFoodIntent(query) {
+                detected = .food
+            } else if detectsWeightIntent(query) {
+                detected = .weight
+            } else if detectsNavigationIntent(query) {
+                detected = .navigation
+            } else if isStaticCommand(query) {
+                detected = .none  // greetings, thanks, help, undo
+            } else if detectsExerciseIntent(query) {
+                detected = .exercise
+            } else if detectsAnyHealthIntent(query) {
+                detected = .health
+            } else {
+                detected = .none
+            }
+
+            let isCorrect = detected == expected
+            if isCorrect { correct += 1 }
+            else { print("WRONG: '\(query)' → \(detected.rawValue) (expected \(expected.rawValue))") }
+
+            var stats = domainStats[expected, default: (0, 0)]
+            stats.total += 1
+            if isCorrect { stats.correct += 1 }
+            domainStats[expected] = stats
+        }
+
+        let accuracy = Double(correct) / Double(total) * 100
+        print("📊 GOLD SET SUMMARY (\(total) queries):")
+        print("   Overall accuracy: \(correct)/\(total) (\(String(format: "%.0f", accuracy))%)")
+        for (domain, stats) in domainStats.sorted(by: { $0.key.rawValue < $1.key.rawValue }) {
+            let pct = Double(stats.correct) / Double(stats.total) * 100
+            print("   \(domain.rawValue): \(stats.correct)/\(stats.total) (\(String(format: "%.0f", pct))%)")
+        }
+
+        XCTAssertGreaterThanOrEqual(total, 50, "Gold set should have 50+ queries")
+        XCTAssertGreaterThanOrEqual(accuracy, 80, "Overall accuracy should be ≥80%")
+    }
+
+    /// Health queries need the right screen context for ToolRanker.
+    /// In the gold set summary we check all health screens to be generous.
+    @MainActor
+    private func detectsAnyHealthIntent(_ query: String) -> Bool {
+        let screens: [AIScreen] = [.bodyRhythm, .supplements, .glucose, .biomarkers, .bodyComposition]
+        return screens.contains { detectsHealthIntent(query, screen: $0) }
     }
 }

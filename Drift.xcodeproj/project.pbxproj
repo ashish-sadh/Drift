@@ -21,7 +21,6 @@
 		1D4B4658B68B40350E20F753 /* ComposedFoodEval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D6EEDE4BB88D55A2579A27D /* ComposedFoodEval.swift */; };
 		1E11E5682458FC83023281D7 /* WeightInsightsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A039993077E4BE9F83149249 /* WeightInsightsView.swift */; };
 		1E41F060499A92A9EFB59BE1 /* BiomarkerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 155E590DFD0A95014B993B9D /* BiomarkerDetailView.swift */; };
-		2042419BAF6D1E8A41C29728 /* FoodLoggingGoldSetTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55581A3E5FB622B0FC6E551D /* FoodLoggingGoldSetTests.swift */; };
 		2159F8ABA37706FCF57C3A63 /* SupplementsTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58C97F6B46397BDA539E78C /* SupplementsTabView.swift */; };
 		23BF8720FC949BA82AFA68B2 /* AutoResearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3053C86565C8B26D3B16A0A2 /* AutoResearchTests.swift */; };
 		24CF74D9CA0E8A4555F1EC68 /* SupplementViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D783FD1AF8952C1C8CECD29 /* SupplementViewModel.swift */; };
@@ -180,13 +179,6 @@
 			remoteGlobalIDString = CAEDCE34417A91D973F68377;
 			remoteInfo = Drift;
 		};
-		EC5290EBC38326B55AB8E897 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = C57AFFDCB18AE227A2FF2ECA /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = CAEDCE34417A91D973F68377;
-			remoteInfo = Drift;
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -256,7 +248,6 @@
 		217B3F5DA6C6AA9BB267D9F3 /* WeightEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightEntryView.swift; sourceTree = "<group>"; };
 		22F8386EAF9FBD18F89C8C60 /* ActiveWorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveWorkoutView.swift; sourceTree = "<group>"; };
 		24385DF0FF7F89584AE40020 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
-		2459ABBBAA5D6DECC4B3F604 /* DriftRegressionTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DriftRegressionTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		24EBC73AF46E92F7FF6A10FF /* IntegrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationTests.swift; sourceTree = "<group>"; };
 		2662F38D09EED0C1C9415508 /* PhotoLogCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogCaptureView.swift; sourceTree = "<group>"; };
 		2DEC3049742676C1201A6847 /* HardEvalSet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HardEvalSet.swift; sourceTree = "<group>"; };
@@ -275,7 +266,6 @@
 		4902DF0863C6F54F0D1BC3BA /* HealthKitService+Sleep.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HealthKitService+Sleep.swift"; sourceTree = "<group>"; };
 		4EACDB02677C363A05FD0592 /* FoodLogSheetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodLogSheetTests.swift; sourceTree = "<group>"; };
 		552F5AE6789DA294DDB91E8B /* Drift.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Drift.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		55581A3E5FB622B0FC6E551D /* FoodLoggingGoldSetTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodLoggingGoldSetTests.swift; sourceTree = "<group>"; };
 		55F24D93872F919F1A8CB319 /* BarcodeScannerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BarcodeScannerView.swift; sourceTree = "<group>"; };
 		57BE014AD72F4F5691483658 /* CloudVisionClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudVisionClientTests.swift; sourceTree = "<group>"; };
 		5893DE4C163CA3CF50E74C1A /* DEXAOverviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DEXAOverviewView.swift; sourceTree = "<group>"; };
@@ -451,7 +441,6 @@
 				552F5AE6789DA294DDB91E8B /* Drift.app */,
 				3F480CCAF91EFD799E6B5B8C /* DriftLLMEvalMacOS.xctest */,
 				7395A23088568B416917E2A6 /* DriftLLMEvalTests.xctest */,
-				2459ABBBAA5D6DECC4B3F604 /* DriftRegressionTests.xctest */,
 				668D8D5951EB119A1624DDB2 /* DriftTests.xctest */,
 				0F759FA8F6D800CE5BAD454A /* DriftWidget.appex */,
 			);
@@ -463,7 +452,6 @@
 			children = (
 				DF13210FEF8ED80B93DD4A50 /* Drift */,
 				F4B015D112A49ACBB40A883E /* DriftLLMEvalMacOS */,
-				A51A4BF39D0723CDD3D0F4ED /* DriftRegressionTests */,
 				230C4300561292D969C89B4E /* DriftTests */,
 				F48F3B458C8C99C4F6107636 /* DriftWidget */,
 				5C5A33109C9BA8C6F1F9ED8F /* LLMEval */,
@@ -655,14 +643,6 @@
 				0FF1A03F6A7AD74047A466B9 /* ToolRouterEval.swift */,
 			);
 			path = PerStage;
-			sourceTree = "<group>";
-		};
-		A51A4BF39D0723CDD3D0F4ED /* DriftRegressionTests */ = {
-			isa = PBXGroup;
-			children = (
-				55581A3E5FB622B0FC6E551D /* FoodLoggingGoldSetTests.swift */,
-			);
-			path = DriftRegressionTests;
 			sourceTree = "<group>";
 		};
 		B6B13628C10FC8148ACA6AF2 /* Workout */ = {
@@ -913,24 +893,6 @@
 			productReference = 552F5AE6789DA294DDB91E8B /* Drift.app */;
 			productType = "com.apple.product-type.application";
 		};
-		DE77972B0B2CA3FDE2ADF851 /* DriftRegressionTests */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 55FB97222AB7959E7886BA25 /* Build configuration list for PBXNativeTarget "DriftRegressionTests" */;
-			buildPhases = (
-				E2BDA2B946CE5D5212916DDB /* Sources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				8E04DA48F877357C9803FE80 /* PBXTargetDependency */,
-			);
-			name = DriftRegressionTests;
-			packageProductDependencies = (
-			);
-			productName = DriftRegressionTests;
-			productReference = 2459ABBBAA5D6DECC4B3F604 /* DriftRegressionTests.xctest */;
-			productType = "com.apple.product-type.bundle.unit-test";
-		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -969,7 +931,6 @@
 				CAEDCE34417A91D973F68377 /* Drift */,
 				BBE0CA657695217E1CA887C3 /* DriftLLMEvalMacOS */,
 				7E479E55896BA83608D55D3B /* DriftLLMEvalTests */,
-				DE77972B0B2CA3FDE2ADF851 /* DriftRegressionTests */,
 				50A0CCC2E8C96C468D93CEF8 /* DriftTests */,
 				5C564ED11782E91848719970 /* DriftWidget */,
 			);
@@ -1169,14 +1130,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E2BDA2B946CE5D5212916DDB /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				2042419BAF6D1E8A41C29728 /* FoodLoggingGoldSetTests.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -1189,11 +1142,6 @@
 			isa = PBXTargetDependency;
 			target = CAEDCE34417A91D973F68377 /* Drift */;
 			targetProxy = A20186D382809E275B6F9AFC /* PBXContainerItemProxy */;
-		};
-		8E04DA48F877357C9803FE80 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = CAEDCE34417A91D973F68377 /* Drift */;
-			targetProxy = EC5290EBC38326B55AB8E897 /* PBXContainerItemProxy */;
 		};
 		A2F4FA2AB0193C1E986DD906 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1345,42 +1293,6 @@
 					"@loader_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.drift.DriftLLMEvalTests;
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Drift.app/Drift";
-			};
-			name = Release;
-		};
-		5E2F81DB82D08B527F27DEE7 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				GENERATE_INFOPLIST_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.drift.DriftRegressionTests;
-				SDKROOT = iphoneos;
-				SWIFT_VERSION = 6.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Drift.app/Drift";
-			};
-			name = Debug;
-		};
-		617AEFB5DB6E1AFF94EA4A1B /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				GENERATE_INFOPLIST_FILE = YES;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@loader_path/Frameworks",
-				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.drift.DriftRegressionTests;
 				SDKROOT = iphoneos;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1574,15 +1486,6 @@
 			buildConfigurations = (
 				FC9E20CF866A0A67DDDE31F6 /* Debug */,
 				5A66D172B641D552865EECF8 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Debug;
-		};
-		55FB97222AB7959E7886BA25 /* Build configuration list for PBXNativeTarget "DriftRegressionTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				5E2F81DB82D08B527F27DEE7 /* Debug */,
-				617AEFB5DB6E1AFF94EA4A1B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
