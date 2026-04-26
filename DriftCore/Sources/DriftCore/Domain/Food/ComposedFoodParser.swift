@@ -1,5 +1,4 @@
 import Foundation
-import DriftCore
 
 /// Parses composed-food queries: "coffee with milk", "oatmeal with honey and banana".
 /// Splits on additive connectors so each component is logged separately — calories sum correctly.
@@ -10,7 +9,7 @@ public enum ComposedFoodParser {
     /// "log coffee with milk" → [FoodIntent("coffee"), FoodIntent("milk")]
     /// "oatmeal with milk and honey" → [FoodIntent("oatmeal"), FoodIntent("milk"), FoodIntent("honey")]
     /// Returns nil when no composition connector is found.
-    public static func parse(_ text: String) -> [AIActionExecutor.FoodIntent]? {
+    public static func parse(_ text: String) -> [FoodIntent]? {
         let lower = text.lowercased().trimmingCharacters(in: .whitespaces)
 
         var remainder = stripVerbPrefixes(from: lower)
@@ -32,13 +31,13 @@ public enum ComposedFoodParser {
         // Build base intent
         let (baseAmt, baseFood, baseGrams) = AIActionExecutor.extractAmount(from: baseTrimmed)
         guard !baseFood.isEmpty else { return nil }
-        let baseIntent = AIActionExecutor.FoodIntent(query: baseFood, servings: baseAmt, gramAmount: baseGrams)
+        let baseIntent = FoodIntent(query: baseFood, servings: baseAmt, gramAmount: baseGrams)
 
         // Split additives on "and" / "," to support multi-additive: "milk and honey"
         let additiveComponents = splitAdditives(additivesRaw)
         guard !additiveComponents.isEmpty else { return nil }
 
-        var intents: [AIActionExecutor.FoodIntent] = [baseIntent]
+        var intents: [FoodIntent] = [baseIntent]
         for raw in additiveComponents {
             let trimmed = raw.trimmingCharacters(in: .whitespaces)
                 .replacingOccurrences(of: "^extra ", with: "", options: .regularExpression)
@@ -48,7 +47,7 @@ public enum ComposedFoodParser {
             guard !trimmed.isEmpty else { continue }
             let (amt, food, grams) = AIActionExecutor.extractAmount(from: trimmed)
             guard !food.isEmpty else { continue }
-            intents.append(AIActionExecutor.FoodIntent(query: food, servings: amt, gramAmount: grams))
+            intents.append(FoodIntent(query: food, servings: amt, gramAmount: grams))
         }
 
         // Need at least 2 items (base + 1 additive) to be useful

@@ -2,21 +2,9 @@ import Foundation
 
 /// Parses user messages for food/weight/workout intent and extracts parameters.
 /// Pure parsing logic — no database, no LLM, no UI.
+/// `FoodIntent` lives in `Models/FoodIntent.swift` so Domain parsers
+/// (`ComposedFoodParser`) can produce it without depending on AI.
 public enum AIActionExecutor {
-
-    public struct FoodIntent: Sendable {
-        public let query: String
-        public let servings: Double?
-        public var mealHint: String? = nil
-        public var gramAmount: Double? = nil
-
-        public init(query: String, servings: Double?, mealHint: String? = nil, gramAmount: Double? = nil) {
-            self.query = query
-            self.servings = servings
-            self.mealHint = mealHint
-            self.gramAmount = gramAmount
-        }
-    }
 
     public struct WeightIntent: Sendable {
         public let weightValue: Double

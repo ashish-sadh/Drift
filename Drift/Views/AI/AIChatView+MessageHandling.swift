@@ -606,7 +606,7 @@ extension AIChatViewModel {
         return true
     }
 
-    private func buildMealFromIntents(_ intents: [AIActionExecutor.FoodIntent], resolved: String) {
+    private func buildMealFromIntents(_ intents: [FoodIntent], resolved: String) {
         var mealName = "Meal"
         let lower = resolved.lowercased()
         for (suffix, meal) in [(" for breakfast", "breakfast"), (" for lunch", "lunch"),

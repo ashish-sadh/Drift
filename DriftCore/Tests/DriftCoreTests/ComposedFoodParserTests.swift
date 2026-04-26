@@ -5,7 +5,7 @@ final class ComposedFoodParserTests: XCTestCase {
 
     // MARK: - Helpers
 
-    private func parse(_ text: String) -> [AIActionExecutor.FoodIntent]? {
+    private func parse(_ text: String) -> [FoodIntent]? {
         ComposedFoodParser.parse(text)
     }
 
