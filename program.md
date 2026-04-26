@@ -166,7 +166,7 @@ session-compliance.sh closes the overhead issue and writes the session summary a
 Human says "run autopilot". No watchdog, no model switching.
 
 1. Check P0 bugs → fix first.
-2. Check `Docs/sprint.md` for unchecked items → pick top one.
+2. Pick the next task: `scripts/sprint-service.sh next --senior` (or `--junior`) shows the top item. Add `--claim` to atomically mark it in-progress. The queue lives on GitHub (`sprint-task` label) — there is no static task list.
 3. No sprint items → roadmap "Now" items → failing queries → permanent tasks.
 4. Execute: read → edit → build → test → commit → push. Repeat.
 

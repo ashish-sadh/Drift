@@ -8,7 +8,7 @@ Drift is an AI-first local health tracker. AI chat is the showstopper — the pr
 ## Three Operating Modes
 
 ### Mode 1: Human-Shepherded (default)
-Human drives feature work. Read `Docs/sprint.md` for current tickets. Build, test, commit per ticket. You can publish TestFlight anytime. All hooks apply except TestFlight auto-publish.
+Human drives feature work. To see open work: `scripts/sprint-service.sh status` (full snapshot) or `scripts/sprint-service.sh next --senior` / `--junior` (top item). The queue lives on GitHub as `sprint-task`-labeled issues — there is no static task list to read. Build, test, commit per ticket. You can publish TestFlight anytime. All hooks apply except TestFlight auto-publish.
 
 ### Mode 2: Autopilot
 Human says "run autopilot" in a session. Reads `program.md` and loops forever — features, bugs, UI, AI, tests, food DB, code quality (boy scout rule). Runs in foreground, Ctrl+C to stop. No watchdog, no auto-restart.
