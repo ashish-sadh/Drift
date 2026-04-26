@@ -13,7 +13,7 @@ public enum Preferences {
         get {
             guard let raw = UserDefaults.standard.string(forKey: weightUnitKey),
                   let unit = WeightUnit(rawValue: raw) else {
-                return .kg
+                return .lbs
             }
             return unit
         }

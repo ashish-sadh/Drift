@@ -71,7 +71,11 @@ struct MoreTabView: View {
                             BiomarkersTabView()
                         }
                         Divider().overlay(Theme.separator)
-                        navRow(icon: "gear", title: "Settings", subtitle: "Units, Health access, algorithm", color: .secondary) {
+                        navRow(icon: "camera.viewfinder", title: "Photo Log", subtitle: "Snap a meal, get calories · BYOK cloud AI", color: Theme.accent) {
+                            PhotoLogBetaSettingsView()
+                        }
+                        Divider().overlay(Theme.separator)
+                        navRow(icon: "gear", title: "Settings", subtitle: "Units, Health access, export", color: .secondary) {
                             SettingsView()
                         }
                     }
@@ -222,15 +226,17 @@ struct SettingsView: View {
         ScrollView {
             VStack(spacing: 14) {
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Units")
+                    Text("Body Weight Unit")
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(.secondary)
-                    Picker("Weight Unit", selection: $weightUnit) {
+                    Picker("Body Weight Unit", selection: $weightUnit) {
                         Text("kg").tag(WeightUnit.kg)
                         Text("lbs").tag(WeightUnit.lbs)
                     }
                     .pickerStyle(.segmented)
                     .onChange(of: weightUnit) { _, v in Preferences.weightUnit = v }
+                    Text("Affects body weight tracking only. Exercise weights are always shown in lbs.")
+                        .font(.caption2).foregroundStyle(.tertiary)
                 }
                 .card()
 
@@ -488,30 +494,6 @@ struct SettingsView: View {
                 } message: {
                     Text("When on, each chat turn's full query and assistant response will be saved on this device only. Nothing is transmitted. You can Export JSON anytime to share a transcript with the Drift team to improve multi-turn AI reliability, or Delete all to wipe it.")
                 }
-
-                // Photo Log (Beta) — BYOK cloud vision. #224 / #266.
-                NavigationLink {
-                    PhotoLogBetaSettingsView()
-                } label: {
-                    HStack(spacing: 12) {
-                        Image(systemName: "camera.viewfinder")
-                            .foregroundStyle(Theme.accent).frame(width: 24)
-                        VStack(alignment: .leading, spacing: 2) {
-                            HStack(spacing: 6) {
-                                Text("Photo Log").font(.subheadline.weight(.medium))
-                                Text("BETA").font(.caption2.weight(.bold))
-                                    .padding(.horizontal, 6).padding(.vertical, 2)
-                                    .background(Theme.accent.opacity(0.2)).clipShape(Capsule())
-                            }
-                            Text("Snap a meal, get calories · BYOK cloud AI")
-                                .font(.caption2).foregroundStyle(.tertiary)
-                        }
-                        Spacer()
-                        Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
-                    }
-                    .padding(.vertical, 10)
-                }
-                .card()
 
                 // Algorithm
                 NavigationLink {
