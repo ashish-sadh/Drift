@@ -197,6 +197,14 @@ struct PhotoLogBetaSettingsView: View {
             Image(systemName: "lock.fill").foregroundStyle(Theme.accent)
             Text(masked).font(.caption.monospaced())
             Spacer()
+            Button(role: .destructive) {
+                clearKey()
+            } label: {
+                Label("Clear", systemImage: "trash")
+                    .font(.caption.weight(.medium))
+            }
+            .buttonStyle(.bordered)
+            .tint(Theme.surplus)
             Button {
                 keyInput = ""
                 replacingKey = true
@@ -251,43 +259,25 @@ struct PhotoLogBetaSettingsView: View {
     }
 
     private var actionSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Test Connection is the primary action after pasting a key —
-            // promote it to a filled button so it reads as the CTA and
-            // clears the chat-orb obscuring the bottom of the screen.
-            Button {
-                Task { await runTestConnection() }
-            } label: {
-                HStack(spacing: 8) {
-                    if testing {
-                        ProgressView().scaleEffect(0.8).tint(.white)
-                    } else {
-                        Image(systemName: "bolt.horizontal.fill")
-                    }
-                    Text(testing ? "Testing…" : "Test Connection")
-                        .font(.subheadline.weight(.semibold))
-                    Spacer()
+        Button {
+            Task { await runTestConnection() }
+        } label: {
+            HStack(spacing: 8) {
+                if testing {
+                    ProgressView().scaleEffect(0.8).tint(.white)
+                } else {
+                    Image(systemName: "bolt.horizontal.fill")
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 10)
+                Text(testing ? "Testing…" : "Test Connection")
+                    .font(.subheadline.weight(.semibold))
+                Spacer()
             }
-            .buttonStyle(.borderedProminent)
-            .tint(Theme.accent)
-            .disabled(testing || !CloudVisionKey.has(provider: provider))
-
-            Button(role: .destructive) {
-                clearKey()
-            } label: {
-                HStack {
-                    Image(systemName: "trash")
-                    Text("Clear Key").font(.subheadline.weight(.medium))
-                    Spacer()
-                }
-            }
-            .buttonStyle(.bordered)
-            .tint(Theme.surplus)
-            .disabled(!CloudVisionKey.has(provider: provider))
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
         }
+        .buttonStyle(.borderedProminent)
+        .tint(Theme.accent)
+        .disabled(testing || !CloudVisionKey.has(provider: provider))
         .card()
     }
 
