@@ -17,6 +17,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib/atomic-write.sh
+source "$(dirname "$0")/lib/atomic-write.sh"
+
 STATE_FILE="$HOME/drift-state/sprint-state.json"
 LOCK_FILE="$HOME/drift-state/sprint-state.json.lock"
 LAST_REVIEW_FILE="$HOME/drift-state/last-review-time"
@@ -564,8 +567,36 @@ cmd_planning_due() {
 }
 
 cmd_planning_done() {
-    date +%s > "$LAST_PLANNING_FILE"
+    atomic_write "$LAST_PLANNING_FILE" "$(date +%s)"
     echo "Recorded planning time"
+}
+
+# Planning-time context — emits whether the planning session should also do a
+# product review this round. Folded here so review has a single cadence (sprint
+# planning), not a separate timer that drifts.
+#
+# Usage: scripts/sprint-service.sh planning-context
+# Outputs (one line each, key=value):
+#   cycle_count=<int>
+#   last_review_cycle=<int>
+#   cycles_since_last_review=<int>
+#   review_due=<true|false>           # true when cycles_since_last_review >= REVIEW_CYCLE_INTERVAL
+#   review_cycle_interval=<int>       # default 20, override via PRODUCT_REVIEW_CYCLE_INTERVAL env
+cmd_planning_context() {
+    local INTERVAL="${PRODUCT_REVIEW_CYCLE_INTERVAL:-20}"
+    local CYCLE
+    CYCLE=$(cat "$HOME/drift-state/cycle-counter" 2>/dev/null || echo "0")
+    local LAST_REVIEW_CYCLE
+    LAST_REVIEW_CYCLE=$(cat "$HOME/drift-state/last-review-cycle" 2>/dev/null || echo "0")
+    local SINCE=$(( CYCLE - LAST_REVIEW_CYCLE ))
+    [ "$SINCE" -lt 0 ] && SINCE=0
+    local DUE="false"
+    [ "$SINCE" -ge "$INTERVAL" ] && DUE="true"
+    echo "cycle_count=$CYCLE"
+    echo "last_review_cycle=$LAST_REVIEW_CYCLE"
+    echo "cycles_since_last_review=$SINCE"
+    echo "review_due=$DUE"
+    echo "review_cycle_interval=$INTERVAL"
 }
 
 # ── Dispatch ──────────────────────────────────────────────────────────────────
@@ -587,9 +618,10 @@ case "$CMD" in
     count)             cmd_count "${1:---sprint}" ;;
     planning-due)      cmd_planning_due ;;
     planning-done)     cmd_planning_done ;;
+    planning-context)  cmd_planning_context ;;
     *)
         echo "Unknown command: $CMD" >&2
-        echo "Commands: refresh, next, claim, done, unclaim, session-done, reset-sprint-done, clear, status, count, planning-due, planning-done" >&2
+        echo "Commands: refresh, next, claim, done, unclaim, session-done, reset-sprint-done, clear, status, count, planning-due, planning-done, planning-context" >&2
         exit 1
         ;;
 esac

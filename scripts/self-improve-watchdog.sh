@@ -11,6 +11,9 @@
 
 set -euo pipefail
 
+# shellcheck source=lib/atomic-write.sh
+source "$(dirname "$0")/lib/atomic-write.sh"
+
 # Kill any existing watchdog (prevent duplicates)
 EXISTING=$(pgrep -f "self-improve-watchdog.sh" | grep -v $$ || true)
 if [ -n "$EXISTING" ]; then
@@ -34,10 +37,17 @@ NUDGE_WAIT=300       # 5 minutes after nudge before killing
 COMMIT_STALL=10800   # 3 hours — genuinely-hard bugs sometimes take this long, but 0 commits past this is a tarpit
 KILL_WAIT=10
 CRASH_FILE="$HOME/drift-state/consecutive-crashes"
+# Stable-run reset threshold (gbrain supervisor.ts pattern): if a session was
+# alive for this long before crashing, treat it as a transient flake and
+# reset the consecutive-crashes counter to 0. Prevents the "5-min flap" mode
+# where 5 long-stable runs that each happened to crash at the end get
+# escalated as if it were a broken config.
+STABLE_RUN_THRESHOLD=300
 MONITOR_PID=""
 
 PROMPT="run autopilot"
 CLAUDE_PID=""
+SESSION_STARTED_AT=0
 CURRENT_LOG=""
 
 mkdir -p "$LOG_DIR"
@@ -169,9 +179,22 @@ sync_stamps_from_main() {
         local review_stamp
         review_stamp=$(cat "$SD/last-review-time" 2>/dev/null || echo "0")
         if (( review_last > review_stamp )); then
-            echo "$review_last" > "$SD/last-review-time"
+            atomic_write "$SD/last-review-time" "$review_last"
             log "Self-heal: bumped last-review-time $review_stamp → $review_last (from merged review commit)"
         fi
+    fi
+
+    # Self-heal last-review-cycle: when the cycle stamp is missing, set it to
+    # (cycle - INTERVAL) so the very next sprint planning session does the
+    # review. Avoids the 3036-cycle drift failure mode permanently.
+    local INTERVAL="${PRODUCT_REVIEW_CYCLE_INTERVAL:-20}"
+    local cycle_now
+    cycle_now=$(cat "$SD/cycle-counter" 2>/dev/null || echo "0")
+    if [[ ! -s "$SD/last-review-cycle" ]] && (( cycle_now > 0 )); then
+        local seed=$(( cycle_now - INTERVAL ))
+        (( seed < 0 )) && seed=0
+        atomic_write "$SD/last-review-cycle" "$seed"
+        log "Self-heal: stamped last-review-cycle = $seed (cycle_now=$cycle_now, interval=$INTERVAL) so next planning does the review"
     fi
 
     # Most recent exec report merge → last-report-time. Matches the squash-
@@ -183,7 +206,7 @@ sync_stamps_from_main() {
         local exec_stamp
         exec_stamp=$(cat "$SD/last-report-time" 2>/dev/null || echo "0")
         if (( exec_last > exec_stamp )); then
-            echo "$exec_last" > "$SD/last-report-time"
+            atomic_write "$SD/last-report-time" "$exec_last"
             log "Self-heal: bumped last-report-time $exec_stamp → $exec_last (from merged exec commit)"
         fi
     fi
@@ -195,7 +218,7 @@ sync_stamps_from_main() {
         local plan_state
         plan_state=$(gh issue view "$plan_issue" --json state --jq '.state' 2>/dev/null || echo "")
         if [[ "$plan_state" == "CLOSED" ]]; then
-            date +%s > "$SD/last-planning-time"
+            atomic_write "$SD/last-planning-time" "$(date +%s)"
             rm -f "$SD/planning-issue"
             log "Self-heal: planning Issue #$plan_issue is CLOSED — stamped last-planning-time and cleared tracking file"
         fi
@@ -210,7 +233,7 @@ sync_stamps_from_main() {
         local tf_stamp
         tf_stamp=$(cat "$SD/last-testflight-publish" 2>/dev/null || echo "0")
         if (( tf_last > tf_stamp )); then
-            echo "$tf_last" > "$SD/last-testflight-publish"
+            atomic_write "$SD/last-testflight-publish" "$tf_last"
             log "Self-heal: bumped last-testflight-publish $tf_stamp → $tf_last (from TestFlight commit)"
         fi
     fi
@@ -495,6 +518,11 @@ start_claude() {
         > "$CURRENT_LOG" 2>&1 &
     CLAUDE_PID=$!
     echo "$CLAUDE_PID" > "$PID_FILE"
+    # Stamp the spawn time for stable-run-reset crash recovery (gbrain pattern):
+    # if a session ran for STABLE_RUN_THRESHOLD seconds before crashing, we
+    # forgive prior crash history — distinguishes "broken config" (instant
+    # crash, stays stuck) from "transient flake" (long stable run, then crash).
+    SESSION_STARTED_AT=$(date +%s)
     log "Autopilot started with PID $CLAUDE_PID (model=$MODEL)"
 
     # Start Haiku monitor
@@ -727,13 +755,23 @@ while true; do
                 stop_monitor
                 if [[ -n "$CURRENT_LOG" ]] && grep -q '"type":"result"' "$CURRENT_LOG" 2>/dev/null; then
                     log "Autopilot completed normally. Restarting..."
-                    echo "0" > "$CRASH_FILE"
+                    atomic_write "$CRASH_FILE" "0"
                     run_compliance "normal"
                 else
-                        CRASHES=$(cat "$CRASH_FILE" 2>/dev/null || echo "0")
-                    CRASHES=$((CRASHES + 1))
-                    echo "$CRASHES" > "$CRASH_FILE"
-                    log "Autopilot CRASHED (no result event). Crash #$CRASHES. Restarting..."
+                    # Stable-run reset: if the session was alive for at least
+                    # STABLE_RUN_THRESHOLD seconds, this crash is most likely
+                    # transient (network, simulator deadlock, etc.) — forgive
+                    # prior crash history.
+                    NOW=$(date +%s)
+                    SESSION_AGE=$(( NOW - SESSION_STARTED_AT ))
+                    PREV_CRASHES=$(cat "$CRASH_FILE" 2>/dev/null || echo "0")
+                    if (( SESSION_AGE >= STABLE_RUN_THRESHOLD )) && (( PREV_CRASHES > 0 )); then
+                        log "Stable-run reset: session ran ${SESSION_AGE}s before crash (≥ ${STABLE_RUN_THRESHOLD}s). Forgiving $PREV_CRASHES prior crash(es)."
+                        PREV_CRASHES=0
+                    fi
+                    CRASHES=$((PREV_CRASHES + 1))
+                    atomic_write "$CRASH_FILE" "$CRASHES"
+                    log "Autopilot CRASHED (no result event, session age ${SESSION_AGE}s). Crash #$CRASHES. Restarting..."
                     run_compliance "crash"
                     if [[ "$CRASHES" -ge 3 ]]; then
                         log "WARNING: $CRASHES consecutive crashes. Backing off 5 min."

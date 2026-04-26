@@ -42,7 +42,12 @@ scripts/planning-service.sh remaining
 
 6. **Assess state:** Read `Docs/roadmap.md`, `Docs/state.md`. Run `git log --oneline -40`. Check recent closed issues.
 
-7. **Product review (if due):** `scripts/report-service.sh review-due || true` — if due: `scripts/report-service.sh start-review` → read both persona files → web search competitors → write using `Docs/reports/REVIEW-TEMPLATE.md` (every section required, filename `review-cycle-{N}.md`) → PR → `scripts/report-service.sh finish`. Then: `scripts/planning-service.sh checkpoint review_merged`
+7. **Product review (if due):** product review has NO independent cadence — it rides on sprint planning. Check the cycle gap:
+   ```bash
+   eval "$(scripts/sprint-service.sh planning-context)"
+   echo "cycles since last review: $cycles_since_last_review (interval $review_cycle_interval)"
+   ```
+   If `review_due=true`: `scripts/report-service.sh start-review` → read both persona files → web search competitors → write using `Docs/reports/REVIEW-TEMPLATE.md` (every section required, filename `review-cycle-{N}.md`) → PR → `scripts/report-service.sh finish` (stamps `last-review-cycle` → trigger resets). Then: `scripts/planning-service.sh checkpoint review_merged`. If not due, skip — DO NOT do reviews on a separate timer.
 
 8. **Daily exec report (if due):** `scripts/report-service.sh daily-due || true` — if due: `scripts/report-service.sh start-exec` → write report → PR with `--label report` → merge. Then: `echo $(date +%s) > ~/drift-state/last-report-time`
 
@@ -134,6 +139,7 @@ Human says "run autopilot". No watchdog, no model switching.
 ## Rules
 
 - **Tests must pass before committing.** Run eval harness after AI changes — revert immediately if scores drop.
+- **Commit only files YOU edited this session.** Use `git commit -- <explicit paths>` (the `--` form) to scope the commit to those paths. Never `git commit -a`, never `git commit` with no paths if there might be pre-staged work. If `git diff --cached --name-only` shows files you didn't touch, those belong to another agent or a human — leave them staged, don't sweep them.
 - **TestFlight:** hook injects mandatory publish instructions when due — follow them exactly.
 - **Daily exec report:** hook injects mandatory instructions when due — follow the template exactly.
 - **Every bug close requires a resolution comment** (enforced by hook — will block without it).
