@@ -185,7 +185,7 @@ Human says "run autopilot". No watchdog, no model switching.
 - **Read full issues before implementing** — body + all comments + screenshots.
 - **Post a plan comment before every implementation** (not needed for P0 bugs in emergency).
 - **GitHub API:** Reads = 1pt, writes = 5pts. Budget 900pts/min. Batch edits. On 403/429: comment on current task, exit — watchdog restarts with backoff.
-- **Output to `/tmp/`.** Run `xcodegen generate` if adding files. New ideas → `Docs/backlog.md`.
+- **Output to `/tmp/`.** Run `xcodegen generate` if adding files. New ideas → `gh issue create --label deferred --title "<idea>" --body "<details>"` (the queue lives on GitHub, not in a static doc).
 
 ---
 

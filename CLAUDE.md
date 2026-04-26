@@ -20,23 +20,26 @@ Fully autonomous background operation. The watchdog (`scripts/self-improve-watch
 See `program.md` for autopilot instructions, sprint lifecycle, and control commands. Hooks are defined in `.claude/settings.json` and `.claude/hooks/`.
 
 ## Doc Map
-| Doc | What it is |
-|-----|-----------|
-| `Docs/ai-parity.md` | **AI chat vs UI feature gap** — what to build next |
-| `Docs/failing-queries.md` | **Failing queries** — real queries that don't work, fix systematically |
-| `Docs/architecture.md` | AI-first dual-model architecture |
-| `Docs/state.md` | Current build, test count, features |
-| `Docs/tools.md` | Service → tool mapping (10 JSON tools) |
-| `Docs/backlog.md` | Long-term tickets (organized by AI gaps) |
-| `Docs/roadmap.md` | **Product roadmap** — unified, domain-sectioned, read every cycle |
-| `Docs/product-review-log.md` | Periodic product + engineering reviews (every 20 cycles) |
-| `Docs/personas/` | Evolving Product Designer + Principal Engineer persona files |
-| `Docs/reports/` | Exec reports and product review reports (published as GitHub PRs) |
-| `Docs/testing.md` | How to run tests, eval harness |
-| `Docs/develop.md` | Dev setup, architecture, adding features |
-| `Docs/improvement-log.md` | Loop cycle log |
-| `Docs/principles/` | Code quality reference cards (Clean Code, Design Patterns, DDD, SwiftUI) |
-| `program.md` | **Drift Autopilot** — the single autonomous loop program |
+
+Each entry tagged with its maintenance status. **Auto-maintained** = a script or workflow keeps it current. **Manual** = humans hand-edit; will drift if no one tends it. **Reference** = slow-moving by design (architecture, principles, dev setup). Sessions reading "Manual" docs should treat them as snapshots that may not match reality.
+
+**Authoritative live state** (the queue of work, current focus, who's running what) lives outside this Doc Map: `gh issue list`, `~/drift-state/sprint-state.json`, `command-center/heartbeat.json`. There is no static task list.
+
+| Doc | Status | What it is |
+|-----|--------|-----------|
+| `program.md` | **Auto/manual** | **Drift Autopilot** — the single autonomous loop program. Edited as the harness evolves. |
+| `Docs/roadmap.md` | **Auto-maintained** (planning step 10) | Product roadmap — unified, domain-sectioned. Re-read every cycle. |
+| `Docs/personas/` | **Auto-maintained** (planning step 10) | Evolving Product Designer + Principal Engineer persona files. |
+| `Docs/reports/` | **Auto-maintained** (review/exec PR workflows) | Exec reports + product review reports. Published as GitHub PRs. |
+| `Docs/state.md` | Manual snapshot — may drift | Build number, test count, features. Updated periodically; check git log for freshness. |
+| `Docs/architecture.md` | Reference (slow-moving) | AI-first dual-model architecture. Update only when architecture changes. |
+| `Docs/failing-queries.md` | Manual — appended by sessions | Real AI-chat queries that don't work, fixed systematically. |
+| `Docs/testing.md` | Reference | How to run tests, eval harness. |
+| `Docs/develop.md` | Reference | Dev setup, architecture, adding features. |
+| `Docs/principles/` | Reference | Code quality cards (Clean Code, Design Patterns, DDD, SwiftUI). |
+| `Docs/refactor/` | Manual — durable refactor plans | Multi-day refactor proposals committed for later pickup. |
+| `Docs/audits/` | Manual — point-in-time audits | Historical audit snapshots. |
+| `Docs/archive/` | Frozen | Legacy docs (improvement-log, product-review-log) kept for history; not maintained. |
 
 ## Rules
 - Build and test after every change
