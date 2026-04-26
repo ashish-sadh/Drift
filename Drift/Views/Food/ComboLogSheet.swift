@@ -20,6 +20,7 @@ struct ComboLogSheet: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var logItems: [ComboLogItem]
+    @State private var showingDeleteConfirm = false
 
     init(combo: Food, viewModel: FoodLogViewModel, onLogged: @escaping () -> Void) {
         self.combo = combo
@@ -58,6 +59,11 @@ struct ComboLogSheet: View {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(role: .destructive) { showingDeleteConfirm = true } label: {
+                        Image(systemName: "trash")
+                    }
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     let canLog = logItems.isEmpty || !checkedItems.isEmpty
                     Button(logItems.isEmpty ? "Log" : "Log \(checkedItems.count)") { logSelected() }
@@ -65,6 +71,12 @@ struct ComboLogSheet: View {
                         .foregroundStyle(canLog ? Theme.accent : .secondary)
                         .disabled(!canLog)
                 }
+            }
+            .alert("Delete \"\(combo.name)\"?", isPresented: $showingDeleteConfirm) {
+                Button("Delete", role: .destructive) { deleteCombo() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This combo will be permanently deleted.")
             }
         }
         .presentationDetents([.medium, .large])
@@ -177,6 +189,13 @@ struct ComboLogSheet: View {
         .padding(24)
         .frame(maxWidth: .infinity)
         .background(Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 12))
+    }
+
+    private func deleteCombo() {
+        guard let id = combo.id else { return }
+        try? AppDatabase.shared.writer.write { db in try Food.deleteOne(db, key: id) }
+        viewModel.loadSuggestions()
+        dismiss()
     }
 
     private func logSelected() {

@@ -21,6 +21,7 @@ struct QuickAddView: View {
     @State private var recipeLogTime = Date()
     @State private var recipeServings = "1"
     @State private var expandOnLog = false
+    @State private var showingDeleteConfirm = false
 
     /// Top-level type lives in DriftCore so AppDatabase + ConversationState can persist it.
     typealias RecipeItem = DriftCore.RecipeItem
@@ -161,7 +162,22 @@ struct QuickAddView: View {
             .scrollDismissesKeyboard(.interactively)
             .background(Theme.background)
             .navigationTitle("Combo / Recipe").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                if editingRecipeID != nil {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button(role: .destructive) { showingDeleteConfirm = true } label: {
+                            Image(systemName: "trash")
+                        }
+                    }
+                }
+            }
+            .alert("Delete Combo?", isPresented: $showingDeleteConfirm) {
+                Button("Delete", role: .destructive) { deleteCombo() }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This combo will be permanently deleted.")
+            }
             .onAppear {
                 if items.isEmpty && !initialItems.isEmpty {
                     items = initialItems
@@ -208,6 +224,13 @@ struct QuickAddView: View {
             get: { editingIndex.map { IdentifiableInt(value: $0) } },
             set: { editingIndex = $0?.value }
         )
+    }
+
+    private func deleteCombo() {
+        guard let id = editingRecipeID else { return }
+        try? AppDatabase.shared.writer.write { db in try Food.deleteOne(db, key: id) }
+        viewModel.loadSuggestions()
+        dismiss()
     }
 
     private func saveAndLogRecipe() {
