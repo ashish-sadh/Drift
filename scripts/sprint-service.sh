@@ -603,8 +603,8 @@ cmd_planning_due() {
     LAST=$(cat "$LAST_PLANNING_FILE" 2>/dev/null || echo "0")
     local NOW
     NOW=$(date +%s)
-    local HOURS_SINCE=$(( (NOW - LAST) / 3600 ))
-    if [ "$HOURS_SINCE" -ge 6 ]; then
+    local SECONDS_SINCE=$(( NOW - LAST ))
+    if [ "$SECONDS_SINCE" -ge 21600 ]; then
         exit 0  # planning due
     else
         exit 1  # not due
@@ -630,7 +630,7 @@ cmd_planning_done() {
 cmd_planning_context() {
     local INTERVAL="${PRODUCT_REVIEW_CYCLE_INTERVAL:-20}"
     local CYCLE
-    CYCLE=$(cat "$HOME/drift-state/cycle-counter" 2>/dev/null || echo "0")
+    CYCLE=$(cat "$HOME/drift-state/commit-counter" 2>/dev/null || echo "0")
     local LAST_REVIEW_CYCLE
     LAST_REVIEW_CYCLE=$(cat "$HOME/drift-state/last-review-cycle" 2>/dev/null || echo "0")
     local SINCE=$(( CYCLE - LAST_REVIEW_CYCLE ))

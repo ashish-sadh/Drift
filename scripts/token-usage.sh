@@ -46,7 +46,7 @@ total_cost = cost_in + cost_cw + cost_cr + cost_out
 
 cycle_count = 0
 try:
-    cycle_count = int(open(os.path.expanduser('~/drift-state/cycle-counter')).read().strip())
+    cycle_count = int(open(os.path.expanduser('~/drift-state/commit-counter')).read().strip())
 except:
     pass
 

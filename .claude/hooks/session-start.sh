@@ -3,7 +3,7 @@
 # Injects cycle state, product focus, design docs, report feedback.
 # Uses 5-min cache to reduce API calls on rapid restarts.
 
-COUNTER_FILE="$HOME/drift-state/cycle-counter"
+COUNTER_FILE="$HOME/drift-state/commit-counter"
 LAST_REVIEW_FILE="$HOME/drift-state/last-review-cycle"
 CACHE_DIR="$HOME/drift-state"
 

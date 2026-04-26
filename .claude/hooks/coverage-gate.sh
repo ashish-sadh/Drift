@@ -8,7 +8,7 @@
 
 set -e
 
-COUNTER_FILE="$HOME/drift-state/cycle-counter"
+COUNTER_FILE="$HOME/drift-state/commit-counter"
 LAST_COVERAGE_FILE="$HOME/drift-state/last-coverage-snapshot"
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 

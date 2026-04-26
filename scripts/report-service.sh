@@ -28,34 +28,47 @@ cmd_daily_due() {
 cmd_review_due() {
     # exits 0 if product review IS due, exits 1 if not.
     #
-    # Authoritative trigger is the CYCLE GAP, not wall-clock time. Sprint
-    # planning is the single cadence; this returns true when planning should
-    # also do a product review (every PRODUCT_REVIEW_CYCLE_INTERVAL cycles,
-    # default 20). Time-based fallback only kicks in when cycle-counter is
-    # missing.
+    # Two gates, BOTH must pass:
+    #   1. Commit-counter gap: at least PRODUCT_REVIEW_CYCLE_INTERVAL "real work"
+    #      commits (default 20) since the last review. Only commits that
+    #      survive the housekeeping filter in cycle-counter.sh count.
+    #   2. Wall-clock floor: at least PRODUCT_REVIEW_MIN_HOURS (default 6) since
+    #      last-review-time. Prevents a commit-storm from triggering a second
+    #      review minutes after the first — matches planning's 6h cadence so
+    #      reviews ride on planning naturally.
+    #
+    # Time-only fallback when commit-counter is missing.
     local INTERVAL="${PRODUCT_REVIEW_CYCLE_INTERVAL:-20}"
-    local CYCLE
-    CYCLE=$(cat "$STATE_DIR/cycle-counter" 2>/dev/null || echo "0")
+    local MIN_HOURS="${PRODUCT_REVIEW_MIN_HOURS:-6}"
+    local MIN_SECONDS=$(( MIN_HOURS * 3600 ))
+
+    local LAST_TIME
+    LAST_TIME=$(cat "$STATE_DIR/last-review-time" 2>/dev/null || echo "0")
+    local NOW
+    NOW=$(date +%s)
+    local SECONDS_SINCE=$(( NOW - LAST_TIME ))
+    if [ "$SECONDS_SINCE" -lt "$MIN_SECONDS" ]; then
+        exit 1  # too recent (wall-clock floor)
+    fi
+
+    local COUNT
+    COUNT=$(cat "$STATE_DIR/commit-counter" 2>/dev/null || cat "$STATE_DIR/cycle-counter" 2>/dev/null || echo "0")
     local LAST_REVIEW_CYCLE
     LAST_REVIEW_CYCLE=$(cat "$STATE_DIR/last-review-cycle" 2>/dev/null || echo "0")
 
-    if [ "$CYCLE" -gt 0 ]; then
-        local SINCE=$(( CYCLE - LAST_REVIEW_CYCLE ))
+    if [ "$COUNT" -gt 0 ]; then
+        local SINCE=$(( COUNT - LAST_REVIEW_CYCLE ))
         [ "$SINCE" -lt 0 ] && SINCE=0
         if [ "$SINCE" -ge "$INTERVAL" ]; then
-            exit 0  # review due (cycle gap)
+            exit 0  # both gates passed: time floor + commit gap
         else
-            exit 1  # not due
+            exit 1  # commit gap not met
         fi
     fi
 
-    # Fallback: cycle counter unavailable — use 6-hour wall-clock window.
-    if git log main --oneline --since="6 hours ago" 2>/dev/null | grep -qi "review-cycle"; then
-        exit 1
-    fi
-    LAST=$(cat "$STATE_DIR/last-review-time" 2>/dev/null || echo "0")
-    NOW=$(date +%s)
-    if [ $(( NOW - LAST )) -lt 21600 ]; then
+    # Fallback: counter unavailable — wall-clock floor already passed above,
+    # also check git log to confirm no review committed in last 6h.
+    if git log main --oneline --since="${MIN_HOURS} hours ago" 2>/dev/null | grep -qi "review-cycle"; then
         exit 1
     fi
     exit 0

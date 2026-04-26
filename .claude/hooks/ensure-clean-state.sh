@@ -45,7 +45,7 @@ fi
 
 # Check if persona files were updated after a product review (planning sessions only)
 if [ "$DRIFT_CONTROL" = "RUN" ] && [ "$SESSION_TYPE" = "planning" ] && [ "$IS_AUTONOMOUS" = "1" ]; then
-  CYCLE_COUNT=$(cat "$HOME/drift-state/cycle-counter" 2>/dev/null || echo "0")
+  CYCLE_COUNT=$(cat "$HOME/drift-state/commit-counter" 2>/dev/null || echo "0")
   LAST_REVIEW=$(cat "$HOME/drift-state/last-review-cycle" 2>/dev/null || echo "0")
   if [ "$CYCLE_COUNT" -eq "$LAST_REVIEW" ] && [ "$CYCLE_COUNT" -gt 0 ]; then
     DESIGNER_FILE="${CLAUDE_PROJECT_DIR:-.}/Docs/personas/product-designer.md"

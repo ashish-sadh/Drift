@@ -55,7 +55,7 @@ for l in lines[-10:]:
     [[ -z "$RECENT" ]] && continue
 
     MODEL=$(cat ~/drift-state/last-model 2>/dev/null || echo "?")
-    CYCLE=$(cat ~/drift-state/cycle-counter 2>/dev/null || echo "?")
+    CYCLE=$(cat ~/drift-state/commit-counter 2>/dev/null || echo "?")
     SESSION_TYPE=$(basename "$CURRENT_LOG" | sed 's/session_\([a-z]*\)_.*/\1/')
     LOG_LINES=$(wc -l < "$CURRENT_LOG" | tr -d ' ')
 

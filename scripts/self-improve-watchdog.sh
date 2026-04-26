@@ -438,7 +438,7 @@ start_claude() {
         # (710-cycle gap observed 2026-04-21).
         log "Sprint planning due — $MODEL"
 
-        local CYCLE=$(cat "$HOME/drift-state/cycle-counter" 2>/dev/null || echo "?")
+        local CYCLE=$(cat "$HOME/drift-state/commit-counter" 2>/dev/null || echo "?")
         rm -f "$HOME/drift-state/planning-issue"
         local PLAN_ISSUE=$(gh issue create \
             --title "Sprint Planning — Cycle $CYCLE" \
