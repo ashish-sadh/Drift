@@ -20,6 +20,14 @@
 
 set -e
 
+# 0. Filter to git-commit only. The settings.json `if: "Bash(git commit *)"`
+#    matcher does NOT actually filter PreToolUse — without this in-script
+#    check the hook would fire on every Bash call and block all autopilot
+#    work. (Bug observed 2026-04-26 cycle 7581: session cleared in_progress
+#    to bypass the hook.)
+TOOL_INPUT="${TOOL_INPUT:-}"
+echo "$TOOL_INPUT" | grep -qE "git[[:space:]]+commit" || exit 0
+
 # 1. Only gate autopilot. Humans aren't subject to this discipline.
 [[ "${DRIFT_AUTONOMOUS:-0}" != "1" ]] && exit 0
 

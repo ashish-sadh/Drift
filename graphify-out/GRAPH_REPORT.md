@@ -1,12 +1,12 @@
 # Graph Report - /Users/ashishsadh/workspace/Drift  (2026-04-26)
 
 ## Corpus Check
-- 411 files · ~1,790,062 words
+- 411 files · ~1,790,387 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 5685 nodes · 15988 edges · 151 communities detected
-- Extraction: 46% EXTRACTED · 54% INFERRED · 0% AMBIGUOUS · INFERRED: 8555 edges (avg confidence: 0.8)
+- 5687 nodes · 15992 edges · 151 communities detected
+- Extraction: 46% EXTRACTED · 54% INFERRED · 0% AMBIGUOUS · INFERRED: 8557 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -175,6 +175,8 @@
 10. `weight` - 87 edges
 
 ## Surprising Connections (you probably didn't know these)
+- `forceRelease()` --calls--> `confirm`  [INFERRED]
+  /Users/ashishsadh/workspace/Drift/command-center/app.js → /Users/ashishsadh/workspace/Drift/DriftCore/Sources/DriftCore/AI/Tools/ToolSchema.swift
 - `weightEntryKgToLbsConversion()` --calls--> `WeightEntry`  [INFERRED]
   /Users/ashishsadh/workspace/Drift/DriftCore/Tests/DriftCoreTests/RobustnessTests.swift → /Users/ashishsadh/workspace/Drift/DriftCore/Sources/DriftCore/Models/WeightEntry.swift
 - `foodEntryTotalCaloriesZeroServings()` --calls--> `FoodEntry`  [INFERRED]
@@ -183,62 +185,60 @@
   /Users/ashishsadh/workspace/Drift/DriftCore/Tests/DriftCoreTests/RobustnessTests.swift → /Users/ashishsadh/workspace/Drift/DriftCore/Sources/DriftCore/Models/FoodEntry.swift
 - `foodEntryFractionalServings()` --calls--> `FoodEntry`  [INFERRED]
   /Users/ashishsadh/workspace/Drift/DriftCore/Tests/DriftCoreTests/RobustnessTests.swift → /Users/ashishsadh/workspace/Drift/DriftCore/Sources/DriftCore/Models/FoodEntry.swift
-- `foodEntryMicronutrientsNilByDefault()` --calls--> `FoodEntry`  [INFERRED]
-  /Users/ashishsadh/workspace/Drift/DriftCore/Tests/DriftCoreTests/DatabaseEdgeCaseTests.swift → /Users/ashishsadh/workspace/Drift/DriftCore/Sources/DriftCore/Models/FoodEntry.swift
 
 ## Communities
 
 ### Community 0 - "Community 0"
 Cohesion: 0.01
-Nodes (318): AIActionExecutor, AIActionExecutor, FoodMatch, WeightIntent, AIEvalHarness, AIRuleEngine, aiRuleEngineCaloriesLeft_overTarget_showsOverMessage(), aiRuleEngineCaloriesLeft_withModerateFood_showsRemaining() (+310 more)
+Nodes (323): aiRuleEngineWithFoodDataReachesWorkoutCheck(), foodServiceCopyYesterday(), foodServiceDeleteEntryLast(), foodServiceDeleteEntryNoMatch(), foodServiceExplainCalories(), foodServiceFetchFoodsByCategory(), foodServiceFindByName(), foodServiceGetCaloriesLeft() (+315 more)
 
 ### Community 1 - "Community 1"
-Cohesion: 0.02
-Nodes (281): logFood, aiRuleEngineWithFoodDataReachesWorkoutCheck(), foodServiceCopyYesterday(), foodServiceDeleteEntryLast(), foodServiceDeleteEntryNoMatch(), AppDatabase, AppDatabase, RecentEntry (+273 more)
+Cohesion: 0.01
+Nodes (192): AIActionExecutor, AIActionExecutor, FoodMatch, AIChainOfThought, Step, AIContextBuilder, AIContextBuilder, AIEvalHarness (+184 more)
 
 ### Community 2 - "Community 2"
 Cohesion: 0.01
-Nodes (311): ActiveExercise, ActiveSet, WorkoutExercise, AIBackend, AIBackendType, llamaCpp, mlx, AIModelTier (+303 more)
+Nodes (357): logFood, food, food, seedFoodDB(), FoodEntry, allFoodsHaveNonEmptyNames(), allFoodsHavePositiveCaloriesOrZero(), allFoodsHaveReasonableServingSize() (+349 more)
 
 ### Community 3 - "Community 3"
 Cohesion: 0.01
-Nodes (332): food, food, foodCategoryFetch(), foodSearchLimit(), foodSearchSpecialChars(), seedFoodDB(), FoodEntry, allFoodsHaveNonEmptyNames() (+324 more)
+Nodes (130): ActiveExercise, ActiveSet, ActiveWorkoutView, AIChatInsightsView, AIChatView, TypewriterText, weight, AIView (+122 more)
 
 ### Community 4 - "Community 4"
 Cohesion: 0.01
-Nodes (115): ActiveWorkoutView, AIChatInsightsView, AIChatView, TypewriterText, weight, AIView, foodServiceIsFavorite(), AlgorithmSettingsView (+107 more)
+Nodes (185): AIResponseCleaner, clean_deduplicatesSentences(), clean_emptyStringReturnsEmpty(), clean_preservesValidPunctuation_exclamation(), clean_preservesValidPunctuation_question(), clean_removesAIDisclaimerSentence(), clean_removesAssistantLongPrefix(), clean_removesAssistantShortPrefix() (+177 more)
 
 ### Community 5 - "Community 5"
 Cohesion: 0.01
-Nodes (39): AIBackend, AmbiguityEval, BaselineEntry, ChatLatencyBenchmark, ClarifyMeasurement, ClarifySpec, FirstTokenCapture, loadLatencyBaseline() (+31 more)
+Nodes (142): AIActionParser, bodyComposition, App, BodySpecPDFParser, Supplemental, BaselineEntry, ChatLatencyBenchmark, ClarifyMeasurement (+134 more)
 
 ### Community 6 - "Community 6"
-Cohesion: 0.02
-Nodes (130): AddMode, custom, popular, AddSupplementView, DownloadError, invalidGGUF, sizeMismatch, ProgressTracker (+122 more)
+Cohesion: 0.01
+Nodes (35): AIBackend, AmbiguityEval, loadLatencyBaseline(), SingleItemSmokeTest, ComposedFoodEval, DomainExtractorEval, Case, DomainExtractorGoldSetTests (+27 more)
 
 ### Community 7 - "Community 7"
-Cohesion: 0.02
-Nodes (152): AIChatViewModel, aiToolAgentAgentOutputConstruction(), aiToolAgentExecuteRelevantToolsActionQuery(), aiToolAgentExecuteRelevantToolsInfoQuery(), aiToolAgentExecuteRelevantToolsWeightQuery(), aiToolAgentExecuteToolWithExplainCalories(), aiToolAgentExecuteToolWithFoodInfo(), aiToolAgentExecuteToolWithTextResult() (+144 more)
+Cohesion: 0.01
+Nodes (179): WeightIntent, AIBackend, AIBackendType, llamaCpp, mlx, AIModelTier, large, small (+171 more)
 
 ### Community 8 - "Community 8"
-Cohesion: 0.03
-Nodes (113): DeviceCapability, AIModelManager, friendlyMessageTranslatesOfflineError(), friendlyMessageTranslatesTimeout(), gemma4URLIsPinnedToRevision(), isValidGGUFAcceptsGGUFMagic(), isValidGGUFRejectsEmptyFile(), isValidGGUFRejectsNonGGUFFile() (+105 more)
+Cohesion: 0.02
+Nodes (174): exercisesByMuscleReturnsResults(), usdaRateLimitingDoesNotCrash(), servingUnitFoodRelative(), workoutSet1RMFor30Reps(), ExerciseDatabase, parseServingSizeGrams(), parseServingSizeML(), parseServingSizeNil() (+166 more)
 
 ### Community 9 - "Community 9"
 Cohesion: 0.02
-Nodes (112): AIDataCache, CycleData, SleepData, MuscleStatus, moderate, recovered, recovering, untrained (+104 more)
+Nodes (144): AIChatViewModel, aiToolAgentAgentOutputConstruction(), aiToolAgentExecuteRelevantToolsActionQuery(), aiToolAgentExecuteRelevantToolsInfoQuery(), aiToolAgentExecuteRelevantToolsWeightQuery(), aiToolAgentExecuteToolWithExplainCalories(), aiToolAgentExecuteToolWithFoodInfo(), aiToolAgentExecuteToolWithTextResult() (+136 more)
 
 ### Community 10 - "Community 10"
-Cohesion: 0.02
-Nodes (119): AIChatViewModel, onlineFoodSearchDefaultOn(), onlineFoodSearchToggle(), CloudVisionKey, KeyCache, StorageError, biometricUnavailable, keychainStatus (+111 more)
+Cohesion: 0.03
+Nodes (114): DeviceCapability, AIModelManager, DownloadError, invalidGGUF, sizeMismatch, DownloadState, completed, downloading (+106 more)
 
 ### Community 11 - "Community 11"
-Cohesion: 0.01
-Nodes (166): CodingKeys, barcode, brand, caloriesPer100g, carbsGPer100g, createdAt, fatGPer100g, fiberGPer100g (+158 more)
+Cohesion: 0.02
+Nodes (139): AIScreen, algorithm, biomarkers, bodyRhythm, cycle, dashboard, exercise, glucose (+131 more)
 
 ### Community 12 - "Community 12"
-Cohesion: 0.02
-Nodes (103): foodContext_emptyDiary_saysNothingLoggedNotRecent(), AIToolAgentPrompts, AutoResearchTests, Baseline, Keys, currentDay, iteration, mealName (+95 more)
+Cohesion: 0.01
+Nodes (149): CodingKeys, barcode, brand, caloriesPer100g, carbsGPer100g, createdAt, fatGPer100g, fiberGPer100g (+141 more)
 
 ### Community 13 - "Community 13"
 Cohesion: 0.03
@@ -246,35 +246,35 @@ Nodes (127): ExtractedResult, ExtractionOutput, LabReportOCR, commaGroupedNumber
 
 ### Community 14 - "Community 14"
 Cohesion: 0.03
-Nodes (73): Action, createWorkout, logWeight, none, showNutrition, showWeight, startWorkout, AIActionParser (+65 more)
+Nodes (80): AIChatViewModel, BiomarkerCardData, ChatMessage, FoodCardData, GlucoseCardData, ManualFoodPrefill, NavigationCardData, NutritionLookupCardData (+72 more)
 
 ### Community 15 - "Community 15"
-Cohesion: 0.03
-Nodes (61): AIChainOfThought, Step, AIContextBuilder, AIContextBuilder, aiChainOfThoughtComparison(), aiChainOfThoughtFoodQuery(), aiChainOfThoughtMultiDomain(), aiChainOfThoughtNutritionLookup() (+53 more)
+Cohesion: 0.02
+Nodes (92): AIToolAgentPrompts, AutoResearchTests, Baseline, CustomStringConvertible, compute_wtca(), evaluate(), GGUFInference, HFInference (+84 more)
 
 ### Community 16 - "Community 16"
 Cohesion: 0.03
-Nodes (100): GeneratingState, generating, idle, thinking, DownloadState, completed, downloading, error (+92 more)
+Nodes (82): Action, createWorkout, logWeight, none, showNutrition, showWeight, startWorkout, WorkoutExercise (+74 more)
 
 ### Community 17 - "Community 17"
 Cohesion: 0.03
-Nodes (74): FoodInfoGoalProgressTests, defaultFiberGRoundsUpToNearestFive(), dietPrefHighProtein(), dietPrefLowCarb(), dietPrefLowFatStillMeetsMinimum(), goalResolvedCalorieTargetUsesSoftCap(), macroTargetsAutoCalculate(), macroTargetsFallbackWithoutData() (+66 more)
+Nodes (99): GeneratingState, generating, idle, thinking, ConversationState.Phase, FoodEntryRef, Keys, currentDay (+91 more)
 
 ### Community 18 - "Community 18"
-Cohesion: 0.03
-Nodes (74): CrossDomainInsightTool, clampWindow_bucketsByThreshold(), datesInRange_emptyForReversedBounds(), datesInRange_generatesConsecutiveDays(), dateWindow_includesEndDay(), directionLabel_signs(), formatSummary_containsKeyFields(), formatSummary_signedCoefficient() (+66 more)
+Cohesion: 0.02
+Nodes (104): AddMode, custom, popular, AddSupplementView, CaseIterable, CloudVisionProvider, anthropic, gemini (+96 more)
 
 ### Community 19 - "Community 19"
-Cohesion: 0.04
-Nodes (56): AIChatViewModel, BiomarkerCardData, ChatMessage, FoodCardData, GlucoseCardData, ManualFoodPrefill, NavigationCardData, NutritionLookupCardData (+48 more)
+Cohesion: 0.03
+Nodes (72): FoodInfoGoalProgressTests, defaultFiberGRoundsUpToNearestFive(), dietPrefHighProtein(), dietPrefLowCarb(), dietPrefLowFatStillMeetsMinimum(), goalResolvedCalorieTargetUsesSoftCap(), macroTargetsAutoCalculate(), macroTargetsFallbackWithoutData() (+64 more)
 
 ### Community 20 - "Community 20"
-Cohesion: 0.03
-Nodes (65): foodServiceDailyTotalsStruct(), foodServiceExplainCalories(), foodServiceFetchFoodsByCategory(), foodServiceFindByName(), foodServiceGetCaloriesLeft(), foodServiceGetDailyTotals(), foodServiceGetDailyTotalsWithDate(), foodServiceGetNutrition() (+57 more)
+Cohesion: 0.04
+Nodes (52): aiParseFoodWithoutAmount(), aiParseFoodWithServings(), aiParseLogFood(), aiParseMultipleActionsFirstWins(), aiParseNoAction(), aiParseShowWeight(), aiParseStartWorkout(), api() (+44 more)
 
 ### Community 21 - "Community 21"
 Cohesion: 0.05
-Nodes (51): AIScreen, algorithm, biomarkers, bodyRhythm, cycle, dashboard, exercise, glucose (+43 more)
+Nodes (40): CrossDomainInsightTool, clampWindow_bucketsByThreshold(), datesInRange_emptyForReversedBounds(), datesInRange_generatesConsecutiveDays(), dateWindow_includesEndDay(), directionLabel_signs(), formatSummary_containsKeyFields(), formatSummary_signedCoefficient() (+32 more)
 
 ### Community 22 - "Community 22"
 Cohesion: 0.05
@@ -289,36 +289,36 @@ Cohesion: 0.06
 Nodes (38): intentClassifierClassifyLegacyCoversAsyncPath(), plantPointsAliasNormalization(), plantPointsAvocadoDeduplication(), plantPointsKeywordExtraction(), plantPointsNOVA3UsesIngredients(), plantPointsNOVA4SkipsEverything(), plantPointsProcessedExcluded(), plantPointsSpiceBlendExpansion() (+30 more)
 
 ### Community 25 - "Community 25"
-Cohesion: 0.07
-Nodes (43): AIResponseCleaner, clean_deduplicatesSentences(), clean_emptyStringReturnsEmpty(), clean_preservesValidPunctuation_exclamation(), clean_preservesValidPunctuation_question(), clean_removesAIDisclaimerSentence(), clean_removesAssistantLongPrefix(), clean_removesAssistantShortPrefix() (+35 more)
-
-### Community 26 - "Community 26"
 Cohesion: 0.08
 Nodes (35): synonymExpansionBasic(), AnyCodable, SpellCorrectService, expandSynonyms_aloo(), expandSynonyms_chana(), expandSynonyms_crispsToChips(), expandSynonyms_dahi(), expandSynonyms_fries() (+27 more)
 
-### Community 27 - "Community 27"
+### Community 26 - "Community 26"
 Cohesion: 0.08
 Nodes (30): ClarificationBuilder, bareFoodNounOffersLogAndInfoOptions(), bareFoodNounVarietyAllTrigger(), bareSupplementMultiwordTriggers(), bareSupplementNounOffersMarkAndStatus(), bareWeightValueOffersKgLbsAndGoal(), clarificationOptionRoundtripsCodable(), clearFoodLoggingDoesNotTrigger() (+22 more)
 
-### Community 28 - "Community 28"
+### Community 27 - "Community 27"
 Cohesion: 0.09
 Nodes (3): HardTurn, MultiTurnRegressionTests, Scenario
 
-### Community 29 - "Community 29"
+### Community 28 - "Community 28"
 Cohesion: 0.1
 Nodes (20): GoalProgressInfo, WeightServiceAPI, WeightTrendInfo, describeTrendNoDataMessage(), describeTrendReturnsNonEmptyString(), fetchBodyCompositionReturnsArray(), getGoalProgressDoesNotCrash(), getHistory365BypassesFilter() (+12 more)
 
-### Community 30 - "Community 30"
+### Community 29 - "Community 29"
 Cohesion: 0.13
 Nodes (26): hasRequiredParams_editMeal_actionOnly(), hasRequiredParams_foodInfo_queryOrName(), hasRequiredParams_logFood_emptyParams(), hasRequiredParams_logFood_nameOnly(), hasRequiredParams_logWeight_valueOnly(), hasRequiredParams_markSupplement_nameOnly(), hasRequiredParams_nonTargetTool_defaultsTrue(), noRetryWhenFoodInfoHasNameButNoQuery() (+18 more)
 
-### Community 31 - "Community 31"
+### Community 30 - "Community 30"
 Cohesion: 0.11
 Nodes (3): Rule, VoiceTranscriptionPostFixer, VoiceTranscriptionPostFixerTests
 
-### Community 32 - "Community 32"
+### Community 31 - "Community 31"
 Cohesion: 0.08
 Nodes (12): AVCaptureMetadataOutputObjectsDelegate, BarcodeScannerView, CameraView, Coordinator, NutritionPhotoCaptureView, ScannerViewController, ShareSheet, NSObject (+4 more)
+
+### Community 32 - "Community 32"
+Cohesion: 0.32
+Nodes (4): CaloriesEntry, CaloriesProvider, TimelineEntry, TimelineProvider
 
 ### Community 33 - "Community 33"
 Cohesion: 0.48
@@ -1027,12 +1027,12 @@ Nodes (0):
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `date` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 9`, `Community 10`, `Community 11`, `Community 12`, `Community 14`, `Community 15`, `Community 17`, `Community 18`, `Community 19`, `Community 20`, `Community 22`, `Community 23`, `Community 29`?**
-  _High betweenness centrality (0.051) - this node is a cross-community bridge._
-- **Why does `WeightEntry` connect `Community 1` to `Community 0`, `Community 2`, `Community 6`, `Community 9`, `Community 10`, `Community 11`, `Community 17`, `Community 19`, `Community 29`?**
+- **Why does `date` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 9`, `Community 10`, `Community 12`, `Community 14`, `Community 15`, `Community 16`, `Community 19`, `Community 20`, `Community 21`, `Community 22`, `Community 23`, `Community 24`, `Community 28`, `Community 32`?**
+  _High betweenness centrality (0.061) - this node is a cross-community bridge._
+- **Why does `FoodEntry` connect `Community 2` to `Community 0`, `Community 3`, `Community 4`, `Community 7`, `Community 12`, `Community 15`, `Community 19`, `Community 21`?**
+  _High betweenness centrality (0.025) - this node is a cross-community bridge._
+- **Why does `MealType` connect `Community 0` to `Community 1`, `Community 2`, `Community 3`, `Community 5`, `Community 7`, `Community 14`, `Community 15`, `Community 18`?**
   _High betweenness centrality (0.023) - this node is a cross-community bridge._
-- **Why does `data` connect `Community 8` to `Community 0`, `Community 1`, `Community 2`, `Community 3`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 9`, `Community 10`, `Community 12`, `Community 15`, `Community 17`, `Community 18`, `Community 21`, `Community 23`?**
-  _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Are the 355 inferred relationships involving `String` (e.g. with `.classify()` and `.extractTool()`) actually correct?**
   _`String` has 355 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 292 inferred relationships involving `date` (e.g. with `.measureTTFT()` and `.testSingleItemTTFTSmoke()`) actually correct?**
