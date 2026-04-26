@@ -113,12 +113,6 @@
       </div>
     </div>
 
-    <div id="tab-sprint" style="display:none">
-      <div id="sprint-content">
-        <div class="empty" style="color:var(--text-muted)">Loading...</div>
-      </div>
-    </div>
-
     <div id="tab-features" style="display:none">
       <details open style="margin-bottom:24px;">
         <summary style="cursor:pointer;color:rgb(111,66,193);font-weight:600;font-size:15px;padding:12px 0;">Request a Feature</summary>
@@ -1184,9 +1178,14 @@
         el.style.display = 'none';
       }
     }
-    // Auto-refresh live status every 30s when Sprint tab is active
+    // Auto-refresh live status + sprint plan every 30s when Sprint tab is active.
+    // Catches: in-progress label changes (claim/done), new sprint-tasks created
+    // by planning, P0 bugs filed, awaiting-approval bugs that flip to sprint.
     setInterval(() => {
-      if (getToken() && document.querySelector('.tab.active')?.dataset.tab === 'sprint') loadLiveStatus();
+      if (!getToken()) return;
+      if (document.querySelector('.tab.active')?.dataset.tab !== 'sprint') return;
+      loadLiveStatus();
+      loadSprint();
     }, 30000);
 
     async function loadSprint() {
