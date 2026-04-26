@@ -26,6 +26,15 @@
 
 set -e
 
+# Read stdin JSON (PreToolUse contract — see pause-gate.sh:6-7 for proven pattern).
+# Earlier version of this hook read TOOL_INPUT env var which is never set in PreToolUse,
+# causing it to block every Bash call. Always read stdin.
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null || echo "")
+
+# Empty command (parse failure / non-Bash event) — fail open
+[ -z "$COMMAND" ] && exit 0
+
 # Only autopilot
 [ "${DRIFT_AUTONOMOUS:-0}" = "1" ] || exit 0
 
@@ -50,12 +59,11 @@ except Exception:
 [ -n "$IN_PROGRESS" ] && exit 0
 
 # in_progress is null — gate the command.
-TOOL_INPUT="${TOOL_INPUT:-}"
 
 # Allowlist (regex). ANY match → allow.
 ALLOW='(scripts/sprint-service\.sh|gh issue view|gh issue list|gh issue comment|gh pr list|cat .*drift-state|cat .*MEMORY\.md|cat .*program\.md|cat .*CLAUDE\.md|cat .*roadmap\.md|^[[:space:]]*ls( |$)|^[[:space:]]*pwd|^[[:space:]]*echo)'
 
-if echo "$TOOL_INPUT" | grep -qE "$ALLOW"; then
+if echo "$COMMAND" | grep -qE "$ALLOW"; then
     exit 0
 fi
 

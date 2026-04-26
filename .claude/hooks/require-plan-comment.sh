@@ -20,13 +20,18 @@
 
 set -e
 
-# 0. Filter to git-commit only. The settings.json `if: "Bash(git commit *)"`
+# 0. Read stdin JSON (PreToolUse contract — pause-gate.sh:6-7 for proven pattern).
+#    Filter to git-commit only. The settings.json `if: "Bash(git commit *)"`
 #    matcher does NOT actually filter PreToolUse — without this in-script
 #    check the hook would fire on every Bash call and block all autopilot
-#    work. (Bug observed 2026-04-26 cycle 7581: session cleared in_progress
-#    to bypass the hook.)
-TOOL_INPUT="${TOOL_INPUT:-}"
-echo "$TOOL_INPUT" | grep -qE "git[[:space:]]+commit" || exit 0
+#    work. (Bug observed 2026-04-26 cycle 7581.)
+#
+#    Earlier version of this hook read TOOL_INPUT env var which is never set in
+#    PreToolUse, so the filter never matched and the hook silently fell through
+#    on every Bash call (no-op). Always read stdin.
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null || echo "")
+echo "$COMMAND" | grep -qE "git[[:space:]]+commit" || exit 0
 
 # 1. Only gate autopilot. Humans aren't subject to this discipline.
 [[ "${DRIFT_AUTONOMOUS:-0}" != "1" ]] && exit 0
