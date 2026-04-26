@@ -2,6 +2,27 @@ import Foundation
 @testable import DriftCore
 import Testing
 
+// MARK: - Test Helpers
+
+/// Build N consecutive daily entries ending today. The last entry has index
+/// (count - 1) and date == today, so all data lands inside the default
+/// 21-day regression window. Use this instead of hard-coded YYYY-MM-DD
+/// strings — those silently fall outside the window once today moves on
+/// and force the calculator into its 2-point fallback path.
+private func recentDailyEntries(
+    count: Int,
+    weight: (Int) -> Double
+) -> [(date: String, weightKg: Double)] {
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd"
+    formatter.locale = Locale(identifier: "en_US_POSIX")
+    let today = Date()
+    return (0..<count).map { i in
+        let d = Calendar.current.date(byAdding: .day, value: -(count - 1 - i), to: today)!
+        return (date: formatter.string(from: d), weightKg: weight(i))
+    }
+}
+
 // MARK: - EMA Core (12 tests)
 
 @Test func emaWithSingleEntry() async throws {
@@ -97,25 +118,23 @@ import Testing
 // MARK: - Trend Direction (5 tests)
 
 @Test func losingTrend() async throws {
-    let t = WeightTrendCalculator.calculateTrend(entries: (0..<20).map {
-        (date: String(format: "2026-03-%02d", $0+1), weightKg: 60.0 - Double($0) * 0.1)
-    })!
+    let entries = recentDailyEntries(count: 20) { 60.0 - Double($0) * 0.1 }
+    let t = WeightTrendCalculator.calculateTrend(entries: entries)!
     #expect(t.trendDirection == .losing)
     #expect(t.weeklyRateKg < 0)
 }
 
 @Test func gainingTrend() async throws {
-    let t = WeightTrendCalculator.calculateTrend(entries: (0..<20).map {
-        (date: String(format: "2026-03-%02d", $0+1), weightKg: 55.0 + Double($0) * 0.1)
-    })!
+    let entries = recentDailyEntries(count: 20) { 55.0 + Double($0) * 0.1 }
+    let t = WeightTrendCalculator.calculateTrend(entries: entries)!
     #expect(t.trendDirection == .gaining)
     #expect(t.weeklyRateKg > 0)
 }
 
 @Test func maintainingTrend() async throws {
-    let t = WeightTrendCalculator.calculateTrend(entries: (0..<14).map {
-        (date: String(format: "2026-03-%02d", $0+1), weightKg: 55.0 + ($0 % 2 == 0 ? 0.02 : -0.02))
-    })!
+    // 14 entries oscillating ±0.02 kg around 55 — OLS slope should be ≈0.
+    let entries = recentDailyEntries(count: 14) { 55.0 + ($0 % 2 == 0 ? 0.02 : -0.02) }
+    let t = WeightTrendCalculator.calculateTrend(entries: entries)!
     #expect(t.trendDirection == .maintaining)
 }
 

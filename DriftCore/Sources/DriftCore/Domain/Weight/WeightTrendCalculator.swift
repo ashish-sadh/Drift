@@ -180,14 +180,22 @@ public enum WeightTrendCalculator {
         guard let windowStart = Calendar.current.date(byAdding: .day, value: -config.regressionWindowDays, to: Date()) else { return nil }
         let recentPoints = dataPoints.filter { $0.date >= windowStart }
 
+        // Slope is computed on RAW filtered weights, NOT on the EMA series.
+        // Regressing on EMA values measures how fast the EMA is catching up to
+        // reality (which may move opposite to actual weight when the user's
+        // regime recently changed) instead of how the user's actual weight is
+        // changing. Outlier removal (above) provides robustness; regression
+        // itself averages remaining noise (slope variance ~ σ²/N³).
         let weeklyRateKg: Double
         if recentPoints.count >= 3 {
-            weeklyRateKg = linearRegressionSlope(points: recentPoints) * 7
+            weeklyRateKg = linearRegressionSlopeOnActualWeight(points: recentPoints) * 7
         } else if dataPoints.count >= 2 {
             let last = dataPoints[dataPoints.count - 1]
             let prev = dataPoints[dataPoints.count - 2]
+            let lastW = last.actualWeight ?? last.emaWeight
+            let prevW = prev.actualWeight ?? prev.emaWeight
             let days = Calendar.current.dateComponents([.day], from: prev.date, to: last.date).day ?? 1
-            weeklyRateKg = days > 0 ? (last.emaWeight - prev.emaWeight) / Double(days) * 7 : 0
+            weeklyRateKg = days > 0 ? (lastW - prevW) / Double(days) * 7 : 0
         } else {
             weeklyRateKg = 0
         }
@@ -203,8 +211,12 @@ public enum WeightTrendCalculator {
             trendDirection = .maintaining
         }
 
+        // Project from the latest ACTUAL weight, not from the (possibly lagging)
+        // EMA. Using the EMA as the base of projection compounds the lag —
+        // user sees a "projected weight" that's anchored to a stale value.
+        let latestActualWeight = dataPoints.last?.actualWeight ?? currentEMA
         let projection30Day: Double? = dataPoints.count >= 3
-            ? currentEMA + (weeklyRateKg / 7 * 30)
+            ? latestActualWeight + (weeklyRateKg / 7 * 30)
             : nil
 
         return WeightTrend(
@@ -240,23 +252,44 @@ public enum WeightTrendCalculator {
 
     // MARK: - Linear Regression
 
-    public static func linearRegressionSlope(points: [WeightDataPoint]) -> Double {
-        guard points.count >= 2 else { return 0 }
+    /// OLS slope (kg/day) over (date, weight) pairs. Shared by the EMA-based
+    /// and actual-weight-based regression entry points.
+    private static func slopeOfSeries(_ samples: [(date: Date, weight: Double)]) -> Double {
+        guard samples.count >= 2 else { return 0 }
 
-        let referenceDate = points[0].date
-        let n = Double(points.count)
+        let referenceDate = samples[0].date
+        let n = Double(samples.count)
 
         var sumX: Double = 0, sumY: Double = 0, sumXY: Double = 0, sumX2: Double = 0
-
-        for point in points {
-            let x = Double(Calendar.current.dateComponents([.day], from: referenceDate, to: point.date).day ?? 0)
-            let y = point.emaWeight
+        for s in samples {
+            let x = Double(Calendar.current.dateComponents([.day], from: referenceDate, to: s.date).day ?? 0)
+            let y = s.weight
             sumX += x; sumY += y; sumXY += x * y; sumX2 += x * x
         }
 
         let denominator = n * sumX2 - sumX * sumX
         guard denominator != 0 else { return 0 }
         return (n * sumXY - sumX * sumY) / denominator
+    }
+
+    /// Slope (kg/day) of the EMA-smoothed series. Public for tests and
+    /// algorithm-preview tools, but **not** used to compute weeklyRate /
+    /// surplus / projection — see linearRegressionSlopeOnActualWeight.
+    public static func linearRegressionSlope(points: [WeightDataPoint]) -> Double {
+        slopeOfSeries(points.map { (date: $0.date, weight: $0.emaWeight) })
+    }
+
+    /// Slope (kg/day) of the raw actual-weight series. Filters out points
+    /// without an actualWeight (synthesized/missing-data points). This is
+    /// the slope that drives weeklyRate, daily deficit, and projection —
+    /// regressing on raw weights avoids the EMA-lag inversion that
+    /// happens when a user's weight regime recently changed direction.
+    public static func linearRegressionSlopeOnActualWeight(points: [WeightDataPoint]) -> Double {
+        let samples: [(date: Date, weight: Double)] = points.compactMap {
+            guard let w = $0.actualWeight else { return nil }
+            return (date: $0.date, weight: w)
+        }
+        return slopeOfSeries(samples)
     }
 
     // MARK: - Weight Changes
