@@ -1850,5 +1850,20 @@
     "description": "TestFlight build 173 — sprint planning cycle 5965 (no code changes, version bump)",
     "features": [],
     "fixes": []
+  },
+  {
+    "build": 175,
+    "date": "2026-04-25T00:00:00-07:00",
+    "description": "Build 175 — DriftCore extraction, harness reliability, 5-tier test architecture",
+    "features": [
+      "DriftCore: Pure logic (AI pipeline, food/workout/weight services) now in a cross-platform Swift package — faster inner-loop builds.",
+      "5-tier test architecture: pure logic tests run in ~0.1s on macOS, no simulator boot for AI pipeline changes.",
+      "Harness reliability: autonomous sessions now reliably reach the task loop; gh API errors no longer silently swallowed."
+    ],
+    "fixes": [
+      "Planning sessions no longer exit mid-session due to task-loop routing failures.",
+      "Harness state writes are now atomic — no partial state on session crash.",
+      "DriftCore public API surface cleaned up: test-only internals no longer leaked as public symbols."
+    ]
   }
 ]
