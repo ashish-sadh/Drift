@@ -21,8 +21,8 @@ public enum AIActionExecutor {
     /// Conversational openers that wrap a logging intent — stripped first.
     /// "i want to log eggs" → "log eggs"
     private static let conversationalPrefixes = [
-        "i want to ", "i'd like to ", "can you ", "could you ",
-        "can i ", "please ", "let me ", "help me "
+        "i want to ", "i'd like to ", "i'd to ",
+        "can you ", "could you ", "can i ", "please ", "let me ", "help me "
     ]
 
     /// Imperative logging verbs at the start of the (possibly already-stripped) text.
