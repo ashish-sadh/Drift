@@ -1865,5 +1865,18 @@
       "Harness state writes are now atomic — no partial state on session crash.",
       "DriftCore public API surface cleaned up: test-only internals no longer leaked as public symbols."
     ]
+  },
+  {
+    "build": 176,
+    "date": "2026-04-26T00:00:00-07:00",
+    "description": "Build 176 — AI chat reliability improvements, prompt quality audit cycle 7485",
+    "features": [
+      "AI chat now correctly handles conversational prefixes like 'I'd like to add...' when logging food.",
+      "Improved micronutrient and goal-progress query handling in Stage 1/3 prompts."
+    ],
+    "fixes": [
+      "Fixed intent routing miss for 'i'd like to add' conversational prefix (#457).",
+      "Prompt quality audit: added targeted few-shot examples for micronutrient and macro goal progress queries (#458)."
+    ]
   }
 ]
