@@ -62,12 +62,21 @@ public struct WeightGoal: Codable, Sendable {
     public var fatTargetG: Double?
     public var dietPreference: DietPreference?
     public var calorieTargetOverride: Double?
+    /// Explicit calorie goal set by the user ("set my calorie goal to 2000").
+    /// Mirrors calorieTargetOverride — new preferred name; #441 reads this.
+    public var calorieGoal: Double? {
+        get { calorieTargetOverride }
+        set { calorieTargetOverride = newValue }
+    }
+    /// Explicit protein goal in grams set by the user ("set protein target to 150g").
+    public var proteinGoal: Double?
 
     public static let storageKey = "drift_weight_goal"
 
     public init(targetWeightKg: Double, monthsToAchieve: Int, startDate: String, startWeightKg: Double,
                 proteinTargetG: Double? = nil, carbsTargetG: Double? = nil, fatTargetG: Double? = nil,
-                dietPreference: DietPreference? = nil, calorieTargetOverride: Double? = nil) {
+                dietPreference: DietPreference? = nil, calorieTargetOverride: Double? = nil,
+                proteinGoal: Double? = nil) {
         self.targetWeightKg = targetWeightKg
         self.monthsToAchieve = monthsToAchieve
         self.startDate = startDate
@@ -77,6 +86,7 @@ public struct WeightGoal: Codable, Sendable {
         self.fatTargetG = fatTargetG
         self.dietPreference = dietPreference
         self.calorieTargetOverride = calorieTargetOverride
+        self.proteinGoal = proteinGoal
     }
 
     // MARK: - Current-Weight-Based Calculations

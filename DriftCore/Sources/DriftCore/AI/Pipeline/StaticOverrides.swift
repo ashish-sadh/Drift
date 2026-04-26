@@ -347,6 +347,24 @@ public enum StaticOverrides {
             }
         }
 
+        // Set protein goal: "set my protein target to 150g", "protein goal 120g", "my protein target is 180"
+        let protGoalInput = Self.resolveWordNumbers(lower)
+        let protGoalPattern = #"(?:set (?:my )?protein (?:goal|target|limit)|(?:my )?protein (?:goal|target|limit)(?:\s+is)?)\s+(?:to\s+)?(\d{2,3})(?:\s*g)?"#
+        if let protGoalRegex = try? NSRegularExpression(pattern: protGoalPattern),
+           let protGoalMatch = protGoalRegex.firstMatch(in: protGoalInput, range: NSRange(protGoalInput.startIndex..., in: protGoalInput)),
+           let numRange = Range(protGoalMatch.range(at: 1), in: protGoalInput),
+           let grams = Double(String(protGoalInput[numRange])),
+           grams >= 20 && grams <= 400 {
+            return .handler {
+                let currentKg = WeightTrendService.shared.latestWeightKg ?? 70
+                var goal = WeightGoal.load() ?? WeightGoal(targetWeightKg: currentKg, monthsToAchieve: 6,
+                    startDate: DateFormatters.todayString, startWeightKg: currentKg)
+                goal.proteinGoal = grams
+                goal.save()
+                return "Protein goal set to \(Int(grams))g/day."
+            }
+        }
+
         // Inline macros: "log 400 cal 30g protein lunch" or "chipotle bowl: 690 cal — 19g protein, 47g carbs, 51g fat"
         let macroPattern = #"(\d+)\s*(?:cal|kcal).*?(\d+)\s*(?:g\s*)?(?:p(?:rotein)?)"#
         if let macroRegex = try? NSRegularExpression(pattern: macroPattern),

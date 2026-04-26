@@ -449,21 +449,51 @@ public enum ToolRegistration {
 
         r.register(ToolSchema(
             id: "weight.set_goal", name: "set_goal", service: "weight",
-            description: "User wants to SET or UPDATE their weight goal. Use when they say 'set goal to', 'target weight', 'I want to weigh'.",
-            parameters: [ToolParam("target", "number", "Target weight"), ToolParam("unit", "string", "kg or lbs", required: false)],
+            description: "User wants to SET or UPDATE a goal. Handles weight ('set goal to 75kg'), calorie ('set calorie goal to 2000'), or protein ('set protein target to 150g') goals.",
+            parameters: [
+                ToolParam("target", "number", "Target value (weight kg/lbs, calories kcal, or protein grams)"),
+                ToolParam("goal_type", "string", "weight | calorie | protein (default: weight)", required: false),
+                ToolParam("unit", "string", "kg or lbs for weight goals", required: false)
+            ],
             handler: { params in
-                guard let target = params.double("target") else { return .error("Missing target weight") }
-                let unit = params.string("unit") ?? Preferences.weightUnit.rawValue
-                let targetKg = unit.lowercased().hasPrefix("kg") ? target : target / 2.20462
-                if targetKg < 20 || targetKg > 200 { return .error("Target \(target) \(unit) is outside valid range.") }
+                guard let target = params.double("target") else { return .error("Missing target value") }
+                let goalType = params.string("goal_type")?.lowercased() ?? "weight"
 
-                let currentKg = WeightTrendService.shared.latestWeightKg ?? targetKg
-                var goal = WeightGoal.load() ?? WeightGoal(targetWeightKg: targetKg, monthsToAchieve: 6,
-                    startDate: DateFormatters.todayString, startWeightKg: currentKg)
-                goal.targetWeightKg = targetKg
-                goal.save()
-                let display = unit.lowercased().hasPrefix("kg") ? String(format: "%.1f kg", target) : String(format: "%.0f lbs", target)
-                return .text("Goal set to \(display).")
+                switch goalType {
+                case "calorie":
+                    guard target >= 1000 && target <= 5000 else {
+                        return .error("Calorie goal \(Int(target)) is outside valid range (1000–5000).")
+                    }
+                    let currentKg = WeightTrendService.shared.latestWeightKg ?? 70
+                    var goal = WeightGoal.load() ?? WeightGoal(targetWeightKg: currentKg, monthsToAchieve: 6,
+                        startDate: DateFormatters.todayString, startWeightKg: currentKg)
+                    goal.calorieTargetOverride = target
+                    goal.save()
+                    return .text("Calorie goal set to \(Int(target)) kcal/day.")
+
+                case "protein":
+                    guard target >= 20 && target <= 400 else {
+                        return .error("Protein goal \(Int(target))g is outside valid range (20–400g).")
+                    }
+                    let currentKg = WeightTrendService.shared.latestWeightKg ?? 70
+                    var goal = WeightGoal.load() ?? WeightGoal(targetWeightKg: currentKg, monthsToAchieve: 6,
+                        startDate: DateFormatters.todayString, startWeightKg: currentKg)
+                    goal.proteinGoal = target
+                    goal.save()
+                    return .text("Protein goal set to \(Int(target))g/day.")
+
+                default: // "weight"
+                    let unit = params.string("unit") ?? Preferences.weightUnit.rawValue
+                    let targetKg = unit.lowercased().hasPrefix("kg") ? target : target / 2.20462
+                    if targetKg < 20 || targetKg > 200 { return .error("Target \(target) \(unit) is outside valid range.") }
+                    let currentKg = WeightTrendService.shared.latestWeightKg ?? targetKg
+                    var goal = WeightGoal.load() ?? WeightGoal(targetWeightKg: targetKg, monthsToAchieve: 6,
+                        startDate: DateFormatters.todayString, startWeightKg: currentKg)
+                    goal.targetWeightKg = targetKg
+                    goal.save()
+                    let display = unit.lowercased().hasPrefix("kg") ? String(format: "%.1f kg", target) : String(format: "%.0f lbs", target)
+                    return .text("Goal set to \(display).")
+                }
             }
         ))
 

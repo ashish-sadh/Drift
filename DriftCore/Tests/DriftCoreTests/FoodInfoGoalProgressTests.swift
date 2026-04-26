@@ -59,4 +59,84 @@ final class FoodInfoGoalProgressTests: XCTestCase {
         let line = FoodService.macroProgressLine(label: "Calories", currentG: 1500, targetG: 2000, unit: " cal")
         XCTAssertEqual(line, "Calories: 1500 cal / 2000 cal goal — 75% (500 cal to go).")
     }
+
+    // MARK: - WeightGoal.proteinGoal / calorieGoal (#440)
+
+    func testWeightGoal_ProteinGoalRoundTrips() {
+        var goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 6,
+                              startDate: "2026-01-01", startWeightKg: 80)
+        goal.proteinGoal = 150
+        let data = try! JSONEncoder().encode(goal)
+        let decoded = try! JSONDecoder().decode(WeightGoal.self, from: data)
+        XCTAssertEqual(decoded.proteinGoal, 150)
+    }
+
+    func testWeightGoal_ProteinGoalNilByDefault() {
+        let goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 6,
+                              startDate: "2026-01-01", startWeightKg: 80)
+        XCTAssertNil(goal.proteinGoal)
+    }
+
+    func testWeightGoal_CalorieGoalMirrorsOverride() {
+        var goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 6,
+                              startDate: "2026-01-01", startWeightKg: 80)
+        goal.calorieGoal = 2000
+        XCTAssertEqual(goal.calorieTargetOverride, 2000)
+        goal.calorieTargetOverride = 1800
+        XCTAssertEqual(goal.calorieGoal, 1800)
+    }
+
+    func testWeightGoal_BothGoalsIndependent() {
+        var goal = WeightGoal(targetWeightKg: 75, monthsToAchieve: 6,
+                              startDate: "2026-01-01", startWeightKg: 80)
+        goal.calorieGoal = 2000
+        goal.proteinGoal = 150
+        XCTAssertEqual(goal.calorieGoal, 2000)
+        XCTAssertEqual(goal.proteinGoal, 150)
+        goal.proteinGoal = nil
+        XCTAssertNil(goal.proteinGoal)
+        XCTAssertEqual(goal.calorieGoal, 2000, "Clearing proteinGoal must not affect calorieGoal")
+    }
+
+    // MARK: - StaticOverrides protein goal routing (#440)
+
+    @MainActor
+    func testStaticOverrides_ProteinGoalPatternMatches() {
+        let matchingQueries = [
+            "set my protein target to 150g",
+            "set protein target 120",
+            "protein goal 180g",
+            "my protein target is 160",
+            "set protein goal to 200",
+        ]
+        for query in matchingQueries {
+            let result = StaticOverrides.match(query.lowercased())
+            XCTAssertNotNil(result, "Should match protein goal pattern: '\(query)'")
+            if case .handler = result { /* pass */ }
+            else { XCTFail("Protein goal '\(query)' should return .handler, got: \(String(describing: result))") }
+        }
+    }
+
+    @MainActor
+    func testStaticOverrides_ProteinGoalOutOfRangeRejected() {
+        // Values outside 20–400 should not match the protein goal pattern
+        let nonMatches = [
+            "set protein goal to 5",   // below floor (< 20)
+            "set protein goal to 500", // above ceiling (> 400)
+        ]
+        for query in nonMatches {
+            let result = StaticOverrides.match(query.lowercased())
+            if case .handler = result {
+                XCTFail("Out-of-range protein goal '\(query)' should not produce a handler")
+            }
+        }
+    }
+
+    @MainActor
+    func testStaticOverrides_CalorieGoalStillWorks() {
+        let result = StaticOverrides.match("set my calorie goal to 2000")
+        XCTAssertNotNil(result, "Calorie goal pattern must still match after protein goal addition")
+        if case .handler = result { /* pass */ }
+        else { XCTFail("Calorie goal should return .handler") }
+    }
 }
