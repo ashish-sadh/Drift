@@ -1,11 +1,8 @@
 import Foundation
-import DriftCore
 
-/// Display formatter for `WorkoutSet`. References `Preferences.weightUnit`
-/// (which lives in the iOS app target alongside SwiftUI), so the formatter
-/// stays here while the data type lives in DriftCore.
+/// Display formatter for `WorkoutSet`. References `Preferences.weightUnit`.
 extension WorkoutSet {
-    var display: String {
+    public var display: String {
         let u = Preferences.weightUnit
         if let d = durationSec, d > 0 {
             let m = d / 60; let s = d % 60

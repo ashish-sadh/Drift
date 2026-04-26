@@ -1,7 +1,6 @@
 import Foundation
 @testable import DriftCore
 import Testing
-@testable import Drift
 
 private func makeEntries(startDate: String, weightKgByDay: [Double]) -> [WeightEntry] {
     let fmt = DateFormatters.dateOnly

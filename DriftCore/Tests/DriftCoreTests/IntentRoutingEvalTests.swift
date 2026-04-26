@@ -1,6 +1,5 @@
 import XCTest
 @testable import DriftCore
-@testable import Drift
 
 /// Intent routing eval: verifies ToolRanker correctly ranks tools for natural food phrasing.
 /// Focus: implicit food logging (no "log" keyword) and nutrition-query negatives.

@@ -1,7 +1,6 @@
 import XCTest
 @testable import DriftCore
 import Foundation
-@testable import Drift
 
 /// Unit tests for the USDA fallback path.
 /// Most tests are deterministic (no network). Live search tests are gated behind

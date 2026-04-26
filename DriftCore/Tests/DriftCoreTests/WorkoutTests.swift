@@ -2,7 +2,6 @@ import Foundation
 @testable import DriftCore
 import Testing
 import GRDB
-@testable import Drift
 
 // MARK: - Workout CRUD (12 tests)
 

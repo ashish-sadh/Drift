@@ -1,7 +1,6 @@
 import Foundation
 @testable import DriftCore
 import Testing
-@testable import Drift
 
 /// Regression coverage for #249 — "Weekly summary" chip routed to a
 /// fuzzy food match ("Mix secos y arandanos - Weekly!") instead of the

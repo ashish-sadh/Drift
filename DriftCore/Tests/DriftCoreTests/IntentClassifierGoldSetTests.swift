@@ -1,6 +1,5 @@
 import XCTest
 @testable import DriftCore
-@testable import Drift
 
 /// Isolated gold set for IntentClassifier — sprint task #161.
 /// Tests deterministic JSON parsing (parseResponse/mapResponse) and StaticOverrides routing.

@@ -1,7 +1,6 @@
 import Foundation
 @testable import DriftCore
 import Testing
-@testable import Drift
 
 // MARK: - WeightServiceAPI Tests
 // Tests for validation, unit conversion, history filtering, and describe logic.
