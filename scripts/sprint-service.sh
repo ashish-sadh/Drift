@@ -329,12 +329,14 @@ cmd_claim() {
     local ISSUE_JSON
     ISSUE_JSON=$(gh issue view "$NUM" --json title,labels 2>/dev/null || echo '{"title":"Issue #'"$NUM"'","labels":[]}')
 
-    python3 - "$STATE_FILE" "$NUM" "$ISSUE_JSON" <<'PYEOF'
+        local NOW_TS=$(date +%s)
+    python3 - "$STATE_FILE" "$NUM" "$ISSUE_JSON" "$NOW_TS" <<'PYEOF'
 import json, sys
 
 state_file  = sys.argv[1]
 num         = int(sys.argv[2])
 issue_json  = sys.argv[3]
+now_ts      = int(sys.argv[4])
 
 try:
     state = json.load(open(state_file))
@@ -358,6 +360,7 @@ else:
     found["status"] = "in_progress"
 
 state["in_progress"] = num
+state["claim_started"] = now_ts  # for stale-claim detection in self-improve-watchdog
 with open(state_file, "w") as f:
     json.dump(state, f, indent=2)
 print(f"Claimed #{num}")
@@ -418,6 +421,7 @@ state_file, num = sys.argv[1], int(sys.argv[2])
 try:
     d = json.load(open(state_file))
     d["in_progress"] = None
+    d.pop("claim_started", None)
     for t in d["tasks"]:
         if t["number"] == num:
             t["status"] = "done"
@@ -444,7 +448,9 @@ import json, sys
 state_file, num = sys.argv[1], int(sys.argv[2])
 try:
     d = json.load(open(state_file))
-    if d.get("in_progress") == num: d["in_progress"] = None
+    if d.get("in_progress") == num:
+        d["in_progress"] = None
+        d.pop("claim_started", None)
     for t in d["tasks"]:
         if t["number"] == num: t["status"] = "pending"; break
     with open(state_file, "w") as f: json.dump(d, f, indent=2)
@@ -473,7 +479,9 @@ import json, sys
 state_file, num = sys.argv[1], int(sys.argv[2])
 try:
     d = json.load(open(state_file))
-    if d.get("in_progress") == num: d["in_progress"] = None
+    if d.get("in_progress") == num:
+        d["in_progress"] = None
+        d.pop("claim_started", None)
     for t in d["tasks"]:
         if t["number"] == num:
             t["status"] = "done"
@@ -544,6 +552,7 @@ state_file = sys.argv[1]
 try:
     d = json.load(open(state_file))
     d["in_progress"] = None
+    d.pop("claim_started", None)
     for t in d["tasks"]:
         if t.get("status") == "in_progress": t["status"] = "pending"
     with open(state_file, "w") as f: json.dump(d, f, indent=2)

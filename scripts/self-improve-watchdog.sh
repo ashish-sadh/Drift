@@ -260,6 +260,71 @@ reconcile_in_progress() {
     fi
 }
 
+# Stale-claim detection — flag issues claimed >threshold ago with no progress.
+#
+# "Progress" = either a commit referencing #N in its message, or any new
+# comment on the issue, both since claim_started. If neither happened in
+# the last hour (default), the claim is presumed stuck — auto-flag the
+# issue with `blocked` + `needs-review`, comment, and unclaim locally so
+# the next session can move on.
+#
+# Solves two failure modes:
+#   1. Sessions getting stuck on impossible tasks (e.g. #469 telemetry
+#      analysis with no telemetry). They thrash for an hour, get flagged,
+#      human reviews, closes as wontfix.
+#   2. Hung/wandering sessions that bypass the claim hook somehow — no
+#      commits, no comments, just exploration → flagged.
+#
+# Threshold: DRIFT_CLAIM_STALE_THRESHOLD_SECS env var, default 3600 (1h).
+check_stale_claim() {
+    local SD="$HOME/drift-state"
+    local STATE_FILE="$SD/sprint-state.json"
+    [[ -f "$STATE_FILE" ]] || return
+
+    local NUM CLAIM_TS
+    NUM=$(jq -r '.in_progress // empty' "$STATE_FILE" 2>/dev/null || echo "")
+    [[ -z "$NUM" || "$NUM" == "null" ]] && return
+    CLAIM_TS=$(jq -r '.claim_started // empty' "$STATE_FILE" 2>/dev/null || echo "")
+    [[ -z "$CLAIM_TS" || "$CLAIM_TS" == "null" ]] && return  # legacy claim, skip
+
+    local NOW AGE THRESHOLD
+    NOW=$(date +%s)
+    AGE=$(( NOW - CLAIM_TS ))
+    THRESHOLD=${DRIFT_CLAIM_STALE_THRESHOLD_SECS:-3600}
+    (( AGE < THRESHOLD )) && return
+
+    # Any commit referencing #N in its message since claim_started?
+    local COMMITS
+    COMMITS=$(cd "$WORK_DIR" && git log --since="@$CLAIM_TS" --grep="#$NUM" --oneline 2>/dev/null | wc -l | tr -d ' ')
+    if [[ "$COMMITS" -gt 0 ]]; then
+        return
+    fi
+
+    # Any new comment on the issue since claim_started? (RFC3339 → epoch via python)
+    local LATEST_COMMENT_TS
+    LATEST_COMMENT_TS=$(gh issue view "$NUM" --json comments \
+        --jq '[.comments[].createdAt] | sort | last // ""' 2>/dev/null \
+        | python3 -c "
+import sys
+from datetime import datetime
+s = sys.stdin.read().strip().strip('\"')
+if not s: print(0); sys.exit()
+try:
+    print(int(datetime.fromisoformat(s.replace('Z','+00:00')).timestamp()))
+except Exception:
+    print(0)
+" 2>/dev/null || echo "0")
+    if [[ "$LATEST_COMMENT_TS" -gt "$CLAIM_TS" ]]; then
+        return
+    fi
+
+    # Stale — flag it.
+    log "Stale-claim: #$NUM claimed ${AGE}s ago (threshold ${THRESHOLD}s), no commits referencing #$NUM, no new comments. Auto-flagging."
+    gh issue edit "$NUM" --add-label blocked --add-label needs-review >/dev/null 2>&1 || true
+    gh issue comment "$NUM" --body "Auto-flagged stale claim — claimed for ${AGE}s with no commits referencing #${NUM} and no new activity. Review and unblock, close, or reassign." >/dev/null 2>&1 || true
+    "$WORK_DIR/scripts/sprint-service.sh" unclaim "$NUM" >/dev/null 2>&1 || true
+}
+
 # Strip orphan in-progress labels — a closed issue should never carry
 # in-progress (always wrong), and an open sprint-task we're not working on
 # shouldn't either. Planning and design-doc issues have their own lifecycle
@@ -762,6 +827,7 @@ while true; do
             # locking our in_progress slot, and orphan in-progress labels.
             sync_stamps_from_main
             reconcile_in_progress
+            check_stale_claim
             sweep_stale_in_progress_labels
             commit_heartbeat_if_due
             # Check if autopilot is dead
