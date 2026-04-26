@@ -758,6 +758,10 @@ final class IntentClassifierGoldSetTests: XCTestCase {
             "how do I do a deadlift", "how to do bench press", "form tips for squats",
             // #169 — protein/nutrition status must not log food
             "am I on track for protein", "how many calories should I eat",
+            // #458 — micronutrient queries must not log food
+            "how much fiber did I eat today", "how much sodium today", "what's my sugar intake",
+            // #458 — goal progress must not log food
+            "am I hitting my protein goal", "on track for calories",
         ]
         var falsePositives: [String] = []
         for query in nonFoodQueries {
@@ -985,5 +989,72 @@ final class IntentClassifierGoldSetTests: XCTestCase {
         print("📊 GOLD SET: \(correct)/\(allQueries.count) (\(String(format: "%.0f", accuracy))%)")
         XCTAssertGreaterThanOrEqual(allQueries.count, 50, "Gold set should have 50+ queries")
         XCTAssertGreaterThanOrEqual(accuracy, 80, "Overall accuracy should be ≥80%")
+    }
+
+    // MARK: - Micronutrient & Goal Progress Queries (#458 audit)
+
+    func testMicronutrientQueries_ParseToFoodInfo() {
+        let cases: [(json: String, expectedQuery: String)] = [
+            (#"{"tool":"food_info","query":"fiber today"}"#, "fiber today"),
+            (#"{"tool":"food_info","query":"sodium today"}"#, "sodium today"),
+            (#"{"tool":"food_info","query":"sugar today"}"#, "sugar today"),
+            (#"{"tool":"food_info","query":"fiber this week"}"#, "fiber this week"),
+        ]
+        var correct = 0
+        for (json, expectedQuery) in cases {
+            guard let intent = IntentClassifier.parseResponse(json) else {
+                print("MISS (micronutrient): \(json)"); continue
+            }
+            if intent.tool == "food_info" && intent.params["query"] == expectedQuery {
+                correct += 1
+            } else {
+                print("WRONG (micronutrient): got tool=\(intent.tool) query=\(intent.params["query"] ?? "nil")")
+            }
+        }
+        print("📊 Micronutrient routing: \(correct)/\(cases.count)")
+        XCTAssertEqual(correct, cases.count, "Micronutrient queries must route to food_info")
+    }
+
+    func testGoalProgressQueries_ParseToFoodInfo() {
+        let cases: [(json: String, expectedQuery: String)] = [
+            (#"{"tool":"food_info","query":"protein goal"}"#, "protein goal"),
+            (#"{"tool":"food_info","query":"calorie goal"}"#, "calorie goal"),
+            (#"{"tool":"food_info","query":"am I hitting my protein goal"}"#, "am I hitting my protein goal"),
+        ]
+        var correct = 0
+        for (json, expectedQuery) in cases {
+            guard let intent = IntentClassifier.parseResponse(json) else {
+                print("MISS (goal progress): \(json)"); continue
+            }
+            if intent.tool == "food_info" && intent.params["query"] == expectedQuery {
+                correct += 1
+            } else {
+                print("WRONG (goal progress): got tool=\(intent.tool) query=\(intent.params["query"] ?? "nil")")
+            }
+        }
+        print("📊 Goal progress routing: \(correct)/\(cases.count)")
+        XCTAssertEqual(correct, cases.count, "Goal progress queries must route to food_info")
+    }
+
+    func testSetGoalWithGoalType_ParseCorrectly() {
+        let cases: [(json: String, target: String, goalType: String)] = [
+            (#"{"tool":"set_goal","target":"150","goal_type":"protein"}"#, "150", "protein"),
+            (#"{"tool":"set_goal","target":"2000","goal_type":"calorie"}"#, "2000", "calorie"),
+        ]
+        var correct = 0
+        for (json, expectedTarget, expectedType) in cases {
+            guard let intent = IntentClassifier.parseResponse(json) else {
+                print("MISS (set_goal goal_type): \(json)"); continue
+            }
+            if intent.tool == "set_goal"
+                && intent.params["target"] == expectedTarget
+                && intent.params["goal_type"] == expectedType {
+                correct += 1
+            } else {
+                print("WRONG (set_goal): tool=\(intent.tool) target=\(intent.params["target"] ?? "nil") goal_type=\(intent.params["goal_type"] ?? "nil")")
+            }
+        }
+        print("📊 set_goal goal_type routing: \(correct)/\(cases.count)")
+        XCTAssertEqual(correct, cases.count, "set_goal with goal_type must parse correctly")
     }
 }

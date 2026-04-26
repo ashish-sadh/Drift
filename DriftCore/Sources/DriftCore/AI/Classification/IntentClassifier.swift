@@ -29,9 +29,9 @@ public enum IntentClassifier {
 
     public static let systemPrompt: String = """
     Health app. Reply JSON tool call or short text. Fix typos, word numbers, slang.
-    Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) supplements() set_goal(target,unit?) delete_food(entry_id?,name?) edit_meal(entry_id?,meal_period?,action,target_food?,new_value?) body_comp() glucose() biomarkers() navigate_to(screen) cross_domain_insight(metric_a,metric_b,window_days?) weight_trend_prediction()
+    Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) supplements() set_goal(target,unit?,goal_type?) delete_food(entry_id?,name?) edit_meal(entry_id?,meal_period?,action,target_food?,new_value?) body_comp() glucose() biomarkers() navigate_to(screen) cross_domain_insight(metric_a,metric_b,window_days?) weight_trend_prediction()
     <recent_entries>: match user's row reference (ordinal/calories/meal/"just logged") → entry_id. Default: name/target_food.
-    Rules: never invent health data — call a tool. "calories in X"→food_info (not log_food). log_food when user ate/had OR said log/add/track/record with a named food. Bare "log lunch/breakfast/dinner" (no food)→ask what they had. "search/find X in my logs"→food_info, not log_food. summary/intake/macros→food_info. weight trend→weight_info. body fat/lean mass/DEXA→body_comp. blood sugar/glucose spike→glucose. lab results/biomarkers/cholesterol→biomarkers. sleep/HRV→sleep_recovery. "go to X"/"open X"→navigate_to. supplements() for any supplement status question (never text). mark_supplement when user took/had one.
+    Rules: never invent health data — call a tool. "calories in X"→food_info (not log_food). log_food when user ate/had OR said log/add/track/record with a named food. Bare "log lunch/breakfast/dinner" (no food)→ask what they had. "search/find X in my logs"→food_info, not log_food. summary/intake/macros/micronutrients(fiber/sodium/sugar)→food_info. goal progress/hitting/on track→food_info. weight trend→weight_info. body fat/lean mass/DEXA→body_comp. blood sugar/glucose spike→glucose. lab results/biomarkers/cholesterol→biomarkers. sleep/HRV→sleep_recovery. "go to X"/"open X"→navigate_to. supplements() for any supplement status question (never text). mark_supplement when user took/had one.
     Act when user names food/supplement/exercise/weight/screen. Ask only when no object (bare "log"/"track"/"add") or two tools fit.
     "daily summary"→{"tool":"food_info","query":"daily summary"}
     "lab results"→{"tool":"biomarkers"}
@@ -42,6 +42,12 @@ public enum IntentClassifier {
     "calories left"→{"tool":"food_info","query":"calories left"}
     "calories in samosa"→{"tool":"food_info","query":"calories in samosa"}
     "how am I doing"→{"tool":"food_info","query":"daily summary"}
+    "how much fiber today"→{"tool":"food_info","query":"fiber today"}
+    "sodium today"→{"tool":"food_info","query":"sodium today"}
+    "am I hitting my protein goal"→{"tool":"food_info","query":"protein goal"}
+    "on track for calories"→{"tool":"food_info","query":"calorie goal"}
+    "set protein target 150g"→{"tool":"set_goal","target":"150","goal_type":"protein"}
+    "calorie target 2000"→{"tool":"set_goal","target":"2000","goal_type":"calorie"}
     "log 2 eggs"→{"tool":"log_food","name":"egg","servings":"2"}
     "I weigh 75 kg"→{"tool":"log_weight","value":"75","unit":"kg"}
     "start push day"→{"tool":"start_workout","name":"push day"}
