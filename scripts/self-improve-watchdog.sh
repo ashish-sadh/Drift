@@ -599,7 +599,21 @@ if [[ -f "$PID_FILE" ]]; then
     if kill -0 "$SAVED_PID" 2>/dev/null; then
         CLAUDE_PID="$SAVED_PID"
         CURRENT_LOG=$(ls -t "$LOG_DIR"/session_*.log 2>/dev/null | head -1)
-        log "Adopted existing autopilot (PID $CLAUDE_PID, log: $CURRENT_LOG)"
+        # Recover SESSION_STARTED_AT from the log file. Without this, the
+        # stable-run-reset crash math computes `now - 0 = bogus huge number`
+        # and logs e.g. "session age 1777186865s" (a 56-year-old session).
+        # Strategy: parse the timestamp embedded in the log filename
+        # (`session_{type}_{epoch}.log`); fall back to file mtime; fall back
+        # to "now" if neither is available.
+        if [[ -n "$CURRENT_LOG" ]]; then
+            SESSION_STARTED_AT=$(echo "$CURRENT_LOG" | sed -nE 's|.*/session_[^_]+_([0-9]+)\.log$|\1|p')
+            if [[ -z "$SESSION_STARTED_AT" ]]; then
+                SESSION_STARTED_AT=$(stat -f %m "$CURRENT_LOG" 2>/dev/null || stat -c %Y "$CURRENT_LOG" 2>/dev/null || date +%s)
+            fi
+        else
+            SESSION_STARTED_AT=$(date +%s)
+        fi
+        log "Adopted existing autopilot (PID $CLAUDE_PID, started $(($(date +%s) - SESSION_STARTED_AT))s ago, log: $CURRENT_LOG)"
     else
         log "Stale PID file (PID $SAVED_PID dead). Will start fresh."
         rm -f "$PID_FILE"
