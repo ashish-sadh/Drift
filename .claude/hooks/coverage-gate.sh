@@ -33,7 +33,7 @@ sleep 2
 rm -rf /tmp/DriftCoverage.xcresult
 xcodebuild test -project Drift.xcodeproj -scheme Drift \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -only-testing:DriftTests \
+  -skip-testing:DriftLLMEvalTests \
   -enableCodeCoverage YES \
   -resultBundlePath /tmp/DriftCoverage.xcresult \
   > /tmp/drift-coverage-test.log 2>&1 || true

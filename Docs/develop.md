@@ -45,7 +45,7 @@ xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iO
 - **Gemma 4 path:** LLM decides which tool to call with all 10 tools visible
 - Tool calls are JSON: `{"tool":"log_food","params":{"name":"eggs","amount":"2"}}`
 - `LocalAIService.isLargeModel` flag drives routing decisions
-- Run eval harness after any AI change: `xcodebuild test ... -only-testing:'DriftTests/AIEvalHarness'`
+- Run eval harness after any AI change: `cd DriftCore && swift test --filter AIEvalHarness`
 
 ### HealthKit
 - `HealthKitService` is an `actor` for thread safety

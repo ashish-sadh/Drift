@@ -23,7 +23,7 @@ if [ ! -d "$RESULT_BUNDLE" ]; then
     echo "❌ No coverage data. Run tests with -enableCodeCoverage YES first:"
     echo "   pkill -9 -f xcodebuild 2>/dev/null; sleep 2"
     echo "   rm -rf /tmp/DriftCoverage.xcresult"
-    echo "   xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:DriftTests -enableCodeCoverage YES -resultBundlePath /tmp/DriftCoverage.xcresult"
+    echo "   xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -skip-testing:DriftLLMEvalTests -enableCodeCoverage YES -resultBundlePath /tmp/DriftCoverage.xcresult"
     exit 1
 fi
 

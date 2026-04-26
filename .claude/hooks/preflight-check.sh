@@ -44,7 +44,7 @@ pkill -9 -f xcodebuild 2>/dev/null || true
 sleep 2
 xcodebuild test -project Drift.xcodeproj -scheme Drift \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -only-testing:DriftTests \
+  -skip-testing:DriftLLMEvalTests \
   > /tmp/drift-preflight-test.log 2>&1
 if [ $? -ne 0 ]; then
   FAILED_TESTS=$(grep "✘" /tmp/drift-preflight-test.log 2>/dev/null | head -10)
@@ -53,16 +53,14 @@ else
   echo "  [2/5] Tests OK" >&2
 fi
 
-# 3. AI eval harness
+# 3. AI eval harness (moved to DriftCore in 2026-04 migration — runs via swift test)
 echo "  [3/5] AI eval harness..." >&2
-pkill -9 -f xcodebuild 2>/dev/null || true
-sleep 2
-xcodebuild test -project Drift.xcodeproj -scheme Drift \
-  -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -only-testing:'DriftTests/AIEvalHarness' \
-  > /tmp/drift-preflight-eval.log 2>&1
-if [ $? -ne 0 ]; then
-  FAILED_EVAL=$(grep "✘" /tmp/drift-preflight-eval.log 2>/dev/null | head -10)
+pushd DriftCore > /dev/null
+swift test --filter AIEvalHarness > /tmp/drift-preflight-eval.log 2>&1
+RC=$?
+popd > /dev/null
+if [ $RC -ne 0 ]; then
+  FAILED_EVAL=$(grep "✘\|failed" /tmp/drift-preflight-eval.log 2>/dev/null | head -10)
   FAILURES="${FAILURES}\n- AI EVAL FAILED:\n${FAILED_EVAL}"
 else
   echo "  [3/5] AI eval OK" >&2

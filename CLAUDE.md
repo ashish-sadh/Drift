@@ -102,7 +102,7 @@ The codebase is split into a multi-platform `DriftCore` Swift package + the iOS 
 |---|---|---|
 | Pure logic in `DriftCore/Sources/DriftCore/` | `cd DriftCore && swift test` | ~2s warm (~850 tests) |
 | AI pipeline (LLM eval) | `xcodebuild test -scheme DriftLLMEvalMacOS -destination 'platform=macOS'` | 30s deterministic per-stage / ~5min full |
-| iOS UI / HealthKit / Widget integration | `xcodebuild test -scheme Drift -destination 'iOS Simulator,name=iPhone 17 Pro' -only-testing:DriftTests` | ~30s (~1200 tests) |
+| iOS UI / HealthKit / Widget integration | `xcodebuild test -scheme Drift -destination 'iOS Simulator,name=iPhone 17 Pro' -skip-testing:DriftLLMEvalTests` | ~30s (~1200 tests) |
 | Pre-TestFlight | run all of the above |  |
 
 If you touch a file that's only Swift logic (no SwiftUI / HealthKit / WidgetKit / etc), it almost certainly belongs in DriftCore — keep the iOS target lean.
@@ -146,7 +146,7 @@ xcodebuild build -project Drift.xcodeproj -scheme Drift -destination 'platform=i
 
 # iOS unit tests (~1200 tests, ~30s) — for pure DriftCore logic prefer `cd DriftCore && swift test`. ALWAYS kill stale processes first
 pkill -9 -f xcodebuild 2>/dev/null; sleep 2
-xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:DriftTests
+xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -skip-testing:DriftLLMEvalTests
 
 # LLM eval lite (3 queries per model, ~2 min) — run after AI changes
 pkill -9 -f xcodebuild 2>/dev/null; sleep 2
@@ -163,13 +163,13 @@ DRIFT_DEEP_EVAL=1 xcodebuild test -project Drift.xcodeproj -scheme Drift -destin
 # Check failures
 xcodebuild test ... 2>&1 | grep "✘"  # empty = all pass
 
-# AI eval harness only (intent detection, no LLM)
-xcodebuild test ... -only-testing:'DriftTests/AIEvalHarness'
+# AI eval harness only (intent detection, no LLM) — moved to DriftCore
+cd DriftCore && swift test --filter AIEvalHarness
 
 # Coverage check (run after tests with coverage enabled)
 rm -rf /tmp/DriftCoverage.xcresult
 pkill -9 -f xcodebuild 2>/dev/null; sleep 2
-xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:DriftTests -enableCodeCoverage YES -resultBundlePath /tmp/DriftCoverage.xcresult
+xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -skip-testing:DriftLLMEvalTests -enableCodeCoverage YES -resultBundlePath /tmp/DriftCoverage.xcresult
 ./scripts/coverage-check.sh
 ```
 

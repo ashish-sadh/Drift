@@ -26,7 +26,7 @@ xcodebuild test ... 2>&1 | grep "✘"  # empty = all pass
 # AI eval harness only (212+ test methods)
 xcodebuild test -project Drift.xcodeproj -scheme Drift \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -only-testing:'DriftTests/AIEvalHarness'
+  --filter AIEvalHarness
 
 # LLM tool-calling eval (needs model on simulator — 100 queries)
 xcodebuild test -project Drift.xcodeproj -scheme Drift \
@@ -39,8 +39,8 @@ xcodebuild test -project Drift.xcodeproj -scheme Drift \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
   -only-testing:'DriftLLMEvalTests/MultiTurnEvalTests' 2>&1 | grep -E "📊|❌|✔"
 
-# Specific test class
-xcodebuild test ... -only-testing:DriftTests/WorkoutTests
+# Specific test class (DriftCore tests run via swift test)
+cd DriftCore && swift test --filter WorkoutTests
 ```
 
 ## Test Files (19 files, 729+ tests, 248 methods)
