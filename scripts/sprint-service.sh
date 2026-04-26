@@ -391,14 +391,26 @@ cmd_done() {
     local COMMENT="Done.${COMMIT_REF}"
     [ -n "$NOTE" ] && COMMENT="$NOTE${COMMIT_REF}"
 
-    # All three calls are loud (logged to gh-errors.log on failure) but
-    # non-blocking: we still update local state + increment budget so the
-    # session can progress. Failed closes leave the GitHub issue open and
-    # the WARN visible — the watchdog or human can re-close them. This
-    # preserves the budget-bookkeeping semantics test-drift-control.sh expects.
-    gh_loud "comment on #$NUM" -- issue comment "$NUM" --body "$COMMENT" || true
-    gh_loud "close #$NUM" -- issue close "$NUM" || true
-    gh_loud "remove in-progress label on #$NUM" -- issue edit "$NUM" --remove-label in-progress || true
+    # Defensive check: if the GitHub issue is already CLOSED, skip the
+    # duplicate comment + close calls. Prevents the "Done. Commit: reconcile"
+    # noise pattern observed on #440 (2026-04-26) where a session worked on
+    # a closed issue and posted spurious comments. Local state still updates
+    # and budget still increments — that's what callers depend on.
+    local CURRENT_STATE
+    CURRENT_STATE=$(gh issue view "$NUM" --json state --jq '.state' 2>/dev/null || echo "OPEN")
+    if [ "$CURRENT_STATE" = "CLOSED" ]; then
+        echo "Issue #$NUM is already CLOSED on GitHub — skipping duplicate comment+close, just clearing local state." >&2
+        gh_loud "remove in-progress label on closed #$NUM" -- issue edit "$NUM" --remove-label in-progress || true
+    else
+        # All three calls are loud (logged to gh-errors.log on failure) but
+        # non-blocking: we still update local state + increment budget so the
+        # session can progress. Failed closes leave the GitHub issue open and
+        # the WARN visible — the watchdog or human can re-close them. This
+        # preserves the budget-bookkeeping semantics test-drift-control.sh expects.
+        gh_loud "comment on #$NUM" -- issue comment "$NUM" --body "$COMMENT" || true
+        gh_loud "close #$NUM" -- issue close "$NUM" || true
+        gh_loud "remove in-progress label on #$NUM" -- issue edit "$NUM" --remove-label in-progress || true
+    fi
 
     python3 - "$STATE_FILE" "$NUM" <<'PYEOF'
 import json, sys

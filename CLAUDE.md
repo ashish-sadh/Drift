@@ -25,7 +25,6 @@ See `program.md` for autopilot instructions, sprint lifecycle, and control comma
 | `Docs/ai-parity.md` | **AI chat vs UI feature gap** — what to build next |
 | `Docs/failing-queries.md` | **Failing queries** — real queries that don't work, fix systematically |
 | `Docs/architecture.md` | AI-first dual-model architecture |
-| `Docs/sprint.md` | Current sprint (close parity gaps) |
 | `Docs/state.md` | Current build, test count, features |
 | `Docs/tools.md` | Service → tool mapping (10 JSON tools) |
 | `Docs/backlog.md` | Long-term tickets (organized by AI gaps) |
