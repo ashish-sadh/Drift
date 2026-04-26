@@ -47,7 +47,7 @@ scripts/planning-service.sh remaining
    eval "$(scripts/sprint-service.sh planning-context)"
    echo "cycles since last review: $cycles_since_last_review (interval $review_cycle_interval)"
    ```
-   If `review_due=true`: `scripts/report-service.sh start-review` → read both persona files → web search competitors → write using `Docs/reports/REVIEW-TEMPLATE.md` (every section required, filename `review-cycle-{N}.md`) → PR → `scripts/report-service.sh finish` (stamps `last-review-cycle` → trigger resets). Then: `scripts/planning-service.sh checkpoint review_merged`. If not due, skip — DO NOT do reviews on a separate timer.
+   If `review_due=true`: `scripts/report-service.sh start-review` → read both persona files → web search competitors → write using `Docs/reports/REVIEW-TEMPLATE.md` (every section required, filename `review-cycle-{N}.md`) → PR → `scripts/report-service.sh finish` (stamps `last-review-cycle` → trigger resets). **Then file a sprint-task for every finding** with `Source: review-cycle-<N>` in the body, the appropriate SENIOR/JUNIOR label, and standard Goal/Files/Approach/Tests/Acceptance scaffolding. A review that produces findings without filed tasks is a review that did nothing. Then: `scripts/planning-service.sh checkpoint review_merged`. If not due, skip — DO NOT do reviews on a separate timer.
 
 8. **Daily exec report (if due):** `scripts/report-service.sh daily-due || true` — if due: `scripts/report-service.sh start-exec` → write report → PR with `--label report` → merge. Then: `echo $(date +%s) > ~/drift-state/last-report-time`
 
@@ -66,9 +66,16 @@ scripts/planning-service.sh remaining
      - **Already done** (issue describes work already in main) → `gh issue close $N --comment "Closed: implemented in <commit>"`
      - **Real** → leave open
      Triage is the entire planning's value when the queue is overflowing — the watchdog has been creating tasks faster than sessions can close them. **Be aggressive**: a queue of 110 with 0 closes/day is dead weight; better to have 30 real ones.
-   - **If `OPEN < 60`: NORMAL mode.** Create 8+ new sprint-tasks, prioritized: P0 bugs → product focus → admin feedback → roadmap "Now" → parity gaps.
+   - **If `OPEN < 60`: NORMAL mode.** Create 8+ new sprint-tasks. **Every task body must include a `Source:` line.** Source order:
+     1. **Active campaigns from #111 (product focus)** — read the issue, decompose each campaign into 2–3 concrete sprint-tasks. Body: `Source: campaign-<slug>`.
+     2. **Open findings from latest design/product review** — read the most recent `Docs/reports/review-cycle-*.md`. For each finding without a sprint-task already in the queue, file one. Body: `Source: review-cycle-<N>`.
+     3. **P0 bugs** — mandatory, regardless of source. Body: `Source: P0-<short>`.
+     4. **Admin/user feedback** — if it maps to a campaign or review finding, fold there; otherwise create. Body: `Source: feedback-<note>`.
+     5. **Roadmap "Now"** items not already covered. Body: `Source: roadmap-<item>`.
 
-   Body of new tasks must include: Goal, Files to modify, Approach, Tests, Acceptance criteria.
+     Goal: ≥90% of new tasks carry a `Source:` reference. If you can't map most new work to a source, you're freelancing — flag it in the planning summary; don't invent.
+
+   Body of new tasks must include: `Source:`, Goal, Files to modify, Approach, Tests, Acceptance criteria.
    SENIOR = AI pipeline, architecture, multi-file refactors. JUNIOR = food DB, UI, tests, simple fixes.
    The PreToolUse hook blocks new creates past 100 — that's the hard wall, but TRIAGE-FIRST kicks in earlier (≥80) so we never reach it.
 
@@ -109,7 +116,7 @@ You are the senior engineer and PE. session-start.sh has injected your context, 
    TASK=$(scripts/sprint-service.sh next --senior --claim)
    echo "$TASK"
    ```
-   - If `"none"` → exit immediately. Don't go reading docs to "find something to do." If the queue is empty, the session is done.
+   - If `"none"` → exit immediately. Don't backfill from your own ideas — backfill is planning's job. If the queue is empty, the session is done.
    - Otherwise: extract `$N` from the first word. The next steps all happen ONLY in the context of working on `#$N`.
    - **Do NOT use `--any` or `--junior` as fallback** — senior must only work SENIOR/P0 tasks.
    - If diagnosis reveals the task is misspec'd or a dup: `sprint-service.sh unclaim $N` → loop back to step 2.
@@ -147,7 +154,7 @@ You are the junior engineer. session-start.sh has injected your context, created
    TASK=$(scripts/sprint-service.sh next --junior --claim)
    echo "$TASK"
    ```
-   If `"none"` → exit. Don't go looking for work.
+   If `"none"` → exit. Don't backfill from your own ideas — backfill is planning's job.
 
 3. **Work the task.** Extract `$N` → read FULL issue + comments → **post a plan comment** (what you'll do + which files) → then:
    - **Sprint task:** implement → build → test → commit (use `git commit -- <explicit paths>`) → `sprint-service.sh done $N $(git rev-parse HEAD)`
