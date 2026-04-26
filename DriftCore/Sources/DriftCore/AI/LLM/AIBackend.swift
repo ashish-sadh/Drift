@@ -23,6 +23,8 @@ protocol AIBackend: AnyObject, Sendable {
 // MARK: - Model Tier
 
 /// Which model to download based on device capabilities.
+/// Public because `AIModelManager.currentTier: AIModelTier` is read by iOS
+/// (e.g. `FloatingAIAssistant` compares `currentTier == .large`).
 public enum AIModelTier: Sendable {
     case small   // SmolLM2-360M Q8 (~368MB) — 6GB devices
     case large   // Gemma 4 E2B Q4_K_M (~2900MB) — 8GB+ devices, best tool calling

@@ -1,7 +1,8 @@
 import Foundation
-import DriftCore
 
 /// Parses Lingo CGM CSV exports and imports glucose readings.
+/// Public because `CGMImportService.ImportResult` is the return type of
+/// `GlucoseService.importLingoCSV(url:)`, called from iOS GlucoseTabView.
 public enum CGMImportService {
     public struct ImportResult: Sendable {
         public let imported: Int
