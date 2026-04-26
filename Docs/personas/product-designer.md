@@ -308,6 +308,14 @@
 - Southeast Asian (#450), Caribbean (#446), and East Asian home cooking (#445) are the three highest-frequency missing cuisine families for the non-Western user base. Adding all three this sprint closes the major global cuisine gaps.
 - Queue at 30 tasks entering this cycle is the healthiest queue state in 10+ planning cycles. Maintain discipline — don't add more than 15 new tasks without corresponding drain.
 
+### What I Learned — Planning Cycle 7564 (2026-04-26)
+- All 4 failing-query categories from cycle 5965 are now closed (historical dates, calorie goal, macro goal progress, micronutrients). The "trust restoration" sprint worked — the pattern of closing week-1 test queries is the right prioritization principle.
+- Micronutrient tracking (#442) and macro goal progress (#441) shipped but have no gold set coverage yet. A feature that's shipped but not eval-verified is half-done. Every failing-query category fix must be paired with gold set cases in the same sprint.
+- Analytical tools at 3 of 5 needed for "AI health coach" positioning. Whoop Behavior Trends is now live — every cycle supplement_insight and food_timing_insight stay unshipped, Whoop cements that positioning. These two must be P0 SENIOR in the next session, no exceptions.
+- Food DB at 2,511 flat for multiple cycles is a silent daily loss. Users who don't find their meal log it elsewhere and habitually return there. USDA Phase 2 (#345) has been deferred 15+ cycles; needs a hard ship deadline (cycle 7600) or it becomes dead weight in the queue.
+- MFP's Today tab redesign is backfiring (more taps, user complaints). Our chat-first removes friction while they add it. This is a brief competitive window — use it in TestFlight release notes: "log lunch in one sentence, not 4 taps."
+- West African and Japanese home cooking added to food DB queue — closing global cuisine gaps beyond Indian/South Asian/East Asian that are already covered.
+
 ### What I Learned — Planning Cycle 7485 (2026-04-26)
 - 2 of 4 failing query categories closed since last review (historical dates, calorie goal setting) — trust restoration is working. The pattern: close the queries users test in week-1, because silent wrong answers end the relationship before it starts. Still open: micronutrient queries (#442) and macro goal progress (#440, #441).
 - DriftCore pure-logic test migration (pure Swift → `swift test`, 0.1s) is the highest-leverage engineering improvement in recent cycles. Every AI prompt change can now be validated in seconds instead of waiting 30s for simulator boot. This makes the "improve → verify → commit" loop fast enough to actually happen every session.

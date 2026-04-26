@@ -316,6 +316,14 @@
 - `/debug last-failures` (#447) must be gated to DEBUG builds. A PreToolUse hook on git commit should verify no /debug routes are reachable in release target. Pattern: `#if DEBUG` around the debug command handler, plus an XCTest that verifies DebugCommandService is unreachable from the release scheme.
 - Queue at 30 entering this cycle means full drain is 6 junior sessions + 2 senior sessions — the most executable queue state in recent memory. Adding 14 new tasks (439–452) brings it to 44, which is below the 70 cap. Maintain this loading level.
 
+### What I Learned — Planning Cycle 7564 (2026-04-26)
+- All 4 failing-query categories closed. Historical date and calorie goal fixes are in StaticOverrides + service layer. Micro-nutrient tracking added DB migration v35 with nullable columns and COALESCE aggregation — the right pattern for additive migrations. Macro goal progress (#441) depends strictly on #440 (calorieGoal/proteinGoal columns) landing first.
+- DriftCore migration is now fully delivering: FoodLoggingGoldSetTests runs in 0.1s. This makes the "run gold set every session" product focus practical. The eval gate is only useful if it's fast enough to run without friction.
+- Gold set coverage gap: macro goal and micronutrient features shipped but have zero gold set cases. A shipped feature without eval coverage is unverified — it can silently regress. New task #470 closes this gap with 12 cases.
+- Planning session crash (#381, #354, #407, #408) has been deferred 10+ cycles and costs human time every 6 hours. Root cause (exit hook timing when DOD isn't cleanly reached) is identified but unresolved. This must be fixed — it's not optional infra debt when it breaks every planning cycle.
+- State.md at build 174 while actual is 176 — two builds behind after one planning session. State.md must be refreshed as part of every sprint, not just occasionally. New task #472 closes it this cycle; future cycles should treat it as planning step 0.
+- Queue at 67 after creating 8 tasks (59 + 8). Still below 70 cap. Maintaining discipline on NORMAL mode additions is working — queue has stayed manageable.
+
 ### What I Learned — Planning Cycle 7485 (2026-04-26)
 - DriftCore pure-logic test migration is the highest-leverage architectural improvement in recent cycles. Moving all pure-logic tests from iOS simulator (30s boot) to `swift test` (0.1s warm) makes the AI quality iteration loop feasible in practice. Every session that touches a prompt or tool can verify instantly — previously you'd defer because 30s feels expensive. This is the forcing function that enables the "run FoodLoggingGoldSetTests every session" product focus.
 - DriftRegressionTests target retired cleanly into DriftCoreTests — zero duplicate coverage, tests moved by logical domain. Pattern for future migrations: move by file, run `swift test` after each file, commit after each passing batch. Don't move all at once.
