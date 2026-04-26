@@ -26,14 +26,10 @@ import GRDB
 }
 
 @Test func workoutSetDisplay() async throws {
-    let saved = Preferences.weightUnit; defer { Preferences.weightUnit = saved }
-    Preferences.weightUnit = .lbs
     let s1 = WorkoutSet(workoutId: 1, exerciseName: "Bench", setOrder: 1, weightLbs: 135, reps: 10, isWarmup: false)
     #expect(s1.display.contains("135"))
+    #expect(s1.display.contains("lbs"))
     #expect(s1.display.contains("10"))
-    // Verify kg display
-    Preferences.weightUnit = .kg
-    #expect(s1.display.contains("61")) // 135 lbs ≈ 61 kg
 }
 
 @Test func workoutSet1RM() async throws {

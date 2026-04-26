@@ -115,17 +115,11 @@ import GRDB
 }
 
 @Test @MainActor func workoutSetDisplayFormatted() async throws {
-    let saved = Preferences.weightUnit; defer { Preferences.weightUnit = saved }
-    Preferences.weightUnit = .lbs
     let s1 = WorkoutSet(workoutId: 1, exerciseName: "Bench", setOrder: 1, weightLbs: 225, reps: 5, isWarmup: false)
     #expect(s1.display == "225 lbs × 5")
 
     let s2 = WorkoutSet(workoutId: 1, exerciseName: "Pull-up", setOrder: 1, weightLbs: nil, reps: 12, isWarmup: false)
     #expect(s2.display == "BW × 12")
-
-    // Verify kg conversion
-    Preferences.weightUnit = .kg
-    #expect(s1.display == "102 kg × 5") // 225 lbs ≈ 102 kg
 }
 
 @Test func workoutTemplateJsonRoundTrip() async throws {

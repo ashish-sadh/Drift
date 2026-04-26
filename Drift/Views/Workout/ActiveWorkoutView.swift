@@ -398,7 +398,7 @@ struct ActiveWorkoutView: View {
             HStack(spacing: 0) {
                 Text("Set").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 28, alignment: .leading)
                 Text("Previous").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 85, alignment: .leading)
-                Text(assisted ? "-\(Preferences.weightUnit.displayName)" : Preferences.weightUnit.displayName).font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 55)
+                Text(assisted ? "-lbs" : "lbs").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 55)
                 Text(isDuration ? "Time (s)" : "Reps").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 50)
                 Spacer()
                 Text("✓").font(.caption2.weight(.bold)).foregroundStyle(.tertiary).frame(width: 30)
@@ -634,9 +634,8 @@ struct ActiveWorkoutView: View {
             allHistory.filter { $0.workoutId == wid }.sorted { $0.setOrder < $1.setOrder }
         } ?? []
 
-        let wu = Preferences.weightUnit
         let previous = lastSession.prefix(5).map { s in
-            "\(Int(wu.convertFromLbs(s.weightLbs ?? 0))) \(wu.displayName) \u{00D7} \(s.reps ?? 0)"
+            "\(Int(s.weightLbs ?? 0)) lbs \u{00D7} \(s.reps ?? 0)"
         }
 
         let count = setCount ?? (lastSession.isEmpty ? 3 : max(lastSession.count, 3))
@@ -644,7 +643,7 @@ struct ActiveWorkoutView: View {
         for i in 0..<count {
             if i < lastSession.count {
                 let s = lastSession[i]
-                sets.append(ActiveSet(weight: s.weightLbs.map { String(Int(wu.convertFromLbs($0))) } ?? "",
+                sets.append(ActiveSet(weight: s.weightLbs.map { String(Int($0)) } ?? "",
                                       reps: s.reps.map { String($0) } ?? "", isWarmup: isWarmup))
             } else {
                 sets.append(ActiveSet(weight: "", reps: "", isWarmup: isWarmup))
@@ -672,13 +671,11 @@ struct ActiveWorkoutView: View {
                 Log.app.error("Save workout: no ID after save")
                 return
             }
-            let saveUnit = Preferences.weightUnit
             var allSets: [WorkoutSet] = []
             for (ei, ex) in exercises.enumerated() {
                 let isDuration = WorkoutSet.isDurationExercise(ex.name)
                 for (si, s) in ex.sets.enumerated() where s.done {
-                    let raw = Double(s.weight) ?? 0
-                    let w = saveUnit.convertToLbs(raw)
+                    let w = Double(s.weight) ?? 0
                     let r = Int(s.reps) ?? 0
                     let dur = isDuration ? (Int(s.reps) ?? 0) : nil // duration exercises store seconds in reps field
                     guard r > 0 || (isDuration && (dur ?? 0) > 0) else { continue }
@@ -692,8 +689,7 @@ struct ActiveWorkoutView: View {
                 for (ei, ex) in exercises.enumerated() {
                     let isDuration = WorkoutSet.isDurationExercise(ex.name)
                     for (si, s) in ex.sets.enumerated() {
-                        let raw = Double(s.weight) ?? 0
-                        let w = saveUnit.convertToLbs(raw)
+                        let w = Double(s.weight) ?? 0
                         let r = Int(s.reps) ?? 0
                         let dur = isDuration ? (Int(s.reps) ?? 0) : nil
                         guard r > 0 || (isDuration && (dur ?? 0) > 0) else { continue }
@@ -708,13 +704,11 @@ struct ActiveWorkoutView: View {
             if andDismiss {
                 // Build completion share text + check milestones
                 let totalVolLbs = allSets.reduce(0.0) { $0 + (($1.weightLbs ?? 0) * Double($1.reps ?? 0)) }
-                let volUnit = Preferences.weightUnit
-                let totalVol = volUnit.convertFromLbs(totalVolLbs)
                 let exerciseNames = exercises.map(\.name).filter { !$0.isEmpty }
                 let duration = workout.durationDisplay
                 var shareLines = ["💪 \(workout.name)"]
                 if !duration.isEmpty { shareLines.append("⏱ \(duration)") }
-                shareLines.append("🏋️ \(Int(totalVol)) \(volUnit.displayName) total volume")
+                shareLines.append("🏋️ \(Int(totalVolLbs)) lbs total volume")
                 shareLines.append("\(exerciseNames.count) exercises · \(allSets.count) sets")
                 completionShareText = shareLines.joined(separator: "\n")
 
