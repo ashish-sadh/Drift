@@ -5,6 +5,19 @@ Drift is an AI-first local health tracker. AI chat is the showstopper — the pr
 
 **Dual-model:** SmolLM (360M) does heavy lifting with hardcoded harness. Gemma 4 (2B) uplifts with intelligence — smart tool calling, multi-turn, cross-domain reasoning. Privacy-first: everything on-device, no cloud, no accounts.
 
+## Design Tenets
+
+- AI chat is the showstopper. Every data entry must be doable through conversation; UI exists for visual analytics and as a fallback.
+- Privacy-first. Everything on-device, no cloud, no accounts, no analytics. Any cloud touchpoint surfaces explicitly to the user.
+- Goal-aware color, never "good/bad". Green = aligned with the user's goal direction; red = against it. Default goal: losing weight.
+- Indian food is the bar. Every food list, search, parser, and eval works for Indian cuisine first; everything else is downstream.
+- Friend feedback over telemetry. When unsure if a feature is right, ask a user; do not instrument behavior.
+- DriftCore by default. If a file doesn't `import UIKit/SwiftUI/HealthKit/WidgetKit/AVFoundation/Speech/Photos/AppIntents`, it belongs in DriftCore — even if only iOS currently uses it.
+- One tier per test file. Mixing Tier-0 logic with Tier-3 LLM-backed asserts is the failure mode that turned the old suite into a liability.
+- No backwards-compat shims. Change the code, delete the old, no `_oldXxx` aliases or "removed" comment markers.
+- Three similar lines beats premature abstraction. Don't extract on the second occurrence; consider it on the third.
+- Build and test after every change. The harness will block the commit if you skip; trust the discipline, not your gut.
+
 ## Three Operating Modes
 
 ### Mode 1: Human-Shepherded (default)
@@ -53,6 +66,7 @@ Each entry tagged with its maintenance status. **Auto-maintained** = a script or
 - Run coverage check after writing tests: `./scripts/coverage-check.sh`
 - Coverage targets: **80%** for pure logic/calculators, **50%** for services/viewmodels/database
 - Write tests for any new service or logic code before committing
+- If your change affects `Docs/state.md` (build, test counts, food/exercise/biomarker counts, AI architecture, capabilities), update it in the same commit
 
 ## Color Philosophy (Goal-Aware)
 - Green (Theme.deficit) = aligned with goal direction
