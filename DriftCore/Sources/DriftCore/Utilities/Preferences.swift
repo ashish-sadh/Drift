@@ -82,6 +82,17 @@ public enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: chatTelemetryEnabledKey) }
     }
 
+    // MARK: - Remote Model
+
+    private static let useRemoteModelOnWiFiKey = "drift_use_remote_model_on_wifi"
+
+    /// When enabled, AI chat routes through a remote model (Anthropic/OpenAI) on Wi-Fi.
+    /// Default: OFF. Not exposed in production UI — architectural prep only.
+    public static var useRemoteModelOnWiFi: Bool {
+        get { UserDefaults.standard.bool(forKey: useRemoteModelOnWiFiKey) }
+        set { UserDefaults.standard.set(newValue, forKey: useRemoteModelOnWiFiKey) }
+    }
+
     // MARK: - Photo Log Beta opt-in
 
     private static let photoLogEnabledKey = "drift_photo_log_enabled"
