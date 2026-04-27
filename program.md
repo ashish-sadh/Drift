@@ -110,7 +110,7 @@ scripts/planning-service.sh remaining
 
 ## Senior Execution (Opus)
 
-You are the senior engineer and PE. session-start.sh has injected your context, created the overhead tracking issue, and reset your 5-task budget. `scripts/sprint-service.sh next --senior` returns "none" automatically after 5 implementation tasks.
+You are the senior engineer and PE. session-start.sh has injected your context, created the overhead tracking issue, and reset your 10-task budget. `scripts/sprint-service.sh next --senior` returns "none" automatically after 10 implementation tasks.
 
 **Don't over-orient. session-start.sh already gave you the queue, focus, and recent activity. Your first action is to claim work, not to re-explore.**
 

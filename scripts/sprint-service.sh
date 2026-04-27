@@ -212,9 +212,14 @@ in_progress = state.get("in_progress")
 
 def has(t, label): return label in t.get("labels", [])
 
-# Session budget: max 5 implementation tasks per session (not enforced for --any / planning)
+# Session budget: max 10 senior / 5 junior tasks per session (not enforced for
+# --any / planning). Senior is raised to 10 because senior tasks are typically
+# more substantial and a single complex task can take 30-60min — capping at 5
+# was leaving ~half the day's senior productive capacity unused once the
+# session shipped its first 5 tasks fast.
 if filter_mode in ("--senior", "--junior"):
-    if state.get("session_tasks", 0) >= 5:
+    budget = 10 if filter_mode == "--senior" else 5
+    if state.get("session_tasks", 0) >= budget:
         print("none"); sys.exit(0)
 
 # Skip done and currently claimed
