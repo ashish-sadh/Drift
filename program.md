@@ -40,7 +40,12 @@ scripts/planning-service.sh remaining
    - P0/P1 → `gh issue edit {N} --add-label sprint-task && gh issue comment {N} --body "Triaged: added to sprint."`
    - Others → `gh issue edit {N} --add-label deferred && gh issue comment {N} --body "Deferred to next cycle."`
 
-6. **Assess state:** Read `Docs/roadmap.md`, `Docs/state.md`, `Docs/decisions.md` (last ~10 entries — captures non-obvious calls humans/sessions made recently that should inform planning). Run `git log --oneline -40`. Check recent closed issues. **If you see a significant decision in the last 24h of commits that's NOT in `Docs/decisions.md`** (architecture change, harness rule from incident, design tenet from a real failure), append a one-paragraph entry to the top of the most recent date section. Skip routine bug fixes / feature ships — those live in commit messages.
+6. **Assess state + edit decisions log:** Read `Docs/roadmap.md`, `Docs/state.md`, `Docs/decisions.md` (last ~10 entries inform planning judgment). Run `git log --oneline -40`. Check recent closed issues. **You are the editor of `Docs/decisions.md`** — sessions append during their work; you keep it in shape:
+   - **Sweep last 24h of commits** for significant decisions not yet captured (architecture change, harness rule from incident, design tenet from a real failure). Append entries that pass the bar (*"would a future session reading the diff still ask why was it done this way?"*) under today's date heading at the top.
+   - **Prune entries that didn't meet the bar.** Routine bug fixes, feature ships, refactors-for-cleanliness, test additions, or vague "I did X" entries without a *why* → delete. Don't keep noise.
+   - **Consolidate duplicates.** Two entries describing the same decision → merge into one.
+   - **Archive old entries.** Anything >30 days old that's now common knowledge / fully absorbed into CLAUDE.md or other docs → delete (decisions.md isn't a museum; it's a working memory).
+   - The file should stay <300 lines. If it's growing past that, prune harder.
 
 7. **Product review (if due):** product review has NO independent cadence — it rides on sprint planning. Check the cycle gap:
    ```bash
@@ -127,6 +132,7 @@ You are the senior engineer and PE. session-start.sh has injected your context, 
 3. **Work the task.** Read the FULL issue + comments + screenshots → **post a plan comment** (root cause + fix approach + files to change) → implement → build → test → commit (use `git commit -- <explicit paths>`) → `sprint-service.sh done $N $(git rev-parse HEAD)`.
    - **Bug close:** write `echo "Resolution: ..." > /tmp/done-note-$N` before `done` (hook enforces non-empty resolution).
    - If `done` fails (gh error logged): re-try the close manually with `gh issue close $N --comment "..."` and verify.
+   - **Append to `Docs/decisions.md` IFF you made a non-obvious decision.** The bar: *"would a future session reading the diff still ask why was it done this way?"* If yes (architectural call, harness rule from incident, reversal of a prior approach, cross-cutting design choice) → add a 1–3 sentence entry under today's date heading at the top, with the *why* + commit hash. If no (routine bug fix, refactor for cleanliness, test addition, feature ship) → skip. Don't fill it with noise; planning prunes garbage.
 
 4. **Loop to step 2** until budget exhausted or queue empty.
 
@@ -162,6 +168,7 @@ You are the junior engineer. session-start.sh has injected your context, created
    - **Permanent task:** implement → commit → `gh issue comment $N --body "Progress: ..."` → `sprint-service.sh session-done $N`. **NEVER run `gh issue close` on a permanent task** — they recur.
    - **Stale** (already closed): `sprint-service.sh session-done $N` → loop to step 2.
    - **Too complex?** unclaim + `gh issue edit $N --add-label SENIOR` → loop to step 2.
+   - **Append to `Docs/decisions.md` IFF you made a non-obvious call.** Junior tasks rarely qualify — most are routine bug fixes / UI tweaks / DB additions where the diff is self-explanatory. Skip unless the bar applies: *"would a future session reading the diff still ask why was it done this way?"*
 
 4. **Loop to step 2** until budget exhausted or queue empty.
 

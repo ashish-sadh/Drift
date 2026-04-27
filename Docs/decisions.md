@@ -2,6 +2,8 @@
 
 Append-only record of non-obvious decisions: architecture changes, harness rules, design tenets that emerged from a real incident, performance/correctness tradeoffs that future readers should know about.
 
+**The bar (read this before appending):** *"would a future session reading the diff still ask **why was it done this way?**"* — if yes, append. If the diff explains itself, don't.
+
 **What goes here:**
 - Architectural calls (e.g. "regress on raw weights, not EMA")
 - Harness/process rules that came from a real incident (e.g. "raise stale-claim threshold to 90min after #426 false flag")
@@ -9,16 +11,22 @@ Append-only record of non-obvious decisions: architecture changes, harness rules
 - Reversals (e.g. "replaced crashed/<N> branches with patch files — branch ceremony was too heavy")
 
 **What does NOT go here:**
-- Bug fixes (commit message + Resolution comment is enough)
-- Feature ships (changelog/releases.json captures these)
-- Code style choices (live in CLAUDE.md tenets)
-- Routine planning decomposition (sprint-task bodies capture this)
+- Bug fixes — commit message + Resolution comment is enough
+- Feature ships — changelog/releases.json captures these
+- Code style / refactor for cleanliness — live in CLAUDE.md tenets, no per-decision noise
+- Routine planning decomposition — sprint-task bodies capture this
+- Test additions — diff is self-explanatory
+- "I did X" without a *why* — every entry must have a reason future-you couldn't reconstruct from the diff alone
+
+**Who appends:**
+- **Anyone** with a real decision — senior, junior, planning, human. After closing the issue (or as part of closing).
+- **Planning** is the editor: step 6 sweeps for missed entries from significant commits AND prunes the file (remove entries that didn't meet the bar, consolidate duplicates, archive entries >30 days that are now common knowledge).
 
 **Format:**
 - Most recent at the top
-- One section per decision: `### YYYY-MM-DD — <slug>`
-- 1–3 sentences max for the body. The *why* is the load-bearing part. Link the commit hash so readers can see the diff.
-- Sessions append when they make a call worth remembering. Planning sessions sweep recent significant commits during step 6 (Assess state) and add anything missed.
+- One section per decision: `### <slug> — <one-line summary>`
+- 1–3 sentences for the body. Lead with the *why*. Link the commit hash.
+- Group by date heading: `## YYYY-MM-DD`
 
 ---
 
