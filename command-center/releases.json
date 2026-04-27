@@ -1885,5 +1885,18 @@
     "description": "Build 182 \u2014 heartbeat snapshots",
     "features": [],
     "fixes": []
+  },
+  {
+    "build": 183,
+    "date": "2026-04-27T00:00:00-07:00",
+    "description": "Build 183 \u2014 harness reliability fixes",
+    "features": [
+      "Autonomous session WIP is now preserved on crash/restart \u2014 resumable sessions pick up from where they left off.",
+      "Senior session task budget raised to 10 tasks per cycle."
+    ],
+    "fixes": [
+      "Fixed atomic-write RETURN trap crash that was crashing the watchdog ~8x/day.",
+      "Watchdog stale-claim threshold raised from 60min to 90min to reduce false restarts."
+    ]
   }
 ]
