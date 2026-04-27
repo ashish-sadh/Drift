@@ -326,6 +326,74 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(correct, voiceQueries.count - 1, "At most 1 voice-style miss after normalization")
     }
 
+    // MARK: - Cycle 7689 Eval Cases (micronutrient + goal-progress clusters)
+
+    func testCycle7689_MicronutrientQueriesNotLoggedAsFood() {
+        // These must route to food_info, not parseFoodIntent (false-positive prevention)
+        let queries = [
+            "did I get enough fiber this week",
+            "how much sodium did I have today",
+            "am I getting enough vitamins",
+            "sugar intake this week",
+            "fiber this week",
+            "how's my sodium today",
+        ]
+        var falsePositives: [String] = []
+        for q in queries {
+            let normalized = InputNormalizer.normalize(q).lowercased()
+            if AIActionExecutor.parseFoodIntent(normalized) != nil {
+                falsePositives.append(q)
+            }
+        }
+        if !falsePositives.isEmpty { print("FALSE POSITIVES (micronutrient):\n\(falsePositives.joined(separator: "\n"))") }
+        print("📊 Micronutrient non-food: \(queries.count - falsePositives.count)/\(queries.count) correctly rejected")
+        XCTAssertEqual(falsePositives.count, 0, "Micronutrient queries must not parse as food log")
+    }
+
+    func testCycle7689_GoalProgressQueriesNotLoggedAsFood() {
+        // These must route to food_info, not parseFoodIntent (false-positive prevention)
+        let queries = [
+            "am I meeting my carb target",
+            "how far off am I from my fat goal",
+            "am I on track for my protein today",
+            "did I hit my macro goals",
+            "how close am I to my calorie goal",
+            "am I below my fat target",
+        ]
+        var falsePositives: [String] = []
+        for q in queries {
+            let normalized = InputNormalizer.normalize(q).lowercased()
+            if AIActionExecutor.parseFoodIntent(normalized) != nil {
+                falsePositives.append(q)
+            }
+        }
+        if !falsePositives.isEmpty { print("FALSE POSITIVES (goal-progress):\n\(falsePositives.joined(separator: "\n"))") }
+        print("📊 Goal-progress non-food: \(queries.count - falsePositives.count)/\(queries.count) correctly rejected")
+        XCTAssertEqual(falsePositives.count, 0, "Goal-progress queries must not parse as food log")
+    }
+
+    func testCycle7689_IndianRegionalEdgeCases() {
+        let cases: [(String, String)] = [
+            ("ate poha for breakfast", "poha"),
+            ("had pav bhaji tonight", "pav"),
+            ("log upma with coconut chutney", "upma"),
+            ("just had sabudana khichdi", "sabudana"),
+            ("ate 2 vada with sambar", "vada"),
+        ]
+        var correct = 0
+        for (q, keyword) in cases {
+            let normalized = InputNormalizer.normalize(q).lowercased()
+            if let intent = AIActionExecutor.parseFoodIntent(normalized),
+               intent.query.lowercased().contains(keyword) || normalized.contains(keyword) {
+                correct += 1
+            } else {
+                print("MISS (Indian regional edge): '\(q)'")
+            }
+        }
+        print("📊 Indian regional edge cases: \(correct)/\(cases.count)")
+        XCTAssertGreaterThanOrEqual(correct, cases.count - 1, "At most 1 Indian regional edge case miss")
+    }
+
     // MARK: - Summary Gold Set
 
     func testFoodLoggingGoldSetSummary() {
@@ -365,6 +433,18 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             ("how do I do a deadlift", false),
             ("am I on track for protein", false),
             ("I weigh 165 lbs", false),
+            // Cycle 7689: micronutrient cluster (must NOT be food-logged)
+            ("did I get enough fiber this week", false),
+            ("am I getting enough vitamins", false),
+            ("sugar intake this week", false),
+            // Cycle 7689: goal-progress cluster (must NOT be food-logged)
+            ("am I meeting my carb target", false),
+            ("how far off am I from my fat goal", false),
+            ("did I hit my macro goals", false),
+            // Cycle 7689: Indian regional edge cases (should log food)
+            ("ate poha for breakfast", true),
+            ("had pav bhaji tonight", true),
+            ("log upma with coconut chutney", true),
         ]
 
         var truePositive = 0, trueNegative = 0
