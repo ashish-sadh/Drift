@@ -183,6 +183,22 @@ public enum AIToolAgent {
             return await executeTool(toolCall)
         }
 
+        // ── Phase 2a-ctx: Context-aware tie-break (before clarifier + LLM) ──
+        // Resolve ambiguous messages using phase/history before spending an
+        // LLM call or asking the user. Computed once; reused inside Phase 2
+        // if IntentThresholds later votes to clarify. #449.
+        let contextResolution = IntentContextResolver.resolve(
+            message: normalized,
+            phase: ConversationState.shared.phase,
+            lastTool: ConversationState.shared.lastTool,
+            lastTopic: ConversationState.shared.lastTopic
+        )
+        if case .resolved(let resolvedTool, let resolvedParams) = contextResolution {
+            Log.app.info("IntentContextResolver: '\(message)' → \(resolvedTool) (context)")
+            let call = ToolCall(tool: resolvedTool, params: ToolCallParams(values: resolvedParams))
+            return await executeTool(call)
+        }
+
         // ── Phase 2a: Ask-don't-guess clarification (pre-classifier) ──
         // Genuinely-ambiguous inputs ("biryani", "creatine", bare numbers)
         // divert to a tappable clarifier BEFORE spending an LLM call. Keeps
@@ -238,6 +254,13 @@ public enum AIToolAgent {
                     )
                     if decision == .clarify {
                         Log.app.info("IntentThresholds: clarify → \(intent.tool) for '\(message)' (confidence: \(intent.confidence))")
+                        // Context beats clarification: if conversation state already
+                        // resolves the ambiguity, proceed directly. #449.
+                        if case .resolved(let ctxTool, let ctxParams) = contextResolution {
+                            Log.app.info("IntentContextResolver: context overrides clarify → \(ctxTool)")
+                            let call = ToolCall(tool: ctxTool, params: ToolCallParams(values: ctxParams))
+                            return await executeTool(call)
+                        }
                         if let opts = ClarificationBuilder.buildOptions(for: normalized),
                            opts.count >= 2 {
                             return AgentOutput(

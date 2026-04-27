@@ -1036,6 +1036,59 @@ final class IntentClassifierGoldSetTests: XCTestCase {
         XCTAssertEqual(correct, cases.count, "Goal progress queries must route to food_info")
     }
 
+    /// 4 tie-break cases: context-aware resolution beats clarification when
+    /// conversation state makes the right tool unambiguous. #449.
+    func testContextAwareTieBreak() {
+        // 1. "add 50" in awaitingMealItems → edit_meal, not new food log
+        let mealPhaseResult = IntentContextResolver.resolve(
+            message: "add 50",
+            phase: .awaitingMealItems(mealName: "lunch"),
+            lastTool: nil,
+            lastTopic: .food
+        )
+        if case .resolved(let tool, _) = mealPhaseResult {
+            XCTAssertEqual(tool, "edit_meal", "#449 meal phase: 'add 50' must route to edit_meal")
+        } else {
+            XCTFail("#449: 'add 50' in meal phase must resolve — not show clarification")
+        }
+
+        // 2. "add 50" after food log (idle, lastTool=log_food) → edit_meal
+        let afterFoodLog = IntentContextResolver.resolve(
+            message: "add 50",
+            phase: .idle,
+            lastTool: "log_food",
+            lastTopic: .food
+        )
+        if case .resolved(let tool, _) = afterFoodLog {
+            XCTAssertEqual(tool, "edit_meal", "#449 post-log: 'add 50' after food log must route to edit_meal")
+        } else {
+            XCTFail("#449: 'add 50' after food log must resolve without clarification")
+        }
+
+        // 3. "add 50" with no food context → .pass (should reach clarification card)
+        let noContext = IntentContextResolver.resolve(
+            message: "add 50",
+            phase: .idle,
+            lastTool: nil,
+            lastTopic: .unknown
+        )
+        XCTAssertEqual(noContext, .pass,
+            "#449: 'add 50' without context must return .pass so clarification card is shown")
+
+        // 4. Exercise in awaitingExercises phase → log_activity
+        let exercisePhase = IntentContextResolver.resolve(
+            message: "bench press 3x10 at 135",
+            phase: .awaitingExercises,
+            lastTool: nil,
+            lastTopic: .exercise
+        )
+        if case .resolved(let tool, _) = exercisePhase {
+            XCTAssertEqual(tool, "log_activity", "#449 workout phase: exercise input must route to log_activity")
+        } else {
+            XCTFail("#449: exercise input in workout phase must resolve without clarification")
+        }
+    }
+
     func testSetGoalWithGoalType_ParseCorrectly() {
         let cases: [(json: String, target: String, goalType: String)] = [
             (#"{"tool":"set_goal","target":"150","goal_type":"protein"}"#, "150", "protein"),
