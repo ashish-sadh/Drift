@@ -496,8 +496,51 @@ public enum StaticOverrides {
             }
         }
 
+        // ── /debug commands (DEBUG builds only) — invisible in release. #447 ──
+        #if DEBUG
+        if lower.hasPrefix("/debug ") {
+            let sub = String(lower.dropFirst(7)).trimmingCharacters(in: .whitespaces)
+            if sub == "last-failures" || sub.hasPrefix("last-failures ") {
+                let n: Int
+                if sub == "last-failures" {
+                    n = 5
+                } else {
+                    let arg = String(sub.dropFirst("last-failures ".count))
+                        .trimmingCharacters(in: .whitespaces)
+                    n = max(1, min(Int(arg) ?? 5, 50))
+                }
+                return .handler { Self.lastFailuresOutput(limit: n) }
+            }
+        }
+        #endif
+
         return nil
     }
+
+    #if DEBUG
+    /// Formats the last `limit` pipeline failures from telemetry as a text card.
+    /// Accepts an injectable service so tests can pass a test-DB instance. #447.
+    nonisolated static func lastFailuresOutput(
+        limit: Int,
+        telemetry: ChatTelemetryService = .shared
+    ) -> String {
+        let failures = telemetry.fetchRecent(limit: 200)
+            .filter { $0.outcome == ChatTelemetryService.Outcome.failed.rawValue
+                   || $0.outcome == ChatTelemetryService.Outcome.timeout.rawValue }
+            .suffix(limit)
+        guard !failures.isEmpty else {
+            return "No failures in telemetry. Enable telemetry in Settings → More, or no failures have occurred yet."
+        }
+        var lines = ["/debug last-failures (\(failures.count)):"]
+        for (i, row) in failures.reversed().enumerated() {
+            let query = row.queryText.map { String($0.prefix(50)) } ?? "[\(row.queryFingerprint)]"
+            let stage = row.toolCalled ?? row.intentLabel ?? "unknown"
+            lines.append("\(i + 1). \"\(query)\"")
+            lines.append("   \(stage) — \(row.outcome) — \(row.latencyMs)ms")
+        }
+        return lines.joined(separator: "\n")
+    }
+    #endif
 
     /// Detect structured workout exercise patterns: "3x10", "3 sets of 10", "@135", "at 135 lbs".
     /// Used to skip activity-confirmation flow and route to proper exercise logging pipeline.
