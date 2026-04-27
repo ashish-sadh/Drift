@@ -275,7 +275,13 @@ reconcile_in_progress() {
 #   2. Hung/wandering sessions that bypass the claim hook somehow — no
 #      commits, no comments, just exploration → flagged.
 #
-# Threshold: DRIFT_CLAIM_STALE_THRESHOLD_SECS env var, default 3600 (1h).
+# Threshold: DRIFT_CLAIM_STALE_THRESHOLD_SECS env var, default 5400 (90 min).
+# Was 3600 (60 min) — bumped after #426 false-positive: session shipped 7
+# real edits over 60 min, hit Anthropic API stream timeout right at the 1h
+# mark, never committed, got auto-flagged at 61 min. Complex senior tasks
+# (multi-file refactor, new tool with tests) legitimately need 60-90 min
+# before first commit. The 90-min threshold gives breathing room while
+# still catching genuinely stuck claims within 1.5h.
 check_stale_claim() {
     local SD="$HOME/drift-state"
     local STATE_FILE="$SD/sprint-state.json"
@@ -290,7 +296,7 @@ check_stale_claim() {
     local NOW AGE THRESHOLD
     NOW=$(date +%s)
     AGE=$(( NOW - CLAIM_TS ))
-    THRESHOLD=${DRIFT_CLAIM_STALE_THRESHOLD_SECS:-3600}
+    THRESHOLD=${DRIFT_CLAIM_STALE_THRESHOLD_SECS:-5400}
     (( AGE < THRESHOLD )) && return
 
     # Any commit referencing #N in its message since claim_started?
