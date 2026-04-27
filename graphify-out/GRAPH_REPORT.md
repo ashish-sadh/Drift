@@ -1,7 +1,7 @@
 # Graph Report - /Users/ashishsadh/workspace/Drift  (2026-04-26)
 
 ## Corpus Check
-- 414 files · ~1,850,195 words
+- 414 files · ~1,850,101 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -1013,9 +1013,9 @@ Nodes (0):
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `date` connect `Community 2` to `Community 0`, `Community 1`, `Community 3`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 9`, `Community 10`, `Community 11`, `Community 12`, `Community 15`, `Community 16`, `Community 17`, `Community 19`, `Community 20`, `Community 22`, `Community 26`?**
-  _High betweenness centrality (0.074) - this node is a cross-community bridge._
-- **Why does `main()` connect `Community 20` to `Community 9`, `Community 1`?**
-  _High betweenness centrality (0.021) - this node is a cross-community bridge._
+  _High betweenness centrality (0.048) - this node is a cross-community bridge._
+- **Why does `ToolCallParams` connect `Community 0` to `Community 3`, `Community 5`, `Community 8`, `Community 12`, `Community 15`?**
+  _High betweenness centrality (0.031) - this node is a cross-community bridge._
 - **Are the 358 inferred relationships involving `String` (e.g. with `.classify()` and `.extractTool()`) actually correct?**
   _`String` has 358 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 293 inferred relationships involving `date` (e.g. with `.measureTTFT()` and `.testSingleItemTTFTSmoke()`) actually correct?**
