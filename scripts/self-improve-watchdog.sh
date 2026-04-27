@@ -383,23 +383,22 @@ snapshot_wip_if_in_progress() {
     fi
 
     mkdir -p "$SD/wip"
-    # Capture both committed-baseline diff AND status (untracked files
-    # don't appear in `git diff` but do appear in status). Apply with
-    # `git apply` after `git add -A` if you want untracked files restored.
-    {
-        git status --porcelain 2>/dev/null
-        echo "---"
-        git diff HEAD 2>/dev/null
-        echo "---"
-        # Capture untracked file contents so they're recoverable
-        git ls-files --others --exclude-standard 2>/dev/null | while read -r f; do
-            [[ -f "$f" ]] || continue
-            echo "=== UNTRACKED: $f ==="
-            cat "$f"
-            echo "=== END UNTRACKED ==="
-        done
-    } > "$SD/wip/${NUM}.patch.tmp" 2>/dev/null
+
+    # Tracked changes → standard `git apply`-compatible patch (binary-safe).
+    git diff HEAD --binary > "$SD/wip/${NUM}.patch.tmp" 2>/dev/null
     mv "$SD/wip/${NUM}.patch.tmp" "$SD/wip/${NUM}.patch"
+
+    # Untracked files → tarball (git diff doesn't capture them). Filter out
+    # noise paths the same way as the edit-detection above.
+    local UNTRACKED
+    UNTRACKED=$(git ls-files --others --exclude-standard 2>/dev/null \
+        | grep -vE 'command-center/heartbeat\.json|graphify-out/|\.xcodeproj/' || true)
+    if [[ -n "$UNTRACKED" ]]; then
+        echo "$UNTRACKED" | tar -czf "$SD/wip/${NUM}.untracked.tar.gz.tmp" -T - 2>/dev/null
+        mv "$SD/wip/${NUM}.untracked.tar.gz.tmp" "$SD/wip/${NUM}.untracked.tar.gz"
+    else
+        rm -f "$SD/wip/${NUM}.untracked.tar.gz"
+    fi
 }
 
 # Strip orphan in-progress labels — a closed issue should never carry
@@ -905,6 +904,7 @@ while true; do
             sync_stamps_from_main
             reconcile_in_progress
             check_stale_claim
+            snapshot_wip_if_in_progress
             sweep_stale_in_progress_labels
             commit_heartbeat_if_due
             # Check if autopilot is dead
