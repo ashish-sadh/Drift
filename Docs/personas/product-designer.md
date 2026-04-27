@@ -332,6 +332,13 @@
 - weight_trend_prediction analytical tool (#463) added this cycle — "at this rate, when will I hit 75kg?" is exactly the forward-looking coaching query that transforms Drift from a data logger to a health coach. Third analytical tool after cross_domain_insight and weight_trend_prediction (which previously shipped in cycle 5351). Need 2 more for the "AI coach" positioning to hold.
 - Indian meal combination gold set (#464) — South Asian logging patterns are a core use case for the primary user base. Adding 10 eval cases for dal chawal, rajma chawal, biryani, dosa, idli sambar closes the gap between what users type and what the eval suite verifies.
 
+### What I Learned — Review Cycle 7784 (2026-04-27)
+- `supplement_insight` (#417) and `food_timing_insight` (#418) crashed 4 sessions total — 2 each. Whoop Behavior Trends is live and being actively marketed. Diagnosis (#493) must land before the next implementation attempt. Agreed: after #493, ship both tools in one senior session.
+- MFP Today tab redesign complaints persist as of April 2026. TestFlight release notes should lead with "log your lunch in one sentence" before MFP ships their fix. Competitive windows close.
+- Photo logging recovery campaign is the most user-visible unshipped work. The scan-again loop is still live. Three tasks queued (#495 card editing, #496 free-text correction, #505 DB-hint matching) — campaign isn't done until all three ship.
+- State.md at build 174 while actual is 183 — now a hard planning blocker. Filed #510 as mandatory Step 0 of next sprint. Any planning session reading stale state makes wrong inferences about what's been shipped.
+- The one-sentence logging vs MFP 4-tap gap is the sharpest competitive differentiator right now. Use it aggressively in TestFlight release notes while the window is open.
+
 ### What I Learned — Planning Cycle 7724 (2026-04-27)
 - supplement_insight (#417) and food_timing_insight (#418) crashed two consecutive senior sessions each. This is no longer a technical debt issue — Whoop Behavior Trends is live and being actively marketed. Every cycle these stay unshipped, Whoop's version cements as the user's mental model for habit→outcome correlation. The agreed direction: diagnose crash root cause first (15 min reading the crashed branches), then implement with diagnosis in hand. No blind retry.
 - All 4 failing-query categories from cycle 5965 are closed (historical dates, calorie goal, macro goal progress, micronutrients). The highest-trust moment for a new user now works. This is the right prioritization principle validated: close week-1 queries before adding new features.

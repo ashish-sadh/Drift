@@ -59,6 +59,7 @@ What's not: supplement_insight + food_timing_insight (2 analytical tools crashed
 - ~~**AI Chat depth — eval closure & analytical expansion (P0, cycle 7564 sprint)**~~ PARTIALLY DONE — Food DB West African (#474) ✅, Japanese home cooking (#475) ✅. Still queued: FoodLoggingGoldSetTests run (#468/#481), LLM prompt audit (#469/#483), FoodLoggingGoldSet +12 (#470), MultiTurnRegression +8 (#471), State.md refresh (#472/#482), failing-queries.md (#473/#486). Still open: supplement_insight (#417), food_timing_insight (#418), planning crash fix (#407), USDA Phase 2 (#485 batch import).
 - ~~**AI Chat depth — analytical tools, eval coverage & USDA batch import (P0, cycle 7689 sprint)**~~ PARTIALLY DONE — USDA Phase 2 batch import 500+ foods (#484) ✅. FoodLoggingGoldSetTests run + fix failures (#482) ✅. LLM prompt audit cycle 7689 (#483) ✅. IntentClassifier tie-break v2 (#449) ✅. /debug last-failures (#447) ✅. Still open: supplement_insight (#417), food_timing_insight (#418), State.md refresh (#481), failing-queries.md refresh (#485/#486), USDA DEMO_KEY (#488), planning crash fix (#407).
 - **AI Chat depth — campaigns: photo logging recovery, remote model prep, zero user math (P0, cycle 7724 sprint)** — Crash diagnosis for #417/#418 before retry (#493). supplement_insight analytical tool (#417). food_timing_insight analytical tool (#418). Photo-log review card: editable title, add-by-text, remove-item (#495). Photo-log free-text correction: hint re-runs recognition (#496). RemoteLLMBackend AIBackend conformance + BYOK Keychain (#494). Remote model chat turn indicator (#500). Unit conversion in food logging: oz/cups/pieces invisible (#497). Portion scaling: "double it", "1.5 servings", "half" (#498). Zero user math — calories left + macro aggregation (#502). FoodLoggingGoldSet +10 unit/portion/correction eval cases (#499). TestFlight release notes MFP competitive window (#501). State.md refresh to build 182 (#481).
+- **AI Chat depth — campaign completion + analytical tools (P0, cycle 7784 sprint)** — Photo-log DB smart matching + category portion defaults (#505). Cross-session conversation context: persist last 5 turns, inject at session start (#506). RemoteLLMBackend streaming integration test — mock HTTP for tool-call round trip (#512). FoodLoggingGoldSetTests run cycle 7784 (#507). LLM prompt quality audit cycle 7784 (#508). failing-queries.md refresh 7689→7784 (#509). State.md refresh to build 183 (#510). MultiTurnRegression +8 — photo-log + unit/portion chains (#511). Analytical tools: supplement_insight (#417) + food_timing_insight (#418) after diagnosis (#493). Build 183 on TestFlight.
 
 ### Next
 - ~~**USDA API Phase 1**~~ DONE — Opt-in toggle, rate limiting, searchWithFallback, privacy notice. Behind toggle (default OFF).
@@ -68,7 +69,8 @@ What's not: supplement_insight + food_timing_insight (2 analytical tools crashed
 ### Later
 - Fine-tuned SmolLM on Drift tool-calling dataset
 - Grammar-constrained sampling for reliable JSON
-- Conversation memory across sessions
+- ~~**Cross-session conversation context (P1)**~~ → #506 in queue — persist last 5 turns, inject at session start
+- Deep conversation memory across sessions (semantic search, long-term recall)
 - On-device embeddings for semantic food/exercise search
 - **AI Health Coach mode** — Proactive suggestions based on cross-domain patterns (not just reactive Q&A). Requires conversation memory + background analysis. Aspirational vision.
 
