@@ -122,6 +122,7 @@ You are the senior engineer and PE. session-start.sh has injected your context, 
    - If diagnosis reveals the task is misspec'd or a dup: `sprint-service.sh unclaim $N` → loop back to step 2.
    - **Stale** (already closed on GitHub): `sprint-service.sh session-done $N` → loop.
    - **Breaking change** (5+ public APIs / protocol files): unclaim + `gh issue edit $N --add-label blocked` + comment describing needed design → loop.
+   - **Resumable** (issue has `resumable` label from a prior crashed session): the latest comment will reference a `crashed/<N>-<ts>` branch. Decide: `git checkout <branch>` to continue the previous WIP and finish it (faster), OR stay on main and redo from scratch (cleaner if the crashed work was off-track). Either way: post a comment noting which path you took, then proceed with the standard plan-comment + implement loop. After successful close, `gh issue edit $N --remove-label resumable` and consider deleting the `crashed/<N>-*` branch.
 
 3. **Work the task.** Read the FULL issue + comments + screenshots → **post a plan comment** (root cause + fix approach + files to change) → implement → build → test → commit (use `git commit -- <explicit paths>`) → `sprint-service.sh done $N $(git rev-parse HEAD)`.
    - **Bug close:** write `echo "Resolution: ..." > /tmp/done-note-$N` before `done` (hook enforces non-empty resolution).
