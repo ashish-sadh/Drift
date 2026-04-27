@@ -1810,7 +1810,7 @@
     "description": "AI chat: progressive multi-item food streaming + expanded LLM eval + sprint-service claim gate",
     "features": [
       "AI chat: multi-food inputs ('rice and dal') now stream each item result as it resolves instead of batching",
-      "LLM eval expanded to 175+ cases — added sleep edge cases, glucose implicit queries, supplement advice vs status, implicit food intent",
+      "LLM eval expanded to 175+ cases \u2014 added sleep edge cases, glucose implicit queries, supplement advice vs status, implicit food intent",
       "Sprint-service: atomic next --claim command prevents double-claiming tasks",
       "Command-center: ECG-style sparkline activity chart, simpler activity dashboard",
       "Watchdog: launchd plist + install helper for supervised lifecycle, session heartbeat for reliable liveness detection",
@@ -1824,52 +1824,52 @@
   {
     "build": 171,
     "date": "2026-04-23T00:00:00-07:00",
-    "description": "chore: TestFlight build 171 — infrastructure heartbeat snapshots",
+    "description": "chore: TestFlight build 171 \u2014 infrastructure heartbeat snapshots",
     "features": [],
     "fixes": []
   },
   {
     "build": 172,
     "date": "2026-04-24T09:55:00-07:00",
-    "description": "TestFlight build 172 — strawberry overcount fixed + AI chat meal log no longer drops items",
+    "description": "TestFlight build 172 \u2014 strawberry overcount fixed + AI chat meal log no longer drops items",
     "features": [
       "AI chat \"log breakfast avocado toast and coffee\" now shows both items in the diary as separate rows (previously collapsed into one aggregated entry).",
-      "Combos & Recipes list: tap a row to edit, pencil icon next to Log — edit affordance was previously only reachable by swipe-left.",
-      "Gram figures for unit pills show \"≈\" when the weight is a guess (spray, flat-constant tbsp) vs a measured value."
+      "Combos & Recipes list: tap a row to edit, pencil icon next to Log \u2014 edit affordance was previously only reachable by swipe-left.",
+      "Gram figures for unit pills show \"\u2248\" when the weight is a guess (spray, flat-constant tbsp) vs a measured value."
     ],
     "fixes": [
-      "Strawberry \"5 pieces = 750g = 240 cal\" overcount — was 4× over real, now gated behind real piece-size data and defaults to ~19 cal.",
+      "Strawberry \"5 pieces = 750g = 240 cal\" overcount \u2014 was 4\u00d7 over real, now gated behind real piece-size data and defaults to ~19 cal.",
       "117 `gramsEquivalent: ss` sites in ServingUnit.swift no longer silently synthesize unit weights from food.servingSize; the piece unit is only offered when backed by a trusted source.",
-      "USDAFoodService stops discarding foodPortions from API responses — per-unit gram weights from USDA now propagate into Food so online fallback foods get correct piece/cup/tbsp.",
+      "USDAFoodService stops discarding foodPortions from API responses \u2014 per-unit gram weights from USDA now propagate into Food so online fallback foods get correct piece/cup/tbsp.",
       "OpenFoodFacts `piecesPerServing` now flows through to Food.pieceSizeG (was dropped at the adapter seam)."
     ]
   },
   {
     "build": 173,
     "date": "2026-04-24T11:30:00-07:00",
-    "description": "TestFlight build 173 — sprint planning cycle 5965 (no code changes, version bump)",
+    "description": "TestFlight build 173 \u2014 sprint planning cycle 5965 (no code changes, version bump)",
     "features": [],
     "fixes": []
   },
   {
     "build": 175,
     "date": "2026-04-25T00:00:00-07:00",
-    "description": "Build 175 — DriftCore extraction, harness reliability, 5-tier test architecture",
+    "description": "Build 175 \u2014 DriftCore extraction, harness reliability, 5-tier test architecture",
     "features": [
-      "DriftCore: Pure logic (AI pipeline, food/workout/weight services) now in a cross-platform Swift package — faster inner-loop builds.",
+      "DriftCore: Pure logic (AI pipeline, food/workout/weight services) now in a cross-platform Swift package \u2014 faster inner-loop builds.",
       "5-tier test architecture: pure logic tests run in ~0.1s on macOS, no simulator boot for AI pipeline changes.",
       "Harness reliability: autonomous sessions now reliably reach the task loop; gh API errors no longer silently swallowed."
     ],
     "fixes": [
       "Planning sessions no longer exit mid-session due to task-loop routing failures.",
-      "Harness state writes are now atomic — no partial state on session crash.",
+      "Harness state writes are now atomic \u2014 no partial state on session crash.",
       "DriftCore public API surface cleaned up: test-only internals no longer leaked as public symbols."
     ]
   },
   {
     "build": 176,
     "date": "2026-04-26T00:00:00-07:00",
-    "description": "Build 176 — AI chat reliability improvements, prompt quality audit cycle 7485",
+    "description": "Build 176 \u2014 AI chat reliability improvements, prompt quality audit cycle 7485",
     "features": [
       "AI chat now correctly handles conversational prefixes like 'I'd like to add...' when logging food.",
       "Improved micronutrient and goal-progress query handling in Stage 1/3 prompts."
@@ -1878,5 +1878,12 @@
       "Fixed intent routing miss for 'i'd like to add' conversational prefix (#457).",
       "Prompt quality audit: added targeted few-shot examples for micronutrient and macro goal progress queries (#458)."
     ]
+  },
+  {
+    "build": 182,
+    "date": "2026-04-27T00:00:00-07:00",
+    "description": "Build 182 \u2014 heartbeat snapshots",
+    "features": [],
+    "fixes": []
   }
 ]
