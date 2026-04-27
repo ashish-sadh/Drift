@@ -12,7 +12,7 @@ Follow the section that matches your prompt. The watchdog passes one of:
 
 _Directive:_ **Read `Docs/roadmap.md` to understand product direction. Be bold. The goal is visible, meaningful progress every cycle.**
 
-_Override:_ CONTINUE
+_Override:_ STOP
 
 **How enforcement works:** Hooks and the watchdog enforce what must not be skipped. This file guides decisions that require judgment. If Override says STOP, exit cleanly.
 
@@ -110,9 +110,33 @@ scripts/planning-service.sh remaining
 
 ## Senior Execution (Opus)
 
-You are the senior engineer and PE. session-start.sh has injected your context, created the overhead tracking issue, and reset your 10-task budget. `scripts/sprint-service.sh next --senior` returns "none" automatically after 10 implementation tasks.
+### YOUR ONE JOB — sprint throughput
 
-**Don't over-orient. session-start.sh already gave you the queue, focus, and recent activity. Your first action is to claim work, not to re-explore.**
+Loop until budget (10) exhausted or queue empty:
+
+```
+1. CLAIM    scripts/sprint-service.sh next --senior --claim   ← gives you #N
+2. PLAN     gh issue comment N --body 'Plan: ...'             ← within 5 min
+3. WORK     read claimed-issue files, edit, build, test
+4. COMMIT   git commit ... (include #N in message)
+5. DONE     scripts/sprint-service.sh done N <commit-hash>    ← closes the issue
+6. LOOP     back to step 1
+```
+
+**YOUR JOB IS NOT:**
+- Browsing the queue beyond what `next --senior --claim` returned
+- Reading random docs to "get context"
+- Investigating bugs you didn't claim
+- Refactoring outside the claimed issue's scope
+- Posting status text to chat that isn't a `Plan:` / `Progress:` / `Resolution:` comment on the issue
+
+If you find a real architectural problem mid-task: file a NEW issue (`gh issue create`) and finish your claim first. Don't pivot.
+
+**The Plan comment in step 2 is non-negotiable.** Other sessions and humans can not see what you are doing without it. Hooks will nudge you at 5/10/15 min if you skip it.
+
+session-start.sh has injected your context, created the overhead tracking issue, and reset your 10-task budget. `scripts/sprint-service.sh next --senior` returns "none" automatically after 10 tasks.
+
+### Detailed protocol
 
 1. Check Override — if STOP, exit cleanly.
 
@@ -150,9 +174,29 @@ session-compliance.sh closes the overhead issue and writes the session summary a
 
 ## Junior Execution (Sonnet)
 
-You are the junior engineer. session-start.sh has injected your context, created the overhead tracking issue, and reset your 10-task budget. `scripts/sprint-service.sh next --junior` returns "none" automatically after 10 tasks or when the queue is truly empty (including permanent tasks).
+### YOUR ONE JOB — sprint throughput
 
-**Don't over-orient. session-start.sh already gave you the queue and focus. Your first action is to claim, not to explore.**
+Loop until budget (10) exhausted or queue empty:
+
+```
+1. CLAIM    scripts/sprint-service.sh next --junior --claim   ← gives you #N
+2. PLAN     gh issue comment N --body 'Plan: ...'             ← within 5 min
+3. WORK     implement, build, test
+4. COMMIT   git commit ... (include #N in message)
+5. DONE     scripts/sprint-service.sh done N <commit-hash>    ← closes the issue
+            (permanent-task variant: session-done, never close)
+6. LOOP     back to step 1
+```
+
+**YOUR JOB IS NOT:**
+- Browsing the queue beyond what `next --junior --claim` returned
+- Reading random docs to "get context"
+- Refactoring outside the claimed issue's scope
+- Posting status text to chat that isn't a `Plan:` / `Progress:` / `Resolution:` comment on the issue
+
+session-start.sh has injected your context, created the overhead tracking issue, and reset your 10-task budget. `scripts/sprint-service.sh next --junior` returns "none" automatically after 10 tasks.
+
+### Detailed protocol
 
 1. Check Override — if STOP, exit cleanly.
 

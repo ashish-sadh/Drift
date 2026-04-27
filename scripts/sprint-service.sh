@@ -449,6 +449,11 @@ PYEOF
     # writes these every tick while the issue is in_progress.
     rm -f "$HOME/drift-state/wip/${NUM}.patch" "$HOME/drift-state/wip/${NUM}.untracked.tar.gz" 2>/dev/null
 
+    # Clean up plan-posted cache for this issue so a future re-claim of the
+    # same #N starts fresh on the nudge timer (the comment is still on
+    # GitHub; nudge hook will re-detect it on first check).
+    rm -f "$HOME/drift-state/plan-posted/${NUM}" 2>/dev/null
+
     echo "Closed #$NUM"
 }
 

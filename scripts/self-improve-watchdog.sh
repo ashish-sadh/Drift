@@ -426,9 +426,16 @@ sweep_stale_in_progress_labels() {
         --json number --jq '.[].number' 2>/dev/null || echo "")
     for num in $open_stale; do
         [[ -n "$num" ]] || continue
-        if [[ "$num" != "$current" ]]; then
+        # Re-read current right before strip — protects against the race where
+        # a session claims #N during this sweep loop. Without this, the sweep
+        # could strip a fresh claim using the stale `current` snapshot from
+        # the top of the function. (User reported "issues get into in-progress
+        # and then watchdog removes etc" — this race was a contributor.)
+        local current_now
+        current_now=$(jq -r '.in_progress // empty' "$SD/sprint-state.json" 2>/dev/null || echo "")
+        if [[ "$num" != "$current_now" ]]; then
             gh issue edit "$num" --remove-label in-progress >/dev/null 2>&1 \
-                && log "Self-heal: stripped orphan in-progress from open sprint-task #$num (current=${current:-none})"
+                && log "Self-heal: stripped orphan in-progress from open sprint-task #$num (current=${current_now:-none})"
         fi
     done
 }
