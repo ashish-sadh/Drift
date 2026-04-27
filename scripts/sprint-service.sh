@@ -212,14 +212,12 @@ in_progress = state.get("in_progress")
 
 def has(t, label): return label in t.get("labels", [])
 
-# Session budget: max 10 senior / 5 junior tasks per session (not enforced for
-# --any / planning). Senior is raised to 10 because senior tasks are typically
-# more substantial and a single complex task can take 30-60min — capping at 5
-# was leaving ~half the day's senior productive capacity unused once the
-# session shipped its first 5 tasks fast.
+# Session budget: max 10 implementation tasks per session (senior or junior).
+# Was 5 — raised after observing sessions exit early with productive capacity
+# left, especially seniors on multi-file tasks but also juniors crunching
+# through a UI/DB queue. Not enforced for --any (used by tests / planning).
 if filter_mode in ("--senior", "--junior"):
-    budget = 10 if filter_mode == "--senior" else 5
-    if state.get("session_tasks", 0) >= budget:
+    if state.get("session_tasks", 0) >= 10:
         print("none"); sys.exit(0)
 
 # Skip done and currently claimed
@@ -642,7 +640,11 @@ cmd_planning_due() {
     local NOW
     NOW=$(date +%s)
     local SECONDS_SINCE=$(( NOW - LAST ))
-    if [ "$SECONDS_SINCE" -ge 21600 ]; then
+    # 12h cadence — was 6h, raised to halve planning frequency. Planning was
+    # triggering 4x/day even when there was no real change to plan, eating
+    # senior bandwidth. 12h still captures end-of-half-day re-prioritization
+    # and feedback drain without over-firing.
+    if [ "$SECONDS_SINCE" -ge 43200 ]; then
         exit 0  # planning due
     else
         exit 1  # not due

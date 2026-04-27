@@ -18,7 +18,7 @@ _Override:_ CONTINUE
 
 ---
 
-## Sprint Planning (Opus, every ~6 hours)
+## Sprint Planning (Opus, every ~12 hours)
 
 You are the Product Designer + Principal Engineer. session-start.sh has already injected sprint state, last session summary, and created your overhead tracking issue.
 
@@ -98,7 +98,7 @@ scripts/planning-service.sh remaining
       && gh issue edit $N --remove-label in-progress \
       && scripts/sprint-service.sh planning-done
     ```
-    The `planning-done` call writes `~/drift-state/last-planning-time = now` directly. Without it, the 6h planning cadence depends on the watchdog noticing the issue close on a later cycle — which fails if the watchdog restarts before noticing, leaving the stamp stale and re-firing planning every cycle.
+    The `planning-done` call writes `~/drift-state/last-planning-time = now` directly. Without it, the 12h planning cadence depends on the watchdog noticing the issue close on a later cycle — which fails if the watchdog restarts before noticing, leaving the stamp stale and re-firing planning every cycle.
 
 **DOD (ensure-clean-state.sh blocks exit until met):**
 - Either: 8+ NEW sprint-task issues created (NORMAL mode, queue was <60), OR queue closed down to ≤60 (TRIAGE-FIRST mode, queue was ≥80)
@@ -150,7 +150,7 @@ session-compliance.sh closes the overhead issue and writes the session summary a
 
 ## Junior Execution (Sonnet)
 
-You are the junior engineer. session-start.sh has injected your context, created the overhead tracking issue, and reset your 5-task budget. `scripts/sprint-service.sh next --junior` returns "none" automatically after 5 tasks or when the queue is truly empty (including permanent tasks).
+You are the junior engineer. session-start.sh has injected your context, created the overhead tracking issue, and reset your 10-task budget. `scripts/sprint-service.sh next --junior` returns "none" automatically after 10 tasks or when the queue is truly empty (including permanent tasks).
 
 **Don't over-orient. session-start.sh already gave you the queue and focus. Your first action is to claim, not to explore.**
 

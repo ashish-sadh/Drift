@@ -364,9 +364,9 @@ assert_exit0 "planning-due when never run" sprint_service planning-due
 echo "$(date +%s)" > "$LAST_PLANNING_FILE"
 assert_exit_nonzero "planning-due not due when just run" sprint_service planning-due
 
-# 3.6 planning-due returns 0 (due) if 7h ago
-echo "$(( $(date +%s) - 25200 ))" > "$LAST_PLANNING_FILE"
-assert_exit0 "planning-due when 7h ago" sprint_service planning-due
+# 3.6 planning-due returns 0 (due) if 13h ago (cadence is 12h)
+echo "$(( $(date +%s) - 46800 ))" > "$LAST_PLANNING_FILE"
+assert_exit0 "planning-due when 13h ago" sprint_service planning-due
 
 # 3.7 planning-done stamps current time and clears due status
 rm -f "$LAST_PLANNING_FILE"
@@ -936,10 +936,14 @@ sprint_service session-done 202 > /dev/null 2>&1 || true
 ST=$(get_session_tasks)
 assert_eq "session-done on permanent-task increments session_tasks" "1" "$ST"
 
-# 11.5 next --junior returns "none" when session_tasks >= 5 (even with tasks available)
+# 11.5 next --junior returns "none" when session_tasks >= 10 (junior budget bumped to 10)
+write_state_with_budget "null" 10 "$(task 210 'Sprint task' pending sprint-task)"
+RESULT=$(sprint_service next --junior)
+assert_eq "next --junior returns none when session_tasks=10" "none" "$RESULT"
+# Junior at session_tasks=5 should STILL return tasks (budget is 10, not 5)
 write_state_with_budget "null" 5 "$(task 210 'Sprint task' pending sprint-task)"
 RESULT=$(sprint_service next --junior)
-assert_eq "next --junior returns none when session_tasks=5" "none" "$RESULT"
+assert_contains "next --junior at session_tasks=5 still returns task (budget is 10)" "210" "$RESULT"
 
 # 11.6 next --senior returns "none" when session_tasks >= 10 (senior budget is 10)
 write_state_with_budget "null" 10 "$(task 211 'SENIOR task' pending sprint-task SENIOR)"
@@ -1031,27 +1035,33 @@ run_lifecycle() {
 echo ""
 echo "══ Full Session Lifecycle Simulation ═══════════════════════════════════"
 
-# ── LC-1: Complete junior session — 5 sprint tasks, budget exhausted ──────
-# Session start → reset budget → claim 5 tasks → done 5 → next returns "none"
+# ── LC-1: Complete junior session — 10 sprint tasks, budget exhausted ─────
+# Junior budget bumped to 10 (matches senior) — sessions weren't fully
+# utilizing their productive window with a 5-task cap.
 write_state_with_budget "null" 0 \
     "$(task 501 'Task 1' pending sprint-task)" \
     "$(task 502 'Task 2' pending sprint-task)" \
     "$(task 503 'Task 3' pending sprint-task)" \
     "$(task 504 'Task 4' pending sprint-task)" \
     "$(task 505 'Task 5' pending sprint-task)" \
-    "$(task 506 'Task 6' pending sprint-task)"
+    "$(task 506 'Task 6' pending sprint-task)" \
+    "$(task 507 'Task 7' pending sprint-task)" \
+    "$(task 508 'Task 8' pending sprint-task)" \
+    "$(task 509 'Task 9' pending sprint-task)" \
+    "$(task 510 'Task 10' pending sprint-task)" \
+    "$(task 5011 'Task 11' pending sprint-task)"
 sprint_service start-session > /dev/null
-for N in 501 502 503 504 505; do
+for N in 501 502 503 504 505 506 507 508 509 510; do
     sprint_service claim $N > /dev/null 2>&1 || true
     sprint_service done $N "hash$N" > /dev/null 2>&1 || true
 done
 RESULT=$(sprint_service next --junior)
-assert_eq "LC-1: junior budget exhausted after 5 tasks → none" "none" "$RESULT"
+assert_eq "LC-1: junior budget exhausted after 10 tasks → none" "none" "$RESULT"
 ST=$(get_session_tasks)
-assert_eq "LC-1: session_tasks=5 after 5 sprint tasks" "5" "$ST"
-# Task 6 still pending but budget is done
+assert_eq "LC-1: session_tasks=10 after 10 sprint tasks" "10" "$ST"
+# Task 11 still pending but budget is done
 RESULT=$(sprint_service next --any)
-assert_contains "LC-1: task 6 still available via --any" "506" "$RESULT"
+assert_contains "LC-1: task 11 still available via --any" "5011" "$RESULT"
 
 # ── LC-2: Complete senior session — 10 SENIOR tasks, budget exhausted ─────
 # Senior budget is 10 (was 5; raised after observing senior sessions were
@@ -1143,31 +1153,36 @@ sprint_service session-done 552 > /dev/null 2>&1 || true
 RESULT=$(sprint_service next --junior)
 assert_eq "LC-6: no more tasks after sprint + perm done" "none" "$RESULT"
 
-# ── LC-7: Two session handoff — session 1 does 5, session 2 picks up ──────
+# ── LC-7: Two session handoff — session 1 does 10, session 2 picks up ─────
 write_state_with_budget "null" 0 \
     "$(task 561 'Task A' pending sprint-task)" \
     "$(task 562 'Task B' pending sprint-task)" \
     "$(task 563 'Task C' pending sprint-task)" \
     "$(task 564 'Task D' pending sprint-task)" \
     "$(task 565 'Task E' pending sprint-task)" \
-    "$(task 566 'Task F' pending sprint-task)" \
-    "$(task 567 'Task G' pending sprint-task)"
-# Session 1: does 5 tasks
+    "$(task 1566 'Task F' pending sprint-task)" \
+    "$(task 1567 'Task G' pending sprint-task)" \
+    "$(task 1568 'Task H' pending sprint-task)" \
+    "$(task 1569 'Task I' pending sprint-task)" \
+    "$(task 1570 'Task J' pending sprint-task)" \
+    "$(task 566 'Task K' pending sprint-task)" \
+    "$(task 567 'Task L' pending sprint-task)"
+# Session 1: does 10 tasks (budget)
 sprint_service start-session > /dev/null
-for N in 561 562 563 564 565; do
+for N in 561 562 563 564 565 1566 1567 1568 1569 1570; do
     sprint_service claim $N > /dev/null 2>&1 || true
     sprint_service done $N "h$N" > /dev/null 2>&1 || true
 done
 assert_eq "LC-7: session 1 budget exhausted" "none" "$(sprint_service next --junior)"
 # Watchdog restarts, session 2 starts
 sprint_service start-session > /dev/null
-# Session 2 picks up remaining tasks F and G
+# Session 2 picks up remaining tasks K and L
 RESULT=$(sprint_service next --junior)
-assert_contains "LC-7: session 2 picks up task F (566)" "566" "$RESULT"
+assert_contains "LC-7: session 2 picks up task K (566)" "566" "$RESULT"
 sprint_service claim 566 > /dev/null 2>&1 || true
 sprint_service done 566 "h566" > /dev/null 2>&1 || true
 RESULT=$(sprint_service next --junior)
-assert_contains "LC-7: session 2 picks up task G (567)" "567" "$RESULT"
+assert_contains "LC-7: session 2 picks up task L (567)" "567" "$RESULT"
 
 # ── LC-8: needs-review tasks never returned (any session, any filter) ──────
 write_state_with_budget "null" 0 \
@@ -1209,11 +1224,11 @@ assert_eq "LC-10: junior gets regular sprint (after SENIOR done)" "591 Junior sp
 RESULT=$(sprint_service next --senior)
 assert_eq "LC-10: senior has nothing left (regular sprint not for senior)" "none" "$RESULT"
 
-# ── LC-11: Planning-due boundary — exactly at 6h and 6h-1s ───────────────
-echo "$(( $(date +%s) - 21600 ))" > "$LAST_PLANNING_FILE"   # exactly 6h ago
-assert_exit0    "LC-11: planning-due at exactly 6h" sprint_service planning-due
-echo "$(( $(date +%s) - 21599 ))" > "$LAST_PLANNING_FILE"   # 6h minus 1s
-assert_exit_nonzero "LC-11: planning-not-due at 6h-1s" sprint_service planning-due
+# ── LC-11: Planning-due boundary — exactly at 12h and 12h-1s ────────────
+echo "$(( $(date +%s) - 43200 ))" > "$LAST_PLANNING_FILE"   # exactly 12h ago
+assert_exit0    "LC-11: planning-due at exactly 12h" sprint_service planning-due
+echo "$(( $(date +%s) - 43199 ))" > "$LAST_PLANNING_FILE"   # 12h minus 1s
+assert_exit_nonzero "LC-11: planning-not-due at 12h-1s" sprint_service planning-due
 
 # ── LC-12: Overhead issue does not block real task claims ─────────────────
 write_state_with_budget "null" 0 \
