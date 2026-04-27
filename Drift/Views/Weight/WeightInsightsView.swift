@@ -99,20 +99,23 @@ struct WeightInsightsView: View {
                 }
             }
 
-            // Trend weight — separate row, only when meaningfully different
-            if let latest = WeightTrendService.shared.latestWeightKg, abs(latest - trend.currentEMA) > 0.5 {
-                HStack(spacing: 6) {
-                    Image(systemName: "chart.line.downtrend.xyaxis").font(.caption2).foregroundStyle(.tertiary)
-                    Text("Trend Weight: \(String(format: "%.1f", unit.convert(fromKg: trend.currentEMA))) \(unit.displayName)")
-                        .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                    Button { showTrendInfo = true } label: {
-                        Image(systemName: "info.circle").font(.caption2).foregroundStyle(.quaternary)
-                    }.buttonStyle(.plain)
-                    Spacer()
-                }
-                .padding(.horizontal, 8).padding(.vertical, 6)
-                .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 10))
+            // Trend weight — always shown when we have a trend. The previous
+            // "only when |latest − EMA| > 0.5kg" gate hid the row whenever the
+            // EMA was close to current weight, which became most of the time
+            // after the time-weighted EMA fix made the smoother more responsive.
+            // Users reported the bar "disappeared" — restore it as an always-on
+            // smoothed number, useful even when close to current.
+            HStack(spacing: 6) {
+                Image(systemName: "chart.line.downtrend.xyaxis").font(.caption2).foregroundStyle(.tertiary)
+                Text("Trend Weight: \(String(format: "%.1f", unit.convert(fromKg: trend.currentEMA))) \(unit.displayName)")
+                    .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                Button { showTrendInfo = true } label: {
+                    Image(systemName: "info.circle").font(.caption2).foregroundStyle(.quaternary)
+                }.buttonStyle(.plain)
+                Spacer()
             }
+            .padding(.horizontal, 8).padding(.vertical, 6)
+            .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 10))
 
             // Compact weight-change chips
             weightChangesRow
