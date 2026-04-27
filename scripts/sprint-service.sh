@@ -441,6 +441,11 @@ try:
 except Exception: pass
 PYEOF
 
+    # Clean up any WIP snapshot for this issue — work is shipped, no need to
+    # keep the patch+tarball around. Watchdog snapshot_wip_if_in_progress
+    # writes these every tick while the issue is in_progress.
+    rm -f "$HOME/drift-state/wip/${NUM}.patch" "$HOME/drift-state/wip/${NUM}.untracked.tar.gz" 2>/dev/null
+
     echo "Closed #$NUM"
 }
 

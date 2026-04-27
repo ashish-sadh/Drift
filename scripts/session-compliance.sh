@@ -76,11 +76,20 @@ INTERRUPTED_NUM=$(echo "$INTERRUPTED" | grep -oE '^#[0-9]+' | tr -d '#')
 if [[ "$EXIT_REASON" == "crash" || "$EXIT_REASON" == "stall" ]] && [[ -n "$INTERRUPTED_NUM" ]]; then
     WIP_DIR="$STATE_DIR/wip"
     WIP_PATCH="$WIP_DIR/${INTERRUPTED_NUM}.patch"
-    if [[ -s "$WIP_PATCH" ]]; then
-        echo "[$TS] session-compliance: WIP patch found for #${INTERRUPTED_NUM} ($(wc -c < "$WIP_PATCH") bytes) — labeling resumable"
+    WIP_TARBALL="$WIP_DIR/${INTERRUPTED_NUM}.untracked.tar.gz"
+    if [[ -s "$WIP_PATCH" ]] || [[ -s "$WIP_TARBALL" ]]; then
+        echo "[$TS] session-compliance: WIP found for #${INTERRUPTED_NUM} — labeling resumable"
         gh issue edit "$INTERRUPTED_NUM" --add-label resumable 2>>"$STATE_DIR/gh-errors.log" || true
+        # Build recovery instructions matching what's actually saved
+        RECOVER=""
+        [[ -s "$WIP_PATCH" ]] && RECOVER="git apply $WIP_PATCH"
+        [[ -s "$WIP_TARBALL" ]] && RECOVER="${RECOVER:+$RECOVER && }tar -xzf $WIP_TARBALL"
         gh issue comment "$INTERRUPTED_NUM" \
-          --body "Resumable: crashed session WIP preserved at \`$WIP_PATCH\`. Recover with \`git apply $WIP_PATCH\`. Crash exit reason: \`$EXIT_REASON\`." \
+          --body "Resumable: crashed session WIP preserved. Recover from repo root:
+\`\`\`
+$RECOVER
+\`\`\`
+Crash exit reason: \`$EXIT_REASON\`. After successful close: \`gh issue edit $INTERRUPTED_NUM --remove-label resumable && rm $WIP_PATCH $WIP_TARBALL\`." \
           2>>"$STATE_DIR/gh-errors.log" || true
     fi
 fi
