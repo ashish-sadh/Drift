@@ -7,11 +7,24 @@ public enum WeightTrendCalculator {
 
     /// Tunable algorithm parameters. Adjust these to calibrate deficit estimates.
     public struct AlgorithmConfig: Codable, Sendable {
-        /// EMA smoothing factor. Higher = more responsive, noisier.
-        public var emaAlpha: Double
+        /// Time-weighted EMA half-life in days. After this many days, an
+        /// entry's contribution decays by 50%. Time-weighted (not entry-
+        /// indexed) so cadence-independent — daily and weekly weighers
+        /// with identical real trajectories see the same Trend Weight.
+        public var emaHalfLifeDays: Double
 
-        /// Number of days of EMA data to use for linear regression.
+        /// Default window for slope calculation (two-window endpoint method
+        /// when entries-per-half allows; OLS fallback otherwise).
         public var regressionWindowDays: Int
+
+        /// When |slope| on the default window is below this threshold,
+        /// re-run on a wider window to surface low-rate trends that get
+        /// drowned in daily noise. Threshold in kg/week.
+        public var widenSlopeThresholdKgPerWeek: Double
+
+        /// Wider window used when widening triggers. ~2× default by design
+        /// (halves slope SE).
+        public var widenWindowDays: Int
 
         /// Energy density of body weight change in kcal per kg.
         public var kcalPerKg: Double
@@ -19,30 +32,52 @@ public enum WeightTrendCalculator {
         /// Weekly rate threshold (kg/week) below which we classify as "maintaining".
         public var maintainingThresholdKgPerWeek: Double
 
-        init(emaAlpha: Double, regressionWindowDays: Int, kcalPerKg: Double, maintainingThresholdKgPerWeek: Double) {
-            self.emaAlpha = emaAlpha
+        // Legacy field retained for Codable compatibility with persisted user
+        // configs. Not consumed by the calculator anymore — replaced by
+        // emaHalfLifeDays. Will be removed once all stored configs migrate.
+        public var emaAlpha: Double
+
+        init(
+            emaHalfLifeDays: Double,
+            regressionWindowDays: Int,
+            widenSlopeThresholdKgPerWeek: Double,
+            widenWindowDays: Int,
+            kcalPerKg: Double,
+            maintainingThresholdKgPerWeek: Double,
+            emaAlpha: Double = 0.1
+        ) {
+            self.emaHalfLifeDays = emaHalfLifeDays
             self.regressionWindowDays = regressionWindowDays
+            self.widenSlopeThresholdKgPerWeek = widenSlopeThresholdKgPerWeek
+            self.widenWindowDays = widenWindowDays
             self.kcalPerKg = kcalPerKg
             self.maintainingThresholdKgPerWeek = maintainingThresholdKgPerWeek
+            self.emaAlpha = emaAlpha
         }
 
         public static let `default` = AlgorithmConfig(
-            emaAlpha: 0.1,
+            emaHalfLifeDays: 14,
             regressionWindowDays: 21,
+            widenSlopeThresholdKgPerWeek: 0.227,  // ≈ 0.5 lbs/wk
+            widenWindowDays: 42,
             kcalPerKg: 6000,
             maintainingThresholdKgPerWeek: 0.05
         )
 
         public static let conservative = AlgorithmConfig(
-            emaAlpha: 0.08,
+            emaHalfLifeDays: 21,
             regressionWindowDays: 21,
+            widenSlopeThresholdKgPerWeek: 0.227,
+            widenWindowDays: 42,
             kcalPerKg: 5500,
             maintainingThresholdKgPerWeek: 0.05
         )
 
         public static let responsive = AlgorithmConfig(
-            emaAlpha: 0.15,
+            emaHalfLifeDays: 7,
             regressionWindowDays: 14,
+            widenSlopeThresholdKgPerWeek: 0.227,
+            widenWindowDays: 28,
             kcalPerKg: 7700,
             maintainingThresholdKgPerWeek: 0.05
         )
@@ -160,44 +195,61 @@ public enum WeightTrendCalculator {
         }
         guard !filtered.isEmpty else { return nil }
 
+        // Time-weighted EMA: decay factor depends on elapsed days between
+        // entries, not on entry count. A weekly weigher and a daily weigher
+        // with the same actual trajectory now produce the same EMA — half-
+        // life is a property of time, not log frequency. (Was: entry-indexed
+        // alpha, which made weekly weighers' Trend Weight lag ~25% behind
+        // reality due to seed weight retention.)
         var dataPoints: [WeightDataPoint] = []
         var ema = filtered[0].weight
-
-        for entry in filtered {
-            ema = config.emaAlpha * entry.weight + (1 - config.emaAlpha) * ema
+        var prevDate = filtered[0].date
+        dataPoints.append(WeightDataPoint(
+            date: filtered[0].date,
+            dateString: filtered[0].dateString,
+            actualWeight: filtered[0].weight,
+            emaWeight: ema
+        ))
+        for entry in filtered.dropFirst() {
+            let deltaDays = max(
+                1.0,
+                Double(Calendar.current.dateComponents([.day], from: prevDate, to: entry.date).day ?? 1)
+            )
+            // alpha = 1 - (1/2)^(Δt / halfLife). At Δt = halfLife, alpha = 0.5,
+            // meaning the new entry contributes 50% and the prior EMA 50%.
+            let alpha = 1.0 - pow(0.5, deltaDays / config.emaHalfLifeDays)
+            ema = alpha * entry.weight + (1 - alpha) * ema
             dataPoints.append(WeightDataPoint(
                 date: entry.date,
                 dateString: entry.dateString,
                 actualWeight: entry.weight,
                 emaWeight: ema
             ))
+            prevDate = entry.date
         }
 
         guard let lastPoint = dataPoints.last else { return nil }
         let currentEMA = lastPoint.emaWeight
         let previousEMA = dataPoints.count >= 2 ? dataPoints[dataPoints.count - 2].emaWeight : currentEMA
 
-        guard let windowStart = Calendar.current.date(byAdding: .day, value: -config.regressionWindowDays, to: Date()) else { return nil }
-        let recentPoints = dataPoints.filter { $0.date >= windowStart }
-
-        // Slope is computed on RAW filtered weights, NOT on the EMA series.
-        // Regressing on EMA values measures how fast the EMA is catching up to
-        // reality (which may move opposite to actual weight when the user's
-        // regime recently changed) instead of how the user's actual weight is
-        // changing. Outlier removal (above) provides robustness; regression
-        // itself averages remaining noise (slope variance ~ σ²/N³).
+        // Slope: two-window endpoint method (preferred) → OLS fallback →
+        // 2-point fallback. Adaptive widening when the default-window slope
+        // is below threshold and we have enough history. See
+        // weeklyRateForWindow() docs for the per-method criteria.
+        let primary = weeklyRateForWindow(
+            dataPoints: dataPoints, windowDays: config.regressionWindowDays
+        )
         let weeklyRateKg: Double
-        if recentPoints.count >= 3 {
-            weeklyRateKg = linearRegressionSlopeOnActualWeight(points: recentPoints) * 7
-        } else if dataPoints.count >= 2 {
-            let last = dataPoints[dataPoints.count - 1]
-            let prev = dataPoints[dataPoints.count - 2]
-            let lastW = last.actualWeight ?? last.emaWeight
-            let prevW = prev.actualWeight ?? prev.emaWeight
-            let days = Calendar.current.dateComponents([.day], from: prev.date, to: last.date).day ?? 1
-            weeklyRateKg = days > 0 ? (lastW - prevW) / Double(days) * 7 : 0
+        if let primary, abs(primary) >= config.widenSlopeThresholdKgPerWeek {
+            weeklyRateKg = primary
+        } else if let widened = weeklyRateForWindow(
+            dataPoints: dataPoints, windowDays: config.widenWindowDays
+        ), dataPoints.first.map({ daysBetween($0.date, Date()) >= config.widenWindowDays }) ?? false {
+            // Wider window only kicks in when we actually have ≥widenWindowDays
+            // of history — otherwise it just reproduces the primary result.
+            weeklyRateKg = widened
         } else {
-            weeklyRateKg = 0
+            weeklyRateKg = primary ?? 0
         }
 
         let estimatedDailyDeficit = weeklyRateKg * config.kcalPerKg / 7
@@ -290,6 +342,78 @@ public enum WeightTrendCalculator {
             return (date: $0.date, weight: w)
         }
         return slopeOfSeries(samples)
+    }
+
+    /// Two-window endpoint slope: average the first 7-day window's weights
+    /// vs the last 7-day window's weights, take the difference per week.
+    /// Robust to daily noise (sqrt(7) variance reduction within each
+    /// window) AND catches regime changes (compares actual endpoints, not
+    /// a lagging EMA). Returns nil if either endpoint window has fewer
+    /// than 2 entries — caller should fall back to plain OLS.
+    ///
+    /// Returns slope in **kg/week** (not kg/day, unlike slopeOfSeries).
+    static func slopeViaTwoWindowEndpoints(
+        points: [WeightDataPoint],
+        windowDays: Int
+    ) -> Double? {
+        guard let last = points.last else { return nil }
+        let endpointSpan = 7
+        guard let firstWindowEnd = Calendar.current.date(byAdding: .day, value: -(windowDays - endpointSpan), to: last.date),
+              let lastWindowStart = Calendar.current.date(byAdding: .day, value: -endpointSpan, to: last.date) else {
+            return nil
+        }
+        let firstWindow = points.filter { $0.date <= firstWindowEnd }
+        let lastWindow = points.filter { $0.date >= lastWindowStart }
+        guard firstWindow.count >= 2, lastWindow.count >= 2 else { return nil }
+
+        let firstWeights = firstWindow.compactMap { $0.actualWeight }
+        let lastWeights = lastWindow.compactMap { $0.actualWeight }
+        guard firstWeights.count >= 2, lastWeights.count >= 2 else { return nil }
+
+        let firstAvg = firstWeights.reduce(0, +) / Double(firstWeights.count)
+        let lastAvg = lastWeights.reduce(0, +) / Double(lastWeights.count)
+
+        // Distance between window centers (in weeks). For a 21-day window
+        // with 7-day endpoints, the centers are ~14 days apart (2 weeks).
+        let weeksBetweenCenters = Double(windowDays - endpointSpan) / 7.0
+        guard weeksBetweenCenters > 0 else { return nil }
+        return (lastAvg - firstAvg) / weeksBetweenCenters
+    }
+
+    /// Whole-day count between two dates (positive when `b` is after `a`).
+    /// Wraps Calendar.current to avoid the verbose dateComponents call site.
+    static func daysBetween(_ a: Date, _ b: Date) -> Int {
+        Calendar.current.dateComponents([.day], from: a, to: b).day ?? 0
+    }
+
+    /// Compute weekly rate (kg/wk) for a given window of `dataPoints` ending
+    /// at the latest entry. Tries two-window endpoint method first
+    /// (robust to noise + regime-change-correct), falls back to plain OLS
+    /// on raw weights when too few entries per endpoint, falls back to a
+    /// 2-point delta when the window is sparse. Returns nil only when
+    /// fewer than 2 points exist anywhere — slope is meaningless then.
+    static func weeklyRateForWindow(
+        dataPoints: [WeightDataPoint],
+        windowDays: Int
+    ) -> Double? {
+        guard let windowStart = Calendar.current.date(byAdding: .day, value: -windowDays, to: Date()) else { return nil }
+        let windowed = dataPoints.filter { $0.date >= windowStart }
+
+        if let twoWindow = slopeViaTwoWindowEndpoints(points: windowed, windowDays: windowDays) {
+            return twoWindow
+        }
+        if windowed.count >= 3 {
+            return linearRegressionSlopeOnActualWeight(points: windowed) * 7
+        }
+        if dataPoints.count >= 2 {
+            let last = dataPoints[dataPoints.count - 1]
+            let prev = dataPoints[dataPoints.count - 2]
+            let lastW = last.actualWeight ?? last.emaWeight
+            let prevW = prev.actualWeight ?? prev.emaWeight
+            let days = daysBetween(prev.date, last.date)
+            return days > 0 ? (lastW - prevW) / Double(days) * 7 : nil
+        }
+        return nil
     }
 
     // MARK: - Weight Changes

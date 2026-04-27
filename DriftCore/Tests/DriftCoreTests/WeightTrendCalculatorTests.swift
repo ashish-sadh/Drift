@@ -32,10 +32,14 @@ private func recentDailyEntries(
 }
 
 @Test func emaSmoothing() async throws {
+    // With default 14-day half-life and Δt=1 day, alpha ≈ 0.049 per entry.
+    // 55 → seed, 54 → ema = 0.049*54 + 0.951*55 ≈ 54.95. EMA stays close to
+    // the prior weight (smoothing), exactly as expected.
     let t = WeightTrendCalculator.calculateTrend(entries: [
         (date: "2026-03-01", weightKg: 55.0), (date: "2026-03-02", weightKg: 54.0)
     ])!
-    #expect(abs(t.currentEMA - 54.9) < 0.01) // 0.1*54 + 0.9*55
+    #expect(t.currentEMA > 54.5 && t.currentEMA < 55.0,
+            "EMA should smooth toward newer entry but lag the seed; got \(t.currentEMA)")
 }
 
 @Test func emaSmoothingMultipleEntries() async throws {
@@ -46,10 +50,15 @@ private func recentDailyEntries(
 }
 
 @Test func emaLagsBehindDrop() async throws {
+    // Default half-life is 14 days. After one daily entry, the EMA absorbs
+    // ~5% of the new weight — a 10kg drop only moves the EMA ~0.5kg.
+    // The point of this test is to verify the EMA *lags* (doesn't snap to
+    // the new value), not the exact magnitude.
     let t = WeightTrendCalculator.calculateTrend(entries: [
         (date: "2026-03-01", weightKg: 80.0), (date: "2026-03-02", weightKg: 70.0)
     ])!
-    #expect(abs(t.currentEMA - 79.0) < 0.01) // heavily lagged
+    #expect(t.currentEMA > 78.0 && t.currentEMA < 80.0,
+            "EMA should lag the 10kg drop, staying close to seed; got \(t.currentEMA)")
 }
 
 @Test func emptyEntriesReturnsNil() async throws {
@@ -89,20 +98,32 @@ private func recentDailyEntries(
     #expect(abs(t.currentEMA - 65.0) < 1.5, "EMA should be near 65 despite noise")
 }
 
-@Test func emaVeryHighAlpha() async throws {
-    let config = WeightTrendCalculator.AlgorithmConfig(emaAlpha: 0.5, regressionWindowDays: 21, kcalPerKg: 6000, maintainingThresholdKgPerWeek: 0.05)
+@Test func emaShortHalfLife() async throws {
+    // Half-life of 1 day at Δt=1 day → alpha = 1 - 0.5^1 = 0.5.
+    // Two consecutive daily entries 80, 70 → 0.5*70 + 0.5*80 = 75.
+    let config = WeightTrendCalculator.AlgorithmConfig(
+        emaHalfLifeDays: 1.0, regressionWindowDays: 21,
+        widenSlopeThresholdKgPerWeek: 0.227, widenWindowDays: 42,
+        kcalPerKg: 6000, maintainingThresholdKgPerWeek: 0.05
+    )
     let t = WeightTrendCalculator.calculateTrend(entries: [
         (date: "2026-03-01", weightKg: 80.0), (date: "2026-03-02", weightKg: 70.0)
     ], config: config)!
-    #expect(abs(t.currentEMA - 75.0) < 0.01) // 0.5*70 + 0.5*80
+    #expect(abs(t.currentEMA - 75.0) < 0.01)
 }
 
-@Test func emaVeryLowAlpha() async throws {
-    let config = WeightTrendCalculator.AlgorithmConfig(emaAlpha: 0.01, regressionWindowDays: 21, kcalPerKg: 6000, maintainingThresholdKgPerWeek: 0.05)
+@Test func emaLongHalfLife() async throws {
+    // Half-life of 100 days at Δt=1 day → alpha ≈ 0.0069. Two consecutive
+    // daily entries 80, 70 → ≈ 80 * 0.993 + 70 * 0.0069 ≈ 79.93 (barely moves).
+    let config = WeightTrendCalculator.AlgorithmConfig(
+        emaHalfLifeDays: 100.0, regressionWindowDays: 21,
+        widenSlopeThresholdKgPerWeek: 0.227, widenWindowDays: 42,
+        kcalPerKg: 6000, maintainingThresholdKgPerWeek: 0.05
+    )
     let t = WeightTrendCalculator.calculateTrend(entries: [
         (date: "2026-03-01", weightKg: 80.0), (date: "2026-03-02", weightKg: 70.0)
     ], config: config)!
-    #expect(abs(t.currentEMA - 79.9) < 0.01) // barely moves
+    #expect(abs(t.currentEMA - 79.93) < 0.05)
 }
 
 @Test func ema365DaysData() async throws {
@@ -704,12 +725,11 @@ func makeEntries(days: Int, startKg: Double, ratePerDay: Double) -> [(date: Stri
 @Test func trendDirectionMaintainingHighThreshold() {
     // With a high threshold, a small loss should classify as maintaining
     let config = WeightTrendCalculator.AlgorithmConfig(
-        emaAlpha: 0.1, regressionWindowDays: 21, kcalPerKg: 6000,
-        maintainingThresholdKgPerWeek: 0.5
+        emaHalfLifeDays: 14, regressionWindowDays: 21,
+        widenSlopeThresholdKgPerWeek: 0.227, widenWindowDays: 42,
+        kcalPerKg: 6000, maintainingThresholdKgPerWeek: 0.5
     )
-    let entries: [(String, Double)] = (0..<21).map {
-        (String(format: "2026-03-%02d", $0 + 1), 70.0 - Double($0) * 0.01)
-    }
+    let entries = recentDailyEntries(count: 21) { 70.0 - Double($0) * 0.01 }
     let t = WeightTrendCalculator.calculateTrend(entries: entries, config: config)!
     #expect(t.trendDirection == .maintaining)
 }
