@@ -55,46 +55,33 @@ except Exception:
 PYEOF
 )
 
-# Numeric-only version for git branch naming etc.
+# Numeric-only version for issue ref + WIP path naming.
 INTERRUPTED_NUM=$(echo "$INTERRUPTED" | grep -oE '^#[0-9]+' | tr -d '#')
 
-# Preserve uncommitted work on crash/stall — write it to a `crashed/<N>-<ts>`
-# branch and label the issue with `resumable` so the next senior session
-# (or a human) can pick up where the crashed session left off. Without this,
-# session-compliance + cleanup_dirty_state combo wipes legitimate work just
-# because the session got an API stream timeout or hit a budget edge before
-# it could commit. (Observed 2026-04-27: #426 lost SleepFoodCorrelationTool
-# + 6 file edits; #418 lost FoodTimingInsightTool. Both were genuine work
-# 60 min in, killed by Anthropic API stream idle timeout.)
+# Preserve uncommitted work on crash/stall as a patch file under
+# ~/drift-state/wip/<N>.patch (the watchdog also snapshots periodically
+# during the session — this handler just labels the issue + comments
+# with the path so recovery is one `git apply` away).
+#
+# Patch-file approach (simpler than branches): no remote branches to
+# accumulate, no merge ceremony, single `git apply` recovery. The
+# patch lives in ~/drift-state/ which survives session crashes and
+# watchdog restarts. Tradeoff: local-only — if the machine dies, the
+# work is gone (acceptable since drift-state has no remote anyway).
+#
+# Bug history: #426 lost SleepFoodCorrelationTool + 6 file edits;
+# #418 lost FoodTimingInsightTool. Both: real work 60 min in, killed
+# by Anthropic API stream idle timeout, then session-compliance +
+# cleanup_dirty_state combo wiped the working tree.
 if [[ "$EXIT_REASON" == "crash" || "$EXIT_REASON" == "stall" ]] && [[ -n "$INTERRUPTED_NUM" ]]; then
-    cd "$WORK_DIR" || true
-    # Filter out auto-managed paths so heartbeat/graphify churn alone doesn't
-    # trigger preservation. We only care about real session work.
-    DIRTY_REAL=$(git status --porcelain 2>/dev/null | grep -vE 'command-center/heartbeat\.json|graphify-out/' || true)
-    if [[ -n "$DIRTY_REAL" ]]; then
-        CRASH_BRANCH="crashed/${INTERRUPTED_NUM}-$(date +%s)"
-        echo "[$TS] session-compliance: preserving WIP for #${INTERRUPTED_NUM} on $CRASH_BRANCH"
-        if git checkout -b "$CRASH_BRANCH" 2>/dev/null \
-           && git add -A 2>/dev/null \
-           && git -c user.name="$(git config user.name)" -c user.email="$(git config user.email)" \
-              commit --no-verify -m "WIP: crashed session work for #${INTERRUPTED_NUM}
-
-Auto-preserved by session-compliance.sh ($EXIT_REASON exit).
-Session: $SESSION_TYPE ($MODEL)
-Time: $TS
-
-Recover: git checkout $CRASH_BRANCH" 2>/dev/null \
-           && git push origin "$CRASH_BRANCH" 2>/dev/null; then
-            gh issue edit "$INTERRUPTED_NUM" --add-label resumable 2>>"$STATE_DIR/gh-errors.log" || true
-            gh issue comment "$INTERRUPTED_NUM" \
-              --body "Resumable: crashed session WIP preserved on branch \`$CRASH_BRANCH\`. Next session can \`git checkout $CRASH_BRANCH\` to continue, then merge back via PR. Crash exit reason: \`$EXIT_REASON\`." \
-              2>>"$STATE_DIR/gh-errors.log" || true
-            echo "[$TS] session-compliance: preserved + labeled #${INTERRUPTED_NUM} resumable"
-        else
-            echo "[$TS] session-compliance: WARN failed to preserve crashed work for #${INTERRUPTED_NUM}" >&2
-        fi
-        # Always return to main so cleanup_dirty_state operates on the right branch
-        git checkout main 2>/dev/null || true
+    WIP_DIR="$STATE_DIR/wip"
+    WIP_PATCH="$WIP_DIR/${INTERRUPTED_NUM}.patch"
+    if [[ -s "$WIP_PATCH" ]]; then
+        echo "[$TS] session-compliance: WIP patch found for #${INTERRUPTED_NUM} ($(wc -c < "$WIP_PATCH") bytes) — labeling resumable"
+        gh issue edit "$INTERRUPTED_NUM" --add-label resumable 2>>"$STATE_DIR/gh-errors.log" || true
+        gh issue comment "$INTERRUPTED_NUM" \
+          --body "Resumable: crashed session WIP preserved at \`$WIP_PATCH\`. Recover with \`git apply $WIP_PATCH\`. Crash exit reason: \`$EXIT_REASON\`." \
+          2>>"$STATE_DIR/gh-errors.log" || true
     fi
 fi
 

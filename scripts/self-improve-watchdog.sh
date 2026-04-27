@@ -306,6 +306,21 @@ check_stale_claim() {
         return
     fi
 
+    # Any real edits in the working tree? — third progress signal alongside
+    # commits + comments. A session 60 min into a multi-file change with no
+    # commit yet should not be flagged. Filter out auto-managed paths so
+    # heartbeat/graphify churn alone doesn't count as progress (those run
+    # in the watchdog itself, unrelated to session work).
+    # Bug history: #426 + #418 both lost real work because the auto-flag
+    # fired despite legitimate file edits sitting in the working tree.
+    local REAL_EDITS
+    REAL_EDITS=$(cd "$WORK_DIR" && git status --porcelain 2>/dev/null \
+        | grep -vE 'command-center/heartbeat\.json|graphify-out/|\.xcodeproj/' \
+        | wc -l | tr -d ' ')
+    if [[ "$REAL_EDITS" -gt 0 ]]; then
+        return
+    fi
+
     # Any new comment on the issue since claim_started? (RFC3339 → epoch via python)
     local LATEST_COMMENT_TS
     LATEST_COMMENT_TS=$(gh issue view "$NUM" --json comments \
@@ -338,6 +353,53 @@ except Exception:
     fi
     gh issue comment "$NUM" --body "Auto-flagged stale claim — claimed for ${AGE}s with no commits referencing #${NUM} and no new activity. Review and unblock, close, or reassign." >/dev/null 2>&1 || true
     "$WORK_DIR/scripts/sprint-service.sh" unclaim "$NUM" >/dev/null 2>&1 || true
+}
+
+# Periodic WIP snapshot — every tick, if there's a claimed issue and the
+# working tree has real edits, save the current diff to
+# ~/drift-state/wip/<N>.patch (overwrite). On crash, session-compliance
+# reads this file to label the issue resumable + post the recovery path.
+# On clean exit (cmd_done), sprint-service.sh deletes the patch. Keeps
+# WIP recoverable to within ~30 sec without git branch ceremony.
+snapshot_wip_if_in_progress() {
+    local SD="$HOME/drift-state"
+    local STATE_FILE="$SD/sprint-state.json"
+    [[ -f "$STATE_FILE" ]] || return
+
+    local NUM
+    NUM=$(jq -r '.in_progress // empty' "$STATE_FILE" 2>/dev/null || echo "")
+    [[ -z "$NUM" || "$NUM" == "null" ]] && return
+
+    cd "$WORK_DIR" || return
+    local REAL_EDITS
+    REAL_EDITS=$(git status --porcelain 2>/dev/null \
+        | grep -vE 'command-center/heartbeat\.json|graphify-out/|\.xcodeproj/' \
+        | wc -l | tr -d ' ')
+    if [[ "$REAL_EDITS" -eq 0 ]]; then
+        # No real edits — remove any stale patch (issue was claimed, work
+        # got committed since last tick, patch no longer reflects WIP)
+        rm -f "$SD/wip/${NUM}.patch"
+        return
+    fi
+
+    mkdir -p "$SD/wip"
+    # Capture both committed-baseline diff AND status (untracked files
+    # don't appear in `git diff` but do appear in status). Apply with
+    # `git apply` after `git add -A` if you want untracked files restored.
+    {
+        git status --porcelain 2>/dev/null
+        echo "---"
+        git diff HEAD 2>/dev/null
+        echo "---"
+        # Capture untracked file contents so they're recoverable
+        git ls-files --others --exclude-standard 2>/dev/null | while read -r f; do
+            [[ -f "$f" ]] || continue
+            echo "=== UNTRACKED: $f ==="
+            cat "$f"
+            echo "=== END UNTRACKED ==="
+        done
+    } > "$SD/wip/${NUM}.patch.tmp" 2>/dev/null
+    mv "$SD/wip/${NUM}.patch.tmp" "$SD/wip/${NUM}.patch"
 }
 
 # Strip orphan in-progress labels — a closed issue should never carry
