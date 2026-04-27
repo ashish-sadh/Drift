@@ -316,6 +316,13 @@
 - MFP's Today tab redesign is backfiring (more taps, user complaints). Our chat-first removes friction while they add it. This is a brief competitive window — use it in TestFlight release notes: "log lunch in one sentence, not 4 taps."
 - West African and Japanese home cooking added to food DB queue — closing global cuisine gaps beyond Indian/South Asian/East Asian that are already covered.
 
+### What I Learned — Planning Cycle 7689 (2026-04-26)
+- All 4 failing-query categories closed in one sprint is the highest-trust product move in Drift's history. The pattern: close the queries week-1 users test before anything else. "How many calories last Tuesday?" and "am I hitting my protein goal?" returning correct answers is the difference between a user staying and switching to MFP after day 1.
+- Whoop Behavior Trends shipped April 2026 — behavior→Recovery correlation after 5+ logs. This is the same pattern as `supplement_insight` and `food_timing_insight`. Every cycle these two stay queued, Whoop's version cements as the mental model for this feature type. Both must be SENIOR P0 — no exceptions next session.
+- MFP Today tab redesign backfired (April 2026) — users complaining food logging takes more taps. This is a brief competitive window. The next TestFlight build's release notes should explicitly market "log your lunch in one sentence — no 4-tap diary required." Competitive windows close; use them.
+- Eval coverage must ship with every feature, in the same PR. Features shipped without eval cases (macro goal progress, micronutrient tracking, context-aware tie-break) can silently regress. New rule: no task is marked Done without ≥5 eval cases for any AI pipeline feature.
+- Food DB flat at 2,511 for multiple cycles is a silent daily loss. USDA batch import (offline JSON → foods.json, no runtime API) is the right first step — one junior session, ≥300 new verified foods, closes the most-common "not found" gaps. Proactive search tier in the following sprint.
+
 ### What I Learned — Planning Cycle 7485 (2026-04-26)
 - 2 of 4 failing query categories closed since last review (historical dates, calorie goal setting) — trust restoration is working. The pattern: close the queries users test in week-1, because silent wrong answers end the relationship before it starts. Still open: micronutrient queries (#442) and macro goal progress (#440, #441).
 - DriftCore pure-logic test migration (pure Swift → `swift test`, 0.1s) is the highest-leverage engineering improvement in recent cycles. Every AI prompt change can now be validated in seconds instead of waiting 30s for simulator boot. This makes the "improve → verify → commit" loop fast enough to actually happen every session.
