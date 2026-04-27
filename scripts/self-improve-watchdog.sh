@@ -265,8 +265,8 @@ reconcile_in_progress() {
 # "Progress" = either a commit referencing #N in its message, or any new
 # comment on the issue, both since claim_started. If neither happened in
 # the last hour (default), the claim is presumed stuck — auto-flag the
-# issue with `blocked` + `needs-review`, comment, and unclaim locally so
-# the next session can move on.
+# issue with `needs-review` (which excludes it from `next --senior/junior`),
+# comment, and unclaim locally so the next session can move on.
 #
 # Solves two failure modes:
 #   1. Sessions getting stuck on impossible tasks (e.g. #469 telemetry
@@ -318,9 +318,18 @@ except Exception:
         return
     fi
 
-    # Stale — flag it.
+    # Stale — flag it. `needs-review` is the only label needed: it gates
+    # next --senior/junior so the queue stops returning this issue, and
+    # signals "human, look at this" semantically. Earlier version also
+    # added `blocked` but that was redundant decoration AND created an
+    # atomicity bug — `gh issue edit --add-label X --add-label Y` is
+    # atomic, so when `blocked` didn't exist in the repo the whole call
+    # failed silently and `needs-review` never landed. (Observed 2026-04-26
+    # on #449: 7 auto-flag attempts in 10h, none actually labeled.)
     log "Stale-claim: #$NUM claimed ${AGE}s ago (threshold ${THRESHOLD}s), no commits referencing #$NUM, no new comments. Auto-flagging."
-    gh issue edit "$NUM" --add-label blocked --add-label needs-review >/dev/null 2>&1 || true
+    if ! gh issue edit "$NUM" --add-label needs-review 2>>"$HOME/drift-state/gh-errors.log"; then
+        log "Stale-claim: WARN — failed to add needs-review label on #$NUM (see gh-errors.log)"
+    fi
     gh issue comment "$NUM" --body "Auto-flagged stale claim — claimed for ${AGE}s with no commits referencing #${NUM} and no new activity. Review and unblock, close, or reassign." >/dev/null 2>&1 || true
     "$WORK_DIR/scripts/sprint-service.sh" unclaim "$NUM" >/dev/null 2>&1 || true
 }
