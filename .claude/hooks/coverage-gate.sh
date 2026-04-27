@@ -27,6 +27,16 @@ fi
 
 cd "$PROJECT_DIR"
 
+# Defer if a TestFlight archive is currently running. pkill -9 -f xcodebuild
+# would otherwise kill the long-running archive (5-10 min) and the publish
+# fails with exit code 1. Coverage check can re-run on the next commit.
+# (Bug observed 2026-04-26 build 178: 2 archive attempts both killed by
+#  parallel session commits triggering this hook.)
+if pgrep -f "xcodebuild.*archive" >/dev/null 2>&1; then
+    echo "[coverage-gate] xcodebuild archive in progress — deferring coverage check" >&2
+    exit 0
+fi
+
 # Run tests with coverage (redirect all output to /tmp)
 pkill -9 -f xcodebuild 2>/dev/null || true
 sleep 2

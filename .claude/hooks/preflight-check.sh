@@ -40,6 +40,17 @@ fi
 
 # 2. Full test suite
 echo "  [2/5] Full test suite..." >&2
+# Defer if a TestFlight archive is currently running — preflight is the
+# pre-publish check, and if archive is mid-flight from another session
+# we'd kill it. Skip with a clear note; the publishing session will
+# re-run preflight after the current archive resolves.
+if pgrep -f "xcodebuild.*archive" >/dev/null 2>&1; then
+    echo "  [2/5] DEFERRED — xcodebuild archive in progress; preflight will re-run after." >&2
+    FAILURES="${FAILURES}\n- DEFERRED: xcodebuild archive in progress; re-run preflight when it completes."
+    # Skip remaining checks and exit cleanly so the session doesn't think preflight passed.
+    echo "$FAILURES" >&2
+    exit 1
+fi
 pkill -9 -f xcodebuild 2>/dev/null || true
 sleep 2
 xcodebuild test -project Drift.xcodeproj -scheme Drift \

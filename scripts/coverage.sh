@@ -22,6 +22,12 @@ echo ""
 # Clean previous result bundle
 rm -rf "$RESULT_PATH"
 
+# Defer if an archive is running — pkill would kill the publish.
+if pgrep -f "xcodebuild.*archive" >/dev/null 2>&1; then
+    echo "ERROR: xcodebuild archive in progress. Wait for TestFlight publish to finish, then re-run." >&2
+    exit 1
+fi
+
 # Kill stale xcodebuild processes
 pkill -9 -f xcodebuild 2>/dev/null || true
 sleep 2
