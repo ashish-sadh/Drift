@@ -12,7 +12,7 @@ Follow the section that matches your prompt. The watchdog passes one of:
 
 _Directive:_ **Read `Docs/roadmap.md` to understand product direction. Be bold. The goal is visible, meaningful progress every cycle.**
 
-_Override:_ STOP
+_Override:_ CONTINUE
 
 **How enforcement works:** Hooks and the watchdog enforce what must not be skipped. This file guides decisions that require judgment. If Override says STOP, exit cleanly.
 
@@ -40,7 +40,7 @@ scripts/planning-service.sh remaining
    - P0/P1 → `gh issue edit {N} --add-label sprint-task && gh issue comment {N} --body "Triaged: added to sprint."`
    - Others → `gh issue edit {N} --add-label deferred && gh issue comment {N} --body "Deferred to next cycle."`
 
-6. **Assess state:** Read `Docs/roadmap.md`, `Docs/state.md`. Run `git log --oneline -40`. Check recent closed issues.
+6. **Assess state:** Read `Docs/roadmap.md`, `Docs/state.md`, `Docs/decisions.md` (last ~10 entries — captures non-obvious calls humans/sessions made recently that should inform planning). Run `git log --oneline -40`. Check recent closed issues. **If you see a significant decision in the last 24h of commits that's NOT in `Docs/decisions.md`** (architecture change, harness rule from incident, design tenet from a real failure), append a one-paragraph entry to the top of the most recent date section. Skip routine bug fixes / feature ships — those live in commit messages.
 
 7. **Product review (if due):** product review has NO independent cadence — it rides on sprint planning. Check the cycle gap:
    ```bash

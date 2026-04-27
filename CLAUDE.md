@@ -45,6 +45,7 @@ Each entry tagged with its maintenance status. **Auto-maintained** = a script or
 | `Docs/personas/` | **Auto-maintained** (planning step 10) | Evolving Product Designer + Principal Engineer persona files. |
 | `Docs/reports/` | **Auto-maintained** (review/exec PR workflows) | Exec reports + product review reports. Published as GitHub PRs. |
 | `Docs/state.md` | Manual snapshot — may drift | Build number, test count, features. Updated periodically; check git log for freshness. |
+| `Docs/decisions.md` | **Append-only — sessions add** | Non-obvious decisions: arch changes, harness rules from incidents, design tenets from real failures. Planning step 6 reviews + appends. Read last ~10 entries before making related judgment calls. |
 | `Docs/architecture.md` | Reference (slow-moving) | AI-first dual-model architecture. Update only when architecture changes. |
 | `Docs/failing-queries.md` | Manual — appended by sessions | Real AI-chat queries that don't work, fixed systematically. |
 | `Docs/testing.md` | Reference | How to run tests, eval harness. |
