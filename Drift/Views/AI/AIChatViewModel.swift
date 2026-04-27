@@ -78,9 +78,10 @@ final class AIChatViewModel {
         if snapshot.isMeaningful {
             persistence.save(snapshot)
         } else {
-            // Nothing worth persisting — drop any stale on-disk state so a later restore is clean.
             persistence.clear()
         }
+        let turns = messages.map { HistoryTurn(role: $0.role == .user ? .user : .assistant, text: $0.text) }
+        CrossSessionHistory.save(turns)
     }
 
     struct ManualFoodPrefill {

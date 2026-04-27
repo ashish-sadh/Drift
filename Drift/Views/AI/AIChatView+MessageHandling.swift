@@ -43,9 +43,14 @@ extension AIChatViewModel {
         // Gemma gets the full 400-token budget; SmolLM stays tighter at 150
         // because its attention on distant tokens is less reliable.
         let maxTokens = aiService.isLargeModel ? 400 : 150
-        let turns = messages.map { msg in
+        let sessionTurns = messages.map { msg in
             HistoryTurn(role: msg.role == .user ? .user : .assistant, text: msg.text)
         }
+        // Prepend cross-session turns so cold-start queries ("what did I log yesterday?")
+        // have prior context. ConversationHistoryBuilder's maxTurnWindow=6 naturally
+        // evicts stale cross-session turns once the in-session history grows.
+        let priorTurns = CrossSessionHistory.loadIfFresh() ?? []
+        let turns = priorTurns + sessionTurns
         return ConversationHistoryBuilder.build(turns: turns, maxTokens: maxTokens)
     }
 
