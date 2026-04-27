@@ -28,7 +28,11 @@ atomic_write() {
     local tmp="${target}.tmp.$$"
 
     # Trap to clean up tmp on any failure path (caller's set -e or our own).
-    trap 'rm -f "$tmp"' RETURN
+    # Guard with `${tmp:-}` so the trap doesn't fire `tmp: unbound variable`
+    # under `set -u` when the calling function exits via RETURN before `local
+    # tmp=...` ran (or at the moment the local scope is being torn down on
+    # macOS bash). Watchdog was crash-looping 8x/day on this — see git log.
+    trap 'rm -f "${tmp:-}"' RETURN
 
     # Print the content with a trailing newline (matches `echo > file` semantics).
     printf '%s\n' "$content" > "$tmp" || return 1
@@ -47,7 +51,11 @@ atomic_write_file() {
     local target="$1"
     local tmp="${target}.tmp.$$"
 
-    trap 'rm -f "$tmp"' RETURN
+    # Guard with `${tmp:-}` so the trap doesn't fire `tmp: unbound variable`
+    # under `set -u` when the calling function exits via RETURN before `local
+    # tmp=...` ran (or at the moment the local scope is being torn down on
+    # macOS bash). Watchdog was crash-looping 8x/day on this — see git log.
+    trap 'rm -f "${tmp:-}"' RETURN
 
     cat > "$tmp" || return 1
     sync "$tmp" 2>/dev/null || sync
