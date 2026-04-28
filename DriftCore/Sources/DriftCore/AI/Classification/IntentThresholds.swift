@@ -41,7 +41,7 @@ public enum IntentDomain: String, Sendable, CaseIterable {
         case "mark_supplement", "supplements":
             return .supplements
         case "body_comp", "glucose", "biomarkers", "cross_domain_insight", "weight_trend_prediction",
-             "supplement_insight", "food_timing_insight":
+             "supplement_insight", "food_timing_insight", "sleep_food_correlation":
             return .data
         case "navigate_to":
             return .meta

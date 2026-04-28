@@ -776,6 +776,9 @@ public enum ToolRegistration {
         // Meal timing patterns — avg meal times, late-night eating %. #418.
         FoodTimingInsightTool.syncRegistration(registry: r)
 
+        // Sleep-food correlation — does late eating hurt sleep? #426.
+        SleepFoodCorrelationTool.syncRegistration(registry: r)
+
         // PhotoLog tool is registered separately by the iOS Drift app
         // after this base registration runs (it depends on iOS-only
         // CloudVision / Keychain).
