@@ -2614,7 +2614,7 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     ]
     let trend = WeightTrendCalculator.calculateTrend(
         entries: entries,
-        config: .init(emaAlpha: 0.1, regressionWindowDays: 3, kcalPerKg: 6000, maintainingThresholdKgPerWeek: 0.05)
+        config: .init(emaHalfLifeDays: 14, regressionWindowDays: 3, widenSlopeThresholdKgPerWeek: 0.227, widenWindowDays: 42, kcalPerKg: 6000, maintainingThresholdKgPerWeek: 0.05)
     )
     #expect(trend != nil)
     // With 3-day window, only last 2 entries are in window → fallback path

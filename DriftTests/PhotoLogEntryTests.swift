@@ -286,3 +286,71 @@ private func sampleItem(name: String = "dal",
     let mt = MealType.resolve(now: Date(), recentEntries: [entry])
     #expect(mt == .breakfast)
 }
+
+// MARK: - Add / remove / name-edit mutations (#495)
+
+@Test func blankItemHasZeroMacrosAndDefaultGrams() {
+    let item = PhotoLogEditableItem.blank()
+    #expect(item.name == "")
+    #expect(item.grams == 100)
+    #expect(item.calories == 0)
+    #expect(item.proteinG == 0)
+    #expect(item.carbsG == 0)
+    #expect(item.fatG == 0)
+    #expect(item.selected == true)
+    // Per-gram rates are zero so a later rescale doesn't invent calories.
+    #expect(item.caloriesPerGram == 0)
+    #expect(item.proteinPerGram == 0)
+}
+
+@Test func nameEditIsDirectMutation() {
+    // The review card binds TextField directly to item.name — verify the
+    // struct field is mutable and the change sticks.
+    var item = PhotoLogEditableItem(from: sampleItem(name: "random soup"))
+    item.name = "Dal Tadka"
+    #expect(item.name == "Dal Tadka")
+}
+
+@Test func applyHintMatchReplacesNameAndRecalcsMacros() {
+    // User typed "palak paneer" — DB match substitutes canonical name +
+    // recalculates per-gram rates from the DB food's servingSize.
+    var item = PhotoLogEditableItem(from: sampleItem(name: "spinach cheese curry", grams: 200, calories: 100))
+    let food = Food(name: "Palak Paneer", category: "Indian Curries",
+                    servingSize: 200, servingUnit: "g",
+                    calories: 280, proteinG: 14, carbsG: 10, fatG: 20)
+    item.applyHintMatch(food)
+    #expect(item.name == "Palak Paneer")
+    #expect(item.confidence == .high)
+    #expect(item.macrosManuallyEdited == false)
+    // Macros rescaled to current 200g from DB's per-gram rates.
+    #expect(abs(item.calories - 280) < 1e-6)
+    #expect(abs(item.proteinG - 14) < 1e-6)
+}
+
+@Test func applyHintMatchAppliesPortionDefaultWhenGramsIsZero() {
+    // The LLM missed the grams; applyHintMatch fills in a category-aware default.
+    var item = PhotoLogEditableItem(from: sampleItem(name: "unknown", grams: 0, calories: 0))
+    let food = Food(name: "Dal Makhani", category: "Indian Curries",
+                    servingSize: 200, servingUnit: "g",
+                    calories: 180, proteinG: 8, carbsG: 22, fatG: 7)
+    item.applyHintMatch(food)
+    // portionDefault for "Indian Curries" is 200g.
+    #expect(item.grams == 200)
+    #expect(item.name == "Dal Makhani")
+}
+
+@Test func applyHintMatchRescalesFromCorrectedRates() {
+    // After applyHintMatch, a serving-amount change should use the DB food's
+    // per-gram rates, not the original LLM rates.
+    var item = PhotoLogEditableItem(from: sampleItem(name: "butter chicken", grams: 150, calories: 200, proteinG: 10))
+    let food = Food(name: "Butter Chicken", category: "Indian Curries",
+                    servingSize: 300, servingUnit: "g",
+                    calories: 360, proteinG: 24, carbsG: 12, fatG: 18)
+    item.applyHintMatch(food)
+    // item.grams is still 150; per-gram protein = 24/300 = 0.08 → 150g → 12g.
+    #expect(abs(item.proteinG - 12) < 1e-6)
+    // Double the grams; protein should be 24g (from DB rate, not original 10g/150g).
+    item.grams = 300
+    item.rescale()
+    #expect(abs(item.proteinG - 24) < 1e-6)
+}
