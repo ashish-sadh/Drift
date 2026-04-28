@@ -8,14 +8,26 @@ import Testing
 // "unknown tool"; a *partial* registry would silently work for some tools
 // and fail for others (e.g. someone adds a new tool to the prompt but
 // forgets to register the schema). Same surface symptom, harder to spot.
+//
+// Both router and intelligence prompts are checked — the intelligence
+// prompt is built as `routerPrompt + extras`, so its Tools: line is the
+// router's. But this future-proofs against the prompts diverging.
 
-@Test @MainActor func intentClassifierPrompt_referencesOnlyRegisteredTools() async throws {
+@Test @MainActor func routerPrompt_referencesOnlyRegisteredTools() async throws {
+    try assertPromptToolsAreRegistered(IntentClassifier.routerPrompt, name: "routerPrompt")
+}
+
+@Test @MainActor func intelligencePrompt_referencesOnlyRegisteredTools() async throws {
+    try assertPromptToolsAreRegistered(IntentClassifier.intelligencePrompt, name: "intelligencePrompt")
+}
+
+@MainActor
+private func assertPromptToolsAreRegistered(_ prompt: String, name: String) throws {
     if ToolRegistry.shared.allTools().isEmpty { ToolRegistration.registerAll() }
     let registered = Set(ToolRegistry.shared.allTools().map(\.name))
 
-    let prompt = IntentClassifier.systemPrompt
     guard let toolsLine = prompt.split(separator: "\n").first(where: { $0.hasPrefix("Tools:") }) else {
-        Issue.record("IntentClassifier prompt missing 'Tools:' line")
+        Issue.record("\(name) missing 'Tools:' line")
         return
     }
 
@@ -31,10 +43,10 @@ import Testing
         guard let r = Range(match.range(at: 1), in: toolsLine) else { continue }
         promptTools.append(String(toolsLine[r]))
     }
-    #expect(!promptTools.isEmpty, "Failed to parse any tool names from the prompt — regex broken or prompt format changed")
+    #expect(!promptTools.isEmpty, "\(name): failed to parse any tool names — regex broken or prompt format changed")
 
     for tool in promptTools {
         #expect(registered.contains(tool),
-                "Tool '\(tool)' is in the IntentClassifier prompt but not registered. Either register it in ToolRegistration.registerAll() or remove it from the prompt.")
+                "\(name): tool '\(tool)' is referenced but not registered. Either register it in ToolRegistration.registerAll() or remove it from the prompt.")
     }
 }

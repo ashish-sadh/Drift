@@ -25,9 +25,12 @@ public enum IntentClassifier {
         case text(String)
     }
 
-    // MARK: - System Prompt
+    // MARK: - System Prompts (router + intelligence split)
 
-    public static let systemPrompt: String = """
+    /// Tight router prompt for the small model (SmolLM 360M, 8K context).
+    /// Used by `classifyFull` when the active LocalAIService backend is the
+    /// small tier. Every token must earn its place — see token-ceiling test.
+    public static let routerPrompt: String = """
     Health app. Reply JSON tool call or short text. Fix typos, word numbers, slang.
     Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) supplements() set_goal(target,unit?,goal_type?) delete_food(entry_id?,name?) edit_meal(entry_id?,meal_period?,action,target_food?,new_value?) body_comp() glucose() biomarkers() navigate_to(screen) cross_domain_insight(metric_a,metric_b,window_days?) weight_trend_prediction() supplement_insight(supplement?,window_days?) food_timing_insight(window_days?) sleep_food_correlation(window_days?)
     <recent_entries>: match user's row reference (ordinal/calories/meal/"just logged") → entry_id. Default: name/target_food.
@@ -81,6 +84,66 @@ public enum IntentClassifier {
     If chat context shows assistant logged "2 eggs" and user says "also add toast"→{"tool":"log_food","name":"toast"} (extract ONLY the new item, never carry the prior food)
     JSON when ready. Ask if missing details. Text for chat.
     """
+
+    /// Richer prompt for the intelligence model (Gemma 4 e2b, 128K context).
+    /// Built as `routerPrompt + intelligenceExtras` so router updates auto-
+    /// propagate. Adds multi-turn nuance, edge-case patterns, and tighter
+    /// disambiguation that SmolLM can't fit / can't use.
+    public static let intelligencePrompt: String = routerPrompt + intelligenceExtras
+
+    /// Extras appended to routerPrompt for the intelligence model. Cap at
+    /// ~5K chars so total stays under the 12K intelligencePrompt ceiling
+    /// — well below Gemma 4's 128K context window, leaving headroom for
+    /// chat history + recent_entries context + user input.
+    private static let intelligenceExtras: String = """
+
+
+    Multi-turn nuance:
+    - "and X too" / "also add Y" / "plus Z" after assistant confirmed a logged food → log_food name=just-the-new-item, never carry prior. Example: history "Logged 2 eggs.", user "also add toast" → {"tool":"log_food","name":"toast"}.
+    - "no wait, X" / "actually, X" / "I meant X" → user is contradicting prior turn. If prior was a log, undo via {"tool":"delete_food","name":"<prior food>"} then log X. If prior was a question, re-answer with the new context.
+    - Topic switch ("how was my sleep" after a food turn) → ignore food context entirely. Pick the new topic's tool.
+    - "yes" / "confirm" / "go ahead" after assistant asked a yes/no → carry prior intent, set the appropriate confirmation field (e.g. log_weight after value preview).
+    - Empty / unclear answer to follow-up question ("uh", "hmm", "idk") → ask a tighter, more specific clarifier rather than guessing.
+
+    Edge cases for log_food:
+    - Quantity ranges ("2 to 3 eggs", "like 5 or 6 chips") → use the upper bound as servings.
+    - Multi-item meals ("eggs and toast and oj") → log_food name="eggs, toast, oj" (comma-separated, single call).
+    - Hedged voice input ("um, I had like, two eggs I guess") → strip filler words; log_food name=egg, servings=2.
+    - Brand + food ("starbucks oat latte") → keep brand in name as-is.
+    - Time-relative ("yesterday I had biryani") → log_food still triggers; the date-shift is handled downstream.
+    - Quantity in name ("paneer biryani 200g") → log_food name="paneer biryani", amount="200g".
+    - "I ate the rest" / "finished it" → ask "finished what?" if no recent food in context; else delete_food to inverse-log if user is correcting.
+
+    Disambiguation deep-dive:
+    - "how am I doing" / "give me a check-in" → food_info (daily summary). Default-broad → food_info.
+    - "how am I doing on weight" → weight_info. The qualifier wins.
+    - "calorie X" wins toward food_info even if "weight" is in history.
+    - "X this week" → time-window queries always go to the corresponding info tool (food_info / weight_info / sleep_recovery / exercise_info), never to insight tools unless the user explicitly says "trend / pattern / correlation".
+    - cross_domain_insight only fires for explicit two-metric phrasing ("X vs Y", "did X affect Y", "correlation between X and Y").
+
+    Recovery patterns:
+    - If two tools fit nearly equally, prefer the safer one: info > log (don't log without clear intent), supplements() > mark_supplement, food_info > delete_food.
+    - If user says something that maps to no tool ("what's the weather"), reply naturally as text — do not invent a fake tool call.
+
+    Voice-input artifacts to normalize before classification:
+    - "um", "uh", "like", "I guess", "kinda", "sorta", "y'know" → drop.
+    - "two", "three", "twenty" → 2, 3, 20 (word-numbers to digits).
+    - "and uh" → "and".
+
+    JSON ALWAYS uses double-quoted keys + values. Single quotes / bare keys are invalid.
+    """
+
+    /// Backward-compat alias. Returns routerPrompt by default — code that
+    /// needs the active prompt should call `activeSystemPrompt(isLargeModel:)`
+    /// or check `LocalAIService.shared.isLargeModel` directly.
+    public static var systemPrompt: String { routerPrompt }
+
+    /// Picks the right prompt for the active backend. The intelligence
+    /// prompt has ~3-4× more tokens; only worth shipping when the model
+    /// can actually leverage it (Gemma 4 / large tier).
+    public static func activeSystemPrompt(isLargeModel: Bool) -> String {
+        isLargeModel ? intelligencePrompt : routerPrompt
+    }
 
     // MARK: - Recent-Entries Triggers
 
