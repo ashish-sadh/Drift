@@ -16,7 +16,22 @@ struct BarcodeScannerView: UIViewControllerRepresentable {
         private var captureSession: AVCaptureSession?
         private var hasFoundBarcode = false
 
-        override func viewDidLoad() { super.viewDidLoad(); view.backgroundColor = .black; setupCamera() }
+        override func viewDidLoad() {
+            super.viewDidLoad()
+            view.backgroundColor = .black
+            switch AVCaptureDevice.authorizationStatus(for: .video) {
+            case .authorized:
+                setupCamera()
+            case .notDetermined:
+                AVCaptureDevice.requestAccess(for: .video) { [weak self] granted in
+                    DispatchQueue.main.async { if granted { self?.setupCamera() } }
+                }
+            case .denied, .restricted:
+                break
+            @unknown default:
+                break
+            }
+        }
 
         private func setupCamera() {
             let session = AVCaptureSession()

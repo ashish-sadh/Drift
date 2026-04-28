@@ -2,6 +2,7 @@ import SwiftUI
 import DriftCore
 import PhotosUI
 import UIKit
+import AVFoundation
 
 /// Entry-point sheet for the Photo Log beta. Shows a privacy banner, a
 /// cost estimate, and two buttons — Camera and Library. A confirmed
@@ -12,6 +13,7 @@ struct PhotoLogCaptureView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingCamera = false
     @State private var showingLibrary = false
+    @State private var showingCameraDeniedAlert = false
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var libraryLoadError: String? = nil
 
@@ -103,7 +105,7 @@ struct PhotoLogCaptureView: View {
     private var captureButtons: some View {
         VStack(spacing: 10) {
             Button {
-                showingCamera = true
+                requestCameraAccess()
             } label: {
                 Label("Take Photo", systemImage: "camera.fill")
                     .frame(maxWidth: .infinity)
@@ -111,6 +113,16 @@ struct PhotoLogCaptureView: View {
             .buttonStyle(.borderedProminent)
             .tint(Theme.accent)
             .disabled(!UIImagePickerController.isSourceTypeAvailable(.camera))
+            .alert("Camera access needed", isPresented: $showingCameraDeniedAlert) {
+                Button("Open Settings") {
+                    if let url = URL(string: UIApplication.openSettingsURLString) {
+                        UIApplication.shared.open(url)
+                    }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Drift needs camera access to scan and recognize meals. Enable it in Settings → Drift → Camera.")
+            }
 
             Button {
                 showingLibrary = true
@@ -119,6 +131,24 @@ struct PhotoLogCaptureView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
+        }
+    }
+
+    private func requestCameraAccess() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized:
+            showingCamera = true
+        case .notDetermined:
+            AVCaptureDevice.requestAccess(for: .video) { granted in
+                DispatchQueue.main.async {
+                    if granted { showingCamera = true }
+                    else { showingCameraDeniedAlert = true }
+                }
+            }
+        case .denied, .restricted:
+            showingCameraDeniedAlert = true
+        @unknown default:
+            showingCameraDeniedAlert = true
         }
     }
 
