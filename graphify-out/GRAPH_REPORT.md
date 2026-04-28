@@ -1,7 +1,7 @@
 # Graph Report - /Users/ashishsadh/workspace/Drift  (2026-04-28)
 
 ## Corpus Check
-- 428 files · ~1,881,498 words
+- 428 files · ~1,881,852 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -1033,8 +1033,8 @@ Nodes (0):
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `date` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 9`, `Community 10`, `Community 11`, `Community 12`, `Community 13`, `Community 15`, `Community 16`, `Community 17`, `Community 18`, `Community 20`, `Community 21`, `Community 23`, `Community 24`, `Community 29`?**
-  _High betweenness centrality (0.078) - this node is a cross-community bridge._
-- **Why does `text` connect `Community 2` to `Community 0`, `Community 4`, `Community 5`, `Community 6`, `Community 16`, `Community 17`?**
+  _High betweenness centrality (0.051) - this node is a cross-community bridge._
+- **Why does `CodingKeys` connect `Community 12` to `Community 4`?**
   _High betweenness centrality (0.023) - this node is a cross-community bridge._
 - **Are the 366 inferred relationships involving `String` (e.g. with `.classify()` and `.extractTool()`) actually correct?**
   _`String` has 366 INFERRED edges - model-reasoned connections that need verification._
