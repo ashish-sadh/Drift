@@ -18,8 +18,6 @@
     <button class="btn btn-primary" onclick="startOAuth()">Sign in with GitHub</button>
   </div>
 
-  <div class="metrics" id="metrics" style="display:none;"></div>
-
   <div class="content">
     <div class="tabs">
       <div class="tab active" data-tab="bugs">Bugs</div>
@@ -586,60 +584,6 @@
           document.getElementById('review-list').innerHTML = '<div class="empty">No items need review. All clear.</div>';
         }
       } catch (e) { alert('Failed: ' + e.message); }
-    }
-
-    // Load metrics
-    async function loadMetrics() {
-      const el = document.getElementById('metrics');
-      const metrics = await getMetrics();
-      if (!metrics) {
-        // Fallback: read project.yml for build + state.md for other metrics
-        try {
-          const [projectYml, state] = await Promise.all([
-            getReportContent('project.yml').catch(() => ''),
-            getReportContent('Docs/state.md').catch(() => '')
-          ]);
-          const build = projectYml.match(/CURRENT_PROJECT_VERSION:\s*"(\d+)"/)?.[1] || state.match(/Build\s+(\d+)/)?.[1] || '?';
-          const tests = state.match(/Tests:\*\*\s*([\d,]+)/)?.[1] || '?';
-          const foods = state.match(/Foods:\*\*\s*([\d,]+)/)?.[1] || '?';
-          const tools = state.match(/Tools:\*\*\s*(\d+)/)?.[1] || '?';
-          el.innerHTML = `
-            <div class="metric"><span class="metric-value">${build}</span><span class="metric-label">Build</span></div>
-            <div class="metric"><span class="metric-value">${tests}</span><span class="metric-label">Tests</span></div>
-            <div class="metric"><span class="metric-value">${foods}</span><span class="metric-label">Foods</span></div>
-            <div class="metric"><span class="metric-value">${tools}</span><span class="metric-label">AI Tools</span></div>
-          `;
-        } catch { el.innerHTML = '<div class="metric"><span class="metric-label">Metrics unavailable</span></div>'; }
-        return;
-      }
-      el.innerHTML = `
-        <div class="metric"><span class="metric-value">${metrics.cycle}</span><span class="metric-label">Cycles</span></div>
-        <div class="metric"><span class="metric-value">${metrics.build}</span><span class="metric-label">Build</span></div>
-        <div class="metric"><span class="metric-value">${metrics.tests}</span><span class="metric-label">Tests</span></div>
-        <div class="metric"><span class="metric-value">${metrics.coverage}%</span><span class="metric-label">Coverage</span></div>
-        <div class="metric"><span class="metric-value">${metrics.foods}</span><span class="metric-label">Foods</span></div>
-        <div class="metric"><span class="metric-value">${metrics.lastReview}</span><span class="metric-label">Last Review</span></div>
-        <div class="metric" id="tf-metric"><span class="metric-value" id="tf-metric-value">...</span><span class="metric-label">TestFlight</span></div>
-      `;
-      getTestFlightStatus().then(tf => {
-        const el = document.getElementById('tf-metric-value');
-        const badge = document.getElementById('tf-metric');
-        if (!el) return;
-        if (!tf) { el.textContent = '—'; return; }
-        const elapsed = Date.now() / 1000 - tf.timestamp;
-        const remaining = 10800 - elapsed;
-        if (remaining <= 0) {
-          el.textContent = 'OVERDUE';
-          el.style.color = 'var(--yellow)';
-          if (badge) badge.title = `Last: ${timeAgo(tf.timestamp)} — publish due now`;
-        } else {
-          const h = Math.floor(remaining / 3600);
-          const m = Math.floor((remaining % 3600) / 60);
-          el.textContent = h > 0 ? `in ${h}h ${m}m` : `in ${m}m`;
-          el.style.color = remaining < 1800 ? 'var(--yellow)' : 'var(--green)';
-          if (badge) badge.title = `Last: ${timeAgo(tf.timestamp)}`;
-        }
-      });
     }
 
     // Load reports
@@ -1294,7 +1238,6 @@
 
     showUser();
     if (getToken()) {
-      loadMetrics();
       loadIssues();
       loadFixedBugs();
       loadReports();
