@@ -399,6 +399,23 @@ PYEOF
     # in-progress label may be missing in the UI; both are visible signals
     # rather than silent state divergence.
     gh_loud "add in-progress label on #$NUM" -- issue edit "$NUM" --add-label in-progress || true
+
+    # Resumable warning — surfaces when claiming an issue with `resumable`
+    # label set by the watchdog after a prior session crashed mid-work.
+    # Without this, sessions ran bare `gh issue view N` (no comments) and
+    # missed the WIP file pointers, redoing orientation 6+ times on #515.
+    # Print to STDOUT so the model sees it inline with the claim — stderr
+    # would be dropped from the session's tool result. Filed as #516.
+    if echo "$ISSUE_JSON" | grep -q '"name":"resumable"'; then
+        echo ""
+        echo "⚠️  RESUMABLE — prior session left WIP for #${NUM}. Read context before continuing:"
+        echo "    gh issue view ${NUM} --comments"
+        echo "    ls -la ~/drift-state/wip/${NUM}.*"
+        echo "    git apply ~/drift-state/wip/${NUM}.patch  # or skip + start fresh"
+        echo "  Post a comment noting which path you took before implementing."
+        echo "  Run \`gh issue edit ${NUM} --remove-label resumable\` after committing."
+        echo ""
+    fi
 }
 
 cmd_done() {
