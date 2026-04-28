@@ -771,8 +771,6 @@ fi
 # Initial start
 STATE=$(read_control)
 if [[ "$STATE" == "RUN" ]]; then
-    # Ensure override is CONTINUE
-    sed -i '' 's/_Override:_ STOP/_Override:_ CONTINUE/' "$WORK_DIR/program.md" 2>/dev/null || true
     if [[ -z "$CLAUDE_PID" ]]; then
         cleanup_dirty_state
         start_claude
@@ -786,7 +784,6 @@ elif [[ "$STATE" == "STOP" ]]; then
     exit 0
 elif [[ "$STATE" == "DRAIN" ]]; then
     log "Control file says DRAIN at startup."
-    sed -i '' 's/_Override:_ CONTINUE/_Override:_ STOP/' "$WORK_DIR/program.md" 2>/dev/null || true
     DRAIN_STALE=600
     if is_claude_alive; then
         log "DRAIN: waiting for session to finish (PID $CLAUDE_PID)..."
@@ -853,8 +850,7 @@ while true; do
             ;;
         PAUSE)
             if is_claude_alive; then
-                log "PAUSE requested. Setting override and waiting for graceful exit..."
-                sed -i '' 's/_Override:_ CONTINUE/_Override:_ STOP/' "$WORK_DIR/program.md" 2>/dev/null || true
+                log "PAUSE requested. Waiting for graceful exit (pause-gate.sh hard-blocks claim)..."
                 PAUSE_WAIT=0
                 PAUSE_TIMEOUT=900
                 while is_claude_alive && (( PAUSE_WAIT < PAUSE_TIMEOUT )); do
@@ -876,8 +872,7 @@ while true; do
             continue
             ;;
         DRAIN)
-            sed -i '' 's/_Override:_ CONTINUE/_Override:_ STOP/' "$WORK_DIR/program.md" 2>/dev/null || true
-            log "DRAIN: set _Override: STOP in program.md"
+            log "DRAIN: waiting for current session to finish (pause-gate.sh hard-blocks new claims)."
             if is_claude_alive; then
                 log "DRAIN: waiting for session to finish (PID $CLAUDE_PID)..."
                 DRAIN_STALE=600
@@ -903,8 +898,6 @@ while true; do
             exit 0
             ;;
         RUN)
-            # Ensure override is CONTINUE
-            sed -i '' 's/_Override:_ STOP/_Override:_ CONTINUE/' "$WORK_DIR/program.md" 2>/dev/null || true
             # Reconcile state before touching anything else — catches stamps
             # that a prior session left stale, GitHub-closed tasks still
             # locking our in_progress slot, and orphan in-progress labels.

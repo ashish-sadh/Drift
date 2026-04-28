@@ -12,9 +12,7 @@ Follow the section that matches your prompt. The watchdog passes one of:
 
 _Directive:_ **Read `Docs/roadmap.md` to understand product direction. Be bold. The goal is visible, meaningful progress every cycle.**
 
-_Override:_ CONTINUE
-
-**How enforcement works:** Hooks and the watchdog enforce what must not be skipped. This file guides decisions that require judgment. If Override says STOP, exit cleanly.
+**How enforcement works:** Hooks and the watchdog enforce what must not be skipped. This file guides decisions that require judgment. PAUSE is enforced by `pause-gate.sh` (PreToolUse hook): hard-blocks `sprint-service.sh claim`, soft-signals at safe boundaries — sessions exit cleanly at the next claim attempt.
 
 ---
 
@@ -138,9 +136,7 @@ session-start.sh has injected your context, created the overhead tracking issue,
 
 ### Detailed protocol
 
-1. Check Override — if STOP, exit cleanly.
-
-2. **Claim first.** Before any reading, exploring, or context-loading:
+1. **Claim first.** Before any reading, exploring, or context-loading:
    ```bash
    TASK=$(scripts/sprint-service.sh next --senior --claim)
    echo "$TASK"
@@ -148,25 +144,25 @@ session-start.sh has injected your context, created the overhead tracking issue,
    - If `"none"` → exit immediately. Don't backfill from your own ideas — backfill is planning's job. If the queue is empty, the session is done.
    - Otherwise: extract `$N` from the first word. The next steps all happen ONLY in the context of working on `#$N`.
    - **Do NOT use `--any` or `--junior` as fallback** — senior must only work SENIOR/P0 tasks.
-   - If diagnosis reveals the task is misspec'd or a dup: `sprint-service.sh unclaim $N` → loop back to step 2.
+   - If diagnosis reveals the task is misspec'd or a dup: `sprint-service.sh unclaim $N` → loop back to step 1.
    - **Stale** (already closed on GitHub): `sprint-service.sh session-done $N` → loop.
    - **Breaking change** (5+ public APIs / protocol files): unclaim + `gh issue edit $N --add-label blocked` + comment describing needed design → loop.
    - **Resumable** (issue has `resumable` label from a prior crashed session): the latest comment will reference WIP files at `~/drift-state/wip/<N>.patch` (tracked changes) and optionally `~/drift-state/wip/<N>.untracked.tar.gz` (new files). Decide: `git apply` + extract the tarball to continue the previous WIP and finish it (faster), OR redo from scratch (cleaner if the crashed work was off-track). Post a comment noting which path you took, then proceed with the standard plan-comment + implement loop. `sprint-service.sh done $N` removes the WIP files automatically; also `gh issue edit $N --remove-label resumable`.
 
-3. **Work the task.** Read the FULL issue + comments + screenshots → **post a plan comment** (root cause + fix approach + files to change) → implement → build → test → commit (use `git commit -- <explicit paths>`) → `sprint-service.sh done $N $(git rev-parse HEAD)`.
+2. **Work the task.** Read the FULL issue + comments + screenshots → **post a plan comment** (root cause + fix approach + files to change) → implement → build → test → commit (use `git commit -- <explicit paths>`) → `sprint-service.sh done $N $(git rev-parse HEAD)`.
    - **Bug close:** write `echo "Resolution: ..." > /tmp/done-note-$N` before `done` (hook enforces non-empty resolution).
    - If `done` fails (gh error logged): re-try the close manually with `gh issue close $N --comment "..."` and verify.
    - **Append to `Docs/decisions.md` IFF you made a non-obvious decision.** The bar: *"would a future session reading the diff still ask why was it done this way?"* If yes (architectural call, harness rule from incident, reversal of a prior approach, cross-cutting design choice) → add a 1–3 sentence entry under today's date heading at the top, with the *why* + commit hash. If no (routine bug fix, refactor for cleanliness, test addition, feature ship) → skip. Don't fill it with noise; planning prunes garbage.
 
-4. **Loop to step 2** until budget exhausted or queue empty.
+3. **Loop to step 1** until budget exhausted or queue empty.
 
-5. **Opportunistic only — between tasks, NEVER as a starting activity:**
+4. **Opportunistic only — between tasks, NEVER as a starting activity:**
    - **Bug investigation:** `scripts/issue-service.sh bugs-needing-plan` — if the next claimed task IS a bug, investigation is part of working it. Don't pre-investigate.
    - **Design docs:** `scripts/design-service.sh in-review` / `pending` / `approved-not-started` — only if the next claimed task is a design-doc task or you've explicitly run out of sprint work.
 
-   **Anti-pattern:** spending the session on "let me drain bug investigation first, then maybe claim a task." This is what's been killing sessions — they exhaust budget on orientation and never reach step 2.
+   **Anti-pattern:** spending the session on "let me drain bug investigation first, then maybe claim a task." This is what's been killing sessions — they exhaust budget on orientation and never reach step 1.
 
-6. Can create up to 3 new Issues per session when discovering work. Add `SENIOR` label if complex.
+5. Can create up to 3 new Issues per session when discovering work. Add `SENIOR` label if complex.
 
 session-compliance.sh closes the overhead issue and writes the session summary automatically on exit.
 
@@ -198,23 +194,21 @@ session-start.sh has injected your context, created the overhead tracking issue,
 
 ### Detailed protocol
 
-1. Check Override — if STOP, exit cleanly.
-
-2. **Claim immediately.** Before any reading or exploring:
+1. **Claim immediately.** Before any reading or exploring:
    ```bash
    TASK=$(scripts/sprint-service.sh next --junior --claim)
    echo "$TASK"
    ```
    If `"none"` → exit. Don't backfill from your own ideas — backfill is planning's job.
 
-3. **Work the task.** Extract `$N` → read FULL issue + comments → **post a plan comment** (what you'll do + which files) → then:
+2. **Work the task.** Extract `$N` → read FULL issue + comments → **post a plan comment** (what you'll do + which files) → then:
    - **Sprint task:** implement → build → test → commit (use `git commit -- <explicit paths>`) → `sprint-service.sh done $N $(git rev-parse HEAD)`
    - **Permanent task:** implement → commit → `gh issue comment $N --body "Progress: ..."` → `sprint-service.sh session-done $N`. **NEVER run `gh issue close` on a permanent task** — they recur.
-   - **Stale** (already closed): `sprint-service.sh session-done $N` → loop to step 2.
-   - **Too complex?** unclaim + `gh issue edit $N --add-label SENIOR` → loop to step 2.
+   - **Stale** (already closed): `sprint-service.sh session-done $N` → loop to step 1.
+   - **Too complex?** unclaim + `gh issue edit $N --add-label SENIOR` → loop to step 1.
    - **Append to `Docs/decisions.md` IFF you made a non-obvious call.** Junior tasks rarely qualify — most are routine bug fixes / UI tweaks / DB additions where the diff is self-explanatory. Skip unless the bar applies: *"would a future session reading the diff still ask why was it done this way?"*
 
-4. **Loop to step 2** until budget exhausted or queue empty.
+3. **Loop to step 1** until budget exhausted or queue empty.
 
 session-compliance.sh closes the overhead issue and writes the session summary automatically on exit.
 
