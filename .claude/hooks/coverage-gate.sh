@@ -29,6 +29,19 @@ if pgrep -f "xcodebuild.*archive" >/dev/null 2>&1; then
     exit 0
 fi
 
+# Singleton — only one coverage-gate at a time. Multiple commits landing
+# within ~25s of each other would otherwise fork parallel test runs that
+# all `pkill -9 -f xcodebuild` and fight for the simulator. Lock via mkdir
+# (atomic on POSIX). If we can't acquire, defer; the running gate covers
+# this commit's test surface anyway since we re-run swift test on every
+# commit and the iOS / macOS-eval triggers are diff-scoped.
+LOCK_DIR="/tmp/drift-coverage-gate.lock"
+if ! mkdir "$LOCK_DIR" 2>/dev/null; then
+    echo "[coverage-gate] another coverage-gate already running — deferring" >&2
+    exit 0
+fi
+trap "rmdir '$LOCK_DIR' 2>/dev/null || true" EXIT
+
 # Detect what changed in this commit. Used to scope iOS + macOS LLM eval.
 CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || echo "")
 
