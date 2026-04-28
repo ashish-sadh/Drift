@@ -72,6 +72,20 @@ public enum StaticOverrides {
             return .uiAction(.openBarcodeScanner, "Opening barcode scanner...")
         }
 
+        // Bare meal-period word ("log lunch" / "track breakfast" / "add dinner")
+        // with no food name — must ask follow-up, never log. Prompt-level
+        // guidance for this couldn't reliably steer Gemma 4 e2b at q4_k_m;
+        // intercepting here is deterministic and avoids hitting the LLM at
+        // all. Pattern: <verb> <meal-period>, optional whitespace, end.
+        // testMultiTurn_logLunchFlow asserts the resulting `.text` answer.
+        let bareMealPattern = #"^(log|track|add)\s+(lunch|breakfast|dinner|snack|meal|brunch)\s*$"#
+        if let regex = try? NSRegularExpression(pattern: bareMealPattern),
+           let match = regex.firstMatch(in: lower, range: NSRange(lower.startIndex..., in: lower)),
+           let mealRange = Range(match.range(at: 2), in: lower) {
+            let meal = String(lower[mealRange])
+            return .response("What did you have for \(meal)?")
+        }
+
         // Navigation: "show me my weight chart", "go to food tab", "open exercise"
         if let navAction = matchNavigation(lower) {
             return navAction

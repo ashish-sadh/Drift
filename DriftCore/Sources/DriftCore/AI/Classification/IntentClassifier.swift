@@ -106,12 +106,11 @@ public enum IntentClassifier {
     - Empty / unclear answer to follow-up question ("uh", "hmm", "idk") → ask a tighter, more specific clarifier rather than guessing.
 
     Edge cases for log_food:
-    - Bare meal-period word ("log lunch" / "track breakfast" / "add dinner" / "lunch") with NO food name in the message → reply "What did you have for <meal>?" as TEXT. Do NOT call log_food. Meal words are not foods. This rule overrides every "log_food still triggers" line below.
     - Quantity ranges ("2 to 3 eggs", "like 5 or 6 chips") → use the upper bound as servings.
     - Multi-item meals ("eggs and toast and oj") → log_food name="eggs, toast, oj" (comma-separated, single call).
     - Hedged voice input ("um, I had like, two eggs I guess") → strip filler words; log_food name=egg, servings=2.
     - Brand + food ("starbucks oat latte") → keep brand in name as-is.
-    - Time-relative ("yesterday I had biryani") → log_food still triggers (food name present); the date-shift is handled downstream.
+    - Time-relative ("yesterday I had biryani") → log_food still triggers; the date-shift is handled downstream.
     - Quantity in name ("paneer biryani 200g") → log_food name="paneer biryani", amount="200g".
     - "I ate the rest" / "finished it" → ask "finished what?" if no recent food in context; else delete_food to inverse-log if user is correcting.
 
