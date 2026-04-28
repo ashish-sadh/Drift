@@ -268,6 +268,23 @@ write_state_with_tasks "null" \
 OUT=$(sprint_service next --senior)
 assert_eq "SENIOR sprint beats approved P2 bug for senior" "10 SENIOR sprint" "$OUT"
 
+# 2.3b P0 SENIOR feature beats regular SENIOR sprint (Priority 1.5)
+# A P0 label on a non-bug feature should jump it ahead of the queue.
+write_state_with_tasks "null" \
+    "$(task 10 'Regular SENIOR sprint' pending sprint-task SENIOR)" \
+    "$(task 20 'P0 SENIOR feature' pending sprint-task SENIOR P0)"
+OUT=$(sprint_service next --senior)
+assert_eq "P0 SENIOR feature wins over regular SENIOR sprint" "20 P0 SENIOR feature" "$OUT"
+OUT=$(sprint_service next --any)
+assert_eq "P0 SENIOR feature wins on --any too" "20 P0 SENIOR feature" "$OUT"
+
+# 2.3c P0 bug still beats P0 SENIOR feature (bugs are Priority 1, features 1.5)
+write_state_with_tasks "null" \
+    "$(task 10 'P0 SENIOR feature' pending sprint-task SENIOR P0)" \
+    "$(task 20 'P0 Bug admin' pending bug P0 sprint-task)"
+OUT=$(sprint_service next --senior)
+assert_eq "P0 bug (Priority 1) still beats P0 feature (Priority 1.5)" "20 P0 Bug admin" "$OUT"
+
 # 2.4 needs-review tasks skipped by all sessions
 write_state_with_tasks "null" \
     "$(task 10 'Needs review bug' pending bug P1 needs-review sprint-task)" \

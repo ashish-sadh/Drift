@@ -236,10 +236,24 @@ for t in available:
     if has(t, "bug") and has(t, "P0") and admin_approved(t):
         print(f"{t['number']} {t['title']}"); sys.exit(0)
 
+# ── Priority 1.5 (senior + any): P0 SENIOR features ───────────────────────────
+# A P0 label on a non-bug means the feature is critical-priority but isn't a
+# bug. Without this clause, P0 features were ranked at Priority 2 alongside
+# every other SENIOR sprint-task — the P0 label was effectively decorative.
+# This jumps them ahead of regular SENIOR features. Reachable from --any too
+# so junior queries that touch the senior path still see the elevation.
+if filter_mode in ("--senior", "--any"):
+    for t in available:
+        if has(t, "needs-review"): continue
+        if has(t, "sprint-task") and has(t, "SENIOR") and has(t, "P0"):
+            print(f"{t['number']} {t['title']}"); sys.exit(0)
+
 # ── Senior-only section ────────────────────────────────────────────────────────
 if filter_mode in ("--senior", "--any"):
 
     # Priority 2: SENIOR-labeled sprint tasks (feature tasks + explicitly SENIOR bugs)
+    # P0 SENIOR features already handled by Priority 1.5 above; this picks up
+    # non-P0 SENIOR sprint-tasks.
     for t in available:
         if has(t, "needs-review"): continue
         if has(t, "sprint-task") and has(t, "SENIOR"):
