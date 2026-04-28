@@ -1,7 +1,7 @@
 # Graph Report - /Users/ashishsadh/workspace/Drift  (2026-04-28)
 
 ## Corpus Check
-- 423 files · ~1,874,548 words
+- 423 files · ~1,874,482 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -1033,10 +1033,10 @@ Nodes (0):
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `date` connect `Community 2` to `Community 0`, `Community 1`, `Community 3`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 9`, `Community 10`, `Community 11`, `Community 12`, `Community 13`, `Community 15`, `Community 17`, `Community 18`, `Community 20`, `Community 22`, `Community 27`, `Community 33`?**
-  _High betweenness centrality (0.054) - this node is a cross-community bridge._
-- **Why does `data` connect `Community 13` to `Community 0`, `Community 1`, `Community 2`, `Community 33`, `Community 4`, `Community 5`, `Community 6`, `Community 7`, `Community 8`, `Community 3`, `Community 10`, `Community 12`, `Community 19`, `Community 21`, `Community 22`, `Community 23`, `Community 28`?**
-  _High betweenness centrality (0.025) - this node is a cross-community bridge._
+  _High betweenness centrality (0.065) - this node is a cross-community bridge._
 - **Why does `empty` connect `Community 2` to `Community 32`, `Community 1`, `Community 4`, `Community 7`, `Community 8`, `Community 11`, `Community 22`?**
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+- **Why does `shouldClarify()` connect `Community 19` to `Community 6`?**
   _High betweenness centrality (0.022) - this node is a cross-community bridge._
 - **Are the 362 inferred relationships involving `String` (e.g. with `.classify()` and `.extractTool()`) actually correct?**
   _`String` has 362 INFERRED edges - model-reasoned connections that need verification._

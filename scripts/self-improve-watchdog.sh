@@ -772,6 +772,14 @@ fi
 STATE=$(read_control)
 if [[ "$STATE" == "RUN" ]]; then
     if [[ -z "$CLAUDE_PID" ]]; then
+        # Snapshot WIP BEFORE cleanup. If the prior watchdog died with a live
+        # session that left uncommitted work in the tree, this is our only
+        # chance to capture it — `cleanup_dirty_state` below will git-checkout
+        # everything 5 lines later. Observed regression on #515: prior session
+        # died, watchdog respawned via launchd, fired cleanup straight away,
+        # the resumable patch only contained heartbeat.json + project.pbxproj
+        # noise because the real code edits had been wiped.
+        snapshot_wip_if_in_progress
         cleanup_dirty_state
         start_claude
     else
