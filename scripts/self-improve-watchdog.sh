@@ -52,9 +52,23 @@ CURRENT_LOG=""
 
 mkdir -p "$LOG_DIR"
 
+# Ignore SIGPIPE — observed root cause of recurring watchdog deaths. Without
+# this, any pipeline that loses its reader (file rotation, launchd stdout
+# buffer issue, etc.) propagates SIGPIPE to the watchdog shell and bash exits
+# with 141. Each watchdog death triggers its own signal handler which kills
+# the active senior session — that's the "sessions dying every 2 min"
+# pattern observed 2026-04-28 (5 watchdog respawns / hour).
+trap '' PIPE
+
 log() {
     local msg="[$(date '+%Y-%m-%d %H:%M:%S')] $1"
-    echo "$msg" | tee -a "$WATCHDOG_LOG"
+    # Direct writes — no `tee` pipeline. Was: `echo "$msg" | tee -a "$LOG"`.
+    # The pipeline was the SIGPIPE vector: launchd captures stdout into a
+    # rotated file, and an unfortunate combination of buffering + rotation
+    # would close tee's stdout reader, propagate SIGPIPE up to the script,
+    # and kill the watchdog mid-cycle.
+    echo "$msg" >> "$WATCHDOG_LOG"
+    echo "$msg"
 }
 
 get_model() {
