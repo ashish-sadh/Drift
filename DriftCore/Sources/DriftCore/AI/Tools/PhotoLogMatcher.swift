@@ -73,6 +73,55 @@ public enum PhotoLogMatcher {
         return 150   // sensible fallback for any unclassified food
     }
 
+    // MARK: - Portion Hint Parsing
+
+    /// Parse a free-text correction hint into a portion multiplier.
+    /// Returns nil when the hint isn't a recognizable size cue — callers
+    /// should fall through to food-name DB matching in that case.
+    ///
+    /// Examples:
+    ///   "half" / "half of it" / "1/2" → 0.5
+    ///   "double" / "twice" / "2x"     → 2.0
+    ///   "smaller portion"             → 0.5
+    ///   "1.5x"                        → 1.5
+    ///   "50%"                         → 0.5
+    ///   "paratha"                     → nil  (food name, not a size cue)
+    public static func parsePortionMultiplier(_ hint: String) -> Double? {
+        let s = hint.lowercased()
+
+        // Named fractions
+        if s.contains("half") || s.contains("1/2") { return 0.5 }
+        if s.contains("quarter") || s.contains("1/4") { return 0.25 }
+
+        // Named multiples
+        if s.contains("double") || s.contains("twice") || s.contains("2x") { return 2.0 }
+        if s.contains("triple") || s.contains("3x") { return 3.0 }
+        if s.contains("1.5x") { return 1.5 }
+
+        // Vague size cues — map to nearest sensible fraction
+        if s.contains("smaller") || s.contains("small portion") { return 0.5 }
+        if s.contains("larger") || s.contains("bigger") { return 1.5 }
+
+        // Percentage: "50%", "75%"
+        let pctRegex = try? NSRegularExpression(pattern: #"(\d+(?:\.\d+)?)\s*%"#)
+        if let match = pctRegex?.firstMatch(in: s, range: NSRange(s.startIndex..., in: s)),
+           let range = Range(match.range(at: 1), in: s),
+           let pct = Double(s[range]) {
+            return pct / 100.0
+        }
+
+        // Explicit "Nx" multiplier: "2.5x", "0.75x"
+        let mulRegex = try? NSRegularExpression(pattern: #"(\d+(?:\.\d+)?)\s*x\b"#,
+                                                options: .caseInsensitive)
+        if let match = mulRegex?.firstMatch(in: s, range: NSRange(s.startIndex..., in: s)),
+           let range = Range(match.range(at: 1), in: s),
+           let factor = Double(s[range]) {
+            return factor
+        }
+
+        return nil
+    }
+
     // MARK: - Word Overlap (internal, exposed for testing)
 
     /// Fraction of words in `query` that appear in `candidate` (case-insensitive).

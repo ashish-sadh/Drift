@@ -129,6 +129,63 @@ struct PhotoLogMatcherTests {
         #expect(match == nil)
     }
 
+    // MARK: - Portion Multiplier Parsing (#522)
+
+    @Test func portionHalfReturnsPointFive() {
+        #expect(PhotoLogMatcher.parsePortionMultiplier("half") == 0.5)
+        #expect(PhotoLogMatcher.parsePortionMultiplier("half of it") == 0.5)
+        #expect(PhotoLogMatcher.parsePortionMultiplier("I had smaller portion. Half of it") == 0.5)
+        #expect(PhotoLogMatcher.parsePortionMultiplier("1/2") == 0.5)
+    }
+
+    @Test func portionDoubleReturnsTwo() {
+        #expect(PhotoLogMatcher.parsePortionMultiplier("double") == 2.0)
+        #expect(PhotoLogMatcher.parsePortionMultiplier("twice the amount") == 2.0)
+        #expect(PhotoLogMatcher.parsePortionMultiplier("2x") == 2.0)
+    }
+
+    @Test func portionExplicitMultiplier() {
+        #expect(PhotoLogMatcher.parsePortionMultiplier("1.5x") == 1.5)
+        #expect(PhotoLogMatcher.parsePortionMultiplier("3x") == 3.0)
+        #expect(PhotoLogMatcher.parsePortionMultiplier("2.5x") == 2.5)
+    }
+
+    @Test func portionPercentage() {
+        let result = PhotoLogMatcher.parsePortionMultiplier("50%")
+        #expect(result == 0.5)
+        let result75 = PhotoLogMatcher.parsePortionMultiplier("75%")
+        #expect(result75 == 0.75)
+    }
+
+    @Test func portionSmallerReturnsPointFive() {
+        #expect(PhotoLogMatcher.parsePortionMultiplier("smaller portion") == 0.5)
+        #expect(PhotoLogMatcher.parsePortionMultiplier("smaller") == 0.5)
+    }
+
+    @Test func portionLargerReturnsOneFive() {
+        #expect(PhotoLogMatcher.parsePortionMultiplier("bigger portion") == 1.5)
+        #expect(PhotoLogMatcher.parsePortionMultiplier("larger") == 1.5)
+    }
+
+    @Test func portionQuarterReturnsPointTwoFive() {
+        #expect(PhotoLogMatcher.parsePortionMultiplier("quarter") == 0.25)
+        #expect(PhotoLogMatcher.parsePortionMultiplier("1/4") == 0.25)
+    }
+
+    @Test func foodNameReturnsNil() {
+        // Food names must not be mistaken for portion cues
+        #expect(PhotoLogMatcher.parsePortionMultiplier("paratha") == nil)
+        #expect(PhotoLogMatcher.parsePortionMultiplier("palak paneer") == nil)
+        #expect(PhotoLogMatcher.parsePortionMultiplier("this is actually rice") == nil)
+    }
+
+    @Test func emptyHintReturnsNil() {
+        #expect(PhotoLogMatcher.parsePortionMultiplier("") == nil)
+        #expect(PhotoLogMatcher.parsePortionMultiplier("   ") == nil)
+    }
+
+    // MARK: - DB Matching (seeded in-memory DB)
+
     @Test func fuzzyMatchAmbiguousName() throws {
         let db = try AppDatabase.empty()
         var food = Food(name: "Chicken Biryani", category: "Indian Meals",

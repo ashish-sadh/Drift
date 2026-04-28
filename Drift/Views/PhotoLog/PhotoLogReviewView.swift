@@ -263,6 +263,7 @@ private struct PhotoLogItemRow: View {
     @State private var expanded: Bool = false
     @State private var showCorrection: Bool = false
     @State private var correctionHint: String = ""
+    @State private var correctionError: String? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -324,17 +325,25 @@ private struct PhotoLogItemRow: View {
     @ViewBuilder
     private var correctionRow: some View {
         if showCorrection {
-            HStack(spacing: 8) {
-                TextField("e.g. palak paneer", text: $correctionHint)
-                    .font(.caption)
-                    .textFieldStyle(.roundedBorder)
-                    .autocorrectionDisabled()
-                    .focused($correctionFocused)
-                    .onSubmit { applyCorrection() }
-                Button("Fix") { applyCorrection() }
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(Theme.accent)
-                    .disabled(correctionHint.trimmingCharacters(in: .whitespaces).isEmpty)
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    TextField("e.g. paratha, or 'half portion'", text: $correctionHint)
+                        .font(.caption)
+                        .textFieldStyle(.roundedBorder)
+                        .autocorrectionDisabled()
+                        .focused($correctionFocused)
+                        .onSubmit { applyCorrection() }
+                        .onChange(of: correctionHint) { _, _ in correctionError = nil }
+                    Button("Fix") { applyCorrection() }
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(Theme.accent)
+                        .disabled(correctionHint.trimmingCharacters(in: .whitespaces).isEmpty)
+                }
+                if let error = correctionError {
+                    Text(error)
+                        .font(.caption2)
+                        .foregroundStyle(Theme.surplus)
+                }
             }
             .transition(.opacity.combined(with: .move(edge: .top)))
         } else {
@@ -353,12 +362,27 @@ private struct PhotoLogItemRow: View {
     private func applyCorrection() {
         let hint = correctionHint.trimmingCharacters(in: .whitespaces)
         guard !hint.isEmpty else { return }
+
+        // Portion multiplier: "half", "double", "1.5x", "smaller portion", etc.
+        if let multiplier = PhotoLogMatcher.parsePortionMultiplier(hint), item.grams > 0 {
+            item.setAmount(item.servingAmount * multiplier)
+            correctionHint = ""
+            correctionError = nil
+            withAnimation { showCorrection = false }
+            return
+        }
+
+        // Food name swap: DB lookup for exact/fuzzy match.
         if let food = PhotoLogMatcher.matchFood(recognizedName: hint) {
             item.applyHintMatch(food)
             correctionHint = ""
+            correctionError = nil
             withAnimation { showCorrection = false }
+            return
         }
-        // No DB match: leave the field open so the user can refine the hint.
+
+        // Neither matched — show inline feedback so the button never silently no-ops.
+        correctionError = "No match — try a food name (e.g. 'paratha') or 'half'/'double' for portions."
     }
 
     // MARK: - Amount field
