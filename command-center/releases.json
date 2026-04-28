@@ -1929,5 +1929,20 @@
       "Per-commit test/archive gate now detects compound commands (chained && or ;).",
       "Heartbeat refresh + graphify report kept current."
     ]
+  },
+  {
+    "build": 186,
+    "date": "2026-04-28T10:21:00-07:00",
+    "description": "Build 186 — hydration tracking, multi-intent chat, photo-log corrections + Add-item DB search",
+    "features": [
+      "Hydration tracking via AI chat — say \"log 8 oz water\" or \"how much water today?\" and the assistant handles it (#383).",
+      "Multi-intent commands now run sequentially — \"log lunch and update weight to 75kg\" executes both tools in one turn (#384).",
+      "Photo-log Add item now searches your food DB inline — type a name, tap a result, the row pre-fills with macros instead of asking you to type from scratch (#525)."
+    ],
+    "fixes": [
+      "Photo-log Fix button now actually does something for free-form corrections (was silently no-op for portion changes like \"smaller portion, half of it\") (#522).",
+      "Photo-log Fix re-run is scoped to the single item you tapped — no more wiping your manual edits on other items in the meal (#524).",
+      "AI workflows now trust the model's identification + macros directly — the local food DB stops second-guessing AI vision results which had multiple bugs (#523)."
+    ]
   }
 ]
