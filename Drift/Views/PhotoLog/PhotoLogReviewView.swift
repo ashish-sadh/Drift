@@ -269,15 +269,22 @@ private struct PhotoLogItemRow: View {
     let aiCorrector: ((PhotoLogEditableItem, String) async -> PhotoLogItem?)?
     @FocusState private var amountFocused: Bool
     @FocusState private var correctionFocused: Bool
+    @FocusState private var searchFocused: Bool
     @State private var amountText: String = ""
     @State private var expanded: Bool = false
     @State private var showCorrection: Bool = false
     @State private var correctionHint: String = ""
     @State private var correctionError: String? = nil
     @State private var correctionLoading = false
+    @State private var showSearch = false
+    @State private var searchQuery = ""
+    @State private var searchResults: [Food] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+            if showSearch {
+                searchField
+            } else {
             // Top row — checkbox, name, amount+unit picker.
             HStack(alignment: .center, spacing: 12) {
                 Button {
@@ -325,10 +332,77 @@ private struct PhotoLogItemRow: View {
             }
 
             correctionRow
+            } // end else
         }
         .opacity(item.selected ? 1.0 : 0.45)
         .onAppear { syncAmountText() }
         .onChange(of: item.servingUnit) { _, _ in syncAmountText() }
+        .task {
+            guard item.name.isEmpty && item.calories == 0 else { return }
+            showSearch = true
+            try? await Task.sleep(nanoseconds: 100_000_000)
+            searchFocused = true
+        }
+    }
+
+    // MARK: - Inline DB search (new blank items)
+
+    private var searchField: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                TextField("Search foods…", text: $searchQuery)
+                    .font(.subheadline)
+                    .autocorrectionDisabled()
+                    .focused($searchFocused)
+                    .onChange(of: searchQuery) { _, q in
+                        let trimmed = q.trimmingCharacters(in: .whitespaces)
+                        searchResults = trimmed.count >= 2
+                            ? Array(FoodService.searchFood(query: trimmed).prefix(5))
+                            : []
+                    }
+                    .onSubmit { commitSearch() }
+                Button { commitSearch() } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(Theme.textTertiary)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 10))
+
+            ForEach(searchResults, id: \.name) { food in
+                Button {
+                    item.applyHintMatch(food)
+                    searchQuery = ""
+                    searchResults = []
+                    showSearch = false
+                } label: {
+                    HStack {
+                        Text(food.name)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(Theme.textPrimary)
+                            .lineLimit(1)
+                        Spacer()
+                        Text("\(Int(food.calories.rounded())) cal · \(Int(food.servingSize.rounded()))g")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 12)
+                    .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func commitSearch() {
+        let trimmed = searchQuery.trimmingCharacters(in: .whitespaces)
+        if !trimmed.isEmpty { item.name = trimmed }
+        searchQuery = ""
+        searchResults = []
+        showSearch = false
     }
 
     // MARK: - Correction row

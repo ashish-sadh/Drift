@@ -339,6 +339,33 @@ private func sampleItem(name: String = "dal",
     #expect(item.name == "Dal Makhani")
 }
 
+// MARK: - Inline DB search for Add item (#525)
+
+@Test @MainActor func addItemDBPickPopulatesNameAndMacros() {
+    var item = PhotoLogEditableItem.blank()
+    let results = FoodService.searchFood(query: "rice")
+    guard let food = results.first else { return } // skip if DB empty
+    item.applyHintMatch(food)
+    #expect(!item.name.isEmpty)
+    #expect(item.calories > 0)
+    #expect(item.grams > 0)
+    #expect(item.caloriesPerGram > 0)
+}
+
+@Test @MainActor func unknownQueryYieldsNoDBResults() {
+    let results = FoodService.searchFood(query: "asdfqwer123xyz")
+    #expect(results.isEmpty)
+}
+
+@Test func addItemBlankRowHasZeroMacrosUntilPicked() {
+    let item = PhotoLogEditableItem.blank()
+    #expect(item.name.isEmpty)
+    #expect(item.calories == 0)
+    #expect(item.proteinG == 0)
+    #expect(item.carbsG == 0)
+    #expect(item.fatG == 0)
+}
+
 // MARK: - AI correction scoping (#524)
 
 @Test func applyAICorrectionUpdatesOnlyTargetItem() {
