@@ -156,6 +156,8 @@ import Testing
     #expect(IntentClassifier.needsRecentEntries("No, I had the other chicken instead"))
     #expect(IntentClassifier.needsRecentEntries("Actually I had salmon, not chicken"))
     #expect(IntentClassifier.needsRecentEntries("no, i had pasta not rice"))
+    #expect(IntentClassifier.needsRecentEntries("Wait, it was 2 eggs not 3"))
+    #expect(IntentClassifier.needsRecentEntries("No, that was lunch not dinner"))
 }
 
 @Test func composeUserMessageOrdersRecentBeforeHistory() {
