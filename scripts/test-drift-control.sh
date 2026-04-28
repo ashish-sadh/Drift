@@ -411,6 +411,21 @@ RESULT=$(sprint_service next --junior --claim 2>/dev/null)
 assert_eq "next --claim with empty queue prints none" "none" "$RESULT"
 IN_P=$(jq -r '.in_progress' "$STATE_FILE")
 assert_eq "next --claim with empty queue leaves in_progress null" "null" "$IN_P"
+
+# 3.10 cmd_claim prints RESUMABLE warning when issue has `resumable` label.
+# Without this warning, sessions ran bare `gh issue view N` (no comments)
+# and never saw the WIP file pointers, looping on orientation. See #516.
+write_state_with_tasks "null" \
+    "$(task 800 'Resumable claim' pending sprint-task SENIOR resumable)"
+OUT=$(sprint_service claim 800 2>&1)
+assert_contains "claim prints RESUMABLE warning when label set" "RESUMABLE" "$OUT"
+assert_contains "claim warning includes WIP patch path with issue number" "wip/800.patch" "$OUT"
+
+# 3.11 cmd_claim does NOT print RESUMABLE for non-resumable issues
+write_state_with_tasks "null" \
+    "$(task 801 'Normal claim' pending sprint-task SENIOR)"
+OUT=$(sprint_service claim 801 2>&1)
+assert_not_contains "claim silent on resumable warning for non-resumable issue" "RESUMABLE" "$OUT"
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════

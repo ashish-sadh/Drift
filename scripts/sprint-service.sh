@@ -406,7 +406,20 @@ PYEOF
     # missed the WIP file pointers, redoing orientation 6+ times on #515.
     # Print to STDOUT so the model sees it inline with the claim — stderr
     # would be dropped from the session's tool result. Filed as #516.
-    if echo "$ISSUE_JSON" | grep -q '"name":"resumable"'; then
+    #
+    # Source of truth = state file (already updated by the Python claim
+    # block above). Tests pre-populate state, gh may fail in test envs.
+    local IS_RESUMABLE
+    IS_RESUMABLE=$(python3 -c "
+import json
+try:
+    state = json.load(open('$STATE_FILE'))
+    task = next((t for t in state.get('tasks', []) if t['number'] == $NUM), None)
+    print('yes' if task and 'resumable' in task.get('labels', []) else 'no')
+except Exception:
+    print('no')
+")
+    if [ "$IS_RESUMABLE" = "yes" ]; then
         echo ""
         echo "⚠️  RESUMABLE — prior session left WIP for #${NUM}. Read context before continuing:"
         echo "    gh issue view ${NUM} --comments"
