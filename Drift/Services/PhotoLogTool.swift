@@ -82,7 +82,8 @@ enum PhotoLogTool {
             } else {
                 svc = try await buildDefaultService()
             }
-            let response = try await svc.analyze(image: image, prompt: prompt)
+            let raw = try await svc.analyze(image: image, prompt: prompt)
+            let response = applyDBMatching(raw)
             return AgentOutput(
                 text: summarize(response: response),
                 action: nil,
@@ -126,6 +127,26 @@ enum PhotoLogTool {
         case .gemini:    client = GeminiVisionClient(apiKey: key, model: model)
         }
         return PhotoLogService(client: client)
+    }
+
+    // MARK: - DB Matching
+
+    /// For each recognized item: substitute the canonical DB name when a match
+    /// is found, and fill in gram defaults by food category when grams == 0.
+    nonisolated static func applyDBMatching(_ response: PhotoLogResponse) -> PhotoLogResponse {
+        let items = response.items.map { item -> PhotoLogItem in
+            var updated = item
+            let match = PhotoLogMatcher.matchFood(recognizedName: item.name)
+            if let food = match { updated.name = food.name }
+            if updated.grams < 1 {
+                let category = match?.category ?? ""
+                updated.grams = PhotoLogMatcher.portionDefault(
+                    category: category, recognizedName: item.name
+                )
+            }
+            return updated
+        }
+        return PhotoLogResponse(items: items, overallConfidence: response.overallConfidence, notes: response.notes)
     }
 
     // MARK: - Summary formatting
