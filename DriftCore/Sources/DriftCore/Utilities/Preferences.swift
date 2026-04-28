@@ -61,6 +61,19 @@ public enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: healthNudgesKey) }
     }
 
+    // MARK: - Hydration
+
+    private static let waterGoalMlKey = "drift_water_goal_ml"
+
+    /// Daily water intake goal in millilitres. Default: 2000ml.
+    public static var waterGoalMl: Double {
+        get {
+            let v = UserDefaults.standard.double(forKey: waterGoalMlKey)
+            return v > 0 ? v : 2000
+        }
+        set { UserDefaults.standard.set(newValue, forKey: waterGoalMlKey) }
+    }
+
     // MARK: - Smart Meal Reminders
 
     private static let mealRemindersKey = "drift_meal_reminders"

@@ -364,6 +364,47 @@ public enum ToolRegistration {
             handler: { _ in .text(FoodService.explainCalories()) }
         ))
 
+        // MARK: - Hydration Tools
+
+        r.register(ToolSchema(
+            id: "hydration.log_water", name: "log_water", service: "hydration",
+            description: "User wants to LOG water or fluid intake. Use when they say 'drank', 'had water', 'drinking', 'gulped', or mention a quantity of water/juice/tea.",
+            parameters: [
+                ToolParam("amount", "number", "Quantity of fluid"),
+                ToolParam("unit", "string", "ml, l, oz, cups, glass, bottle — default ml", required: false)
+            ],
+            validate: { params in
+                guard let amount = params.double("amount"), amount > 0 else { return "Missing amount" }
+                let unit = params.string("unit") ?? "ml"
+                guard let ml = HydrationService.parseMl(amount: amount, unit: unit) else {
+                    return "Unknown unit '\(unit)'. Use ml, l, oz, cups, glass, or bottle."
+                }
+                if ml < 10 || ml > 5000 { return "Amount \(Int(ml))ml is outside valid range (10–5000ml)" }
+                return nil
+            },
+            handler: { params in
+                guard let amount = params.double("amount") else { return .error("Missing amount") }
+                let unit = params.string("unit") ?? "ml"
+                guard let ml = HydrationService.parseMl(amount: amount, unit: unit) else {
+                    return .error("Unknown unit '\(unit)'")
+                }
+                do {
+                    let totalMl = try HydrationService.logWater(amountMl: ml)
+                    let goal = Preferences.waterGoalMl
+                    let pct = Int((totalMl / goal * 100).rounded())
+                    let logged = ml >= 1000
+                        ? String(format: "%.1fL", ml / 1000)
+                        : "\(Int(ml))ml"
+                    let total = totalMl >= 1000
+                        ? String(format: "%.1fL", totalMl / 1000)
+                        : "\(Int(totalMl))ml"
+                    return .text("Logged \(logged). Today: \(total)/\(Int(goal))ml (\(pct)%).")
+                } catch {
+                    return .error("Couldn't save water entry.")
+                }
+            }
+        ))
+
         // MARK: - Weight Tools (2 — consolidated from 4)
 
         r.register(ToolSchema(

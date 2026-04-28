@@ -567,5 +567,16 @@ enum Migrations {
                 t.add(column: "sugar_g", .double)
             }
         }
+
+        migrator.registerMigration("v36_hydration") { db in
+            try db.create(table: "water_entry") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("date", .text).notNull()
+                t.column("amount_ml", .double).notNull()
+                t.column("logged_at", .text).notNull()
+                t.column("source", .text).notNull().defaults(to: "manual")
+            }
+            try db.create(index: "idx_water_entry_date", on: "water_entry", columns: ["date"])
+        }
     }
 }
