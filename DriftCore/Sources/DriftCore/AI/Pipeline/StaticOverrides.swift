@@ -336,7 +336,7 @@ public enum StaticOverrides {
            let calGoalMatch = calGoalRegex.firstMatch(in: calGoalInput, range: NSRange(calGoalInput.startIndex..., in: calGoalInput)),
            let numRange = Range(calGoalMatch.range(at: 1), in: calGoalInput),
            let calories = Double(String(calGoalInput[numRange])),
-           calories >= 1000 && calories <= 5000 {
+           calories >= 1200 && calories <= 5000 {
             return .handler {
                 let currentKg = WeightTrendService.shared.latestWeightKg ?? 70
                 var goal = WeightGoal.load() ?? WeightGoal(targetWeightKg: currentKg, monthsToAchieve: 6,

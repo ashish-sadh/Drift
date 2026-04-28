@@ -471,8 +471,8 @@ public enum ToolRegistration {
 
                 switch goalType {
                 case "calorie":
-                    guard target >= 1000 && target <= 5000 else {
-                        return .error("Calorie goal \(Int(target)) is outside valid range (1000–5000).")
+                    guard target >= 1200 && target <= 5000 else {
+                        return .error("Calorie goal \(Int(target)) is outside valid range (1200–5000). 1200 is the floor — anything lower isn't safe to recommend.")
                     }
                     let currentKg = WeightTrendService.shared.latestWeightKg ?? 70
                     var goal = WeightGoal.load() ?? WeightGoal(targetWeightKg: currentKg, monthsToAchieve: 6,
