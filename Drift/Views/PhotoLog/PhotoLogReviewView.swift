@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import DriftCore
 
 /// Second step of the Photo Log flow. The cloud-vision response has been
@@ -11,6 +12,9 @@ struct PhotoLogReviewView: View {
     @Binding var items: [PhotoLogEditableItem]
     let overallConfidence: Confidence
     let notes: String?
+    /// Original captured image — passed to per-item AI correction so the fix
+    /// call can reference the photo without re-running on the whole meal.
+    let photo: UIImage?
     let foodLog: FoodLogViewModel
     let onLogged: () -> Void
     let onRetake: () -> Void
@@ -83,9 +87,12 @@ struct PhotoLogReviewView: View {
     }
 
     private var itemsSection: some View {
-        Section {
+        let corrector: ((PhotoLogEditableItem, String) async -> PhotoLogItem?)? = photo.map { img in
+            { item, hint in try? await PhotoLogFlowService.correctItem(item, hint: hint, image: img) }
+        }
+        return Section {
             ForEach($items) { $item in
-                PhotoLogItemRow(item: $item)
+                PhotoLogItemRow(item: $item, aiCorrector: corrector)
             }
             .onDelete(perform: removeItems)
             Button {
@@ -257,6 +264,9 @@ struct PhotoLogReviewView: View {
 
 private struct PhotoLogItemRow: View {
     @Binding var item: PhotoLogEditableItem
+    /// Scoped AI corrector — called with just this item + hint. Never receives
+    /// the full items array. nil when no photo is available (e.g. tests).
+    let aiCorrector: ((PhotoLogEditableItem, String) async -> PhotoLogItem?)?
     @FocusState private var amountFocused: Bool
     @FocusState private var correctionFocused: Bool
     @State private var amountText: String = ""
@@ -264,6 +274,7 @@ private struct PhotoLogItemRow: View {
     @State private var showCorrection: Bool = false
     @State private var correctionHint: String = ""
     @State private var correctionError: String? = nil
+    @State private var correctionLoading = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -334,10 +345,15 @@ private struct PhotoLogItemRow: View {
                         .focused($correctionFocused)
                         .onSubmit { applyCorrection() }
                         .onChange(of: correctionHint) { _, _ in correctionError = nil }
-                    Button("Fix") { applyCorrection() }
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(Theme.accent)
-                        .disabled(correctionHint.trimmingCharacters(in: .whitespaces).isEmpty)
+                    if correctionLoading {
+                        ProgressView()
+                            .frame(width: 32)
+                    } else {
+                        Button("Fix") { applyCorrection() }
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(Theme.accent)
+                            .disabled(correctionHint.trimmingCharacters(in: .whitespaces).isEmpty)
+                    }
                 }
                 if let error = correctionError {
                     Text(error)
@@ -363,7 +379,7 @@ private struct PhotoLogItemRow: View {
         let hint = correctionHint.trimmingCharacters(in: .whitespaces)
         guard !hint.isEmpty else { return }
 
-        // Portion multiplier: "half", "double", "1.5x", "smaller portion", etc.
+        // Portion multiplier is purely local — no AI needed.
         if let multiplier = PhotoLogMatcher.parsePortionMultiplier(hint), item.grams > 0 {
             item.setAmount(item.servingAmount * multiplier)
             correctionHint = ""
@@ -372,17 +388,25 @@ private struct PhotoLogItemRow: View {
             return
         }
 
-        // Food name swap: DB lookup for exact/fuzzy match.
-        if let food = PhotoLogMatcher.matchFood(recognizedName: hint) {
-            item.applyHintMatch(food)
-            correctionHint = ""
-            correctionError = nil
-            withAnimation { showCorrection = false }
+        // AI correction scoped to this item only — passes item + hint + photo,
+        // never the full items array. Other rows are untouched.
+        guard let aiCorrector else {
+            correctionError = "Correction unavailable — try 'half' or 'double' for portions."
             return
         }
-
-        // Neither matched — show inline feedback so the button never silently no-ops.
-        correctionError = "No match — try a food name (e.g. 'paratha') or 'half'/'double' for portions."
+        correctionLoading = true
+        correctionError = nil
+        Task { @MainActor in
+            defer { correctionLoading = false }
+            if let aiItem = await aiCorrector(item, hint) {
+                item.applyAICorrection(aiItem)
+                correctionHint = ""
+                correctionError = nil
+                withAnimation { showCorrection = false }
+            } else {
+                correctionError = "Couldn't identify that — try a clearer description."
+            }
+        }
     }
 
     // MARK: - Amount field

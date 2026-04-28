@@ -16,6 +16,7 @@ struct PhotoLogFlowView: View {
 
     @Environment(\.dismiss) private var dismiss
     @State private var state: PhotoLogViewState = .capture
+    @State private var capturedPhoto: UIImage? = nil
     @State private var analysisTask: Task<Void, Never>? = nil
 
     var body: some View {
@@ -75,6 +76,7 @@ struct PhotoLogFlowView: View {
         ReviewHost(items: initialItems,
                    confidence: confidence,
                    notes: notes,
+                   photo: capturedPhoto,
                    foodLog: foodLog,
                    onLogged: { dismiss() },
                    onRetake: { state = .capture })
@@ -151,6 +153,7 @@ struct PhotoLogFlowView: View {
 
     private func runAnalysis(on image: UIImage) {
         state = .analyzing
+        capturedPhoto = image
         analysisTask?.cancel()
         analysisTask = Task { @MainActor in
             let result = await analyzer(image)
@@ -210,6 +213,7 @@ private struct ReviewHost: View {
     @State var items: [PhotoLogEditableItem]
     let confidence: Confidence
     let notes: String?
+    let photo: UIImage?
     let foodLog: FoodLogViewModel
     let onLogged: () -> Void
     let onRetake: () -> Void
@@ -219,6 +223,7 @@ private struct ReviewHost: View {
             items: $items,
             overallConfidence: confidence,
             notes: notes,
+            photo: photo,
             foodLog: foodLog,
             onLogged: onLogged,
             onRetake: onRetake
@@ -232,6 +237,23 @@ private struct ReviewHost: View {
 @MainActor
 enum PhotoLogFlowService {
     static func analyze(image: UIImage) async throws -> PhotoLogResponse {
+        let service = try await makeService()
+        return try await service.analyze(image: image, prompt: PhotoLogTool.defaultPrompt)
+    }
+
+    /// Re-run AI recognition scoped to a single item. The prompt names the
+    /// item and the user's hint so the model focuses on just that food — it
+    /// never sees the full `items` array and cannot wipe other rows.
+    static func correctItem(_ item: PhotoLogEditableItem,
+                            hint: String,
+                            image: UIImage) async throws -> PhotoLogItem? {
+        let service = try await makeService()
+        let prompt = "The item shown is '\(item.name)'. User correction: \"\(hint)\". Return the corrected food — name, grams, and macros for this single item only. Do not describe other items in the photo."
+        let response = try await service.analyze(image: image, prompt: prompt)
+        return response.items.first
+    }
+
+    private static func makeService() async throws -> PhotoLogService {
         let provider = Preferences.photoLogProvider
         guard let key = try await CloudVisionKey.get(for: provider) else {
             throw CloudVisionKey.StorageError.notFound
@@ -243,7 +265,6 @@ enum PhotoLogFlowService {
         case .openai:    client = OpenAIVisionClient(apiKey: key, model: model)
         case .gemini:    client = GeminiVisionClient(apiKey: key, model: model)
         }
-        let service = PhotoLogService(client: client)
-        return try await service.analyze(image: image, prompt: PhotoLogTool.defaultPrompt)
+        return PhotoLogService(client: client)
     }
 }

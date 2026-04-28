@@ -173,6 +173,46 @@ struct PhotoLogEditableItem: Identifiable, Equatable {
         case calories, protein, carbs, fat, fiber
     }
 
+    /// Apply an AI correction to this single item. Replaces name, grams,
+    /// macros, and ingredients with the AI's updated values. `selected` is
+    /// intentionally preserved — the checkbox is the user's choice, not a
+    /// correctness signal. `macrosManuallyEdited` is reset since AI just
+    /// replaced the baseline. Uses fixed-conversion units only (not pieces/
+    /// slices) to avoid stale `originalGrams` after the swap.
+    mutating func applyAICorrection(_ aiItem: PhotoLogItem) {
+        name = aiItem.name
+        let g = max(aiItem.grams, 1)
+        let c = max(aiItem.calories, 0)
+        let p = max(aiItem.proteinG, 0)
+        let carb = max(aiItem.carbsG, 0)
+        let f = max(aiItem.fatG, 0)
+        let fb = max(aiItem.fiberG, 0)
+        grams = g
+        calories = c
+        proteinG = p
+        carbsG = carb
+        fatG = f
+        fiberG = fb
+        caloriesPerGram = c / g
+        proteinPerGram  = p / g
+        carbsPerGram    = carb / g
+        fatPerGram      = f / g
+        fiberPerGram    = fb / g
+        if let aiUnit = PhotoLogServingUnit.parse(aiItem.servingUnit),
+           aiUnit.fixedGramsPerUnit != nil {
+            servingUnit = aiUnit
+            let gpu = aiUnit.fixedGramsPerUnit!
+            servingAmount = gpu > 0 ? g / gpu : 1
+        } else {
+            servingUnit = .grams
+            servingAmount = g
+        }
+        if let ing = aiItem.ingredients { ingredients = ing }
+        confidence = aiItem.confidence
+        macrosManuallyEdited = false
+        // `selected` intentionally preserved — do not touch
+    }
+
     /// Apply a DB food match from a user correction hint.
     /// Substitutes the canonical name, recalculates per-gram rates from the
     /// DB food's macros, and rescales to the current grams. If grams is 0,
