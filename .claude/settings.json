@@ -1,5 +1,4 @@
 {
-  "advisorModel": "opus",
   "hooks": {
     "PreToolUse": [
       {
