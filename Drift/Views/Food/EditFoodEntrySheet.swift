@@ -268,6 +268,9 @@ struct EditFoodEntrySheet: View {
                                     carbsG: Double(editC) ?? entry.carbsG,
                                     fatG: Double(editF) ?? entry.fatG,
                                     fiberG: Double(editFb) ?? entry.fiberG)
+                                if multiplier > 0, multiplier != entry.servings {
+                                    viewModel.updateEntryServings(id: id, servings: multiplier)
+                                }
                             } else {
                                 viewModel.updateEntryServings(id: id, servings: multiplier)
                             }

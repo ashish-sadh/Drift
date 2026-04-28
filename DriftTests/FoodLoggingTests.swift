@@ -175,6 +175,22 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     #expect(nutrition.calories == 200)
 }
 
+@Test func quickAddServingsPersistOnSave() async throws {
+    let db = try AppDatabase.empty()
+    var mealLog = MealLog(date: "2026-03-30", mealType: "snack")
+    try db.saveMealLog(&mealLog)
+
+    var entry = FoodEntry(mealLogId: mealLog.id!, foodName: "Paratha", servingSizeG: 0, servings: 1, calories: 550, proteinG: 12, carbsG: 90, fatG: 25, fiberG: 7)
+    try db.saveFoodEntry(&entry)
+
+    try db.updateFoodEntryServings(id: entry.id!, servings: 0.5)
+
+    let fetched = try db.fetchFoodEntries(forMealLog: mealLog.id!)
+    #expect(fetched.count == 1)
+    #expect(fetched[0].servings == 0.5, "servings should persist after edit")
+    #expect(fetched[0].calories == 550, "macros unchanged — quick-add stores totals")
+}
+
 @Test func differentDatesNutritionIsolated() async throws {
     let db = try AppDatabase.empty()
 
