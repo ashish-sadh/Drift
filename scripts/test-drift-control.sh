@@ -364,9 +364,9 @@ assert_exit0 "planning-due when never run" sprint_service planning-due
 echo "$(date +%s)" > "$LAST_PLANNING_FILE"
 assert_exit_nonzero "planning-due not due when just run" sprint_service planning-due
 
-# 3.6 planning-due returns 0 (due) if 13h ago (cadence is 12h)
-echo "$(( $(date +%s) - 46800 ))" > "$LAST_PLANNING_FILE"
-assert_exit0 "planning-due when 13h ago" sprint_service planning-due
+# 3.6 planning-due returns 0 (due) if 25h ago (cadence is 24h)
+echo "$(( $(date +%s) - 90000 ))" > "$LAST_PLANNING_FILE"
+assert_exit0 "planning-due when 25h ago" sprint_service planning-due
 
 # 3.7 planning-done stamps current time and clears due status
 rm -f "$LAST_PLANNING_FILE"
@@ -1224,11 +1224,11 @@ assert_eq "LC-10: junior gets regular sprint (after SENIOR done)" "591 Junior sp
 RESULT=$(sprint_service next --senior)
 assert_eq "LC-10: senior has nothing left (regular sprint not for senior)" "none" "$RESULT"
 
-# ── LC-11: Planning-due boundary — exactly at 12h and 12h-1s ────────────
-echo "$(( $(date +%s) - 43200 ))" > "$LAST_PLANNING_FILE"   # exactly 12h ago
-assert_exit0    "LC-11: planning-due at exactly 12h" sprint_service planning-due
-echo "$(( $(date +%s) - 43199 ))" > "$LAST_PLANNING_FILE"   # 12h minus 1s
-assert_exit_nonzero "LC-11: planning-not-due at 12h-1s" sprint_service planning-due
+# ── LC-11: Planning-due boundary — exactly at 24h and 24h-1s ────────────
+echo "$(( $(date +%s) - 86400 ))" > "$LAST_PLANNING_FILE"   # exactly 24h ago
+assert_exit0    "LC-11: planning-due at exactly 24h" sprint_service planning-due
+echo "$(( $(date +%s) - 86399 ))" > "$LAST_PLANNING_FILE"   # 24h minus 1s
+assert_exit_nonzero "LC-11: planning-not-due at 24h-1s" sprint_service planning-due
 
 # ── LC-12: Overhead issue does not block real task claims ─────────────────
 write_state_with_budget "null" 0 \

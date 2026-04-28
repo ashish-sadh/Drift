@@ -12,13 +12,13 @@ Follow the section that matches your prompt. The watchdog passes one of:
 
 _Directive:_ **Read `Docs/roadmap.md` to understand product direction. Be bold. The goal is visible, meaningful progress every cycle.**
 
-_Override:_ STOP
+_Override:_ CONTINUE
 
 **How enforcement works:** Hooks and the watchdog enforce what must not be skipped. This file guides decisions that require judgment. If Override says STOP, exit cleanly.
 
 ---
 
-## Sprint Planning (Opus, every ~12 hours)
+## Sprint Planning (Opus, every ~24 hours)
 
 You are the Product Designer + Principal Engineer. session-start.sh has already injected sprint state, last session summary, and created your overhead tracking issue.
 
@@ -98,7 +98,7 @@ scripts/planning-service.sh remaining
       && gh issue edit $N --remove-label in-progress \
       && scripts/sprint-service.sh planning-done
     ```
-    The `planning-done` call writes `~/drift-state/last-planning-time = now` directly. Without it, the 12h planning cadence depends on the watchdog noticing the issue close on a later cycle — which fails if the watchdog restarts before noticing, leaving the stamp stale and re-firing planning every cycle.
+    The `planning-done` call writes `~/drift-state/last-planning-time = now` directly. Without it, the 24h planning cadence depends on the watchdog noticing the issue close on a later cycle — which fails if the watchdog restarts before noticing, leaving the stamp stale and re-firing planning every cycle.
 
 **DOD (ensure-clean-state.sh blocks exit until met):**
 - Either: 8+ NEW sprint-task issues created (NORMAL mode, queue was <60), OR queue closed down to ≤60 (TRIAGE-FIRST mode, queue was ≥80)

@@ -12,7 +12,7 @@
 #   clear                                — remove ALL in-progress (watchdog cleanup)
 #   status                               — print sprint summary
 #   count [--p0|--senior|--junior|--sprint|--permanent] — print count
-#   planning-due                         — exit 0 if 6+ hours since last planning
+#   planning-due                         — exit 0 if 24+ hours since last planning
 #   planning-done                        — stamp last-planning-time = now
 
 set -euo pipefail
@@ -645,11 +645,11 @@ cmd_planning_due() {
     local NOW
     NOW=$(date +%s)
     local SECONDS_SINCE=$(( NOW - LAST ))
-    # 12h cadence — was 6h, raised to halve planning frequency. Planning was
-    # triggering 4x/day even when there was no real change to plan, eating
-    # senior bandwidth. 12h still captures end-of-half-day re-prioritization
-    # and feedback drain without over-firing.
-    if [ "$SECONDS_SINCE" -ge 43200 ]; then
+    # 24h cadence — was 12h, raised again to once-per-day. Planning is
+    # high-cost senior work and most days don't accumulate enough new
+    # priority signal in 12h to warrant re-planning. Product review rides
+    # on the same trigger (see report-service.sh review-due).
+    if [ "$SECONDS_SINCE" -ge 86400 ]; then
         exit 0  # planning due
     else
         exit 1  # not due
