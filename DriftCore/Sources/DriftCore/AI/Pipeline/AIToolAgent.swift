@@ -176,6 +176,17 @@ public enum AIToolAgent {
             normalized = rewritten
         }
 
+        // ── Stage 0.5: Multi-intent splitting (large model only) ──
+        // Pre-pass: split "I had eggs and logged 70kg" into two sub-queries
+        // executed sequentially, before spending an LLM call on the compound.
+        if isLargeModel, let subQueries = MultiIntentSplitter.split(normalized), subQueries.count >= 2 {
+            Log.app.info("MultiIntentSplitter: '\(normalized)' → \(subQueries.count) sub-queries")
+            return await executeMultiIntent(
+                subQueries: subQueries, screen: screen, history: history,
+                isLargeModel: isLargeModel, onStep: onStep, onToken: onToken
+            )
+        }
+
         // ── Phase 1: Try rules on raw input (instant, both models) ──
         // Only for high-confidence action commands (undo, delete, greetings)
         if let toolCall = ToolRanker.tryRulePick(query: normalized, screen: screen) {
@@ -437,6 +448,38 @@ public enum AIToolAgent {
         ConversationState.shared.captureToolSummary("Multi-item log: \(summary)")
         let action = ToolAction.openRecipeBuilder(items: resolvedNames, mealName: mealHint)
         return AgentOutput(text: summaryLines.joined(separator: "\n"), action: action, toolsCalled: ["log_food"])
+    }
+
+    // MARK: - Multi-Intent Execution (Stage 0.5)
+
+    /// Execute N cross-domain sub-queries sequentially and combine their outputs.
+    /// Text outputs are joined with "\n\n". The first ToolAction found (sheet opener)
+    /// is preserved in the combined result — only one sheet can open at a time.
+    static func executeMultiIntent(
+        subQueries: [String],
+        screen: AIScreen,
+        history: String,
+        isLargeModel: Bool,
+        onStep: (String) -> Void,
+        onToken: @escaping @Sendable (String) -> Void
+    ) async -> AgentOutput {
+        var outputs: [AgentOutput] = []
+        for subQuery in subQueries {
+            let output = await runInner(
+                message: subQuery, screen: screen, history: history,
+                isLargeModel: isLargeModel, onStep: onStep, onToken: onToken
+            )
+            outputs.append(output)
+        }
+        let combinedText = outputs.compactMap { $0.text.isEmpty ? nil : $0.text }
+            .joined(separator: "\n\n")
+        let firstAction = outputs.first(where: { $0.action != nil })?.action
+        let toolsCalled = outputs.flatMap { $0.toolsCalled }
+        let anyFailed = outputs.contains(where: { $0.didFail })
+        return AgentOutput(
+            text: combinedText, action: firstAction,
+            toolsCalled: toolsCalled, didFail: anyFailed
+        )
     }
 
     // MARK: - Tool-First Execution
