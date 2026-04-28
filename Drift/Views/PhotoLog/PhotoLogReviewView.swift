@@ -258,8 +258,11 @@ struct PhotoLogReviewView: View {
 private struct PhotoLogItemRow: View {
     @Binding var item: PhotoLogEditableItem
     @FocusState private var amountFocused: Bool
+    @FocusState private var correctionFocused: Bool
     @State private var amountText: String = ""
     @State private var expanded: Bool = false
+    @State private var showCorrection: Bool = false
+    @State private var correctionHint: String = ""
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -303,19 +306,59 @@ private struct PhotoLogItemRow: View {
                 unitPicker
             }
 
-            // Macro boxes — always visible. Tapping any box opens a decimal
-            // editor so the user can correct what the LLM got wrong.
             macroBoxes
 
-            // Plant badge surfaces the LLM's ingredient list so users can see
-            // what counts toward plant points for this item.
             if !item.ingredients.isEmpty {
                 plantBadge
             }
+
+            correctionRow
         }
         .opacity(item.selected ? 1.0 : 0.45)
         .onAppear { syncAmountText() }
         .onChange(of: item.servingUnit) { _, _ in syncAmountText() }
+    }
+
+    // MARK: - Correction row
+
+    @ViewBuilder
+    private var correctionRow: some View {
+        if showCorrection {
+            HStack(spacing: 8) {
+                TextField("e.g. palak paneer", text: $correctionHint)
+                    .font(.caption)
+                    .textFieldStyle(.roundedBorder)
+                    .autocorrectionDisabled()
+                    .focused($correctionFocused)
+                    .onSubmit { applyCorrection() }
+                Button("Fix") { applyCorrection() }
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Theme.accent)
+                    .disabled(correctionHint.trimmingCharacters(in: .whitespaces).isEmpty)
+            }
+            .transition(.opacity.combined(with: .move(edge: .top)))
+        } else {
+            Button {
+                withAnimation { showCorrection = true }
+                correctionFocused = true
+            } label: {
+                Text("Not right? Describe the food")
+                    .font(.caption2)
+                    .foregroundStyle(Theme.textTertiary)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func applyCorrection() {
+        let hint = correctionHint.trimmingCharacters(in: .whitespaces)
+        guard !hint.isEmpty else { return }
+        if let food = PhotoLogMatcher.matchFood(recognizedName: hint) {
+            item.applyHintMatch(food)
+            correctionHint = ""
+            withAnimation { showCorrection = false }
+        }
+        // No DB match: leave the field open so the user can refine the hint.
     }
 
     // MARK: - Amount field

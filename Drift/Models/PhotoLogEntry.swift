@@ -173,6 +173,30 @@ struct PhotoLogEditableItem: Identifiable, Equatable {
         case calories, protein, carbs, fat, fiber
     }
 
+    /// Apply a DB food match from a user correction hint.
+    /// Substitutes the canonical name, recalculates per-gram rates from the
+    /// DB food's macros, and rescales to the current grams. If grams is 0,
+    /// a category-aware portion default is applied first.
+    mutating func applyHintMatch(_ food: Food) {
+        name = food.name
+        if grams < 1 {
+            grams = PhotoLogMatcher.portionDefault(category: food.category, recognizedName: food.name)
+        }
+        let g = food.servingSize > 0 ? food.servingSize : grams
+        caloriesPerGram = food.calories / g
+        proteinPerGram  = food.proteinG / g
+        carbsPerGram    = food.carbsG / g
+        fatPerGram      = food.fatG / g
+        fiberPerGram    = food.fiberG / g
+        calories = caloriesPerGram * grams
+        proteinG = proteinPerGram * grams
+        carbsG   = carbsPerGram * grams
+        fatG     = fatPerGram * grams
+        fiberG   = fiberPerGram * grams
+        confidence = .high
+        macrosManuallyEdited = false
+    }
+
     /// Empty item the user creates when they tap "Add item" in the review
     /// sheet — the model missed something and they want to fill it in by
     /// hand. Defaults to 100 g / zero macros; per-gram rates stay at zero
