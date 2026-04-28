@@ -139,12 +139,15 @@ struct RemoteLLMBackendTests {
         #expect(backend.isLoaded == true)
     }
 
-    @Test func supportsVisionIsFalse() {
+    @Test func supportsVisionIsTrue() {
+        // All three providers (Anthropic / OpenAI / Gemini) support vision via
+        // the same Photo Log key. The chat layer reads supportsVision to gate
+        // photo-attached propose_meal flows. #515.
         let backend = RemoteLLMBackend(
             provider: .anthropic, modelID: "claude-sonnet-4-6",
             apiKey: "sk-test", session: MockHTTPSession(responseData: Data())
         )
-        #expect(backend.supportsVision == false)
+        #expect(backend.supportsVision == true)
     }
 
     // MARK: - Request Construction
@@ -275,5 +278,192 @@ struct RemoteLLMBackendTests {
         #expect(Preferences.useRemoteModelOnWiFi == true)
         Preferences.useRemoteModelOnWiFi = false
         #expect(Preferences.useRemoteModelOnWiFi == false)
+    }
+
+    /// Single test covers both the round-trip and the default — Swift Testing
+    /// runs `@Test` functions in parallel and the two cases share the same
+    /// UserDefaults key, so split tests would race. Privacy-first tenet
+    /// pins the default to local; remote requires opt-in.
+    @Test func preferredAIBackendRoundTripsAndDefaultsToLocal() {
+        let original = Preferences.preferredAIBackend
+        defer { Preferences.preferredAIBackend = original }
+
+        // Default branch: no stored value → llamaCpp
+        UserDefaults.standard.removeObject(forKey: "drift_preferred_ai_backend")
+        #expect(Preferences.preferredAIBackend == .llamaCpp)
+
+        // Round-trip
+        Preferences.preferredAIBackend = .remote
+        #expect(Preferences.preferredAIBackend == .remote)
+        Preferences.preferredAIBackend = .llamaCpp
+        #expect(Preferences.preferredAIBackend == .llamaCpp)
+    }
+
+    // MARK: - Provider Coverage
+
+    @Test func providerHasAllThreeCases() {
+        // Catches accidental enum trims that would silently break a provider.
+        let all = RemoteLLMBackend.Provider.allCases
+        #expect(all.contains(.anthropic))
+        #expect(all.contains(.openai))
+        #expect(all.contains(.gemini))
+        #expect(all.count == 3)
+    }
+
+    @Test func geminiRequestUsesQueryStringAuth() async throws {
+        let box = RequestBox()
+        let backend = RemoteLLMBackend(
+            provider: .gemini, modelID: "gemini-2.5-flash",
+            apiKey: "test-gem", session: CapturingSession(box: box)
+        )
+        _ = await backend.respond(to: "hi", systemPrompt: "sys")
+        let req = try #require(box.request)
+        // Gemini auth is query-string ?key=…, not a header
+        #expect(req.value(forHTTPHeaderField: "Authorization") == nil)
+        #expect(req.url?.host == "generativelanguage.googleapis.com")
+        #expect(req.url?.query?.contains("key=test-gem") == true)
+        #expect(req.url?.query?.contains("alt=sse") == true)
+    }
+
+    // MARK: - OpenAI SSE Parsing
+
+    @Test func openAITextSSEParsedAndStreamed() async {
+        let sse = Data("""
+            data: {"choices":[{"delta":{"content":"Hello"}}]}
+
+            data: {"choices":[{"delta":{"content":" world"}}]}
+
+            data: [DONE]
+
+            """.utf8)
+        let backend = RemoteLLMBackend(
+            provider: .openai, modelID: "gpt-4o",
+            apiKey: "sk-test", session: MockHTTPSession(responseData: sse)
+        )
+        var tokens: [String] = []
+        let result = await backend.respondStreaming(to: "hi", systemPrompt: "sys") { tokens.append($0) }
+        #expect(result == "Hello world")
+        #expect(tokens == ["Hello", " world"])
+    }
+
+    @Test func openAIToolCallSSEReturnsDriftJSON() async throws {
+        // Two tool_call deltas — first establishes name + opens args, second
+        // appends the rest of the args. Mirrors how OpenAI streams in real life.
+        let sse = Data("""
+            data: {"choices":[{"delta":{"tool_calls":[{"index":0,"id":"call_01","type":"function","function":{"name":"log_food","arguments":"{\\"name\\":"}}]}}]}
+
+            data: {"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"arguments":"\\"eggs\\",\\"servings\\":\\"2\\"}"}}]}}]}
+
+            data: [DONE]
+
+            """.utf8)
+        let backend = RemoteLLMBackend(
+            provider: .openai, modelID: "gpt-4o",
+            apiKey: "sk-test", session: MockHTTPSession(responseData: sse)
+        )
+        let result = await backend.respond(to: "log 2 eggs", systemPrompt: "sys")
+        #expect(!result.isEmpty)
+        let intent = try #require(IntentClassifier.parseResponse(result))
+        #expect(intent.tool == "log_food")
+        #expect(intent.params["name"] == "eggs")
+        #expect(intent.params["servings"] == "2")
+    }
+
+    // MARK: - Gemini SSE Parsing
+
+    @Test func geminiTextSSEParsedAndStreamed() async {
+        let sse = Data("""
+            data: {"candidates":[{"content":{"parts":[{"text":"Hi"}]}}]}
+
+            data: {"candidates":[{"content":{"parts":[{"text":" there"}]}}]}
+
+            """.utf8)
+        let backend = RemoteLLMBackend(
+            provider: .gemini, modelID: "gemini-2.5-flash",
+            apiKey: "test-gem", session: MockHTTPSession(responseData: sse)
+        )
+        var tokens: [String] = []
+        let result = await backend.respondStreaming(to: "hi", systemPrompt: "sys") { tokens.append($0) }
+        #expect(result == "Hi there")
+        #expect(tokens == ["Hi", " there"])
+    }
+
+    @Test func geminiFunctionCallSSEReturnsDriftJSON() async throws {
+        let sse = Data("""
+            data: {"candidates":[{"content":{"parts":[{"functionCall":{"name":"log_food","args":{"name":"biryani","servings":"1"}}}]}}]}
+
+            """.utf8)
+        let backend = RemoteLLMBackend(
+            provider: .gemini, modelID: "gemini-2.5-flash",
+            apiKey: "test-gem", session: MockHTTPSession(responseData: sse)
+        )
+        let result = await backend.respond(to: "had biryani", systemPrompt: "sys")
+        let intent = try #require(IntentClassifier.parseResponse(result))
+        #expect(intent.tool == "log_food")
+        #expect(intent.params["name"] == "biryani")
+        #expect(intent.params["servings"] == "1")
+    }
+
+    // MARK: - Error Categorization (Q7)
+
+    @Test func authErrorSetsLastError() async {
+        let backend = RemoteLLMBackend(
+            provider: .anthropic, modelID: "claude-sonnet-4-6",
+            apiKey: "sk-test", session: MockHTTPSessionError(statusCode: 401)
+        )
+        _ = await backend.respond(to: "hi", systemPrompt: "sys")
+        #expect(backend.lastError == .auth)
+        #expect(backend.lastError?.isFallbackable == false)
+    }
+
+    @Test func rateLimitErrorSetsLastError() async {
+        let backend = RemoteLLMBackend(
+            provider: .anthropic, modelID: "claude-sonnet-4-6",
+            apiKey: "sk-test", session: MockHTTPSessionError(statusCode: 429)
+        )
+        _ = await backend.respond(to: "hi", systemPrompt: "sys")
+        #expect(backend.lastError == .rateLimited)
+        #expect(backend.lastError?.isFallbackable == false)
+    }
+
+    @Test func quotaExceededErrorSetsLastError() async {
+        let backend = RemoteLLMBackend(
+            provider: .anthropic, modelID: "claude-sonnet-4-6",
+            apiKey: "sk-test", session: MockHTTPSessionError(statusCode: 402)
+        )
+        _ = await backend.respond(to: "hi", systemPrompt: "sys")
+        #expect(backend.lastError == .quotaExceeded)
+        #expect(backend.lastError?.isFallbackable == false)
+    }
+
+    @Test func transientErrorSetsLastErrorFallbackable() async {
+        let backend = RemoteLLMBackend(
+            provider: .anthropic, modelID: "claude-sonnet-4-6",
+            apiKey: "sk-test", session: MockHTTPSessionError(statusCode: 503)
+        )
+        _ = await backend.respond(to: "hi", systemPrompt: "sys")
+        #expect(backend.lastError == .transient(503))
+        #expect(backend.lastError?.isFallbackable == true)
+    }
+
+    @Test func missingAPIKeySetsAuthError() async {
+        let backend = RemoteLLMBackend(
+            provider: .anthropic, modelID: "claude-sonnet-4-6",
+            apiKey: nil, session: MockHTTPSession(responseData: Data())
+        )
+        _ = await backend.respond(to: "hi", systemPrompt: "sys")
+        // Treat nil-key as auth so the chat layer surfaces the same retry CTA
+        // as a 401 instead of silently fallback-ing to local.
+        #expect(backend.lastError == .auth)
+    }
+
+    @Test func successResetsLastError() async {
+        let session = MockHTTPSession(responseData: SSEFixture.textResponse)
+        let backend = RemoteLLMBackend(
+            provider: .anthropic, modelID: "claude-sonnet-4-6",
+            apiKey: "sk-test", session: session
+        )
+        _ = await backend.respond(to: "hi", systemPrompt: "sys")
+        #expect(backend.lastError == nil)
     }
 }

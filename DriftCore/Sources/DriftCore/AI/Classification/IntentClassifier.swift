@@ -134,8 +134,7 @@ public enum IntentClassifier {
     """
 
     /// Backward-compat alias. Returns routerPrompt by default — code that
-    /// needs the active prompt should call `activeSystemPrompt(isLargeModel:)`
-    /// or check `LocalAIService.shared.isLargeModel` directly.
+    /// needs the active prompt should call `activeSystemPrompt(backend:)`.
     public static var systemPrompt: String { routerPrompt }
 
     /// Picks the right prompt for the active backend. The intelligence
@@ -144,6 +143,52 @@ public enum IntentClassifier {
     public static func activeSystemPrompt(isLargeModel: Bool) -> String {
         isLargeModel ? intelligencePrompt : routerPrompt
     }
+
+    /// Picks the right prompt for the active backend type. Remote backends
+    /// (cloud BYOK) get `remotePrompt` — strict brevity targets baked in to
+    /// reshape verbose cloud-LLM defaults toward Drift's terse house style.
+    public static func activeSystemPrompt(backend: AIBackendType) -> String {
+        switch backend {
+        case .remote: return remotePrompt
+        case .llamaCpp, .mlx: return intelligencePrompt
+        }
+    }
+
+    /// Prompt for remote BYOK backends (Anthropic / OpenAI / Gemini).
+    /// `intelligencePrompt + remoteExtras`. Cloud LLMs default to verbose;
+    /// the extras enforce Drift's terse house style and the inline-card
+    /// photo flow protocol. Hard-capped at 16K chars (token-ceiling test).
+    public static let remotePrompt: String = intelligencePrompt + remoteExtras
+
+    /// Extras layered on top of intelligencePrompt for cloud backends.
+    /// Three jobs: (1) reshape verbose defaults toward Drift's terse house
+    /// style; (2) describe the inline-card / propose_meal protocol for
+    /// photo-attached conversations; (3) clamp output structure (no
+    /// markdown, no preamble, no closing flourishes). Keep under ~3K chars
+    /// so total remotePrompt stays under the 16K ceiling.
+    private static let remoteExtras: String = """
+
+
+    Brevity is the bar. Cloud models default to verbose; here you write like a friend texting:
+    - Direct answer: 5–15 words. "You've had 67g protein, 53g to go."
+    - Status / summary: 15–30 words. "On track — 1.8kg lost in 3 weeks, ~10 weeks to your 72kg goal."
+    - Photo description for a meal card: 10–25 words. The card carries the macros — DON'T repeat them in prose.
+    - Clarification question: under 15 words. ONE question per turn, never two.
+    - Greeting / conversational: 5–10 words.
+    - Hard ceiling: 50 words per response. If you need more, ask a clarifying question instead.
+    - No headers, no bullet lists, no markdown. No preamble ("Sure!", "Let me check..."). No closing flourishes ("Hope this helps!"). Skip the throat-clearing. End on the data.
+
+    Photo-attached conversational logging:
+    - When a photo arrives, identify foods, ask ONE clarifying question per turn. Don't itemize macros in prose — emit a propose_meal tool call. The UI renders an inline card the user can edit, regenerate, or confirm.
+    - propose_meal schema: {"tool":"propose_meal","items":[{"name":"...","grams":N,"calories":N,"protein":N,"carbs":N,"fat":N}, ...]}. One tool call per turn; the card replaces in place.
+    - User talks back ("actually 2 parathas not 1") → emit a fresh propose_meal with the corrected items. Never log_food until the user confirms.
+    - User confirms ("log it" / "yes" / taps ✓) → emit one log_food per item, batched in a single turn.
+    - New photo → discard prior proposal entirely. Don't merge with the old card.
+
+    Tool-call format: native function-calling per provider (Anthropic tool_use / OpenAI function_call / Gemini function_declarations). Drift normalizes them to {"tool":"...", "key":"val"}. Keep argument keys exactly as listed in the tools registry above — the parser is strict about names.
+
+    JSON ALWAYS uses double-quoted keys + values. Single quotes / bare keys are invalid.
+    """
 
     // MARK: - Recent-Entries Triggers
 

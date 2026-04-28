@@ -8,84 +8,45 @@ struct AIView: View {
     var body: some View {
         NavigationStack {
             Group {
-                switch aiService.state {
-                case .notSetUp:
-                    downloadPrompt
-                case .downloading(let progress):
-                    downloadingView(progress: progress)
-                case .loading:
-                    VStack(spacing: 16) {
-                        ProgressView()
-                        Text("Loading AI...").font(.subheadline).foregroundStyle(.secondary)
-                    }
-                case .ready:
+                // Remote backend takes precedence: when the user has flipped
+                // their preference to cloud and the key is configured, treat
+                // the chat as ready even if the local model isn't downloaded.
+                // Spec §LocalAIService.state: ready when EITHER backend
+                // available. #515.
+                if shouldShowChat {
                     AIChatView()
-                case .error(let msg):
-                    errorView(message: msg)
-                case .notEnoughSpace(let msg):
-                    notEnoughSpaceView(message: msg)
+                        .onAppear { Task { await AIBackendCoordinator.applyPreferredBackend() } }
+                } else {
+                    switch aiService.state {
+                    case .notSetUp:
+                        AIChooserView()
+                    case .downloading(let progress):
+                        downloadingView(progress: progress)
+                    case .loading:
+                        VStack(spacing: 16) {
+                            ProgressView()
+                            Text("Loading AI...").font(.subheadline).foregroundStyle(.secondary)
+                        }
+                    case .ready:
+                        AIChatView()
+                    case .error(let msg):
+                        errorView(message: msg)
+                    case .notEnoughSpace(let msg):
+                        notEnoughSpaceView(message: msg)
+                    }
                 }
             }
             .background(Theme.background.ignoresSafeArea())
         }
     }
 
-    // MARK: - Download Prompt
-
-    private var downloadPrompt: some View {
-        VStack(spacing: 20) {
-            Spacer()
-
-            Image(systemName: "sparkles")
-                .font(.system(size: 48))
-                .foregroundStyle(Theme.accent.opacity(0.6))
-
-            Text("Drift AI")
-                .font(.title2.weight(.bold))
-
-            Text("Chat with an AI health assistant that understands your data. Runs entirely on your device — nothing leaves your phone.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 32)
-
-            VStack(spacing: 4) {
-                Text("One-time setup")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                Text("~\(aiService.downloadSizeText) · Wi-Fi recommended")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.secondary)
-            }
-
-            Button {
-                Task { await aiService.downloadModel() }
-            } label: {
-                Label("Set Up AI", systemImage: "arrow.down.circle.fill")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(Theme.accent)
-            .padding(.horizontal, 40)
-
-            Spacer()
-
-            VStack(spacing: 6) {
-                HStack(spacing: 6) {
-                    Image(systemName: "lock.shield.fill")
-                        .foregroundStyle(Theme.deficit)
-                        .font(.caption)
-                    Text("100% on-device")
-                        .font(.caption.weight(.medium))
-                }
-                Text("The AI runs locally on your iPhone. Your health data never leaves your device.")
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
-                    .multilineTextAlignment(.center)
-            }
-            .padding(.horizontal, 32)
-            .padding(.bottom, 24)
-        }
+    /// True when at least one backend is ready to serve a chat turn. Lets us
+    /// short-circuit into the chat even when the local model is missing but
+    /// the user has the cloud BYOK path configured. The chooser shows up
+    /// only when BOTH paths are unavailable.
+    private var shouldShowChat: Bool {
+        AIBackendCoordinator.hasRemoteKey
+            && Preferences.preferredAIBackend == .remote
     }
 
     // MARK: - Downloading

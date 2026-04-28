@@ -21,6 +21,10 @@ import Testing
     try assertPromptToolsAreRegistered(IntentClassifier.intelligencePrompt, name: "intelligencePrompt")
 }
 
+@Test @MainActor func remotePrompt_referencesOnlyRegisteredTools() async throws {
+    try assertPromptToolsAreRegistered(IntentClassifier.remotePrompt, name: "remotePrompt")
+}
+
 @MainActor
 private func assertPromptToolsAreRegistered(_ prompt: String, name: String) throws {
     if ToolRegistry.shared.allTools().isEmpty { ToolRegistration.registerAll() }

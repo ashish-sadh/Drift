@@ -69,6 +69,7 @@
 		69761B4EBFEFDC857FE06E89 /* ChatLatencyBenchmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 734A43F9D7C58B37BC8B6C07 /* ChatLatencyBenchmark.swift */; };
 		6A4AC25199199579681FCAD4 /* WeightViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = D0E8B598BCB7486A2C75848E /* WeightViewModel.swift */; };
 		6B893E6DB5475A6D00BCFA88 /* PerStageEvalSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 121C8FBB3776A9AE57FDF244 /* PerStageEvalSupport.swift */; };
+		6D1F9557E1AE5BF964CC7D09 /* AIBackendCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F4CF97949C6569223B2997F /* AIBackendCoordinator.swift */; };
 		70385AB62DB3A7D09C4BB002 /* latency-baseline.json in Resources */ = {isa = PBXBuildFile; fileRef = D692B540EF483EFFC8EB0569 /* latency-baseline.json */; };
 		70F621B0C5089E738C2DEA5E /* FoodTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A981E37D718D28A6679F9C8 /* FoodTabView.swift */; };
 		71248B6DE58F57FE294B28A3 /* DriftCore in Frameworks */ = {isa = PBXBuildFile; productRef = A21AA79CBEBA5F15DFB3CC7A /* DriftCore */; };
@@ -113,6 +114,7 @@
 		C7666848928C7210A8CE6BD6 /* PromptOptimizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = EBF19C358E700091486400DD /* PromptOptimizer.swift */; };
 		C78684F2133F07AAAC383EDB /* GoalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3258B6E91169170587AAB02B /* GoalView.swift */; };
 		C7DCB089BF4DCF1916C4B0E5 /* GoalView+Profile.swift in Sources */ = {isa = PBXBuildFile; fileRef = F2B8EAC57A3A10193855A81F /* GoalView+Profile.swift */; };
+		CD5F427E0A293D891A4283CD /* AIChooserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A9DA1F02B1BF76DA862072A6 /* AIChooserView.swift */; };
 		CF5BB4A5266F949DA9DEE006 /* LabReportUploadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D747073BCD9310AB76B496 /* LabReportUploadView.swift */; };
 		CFCC147069ADCB2E367DA3D4 /* MealLogUnificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B637DFADAD7FF587E499B6A7 /* MealLogUnificationTests.swift */; };
 		D1D942D61F82FB570F804517 /* CloudVisionClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57BE014AD72F4F5691483658 /* CloudVisionClientTests.swift */; };
@@ -271,6 +273,7 @@
 		893A2B9C27B65BD830B5A520 /* DriftAppLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriftAppLaunchTests.swift; sourceTree = "<group>"; };
 		8E78D132A90B0FDC35353646 /* WeightLogListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightLogListView.swift; sourceTree = "<group>"; };
 		8EAD396A0ED458F8F26650FA /* MultiTurnRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiTurnRegressionTests.swift; sourceTree = "<group>"; };
+		8F4CF97949C6569223B2997F /* AIBackendCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIBackendCoordinator.swift; sourceTree = "<group>"; };
 		92DFDDFA5C14E5C409B99B08 /* PhotoLogBetaSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogBetaSettingsTests.swift; sourceTree = "<group>"; };
 		9317E4AADEC72D6DC385E722 /* LabReportDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabReportDetailView.swift; sourceTree = "<group>"; };
 		967917DDF4130B1A30B42ABA /* CloudVisionClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudVisionClient.swift; sourceTree = "<group>"; };
@@ -285,6 +288,7 @@
 		A434AE755701CCB89A111516 /* PipelineE2EEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PipelineE2EEval.swift; sourceTree = "<group>"; };
 		A4BC95967D2043D701CA63AB /* BodyCompEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyCompEntryView.swift; sourceTree = "<group>"; };
 		A835CA7572E629657044C111 /* PhotoLogServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogServiceTests.swift; sourceTree = "<group>"; };
+		A9DA1F02B1BF76DA862072A6 /* AIChooserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIChooserView.swift; sourceTree = "<group>"; };
 		AAC05282764E0169FEFB3D88 /* PhotoLogTool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogTool.swift; sourceTree = "<group>"; };
 		AB2998A31AEC29094C6F4062 /* WorkoutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutView.swift; sourceTree = "<group>"; };
 		ABDB900BABC9B592330F2629 /* DriftCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DriftCore; path = DriftCore; sourceTree = SOURCE_ROOT; };
@@ -574,6 +578,7 @@
 				483437CB4AFE28505FCFE44A /* AIChatView+MessageHandling.swift */,
 				188A69D621CC2DF63ADFB21F /* AIChatView+Suggestions.swift */,
 				AE2EAA783326D96D5029FC28 /* AIChatViewModel.swift */,
+				A9DA1F02B1BF76DA862072A6 /* AIChooserView.swift */,
 				7F4C6870115BE53081FA0CDE /* AISetupView.swift */,
 				DFF155F20FB2EF069D634C95 /* FloatingAIAssistant.swift */,
 				E2771DB577C8DC7CD66E79ED /* TypingDotsView.swift */,
@@ -671,6 +676,7 @@
 		E9AB1B657564FD836D16BAB5 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				8F4CF97949C6569223B2997F /* AIBackendCoordinator.swift */,
 				9F9F051926CE39DF3E0A47DA /* BodySpecPDFParser.swift */,
 				B45542A3C86D7B44E55451F5 /* FoodService+Logging.swift */,
 				F57B8BA8C0B119CF10614F14 /* HealthKitService.swift */,
@@ -903,11 +909,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6D1F9557E1AE5BF964CC7D09 /* AIBackendCoordinator.swift in Sources */,
 				3DAE20FBF0F571D1C26DFD59 /* AIChatInsightsView.swift in Sources */,
 				F3F76111AABE3827018AE984 /* AIChatView+MessageHandling.swift in Sources */,
 				96B6BBB4C02D93E14F28C043 /* AIChatView+Suggestions.swift in Sources */,
 				E16388BC43C225F2C6B7368A /* AIChatView.swift in Sources */,
 				F7AAF9024EB0E5FDC7108D99 /* AIChatViewModel.swift in Sources */,
+				CD5F427E0A293D891A4283CD /* AIChooserView.swift in Sources */,
 				3375CEC1D52AFAE8D81F4012 /* AISetupView.swift in Sources */,
 				897722DC29F4AAF58BDA1CCF /* ActiveWorkoutView.swift in Sources */,
 				8D8FB3814300848676740EC6 /* AddSupplementView.swift in Sources */,

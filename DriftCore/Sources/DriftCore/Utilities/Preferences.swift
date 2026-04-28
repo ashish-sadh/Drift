@@ -93,6 +93,22 @@ public enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: useRemoteModelOnWiFiKey) }
     }
 
+    // MARK: - Preferred AI Backend (chat routing)
+
+    private static let preferredAIBackendKey = "drift_preferred_ai_backend"
+
+    /// User-selected AI backend for chat. Default: `.llamaCpp` (privacy-first).
+    /// Persisted across launches; flipped by the in-chat cpu/cloud toggle when
+    /// both local and remote backends are available. Mid-thread changes don't
+    /// reset history — `LocalAIService` swaps the underlying backend in place.
+    public static var preferredAIBackend: AIBackendType {
+        get {
+            let raw = UserDefaults.standard.string(forKey: preferredAIBackendKey) ?? ""
+            return AIBackendType(rawValue: raw) ?? .llamaCpp
+        }
+        set { UserDefaults.standard.set(newValue.rawValue, forKey: preferredAIBackendKey) }
+    }
+
     // MARK: - Photo Log Beta opt-in
 
     private static let photoLogEnabledKey = "drift_photo_log_enabled"

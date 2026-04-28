@@ -69,9 +69,13 @@ struct AIChatView: View {
 
             // Input bar
             HStack(spacing: 8) {
-                Image(systemName: "sparkles")
-                    .font(.system(size: 12))
-                    .foregroundStyle(Theme.accent.opacity(0.6))
+                if vm.canToggleBackend {
+                    backendToggle
+                } else {
+                    Image(systemName: "sparkles")
+                        .font(.system(size: 12))
+                        .foregroundStyle(Theme.accent.opacity(0.6))
+                }
 
                 TextField(vm.speechService.isRecording ? "Listening..." : "Ask anything...", text: $vm.inputText, axis: .vertical)
                     .textFieldStyle(.plain).font(.subheadline)
@@ -180,6 +184,27 @@ struct AIChatView: View {
         .onDisappear {
             vm.aiService.scheduleUnload(delay: 60)
         }
+    }
+
+    // MARK: - Backend Toggle (cpu / cloud)
+
+    /// In-chat cpu/cloud toggle. Visible only when both backends are
+    /// configured. Single tap flips between local llama.cpp and remote BYOK.
+    /// Default is local (privacy-first); the remote choice persists across
+    /// app launches via `Preferences.preferredAIBackend`. #515.
+    private var backendToggle: some View {
+        Button {
+            vm.toggleBackend()
+        } label: {
+            Image(systemName: vm.activeBackend == .remote ? "cloud.fill" : "cpu")
+                .font(.system(size: 13))
+                .foregroundStyle(vm.activeBackend == .remote ? Theme.accent : Theme.accent.opacity(0.6))
+                .frame(width: 22, height: 22)
+                .contentTransition(.symbolEffect(.replace))
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(vm.activeBackend == .remote ? "Cloud AI active. Tap to switch to on-device." : "On-device AI active. Tap to switch to cloud.")
+        .accessibilityIdentifier("ai-backend-toggle")
     }
 
     // MARK: - Suggestions Row
