@@ -61,6 +61,19 @@ public enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: healthNudgesKey) }
     }
 
+    // MARK: - Smart Meal Reminders
+
+    private static let mealRemindersKey = "drift_meal_reminders"
+
+    /// Smart meal reminders: contextual "Time to log breakfast" notifications
+    /// fired ~30min after the user's typical meal time, only when their
+    /// timing is consistent (std dev < 45min) AND they haven't logged that
+    /// meal yet today. Default OFF — opt-in like Photo Log Beta. #385.
+    public static var mealRemindersEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: mealRemindersKey) }
+        set { UserDefaults.standard.set(newValue, forKey: mealRemindersKey) }
+    }
+
     // MARK: - Conversation History
 
     private static let conversationHistoryEnabledKey = "drift_conversation_history_enabled"
