@@ -54,6 +54,13 @@ struct DriftApp: App {
                             Log.app.error("Initial sync failed: \(error.localizedDescription)")
                         }
                         #endif
+                        // Recalculate weight trend from DB so latestWeightKg + trend are
+                        // populated for any view or AI tool (weight_info, etc.) before
+                        // the user navigates anywhere. Was previously initialized lazily
+                        // by Dashboard's onAppear — non-Dashboard launch paths got stale
+                        // values. Must run before TDEEEstimator.refresh() since TDEE
+                        // reads WeightTrendService.shared.latestWeightKg.
+                        WeightTrendService.shared.refresh()
                         // Refresh TDEE estimate (uses Apple Health + weight trend + food data)
                         await TDEEEstimator.shared.refresh()
                         // Schedule health nudge notifications (protein, supplements, workouts)

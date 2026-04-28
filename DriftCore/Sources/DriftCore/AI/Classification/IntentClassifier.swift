@@ -47,8 +47,6 @@ public enum IntentClassifier {
     "am I hitting my protein goal"→{"tool":"food_info","query":"protein goal"}
     "on track for calories"→{"tool":"food_info","query":"calorie goal"}
     "did I get enough fiber this week"→{"tool":"food_info","query":"fiber this week"}
-    "am I meeting my carb target"→{"tool":"food_info","query":"carb goal"}
-    "how far off am I from my fat goal"→{"tool":"food_info","query":"fat goal"}
     "set protein target 150g"→{"tool":"set_goal","target":"150","goal_type":"protein"}
     "calorie target 2000"→{"tool":"set_goal","target":"2000","goal_type":"calorie"}
     "log 2 eggs"→{"tool":"log_food","name":"egg","servings":"2"}
