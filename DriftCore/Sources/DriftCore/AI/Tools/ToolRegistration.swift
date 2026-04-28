@@ -770,6 +770,12 @@ public enum ToolRegistration {
         // OLS regression on last 30 days → projected date + R² confidence. #402.
         WeightTrendPredictionTool.syncRegistration(registry: r)
 
+        // Supplement adherence — streak, adherence %, last missed date. #417.
+        SupplementInsightTool.syncRegistration(registry: r)
+
+        // Meal timing patterns — avg meal times, late-night eating %. #418.
+        FoodTimingInsightTool.syncRegistration(registry: r)
+
         // PhotoLog tool is registered separately by the iOS Drift app
         // after this base registration runs (it depends on iOS-only
         // CloudVision / Keychain).
