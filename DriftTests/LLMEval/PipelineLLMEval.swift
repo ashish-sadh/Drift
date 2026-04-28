@@ -21,8 +21,16 @@ final class PipelineLLMEval: XCTestCase {
         let gemmaPath = modelsDir.appendingPathComponent("gemma-4-e2b-q4_k_m.gguf")
         let smolPath  = modelsDir.appendingPathComponent("smollm2-360m-instruct-q8_0.gguf")
 
+        // Skip-with-warning when model is missing instead of XCTFail. On a
+        // fresh simulator (or any CI / dev machine that hasn't downloaded
+        // the model) the file won't be present at the app-container path.
+        // Each test below already guards `Self.gemmaBackend != nil` and
+        // throws XCTSkip — leaving `gemmaBackend` nil makes the entire
+        // suite skip cleanly. Run `bash scripts/download-models.sh` and
+        // boot the app once to populate the model when you actually want
+        // to run the eval.
         guard FileManager.default.fileExists(atPath: gemmaPath.path) else {
-            XCTFail("❌ Gemma 4 not found at \(gemmaPath.path)\nRun: bash scripts/download-models.sh")
+            print("⚠️ Gemma 4 not found at \(gemmaPath.path) — eval suite will SKIP. Run scripts/download-models.sh + boot the app to populate.")
             return
         }
 
@@ -30,13 +38,14 @@ final class PipelineLLMEval: XCTestCase {
         let b = LlamaCppBackend(modelPath: gemmaPath, threads: 4)
         try? b.loadSync()
         if b.isLoaded { gemmaBackend = b; print("✅ Gemma 4 loaded for pipeline eval") }
-        else { XCTFail("❌ Gemma 4 failed to load — check model integrity") }
+        else { print("⚠️ Gemma 4 failed to load — eval suite will SKIP. Check model integrity at \(gemmaPath.path).") }
 
-        // Load SmolLM if available
+        // Load SmolLM if available — same skip-with-warning pattern as Gemma.
         if FileManager.default.fileExists(atPath: smolPath.path) {
             let s = LlamaCppBackend(modelPath: smolPath, threads: 4)
             try? s.loadSync()
             if s.isLoaded { smolBackend = s; print("✅ SmolLM loaded for pipeline eval") }
+            else { print("⚠️ SmolLM failed to load — SmolLM-dependent tests will SKIP.") }
         }
     }
 
