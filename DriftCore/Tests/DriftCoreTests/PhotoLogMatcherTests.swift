@@ -2,35 +2,8 @@ import Foundation
 @testable import DriftCore
 import Testing
 
-/// Tier-0: pure logic + seeded in-memory DB. No network, no cloud vision.
+/// Tier-0: pure logic. No network, no cloud vision, no DB.
 struct PhotoLogMatcherTests {
-
-    // MARK: - Word Overlap
-
-    @Test func exactMatchIsFullOverlap() {
-        #expect(PhotoLogMatcher.wordOverlap("aloo gobi", "aloo gobi") == 1.0)
-    }
-
-    @Test func partialOverlap() {
-        let overlap = PhotoLogMatcher.wordOverlap("scrambled eggs", "eggs")
-        #expect(overlap == 0.5)   // 1 of 2 query words found
-    }
-
-    @Test func noOverlapIsZero() {
-        #expect(PhotoLogMatcher.wordOverlap("biryani", "apple") == 0.0)
-    }
-
-    @Test func overlapIsCaseInsensitive() {
-        #expect(PhotoLogMatcher.wordOverlap("Dal Tadka", "dal tadka") == 1.0)
-    }
-
-    @Test func emptyQueryReturnsZero() {
-        #expect(PhotoLogMatcher.wordOverlap("", "dal") == 0.0)
-    }
-
-    @Test func singleWordQueryFullMatch() {
-        #expect(PhotoLogMatcher.wordOverlap("biryani", "chicken biryani") == 1.0)
-    }
 
     // MARK: - Portion Defaults
 
@@ -86,50 +59,7 @@ struct PhotoLogMatcherTests {
         #expect(PhotoLogMatcher.portionDefault(category: "Unknown", recognizedName: "mystery dish") == 150)
     }
 
-    // MARK: - DB Matching (seeded in-memory DB)
-
-    @Test func matchesExactNameFromDB() throws {
-        let db = try AppDatabase.empty()
-        var food = Food(name: "Dal Tadka", category: "Indian Curries",
-                       servingSize: 200, servingUnit: "g",
-                       calories: 120, proteinG: 6, carbsG: 18, fatG: 3)
-        try db.saveScannedFood(&food)
-
-        let match = PhotoLogMatcher.matchFood(recognizedName: "dal tadka", db: db)
-        let name = try #require(match).name
-        #expect(name.lowercased().contains("dal"))
-    }
-
-    @Test func matchesPartialNameAboveThreshold() throws {
-        let db = try AppDatabase.empty()
-        var food = Food(name: "Scrambled Eggs", category: "Breakfast",
-                       servingSize: 100, servingUnit: "g",
-                       calories: 148, proteinG: 10, carbsG: 1, fatG: 11)
-        try db.saveScannedFood(&food)
-
-        let match = PhotoLogMatcher.matchFood(recognizedName: "scrambled eggs", db: db)
-        #expect(match != nil)
-    }
-
-    @Test func rejectsLowOverlapMatch() throws {
-        let db = try AppDatabase.empty()
-        var food = Food(name: "Oat Bran Muffin", category: "Bakery",
-                       servingSize: 80, servingUnit: "g",
-                       calories: 200, proteinG: 5, carbsG: 30, fatG: 7)
-        try db.saveScannedFood(&food)
-
-        // "oats" ≠ "oat" — no shared words, overlap = 0.0, below threshold
-        let match = PhotoLogMatcher.matchFood(recognizedName: "oats", db: db)
-        #expect(match == nil)
-    }
-
-    @Test func returnsNilWhenDBIsEmpty() throws {
-        let db = try AppDatabase.empty()
-        let match = PhotoLogMatcher.matchFood(recognizedName: "aloo gobi", db: db)
-        #expect(match == nil)
-    }
-
-    // MARK: - Portion Multiplier Parsing (#522)
+    // MARK: - Portion Multiplier Parsing
 
     @Test func portionHalfReturnsPointFive() {
         #expect(PhotoLogMatcher.parsePortionMultiplier("half") == 0.5)
@@ -184,16 +114,4 @@ struct PhotoLogMatcherTests {
         #expect(PhotoLogMatcher.parsePortionMultiplier("   ") == nil)
     }
 
-    // MARK: - DB Matching (seeded in-memory DB)
-
-    @Test func fuzzyMatchAmbiguousName() throws {
-        let db = try AppDatabase.empty()
-        var food = Food(name: "Chicken Biryani", category: "Indian Meals",
-                       servingSize: 300, servingUnit: "g",
-                       calories: 350, proteinG: 22, carbsG: 42, fatG: 9)
-        try db.saveScannedFood(&food)
-
-        let match = PhotoLogMatcher.matchFood(recognizedName: "biryani", db: db)
-        #expect(match != nil)
-    }
 }

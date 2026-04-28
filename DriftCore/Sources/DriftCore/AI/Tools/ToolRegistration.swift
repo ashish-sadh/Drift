@@ -83,43 +83,17 @@ public enum ToolRegistration {
                     name = String(name[..<name.index(name.startIndex, offsetBy: match.range.location)]).trimmingCharacters(in: .whitespaces)
                 }
 
-                // --- Route 2: Multi-item → recipe builder ---
+                // --- Route 2: Multi-item → recipe builder (AI names, no DB substitution) ---
                 let items = name.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
                 if items.count > 1 {
                     let firstName = items[0]
-                    if let food = AIActionExecutor.findFood(query: firstName, servings: servings, gramAmount: gramAmount) {
-                        var enriched: [String: String] = ["name": food.food.name, "amount": "\(food.servings)"]
-                        enriched["remaining_items"] = items.dropFirst().joined(separator: ", ")
-                        return .transform(ToolCallParams(values: enriched))
-                    }
-                    return .transform(ToolCallParams(values: ["name": firstName, "remaining_items": items.dropFirst().joined(separator: ", ")]))
-                }
-
-                // --- Route 3: Single food → DB lookup ---
-                if let food = AIActionExecutor.findFood(query: name, servings: servings, gramAmount: gramAmount) {
-                    var enriched: [String: String] = ["name": food.food.name]
-                    enriched["amount"] = "\(food.servings)"
+                    var enriched: [String: String] = ["name": firstName]
+                    if let s = servings { enriched["amount"] = "\(s)" }
+                    enriched["remaining_items"] = items.dropFirst().joined(separator: ", ")
                     return .transform(ToolCallParams(values: enriched))
                 }
 
-                // --- Route 4: Not in local DB → try USDA/OpenFoodFacts if enabled (5s timeout) ---
-                let searchName = name
-                let onlineResults = await IntentClassifier.withTimeout(seconds: 5) {
-                    await FoodService.searchWithFallback(query: searchName, localThreshold: 1)
-                } ?? []
-                if let best = onlineResults.first {
-                    var enriched: [String: String] = ["name": best.name]
-                    let resolvedServings: Double
-                    if let grams = gramAmount, best.servingSize > 0 {
-                        resolvedServings = grams / best.servingSize
-                    } else {
-                        resolvedServings = servings ?? 1
-                    }
-                    enriched["amount"] = "\(resolvedServings)"
-                    return .transform(ToolCallParams(values: enriched))
-                }
-
-                // --- Route 5: Not found anywhere → pass through for search ---
+                // --- Route 3: Pass through → openFoodSearch so user confirms the food ---
                 var enriched: [String: String] = ["name": name]
                 if let s = servings { enriched["amount"] = "\(s)" }
                 return .transform(ToolCallParams(values: enriched))

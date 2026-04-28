@@ -8,33 +8,6 @@ import Foundation
 /// so the review row doesn't always default to 0g.
 public enum PhotoLogMatcher {
 
-    // MARK: - Thresholds
-
-    /// Minimum word-overlap fraction to accept a DB match.
-    /// 0.5 = at least half the query words appear in the DB name.
-    public static let matchThreshold: Double = 0.5
-
-    // MARK: - DB Matching
-
-    /// Find the best local DB match for a vision-recognized food name.
-    ///
-    /// Uses ranked FTS search then checks word overlap to avoid accepting
-    /// a spurious top-1 result (e.g. "oats" matching "oat bran muffin" for
-    /// a query of "steel cut oats and almonds").
-    ///
-    /// - Parameters:
-    ///   - recognizedName: Raw name string returned by the vision model.
-    ///   - db: Database instance; defaults to the shared production DB.
-    /// - Returns: Matching `Food` entry, or `nil` if no result exceeds the threshold.
-    public static func matchFood(
-        recognizedName: String,
-        db: AppDatabase = AppDatabase.shared
-    ) -> Food? {
-        let results = (try? db.searchFoodsRanked(query: recognizedName)) ?? []
-        guard let top = results.first else { return nil }
-        return wordOverlap(recognizedName, top.name) >= matchThreshold ? top : nil
-    }
-
     // MARK: - Portion Defaults
 
     /// Category-aware gram default when the vision model returned grams == 0.
@@ -122,14 +95,4 @@ public enum PhotoLogMatcher {
         return nil
     }
 
-    // MARK: - Word Overlap (internal, exposed for testing)
-
-    /// Fraction of words in `query` that appear in `candidate` (case-insensitive).
-    /// Scores 1.0 when every query word is found; 0.0 when there is no overlap.
-    static func wordOverlap(_ query: String, _ candidate: String) -> Double {
-        let qWords = Set(query.lowercased().split(separator: " ").map(String.init).filter { !$0.isEmpty })
-        let cWords = Set(candidate.lowercased().split(separator: " ").map(String.init).filter { !$0.isEmpty })
-        guard !qWords.isEmpty else { return 0 }
-        return Double(qWords.intersection(cWords).count) / Double(qWords.count)
-    }
 }
