@@ -55,7 +55,6 @@ pkill -9 -f xcodebuild 2>/dev/null || true
 sleep 2
 xcodebuild test -project Drift.xcodeproj -scheme Drift \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -skip-testing:DriftLLMEvalTests \
   > /tmp/drift-preflight-test.log 2>&1
 if [ $? -ne 0 ]; then
   FAILED_TESTS=$(grep "✘" /tmp/drift-preflight-test.log 2>/dev/null | head -10)

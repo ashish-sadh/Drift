@@ -12,11 +12,9 @@ schemes:
       targets:
         Drift: all
         DriftTests: [test]
-        DriftLLMEvalTests: [test]
     test:
       targets:
         - DriftTests
-        - DriftLLMEvalTests
   DriftLLMEvalMacOS:
     build:
       targets:
@@ -94,18 +92,6 @@ targets:
       - path: DriftTests
         excludes:
           - "LLMEval"
-    dependencies:
-      - target: Drift
-    settings:
-      base:
-        SWIFT_VERSION: "6.0"
-        GENERATE_INFOPLIST_FILE: YES
-
-  DriftLLMEvalTests:
-    type: bundle.unit-test
-    platform: iOS
-    sources:
-      - path: DriftTests/LLMEval
     dependencies:
       - target: Drift
     settings:
