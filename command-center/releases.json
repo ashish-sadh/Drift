@@ -1914,5 +1914,20 @@
       "Fixed WeightTrendService not refreshing on launch.",
       "Preflight now gates macOS LLM eval for prompt regressions."
     ]
+  },
+  {
+    "build": 185,
+    "date": "2026-04-28T00:00:00-07:00",
+    "description": "Build 185 — watchdog stability, hook-driven test gating, resumable sprint warnings",
+    "features": [
+      "Resumable warning surfaces on issue claim so the next session knows prior WIP exists.",
+      "Sprint-service gains test coverage; safer claim/release loop."
+    ],
+    "fixes": [
+      "Watchdog no longer dies on SIGPIPE; tee removed from the supervisor pipeline.",
+      "Watchdog hardened against pipefail + grep edge case that surfaced as latent crashes.",
+      "Per-commit test/archive gate now detects compound commands (chained && or ;).",
+      "Heartbeat refresh + graphify report kept current."
+    ]
   }
 ]
