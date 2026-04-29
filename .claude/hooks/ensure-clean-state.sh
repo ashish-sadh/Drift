@@ -20,6 +20,18 @@ SESSION_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo ""
 # so role-specific gates below must key off this flag instead.
 IS_AUTONOMOUS="${DRIFT_AUTONOMOUS:-0}"
 
+# Fix A: proactive branch sweep on session end. Planning sessions create
+# review/cycle-N or report/exec-DATE branches. If the session crashed mid-
+# flow (gh pr merge succeeded but `report-service.sh finish` never ran to
+# switch back), HEAD is left on the feature branch. Run `finish` here to
+# merge any open PR + switch to main + pull. Idempotent — finish is safe
+# to call when nothing is mid-flow.
+CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+if [[ "$CURRENT_BRANCH" =~ ^(review/cycle-|report/exec-|report/) ]]; then
+  echo "[ensure-clean-state] HEAD on $CURRENT_BRANCH — running report-service.sh finish to switch back to main"
+  scripts/report-service.sh finish 2>/dev/null || git checkout main 2>/dev/null || true
+fi
+
 # Check for uncommitted changes (staged or unstaged). Skip files that the
 # autopilot regenerates on its own schedule — they're not operator edits:
 # - command-center/heartbeat.json: watchdog rewrites every 30s

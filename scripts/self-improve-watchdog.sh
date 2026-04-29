@@ -108,6 +108,19 @@ cleanup_dirty_state() {
     # Drop stashes left by crashed sessions
     git stash drop 2>/dev/null || true
 
+    # Fix B: stale-branch sweep. If the prior session crashed mid-report-flow
+    # (review/cycle-N or report/exec-DATE branch was created, work was done,
+    # but `report-service.sh finish` never ran to switch back), HEAD is left
+    # on the feature branch. Operator-mode sessions then accidentally land
+    # commits on the stale branch instead of main. Switch back proactively.
+    local CURRENT_BRANCH
+    CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+    if [[ -n "$CURRENT_BRANCH" && "$CURRENT_BRANCH" != "main" ]]; then
+        log "Stale branch: HEAD on $CURRENT_BRANCH (probably from a crashed report flow). Switching back to main."
+        git checkout main 2>/dev/null || true
+        git pull --ff-only origin main 2>/dev/null || true
+    fi
+
     local DIRTY=$(git status --porcelain 2>/dev/null | head -20)
     if [[ -n "$DIRTY" ]]; then
         log "Dirty state after session exit. Discarding incomplete changes:"
@@ -125,6 +138,38 @@ cleanup_dirty_state() {
     # Remove stale TestFlight authorization — a crashed session may have left this set
     # without completing the publish. Next session gets a fresh authorization flow.
     rm -f "$HOME/drift-state/testflight-publish-authorized"
+
+    # Fix C: orphan WIP patch sweep. snapshot_wip_if_in_progress only cleans
+    # patches when the current claim's tree goes empty. Patches for issues
+    # that closed via `gh issue close` (bypassing cmd_done) or via watchdog
+    # reconcile, OR claims that got unclaimed before commit, leak forever.
+    # Observed 2026-04-28: 345.patch lingered for hours after #345 was
+    # unclaimed without going through cmd_done. Sweep at startup: any patch
+    # whose issue is closed → delete; any patch >7 days old → delete.
+    local WIP_DIR="$HOME/drift-state/wip"
+    if [[ -d "$WIP_DIR" ]]; then
+        local now_ts
+        now_ts=$(date +%s)
+        for patch in "$WIP_DIR"/*.patch; do
+            [[ -f "$patch" ]] || continue
+            local num
+            num=$(basename "$patch" .patch)
+            [[ "$num" =~ ^[0-9]+$ ]] || continue
+            local age_days
+            age_days=$(( (now_ts - $(stat -f %m "$patch" 2>/dev/null || echo "$now_ts")) / 86400 ))
+            if [[ "$age_days" -gt 7 ]]; then
+                log "WIP cleanup: $patch is ${age_days}d old, removing."
+                rm -f "$patch" "$WIP_DIR/${num}.untracked.tar.gz"
+                continue
+            fi
+            local issue_state
+            issue_state=$(gh issue view "$num" --json state --jq '.state' 2>/dev/null || echo "")
+            if [[ "$issue_state" == "CLOSED" ]]; then
+                log "WIP cleanup: #$num is CLOSED, removing $patch."
+                rm -f "$patch" "$WIP_DIR/${num}.untracked.tar.gz"
+            fi
+        done
+    fi
 }
 
 kill_claude() {
