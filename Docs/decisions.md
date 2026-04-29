@@ -32,6 +32,12 @@ Append-only record of non-obvious decisions: architecture changes, harness rules
 
 ## 2026-04-28
 
+### remove-db-matching-from-ai — AI workflows trust LLM output directly, no local DB second-guess
+Removed `PhotoLogTool.applyDBMatching`, the `log_food` preHook DB lookup paths, and `PhotoLogMatcher.matchFood`. Multiple P0 bugs (#522, #524, #525) traced to DB second-guessing correct AI output — case-sensitive lookups, fuzzy false positives, silent-failure UX when user input doesn't look like a food name. Vision models trained on food photos beat string-distance; AI macros are within ~10-15%, within self-reported noise floor. DB remains for explicit user search (food_info tool), barcode scan, and manual entry. Commit `f97cf10`.
+
+### photo-log-provider-fallback-chain — FallbackVisionClient tries Anthropic→OpenAI→Gemini on transient failures
+Single-provider photo log meant any transient API failure (rate limit, 5xx, timeout) blocked the feature entirely. New `FallbackVisionClient` actor tries providers in order, advancing on transient errors and aborting immediately on permanent ones (401, malformed, offline). Keys fetched lazily so biometrics only prompt for the provider actually needed. Provider name appended to chat summary when fallback was used. Commit `866c074`.
+
 ### remote-byok-chat — cloud chat shares Photo Log key, no separate setup
 `AIBackendType` gained `.remote`; `LocalAIService.useRemoteBackend()` accepts an apiKey from the iOS shell (DriftCore never touches Keychain). Cloud chat reuses Photo Log's `CloudVisionKey` entry + provider/model preference — once Photo Log is configured, chat is free. `Preferences.preferredAIBackend` defaults to `.llamaCpp` (privacy-first); the in-chat cpu/cloud toggle only renders when both backends are available so it can never be a no-op. `RemoteLLMBackend` now ships native parsers for Anthropic / OpenAI / Gemini SSE (text + tool calls), with categorized errors (`auth | rateLimited | quotaExceeded | transient | malformed`) so the chat layer can decide whether to auto-fallback to local (transient only) or surface a retry CTA. Photo conversational flow (`propose_meal` + `ProposedMealCardView`) deferred to a follow-up — the prompt protocol is baked into `IntentClassifier.remotePrompt`, but the inline-card UI + photo attachment are not yet wired. Issue #515.
 
