@@ -1995,5 +1995,19 @@
       "South Indian food DB: 34 new entries"
     ],
     "fixes": []
+  },
+  {
+    "build": 191,
+    "date": "2026-04-29T00:00:00-07:00",
+    "description": "Multi-item meal macro totals + zero-user-math improvements",
+    "features": [
+      "AI chat now computes total macros for multi-item meals (e.g. 'macros for dal, rice, and sabzi') without requiring the user to add them up"
+    ],
+    "fixes": [
+      "Weight chart: clip widened regression window at logging gaps (#545)",
+      "Weight chart: enforce selected time range on chart x-axis (#544)",
+      "Food: remove hardcoded recipe seeds from DefaultFoods (#541)",
+      "Food log: move Delete combo into ellipsis menu in ComboLogSheet (#542)"
+    ]
   }
 ]
