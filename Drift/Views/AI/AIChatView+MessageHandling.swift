@@ -1227,6 +1227,7 @@ extension AIChatViewModel {
                 } else {
                     messages[idx].text = output.text
                     messages[idx].clarificationOptions = output.clarificationOptions
+                    messages[idx].remoteProvider = aiService.remoteProviderName
                     attachToolCards(to: &messages[idx], toolsCalled: output.toolsCalled)
                 }
             }

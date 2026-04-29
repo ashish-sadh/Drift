@@ -138,6 +138,9 @@ final class AIChatViewModel {
         /// rendered as a tappable chip. Tapping sends the label as a new
         /// user message; the VM resolves it against the active phase. #226.
         var clarificationOptions: [ClarificationOption]?
+        /// Non-nil when a cloud backend handled this turn ("Anthropic", "OpenAI",
+        /// "Gemini"). Nil means on-device — silence = privacy by default. #533.
+        var remoteProvider: String?
         let createdAt = Date()
         enum Role { case user, assistant }
     }

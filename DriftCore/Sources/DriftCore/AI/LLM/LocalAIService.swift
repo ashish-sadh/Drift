@@ -298,6 +298,15 @@ public final class LocalAIService {
         (backend as? RemoteLLMBackend)?.lastError
     }
 
+    /// Display name of the active remote provider ("Anthropic", "OpenAI", "Gemini"),
+    /// or nil when the local backend is in use. Stamped on assistant messages
+    /// so the UI can show a per-turn cloud badge.
+    public var remoteProviderName: String? {
+        guard activeBackendType == .remote,
+              let remote = backend as? RemoteLLMBackend else { return nil }
+        return remote.provider.rawValue.capitalized
+    }
+
     /// Device info for display.
     public var deviceInfo: String {
         let ram = String(format: "%.0f", DeviceCapability.ramGB)
