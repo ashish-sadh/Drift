@@ -121,13 +121,33 @@ public final class RemoteLLMBackend: AIBackend, @unchecked Sendable {
         systemPrompt: String,
         onToken: @escaping @Sendable (String) -> Void
     ) async -> String {
+        await respondStreamingCore(prompt: prompt, imageData: nil, systemPrompt: systemPrompt, onToken: onToken)
+    }
+
+    /// Photo-capable variant. Embeds `imageData` (JPEG bytes) in the user
+    /// content block alongside the text prompt, per each provider's vision API.
+    public func respondStreamingWithPhoto(
+        to prompt: String,
+        imageData: Data,
+        systemPrompt: String,
+        onToken: @escaping @Sendable (String) -> Void
+    ) async -> String {
+        await respondStreamingCore(prompt: prompt, imageData: imageData, systemPrompt: systemPrompt, onToken: onToken)
+    }
+
+    private func respondStreamingCore(
+        prompt: String,
+        imageData: Data?,
+        systemPrompt: String,
+        onToken: @escaping @Sendable (String) -> Void
+    ) async -> String {
         errorBox.value = nil
         guard let key = apiKey else {
             errorBox.value = .auth
             return ""
         }
         do {
-            let request = try buildRequest(prompt: prompt, systemPrompt: systemPrompt, apiKey: key)
+            let request = try buildRequest(prompt: prompt, imageData: imageData, systemPrompt: systemPrompt, apiKey: key)
             let (data, response) = try await session.data(for: request)
             if let http = response as? HTTPURLResponse, http.statusCode != 200 {
                 errorBox.value = categorize(status: http.statusCode)
@@ -154,15 +174,15 @@ public final class RemoteLLMBackend: AIBackend, @unchecked Sendable {
 
     // MARK: - Request Building
 
-    private func buildRequest(prompt: String, systemPrompt: String, apiKey: String) throws -> URLRequest {
+    private func buildRequest(prompt: String, imageData: Data?, systemPrompt: String, apiKey: String) throws -> URLRequest {
         switch provider {
-        case .anthropic: return try buildAnthropicRequest(prompt: prompt, systemPrompt: systemPrompt, apiKey: apiKey)
-        case .openai:    return try buildOpenAIRequest(prompt: prompt, systemPrompt: systemPrompt, apiKey: apiKey)
-        case .gemini:    return try buildGeminiRequest(prompt: prompt, systemPrompt: systemPrompt, apiKey: apiKey)
+        case .anthropic: return try buildAnthropicRequest(prompt: prompt, imageData: imageData, systemPrompt: systemPrompt, apiKey: apiKey)
+        case .openai:    return try buildOpenAIRequest(prompt: prompt, imageData: imageData, systemPrompt: systemPrompt, apiKey: apiKey)
+        case .gemini:    return try buildGeminiRequest(prompt: prompt, imageData: imageData, systemPrompt: systemPrompt, apiKey: apiKey)
         }
     }
 
-    private func buildAnthropicRequest(prompt: String, systemPrompt: String, apiKey: String) throws -> URLRequest {
+    private func buildAnthropicRequest(prompt: String, imageData: Data?, systemPrompt: String, apiKey: String) throws -> URLRequest {
         guard let url = URL(string: "https://api.anthropic.com/v1/messages") else {
             throw BackendError.invalidURL
         }
@@ -172,18 +192,28 @@ public final class RemoteLLMBackend: AIBackend, @unchecked Sendable {
         req.setValue(apiKey, forHTTPHeaderField: "x-api-key")
         req.setValue("2023-06-01", forHTTPHeaderField: "anthropic-version")
 
+        let userContent: Any
+        if let jpeg = imageData {
+            userContent = [
+                ["type": "image", "source": ["type": "base64", "media_type": "image/jpeg", "data": jpeg.base64EncodedString()]],
+                ["type": "text", "text": prompt]
+            ] as [Any]
+        } else {
+            userContent = prompt
+        }
+
         let body: [String: Any] = [
             "model": modelID,
-            "max_tokens": 256,
+            "max_tokens": 512,
             "stream": true,
             "system": systemPrompt,
-            "messages": [["role": "user", "content": prompt]]
+            "messages": [["role": "user", "content": userContent]]
         ]
         req.httpBody = try JSONSerialization.data(withJSONObject: body)
         return req
     }
 
-    private func buildOpenAIRequest(prompt: String, systemPrompt: String, apiKey: String) throws -> URLRequest {
+    private func buildOpenAIRequest(prompt: String, imageData: Data?, systemPrompt: String, apiKey: String) throws -> URLRequest {
         guard let url = URL(string: "https://api.openai.com/v1/chat/completions") else {
             throw BackendError.invalidURL
         }
@@ -192,21 +222,31 @@ public final class RemoteLLMBackend: AIBackend, @unchecked Sendable {
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
         req.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
 
+        let userContent: Any
+        if let jpeg = imageData {
+            let dataURL = "data:image/jpeg;base64,\(jpeg.base64EncodedString())"
+            userContent = [
+                ["type": "image_url", "image_url": ["url": dataURL]],
+                ["type": "text", "text": prompt]
+            ] as [Any]
+        } else {
+            userContent = prompt
+        }
+
         let body: [String: Any] = [
             "model": modelID,
-            "max_tokens": 256,
+            "max_tokens": 512,
             "stream": true,
             "messages": [
                 ["role": "system", "content": systemPrompt],
-                ["role": "user", "content": prompt]
+                ["role": "user", "content": userContent]
             ]
         ]
         req.httpBody = try JSONSerialization.data(withJSONObject: body)
         return req
     }
 
-    private func buildGeminiRequest(prompt: String, systemPrompt: String, apiKey: String) throws -> URLRequest {
-        // Gemini uses ?key=… auth and a streaming endpoint with ?alt=sse.
+    private func buildGeminiRequest(prompt: String, imageData: Data?, systemPrompt: String, apiKey: String) throws -> URLRequest {
         guard let url = URL(string: "https://generativelanguage.googleapis.com/v1beta/models/\(modelID):streamGenerateContent?alt=sse&key=\(apiKey)") else {
             throw BackendError.invalidURL
         }
@@ -214,10 +254,16 @@ public final class RemoteLLMBackend: AIBackend, @unchecked Sendable {
         req.httpMethod = "POST"
         req.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
+        var parts: [[String: Any]] = []
+        if let jpeg = imageData {
+            parts.append(["inline_data": ["mime_type": "image/jpeg", "data": jpeg.base64EncodedString()]])
+        }
+        parts.append(["text": prompt])
+
         let body: [String: Any] = [
             "system_instruction": ["parts": [["text": systemPrompt]]],
-            "contents": [["role": "user", "parts": [["text": prompt]]]],
-            "generation_config": ["max_output_tokens": 256]
+            "contents": [["role": "user", "parts": parts]],
+            "generation_config": ["max_output_tokens": 512]
         ]
         req.httpBody = try JSONSerialization.data(withJSONObject: body)
         return req

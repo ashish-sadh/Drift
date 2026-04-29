@@ -202,6 +202,23 @@ public final class LocalAIService {
         return await backend.respondStreaming(to: message, systemPrompt: systemPrompt, onToken: onToken)
     }
 
+    /// Photo-capable variant for chat vision turns. Only works when the active
+    /// backend is `RemoteLLMBackend` — local models have no vision capability.
+    /// Returns "" (triggering the remote-error path in the VM) when no remote
+    /// backend is installed.
+    public func respondDirectWithPhoto(
+        systemPrompt: String,
+        message: String,
+        imageData: Data,
+        onToken: @escaping @Sendable (String) -> Void
+    ) async -> String {
+        guard let remote = backend as? RemoteLLMBackend else { return "" }
+        return await remote.respondStreamingWithPhoto(
+            to: message, imageData: imageData,
+            systemPrompt: systemPrompt, onToken: onToken
+        )
+    }
+
     // MARK: - Management
 
     private var unloadTimer: Timer?

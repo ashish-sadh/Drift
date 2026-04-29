@@ -6,6 +6,7 @@ import PhotosUI
 struct AIChatView: View {
     @State var vm = AIChatViewModel()
     @FocusState var inputFocused: Bool
+    @State private var photoPickerItem: PhotosPickerItem? = nil
 
     var body: some View {
         VStack(spacing: 0) {
@@ -56,6 +57,28 @@ struct AIChatView: View {
                 suggestionsRow
             }
 
+            // 10-second undo chip — appears after a photo meal card is confirmed
+            if !vm.pendingUndoEntryIds.isEmpty {
+                HStack {
+                    Spacer()
+                    Button { vm.undoProposedMeal() } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.uturn.backward")
+                                .font(.system(size: 11, weight: .medium))
+                            Text("Undo")
+                                .font(.caption.weight(.semibold))
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 16).padding(.vertical, 8)
+                        .background(Capsule().fill(Color.red.opacity(0.75)))
+                    }
+                    .buttonStyle(.plain)
+                    Spacer()
+                }
+                .padding(.vertical, 4)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+            }
+
             Divider().overlay(Color.white.opacity(0.06))
 
             // Input bar
@@ -64,10 +87,36 @@ struct AIChatView: View {
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.accent.opacity(0.6))
 
-                TextField(vm.speechService.isRecording ? "Listening..." : "Ask anything...", text: $vm.inputText, axis: .vertical)
-                    .textFieldStyle(.plain).font(.subheadline)
-                    .lineLimit(1...(vm.speechService.isRecording ? 6 : 3)).focused($inputFocused)
-                    .onSubmit { vm.sendMessage() }
+                VStack(alignment: .leading, spacing: 6) {
+                    if let jpeg = vm.pendingPhotoData, let uiImage = UIImage(data: jpeg) {
+                        HStack(spacing: 8) {
+                            Image(uiImage: uiImage)
+                                .resizable().scaledToFill()
+                                .frame(width: 52, height: 52)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            Button {
+                                vm.pendingPhotoData = nil
+                                photoPickerItem = nil
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                            Spacer()
+                        }
+                        .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .leading)))
+                    }
+
+                    TextField(
+                        vm.speechService.isRecording ? "Listening..." :
+                            (vm.pendingPhotoData != nil ? "Describe the photo (optional)..." : "Ask anything..."),
+                        text: $vm.inputText, axis: .vertical)
+                        .textFieldStyle(.plain).font(.subheadline)
+                        .lineLimit(1...(vm.speechService.isRecording ? 6 : 3)).focused($inputFocused)
+                        .onSubmit { vm.sendMessage() }
+                }
+                .animation(.easeInOut(duration: 0.2), value: vm.pendingPhotoData != nil)
 
                 if vm.speechService.isRecording {
                     Button {
@@ -88,6 +137,26 @@ struct AIChatView: View {
                     }
                     .accessibilityLabel("Send message")
                 } else {
+                    // Camera — only when remote backend is active (local has no vision)
+                    if vm.activeBackend == .remote {
+                        PhotosPicker(selection: $photoPickerItem, matching: .images) {
+                            Image(systemName: vm.pendingPhotoData != nil ? "camera.fill" : "camera")
+                                .font(.system(size: 18))
+                                .foregroundStyle(vm.pendingPhotoData != nil ? Theme.accent : .secondary)
+                        }
+                        .disabled(vm.isGenerating)
+                        .onChange(of: photoPickerItem) { _, newItem in
+                            guard let newItem else { return }
+                            Task {
+                                if let data = try? await newItem.loadTransferable(type: Data.self) {
+                                    vm.pendingPhotoData = data
+                                }
+                                photoPickerItem = nil
+                            }
+                        }
+                        .accessibilityLabel("Attach photo")
+                    }
+
                     Button {
                         vm.speechService.toggleRecording(
                             onTranscript: { text in
@@ -106,12 +175,13 @@ struct AIChatView: View {
                     .accessibilityLabel("Voice input")
                     .disabled(vm.isGenerating)
 
+                    let canSend = !vm.inputText.isEmpty || vm.pendingPhotoData != nil
                     Button { vm.sendMessage() } label: {
                         Image(systemName: "arrow.up.circle.fill").font(.title2)
-                            .foregroundStyle(vm.inputText.isEmpty ? Color.secondary.opacity(0.5) : Theme.accent)
+                            .foregroundStyle(canSend ? Theme.accent : Color.secondary.opacity(0.5))
                     }
                     .accessibilityLabel("Send message")
-                    .disabled(vm.inputText.isEmpty || vm.isGenerating)
+                    .disabled(!canSend || vm.isGenerating)
                 }
             }
             .padding(.horizontal, 12).padding(.vertical, 10)
@@ -365,6 +435,16 @@ struct AIChatView: View {
             }
 
             VStack(alignment: msg.role == .user ? .trailing : .leading, spacing: 6) {
+                // Photo thumbnail — user turns with attached image
+                if msg.role == .user, let jpeg = msg.photoAttachment,
+                   let uiImage = UIImage(data: jpeg) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 200, height: 150)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+
                 if !msg.text.isEmpty {
                     let isNewInstant = msg.role == .assistant
                         && msg.id != vm.streamingMessageId
@@ -447,6 +527,9 @@ struct AIChatView: View {
                 if let provider = msg.remoteProvider {
                     RemoteProviderBadge(provider: provider)
                 }
+                if let card = msg.proposedMealCard {
+                    proposedMealCardView(card, messageId: msg.id)
+                }
                 if let retryText = msg.retryTurn {
                     Button {
                         vm.inputText = retryText
@@ -474,6 +557,85 @@ struct AIChatView: View {
             }
         }
         .padding(.horizontal, 10)
+    }
+
+    // MARK: - Proposed Meal Card (#518)
+
+    private func proposedMealCardView(_ card: AIChatViewModel.ProposedMealCardData, messageId: UUID) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "fork.knife.circle.fill")
+                    .font(.caption).foregroundStyle(Theme.calorieBlue)
+                Text("Detected meal")
+                    .font(.caption.weight(.semibold))
+                Spacer()
+                Text("\(card.items.reduce(0) { $0 + $1.calories }) cal")
+                    .font(.caption2.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+
+            Divider().overlay(Color.white.opacity(0.06))
+
+            ForEach(card.items) { item in
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(item.name)
+                            .font(.caption.weight(.medium))
+                        Text("\(item.grams)g · \(item.protein)P \(item.carbs)C \(item.fat)F")
+                            .font(.system(size: 9)).foregroundStyle(.tertiary)
+                    }
+                    Spacer()
+                    Text("\(item.calories) cal")
+                        .font(.caption.weight(.bold).monospacedDigit())
+                        .foregroundStyle(Theme.calorieBlue)
+                }
+            }
+
+            HStack(spacing: 10) {
+                Button {
+                    vm.clearPendingProposal()
+                    vm.inputText = "Change "
+                    inputFocused = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 10, weight: .medium))
+                        Text("Edit")
+                            .font(.caption.weight(.medium))
+                    }
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 12).padding(.vertical, 6)
+                    .background(Capsule().fill(Color.white.opacity(0.06)))
+                    .overlay(Capsule().strokeBorder(Color.white.opacity(0.1), lineWidth: 0.5))
+                }
+                .buttonStyle(.plain)
+
+                Spacer()
+
+                Button {
+                    vm.confirmProposedMeal(card, messageId: messageId)
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 10, weight: .medium))
+                        Text("Log all")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 14).padding(.vertical, 7)
+                    .background(Capsule().fill(Theme.calorieBlue))
+                }
+                .buttonStyle(.plain)
+                .disabled(vm.isGenerating)
+                .accessibilityLabel("Log all \(card.items.count) items")
+            }
+        }
+        .padding(12)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 14))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(Theme.calorieBlue.opacity(0.25), lineWidth: 0.5)
+        )
     }
 
     // MARK: - Remote Provider Badge (#533)

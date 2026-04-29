@@ -209,7 +209,7 @@ extension AIChatViewModel {
     func sendMessage() {
         var text = inputText.trimmingCharacters(in: .whitespacesAndNewlines)
         if text.count > 300 { text = String(text.prefix(300)) }
-        guard !text.isEmpty, !isGenerating else { return }
+        guard !text.isEmpty || pendingPhotoData != nil, !isGenerating else { return }
         inputText = ""
         // Snapshot conversation state on every send so mid-flow survives app kill.
         // Phases set inside async handlers are captured by the next send or scene-backgrounding.
@@ -222,6 +222,22 @@ extension AIChatViewModel {
         // Phase 0: Normalize input (strip filler words, voice artifacts, repeated words)
         // All subsequent phases see clean input consistently.
         let normalized = InputNormalizer.normalize(text)
+
+        // Photo turn: bypass all local phases — goes directly to remote backend (vision).
+        if let jpeg = pendingPhotoData {
+            pendingPhotoData = nil
+            sendPhotoTurn(text: normalized, imageData: jpeg)
+            return
+        }
+
+        // Phase -1: Active proposal card — route as followup so the remote
+        // backend can emit a corrected propose_meal using conversation history.
+        // sendPhotoFollowupTurn appends the user message itself.
+        if pendingProposalTurnId != nil {
+            sendPhotoFollowupTurn(text: normalized)
+            return
+        }
+
         messages.append(ChatMessage(role: .user, text: normalized))
 
         let lower = normalized.lowercased()
@@ -1118,6 +1134,224 @@ extension AIChatViewModel {
             // fall through silently.
             break
         }
+    }
+
+    // MARK: - Photo-Attached Conversational Logging (#518)
+
+    /// Send a message with a photo attached. Bypasses all local phase handlers —
+    /// photo turns always go to the remote backend. Sets `pendingTurnHasPhoto`
+    /// to block Q7 local fallback (local has no vision).
+    func sendPhotoTurn(text: String, imageData: Data) {
+        guard !isGenerating else { return }
+        pendingTurnHasPhoto = true
+        clearPendingProposal()
+        convState.beginUserTurn()
+
+        let displayText = text.isEmpty ? "What's in this photo?" : text
+        var userMsg = ChatMessage(role: .user, text: displayText)
+        userMsg.photoAttachment = imageData
+        messages.append(userMsg)
+        defer { saveConversationState() }
+
+        runRemoteTurn(
+            message: displayText,
+            imageData: imageData,
+            thinkingLabel: "Analyzing photo..."
+        )
+    }
+
+    /// Route a text correction while a propose_meal card is pending. The remote
+    /// backend uses conversation history to emit a fresh propose_meal with
+    /// corrected items — no image re-send required.
+    private func sendPhotoFollowupTurn(text: String) {
+        guard !isGenerating else { return }
+        pendingTurnHasPhoto = true
+        messages.append(ChatMessage(role: .user, text: text))
+        runRemoteTurn(message: text, imageData: nil, thinkingLabel: "Updating proposal...")
+    }
+
+    /// Shared async plumbing for photo + followup turns. Sets up a streaming
+    /// placeholder, calls the right backend method, then applies the response.
+    private func runRemoteTurn(message: String, imageData: Data?, thinkingLabel: String) {
+        let placeholder = ChatMessage(role: .assistant, text: "")
+        messages.append(placeholder)
+        let responseId = placeholder.id
+        streamingMessageId = responseId
+        generatingState = .thinking(step: thinkingLabel)
+        generationEpoch += 1
+        let myEpoch = generationEpoch
+        let systemPrompt = IntentClassifier.activeSystemPrompt(backend: .remote)
+
+        Task {
+            defer {
+                if generationEpoch == myEpoch { generationEpoch += 1 }
+                streamingMessageId = nil
+                generatingState = .idle
+                pendingTurnHasPhoto = false
+            }
+
+            let onToken: @Sendable (String) -> Void = { [weak self] token in
+                let epoch = myEpoch
+                Task { @MainActor in
+                    guard let self, self.generationEpoch == epoch else { return }
+                    if case .thinking = self.generatingState { self.generatingState = .generating }
+                    if let idx = self.messages.firstIndex(where: { $0.id == responseId }) {
+                        self.messages[idx].text += token
+                    }
+                }
+            }
+
+            let response: String
+            if let jpeg = imageData {
+                response = await aiService.respondDirectWithPhoto(
+                    systemPrompt: systemPrompt, message: message,
+                    imageData: jpeg, onToken: onToken
+                )
+            } else {
+                response = await aiService.respondStreamingDirect(
+                    systemPrompt: systemPrompt, message: message, onToken: onToken
+                )
+            }
+
+            applyPhotoTurnResponse(response, responseId: responseId, originalText: message)
+
+            if let err = aiService.lastRemoteError {
+                await handleRemoteBackendError(err, originalText: message, responseId: responseId)
+            }
+        }
+    }
+
+    /// Parse a `propose_meal` tool-call JSON emitted by the remote backend
+    /// into a `ProposedMealCardData`. Returns nil for plain text responses.
+    func parseProposedMealCard(from response: String) -> ProposedMealCardData? {
+        guard response.contains("propose_meal"),
+              let data = response.data(using: .utf8),
+              let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+              (json["tool"] as? String) == "propose_meal",
+              let rawItems = json["items"] as? [[String: Any]],
+              !rawItems.isEmpty
+        else { return nil }
+
+        let items = rawItems.compactMap { raw -> ProposedMealCardData.Item? in
+            guard let name = raw["name"] as? String, !name.isEmpty else { return nil }
+            func intVal(_ key: String) -> Int {
+                (raw[key] as? Int) ?? Int((raw[key] as? Double) ?? 0)
+            }
+            return ProposedMealCardData.Item(
+                name: name,
+                grams: intVal("grams"),
+                calories: intVal("calories"),
+                protein: intVal("protein"),
+                carbs: intVal("carbs"),
+                fat: intVal("fat")
+            )
+        }
+        guard !items.isEmpty else { return nil }
+        return ProposedMealCardData(items: items)
+    }
+
+    /// Apply a photo-turn or followup response to the streaming placeholder:
+    /// attach a propose_meal card, or surface as regular text.
+    private func applyPhotoTurnResponse(_ response: String, responseId: UUID, originalText: String) {
+        guard let idx = messages.firstIndex(where: { $0.id == responseId }) else { return }
+
+        if let card = parseProposedMealCard(from: response) {
+            messages[idx].text = ""
+            messages[idx].proposedMealCard = card
+            messages[idx].remoteProvider = aiService.remoteProviderName
+            pendingProposalTurnId = responseId
+        } else if response.isEmpty {
+            messages.remove(at: idx)
+        } else {
+            messages[idx].text = response
+            messages[idx].remoteProvider = aiService.remoteProviderName
+        }
+    }
+
+    /// Clear the active proposal card and undo token list.
+    func clearPendingProposal() {
+        pendingProposalTurnId = nil
+        pendingUndoEntryIds = []
+    }
+
+    /// Confirm all items in a proposed meal card: insert each as a FoodEntry
+    /// directly, open a 10s undo window, then dismiss the card in place.
+    func confirmProposedMeal(_ card: ProposedMealCardData, messageId: UUID) {
+        let mealType = MealType.fromHour()
+        let today = DateFormatters.todayString
+        var loggedIds: [Int64] = []
+
+        do {
+            let db = AppDatabase.shared
+            let mealLogs = try db.fetchMealLogs(for: today)
+            var mealLog = mealLogs.first { $0.mealType == mealType.rawValue }
+            if mealLog == nil {
+                var newLog = MealLog(date: today, mealType: mealType.rawValue)
+                try db.saveMealLog(&newLog)
+                mealLog = newLog
+            }
+            guard let mealLogId = mealLog?.id else { return }
+
+            let now = DateFormatters.iso8601.string(from: Date())
+            for item in card.items {
+                var entry = FoodEntry(
+                    mealLogId: mealLogId,
+                    foodName: item.name,
+                    servingSizeG: Double(max(item.grams, 0)),
+                    servings: 1,
+                    calories: Double(item.calories),
+                    proteinG: Double(item.protein),
+                    carbsG: Double(item.carbs),
+                    fatG: Double(item.fat),
+                    fiberG: 0,
+                    loggedAt: now,
+                    date: today,
+                    mealType: mealType.rawValue
+                )
+                try db.saveFoodEntry(&entry)
+                if let id = entry.id { loggedIds.append(id) }
+            }
+        } catch {
+            Log.app.error("confirmProposedMeal: \(error)")
+            messages.append(ChatMessage(role: .assistant, text: "Couldn't log — try again."))
+            return
+        }
+
+        pendingUndoEntryIds = loggedIds
+        pendingProposalTurnId = nil
+        DriftPlatform.widget?.refresh()
+        mealLogRevision += 1
+
+        if let idx = messages.firstIndex(where: { $0.id == messageId }) {
+            let total = card.items.reduce(0) { $0 + $1.calories }
+            let names = card.items.prefix(3).map(\.name).joined(separator: ", ")
+            let extra = card.items.count > 3 ? " +\(card.items.count - 3) more" : ""
+            messages[idx].proposedMealCard = nil
+            messages[idx].text = "Logged \(names)\(extra) — \(total) cal."
+        }
+
+        // Clear undo tokens after 10s
+        let snapshot = loggedIds
+        Task {
+            try? await Task.sleep(for: .seconds(10))
+            await MainActor.run { [weak self] in
+                guard let self, self.pendingUndoEntryIds == snapshot else { return }
+                self.pendingUndoEntryIds = []
+            }
+        }
+    }
+
+    /// Undo the most recent meal-card confirmation (within the 10s window).
+    func undoProposedMeal() {
+        guard !pendingUndoEntryIds.isEmpty else { return }
+        let ids = pendingUndoEntryIds
+        pendingUndoEntryIds = []
+        for id in ids {
+            try? AppDatabase.shared.deleteFoodEntry(id: id)
+        }
+        DriftPlatform.widget?.refresh()
+        mealLogRevision += 1
+        messages.append(ChatMessage(role: .assistant, text: "Undone — all entries from that photo removed."))
     }
 
     private func handleCheatMeal(_ lower: String) -> Bool {

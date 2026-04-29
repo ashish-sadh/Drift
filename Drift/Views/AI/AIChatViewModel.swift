@@ -35,6 +35,13 @@ final class AIChatViewModel {
     /// True when the current turn includes a photo attachment. Local backend has
     /// no vision, so this overrides isFallbackable to prevent auto-fallback. #519 Q7.
     var pendingTurnHasPhoto: Bool = false
+    /// JPEG bytes of the photo the user has selected but not yet sent.
+    var pendingPhotoData: Data? = nil
+    /// ID of the assistant message that currently holds a ProposedMealCardData,
+    /// so correction turns can replace the card in place.
+    var pendingProposalTurnId: UUID? = nil
+    /// Entry IDs logged by the most recent meal-card confirm, held for 10s undo.
+    var pendingUndoEntryIds: [Int64] = []
 
     /// True when both local and remote BYOK backends are configured. Drives
     /// the selector visibility; with only one backend the selector is hidden.
@@ -147,8 +154,26 @@ final class AIChatViewModel {
         /// Non-nil when the assistant message shows a remote error. Stores the
         /// original user turn text so the Retry chip can re-send it. #519 Q7.
         var retryTurn: String?
+        /// JPEG bytes attached by the user. Displayed as a thumbnail in the
+        /// user bubble; sent to the remote backend as a vision turn. #518.
+        var photoAttachment: Data?
+        /// Inline proposed-meal card emitted by the AI via propose_meal. #518.
+        var proposedMealCard: ProposedMealCardData?
         let createdAt = Date()
         enum Role { case user, assistant }
+    }
+
+    struct ProposedMealCardData {
+        struct Item: Identifiable {
+            var id = UUID()
+            var name: String
+            var grams: Int
+            var calories: Int
+            var protein: Int
+            var carbs: Int
+            var fat: Int
+        }
+        var items: [Item]
     }
 
     struct NutritionLookupCardData {
