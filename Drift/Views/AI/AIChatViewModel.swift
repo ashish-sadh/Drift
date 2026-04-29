@@ -34,21 +34,20 @@ final class AIChatViewModel {
     var mealLogRevision = 0
 
     /// True when both local and remote BYOK backends are configured. Drives
-    /// the in-chat cpu/cloud toggle's visibility; with only one backend the
-    /// toggle would be a no-op so we hide it. Re-evaluated on each render.
+    /// the selector visibility; with only one backend the selector is hidden.
     var canToggleBackend: Bool { AIBackendCoordinator.bothBackendsAvailable }
 
-    /// Active backend, mirrored from `LocalAIService` for SwiftUI binding.
-    /// Reads `Preferences` so the UI reflects user intent even before the
-    /// actual backend swap completes (Keychain unlock can take a beat).
-    var activeBackend: AIBackendType { Preferences.preferredAIBackend }
+    /// Stored so @Observable tracks it and re-renders the selector on change.
+    /// Initialized from persisted preference; updated synchronously in toggleBackend()
+    /// before the async backend swap so the UI responds immediately. #540.
+    var activeBackend: AIBackendType = Preferences.preferredAIBackend
 
-    /// Flip the cpu/cloud toggle. Persists the new preference and triggers a
-    /// backend swap. Mid-thread switch keeps `messages` intact — the new
-    /// backend handles the next turn with no history reset.
-    func toggleBackend() {
+    /// Flip the backend. Updates the stored property immediately (triggers
+    /// @Observable re-render), persists the preference, then applies it async.
+    func toggleBackend(to backend: AIBackendType? = nil) {
         guard !isGenerating else { return }
-        let next: AIBackendType = activeBackend == .remote ? .llamaCpp : .remote
+        let next: AIBackendType = backend ?? (activeBackend == .remote ? .llamaCpp : .remote)
+        activeBackend = next
         Preferences.preferredAIBackend = next
         Task { await AIBackendCoordinator.applyPreferredBackend() }
     }

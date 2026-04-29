@@ -9,6 +9,11 @@ struct AIChatView: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // Backend selector — shown at top when both backends available
+            if vm.canToggleBackend {
+                backendSelectorHeader
+            }
+
             // Messages
             ScrollViewReader { proxy in
                 ScrollView {
@@ -53,32 +58,11 @@ struct AIChatView: View {
 
             Divider().overlay(Color.white.opacity(0.06))
 
-            // Disclaimer note — updates when backend switches
-            HStack(spacing: 6) {
-                Image(systemName: vm.activeBackend == .remote ? "cloud.fill" : "lock.shield.fill")
-                    .font(.system(size: 10))
-                    .foregroundStyle(vm.activeBackend == .remote ? Theme.accent : Theme.accent)
-                Text(vm.activeBackend == .remote
-                    ? "Cloud AI active \u{2014} messages are sent to your configured provider."
-                    : "On-device AI \u{2014} data never leaves your phone. Turn off in More \u{2192} Settings.")
-                    .font(.system(size: 10))
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .frame(maxWidth: .infinity)
-            .background(Color.white.opacity(0.03))
-            .animation(.easeInOut(duration: 0.2), value: vm.activeBackend)
-
             // Input bar
             HStack(spacing: 8) {
-                if vm.canToggleBackend {
-                    backendToggle
-                } else {
-                    Image(systemName: "sparkles")
-                        .font(.system(size: 12))
-                        .foregroundStyle(Theme.accent.opacity(0.6))
-                }
+                Image(systemName: "sparkles")
+                    .font(.system(size: 12))
+                    .foregroundStyle(Theme.accent.opacity(0.6))
 
                 TextField(vm.speechService.isRecording ? "Listening..." : "Ask anything...", text: $vm.inputText, axis: .vertical)
                     .textFieldStyle(.plain).font(.subheadline)
@@ -189,38 +173,94 @@ struct AIChatView: View {
         }
     }
 
-    // MARK: - Backend Toggle (cpu / cloud)
+    // MARK: - Backend Selector Header (#540)
 
-    /// In-chat cpu/cloud toggle. Visible only when both backends are
-    /// configured. Single tap flips between local llama.cpp and remote BYOK.
-    /// Default is local (privacy-first); the remote choice persists across
-    /// app launches via `Preferences.preferredAIBackend`. #515.
-    private var backendToggle: some View {
-        Button {
-            vm.toggleBackend()
-        } label: {
-            HStack(spacing: 4) {
-                Image(systemName: vm.activeBackend == .remote ? "cloud.fill" : "cpu")
-                    .font(.system(size: 11))
-                    .contentTransition(.symbolEffect(.replace))
-                Text(vm.activeBackend == .remote ? "Cloud" : "Local")
-                    .font(.system(size: 11, weight: .medium))
+    /// Side-by-side Local Brain / Cloud AI selector cards shown at the top
+    /// of the chat sheet when both backends are available. Replaces the tiny
+    /// icon toggle that users couldn't find. #540.
+    private var backendSelectorHeader: some View {
+        VStack(spacing: 6) {
+            HStack(spacing: 10) {
+                backendCard(
+                    title: "Local Brain",
+                    icon: "cpu",
+                    subtitle: localBrainSubtitle,
+                    selected: vm.activeBackend != .remote,
+                    action: { vm.toggleBackend(to: .llamaCpp) }
+                )
+                backendCard(
+                    title: "Cloud AI",
+                    icon: "cloud.fill",
+                    subtitle: cloudAISubtitle,
+                    selected: vm.activeBackend == .remote,
+                    action: { vm.toggleBackend(to: .remote) }
+                )
             }
-            .foregroundStyle(vm.activeBackend == .remote ? Theme.accent : Theme.accent.opacity(0.75))
-            .padding(.horizontal, 8)
-            .padding(.vertical, 5)
+            .padding(.horizontal, 12)
+
+            Text(vm.activeBackend == .remote
+                ? "Cloud AI \u{00B7} routed through your own \(Preferences.photoLogProvider.rawValue.capitalized) key. Drift never sees your data."
+                : "On-device \u{00B7} runs entirely on your phone. Free, private, no internet needed.")
+                .font(.system(size: 10))
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 14)
+                .animation(.easeInOut(duration: 0.2), value: vm.activeBackend)
+        }
+        .padding(.top, 10).padding(.bottom, 6)
+        .background(Color.white.opacity(0.03))
+        .accessibilityIdentifier("ai-backend-selector")
+    }
+
+    private func backendCard(title: String, icon: String, subtitle: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(selected ? Theme.accent : .secondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(selected ? .primary : .secondary)
+                    Text(subtitle)
+                        .font(.system(size: 11))
+                        .foregroundStyle(selected ? Theme.accent.opacity(0.8) : Color.secondary.opacity(0.6))
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 12).padding(.vertical, 10)
             .background(
-                Capsule()
-                    .fill(vm.activeBackend == .remote
-                        ? Theme.accent.opacity(0.15)
-                        : Color.white.opacity(0.08))
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(selected ? Theme.accent.opacity(0.08) : Color.white.opacity(0.04))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(selected ? Theme.accent.opacity(0.5) : Color.white.opacity(0.08), lineWidth: 1)
+                    )
             )
-            .animation(.easeInOut(duration: 0.2), value: vm.activeBackend)
+            .animation(.easeInOut(duration: 0.18), value: selected)
         }
         .buttonStyle(.plain)
         .disabled(vm.isGenerating)
-        .accessibilityLabel(vm.activeBackend == .remote ? "Cloud AI active. Tap to switch to on-device." : "On-device AI active. Tap to switch to cloud.")
-        .accessibilityIdentifier("ai-backend-toggle")
+        .frame(maxWidth: .infinity)
+        .accessibilityLabel("\(title): \(subtitle). \(selected ? "Selected." : "Tap to select.")")
+    }
+
+    private var localBrainSubtitle: String {
+        switch vm.aiService.state {
+        case .notSetUp: return "Not installed"
+        case .downloading(let p): return "Downloading \(Int(p * 100))%"
+        case .loading: return "Loading..."
+        case .ready where vm.aiService.isModelLoaded: return "Loaded"
+        case .ready: return "Ready to load"
+        case .error: return "Error"
+        case .notEnoughSpace: return "Not enough space"
+        }
+    }
+
+    private var cloudAISubtitle: String {
+        AIBackendCoordinator.hasRemoteKey
+            ? "\(Preferences.photoLogProvider.rawValue.capitalized) \u{00B7} BYOK"
+            : "Setup needed"
     }
 
     // MARK: - Suggestions Row

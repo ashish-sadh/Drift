@@ -2507,3 +2507,32 @@ import Testing
     let prompt = IntentClassifier.systemPrompt
     #expect(prompt.contains("log lunch"), "Prompt should include meal-without-food → follow-up example")
 }
+
+// MARK: - Backend Toggle Binding (#540)
+
+@Test @MainActor func backendToggleUpdatesStoredPropertyImmediately() {
+    let vm = AIChatViewModel()
+    // Start from local
+    vm.toggleBackend(to: .llamaCpp)
+    #expect(vm.activeBackend == .llamaCpp)
+    #expect(Preferences.preferredAIBackend == .llamaCpp)
+
+    // Switch to remote
+    vm.toggleBackend(to: .remote)
+    #expect(vm.activeBackend == .remote, "activeBackend must update synchronously so @Observable re-renders the selector")
+    #expect(Preferences.preferredAIBackend == .remote)
+
+    // Switch back to local
+    vm.toggleBackend(to: .llamaCpp)
+    #expect(vm.activeBackend == .llamaCpp)
+    #expect(Preferences.preferredAIBackend == .llamaCpp)
+}
+
+@Test @MainActor func backendToggleFlipsWhenNoArgument() {
+    let vm = AIChatViewModel()
+    let initial = vm.activeBackend
+    vm.toggleBackend()
+    #expect(vm.activeBackend != initial, "No-arg toggle should flip the active backend")
+    vm.toggleBackend()
+    #expect(vm.activeBackend == initial, "Second flip should return to original")
+}
