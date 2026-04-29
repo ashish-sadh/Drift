@@ -632,8 +632,7 @@ struct SettingsView: View {
             UserDefaults.standard.removeObject(forKey: "drift_default_templates_v3")
             UserDefaults.standard.removeObject(forKey: "drift_default_templates_v2")
             UserDefaults.standard.removeObject(forKey: "drift_default_templates_seeded")
-            UserDefaults.standard.removeObject(forKey: "drift_default_foods_seeded_v1")
-            UserDefaults.standard.removeObject(forKey: "drift_cycle_fertile_window")
+UserDefaults.standard.removeObject(forKey: "drift_cycle_fertile_window")
             Log.app.info("Factory reset performed")
             resetDone = true
         } catch {

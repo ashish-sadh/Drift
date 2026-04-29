@@ -36,8 +36,7 @@ struct DriftApp: App {
                 .task {
                     if !hasRequestedHealthKit {
                         hasRequestedHealthKit = true
-                        DefaultFoods.seedIfNeeded()
-                        #if targetEnvironment(simulator)
+#if targetEnvironment(simulator)
                         // 🧪 Uncomment ONE to test on simulator:
                         // DebugSeedData.seedWeightGoalBug()    // reproduces "gain 14.1 kg" bug
                         // DebugSeedData.seedNormalGoal()        // normal losing goal (correct)

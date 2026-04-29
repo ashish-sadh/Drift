@@ -35,11 +35,6 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     #expect(!results.isEmpty, "Should find meatball entries")
 }
 
-@Test func foodSearchCostco() async throws {
-    let db = seededDB()
-    let results = try db.searchFoods(query: "kirkland")
-    #expect(results.count >= 5, "Should find Kirkland/Costco items: \(results.count)")
-}
 
 @Test func foodDatabaseCount() async throws {
     let db = seededDB()
