@@ -393,6 +393,9 @@ struct AIChatView: View {
                 if let card = msg.biomarkerCard {
                     biomarkerConfirmationCard(card)
                 }
+                if let card = msg.helpCard {
+                    helpCardView(card)
+                }
                 if let options = msg.clarificationOptions, !options.isEmpty {
                     clarificationChips(options)
                 }
@@ -961,6 +964,44 @@ struct AIChatView: View {
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(Color.cyan.opacity(0.2), lineWidth: 0.5)
+        )
+    }
+
+    // MARK: - Help Card
+
+    private func helpCardView(_ card: HelpCardData) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ForEach(card.categories) { (cat: HelpCardData.Category) in
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: cat.icon)
+                        .font(.caption)
+                        .foregroundStyle(Theme.accent)
+                        .frame(width: 18, alignment: .center)
+                        .padding(.top, 1)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(cat.title)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                        ForEach(cat.examples, id: \.self) { example in
+                            Button {
+                                vm.inputText = example
+                            } label: {
+                                Text(example)
+                                    .font(.caption2)
+                                    .foregroundStyle(Theme.accent)
+                                    .multilineTextAlignment(.leading)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(10)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Theme.separator, lineWidth: 0.5)
         )
     }
 }

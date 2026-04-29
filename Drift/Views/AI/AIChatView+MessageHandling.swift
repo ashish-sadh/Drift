@@ -291,6 +291,8 @@ extension AIChatViewModel {
                     messages.append(ChatMessage(role: .assistant, text: text))
                 }
             }
+        case .helpCard(let card):
+            messages.append(ChatMessage(role: .assistant, text: "Here's what I can do:", helpCard: card))
         }
         return true
     }

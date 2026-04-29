@@ -661,6 +661,7 @@ final class IntentClassifierGoldSetTests: XCTestCase {
             if case .navigate = action { return false }
             return true
         case .toolCall: return true
+        case .helpCard: return true
         }
     }
 

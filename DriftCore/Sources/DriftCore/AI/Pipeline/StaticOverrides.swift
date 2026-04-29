@@ -3,12 +3,32 @@ import DriftCore
 
 // MARK: - Static Override Result
 
+/// Structured capability overview shown when user asks "what can you do?".
+public struct HelpCardData: Sendable {
+    public struct Category: Sendable, Identifiable {
+        public var id: String { title }
+        public let icon: String
+        public let title: String
+        public let examples: [String]
+    }
+    public let categories: [Category]
+
+    public static let defaultCard = HelpCardData(categories: [
+        Category(icon: "fork.knife",                           title: "Food",      examples: ["log 2 eggs and toast", "how many calories in dal?"]),
+        Category(icon: "scalemass",                            title: "Weight",    examples: ["log 78 kg", "what's my weight trend?"]),
+        Category(icon: "figure.strengthtraining.traditional",  title: "Exercise",  examples: ["bench press 3x10 at 135", "start push day"]),
+        Category(icon: "heart.fill",                           title: "Health",    examples: ["did I take my vitamins?", "show sleep recovery"]),
+        Category(icon: "chart.line.uptrend.xyaxis",            title: "Analytics", examples: ["do I eat late at night?", "how's my weight trending?"]),
+    ])
+}
+
 /// Result of a static override match — tells AIChatView what to do without hitting the LLM.
 public enum StaticResult: Sendable {
     case response(String)                    // Show this text directly
     case toolCall(ToolCall)                  // Execute this tool directly
     case uiAction(ToolAction, String?)       // Open a sheet/navigate + optional message
     case handler(@MainActor @Sendable () -> String)  // Run custom handler, show result
+    case helpCard(HelpCardData)              // Show structured capability overview card
 }
 
 // MARK: - Static Overrides
@@ -61,8 +81,13 @@ public enum StaticOverrides {
         }
 
         // Help
-        if lower == "help" || lower == "what can you do" || lower == "what can you do?" {
-            return .response("I can help you:\n\u{2022} Log food: \"log 2 eggs and toast\"\n\u{2022} Log workout: \"I did bench press 3x10 at 135\"\n\u{2022} Start template: \"start push day\"\n\u{2022} Check progress: \"how am I doing?\"\n\u{2022} Get insights: \"calories left\", \"daily summary\"\n\u{2022} Ask about: weight, sleep, biomarkers, glucose, supplements")
+        let helpPhrases: Set<String> = [
+            "help", "what can you do", "what can you do?",
+            "what can i ask", "what can i ask you", "what can i ask you?",
+            "what do you know", "what do you know?",
+        ]
+        if helpPhrases.contains(lower) {
+            return .helpCard(HelpCardData.defaultCard)
         }
 
         // Barcode scan
