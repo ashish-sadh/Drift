@@ -1931,6 +1931,17 @@
     ]
   },
   {
+    "build": 187,
+    "date": "2026-04-28T16:30:00-07:00",
+    "description": "Build 187 — photo-log provider fallback chain, correction-as-replacement fixes",
+    "features": [
+      "Photo Log now automatically retries with OpenAI or Gemini if Anthropic has a transient error — no more blank results when one provider is down (#359)."
+    ],
+    "fixes": [
+      "Correction-as-replacement phrases ('make it X', 'change to Y', 'update to Z') now correctly replace the previous value instead of being ignored (#346)."
+    ]
+  },
+  {
     "build": 186,
     "date": "2026-04-28T10:21:00-07:00",
     "description": "Build 186 — hydration tracking, multi-intent chat, photo-log corrections + Add-item DB search",
