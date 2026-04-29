@@ -32,7 +32,7 @@ public enum IntentClassifier {
     /// small tier. Every token must earn its place — see token-ceiling test.
     public static let routerPrompt: String = """
     Health app. Reply JSON tool call or short text. Fix typos, word numbers, slang.
-    Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) supplements() set_goal(target,unit?,goal_type?) delete_food(entry_id?,name?) edit_meal(entry_id?,meal_period?,action,target_food?,new_value?) body_comp() glucose() biomarkers() navigate_to(screen) cross_domain_insight(metric_a,metric_b,window_days?) weight_trend_prediction() supplement_insight(supplement?,window_days?) food_timing_insight(window_days?) sleep_food_correlation(window_days?)
+    Tools: log_food(name,servings?,calories?,protein?,carbs?,fat?) food_info(query) log_weight(value,unit?) weight_info(query?) start_workout(name?) log_activity(name,duration?) exercise_info(query?) sleep_recovery(period?) mark_supplement(name) supplements() set_goal(target,unit?,goal_type?) delete_food(entry_id?,name?) edit_meal(entry_id?,meal_period?,action,target_food?,new_value?) body_comp() glucose() biomarkers() navigate_to(screen) cross_domain_insight(metric_a,metric_b,window_days?) weight_trend_prediction() supplement_insight(supplement?,window_days?) food_timing_insight(window_days?) sleep_food_correlation(window_days?) exercise_volume_summary(window_days?)
     <recent_entries>: match user's row reference (ordinal/calories/meal/"just logged") → entry_id. Default: name/target_food.
     Rules: never invent health data — call a tool. "calories in X"→food_info (not log_food). log_food when user ate/had OR said log/add/track/record with a named food. Bare "log lunch/breakfast/dinner" (no food)→ask what they had. "search/find X in my logs"→food_info, not log_food. summary/intake/macros/micronutrients(fiber/sodium/sugar)→food_info. calorie/protein/carb/fat goal progress/hitting/on track→food_info. weight trend / "on track for my goal" / weight history / "how much have I lost"→weight_info. ONLY "when will I reach my goal weight" (ETA prediction)→weight_trend_prediction. Multi-turn: if assistant just confirmed a logged food and user says "also add X"/"and X too"/"plus Y"→log_food name=just-the-new-item, never carry the prior food. body fat/lean mass/DEXA→body_comp. blood sugar/glucose spike→glucose. lab results/biomarkers/cholesterol→biomarkers. sleep/HRV→sleep_recovery. "go to X"/"open X"→navigate_to. supplements() for any supplement status question (never text). mark_supplement when user took/had one.
     Act when user names food/supplement/exercise/weight/screen. Ask only when no object (bare "log"/"track"/"add") or two tools fit.
@@ -75,6 +75,10 @@ public enum IntentClassifier {
     "how consistent am I with creatine"→{"tool":"supplement_insight","supplement":"creatine"}
     "when do I usually eat"→{"tool":"food_timing_insight"}
     "does eating late affect my sleep"→{"tool":"sleep_food_correlation"}
+    "how's my training volume this week"→{"tool":"exercise_volume_summary"}
+    "how many sets did I do for legs"→{"tool":"exercise_volume_summary"}
+    "am I undertrained anywhere"→{"tool":"exercise_volume_summary"}
+    "muscle group coverage"→{"tool":"exercise_volume_summary"}
     "show me my weight chart"→{"tool":"navigate_to","screen":"weight"}
     "is it okay to take fish oil on an empty stomach"→Fish oil is generally fine with or without food.
     "log lunch"→What did you have for lunch?

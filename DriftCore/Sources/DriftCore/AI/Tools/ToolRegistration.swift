@@ -794,6 +794,9 @@ public enum ToolRegistration {
         // Sleep-food correlation — does late eating hurt sleep? #426.
         SleepFoodCorrelationTool.syncRegistration(registry: r)
 
+        // Exercise volume by muscle group — training volume, undertrained groups. #335.
+        ExerciseVolumeSummaryTool.syncRegistration(registry: r)
+
         // PhotoLog tool is registered separately by the iOS Drift app
         // after this base registration runs (it depends on iOS-only
         // CloudVision / Keychain).
