@@ -26,7 +26,7 @@ public enum ConversationHistoryBuilder {
     public static let perMessageTokens = 60
 
     /// How many trailing turns to consider.
-    public static let maxTurnWindow = 6
+    public static let maxTurnWindow = 10
 
     /// Chars reserved for the `[LAST ACTION: …]` prefix.
     public static let lastActionTokens = 100
@@ -37,7 +37,7 @@ public enum ConversationHistoryBuilder {
     @MainActor
     public static func build(
         turns: [HistoryTurn],
-        maxTokens: Int = 400
+        maxTokens: Int = 800
     ) -> String {
         guard Preferences.conversationHistoryEnabled, !turns.isEmpty else { return "" }
 

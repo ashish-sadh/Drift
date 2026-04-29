@@ -28,7 +28,7 @@ public struct AgentOutput: Sendable {
 /// 3. Tool-first execution → stream presentation with real data (both)
 /// 4. LLM fallback (Gemma: direct streaming, SmolLM: AIChainOfThought)
 /// All LLM calls have a 20s timeout.
-/// Token budget: 4096 context, ~3300 max prompt, 256 max generation.
+/// Token budget: 6144 context, ~5600 max prompt, 256 max generation.
 @MainActor
 public enum AIToolAgent {
 
