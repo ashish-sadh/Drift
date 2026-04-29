@@ -474,5 +474,11 @@ final class FoodLoggingGoldSetTests: XCTestCase {
 
         XCTAssertGreaterThanOrEqual(recall, 80, "Recall should be ≥80%")
         XCTAssertGreaterThanOrEqual(precision, 90, "Precision should be ≥90%")
+
+        // Per-stage failure attribution — surfaces which stage to fix next.
+        let buckets = GoldSetStageAttribution.attribute(cases: allCases.map { ($0.0, $0.1) })
+        let stageReport = GoldSetStageAttribution.report(buckets: buckets, total: allCases.count)
+        print(stageReport)
+        GoldSetStageAttribution.persist(stageReport)
     }
 }
