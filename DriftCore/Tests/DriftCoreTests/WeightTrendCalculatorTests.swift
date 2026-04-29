@@ -379,6 +379,70 @@ func makeEntries(days: Int, startKg: Double, ratePerDay: Double) -> [(date: Stri
     #expect(WeightTrendCalculator.AlgorithmConfig.conservative.kcalPerKg < WeightTrendCalculator.AlgorithmConfig.responsive.kcalPerKg)
 }
 
+// MARK: - Regime-Change Gap Detection (4 tests)
+
+// Build a date exactly N days before today
+private func daysAgo(_ n: Int) -> Date {
+    Calendar.current.date(byAdding: .day, value: -n, to: Date())!
+}
+private func dateStr(_ d: Date) -> String {
+    let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; f.locale = Locale(identifier: "en_US_POSIX"); return f.string(from: d)
+}
+
+@Test func largestGapBetweenConsecutiveBasicCases() {
+    let mkPt = { (d: Date) in WeightTrendCalculator.WeightDataPoint(date: d, dateString: "", actualWeight: 70, emaWeight: 70) }
+    // Empty / single → 0
+    #expect(WeightTrendCalculator.largestGapBetweenConsecutive([]) == 0)
+    #expect(WeightTrendCalculator.largestGapBetweenConsecutive([mkPt(Date())]) == 0)
+    // Consecutive daily → 1
+    let daily = (0..<3).map { mkPt(daysAgo(2 - $0)) }
+    #expect(WeightTrendCalculator.largestGapBetweenConsecutive(daily) == 1)
+    // Mixed gaps: 2d, 17d, 2d → largest = 17
+    let mixed = [mkPt(daysAgo(21)), mkPt(daysAgo(19)), mkPt(daysAgo(2)), mkPt(daysAgo(0))]
+    #expect(WeightTrendCalculator.largestGapBetweenConsecutive(mixed) == 17)
+}
+
+@Test func pointsAfterLastGapReturnsPostGapSegment() {
+    let mkPt = { (d: Date) in WeightTrendCalculator.WeightDataPoint(date: d, dateString: "", actualWeight: 70, emaWeight: 70) }
+    // No gap → all returned
+    let noop = (0..<5).map { mkPt(daysAgo(4 - $0)) }
+    #expect(WeightTrendCalculator.pointsAfterLastGap(noop, gapThresholdDays: 14).count == 5)
+    // Gap of 20d at position 2: points at [40, 38, 18, 17, 16] → last gap is 20d between idx 1 and 2 → returns 3 points
+    let withGap = [mkPt(daysAgo(40)), mkPt(daysAgo(38)), mkPt(daysAgo(18)), mkPt(daysAgo(17)), mkPt(daysAgo(16))]
+    let after = WeightTrendCalculator.pointsAfterLastGap(withGap, gapThresholdDays: 14)
+    #expect(after.count == 3)
+    // Two gaps: 20d then 18d — last gap wins, returns only post-second-gap points
+    let twoGaps = [mkPt(daysAgo(60)), mkPt(daysAgo(40)), mkPt(daysAgo(18)), mkPt(daysAgo(17)), mkPt(daysAgo(16))]
+    let afterTwo = WeightTrendCalculator.pointsAfterLastGap(twoGaps, gapThresholdDays: 14)
+    #expect(afterTwo.count == 3)
+}
+
+@Test func gapInWidenedWindowClipsToPostGap() {
+    // Pre-gap: steep drop (days -42 to -32) then 18-day gap then recent flat (days -14 to 0).
+    // Without fix: widened slope blends steep pre-gap drop → |rate| >> threshold → shows as big loss.
+    // With fix: widened clips to post-gap segment (flat) → rate ≈ 0.
+    var entries: [(date: String, weightKg: Double)] = []
+    // Pre-gap steep drop: 80kg → 74kg over 11 days
+    for i in 0..<11 { entries.append((dateStr(daysAgo(42 - i)), 80.0 - Double(i) * 0.55)) }
+    // Post-gap: flat ~73kg over 15 days
+    for i in 0..<15 { entries.append((dateStr(daysAgo(14 - i)), 73.0 + Double(i) * 0.01)) }
+    let t = WeightTrendCalculator.calculateTrend(entries: entries)!
+    // Post-gap trend is essentially flat; rate should be well below 0.5 lb/wk (0.227 kg/wk)
+    #expect(abs(t.weeklyRateKg) < 0.227, "Expected near-zero rate from post-gap data, got \(t.weeklyRateKg) kg/wk")
+}
+
+@Test func gapBelowThresholdDoesNotClip() {
+    // 12-day gap (< 14d threshold): widening should behave exactly as if no gap.
+    // Pre: slow steady loss, 12-day gap, post: same slow loss continues.
+    var entries: [(date: String, weightKg: Double)] = []
+    for i in 0..<20 { entries.append((dateStr(daysAgo(42 - i)), 80.0 - Double(i) * 0.03)) }
+    // skip 12 days
+    for i in 0..<10 { entries.append((dateStr(daysAgo(10 - i)), 79.4 - Double(i) * 0.03)) }
+    let t = WeightTrendCalculator.calculateTrend(entries: entries)!
+    // Should still detect the slow loss (not clipped to nothing)
+    #expect(t.weeklyRateKg < 0, "Expected negative rate (slow loss), got \(t.weeklyRateKg)")
+}
+
 // MARK: - Weight Entry DB Tests
 
 @Test func saveAndFetchWeightEntry() async throws {

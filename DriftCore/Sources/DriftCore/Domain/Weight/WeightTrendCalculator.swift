@@ -26,6 +26,11 @@ public enum WeightTrendCalculator {
         /// (halves slope SE).
         public var widenWindowDays: Int
 
+        /// Largest gap (days) between consecutive entries within the widened
+        /// window that triggers clipping to post-gap data only. Prevents
+        /// pre-regime data from blending into the slope after a logging pause.
+        public var regimeChangeGapThresholdDays: Int
+
         /// Energy density of body weight change in kcal per kg.
         public var kcalPerKg: Double
 
@@ -44,6 +49,7 @@ public enum WeightTrendCalculator {
             widenWindowDays: Int,
             kcalPerKg: Double,
             maintainingThresholdKgPerWeek: Double,
+            regimeChangeGapThresholdDays: Int = 14,
             emaAlpha: Double = 0.1
         ) {
             self.emaHalfLifeDays = emaHalfLifeDays
@@ -52,6 +58,7 @@ public enum WeightTrendCalculator {
             self.widenWindowDays = widenWindowDays
             self.kcalPerKg = kcalPerKg
             self.maintainingThresholdKgPerWeek = maintainingThresholdKgPerWeek
+            self.regimeChangeGapThresholdDays = regimeChangeGapThresholdDays
             self.emaAlpha = emaAlpha
         }
 
@@ -95,8 +102,11 @@ public enum WeightTrendCalculator {
         public let dataPoints: [WeightDataPoint]
         public let weightChanges: WeightChanges
         public let config: AlgorithmConfig
+        /// Actual window (days) used to compute weeklyRateKg — may differ from
+        /// config.regressionWindowDays when widening or gap-clipping applies.
+        public let rateWindowDays: Int
 
-        init(currentEMA: Double, previousEMA: Double, weeklyRateKg: Double, estimatedDailyDeficit: Double, trendDirection: TrendDirection, projection30Day: Double?, dataPoints: [WeightDataPoint], weightChanges: WeightChanges, config: AlgorithmConfig) {
+        init(currentEMA: Double, previousEMA: Double, weeklyRateKg: Double, estimatedDailyDeficit: Double, trendDirection: TrendDirection, projection30Day: Double?, dataPoints: [WeightDataPoint], weightChanges: WeightChanges, config: AlgorithmConfig, rateWindowDays: Int) {
             self.currentEMA = currentEMA
             self.previousEMA = previousEMA
             self.weeklyRateKg = weeklyRateKg
@@ -106,6 +116,7 @@ public enum WeightTrendCalculator {
             self.dataPoints = dataPoints
             self.weightChanges = weightChanges
             self.config = config
+            self.rateWindowDays = rateWindowDays
         }
     }
 
@@ -234,22 +245,39 @@ public enum WeightTrendCalculator {
 
         // Slope: two-window endpoint method (preferred) → OLS fallback →
         // 2-point fallback. Adaptive widening when the default-window slope
-        // is below threshold and we have enough history. See
-        // weeklyRateForWindow() docs for the per-method criteria.
+        // is below threshold and we have enough history. Gap detection clips
+        // the widened window to post-regime data so a logging pause doesn't
+        // blend stale pre-gap data into the slope.
         let primary = weeklyRateForWindow(
             dataPoints: dataPoints, windowDays: config.regressionWindowDays
         )
         let weeklyRateKg: Double
+        let rateWindowDays: Int
         if let primary, abs(primary) >= config.widenSlopeThresholdKgPerWeek {
             weeklyRateKg = primary
-        } else if let widened = weeklyRateForWindow(
-            dataPoints: dataPoints, windowDays: config.widenWindowDays
-        ), dataPoints.first.map({ daysBetween($0.date, Date()) >= config.widenWindowDays }) ?? false {
-            // Wider window only kicks in when we actually have ≥widenWindowDays
-            // of history — otherwise it just reproduces the primary result.
-            weeklyRateKg = widened
+            rateWindowDays = config.regressionWindowDays
         } else {
-            weeklyRateKg = primary ?? 0
+            let hasEnoughHistory = dataPoints.first.map { daysBetween($0.date, Date()) >= config.widenWindowDays } ?? false
+            if hasEnoughHistory,
+               let widenStart = Calendar.current.date(byAdding: .day, value: -config.widenWindowDays, to: Date()) {
+                let widenedPoints = dataPoints.filter { $0.date >= widenStart }
+                let usablePoints = largestGapBetweenConsecutive(widenedPoints) > config.regimeChangeGapThresholdDays
+                    ? pointsAfterLastGap(widenedPoints, gapThresholdDays: config.regimeChangeGapThresholdDays)
+                    : widenedPoints
+                let usableSpan = usablePoints.count >= 2
+                    ? daysBetween(usablePoints.first!.date, usablePoints.last!.date)
+                    : 0
+                if let widened = weeklyRateForWindow(dataPoints: usablePoints, windowDays: config.widenWindowDays) {
+                    weeklyRateKg = widened
+                    rateWindowDays = max(usableSpan, config.regressionWindowDays)
+                } else {
+                    weeklyRateKg = primary ?? 0
+                    rateWindowDays = config.regressionWindowDays
+                }
+            } else {
+                weeklyRateKg = primary ?? 0
+                rateWindowDays = config.regressionWindowDays
+            }
         }
 
         let estimatedDailyDeficit = weeklyRateKg * config.kcalPerKg / 7
@@ -280,7 +308,8 @@ public enum WeightTrendCalculator {
             projection30Day: projection30Day,
             dataPoints: dataPoints,
             weightChanges: calculateWeightChanges(dataPoints: dataPoints),
-            config: config
+            config: config,
+            rateWindowDays: rateWindowDays
         )
     }
 
@@ -384,6 +413,27 @@ public enum WeightTrendCalculator {
     /// Wraps Calendar.current to avoid the verbose dateComponents call site.
     static func daysBetween(_ a: Date, _ b: Date) -> Int {
         Calendar.current.dateComponents([.day], from: a, to: b).day ?? 0
+    }
+
+    /// Largest gap in days between any two consecutive entries in `points`.
+    /// Returns 0 for fewer than 2 points.
+    static func largestGapBetweenConsecutive(_ points: [WeightDataPoint]) -> Int {
+        guard points.count >= 2 else { return 0 }
+        return zip(points, points.dropFirst())
+            .map { daysBetween($0.date, $1.date) }
+            .max() ?? 0
+    }
+
+    /// Returns all entries that follow the last gap exceeding `gapThresholdDays`.
+    /// If no such gap exists, returns `points` unchanged.
+    static func pointsAfterLastGap(_ points: [WeightDataPoint], gapThresholdDays: Int) -> [WeightDataPoint] {
+        guard points.count >= 2 else { return points }
+        for i in stride(from: points.count - 2, through: 0, by: -1) {
+            if daysBetween(points[i].date, points[i + 1].date) > gapThresholdDays {
+                return Array(points[(i + 1)...])
+            }
+        }
+        return points
     }
 
     /// Compute weekly rate (kg/wk) for a given window of `dataPoints` ending
