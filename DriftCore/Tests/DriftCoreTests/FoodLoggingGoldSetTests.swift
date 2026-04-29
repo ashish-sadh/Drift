@@ -372,6 +372,35 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         XCTAssertEqual(falsePositives.count, 0, "Goal-progress queries must not parse as food log")
     }
 
+    // MARK: - Portion Scaling (#498)
+
+    func testPortionScaling_DecimalServings() {
+        // (query, foodKeyword, expectedServings or nil, expectedGramAmount or nil)
+        let cases: [(String, String, Double?, Double?)] = [
+            ("log 1.5 servings of greek yogurt", "yogurt",    1.5,   nil),
+            ("had 2.5 scoops whey protein",      "whey",      2.5,   nil),
+            ("ate half a roti",                  "roti",      0.5,   nil),
+            ("log double the dal",               "dal",       2.0,   nil),
+            ("had 1.5 cups of rice",             "rice",      nil,  360.0),
+            ("log half a cup of oats",           "oat",       nil,  120.0),
+        ]
+        var correct = 0
+        for (query, keyword, expectedServings, expectedGrams) in cases {
+            let normalized = InputNormalizer.normalize(query).lowercased()
+            if let intent = AIActionExecutor.parseFoodIntent(normalized) {
+                let keywordMatch = intent.query.lowercased().contains(keyword) || normalized.contains(keyword)
+                let servingsOk = expectedServings.map { es in intent.servings.map { abs($0 - es) < 0.01 } ?? false } ?? true
+                let gramsOk = expectedGrams.map { eg in intent.gramAmount.map { abs($0 - eg) < 1.0 } ?? false } ?? true
+                if keywordMatch && servingsOk && gramsOk { correct += 1 }
+                else { print("MISS (portion): '\(query)' → food=\(intent.query) srv=\(intent.servings ?? -1) g=\(intent.gramAmount ?? -1)") }
+            } else {
+                print("MISS (no parse): '\(query)'")
+            }
+        }
+        print("📊 Portion scaling: \(correct)/\(cases.count)")
+        XCTAssertEqual(correct, cases.count, "All portion scaling cases must parse with correct decimal amounts")
+    }
+
     // MARK: - Zero-user-math queries (#502)
 
     func testZeroUserMath_QueriesNotLoggedAsFood() {
@@ -475,6 +504,12 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             ("how much fat have I had today", false),
             ("what are the total macros for dal, rice, and roti", false),
             ("calories remaining for today", false),
+            // #498: portion scaling (SHOULD be food-logged with decimal amounts)
+            ("log 1.5 servings of greek yogurt", true),
+            ("had 2.5 scoops whey protein", true),
+            ("ate half a roti", true),
+            ("log double the dal", true),
+            ("had 1.5 cups of rice", true),
         ]
 
         var truePositive = 0, trueNegative = 0
