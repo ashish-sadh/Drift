@@ -53,12 +53,14 @@ struct AIChatView: View {
 
             Divider().overlay(Color.white.opacity(0.06))
 
-            // Disclaimer note
+            // Disclaimer note — updates when backend switches
             HStack(spacing: 6) {
-                Image(systemName: "lock.shield.fill")
+                Image(systemName: vm.activeBackend == .remote ? "cloud.fill" : "lock.shield.fill")
                     .font(.system(size: 10))
-                    .foregroundStyle(Theme.accent)
-                Text("Small on-device model \u{2014} responses may not be perfect. Data never leaves your phone. Thank you for testing! Next release will be faster and smarter. Turn off in More \u{2192} Settings.")
+                    .foregroundStyle(vm.activeBackend == .remote ? Theme.accent : Theme.accent)
+                Text(vm.activeBackend == .remote
+                    ? "Cloud AI active \u{2014} messages are sent to your configured provider."
+                    : "On-device AI \u{2014} data never leaves your phone. Turn off in More \u{2192} Settings.")
                     .font(.system(size: 10))
                     .foregroundStyle(.secondary)
             }
@@ -66,6 +68,7 @@ struct AIChatView: View {
             .padding(.vertical, 6)
             .frame(maxWidth: .infinity)
             .background(Color.white.opacity(0.03))
+            .animation(.easeInOut(duration: 0.2), value: vm.activeBackend)
 
             // Input bar
             HStack(spacing: 8) {
@@ -196,13 +199,26 @@ struct AIChatView: View {
         Button {
             vm.toggleBackend()
         } label: {
-            Image(systemName: vm.activeBackend == .remote ? "cloud.fill" : "cpu")
-                .font(.system(size: 13))
-                .foregroundStyle(vm.activeBackend == .remote ? Theme.accent : Theme.accent.opacity(0.6))
-                .frame(width: 22, height: 22)
-                .contentTransition(.symbolEffect(.replace))
+            HStack(spacing: 4) {
+                Image(systemName: vm.activeBackend == .remote ? "cloud.fill" : "cpu")
+                    .font(.system(size: 11))
+                    .contentTransition(.symbolEffect(.replace))
+                Text(vm.activeBackend == .remote ? "Cloud" : "Local")
+                    .font(.system(size: 11, weight: .medium))
+            }
+            .foregroundStyle(vm.activeBackend == .remote ? Theme.accent : Theme.accent.opacity(0.75))
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(
+                Capsule()
+                    .fill(vm.activeBackend == .remote
+                        ? Theme.accent.opacity(0.15)
+                        : Color.white.opacity(0.08))
+            )
+            .animation(.easeInOut(duration: 0.2), value: vm.activeBackend)
         }
         .buttonStyle(.plain)
+        .disabled(vm.isGenerating)
         .accessibilityLabel(vm.activeBackend == .remote ? "Cloud AI active. Tap to switch to on-device." : "On-device AI active. Tap to switch to cloud.")
         .accessibilityIdentifier("ai-backend-toggle")
     }

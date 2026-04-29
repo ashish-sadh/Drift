@@ -47,6 +47,7 @@ final class AIChatViewModel {
     /// backend swap. Mid-thread switch keeps `messages` intact — the new
     /// backend handles the next turn with no history reset.
     func toggleBackend() {
+        guard !isGenerating else { return }
         let next: AIBackendType = activeBackend == .remote ? .llamaCpp : .remote
         Preferences.preferredAIBackend = next
         Task { await AIBackendCoordinator.applyPreferredBackend() }
