@@ -205,6 +205,10 @@ public enum ToolRegistration {
                             label: "Calories", currentG: Int(n.calories), targetG: Int(target), unit: " cal"))
                     }
                 }
+                // "Calories left today" / "calories remaining" — direct clean answer
+                if query.contains("calori") && (query.contains("left") || query.contains("remain")) {
+                    return .text(FoodService.getCaloriesLeft())
+                }
                 if query.contains("carb") {
                     if let t = targets {
                         return .text(FoodService.macroProgressLine(
@@ -268,6 +272,48 @@ public enum ToolRegistration {
                         return .text("Focus on protein (\(protLeft)g left today), stay in calorie budget (\(calsLeft) cal left). High-protein foods: chicken, eggs, greek yogurt, paneer, dal.")
                     }
                     return .text("Key tips: prioritize protein, eat in a calorie deficit for fat loss (or surplus for muscle gain). Track your meals to stay on target.")
+                }
+
+                // Multi-item total macros: "total macros for dal, rice, and roti", "X, Y, Z total calories"
+                // Detects: comma-separated foods + "total"/"combined"/"together" + macro keyword
+                let hasMultiItemSignal = query.contains(",") &&
+                    (query.contains("total") || query.contains("combined") || query.contains("together")) &&
+                    (query.contains("macros") || query.contains("calori") || query.contains("protein") || query.contains("carb") || query.contains("fat"))
+                if hasMultiItemSignal {
+                    var foodPart = query
+                    for pfx in ["what are the total macros for ", "total macros for ", "total calories for ",
+                                 "total calories in ", "how many calories in ", "combined macros for ",
+                                 "macros for ", "total protein in "] {
+                        if foodPart.hasPrefix(pfx) { foodPart = String(foodPart.dropFirst(pfx.count)); break }
+                    }
+                    for sfx in [" combined", " total", " together", " all together", " in total", "?"] {
+                        while foodPart.hasSuffix(sfx) {
+                            foodPart = foodPart.dropLast(sfx.count).trimmingCharacters(in: .whitespaces)
+                        }
+                    }
+                    var items = [foodPart]
+                    for sep in [", and ", ", & ", " and ", ", "] {
+                        items = items.flatMap { $0.components(separatedBy: sep) }
+                    }
+                    items = items.map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+                    if items.count > 1 {
+                        var totCal = 0, totP = 0, totC = 0, totF = 0
+                        var found: [String] = [], notFound: [String] = []
+                        for item in items {
+                            if let r = FoodService.getNutrition(name: item) {
+                                totCal += Int(r.food.calories); totP += Int(r.food.proteinG)
+                                totC += Int(r.food.carbsG); totF += Int(r.food.fatG)
+                                found.append(r.food.name)
+                            } else {
+                                notFound.append(item)
+                            }
+                        }
+                        if found.count > 1 {
+                            var resp = "Total (\(found.joined(separator: " + "))): \(totCal) cal, \(totP)g protein, \(totC)g carbs, \(totF)g fat."
+                            if !notFound.isEmpty { resp += " (Not found: \(notFound.joined(separator: ", ")))" }
+                            return .text(resp)
+                        }
+                    }
                 }
 
                 // General food info: calories, macros, meal count, suggestions, context

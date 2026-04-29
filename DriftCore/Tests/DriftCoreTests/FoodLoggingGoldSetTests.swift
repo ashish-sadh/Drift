@@ -372,6 +372,30 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         XCTAssertEqual(falsePositives.count, 0, "Goal-progress queries must not parse as food log")
     }
 
+    // MARK: - Zero-user-math queries (#502)
+
+    func testZeroUserMath_QueriesNotLoggedAsFood() {
+        // These must route to food_info (arithmetic queries), not parseFoodIntent
+        let queries = [
+            "how many calories do I have left today",
+            "how much more protein do I need",
+            "how much fat have I had today",
+            "what are the total macros for dal, rice, and roti",
+            "calories remaining for today",
+            "how much protein until my goal",
+        ]
+        var falsePositives: [String] = []
+        for q in queries {
+            let normalized = InputNormalizer.normalize(q).lowercased()
+            if AIActionExecutor.parseFoodIntent(normalized) != nil {
+                falsePositives.append(q)
+            }
+        }
+        if !falsePositives.isEmpty { print("FALSE POSITIVES (zero-user-math):\n\(falsePositives.joined(separator: "\n"))") }
+        print("📊 Zero-user-math non-food: \(queries.count - falsePositives.count)/\(queries.count) correctly rejected")
+        XCTAssertEqual(falsePositives.count, 0, "Zero-user-math queries must not parse as food log")
+    }
+
     func testCycle7689_IndianRegionalEdgeCases() {
         let cases: [(String, String)] = [
             ("ate poha for breakfast", "poha"),
@@ -445,6 +469,12 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             ("ate poha for breakfast", true),
             ("had pav bhaji tonight", true),
             ("log upma with coconut chutney", true),
+            // #502: zero-user-math (must NOT be food-logged)
+            ("how many calories do I have left today", false),
+            ("how much more protein do I need", false),
+            ("how much fat have I had today", false),
+            ("what are the total macros for dal, rice, and roti", false),
+            ("calories remaining for today", false),
         ]
 
         var truePositive = 0, trueNegative = 0
