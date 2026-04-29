@@ -447,6 +447,25 @@ struct AIChatView: View {
                 if let provider = msg.remoteProvider {
                     RemoteProviderBadge(provider: provider)
                 }
+                if let retryText = msg.retryTurn {
+                    Button {
+                        vm.inputText = retryText
+                        vm.sendMessage()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 10, weight: .medium))
+                            Text("Retry")
+                                .font(.caption.weight(.medium))
+                        }
+                        .foregroundStyle(Theme.accent)
+                        .padding(.horizontal, 12).padding(.vertical, 6)
+                        .background(Capsule().fill(Theme.accent.opacity(0.1)))
+                        .overlay(Capsule().strokeBorder(Theme.accent.opacity(0.3), lineWidth: 0.5))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Retry: \(retryText)")
+                }
             }
             .accessibilityLabel(msg.role == .user ? "You said: \(msg.text)" : "Assistant: \(msg.text)")
 

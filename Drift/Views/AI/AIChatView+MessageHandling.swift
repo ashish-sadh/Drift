@@ -1286,6 +1286,50 @@ extension AIChatViewModel {
                     showingManualFoodEntry = true
                 }
             }
+
+            // Q7: Remote backend error — fallback or surface to user. #519.
+            if let remoteErr = aiService.lastRemoteError {
+                await handleRemoteBackendError(remoteErr, originalText: text, responseId: responseId)
+            }
+        }
+    }
+
+    // MARK: - Remote Backend Error (#519 Q7)
+
+    /// After a remote-backend turn completes, check for an error and either
+    /// silently re-run against local (transient, local available, not a photo
+    /// turn) or surface the error with a retry CTA chip (everything else).
+    func handleRemoteBackendError(
+        _ error: RemoteBackendError,
+        originalText: String,
+        responseId: UUID
+    ) async {
+        let canFallback = error.isFallbackable && !pendingTurnHasPhoto && aiService.isModelLoaded
+        if canFallback {
+            // Switch to local and re-run silently
+            aiService.clearRemoteBackend()
+            activeBackend = .llamaCpp
+            Preferences.preferredAIBackend = .llamaCpp
+            let history = buildConversationHistory()
+            let fallback = await AIToolAgent.run(
+                message: originalText,
+                screen: screenTracker.currentScreen,
+                history: history,
+                isLargeModel: false,
+                onStep: { _ in },
+                onToken: { _ in }
+            )
+            if let idx = messages.firstIndex(where: { $0.id == responseId }) {
+                messages[idx].text = "(answered locally \u{2014} Claude was unreachable) \(fallback.text)"
+                messages[idx].remoteProvider = nil
+                attachToolCards(to: &messages[idx], toolsCalled: fallback.toolsCalled)
+            }
+        } else {
+            if let idx = messages.firstIndex(where: { $0.id == responseId }) {
+                messages[idx].text = error.userFacingMessage
+                messages[idx].retryTurn = originalText
+                messages[idx].remoteProvider = nil
+            }
         }
     }
 

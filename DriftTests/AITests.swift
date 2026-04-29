@@ -2536,3 +2536,48 @@ import Testing
     vm.toggleBackend()
     #expect(vm.activeBackend == initial, "Second flip should return to original")
 }
+
+// MARK: - RemoteBackendError fallback + retry (#519 Q7)
+
+@Test @MainActor func remoteAuthError_replacesMessageAndSetsRetryTurn() async {
+    let vm = AIChatViewModel()
+    let placeholder = AIChatViewModel.ChatMessage(role: .assistant, text: "placeholder")
+    vm.messages.append(AIChatViewModel.ChatMessage(role: .user, text: "what should I eat"))
+    vm.messages.append(placeholder)
+
+    await vm.handleRemoteBackendError(.auth, originalText: "what should I eat", responseId: placeholder.id)
+
+    let response = vm.messages.last!
+    #expect(response.text == RemoteBackendError.auth.userFacingMessage)
+    #expect(response.retryTurn == "what should I eat", "auth error must set retryTurn for retry chip")
+    #expect(response.remoteProvider == nil)
+}
+
+@Test @MainActor func remoteRateLimitError_replacesMessageAndSetsRetryTurn() async {
+    let vm = AIChatViewModel()
+    let placeholder = AIChatViewModel.ChatMessage(role: .assistant, text: "placeholder")
+    vm.messages.append(AIChatViewModel.ChatMessage(role: .user, text: "log 2 eggs"))
+    vm.messages.append(placeholder)
+
+    await vm.handleRemoteBackendError(.rateLimited, originalText: "log 2 eggs", responseId: placeholder.id)
+
+    let response = vm.messages.last!
+    #expect(response.text == RemoteBackendError.rateLimited.userFacingMessage)
+    #expect(response.retryTurn == "log 2 eggs")
+}
+
+@Test @MainActor func remoteTransientError_photoTurn_surfacesErrorNotFallback() async {
+    let vm = AIChatViewModel()
+    vm.pendingTurnHasPhoto = true
+    let placeholder = AIChatViewModel.ChatMessage(role: .assistant, text: "placeholder")
+    vm.messages.append(AIChatViewModel.ChatMessage(role: .user, text: "what's in this meal"))
+    vm.messages.append(placeholder)
+
+    // Local model not loaded (no model in test env) — but photo flag overrides anyway
+    await vm.handleRemoteBackendError(.transient(503), originalText: "what's in this meal", responseId: placeholder.id)
+
+    let response = vm.messages.last!
+    #expect(response.text == RemoteBackendError.transient(503).userFacingMessage,
+            "photo turn must never auto-fallback — always surface error")
+    #expect(response.retryTurn == "what's in this meal")
+}

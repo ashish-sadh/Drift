@@ -32,6 +32,9 @@ final class AIChatViewModel {
     var isGenerating: Bool { generatingState != .idle }
     /// Bumped when a food logging sheet dismisses so suggestion pills re-evaluate.
     var mealLogRevision = 0
+    /// True when the current turn includes a photo attachment. Local backend has
+    /// no vision, so this overrides isFallbackable to prevent auto-fallback. #519 Q7.
+    var pendingTurnHasPhoto: Bool = false
 
     /// True when both local and remote BYOK backends are configured. Drives
     /// the selector visibility; with only one backend the selector is hidden.
@@ -141,6 +144,9 @@ final class AIChatViewModel {
         /// Non-nil when a cloud backend handled this turn ("Anthropic", "OpenAI",
         /// "Gemini"). Nil means on-device — silence = privacy by default. #533.
         var remoteProvider: String?
+        /// Non-nil when the assistant message shows a remote error. Stores the
+        /// original user turn text so the Retry chip can re-send it. #519 Q7.
+        var retryTurn: String?
         let createdAt = Date()
         enum Role { case user, assistant }
     }
