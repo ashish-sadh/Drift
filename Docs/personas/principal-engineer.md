@@ -32,6 +32,7 @@
 - LB/KG bug: stale preference capture pattern. Lesson: audit all @Observable classes for captured-at-init preferences.
 - Build failures in autonomous loop: editing files without reading them first. Lesson: READ-before-EDIT hook was necessary.
 - Code-improvement loop ran dry after 12 meaningful cycles. Lesson: blanket refactoring has diminishing returns — do it alongside feature work.
+- **Telemetry-dependent sprint-tasks** got filed (e.g. #535 "read telemetry failures, update prompt examples"). They cannot run — Drift's chat telemetry is **strictly on-device** at `~/Library/Containers/<bundle>/Data/Documents/drift_telemetry.db`, scoped per-user, no aggregate pipeline by design (privacy-first tenet, #111). Lesson: never decompose a campaign into work that needs central data Drift doesn't collect. Prompt-quality audits use `DriftLLMEvalMacOS` gold sets (deterministic, reproducible). User-reported regressions come in via bugs, not sweeps. Closed #535 2026-04-29.
 
 ### What I Learned — Review #11 (Cycle 199, 2026-04-12)
 - DDD routing is done and clean. 83+ DB calls eliminated. No more blanket refactoring — only alongside feature work.

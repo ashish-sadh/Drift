@@ -28,6 +28,7 @@
 ### Mistakes & Course Corrections
 - Spent too many cycles on blanket code refactoring (code-improvement loop) instead of user-facing features. Merged into single autopilot loop.
 - Initial food DB was too small (1000 foods). Ongoing enrichment is critical.
+- **Don't file tasks that depend on aggregate telemetry.** Drift's telemetry is on-device only (privacy-first tenet, #111). The chat telemetry DB lives in each user's app container — no autopilot session can read it, no central pipeline aggregates it. Tasks like "read telemetry failures and update prompt examples" are infeasible by design. The right surface for prompt-quality audits is the `DriftLLMEvalMacOS` gold set — deterministic, reproducible, auditable. If a real-user failure surfaces, it surfaces via a bug filed by the operator or a TestFlight friend, not a telemetry sweep. Source: #535 (closed 2026-04-29).
 
 ### What I Learned — Review #11 (Cycle 199, 2026-04-12)
 - MFP acquired Cal AI (March 2026) — photo food scanning is now table stakes for nutrition apps.
