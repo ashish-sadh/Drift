@@ -6,7 +6,8 @@ struct WeightChartView: View {
     let trend: WeightTrendCalculator.WeightTrend?
     let unit: WeightUnit
     let granularity: WeightViewModel.Granularity
-    var rawEntries: [WeightEntry] = []  // all entries (unfiltered) for average calculation
+    var rawEntries: [WeightEntry] = []
+    var rangeStart: Date? = nil
 
     private var displayPoints: [(date: Date, actual: Double?, ema: Double)] {
         guard let trend else { return [] }
@@ -84,6 +85,7 @@ struct WeightChartView: View {
                 }
             }
             .chartYScale(domain: .automatic(includesZero: false))
+            .chartXScale(domain: (rangeStart ?? displayPoints.first?.date ?? Date())...Date())
             .chartXAxis {
                 AxisMarks(values: .automatic(desiredCount: 4)) {
                     AxisValueLabel(format: .dateTime.month(.abbreviated)).foregroundStyle(.tertiary)
