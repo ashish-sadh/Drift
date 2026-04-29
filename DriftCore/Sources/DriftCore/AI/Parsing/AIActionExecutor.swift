@@ -233,11 +233,22 @@ public enum AIActionExecutor {
     /// Extract amount from beginning of string: "1/3 avocado" → (0.33, "avocado")
     /// Also converts weight/volume units: "2 oz chicken" → (nil, "chicken", 56.7),
     /// "1 cup oats" → (nil, "oats", 240), "1 tbsp peanut butter" → (nil, "peanut butter", 15).
+    /// Multiplier keywords: "double the chicken" → (2.0, "chicken", nil).
     public static func extractAmount(from text: String) -> (Double?, String, Double?) {
         let weightAndVolumeUnits: Set<String> = ["g", "gram", "grams", "gm", "oz", "ml", "kg", "cup", "cups", "tbsp", "tsp"]
         let countUnitsLeading: Set<String> = ["scoop", "scoops", "piece", "pieces", "slice", "slices",
                                                "serving", "servings", "portion", "portions"]
         let leadingWords = text.split(separator: " ").map(String.init)
+
+        let multiplierWords: [String: Double] = ["double": 2.0, "twice": 2.0, "triple": 3.0, "2x": 2.0, "3x": 3.0]
+        if let first = leadingWords.first, let multiplier = multiplierWords[first.lowercased()] {
+            var rest = Array(leadingWords.dropFirst())
+            if let next = rest.first, ["the", "a", "an", "my"].contains(next.lowercased()) {
+                rest = Array(rest.dropFirst())
+            }
+            let food = rest.joined(separator: " ")
+            if !food.isEmpty { return (multiplier, food.trimmingCharacters(in: .whitespaces), nil) }
+        }
         if leadingWords.count >= 3, let num = Double(leadingWords[0]) {
             let unit = leadingWords[1].lowercased()
             let convertedGrams = normalizeToGrams(num, unit: unit)
@@ -270,6 +281,7 @@ public enum AIActionExecutor {
         let twoWordAmounts: [(String, String, Double)] = [
             ("a", "quarter", 0.25), ("a", "half", 0.5),
             ("one", "quarter", 0.25), ("one", "half", 0.5),
+            ("half", "a", 0.5),
         ]
         if leadingWords.count >= 4 {
             for (w1, w2, amt) in twoWordAmounts {
