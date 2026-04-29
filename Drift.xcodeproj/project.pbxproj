@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		045B162C8175451BD63FF9C6 /* ClarificationCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1D2E86F78FA3B9DFA023EF4B /* ClarificationCardTests.swift */; };
 		07703998EC9E02AD418576E8 /* TypingDotsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2771DB577C8DC7CD66E79ED /* TypingDotsView.swift */; };
 		0884D534B3ADDE47643801F8 /* WeightTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E96402659F73046846B409D5 /* WeightTabView.swift */; };
 		08A036DA58D553363E9D412E /* MultiTurnContextEval.swift in Sources */ = {isa = PBXBuildFile; fileRef = C1D0EF86656667CEF40EB779 /* MultiTurnContextEval.swift */; };
@@ -227,6 +228,7 @@
 		188A69D621CC2DF63ADFB21F /* AIChatView+Suggestions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIChatView+Suggestions.swift"; sourceTree = "<group>"; };
 		19E7517E5B4779CBBE1C7284 /* AITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AITests.swift; sourceTree = "<group>"; };
 		1ABDC86BA4516AA3699FE080 /* WeightChartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightChartView.swift; sourceTree = "<group>"; };
+		1D2E86F78FA3B9DFA023EF4B /* ClarificationCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClarificationCardTests.swift; sourceTree = "<group>"; };
 		1D6EEDE4BB88D55A2579A27D /* ComposedFoodEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ComposedFoodEval.swift; sourceTree = "<group>"; };
 		1D783FD1AF8952C1C8CECD29 /* SupplementViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupplementViewModel.swift; sourceTree = "<group>"; };
 		20576FEB4A7F0371596D08E6 /* QuickAddView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuickAddView.swift; sourceTree = "<group>"; };
@@ -466,6 +468,7 @@
 			children = (
 				19E7517E5B4779CBBE1C7284 /* AITests.swift */,
 				E9FA0E48A2845CFA85AB7395 /* ChatSuggestionPillsTests.swift */,
+				1D2E86F78FA3B9DFA023EF4B /* ClarificationCardTests.swift */,
 				F86480D874FB7BC3461695E4 /* ClarificationFlowTests.swift */,
 				57BE014AD72F4F5691483658 /* CloudVisionClientTests.swift */,
 				CCE57CE0133752BC4B5C80F3 /* CloudVisionKeyTests.swift */,
@@ -1017,6 +1020,7 @@
 			files = (
 				2DDEA9907FA6338488A8E1CD /* AITests.swift in Sources */,
 				64BFF27391CC32B927344BA1 /* ChatSuggestionPillsTests.swift in Sources */,
+				045B162C8175451BD63FF9C6 /* ClarificationCardTests.swift in Sources */,
 				15E39B1D0294AB6762CE9EE8 /* ClarificationFlowTests.swift in Sources */,
 				D1D942D61F82FB570F804517 /* CloudVisionClientTests.swift in Sources */,
 				3CFFACEC0432AE8EC5E7ECF4 /* CloudVisionKeyTests.swift in Sources */,
@@ -1163,7 +1167,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = DriftWidget/DriftWidget.entitlements;
-				CURRENT_PROJECT_VERSION = 187;
+				CURRENT_PROJECT_VERSION = 189;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				INFOPLIST_FILE = DriftWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1183,7 +1187,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = DriftWidget/DriftWidget.entitlements;
-				CURRENT_PROJECT_VERSION = 187;
+				CURRENT_PROJECT_VERSION = 189;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				INFOPLIST_FILE = DriftWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1223,7 +1227,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Drift/Drift.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 187;
+				CURRENT_PROJECT_VERSION = 189;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1356,7 +1360,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Drift/Drift.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 187;
+				CURRENT_PROJECT_VERSION = 189;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
