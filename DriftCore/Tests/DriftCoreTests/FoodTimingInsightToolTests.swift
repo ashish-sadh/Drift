@@ -62,3 +62,93 @@ import Testing
     let formatted = FoodTimingInsightTool.formatHour(0.0)
     #expect(formatted == "12:00 AM")
 }
+
+@Test func foodTiming_formatHour_1am() {
+    #expect(FoodTimingInsightTool.formatHour(1.0) == "1:00 AM")
+}
+
+@Test func foodTiming_formatHour_9_30pm() {
+    #expect(FoodTimingInsightTool.formatHour(21.5) == "9:30 PM")
+}
+
+// MARK: - Routing gold set (parseResponse — no LLM, deterministic)
+
+@Test func foodTiming_routing_whenDoIEat() {
+    let intent = IntentClassifier.parseResponse(#"{"tool":"food_timing_insight"}"#)
+    #expect(intent?.tool == "food_timing_insight")
+}
+
+@Test func foodTiming_routing_lateNightQuery() {
+    let intent = IntentClassifier.parseResponse(#"{"tool":"food_timing_insight","window_days":"14"}"#)
+    #expect(intent?.tool == "food_timing_insight")
+    #expect(intent?.params["window_days"] == "14")
+}
+
+@Test func foodTiming_routing_weekWindow() {
+    let intent = IntentClassifier.parseResponse(#"{"tool":"food_timing_insight","window_days":"7"}"#)
+    #expect(intent?.tool == "food_timing_insight")
+    #expect(intent?.params["window_days"] == "7")
+}
+
+@Test func foodTiming_routing_monthWindow() {
+    let intent = IntentClassifier.parseResponse(#"{"tool":"food_timing_insight","window_days":"30"}"#)
+    #expect(intent?.tool == "food_timing_insight")
+    #expect(intent?.params["window_days"] == "30")
+}
+
+@Test func foodTiming_routing_noParamsDefaultsToTool() {
+    // Minimal JSON — no window_days — still routes correctly
+    let intent = IntentClassifier.parseResponse(#"{"tool":"food_timing_insight","window_days":"0"}"#)
+    #expect(intent?.tool == "food_timing_insight")
+    #expect(intent?.params["window_days"] == "0")
+}
+
+// MARK: - timingStats multi-day
+
+@Test func foodTiming_timingStats_eatingWindowTracksEarliestAndLatest() {
+    let cal = Calendar.current
+    func localISO(hour: Int, minute: Int = 0) -> String {
+        var comps = DateComponents()
+        comps.year = 2026; comps.month = 4; comps.day = 27
+        comps.hour = hour; comps.minute = minute
+        let date = cal.date(from: comps)!
+        return DateFormatters.iso8601.string(from: date)
+    }
+
+    let entries = [
+        FoodEntry(mealLogId: 1, foodName: "Oats", servingSizeG: 0, servings: 1, calories: 300,
+                  loggedAt: localISO(hour: 8), mealType: "breakfast"),
+        FoodEntry(mealLogId: 2, foodName: "Rice", servingSizeG: 0, servings: 1, calories: 500,
+                  loggedAt: localISO(hour: 13), mealType: "lunch"),
+        FoodEntry(mealLogId: 3, foodName: "Dal", servingSizeG: 0, servings: 1, calories: 400,
+                  loggedAt: localISO(hour: 20), mealType: "dinner"),
+    ]
+    let stats = FoodTimingInsightTool.timingStats(entries: entries)
+    #expect(stats.earliestMealHour != nil)
+    #expect(stats.latestMealHour != nil)
+    #expect(stats.earliestMealHour! < stats.latestMealHour!)
+    #expect(stats.avgBreakfastHour != nil)
+    #expect(stats.avgLunchHour != nil)
+    #expect(stats.avgDinnerHour != nil)
+    #expect(stats.lateNightDays == 0)
+}
+
+@Test func foodTiming_timingStats_multipleDaysCountedOnce() {
+    let cal = Calendar.current
+    func localISO(day: Int, hour: Int) -> String {
+        var comps = DateComponents()
+        comps.year = 2026; comps.month = 4; comps.day = day; comps.hour = hour; comps.minute = 0
+        return DateFormatters.iso8601.string(from: cal.date(from: comps)!)
+    }
+
+    let entries = [
+        FoodEntry(mealLogId: 1, foodName: "A", servingSizeG: 0, servings: 1, calories: 100,
+                  loggedAt: localISO(day: 27, hour: 22), mealType: "snack"),
+        FoodEntry(mealLogId: 2, foodName: "B", servingSizeG: 0, servings: 1, calories: 100,
+                  loggedAt: localISO(day: 28, hour: 22), mealType: "snack"),
+    ]
+    let stats = FoodTimingInsightTool.timingStats(entries: entries)
+    #expect(stats.lateNightDays == 2)
+    #expect(stats.totalLoggedDays == 2)
+    #expect(stats.lateNightPct == 100)
+}
