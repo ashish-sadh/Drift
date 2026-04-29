@@ -154,3 +154,132 @@ private func pushToWindow(_ entry: FoodEntry, mealType: String) {
     let msg = EditMealHandler.run(params: ToolCallParams(values: ["action": "remove"]))
     #expect(msg.lowercased().contains("which"))
 }
+
+// MARK: - Name-based window resolution (#314)
+
+@Test @MainActor func nameResolves_UniqueWindowMatch_ByNameKey() {
+    let state = ConversationState.shared
+    state.reset()
+    guard let seeded = seedEntry(mealType: "lunch", foodName: "Chicken Tikka314", calories: 280)
+    else { Issue.record("Seeding failed"); return }
+    defer { cleanup(seeded.mlId) }
+    pushToWindow(seeded.entry, mealType: "lunch")
+
+    // LLM passes name: "chicken" (no entry_id) — window has "Chicken Tikka314"
+    let msg = DeleteFoodHandler.run(params: ToolCallParams(values: ["name": "chicken"]))
+    #expect(msg.contains("Removed"), "Name-based window match should resolve and delete")
+}
+
+@Test @MainActor func nameResolves_UniqueWindowMatch_ByTargetFoodKey() {
+    let state = ConversationState.shared
+    state.reset()
+    guard let seeded = seedEntry(mealType: "dinner", foodName: "Pasta Bolognese314", calories: 420)
+    else { Issue.record("Seeding failed"); return }
+    defer { cleanup(seeded.mlId) }
+    pushToWindow(seeded.entry, mealType: "dinner")
+
+    let msg = EditMealHandler.run(params: ToolCallParams(values: [
+        "target_food": "pasta", "action": "update_quantity", "new_value": "2"
+    ]))
+    #expect(msg.contains("Updated"), "Partial name 'pasta' should resolve 'Pasta Bolognese314' from window")
+}
+
+@Test @MainActor func nameResolves_CaseInsensitive() {
+    let state = ConversationState.shared
+    state.reset()
+    guard let seeded = seedEntry(mealType: "breakfast", foodName: "Rice Pilaf314", calories: 210)
+    else { Issue.record("Seeding failed"); return }
+    defer { cleanup(seeded.mlId) }
+    pushToWindow(seeded.entry, mealType: "breakfast")
+
+    let msg = DeleteFoodHandler.run(params: ToolCallParams(values: ["name": "RICE"]))
+    #expect(msg.contains("Removed"), "Case-insensitive match should resolve 'RICE' → 'Rice Pilaf314'")
+}
+
+@Test @MainActor func nameResolves_AmbiguousReturnsNilFallsToNameSearch() {
+    let state = ConversationState.shared
+    state.reset()
+    guard let a = seedEntry(mealType: "lunch", foodName: "Chicken Curry314", calories: 300),
+          let b = seedEntry(mealType: "dinner", foodName: "Chicken Rice314", calories: 350)
+    else { Issue.record("Seeding failed"); return }
+    defer { cleanup(a.mlId, b.mlId) }
+    pushToWindow(a.entry, mealType: "lunch")
+    pushToWindow(b.entry, mealType: "dinner")
+
+    // Two "chicken" entries → name resolver returns nil → DB name search runs instead
+    let window = state.recentEntries
+    let resolved = FoodEntryRefResolver.resolveByName("chicken", in: window)
+    #expect(resolved == nil, "Ambiguous name match must return nil, not pick one arbitrarily")
+}
+
+@Test @MainActor func nameResolves_UnrelatedFood_ReturnsNil() {
+    let state = ConversationState.shared
+    state.reset()
+    guard let seeded = seedEntry(mealType: "lunch", foodName: "Dal Makhani314", calories: 190)
+    else { Issue.record("Seeding failed"); return }
+    defer { cleanup(seeded.mlId) }
+    pushToWindow(seeded.entry, mealType: "lunch")
+
+    let window = state.recentEntries
+    let resolved = FoodEntryRefResolver.resolveByName("chicken", in: window)
+    #expect(resolved == nil, "Non-matching food name should not resolve")
+}
+
+@Test @MainActor func nameResolves_EmptyPhrase_ReturnsNil() {
+    ConversationState.shared.reset()
+    let window = ConversationState.shared.recentEntries
+    #expect(FoodEntryRefResolver.resolveByName("", in: window) == nil)
+}
+
+@Test @MainActor func nameResolves_3TurnChain_LogLogEdit() {
+    // Simulates: log chicken → log rice → edit chicken by name reference
+    let state = ConversationState.shared
+    state.reset()
+    guard let chicken = seedEntry(mealType: "lunch", foodName: "ChickenRef314", calories: 250, servings: 1),
+          let rice = seedEntry(mealType: "lunch", foodName: "RiceRef314", calories: 180, servings: 1)
+    else { Issue.record("Seeding failed"); return }
+    defer { cleanup(chicken.mlId, rice.mlId) }
+    pushToWindow(chicken.entry, mealType: "lunch")
+    pushToWindow(rice.entry, mealType: "lunch")
+
+    // Turn 3: edit "ChickenRef314" by name, no entry_id provided
+    let msg = EditMealHandler.run(params: ToolCallParams(values: [
+        "target_food": "ChickenRef",
+        "action": "update_quantity",
+        "new_value": "2"
+    ]))
+    #expect(msg.contains("Updated"), "Name-based window lookup should edit chicken entry in 3-turn chain")
+}
+
+@Test @MainActor func nameResolves_3TurnChain_LogLogDelete() {
+    let state = ConversationState.shared
+    state.reset()
+    guard let first = seedEntry(mealType: "dinner", foodName: "SaagDel314", calories: 200),
+          let second = seedEntry(mealType: "dinner", foodName: "NaanDel314", calories: 280)
+    else { Issue.record("Seeding failed"); return }
+    defer { cleanup(first.mlId, second.mlId) }
+    pushToWindow(first.entry, mealType: "dinner")
+    pushToWindow(second.entry, mealType: "dinner")
+
+    // Turn 3: delete saag by name reference
+    let msg = DeleteFoodHandler.run(params: ToolCallParams(values: ["name": "SaagDel"]))
+    #expect(msg.contains("Removed"))
+    #expect(!state.recentEntries.contains(where: { $0.name == "SaagDel314" }))
+    #expect(state.recentEntries.contains(where: { $0.name == "NaanDel314" }))
+}
+
+@Test @MainActor func nameResolves_AfterDelete_EntryNotResolvableFromWindow() {
+    let state = ConversationState.shared
+    state.reset()
+    guard let seeded = seedEntry(mealType: "snack", foodName: "DeletedSnack314", calories: 120)
+    else { Issue.record("Seeding failed"); return }
+    defer { cleanup(seeded.mlId) }
+    pushToWindow(seeded.entry, mealType: "snack")
+
+    _ = DeleteFoodHandler.run(params: ToolCallParams(values: ["name": "DeletedSnack"]))
+
+    // After delete, window should not hold the evicted entry
+    let window = state.recentEntries
+    #expect(!window.contains(where: { $0.name == "DeletedSnack314" }),
+        "Deleted entry must be evicted from window")
+}
