@@ -397,7 +397,12 @@ struct AIChatView: View {
                     helpCardView(card)
                 }
                 if let options = msg.clarificationOptions, !options.isEmpty {
-                    clarificationChips(options)
+                    ClarificationCard(options: options, isDisabled: vm.isGenerating) { picked in
+                        vm.inputText = "\(picked.id)"
+                        vm.sendMessage()
+                    } onOther: {
+                        inputFocused = true
+                    }
                 }
                 if let provider = msg.remoteProvider {
                     RemoteProviderBadge(provider: provider)
@@ -447,46 +452,6 @@ struct AIChatView: View {
             }
             .accessibilityLabel("Handled by \(provider). Tap for privacy details.")
         }
-    }
-
-    // MARK: - Clarification Chips (#226)
-
-    /// Tappable chips rendered under a "Did you mean:" message. Tapping a
-    /// chip sends its label as a new user message — the VM's
-    /// `handleClarificationResponse` picks the option by label match.
-    private func clarificationChips(_ options: [ClarificationOption]) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            ForEach(options) { opt in
-                Button {
-                    vm.inputText = "\(opt.id)"
-                    vm.sendMessage()
-                } label: {
-                    HStack(spacing: 8) {
-                        Text("\(opt.id).")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(Theme.accent)
-                        Text(opt.label)
-                            .font(.caption)
-                            .foregroundStyle(Theme.textPrimary)
-                            .lineLimit(2)
-                        Spacer(minLength: 0)
-                    }
-                    .padding(.horizontal, 12).padding(.vertical, 8)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Theme.accent.opacity(0.08))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Theme.accent.opacity(0.25), lineWidth: 0.5)
-                            )
-                    )
-                }
-                .buttonStyle(.plain)
-                .disabled(vm.isGenerating)
-            }
-        }
-        .frame(maxWidth: 260, alignment: .leading)
     }
 
     // MARK: - Nutrition Lookup Card

@@ -178,3 +178,55 @@ import Testing
     let phase: ConversationState.Phase = .awaitingClarification(options: [])
     #expect(phase.resumeBlurb == "that clarification")
 }
+
+// MARK: - displayIcon population (#316)
+
+@Test func bareFoodNounOptionsHaveIcons() {
+    guard let opts = ClarificationBuilder.buildOptions(for: "chicken") else {
+        Issue.record("expected options"); return
+    }
+    #expect(opts[0].displayIcon == "fork.knife")
+    #expect(opts[1].displayIcon == "magnifyingglass")
+}
+
+@Test func supplementOptionsHaveIcons() {
+    guard let opts = ClarificationBuilder.buildOptions(for: "creatine") else {
+        Issue.record("expected options"); return
+    }
+    #expect(opts[0].displayIcon == "pills.fill")
+    #expect(opts[1].displayIcon == "info.circle")
+}
+
+@Test func weightValueOptionsHaveIcons() {
+    guard let opts = ClarificationBuilder.buildOptions(for: "150") else {
+        Issue.record("expected options"); return
+    }
+    #expect(opts[0].displayIcon == "scalemass.fill")
+    #expect(opts[1].displayIcon == "scalemass.fill")
+    #expect(opts[2].displayIcon == "target")
+}
+
+@Test func ambiguousLogOptionsHaveIcons() {
+    guard let opts = ClarificationBuilder.buildOptions(for: "log rowing") else {
+        Issue.record("expected options for 'log rowing'"); return
+    }
+    #expect(opts[0].displayIcon == "fork.knife")
+    #expect(opts[1].displayIcon == "figure.run")
+}
+
+@Test func indianFoodDosaTriggersCard() {
+    guard let opts = ClarificationBuilder.buildOptions(for: "dosa") else {
+        Issue.record("dosa must trigger clarifier — it is ambiguous log vs info"); return
+    }
+    #expect(opts.count == 2)
+    #expect(opts[0].tool == "log_food")
+    #expect(opts[0].params["name"] == "dosa")
+}
+
+@Test func indianFoodIdliTriggersCard() {
+    guard let opts = ClarificationBuilder.buildOptions(for: "idli") else {
+        Issue.record("idli must trigger clarifier"); return
+    }
+    #expect(opts.count == 2)
+    #expect(opts[0].tool == "log_food")
+}

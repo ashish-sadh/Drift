@@ -122,6 +122,7 @@
 		D1F92D043D241D539585C068 /* ServingInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F7F3BAFA978301368D148CF /* ServingInputView.swift */; };
 		D2E596AFDCE5C6C9C49B5410 /* USDAFallbackEval.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92BBFFC16E3948FD5DABA59 /* USDAFallbackEval.swift */; };
 		D681045AF7657C38E75D4D86 /* FoodSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 42A6CAF4720F61DC0C9BD2E7 /* FoodSearchView.swift */; };
+		D745EB74546A99C36FE2895D /* ClarificationCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9ADFC025483E1D1D5A39857E /* ClarificationCard.swift */; };
 		D8DCF736FEE3123E530756CA /* CycleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 163C4017D9AEE2E0927DC907 /* CycleView.swift */; };
 		D8E7B7B5446C1B3CB3BBF5FC /* DomainExtractorEval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4200A9F331B35DB8ACB881A3 /* DomainExtractorEval.swift */; };
 		DA416FC020E2523119C7E6A7 /* DriftCore in Frameworks */ = {isa = PBXBuildFile; productRef = 474D4520B459A2F8572DBAA1 /* DriftCore */; };
@@ -280,6 +281,7 @@
 		9317E4AADEC72D6DC385E722 /* LabReportDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabReportDetailView.swift; sourceTree = "<group>"; };
 		967917DDF4130B1A30B42ABA /* CloudVisionClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudVisionClient.swift; sourceTree = "<group>"; };
 		9A4575ED692EF5D3BFDBC775 /* AIChatInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIChatInsightsView.swift; sourceTree = "<group>"; };
+		9ADFC025483E1D1D5A39857E /* ClarificationCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClarificationCard.swift; sourceTree = "<group>"; };
 		9BA072B74254D7004020703A /* PhotoLogEntryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogEntryTests.swift; sourceTree = "<group>"; };
 		9F9F051926CE39DF3E0A47DA /* BodySpecPDFParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodySpecPDFParser.swift; sourceTree = "<group>"; };
 		9FA2C56E731BE5610FDC5B12 /* AIChatView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIChatView.swift; sourceTree = "<group>"; };
@@ -583,6 +585,7 @@
 				AE2EAA783326D96D5029FC28 /* AIChatViewModel.swift */,
 				A9DA1F02B1BF76DA862072A6 /* AIChooserView.swift */,
 				7F4C6870115BE53081FA0CDE /* AISetupView.swift */,
+				9ADFC025483E1D1D5A39857E /* ClarificationCard.swift */,
 				DFF155F20FB2EF069D634C95 /* FloatingAIAssistant.swift */,
 				E2771DB577C8DC7CD66E79ED /* TypingDotsView.swift */,
 			);
@@ -929,6 +932,7 @@
 				8D1ED4EACC7CB2C0EEC52743 /* BodyCompEntryView.swift in Sources */,
 				685C24962B2912E5B124EB60 /* BodyMapView.swift in Sources */,
 				BFA019F024F4E73B203B8975 /* BodySpecPDFParser.swift in Sources */,
+				D745EB74546A99C36FE2895D /* ClarificationCard.swift in Sources */,
 				64CD23436486963A92900597 /* CloudVisionClient.swift in Sources */,
 				8B963605CA92499EDDB6C984 /* CloudVisionKey.swift in Sources */,
 				BA70FAADF8E436B8FD334D6C /* ComboLogSheet.swift in Sources */,
@@ -1159,7 +1163,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = DriftWidget/DriftWidget.entitlements;
-				CURRENT_PROJECT_VERSION = 186;
+				CURRENT_PROJECT_VERSION = 187;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				INFOPLIST_FILE = DriftWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1179,7 +1183,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = DriftWidget/DriftWidget.entitlements;
-				CURRENT_PROJECT_VERSION = 186;
+				CURRENT_PROJECT_VERSION = 187;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				INFOPLIST_FILE = DriftWidget/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1219,7 +1223,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Drift/Drift.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 186;
+				CURRENT_PROJECT_VERSION = 187;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1352,7 +1356,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Drift/Drift.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 186;
+				CURRENT_PROJECT_VERSION = 187;
 				DEVELOPMENT_TEAM = ZJ5H5XH82A;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",

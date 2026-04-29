@@ -129,3 +129,49 @@ private func supplementOptions() -> [ClarificationOption] {
     let handled = vm.handleClarificationResponse("1")
     #expect(handled == false)
 }
+
+// MARK: - Card-expected inputs (#316)
+// Each input must produce options so ClarificationCard has something to render.
+
+@Test func dosaTriggersClarificationCard() {
+    guard let opts = ClarificationBuilder.buildOptions(for: "dosa") else {
+        Issue.record("'dosa' must produce options — Indian food is the bar"); return
+    }
+    #expect(opts.count == 2)
+    #expect(opts[0].tool == "log_food")
+    #expect(opts[1].tool == "food_info")
+    #expect(opts.allSatisfy { $0.displayIcon != nil })
+}
+
+@Test func paneerTriggersClarificationCard() {
+    guard let opts = ClarificationBuilder.buildOptions(for: "paneer") else {
+        Issue.record("'paneer' must produce options"); return
+    }
+    #expect(opts.count == 2)
+    #expect(opts.allSatisfy { $0.displayIcon != nil })
+}
+
+@Test func biryaniChipsHaveCorrectIcons() {
+    guard let opts = ClarificationBuilder.buildOptions(for: "biryani") else {
+        Issue.record("'biryani' must produce options"); return
+    }
+    #expect(opts[0].displayIcon == "fork.knife")
+    #expect(opts[1].displayIcon == "magnifyingglass")
+}
+
+@Test func supplementChipHasIcon() {
+    guard let opts = ClarificationBuilder.buildOptions(for: "creatine") else {
+        Issue.record("'creatine' must produce options"); return
+    }
+    #expect(opts[0].displayIcon == "pills.fill")
+}
+
+@Test func bareWeightProducesThreeChips() {
+    guard let opts = ClarificationBuilder.buildOptions(for: "75") else {
+        Issue.record("bare weight must produce 3 options"); return
+    }
+    #expect(opts.count == 3)
+    #expect(opts[0].tool == "log_weight")
+    #expect(opts[2].tool == "set_goal")
+    #expect(opts.allSatisfy { $0.displayIcon != nil })
+}
