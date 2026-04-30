@@ -9,6 +9,8 @@ struct WeightChartView: View {
     var rawEntries: [WeightEntry] = []
     var rangeStart: Date? = nil
 
+    @State private var selectedPoint: (date: Date, value: Double)? = nil
+
     private var displayPoints: [(date: Date, actual: Double?, ema: Double)] {
         guard let trend else { return [] }
         if granularity == .weekly { return weeklyAggregated(trend.dataPoints) }
@@ -83,6 +85,26 @@ struct WeightChartView: View {
                         .foregroundStyle(.white.opacity(0.8))
                         .symbolSize(granularity == .weekly ? 30 : 16)
                 }
+
+                // Selected point callout
+                if let sel = selectedPoint {
+                    PointMark(x: .value("", sel.date), y: .value("", sel.value))
+                        .foregroundStyle(Theme.accent)
+                        .symbolSize(80)
+                        .annotation(position: .top, spacing: 6) {
+                            VStack(spacing: 2) {
+                                Text(sel.date.formatted(.dateTime.month(.abbreviated).day()))
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                Text(String(format: "%.1f \(unit.displayName)", sel.value))
+                                    .font(.caption.weight(.bold).monospacedDigit())
+                                    .foregroundStyle(.primary)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 6))
+                        }
+                }
             }
             .chartYScale(domain: .automatic(includesZero: false))
             .chartXScale(domain: (rangeStart ?? displayPoints.first?.date ?? Date())...Date())
@@ -94,6 +116,28 @@ struct WeightChartView: View {
             .chartYAxis {
                 AxisMarks(position: .trailing) {
                     AxisValueLabel().foregroundStyle(.tertiary)
+                }
+            }
+            .chartOverlay { proxy in
+                GeometryReader { geo in
+                    Rectangle().fill(.clear).contentShape(Rectangle())
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { value in
+                                    let origin = geo[proxy.plotAreaFrame].origin
+                                    let location = CGPoint(
+                                        x: value.location.x - origin.x,
+                                        y: value.location.y - origin.y
+                                    )
+                                    if let date: Date = proxy.value(atX: location.x, as: Date.self),
+                                       let nearest = displayPoints.min(by: {
+                                           abs($0.date.timeIntervalSince(date)) < abs($1.date.timeIntervalSince(date))
+                                       }) {
+                                        selectedPoint = (nearest.date, nearest.ema)
+                                    }
+                                }
+                                .onEnded { _ in selectedPoint = nil }
+                        )
                 }
             }
         }
