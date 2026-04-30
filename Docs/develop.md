@@ -62,6 +62,20 @@ xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iO
 7. If AI-related: add eval harness tests, update `Docs/tools.md`
 8. Run `xcodegen generate` if new files added
 
+## USDA FoodData Central API Key
+
+`USDAFoodService` uses a free USDA API key for online food search. The default `DEMO_KEY` is capped at 1,000 req/day — fine for development, a launch blocker at scale.
+
+**Register a key (2 min):**
+1. Go to https://fdc.nal.usda.gov/api-guide.html and click "Get an API Key"
+2. Enter your email — the key arrives immediately
+3. Set it once at app startup (e.g. in `DriftApp.init()`):
+   ```swift
+   Preferences.usdaApiKey = "YOUR_KEY_HERE"
+   ```
+
+The key is stored in `UserDefaults` and persists across launches. `USDAFoodService` uses it automatically; falls back to `DEMO_KEY` only when the preference is empty. Registered keys are rate-limited at 3,600 req/hour.
+
 ## Dependencies
 - **GRDB.swift** v7.x (SQLite) — only external SPM dependency
 - **llama.xcframework** — embedded, rebuilt from latest llama.cpp (supports Gemma 4, Qwen, SmolLM)

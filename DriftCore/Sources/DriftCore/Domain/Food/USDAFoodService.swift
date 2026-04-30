@@ -40,6 +40,15 @@ public enum USDAFoodService {
         }
     }
 
+    // Register a free key at https://fdc.nal.usda.gov/api-guide.html to raise
+    // the rate limit from 1,000 req/day to 3,600 req/hour. Set via
+    // Preferences.usdaApiKey — falls back to DEMO_KEY only when unset.
+    private static let demoKey = "DEMO_KEY"
+    private static var resolvedApiKey: String {
+        let key = Preferences.usdaApiKey
+        return key.isEmpty ? demoKey : key
+    }
+
     private static let maxRequestsPerSession = 50
     private static var sessionRequestCount = 0
     private static var lastRequestTime: Date?
@@ -58,7 +67,7 @@ public enum USDAFoodService {
         sessionRequestCount += 1
         lastRequestTime = Date()
         let encoded = query.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? query
-        let urlString = "https://api.nal.usda.gov/fdc/v1/foods/search?query=\(encoded)&pageSize=\(limit)&dataType=Foundation,SR%20Legacy&api_key=DEMO_KEY"
+        let urlString = "https://api.nal.usda.gov/fdc/v1/foods/search?query=\(encoded)&pageSize=\(limit)&dataType=Foundation,SR%20Legacy&api_key=\(resolvedApiKey)"
         guard let url = URL(string: urlString) else { return [] }
 
         var request = URLRequest(url: url)

@@ -135,6 +135,18 @@ public enum Preferences {
         set { UserDefaults.standard.set(newValue.rawValue, forKey: preferredAIBackendKey) }
     }
 
+    // MARK: - USDA API Key
+
+    private static let usdaApiKeyKey = "drift_usda_api_key"
+
+    /// USDA FoodData Central API key. Register a free key at https://fdc.nal.usda.gov/api-guide.html
+    /// to raise the rate limit from 1,000 req/day (DEMO_KEY) to 3,600 req/hour.
+    /// When empty, USDAFoodService falls back to DEMO_KEY.
+    public static var usdaApiKey: String {
+        get { UserDefaults.standard.string(forKey: usdaApiKeyKey) ?? "" }
+        set { UserDefaults.standard.set(newValue, forKey: usdaApiKeyKey) }
+    }
+
     // MARK: - Photo Log Beta opt-in
 
     private static let photoLogEnabledKey = "drift_photo_log_enabled"
