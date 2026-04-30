@@ -23,7 +23,8 @@ struct WeightTabView: View {
                         timeRangeBar
 
                         // Chart — hero element
-                        WeightChartView(trend: viewModel.trend, unit: viewModel.weightUnit, granularity: viewModel.granularity, rawEntries: viewModel.entries)
+                        WeightChartView(trend: viewModel.trend, unit: viewModel.weightUnit, granularity: viewModel.granularity, rawEntries: viewModel.entries,
+                                        rangeStart: viewModel.selectedTimeRange.days.flatMap { Calendar.current.date(byAdding: .day, value: -$0, to: Date()) })
                             .frame(height: 260)
 
                         // Big change banner

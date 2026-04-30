@@ -13,6 +13,13 @@ struct DriftApp: App {
         // HealthKit / WidgetKit through protocols instead of direct singletons.
         DriftPlatform.health = HealthKitService.shared
         DriftPlatform.widget = WidgetCenterRefresher()
+        // Register all AI tools in ToolRegistry. Was previously called from
+        // LocalAIService.init(); moved out during DriftCore migration
+        // (96e3173) and the caller wiring was lost — every tool call has
+        // been returning "unknown tool" since. PhotoLog tool registers
+        // separately because it depends on iOS-only Keychain + gating.
+        ToolRegistration.registerAll()
+        PhotoLogTool.syncRegistration()
     }
 
     var body: some Scene {
@@ -29,8 +36,7 @@ struct DriftApp: App {
                 .task {
                     if !hasRequestedHealthKit {
                         hasRequestedHealthKit = true
-                        DefaultFoods.seedIfNeeded()
-                        #if targetEnvironment(simulator)
+#if targetEnvironment(simulator)
                         // 🧪 Uncomment ONE to test on simulator:
                         // DebugSeedData.seedWeightGoalBug()    // reproduces "gain 14.1 kg" bug
                         // DebugSeedData.seedNormalGoal()        // normal losing goal (correct)
@@ -47,6 +53,13 @@ struct DriftApp: App {
                             Log.app.error("Initial sync failed: \(error.localizedDescription)")
                         }
                         #endif
+                        // Recalculate weight trend from DB so latestWeightKg + trend are
+                        // populated for any view or AI tool (weight_info, etc.) before
+                        // the user navigates anywhere. Was previously initialized lazily
+                        // by Dashboard's onAppear — non-Dashboard launch paths got stale
+                        // values. Must run before TDEEEstimator.refresh() since TDEE
+                        // reads WeightTrendService.shared.latestWeightKg.
+                        WeightTrendService.shared.refresh()
                         // Refresh TDEE estimate (uses Apple Health + weight trend + food data)
                         await TDEEEstimator.shared.refresh()
                         // Schedule health nudge notifications (protein, supplements, workouts)

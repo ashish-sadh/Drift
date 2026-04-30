@@ -38,7 +38,6 @@ xcodebuild test \
     -project "$PROJECT" \
     -scheme "$SCHEME" \
     -destination "$DESTINATION" \
-    -skip-testing:DriftLLMEvalTests \
     -enableCodeCoverage YES \
     -resultBundlePath "$RESULT_PATH" \
     2>&1 | tail -5

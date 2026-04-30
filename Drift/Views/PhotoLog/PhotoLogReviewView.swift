@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import DriftCore
 
 /// Second step of the Photo Log flow. The cloud-vision response has been
@@ -11,6 +12,9 @@ struct PhotoLogReviewView: View {
     @Binding var items: [PhotoLogEditableItem]
     let overallConfidence: Confidence
     let notes: String?
+    /// Original captured image — passed to per-item AI correction so the fix
+    /// call can reference the photo without re-running on the whole meal.
+    let photo: UIImage?
     let foodLog: FoodLogViewModel
     let onLogged: () -> Void
     let onRetake: () -> Void
@@ -83,9 +87,12 @@ struct PhotoLogReviewView: View {
     }
 
     private var itemsSection: some View {
-        Section {
+        let corrector: ((PhotoLogEditableItem, String) async -> PhotoLogItem?)? = photo.map { img in
+            { item, hint in try? await PhotoLogFlowService.correctItem(item, hint: hint, image: img) }
+        }
+        return Section {
             ForEach($items) { $item in
-                PhotoLogItemRow(item: $item)
+                PhotoLogItemRow(item: $item, aiCorrector: corrector)
             }
             .onDelete(perform: removeItems)
             Button {
@@ -257,12 +264,27 @@ struct PhotoLogReviewView: View {
 
 private struct PhotoLogItemRow: View {
     @Binding var item: PhotoLogEditableItem
+    /// Scoped AI corrector — called with just this item + hint. Never receives
+    /// the full items array. nil when no photo is available (e.g. tests).
+    let aiCorrector: ((PhotoLogEditableItem, String) async -> PhotoLogItem?)?
     @FocusState private var amountFocused: Bool
+    @FocusState private var correctionFocused: Bool
+    @FocusState private var searchFocused: Bool
     @State private var amountText: String = ""
     @State private var expanded: Bool = false
+    @State private var showCorrection: Bool = false
+    @State private var correctionHint: String = ""
+    @State private var correctionError: String? = nil
+    @State private var correctionLoading = false
+    @State private var showSearch = false
+    @State private var searchQuery = ""
+    @State private var searchResults: [Food] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+            if showSearch {
+                searchField
+            } else {
             // Top row — checkbox, name, amount+unit picker.
             HStack(alignment: .center, spacing: 12) {
                 Button {
@@ -303,19 +325,162 @@ private struct PhotoLogItemRow: View {
                 unitPicker
             }
 
-            // Macro boxes — always visible. Tapping any box opens a decimal
-            // editor so the user can correct what the LLM got wrong.
             macroBoxes
 
-            // Plant badge surfaces the LLM's ingredient list so users can see
-            // what counts toward plant points for this item.
             if !item.ingredients.isEmpty {
                 plantBadge
             }
+
+            correctionRow
+            } // end else
         }
         .opacity(item.selected ? 1.0 : 0.45)
         .onAppear { syncAmountText() }
         .onChange(of: item.servingUnit) { _, _ in syncAmountText() }
+        .task {
+            guard item.name.isEmpty && item.calories == 0 else { return }
+            showSearch = true
+            try? await Task.sleep(nanoseconds: 100_000_000)
+            searchFocused = true
+        }
+    }
+
+    // MARK: - Inline DB search (new blank items)
+
+    private var searchField: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                TextField("Search foods…", text: $searchQuery)
+                    .font(.subheadline)
+                    .autocorrectionDisabled()
+                    .focused($searchFocused)
+                    .onChange(of: searchQuery) { _, q in
+                        let trimmed = q.trimmingCharacters(in: .whitespaces)
+                        searchResults = trimmed.count >= 2
+                            ? Array(FoodService.searchFood(query: trimmed).prefix(5))
+                            : []
+                    }
+                    .onSubmit { commitSearch() }
+                Button { commitSearch() } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(Theme.textTertiary)
+                }
+                .buttonStyle(.plain)
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(Color.white.opacity(0.07), in: RoundedRectangle(cornerRadius: 10))
+
+            ForEach(searchResults, id: \.name) { food in
+                Button {
+                    item.applyHintMatch(food)
+                    searchQuery = ""
+                    searchResults = []
+                    showSearch = false
+                } label: {
+                    HStack {
+                        Text(food.name)
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(Theme.textPrimary)
+                            .lineLimit(1)
+                        Spacer()
+                        Text("\(Int(food.calories.rounded())) cal · \(Int(food.servingSize.rounded()))g")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                    .padding(.vertical, 6)
+                    .padding(.horizontal, 12)
+                    .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private func commitSearch() {
+        let trimmed = searchQuery.trimmingCharacters(in: .whitespaces)
+        if !trimmed.isEmpty { item.name = trimmed }
+        searchQuery = ""
+        searchResults = []
+        showSearch = false
+    }
+
+    // MARK: - Correction row
+
+    @ViewBuilder
+    private var correctionRow: some View {
+        if showCorrection {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 8) {
+                    TextField("e.g. paratha, or 'half portion'", text: $correctionHint)
+                        .font(.caption)
+                        .textFieldStyle(.roundedBorder)
+                        .autocorrectionDisabled()
+                        .focused($correctionFocused)
+                        .onSubmit { applyCorrection() }
+                        .onChange(of: correctionHint) { _, _ in correctionError = nil }
+                    if correctionLoading {
+                        ProgressView()
+                            .frame(width: 32)
+                    } else {
+                        Button("Fix") { applyCorrection() }
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(Theme.accent)
+                            .disabled(correctionHint.trimmingCharacters(in: .whitespaces).isEmpty)
+                    }
+                }
+                if let error = correctionError {
+                    Text(error)
+                        .font(.caption2)
+                        .foregroundStyle(Theme.surplus)
+                }
+            }
+            .transition(.opacity.combined(with: .move(edge: .top)))
+        } else {
+            Button {
+                withAnimation { showCorrection = true }
+                correctionFocused = true
+            } label: {
+                Text("Not right? Describe the food")
+                    .font(.caption2)
+                    .foregroundStyle(Theme.textTertiary)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func applyCorrection() {
+        let hint = correctionHint.trimmingCharacters(in: .whitespaces)
+        guard !hint.isEmpty else { return }
+
+        // Portion multiplier is purely local — no AI needed.
+        if let multiplier = PhotoLogMatcher.parsePortionMultiplier(hint), item.grams > 0 {
+            item.setAmount(item.servingAmount * multiplier)
+            correctionHint = ""
+            correctionError = nil
+            withAnimation { showCorrection = false }
+            return
+        }
+
+        // AI correction scoped to this item only — passes item + hint + photo,
+        // never the full items array. Other rows are untouched.
+        guard let aiCorrector else {
+            correctionError = "Correction unavailable — try 'half' or 'double' for portions."
+            return
+        }
+        correctionLoading = true
+        correctionError = nil
+        Task { @MainActor in
+            defer { correctionLoading = false }
+            if let aiItem = await aiCorrector(item, hint) {
+                item.applyAICorrection(aiItem)
+                correctionHint = ""
+                correctionError = nil
+                withAnimation { showCorrection = false }
+            } else {
+                correctionError = "Couldn't identify that — try a clearer description."
+            }
+        }
     }
 
     // MARK: - Amount field

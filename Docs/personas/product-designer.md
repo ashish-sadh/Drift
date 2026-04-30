@@ -28,6 +28,7 @@
 ### Mistakes & Course Corrections
 - Spent too many cycles on blanket code refactoring (code-improvement loop) instead of user-facing features. Merged into single autopilot loop.
 - Initial food DB was too small (1000 foods). Ongoing enrichment is critical.
+- **Don't file tasks that depend on aggregate telemetry.** Drift's telemetry is on-device only (privacy-first tenet, #111). The chat telemetry DB lives in each user's app container — no autopilot session can read it, no central pipeline aggregates it. Tasks like "read telemetry failures and update prompt examples" are infeasible by design. The right surface for prompt-quality audits is the `DriftLLMEvalMacOS` gold set — deterministic, reproducible, auditable. If a real-user failure surfaces, it surfaces via a bug filed by the operator or a TestFlight friend, not a telemetry sweep. Source: #535 (closed 2026-04-29).
 
 ### What I Learned — Review #11 (Cycle 199, 2026-04-12)
 - MFP acquired Cal AI (March 2026) — photo food scanning is now table stakes for nutrition apps.
@@ -316,6 +317,13 @@
 - MFP's Today tab redesign is backfiring (more taps, user complaints). Our chat-first removes friction while they add it. This is a brief competitive window — use it in TestFlight release notes: "log lunch in one sentence, not 4 taps."
 - West African and Japanese home cooking added to food DB queue — closing global cuisine gaps beyond Indian/South Asian/East Asian that are already covered.
 
+### What I Learned — Planning Cycle 7689 (2026-04-26)
+- All 4 failing-query categories closed in one sprint is the highest-trust product move in Drift's history. The pattern: close the queries week-1 users test before anything else. "How many calories last Tuesday?" and "am I hitting my protein goal?" returning correct answers is the difference between a user staying and switching to MFP after day 1.
+- Whoop Behavior Trends shipped April 2026 — behavior→Recovery correlation after 5+ logs. This is the same pattern as `supplement_insight` and `food_timing_insight`. Every cycle these two stay queued, Whoop's version cements as the mental model for this feature type. Both must be SENIOR P0 — no exceptions next session.
+- MFP Today tab redesign backfired (April 2026) — users complaining food logging takes more taps. This is a brief competitive window. The next TestFlight build's release notes should explicitly market "log your lunch in one sentence — no 4-tap diary required." Competitive windows close; use them.
+- Eval coverage must ship with every feature, in the same PR. Features shipped without eval cases (macro goal progress, micronutrient tracking, context-aware tie-break) can silently regress. New rule: no task is marked Done without ≥5 eval cases for any AI pipeline feature.
+- Food DB flat at 2,511 for multiple cycles is a silent daily loss. USDA batch import (offline JSON → foods.json, no runtime API) is the right first step — one junior session, ≥300 new verified foods, closes the most-common "not found" gaps. Proactive search tier in the following sprint.
+
 ### What I Learned — Planning Cycle 7485 (2026-04-26)
 - 2 of 4 failing query categories closed since last review (historical dates, calorie goal setting) — trust restoration is working. The pattern: close the queries users test in week-1, because silent wrong answers end the relationship before it starts. Still open: micronutrient queries (#442) and macro goal progress (#440, #441).
 - DriftCore pure-logic test migration (pure Swift → `swift test`, 0.1s) is the highest-leverage engineering improvement in recent cycles. Every AI prompt change can now be validated in seconds instead of waiting 30s for simulator boot. This makes the "improve → verify → commit" loop fast enough to actually happen every session.
@@ -324,3 +332,18 @@
 - Food DB at 2,511 has been flat for multiple cycles. USDA Phase 2 (#345) is in queue but keeps getting deferred. At current trajectory, food-not-found moments drive users to MFP daily. This is the compound loss — they log one meal elsewhere and habitually continue.
 - weight_trend_prediction analytical tool (#463) added this cycle — "at this rate, when will I hit 75kg?" is exactly the forward-looking coaching query that transforms Drift from a data logger to a health coach. Third analytical tool after cross_domain_insight and weight_trend_prediction (which previously shipped in cycle 5351). Need 2 more for the "AI coach" positioning to hold.
 - Indian meal combination gold set (#464) — South Asian logging patterns are a core use case for the primary user base. Adding 10 eval cases for dal chawal, rajma chawal, biryani, dosa, idli sambar closes the gap between what users type and what the eval suite verifies.
+
+### What I Learned — Review Cycle 7784 (2026-04-27)
+- `supplement_insight` (#417) and `food_timing_insight` (#418) crashed 4 sessions total — 2 each. Whoop Behavior Trends is live and being actively marketed. Diagnosis (#493) must land before the next implementation attempt. Agreed: after #493, ship both tools in one senior session.
+- MFP Today tab redesign complaints persist as of April 2026. TestFlight release notes should lead with "log your lunch in one sentence" before MFP ships their fix. Competitive windows close.
+- Photo logging recovery campaign is the most user-visible unshipped work. The scan-again loop is still live. Three tasks queued (#495 card editing, #496 free-text correction, #505 DB-hint matching) — campaign isn't done until all three ship.
+- State.md at build 174 while actual is 183 — now a hard planning blocker. Filed #510 as mandatory Step 0 of next sprint. Any planning session reading stale state makes wrong inferences about what's been shipped.
+- The one-sentence logging vs MFP 4-tap gap is the sharpest competitive differentiator right now. Use it aggressively in TestFlight release notes while the window is open.
+
+### What I Learned — Planning Cycle 7724 (2026-04-27)
+- supplement_insight (#417) and food_timing_insight (#418) crashed two consecutive senior sessions each. This is no longer a technical debt issue — Whoop Behavior Trends is live and being actively marketed. Every cycle these stay unshipped, Whoop's version cements as the user's mental model for habit→outcome correlation. The agreed direction: diagnose crash root cause first (15 min reading the crashed branches), then implement with diagnosis in hand. No blind retry.
+- All 4 failing-query categories from cycle 5965 are closed (historical dates, calorie goal, macro goal progress, micronutrients). The highest-trust moment for a new user now works. This is the right prioritization principle validated: close week-1 queries before adding new features.
+- USDA Phase 2 batch import shipped — 500+ verified USDA foods added in one session. The growth model for food DB is now external data sources (USDA JSON dumps), not manual curation. Every future food DB sprint should look for structured data sources before adding entries by hand.
+- Active campaigns this cycle: (1) Photo logging recovery — kill the scan-again loop with in-card editing, free-text correction, and DB-hint matching. (2) Remote-model architectural prep — AIBackend conformance, BYOK Keychain, no user exposure. (3) Zero user math — invisible unit conversion, decimal servings, and automatic macro aggregation so users describe, not compute.
+- MFP competitive window remains open but closing. Their Today tab redesign is still generating complaints (April 2026). TestFlight release notes should lead with "log your lunch in one sentence — no 4-tap diary required" before they fix it.
+- State.md stale by 8 builds is a planning accuracy problem, not a docs problem. When State.md says build 174 and the actual build is 182, every session that reads it makes wrong inferences about what's been shipped. Refreshing State.md must be treated as Step 0 of every sprint, not an optional junior cleanup task.

@@ -152,6 +152,13 @@ public enum AIRuleEngine {
             }
         }
 
+        // Hydration
+        if let waterMl = try? AppDatabase.shared.fetchDailyWaterMl(for: today), waterMl > 0 {
+            let goal = Preferences.waterGoalMl
+            let pct = Int((waterMl / goal * 100).rounded())
+            lines.append("Water: \(Int(waterMl))/\(Int(goal))ml (\(pct)%)")
+        }
+
         // Supplements
         if let supplements = try? AppDatabase.shared.fetchActiveSupplements(),
            !supplements.isEmpty,

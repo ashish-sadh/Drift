@@ -60,8 +60,12 @@ struct ComboLogSheet: View {
                     Button("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(role: .destructive) { showingDeleteConfirm = true } label: {
-                        Image(systemName: "trash")
+                    Menu {
+                        Button(role: .destructive) { showingDeleteConfirm = true } label: {
+                            Label("Delete combo", systemImage: "trash")
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {

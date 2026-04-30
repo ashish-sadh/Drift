@@ -130,7 +130,7 @@ private func makeImage() -> UIImage {
     let output = await PhotoLogTool.run(image: makeImage(), prompt: "what is this", service: service)
 
     #expect(output.toolsCalled == [PhotoLogTool.toolName])
-    #expect(output.text.contains("apple"))
+    #expect(output.text.lowercased().contains("apple"))
     #expect(output.text.contains("cal"))
 
     resetState()

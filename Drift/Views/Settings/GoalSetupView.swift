@@ -17,6 +17,13 @@ struct GoalSetupView: View {
     @State private var customCarbs: String = ""
     @State private var customFat: String = ""
 
+    /// True when the user typed a calorie target below the 1200 safety floor.
+    /// Empty = "auto", which is fine. Non-empty < 1200 disables Save.
+    private var calorieBelowFloor: Bool {
+        guard let cal = Double(calorieTarget) else { return false }
+        return cal < 1200
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -147,13 +154,16 @@ struct GoalSetupView: View {
                 } footer: {
                     let allMacrosSet = dietPref == .custom
                         && !customProtein.isEmpty && !customCarbs.isEmpty && !customFat.isEmpty
-                    if allMacrosSet {
+                    if calorieBelowFloor {
+                        Text("Calorie targets below 1200 aren't safe — pick 1200 or higher, or leave blank to auto-estimate.")
+                            .foregroundStyle(Theme.proteinRed)
+                    } else if allMacrosSet {
                         let implied = (Double(customProtein) ?? 0) * 4
                             + (Double(customCarbs) ?? 0) * 4
                             + (Double(customFat) ?? 0) * 9
                         Text("Set by your macros (\(Int(implied)) kcal/day). To set calories independently, clear a macro field.")
                     } else {
-                        Text("Leave blank to estimate from Apple Health activity data. Set a number if you know your daily intake target.")
+                        Text("Leave blank to estimate from Apple Health activity data. Set a number if you know your daily intake target (minimum 1200).")
                     }
                 }
 
@@ -272,7 +282,7 @@ struct GoalSetupView: View {
                         onSave(goal)
                         dismiss()
                     }
-                    .disabled(Double(targetWeight) == nil)
+                    .disabled(Double(targetWeight) == nil || calorieBelowFloor)
                 }
             }
             .onAppear {

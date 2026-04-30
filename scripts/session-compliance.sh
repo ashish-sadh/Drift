@@ -55,6 +55,45 @@ except Exception:
 PYEOF
 )
 
+# Numeric-only version for issue ref + WIP path naming.
+INTERRUPTED_NUM=$(echo "$INTERRUPTED" | grep -oE '^#[0-9]+' | tr -d '#')
+
+# Preserve uncommitted work on crash/stall as a patch file under
+# ~/drift-state/wip/<N>.patch (the watchdog also snapshots periodically
+# during the session — this handler just labels the issue + comments
+# with the path so recovery is one `git apply` away).
+#
+# Patch-file approach (simpler than branches): no remote branches to
+# accumulate, no merge ceremony, single `git apply` recovery. The
+# patch lives in ~/drift-state/ which survives session crashes and
+# watchdog restarts. Tradeoff: local-only — if the machine dies, the
+# work is gone (acceptable since drift-state has no remote anyway).
+#
+# Bug history: #426 lost SleepFoodCorrelationTool + 6 file edits;
+# #418 lost FoodTimingInsightTool. Both: real work 60 min in, killed
+# by Anthropic API stream idle timeout, then session-compliance +
+# cleanup_dirty_state combo wiped the working tree.
+if [[ "$EXIT_REASON" == "crash" || "$EXIT_REASON" == "stall" ]] && [[ -n "$INTERRUPTED_NUM" ]]; then
+    WIP_DIR="$STATE_DIR/wip"
+    WIP_PATCH="$WIP_DIR/${INTERRUPTED_NUM}.patch"
+    WIP_TARBALL="$WIP_DIR/${INTERRUPTED_NUM}.untracked.tar.gz"
+    if [[ -s "$WIP_PATCH" ]] || [[ -s "$WIP_TARBALL" ]]; then
+        echo "[$TS] session-compliance: WIP found for #${INTERRUPTED_NUM} — labeling resumable"
+        gh issue edit "$INTERRUPTED_NUM" --add-label resumable 2>>"$STATE_DIR/gh-errors.log" || true
+        # Build recovery instructions matching what's actually saved
+        RECOVER=""
+        [[ -s "$WIP_PATCH" ]] && RECOVER="git apply $WIP_PATCH"
+        [[ -s "$WIP_TARBALL" ]] && RECOVER="${RECOVER:+$RECOVER && }tar -xzf $WIP_TARBALL"
+        gh issue comment "$INTERRUPTED_NUM" \
+          --body "Resumable: crashed session WIP preserved. Recover from repo root:
+\`\`\`
+$RECOVER
+\`\`\`
+Crash exit reason: \`$EXIT_REASON\`. After successful close: \`gh issue edit $INTERRUPTED_NUM --remove-label resumable && rm $WIP_PATCH $WIP_TARBALL\`." \
+          2>>"$STATE_DIR/gh-errors.log" || true
+    fi
+fi
+
 # Write last-session-summary.md (next session reads this at startup)
 SUMMARY_FILE="$STATE_DIR/last-session-summary.md"
 cat > "$SUMMARY_FILE" <<EOF

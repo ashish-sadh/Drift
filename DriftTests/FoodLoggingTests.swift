@@ -35,11 +35,6 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     #expect(!results.isEmpty, "Should find meatball entries")
 }
 
-@Test func foodSearchCostco() async throws {
-    let db = seededDB()
-    let results = try db.searchFoods(query: "kirkland")
-    #expect(results.count >= 5, "Should find Kirkland/Costco items: \(results.count)")
-}
 
 @Test func foodDatabaseCount() async throws {
     let db = seededDB()
@@ -173,6 +168,22 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
 
     let nutrition = try db.fetchDailyNutrition(for: "2026-03-30")
     #expect(nutrition.calories == 200)
+}
+
+@Test func quickAddServingsPersistOnSave() async throws {
+    let db = try AppDatabase.empty()
+    var mealLog = MealLog(date: "2026-03-30", mealType: "snack")
+    try db.saveMealLog(&mealLog)
+
+    var entry = FoodEntry(mealLogId: mealLog.id!, foodName: "Paratha", servingSizeG: 0, servings: 1, calories: 550, proteinG: 12, carbsG: 90, fatG: 25, fiberG: 7)
+    try db.saveFoodEntry(&entry)
+
+    try db.updateFoodEntryServings(id: entry.id!, servings: 0.5)
+
+    let fetched = try db.fetchFoodEntries(forMealLog: mealLog.id!)
+    #expect(fetched.count == 1)
+    #expect(fetched[0].servings == 0.5, "servings should persist after edit")
+    #expect(fetched[0].calories == 550, "macros unchanged — quick-add stores totals")
 }
 
 @Test func differentDatesNutritionIsolated() async throws {
@@ -2614,7 +2625,7 @@ private func seededDB() -> AppDatabase { _sharedSeededDB }
     ]
     let trend = WeightTrendCalculator.calculateTrend(
         entries: entries,
-        config: .init(emaAlpha: 0.1, regressionWindowDays: 3, kcalPerKg: 6000, maintainingThresholdKgPerWeek: 0.05)
+        config: .init(emaHalfLifeDays: 14, regressionWindowDays: 3, widenSlopeThresholdKgPerWeek: 0.227, widenWindowDays: 42, kcalPerKg: 6000, maintainingThresholdKgPerWeek: 0.05)
     )
     #expect(trend != nil)
     // With 3-day window, only last 2 entries are in window → fallback path

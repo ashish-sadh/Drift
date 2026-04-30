@@ -83,43 +83,17 @@ public enum ToolRegistration {
                     name = String(name[..<name.index(name.startIndex, offsetBy: match.range.location)]).trimmingCharacters(in: .whitespaces)
                 }
 
-                // --- Route 2: Multi-item → recipe builder ---
+                // --- Route 2: Multi-item → recipe builder (AI names, no DB substitution) ---
                 let items = name.components(separatedBy: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
                 if items.count > 1 {
                     let firstName = items[0]
-                    if let food = AIActionExecutor.findFood(query: firstName, servings: servings, gramAmount: gramAmount) {
-                        var enriched: [String: String] = ["name": food.food.name, "amount": "\(food.servings)"]
-                        enriched["remaining_items"] = items.dropFirst().joined(separator: ", ")
-                        return .transform(ToolCallParams(values: enriched))
-                    }
-                    return .transform(ToolCallParams(values: ["name": firstName, "remaining_items": items.dropFirst().joined(separator: ", ")]))
-                }
-
-                // --- Route 3: Single food → DB lookup ---
-                if let food = AIActionExecutor.findFood(query: name, servings: servings, gramAmount: gramAmount) {
-                    var enriched: [String: String] = ["name": food.food.name]
-                    enriched["amount"] = "\(food.servings)"
+                    var enriched: [String: String] = ["name": firstName]
+                    if let s = servings { enriched["amount"] = "\(s)" }
+                    enriched["remaining_items"] = items.dropFirst().joined(separator: ", ")
                     return .transform(ToolCallParams(values: enriched))
                 }
 
-                // --- Route 4: Not in local DB → try USDA/OpenFoodFacts if enabled (5s timeout) ---
-                let searchName = name
-                let onlineResults = await IntentClassifier.withTimeout(seconds: 5) {
-                    await FoodService.searchWithFallback(query: searchName, localThreshold: 1)
-                } ?? []
-                if let best = onlineResults.first {
-                    var enriched: [String: String] = ["name": best.name]
-                    let resolvedServings: Double
-                    if let grams = gramAmount, best.servingSize > 0 {
-                        resolvedServings = grams / best.servingSize
-                    } else {
-                        resolvedServings = servings ?? 1
-                    }
-                    enriched["amount"] = "\(resolvedServings)"
-                    return .transform(ToolCallParams(values: enriched))
-                }
-
-                // --- Route 5: Not found anywhere → pass through for search ---
+                // --- Route 3: Pass through → openFoodSearch so user confirms the food ---
                 var enriched: [String: String] = ["name": name]
                 if let s = servings { enriched["amount"] = "\(s)" }
                 return .transform(ToolCallParams(values: enriched))
@@ -231,6 +205,10 @@ public enum ToolRegistration {
                             label: "Calories", currentG: Int(n.calories), targetG: Int(target), unit: " cal"))
                     }
                 }
+                // "Calories left today" / "calories remaining" — direct clean answer
+                if query.contains("calori") && (query.contains("left") || query.contains("remain")) {
+                    return .text(FoodService.getCaloriesLeft())
+                }
                 if query.contains("carb") {
                     if let t = targets {
                         return .text(FoodService.macroProgressLine(
@@ -294,6 +272,48 @@ public enum ToolRegistration {
                         return .text("Focus on protein (\(protLeft)g left today), stay in calorie budget (\(calsLeft) cal left). High-protein foods: chicken, eggs, greek yogurt, paneer, dal.")
                     }
                     return .text("Key tips: prioritize protein, eat in a calorie deficit for fat loss (or surplus for muscle gain). Track your meals to stay on target.")
+                }
+
+                // Multi-item total macros: "total macros for dal, rice, and roti", "X, Y, Z total calories"
+                // Detects: comma-separated foods + "total"/"combined"/"together" + macro keyword
+                let hasMultiItemSignal = query.contains(",") &&
+                    (query.contains("total") || query.contains("combined") || query.contains("together")) &&
+                    (query.contains("macros") || query.contains("calori") || query.contains("protein") || query.contains("carb") || query.contains("fat"))
+                if hasMultiItemSignal {
+                    var foodPart = query
+                    for pfx in ["what are the total macros for ", "total macros for ", "total calories for ",
+                                 "total calories in ", "how many calories in ", "combined macros for ",
+                                 "macros for ", "total protein in "] {
+                        if foodPart.hasPrefix(pfx) { foodPart = String(foodPart.dropFirst(pfx.count)); break }
+                    }
+                    for sfx in [" combined", " total", " together", " all together", " in total", "?"] {
+                        while foodPart.hasSuffix(sfx) {
+                            foodPart = foodPart.dropLast(sfx.count).trimmingCharacters(in: .whitespaces)
+                        }
+                    }
+                    var items = [foodPart]
+                    for sep in [", and ", ", & ", " and ", ", "] {
+                        items = items.flatMap { $0.components(separatedBy: sep) }
+                    }
+                    items = items.map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+                    if items.count > 1 {
+                        var totCal = 0, totP = 0, totC = 0, totF = 0
+                        var found: [String] = [], notFound: [String] = []
+                        for item in items {
+                            if let r = FoodService.getNutrition(name: item) {
+                                totCal += Int(r.food.calories); totP += Int(r.food.proteinG)
+                                totC += Int(r.food.carbsG); totF += Int(r.food.fatG)
+                                found.append(r.food.name)
+                            } else {
+                                notFound.append(item)
+                            }
+                        }
+                        if found.count > 1 {
+                            var resp = "Total (\(found.joined(separator: " + "))): \(totCal) cal, \(totP)g protein, \(totC)g carbs, \(totF)g fat."
+                            if !notFound.isEmpty { resp += " (Not found: \(notFound.joined(separator: ", ")))" }
+                            return .text(resp)
+                        }
+                    }
                 }
 
                 // General food info: calories, macros, meal count, suggestions, context
@@ -390,6 +410,47 @@ public enum ToolRegistration {
             handler: { _ in .text(FoodService.explainCalories()) }
         ))
 
+        // MARK: - Hydration Tools
+
+        r.register(ToolSchema(
+            id: "hydration.log_water", name: "log_water", service: "hydration",
+            description: "User wants to LOG water or fluid intake. Use when they say 'drank', 'had water', 'drinking', 'gulped', or mention a quantity of water/juice/tea.",
+            parameters: [
+                ToolParam("amount", "number", "Quantity of fluid"),
+                ToolParam("unit", "string", "ml, l, oz, cups, glass, bottle — default ml", required: false)
+            ],
+            validate: { params in
+                guard let amount = params.double("amount"), amount > 0 else { return "Missing amount" }
+                let unit = params.string("unit") ?? "ml"
+                guard let ml = HydrationService.parseMl(amount: amount, unit: unit) else {
+                    return "Unknown unit '\(unit)'. Use ml, l, oz, cups, glass, or bottle."
+                }
+                if ml < 10 || ml > 5000 { return "Amount \(Int(ml))ml is outside valid range (10–5000ml)" }
+                return nil
+            },
+            handler: { params in
+                guard let amount = params.double("amount") else { return .error("Missing amount") }
+                let unit = params.string("unit") ?? "ml"
+                guard let ml = HydrationService.parseMl(amount: amount, unit: unit) else {
+                    return .error("Unknown unit '\(unit)'")
+                }
+                do {
+                    let totalMl = try HydrationService.logWater(amountMl: ml)
+                    let goal = Preferences.waterGoalMl
+                    let pct = Int((totalMl / goal * 100).rounded())
+                    let logged = ml >= 1000
+                        ? String(format: "%.1fL", ml / 1000)
+                        : "\(Int(ml))ml"
+                    let total = totalMl >= 1000
+                        ? String(format: "%.1fL", totalMl / 1000)
+                        : "\(Int(totalMl))ml"
+                    return .text("Logged \(logged). Today: \(total)/\(Int(goal))ml (\(pct)%).")
+                } catch {
+                    return .error("Couldn't save water entry.")
+                }
+            }
+        ))
+
         // MARK: - Weight Tools (2 — consolidated from 4)
 
         r.register(ToolSchema(
@@ -471,8 +532,8 @@ public enum ToolRegistration {
 
                 switch goalType {
                 case "calorie":
-                    guard target >= 1000 && target <= 5000 else {
-                        return .error("Calorie goal \(Int(target)) is outside valid range (1000–5000).")
+                    guard target >= 1200 && target <= 5000 else {
+                        return .error("Calorie goal \(Int(target)) is outside valid range (1200–5000). 1200 is the floor — anything lower isn't safe to recommend.")
                     }
                     let currentKg = WeightTrendService.shared.latestWeightKg ?? 70
                     var goal = WeightGoal.load() ?? WeightGoal(targetWeightKg: currentKg, monthsToAchieve: 6,
@@ -769,6 +830,21 @@ public enum ToolRegistration {
         // Weight trend prediction — "when will I reach my goal weight?"
         // OLS regression on last 30 days → projected date + R² confidence. #402.
         WeightTrendPredictionTool.syncRegistration(registry: r)
+
+        // Supplement adherence — streak, adherence %, last missed date. #417.
+        SupplementInsightTool.syncRegistration(registry: r)
+
+        // Meal timing patterns — avg meal times, late-night eating %. #418.
+        FoodTimingInsightTool.syncRegistration(registry: r)
+
+        // Sleep-food correlation — does late eating hurt sleep? #426.
+        SleepFoodCorrelationTool.syncRegistration(registry: r)
+
+        // Exercise volume by muscle group — training volume, undertrained groups. #335.
+        ExerciseVolumeSummaryTool.syncRegistration(registry: r)
+
+        // Glucose-food correlation — which foods spike glucose? ±2h window analysis. #324.
+        GlucoseFoodCorrelationTool.syncRegistration(registry: r)
 
         // PhotoLog tool is registered separately by the iOS Drift app
         // after this base registration runs (it depends on iOS-only

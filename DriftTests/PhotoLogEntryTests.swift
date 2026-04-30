@@ -286,3 +286,193 @@ private func sampleItem(name: String = "dal",
     let mt = MealType.resolve(now: Date(), recentEntries: [entry])
     #expect(mt == .breakfast)
 }
+
+// MARK: - Add / remove / name-edit mutations (#495)
+
+@Test func blankItemHasZeroMacrosAndDefaultGrams() {
+    let item = PhotoLogEditableItem.blank()
+    #expect(item.name == "")
+    #expect(item.grams == 100)
+    #expect(item.calories == 0)
+    #expect(item.proteinG == 0)
+    #expect(item.carbsG == 0)
+    #expect(item.fatG == 0)
+    #expect(item.selected == true)
+    // Per-gram rates are zero so a later rescale doesn't invent calories.
+    #expect(item.caloriesPerGram == 0)
+    #expect(item.proteinPerGram == 0)
+}
+
+@Test func nameEditIsDirectMutation() {
+    // The review card binds TextField directly to item.name — verify the
+    // struct field is mutable and the change sticks.
+    var item = PhotoLogEditableItem(from: sampleItem(name: "random soup"))
+    item.name = "Dal Tadka"
+    #expect(item.name == "Dal Tadka")
+}
+
+@Test func applyHintMatchReplacesNameAndRecalcsMacros() {
+    // User typed "palak paneer" — DB match substitutes canonical name +
+    // recalculates per-gram rates from the DB food's servingSize.
+    var item = PhotoLogEditableItem(from: sampleItem(name: "spinach cheese curry", grams: 200, calories: 100))
+    let food = Food(name: "Palak Paneer", category: "Indian Curries",
+                    servingSize: 200, servingUnit: "g",
+                    calories: 280, proteinG: 14, carbsG: 10, fatG: 20)
+    item.applyHintMatch(food)
+    #expect(item.name == "Palak Paneer")
+    #expect(item.confidence == .high)
+    #expect(item.macrosManuallyEdited == false)
+    // Macros rescaled to current 200g from DB's per-gram rates.
+    #expect(abs(item.calories - 280) < 1e-6)
+    #expect(abs(item.proteinG - 14) < 1e-6)
+}
+
+@Test func applyHintMatchAppliesPortionDefaultWhenGramsIsZero() {
+    // The LLM missed the grams; applyHintMatch fills in a category-aware default.
+    var item = PhotoLogEditableItem(from: sampleItem(name: "unknown", grams: 0, calories: 0))
+    let food = Food(name: "Dal Makhani", category: "Indian Curries",
+                    servingSize: 200, servingUnit: "g",
+                    calories: 180, proteinG: 8, carbsG: 22, fatG: 7)
+    item.applyHintMatch(food)
+    // portionDefault for "Indian Curries" is 200g.
+    #expect(item.grams == 200)
+    #expect(item.name == "Dal Makhani")
+}
+
+// MARK: - Inline DB search for Add item (#525)
+
+@Test @MainActor func addItemDBPickPopulatesNameAndMacros() {
+    var item = PhotoLogEditableItem.blank()
+    let results = FoodService.searchFood(query: "rice")
+    guard let food = results.first else { return } // skip if DB empty
+    item.applyHintMatch(food)
+    #expect(!item.name.isEmpty)
+    #expect(item.calories > 0)
+    #expect(item.grams > 0)
+    #expect(item.caloriesPerGram > 0)
+}
+
+@Test @MainActor func unknownQueryYieldsNoDBResults() {
+    let results = FoodService.searchFood(query: "asdfqwer123xyz")
+    #expect(results.isEmpty)
+}
+
+@Test func addItemBlankRowHasZeroMacrosUntilPicked() {
+    let item = PhotoLogEditableItem.blank()
+    #expect(item.name.isEmpty)
+    #expect(item.calories == 0)
+    #expect(item.proteinG == 0)
+    #expect(item.carbsG == 0)
+    #expect(item.fatG == 0)
+}
+
+// MARK: - AI correction scoping (#524)
+
+@Test func applyAICorrectionUpdatesOnlyTargetItem() {
+    // 3-item meal: edit item 2 manually, apply AI correction to item 1,
+    // assert item 2's edits are preserved and item 3 is untouched.
+    var item1 = PhotoLogEditableItem(from: sampleItem(name: "rice", grams: 150, calories: 200))
+    var item2 = PhotoLogEditableItem(from: sampleItem(name: "dal", grams: 100, calories: 180, proteinG: 12))
+    var item3 = PhotoLogEditableItem(from: sampleItem(name: "paratha", grams: 60, calories: 150))
+
+    // User manually edits item 2 name + protein
+    item2.name = "moong dal"
+    item2.setMacro(.protein, to: 15)
+    #expect(item2.macrosManuallyEdited == true)
+
+    // User unselects item 3
+    item3.selected = false
+
+    // Capture state before correction
+    let item2NameBefore = item2.name
+    let item2ProteinBefore = item2.proteinG
+    let item3NameBefore = item3.name
+    let item3GramsBefore = item3.grams
+
+    // Apply AI correction to item 1 only
+    let corrected = PhotoLogItem(name: "basmati rice", grams: 180, calories: 240,
+                                 proteinG: 4, carbsG: 52, fatG: 1, confidence: .high)
+    item1.applyAICorrection(corrected)
+
+    // item 1 updated
+    #expect(item1.name == "basmati rice")
+    #expect(item1.grams == 180)
+    #expect(item1.calories == 240)
+
+    // item 2 completely untouched
+    #expect(item2.name == item2NameBefore)
+    #expect(abs(item2.proteinG - item2ProteinBefore) < 1e-9)
+    #expect(item2.macrosManuallyEdited == true)
+
+    // item 3 completely untouched
+    #expect(item3.name == item3NameBefore)
+    #expect(item3.grams == item3GramsBefore)
+    #expect(item3.selected == false)
+}
+
+@Test func applyAICorrectionPreservesSelectedFlag() {
+    // selected = false before correction must remain false after
+    var item = PhotoLogEditableItem(from: sampleItem(name: "samosa", grams: 80, calories: 200))
+    item.selected = false
+    let corrected = PhotoLogItem(name: "aloo samosa", grams: 90, calories: 220,
+                                 proteinG: 3, carbsG: 28, fatG: 10, confidence: .high)
+    item.applyAICorrection(corrected)
+    #expect(item.selected == false)
+    #expect(item.name == "aloo samosa")
+}
+
+@Test func applyAICorrectionResetsManuallyEditedFlag() {
+    // User had edited macros; AI correction resets the flag (new baseline)
+    var item = PhotoLogEditableItem(from: sampleItem(name: "paneer", grams: 100, calories: 260))
+    item.setMacro(.protein, to: 20)
+    #expect(item.macrosManuallyEdited == true)
+    let corrected = PhotoLogItem(name: "paneer tikka", grams: 120, calories: 310,
+                                 proteinG: 22, carbsG: 5, fatG: 23, confidence: .high)
+    item.applyAICorrection(corrected)
+    #expect(item.macrosManuallyEdited == false)
+    #expect(item.name == "paneer tikka")
+    #expect(abs(item.proteinG - 22) < 1e-9)
+}
+
+@Test func applyAICorrectionUpdatesPerGramRatesForFutureRescale() {
+    // After AI correction, a subsequent grams edit should use the new rates
+    var item = PhotoLogEditableItem(from: sampleItem(grams: 100, calories: 200, proteinG: 10))
+    let corrected = PhotoLogItem(name: "dal makhani", grams: 200, calories: 300,
+                                 proteinG: 16, carbsG: 30, fatG: 10, confidence: .high)
+    item.applyAICorrection(corrected)
+    // Per-gram rates from corrected item: protein = 16/200 = 0.08
+    item.grams = 100
+    item.rescale()
+    #expect(abs(item.proteinG - 8) < 1e-9)   // 0.08 × 100
+    #expect(abs(item.calories - 150) < 1e-9) // 1.5 × 100
+}
+
+@Test func applyAICorrectionUpdatesIngredients() {
+    // Ingredients list replaced with AI's updated answer
+    var item = PhotoLogEditableItem(from: PhotoLogItem(
+        name: "veg pulao", grams: 200, calories: 300,
+        proteinG: 8, carbsG: 55, fatG: 6, confidence: .medium,
+        ingredients: ["rice", "carrot"]
+    ))
+    let corrected = PhotoLogItem(name: "veg biryani", grams: 250, calories: 380,
+                                 proteinG: 10, carbsG: 68, fatG: 8, confidence: .high,
+                                 ingredients: ["basmati rice", "potato", "onion", "spices"])
+    item.applyAICorrection(corrected)
+    #expect(item.ingredients == ["basmati rice", "potato", "onion", "spices"])
+}
+
+@Test func applyHintMatchRescalesFromCorrectedRates() {
+    // After applyHintMatch, a serving-amount change should use the DB food's
+    // per-gram rates, not the original LLM rates.
+    var item = PhotoLogEditableItem(from: sampleItem(name: "butter chicken", grams: 150, calories: 200, proteinG: 10))
+    let food = Food(name: "Butter Chicken", category: "Indian Curries",
+                    servingSize: 300, servingUnit: "g",
+                    calories: 360, proteinG: 24, carbsG: 12, fatG: 18)
+    item.applyHintMatch(food)
+    // item.grams is still 150; per-gram protein = 24/300 = 0.08 → 150g → 12g.
+    #expect(abs(item.proteinG - 12) < 1e-6)
+    // Double the grams; protein should be 24g (from DB rate, not original 10g/150g).
+    item.grams = 300
+    item.rescale()
+    #expect(abs(item.proteinG - 24) < 1e-6)
+}

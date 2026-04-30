@@ -64,9 +64,10 @@ public enum AIModelTier: Sendable {
 // MARK: - Backend Type
 
 /// Public because it appears as a property type on `AIModelManager.backendType`.
-public enum AIBackendType: Sendable {
+public enum AIBackendType: String, Sendable {
     case llamaCpp
     case mlx
+    case remote
 }
 
 // MARK: - Device Capability Detection

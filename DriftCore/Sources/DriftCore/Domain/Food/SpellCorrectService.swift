@@ -249,10 +249,15 @@ public enum SpellCorrectService {
         return changed ? result.joined(separator: " ") : text
     }
 
-    /// Check if a word is already a known food word (exact match in DB).
+    /// Check if a word is already a known food word (exact match or unambiguous prefix in DB).
+    /// Prefix check prevents "chick" from being corrected to "chuck" when the user clearly
+    /// intends the substring search %chick% to find chicken items.
     private static func isKnownFoodWord(_ word: String) -> Bool {
         foodNames.contains(where: { name in
-            name.split(separator: " ").contains(where: { String($0).filter(\.isLetter) == word })
+            name.split(separator: " ").contains(where: {
+                let fw = String($0).filter(\.isLetter) // foodNames already lowercased
+                return fw == word || fw.hasPrefix(word)
+            })
         })
     }
 

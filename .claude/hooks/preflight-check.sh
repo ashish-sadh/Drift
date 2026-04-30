@@ -28,24 +28,24 @@ FAILURES=""
 echo "=== Pre-Flight Checklist ===" >&2
 
 # 1. Clean build
-echo "  [1/5] Clean build..." >&2
+echo "  [1/7] Clean build..." >&2
 xcodebuild build -project Drift.xcodeproj -scheme Drift \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
   > /tmp/drift-preflight-build.log 2>&1
 if [ $? -ne 0 ]; then
   FAILURES="${FAILURES}\n- BUILD FAILED (see /tmp/drift-preflight-build.log)"
 else
-  echo "  [1/5] Build OK" >&2
+  echo "  [1/7] Build OK" >&2
 fi
 
 # 2. Full test suite
-echo "  [2/5] Full test suite..." >&2
+echo "  [2/7] Full test suite..." >&2
 # Defer if a TestFlight archive is currently running — preflight is the
 # pre-publish check, and if archive is mid-flight from another session
 # we'd kill it. Skip with a clear note; the publishing session will
 # re-run preflight after the current archive resolves.
 if pgrep -f "xcodebuild.*archive" >/dev/null 2>&1; then
-    echo "  [2/5] DEFERRED — xcodebuild archive in progress; preflight will re-run after." >&2
+    echo "  [2/7] DEFERRED — xcodebuild archive in progress; preflight will re-run after." >&2
     FAILURES="${FAILURES}\n- DEFERRED: xcodebuild archive in progress; re-run preflight when it completes."
     # Skip remaining checks and exit cleanly so the session doesn't think preflight passed.
     echo "$FAILURES" >&2
@@ -55,17 +55,16 @@ pkill -9 -f xcodebuild 2>/dev/null || true
 sleep 2
 xcodebuild test -project Drift.xcodeproj -scheme Drift \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
-  -skip-testing:DriftLLMEvalTests \
   > /tmp/drift-preflight-test.log 2>&1
 if [ $? -ne 0 ]; then
   FAILED_TESTS=$(grep "✘" /tmp/drift-preflight-test.log 2>/dev/null | head -10)
   FAILURES="${FAILURES}\n- TESTS FAILED:\n${FAILED_TESTS}"
 else
-  echo "  [2/5] Tests OK" >&2
+  echo "  [2/7] Tests OK" >&2
 fi
 
 # 3. AI eval harness (moved to DriftCore in 2026-04 migration — runs via swift test)
-echo "  [3/5] AI eval harness..." >&2
+echo "  [3/7] AI eval harness..." >&2
 pushd DriftCore > /dev/null
 swift test --filter AIEvalHarness > /tmp/drift-preflight-eval.log 2>&1
 RC=$?
@@ -74,34 +73,50 @@ if [ $RC -ne 0 ]; then
   FAILED_EVAL=$(grep "✘\|failed" /tmp/drift-preflight-eval.log 2>/dev/null | head -10)
   FAILURES="${FAILURES}\n- AI EVAL FAILED:\n${FAILED_EVAL}"
 else
-  echo "  [3/5] AI eval OK" >&2
+  echo "  [3/7] AI eval OK" >&2
 fi
 
-# 4. No uncommitted changes
-echo "  [4/5] Clean git state..." >&2
+# 4. macOS LLM eval (real Gemma routing, multi-turn, prompt regressions).
+# ~10-12 min wall time. Catches LLM regressions invisible to pure-logic
+# Tier-0 tests — tool-routing drift after a new tool is added, multi-turn
+# context bleed, prompt-edit fallout. macOS scheme runs as a native Mac
+# binary (no simulator) and uses ~/drift-state/models/gemma-4-e2b-q4_k_m.gguf
+# which the dev/Mac runner already has from running the app.
+echo "  [4/7] macOS LLM eval (10-12 min)..." >&2
+xcodebuild test -scheme DriftLLMEvalMacOS -destination 'platform=macOS' \
+  > /tmp/drift-preflight-llmeval.log 2>&1
+if [ $? -ne 0 ]; then
+  FAILED_LLM=$(grep "error:\|✘" /tmp/drift-preflight-llmeval.log 2>/dev/null | head -10)
+  FAILURES="${FAILURES}\n- macOS LLM EVAL FAILED (likely tool-routing or multi-turn regression):\n${FAILED_LLM}"
+else
+  echo "  [4/7] macOS LLM eval OK" >&2
+fi
+
+# 5. No uncommitted changes
+echo "  [5/7] Clean git state..." >&2
 DIRTY=$(git status --porcelain 2>/dev/null | grep -v '^??' | grep -v '.claude/' | head -5)
 if [ -n "$DIRTY" ]; then
   FAILURES="${FAILURES}\n- UNCOMMITTED CHANGES:\n${DIRTY}"
 else
-  echo "  [4/5] Git clean" >&2
+  echo "  [5/7] Git clean" >&2
 fi
 
-# 5. Check for recent regressions — any reverts in last 5 commits
-echo "  [5/5] No recent reverts..." >&2
+# 6. Check for recent regressions — any reverts in last 5 commits
+echo "  [6/7] No recent reverts..." >&2
 REVERTS=$(git log --oneline -5 | grep -i "revert\|checkout --\|broken\|FAILED" | head -3)
 if [ -n "$REVERTS" ]; then
   # Warning only, don't block
-  echo "  [5/5] WARNING: Recent reverts found (not blocking):" >&2
+  echo "  [6/7] WARNING: Recent reverts found (not blocking):" >&2
   echo "  ${REVERTS}" >&2
 else
-  echo "  [5/5] No reverts" >&2
+  echo "  [6/7] No reverts" >&2
 fi
 
 # 6. Check for open P0 bug issues — FAIL-CLOSED: treat API errors as "bugs present".
 # Also cross-check the watchdog's cache-p0-bugs file so a transient gh flake can't
 # silently skip the guard. Build 152 (2026-04-20) shipped with #271 open because the
 # previous version silently treated empty gh output as "no bugs."
-echo "  [6/6] No P0 bugs..." >&2
+echo "  [7/7] No P0 bugs..." >&2
 P0_RAW=$(gh issue list --state open --label bug --label P0 --json number,title 2>&1)
 GH_EXIT=$?
 CACHE_P0=$(cat "$HOME/drift-state/cache-p0-bugs" 2>/dev/null || true)
@@ -113,7 +128,7 @@ elif [ -n "$P0_RAW" ] && echo "$P0_RAW" | jq -e 'length > 0' >/dev/null 2>&1; th
 elif [ -n "$CACHE_P0" ]; then
   FAILURES="${FAILURES}\n- Watchdog cache-p0-bugs is still non-empty (label race). Clear it before publishing:\n${CACHE_P0}"
 else
-  echo "  [6/6] No P0 bugs" >&2
+  echo "  [7/7] No P0 bugs" >&2
 fi
 
 echo "===========================" >&2

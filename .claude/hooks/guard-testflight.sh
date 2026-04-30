@@ -8,21 +8,24 @@ set -e
 INPUT=$(cat)
 COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // empty')
 
-# Only gate ACTUAL xcodebuild invocations — not grep/echo/cat that merely mention
-# "xcodebuild archive" in their arguments (that false-positive blocked the operator's
-# diagnostic greps). Skip leading VAR=value env assignments before reading the verb.
-FIRST_WORD=$(echo "$COMMAND" | awk '{for (i=1;i<=NF;i++) if ($i !~ /^[A-Za-z_][A-Za-z0-9_]*=/) {print $i; exit}}')
-SUBCMD=$(echo "$COMMAND" | awk '{seen=0; for (i=1;i<=NF;i++) if ($i !~ /^[A-Za-z_][A-Za-z0-9_]*=/) {if (seen) {print $i; exit}; seen=1}}')
-
-case "$FIRST_WORD" in
-  xcodebuild|*/xcodebuild) ;;
-  *) exit 0 ;;
-esac
-
-case "$SUBCMD" in
-  archive|-exportArchive) ;;
-  *) exit 0 ;;
-esac
+# Only gate ACTUAL xcodebuild invocations. Match `xcodebuild <archive|-exportArchive>`
+# anywhere in the command, including compound shell expressions like:
+#   pkill -9 -f xcodebuild; sleep 2; xcodebuild archive ...
+# which the prior FIRST_WORD-only check missed (sessions started chaining
+# pkill+xcodebuild per CLAUDE.md guidance, slipping past the gate entirely).
+# Anchored to a delimiter or start-of-line so a shell-quoted "xcodebuild archive"
+# inside a grep/echo/cat doesn't false-positive.
+#
+# Pattern: (start | ; | && | || | & | newline | spaces) followed by optional
+# path prefix, then `xcodebuild`, then whitespace, then archive | -exportArchive.
+SUBCMD=""
+if echo "$COMMAND" | grep -qE '(^|[;&|]| && | \|\| )[[:space:]]*([^[:space:];&|]*\/)?xcodebuild[[:space:]]+archive([[:space:]]|$)'; then
+    SUBCMD="archive"
+elif echo "$COMMAND" | grep -qE '(^|[;&|]| && | \|\| )[[:space:]]*([^[:space:];&|]*\/)?xcodebuild[[:space:]]+-exportArchive([[:space:]]|$)'; then
+    SUBCMD="-exportArchive"
+else
+    exit 0
+fi
 
 # Human sessions can always publish
 DRIFT_CONTROL=$(cat "$HOME/drift-control.txt" 2>/dev/null | tr -d '[:space:]' | tr '[:lower:]' '[:upper:]')

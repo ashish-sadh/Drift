@@ -12,7 +12,7 @@
 #   clear                                — remove ALL in-progress (watchdog cleanup)
 #   status                               — print sprint summary
 #   count [--p0|--senior|--junior|--sprint|--permanent] — print count
-#   planning-due                         — exit 0 if 6+ hours since last planning
+#   planning-due                         — exit 0 if 24+ hours since last planning
 #   planning-done                        — stamp last-planning-time = now
 
 set -euo pipefail
@@ -212,9 +212,12 @@ in_progress = state.get("in_progress")
 
 def has(t, label): return label in t.get("labels", [])
 
-# Session budget: max 5 implementation tasks per session (not enforced for --any / planning)
+# Session budget: max 10 implementation tasks per session (senior or junior).
+# Was 5 — raised after observing sessions exit early with productive capacity
+# left, especially seniors on multi-file tasks but also juniors crunching
+# through a UI/DB queue. Not enforced for --any (used by tests / planning).
 if filter_mode in ("--senior", "--junior"):
-    if state.get("session_tasks", 0) >= 5:
+    if state.get("session_tasks", 0) >= 10:
         print("none"); sys.exit(0)
 
 # Skip done and currently claimed
@@ -233,10 +236,24 @@ for t in available:
     if has(t, "bug") and has(t, "P0") and admin_approved(t):
         print(f"{t['number']} {t['title']}"); sys.exit(0)
 
+# ── Priority 1.5 (senior + any): P0 SENIOR features ───────────────────────────
+# A P0 label on a non-bug means the feature is critical-priority but isn't a
+# bug. Without this clause, P0 features were ranked at Priority 2 alongside
+# every other SENIOR sprint-task — the P0 label was effectively decorative.
+# This jumps them ahead of regular SENIOR features. Reachable from --any too
+# so junior queries that touch the senior path still see the elevation.
+if filter_mode in ("--senior", "--any"):
+    for t in available:
+        if has(t, "needs-review"): continue
+        if has(t, "sprint-task") and has(t, "SENIOR") and has(t, "P0"):
+            print(f"{t['number']} {t['title']}"); sys.exit(0)
+
 # ── Senior-only section ────────────────────────────────────────────────────────
 if filter_mode in ("--senior", "--any"):
 
     # Priority 2: SENIOR-labeled sprint tasks (feature tasks + explicitly SENIOR bugs)
+    # P0 SENIOR features already handled by Priority 1.5 above; this picks up
+    # non-P0 SENIOR sprint-tasks.
     for t in available:
         if has(t, "needs-review"): continue
         if has(t, "sprint-task") and has(t, "SENIOR"):
@@ -382,6 +399,36 @@ PYEOF
     # in-progress label may be missing in the UI; both are visible signals
     # rather than silent state divergence.
     gh_loud "add in-progress label on #$NUM" -- issue edit "$NUM" --add-label in-progress || true
+
+    # Resumable warning — surfaces when claiming an issue with `resumable`
+    # label set by the watchdog after a prior session crashed mid-work.
+    # Without this, sessions ran bare `gh issue view N` (no comments) and
+    # missed the WIP file pointers, redoing orientation 6+ times on #515.
+    # Print to STDOUT so the model sees it inline with the claim — stderr
+    # would be dropped from the session's tool result. Filed as #516.
+    #
+    # Source of truth = state file (already updated by the Python claim
+    # block above). Tests pre-populate state, gh may fail in test envs.
+    local IS_RESUMABLE
+    IS_RESUMABLE=$(python3 -c "
+import json
+try:
+    state = json.load(open('$STATE_FILE'))
+    task = next((t for t in state.get('tasks', []) if t['number'] == $NUM), None)
+    print('yes' if task and 'resumable' in task.get('labels', []) else 'no')
+except Exception:
+    print('no')
+")
+    if [ "$IS_RESUMABLE" = "yes" ]; then
+        echo ""
+        echo "⚠️  RESUMABLE — prior session left WIP for #${NUM}. Read context before continuing:"
+        echo "    gh issue view ${NUM} --comments"
+        echo "    ls -la ~/drift-state/wip/${NUM}.*"
+        echo "    git apply ~/drift-state/wip/${NUM}.patch  # or skip + start fresh"
+        echo "  Post a comment noting which path you took before implementing."
+        echo "  Run \`gh issue edit ${NUM} --remove-label resumable\` after committing."
+        echo ""
+    fi
 }
 
 cmd_done() {
@@ -440,6 +487,16 @@ try:
     with open(state_file, "w") as f: json.dump(d, f, indent=2)
 except Exception: pass
 PYEOF
+
+    # Clean up any WIP snapshot for this issue — work is shipped, no need to
+    # keep the patch+tarball around. Watchdog snapshot_wip_if_in_progress
+    # writes these every tick while the issue is in_progress.
+    rm -f "$HOME/drift-state/wip/${NUM}.patch" "$HOME/drift-state/wip/${NUM}.untracked.tar.gz" 2>/dev/null
+
+    # Clean up plan-posted cache for this issue so a future re-claim of the
+    # same #N starts fresh on the nudge timer (the comment is still on
+    # GitHub; nudge hook will re-detect it on first check).
+    rm -f "$HOME/drift-state/plan-posted/${NUM}" 2>/dev/null
 
     echo "Closed #$NUM"
 }
@@ -632,7 +689,11 @@ cmd_planning_due() {
     local NOW
     NOW=$(date +%s)
     local SECONDS_SINCE=$(( NOW - LAST ))
-    if [ "$SECONDS_SINCE" -ge 21600 ]; then
+    # 24h cadence — was 12h, raised again to once-per-day. Planning is
+    # high-cost senior work and most days don't accumulate enough new
+    # priority signal in 12h to warrant re-planning. Product review rides
+    # on the same trigger (see report-service.sh review-due).
+    if [ "$SECONDS_SINCE" -ge 86400 ]; then
         exit 0  # planning due
     else
         exit 1  # not due

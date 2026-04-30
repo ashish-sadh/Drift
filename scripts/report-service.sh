@@ -32,14 +32,14 @@ cmd_review_due() {
     #   1. Commit-counter gap: at least PRODUCT_REVIEW_CYCLE_INTERVAL "real work"
     #      commits (default 20) since the last review. Only commits that
     #      survive the housekeeping filter in cycle-counter.sh count.
-    #   2. Wall-clock floor: at least PRODUCT_REVIEW_MIN_HOURS (default 6) since
+    #   2. Wall-clock floor: at least PRODUCT_REVIEW_MIN_HOURS (default 24) since
     #      last-review-time. Prevents a commit-storm from triggering a second
-    #      review minutes after the first — matches planning's 6h cadence so
-    #      reviews ride on planning naturally.
+    #      review minutes after the first — matches planning's 24h cadence so
+    #      reviews ride on planning naturally (once per day).
     #
     # Time-only fallback when commit-counter is missing.
     local INTERVAL="${PRODUCT_REVIEW_CYCLE_INTERVAL:-20}"
-    local MIN_HOURS="${PRODUCT_REVIEW_MIN_HOURS:-6}"
+    local MIN_HOURS="${PRODUCT_REVIEW_MIN_HOURS:-24}"
     local MIN_SECONDS=$(( MIN_HOURS * 3600 ))
 
     local LAST_TIME
@@ -67,7 +67,7 @@ cmd_review_due() {
     fi
 
     # Fallback: counter unavailable — wall-clock floor already passed above,
-    # also check git log to confirm no review committed in last 6h.
+    # also check git log to confirm no review committed in last 24h.
     if git log main --oneline --since="${MIN_HOURS} hours ago" 2>/dev/null | grep -qi "review-cycle"; then
         exit 1
     fi

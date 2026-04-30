@@ -436,15 +436,36 @@ final class IntentClassifierGoldSetTests: XCTestCase {
         }
     }
 
-    // MARK: - Token Ceiling
+    // MARK: - Token Ceilings (per-prompt)
 
-    /// Locks prompt size after audit v2 (removed 2 redundant examples, -206 chars).
-    /// Fails if someone adds new examples without removing equivalent dead weight.
+    /// Router prompt is sent to the small model (SmolLM 360M, 8K context) on
+    /// every classification call. Tight ceiling forces redundant-example
+    /// pruning when new tools land. The cost of going over is felt directly
+    /// — every byte in this prompt crowds out user input + chat history.
     @MainActor
-    func testSystemPrompt_TokenCeiling() {
-        let charCount = IntentClassifier.systemPrompt.count
-        XCTAssertLessThanOrEqual(charCount, 5600,
-            "systemPrompt has \(charCount) chars — over the 5600-char ceiling. Remove redundant examples before adding new ones.")
+    func testRouterPrompt_TokenCeiling() {
+        let charCount = IntentClassifier.routerPrompt.count
+        XCTAssertLessThanOrEqual(charCount, 6000,
+            "routerPrompt has \(charCount) chars — over the 6000-char ceiling. Remove redundant examples before adding new ones (router is sent to SmolLM with 8K context).")
+    }
+
+    /// Intelligence prompt is sent to the large model (Gemma 4 e2b, 128K
+    /// context). Roomier ceiling — we can afford richer multi-turn examples,
+    /// edge-case patterns, and tighter disambiguation. Still capped so we
+    /// don't drift to "throw everything in" — first-message latency on CPU
+    /// scales with prompt length.
+    @MainActor
+    func testIntelligencePrompt_TokenCeiling() {
+        let charCount = IntentClassifier.intelligencePrompt.count
+        XCTAssertLessThanOrEqual(charCount, 12000,
+            "intelligencePrompt has \(charCount) chars — over the 12000-char ceiling. Trim before adding more — first-message latency scales with prompt length.")
+    }
+
+    /// Legacy alias — kept until call sites migrate. Should track routerPrompt.
+    @MainActor
+    func testSystemPrompt_AliasMatchesRouter() {
+        XCTAssertEqual(IntentClassifier.systemPrompt, IntentClassifier.routerPrompt,
+            "Backward-compat alias systemPrompt drifted from routerPrompt — pick one.")
     }
 
     // MARK: - Domain-Blend Gold Set (#246)
@@ -640,6 +661,7 @@ final class IntentClassifierGoldSetTests: XCTestCase {
             if case .navigate = action { return false }
             return true
         case .toolCall: return true
+        case .helpCard: return true
         }
     }
 

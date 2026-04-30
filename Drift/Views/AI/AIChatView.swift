@@ -6,9 +6,15 @@ import PhotosUI
 struct AIChatView: View {
     @State var vm = AIChatViewModel()
     @FocusState var inputFocused: Bool
+    @State private var photoPickerItem: PhotosPickerItem? = nil
 
     var body: some View {
         VStack(spacing: 0) {
+            // Backend selector — shown at top when both backends available
+            if vm.canToggleBackend {
+                backendSelectorHeader
+            }
+
             // Messages
             ScrollViewReader { proxy in
                 ScrollView {
@@ -51,21 +57,29 @@ struct AIChatView: View {
                 suggestionsRow
             }
 
-            Divider().overlay(Color.white.opacity(0.06))
-
-            // Disclaimer note
-            HStack(spacing: 6) {
-                Image(systemName: "lock.shield.fill")
-                    .font(.system(size: 10))
-                    .foregroundStyle(Theme.accent)
-                Text("Small on-device model \u{2014} responses may not be perfect. Data never leaves your phone. Thank you for testing! Next release will be faster and smarter. Turn off in More \u{2192} Settings.")
-                    .font(.system(size: 10))
-                    .foregroundStyle(.secondary)
+            // 10-second undo chip — appears after a photo meal card is confirmed
+            if !vm.pendingUndoEntryIds.isEmpty {
+                HStack {
+                    Spacer()
+                    Button { vm.undoProposedMeal() } label: {
+                        HStack(spacing: 6) {
+                            Image(systemName: "arrow.uturn.backward")
+                                .font(.system(size: 11, weight: .medium))
+                            Text("Undo")
+                                .font(.caption.weight(.semibold))
+                        }
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 16).padding(.vertical, 8)
+                        .background(Capsule().fill(Color.red.opacity(0.75)))
+                    }
+                    .buttonStyle(.plain)
+                    Spacer()
+                }
+                .padding(.vertical, 4)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .frame(maxWidth: .infinity)
-            .background(Color.white.opacity(0.03))
+
+            Divider().overlay(Color.white.opacity(0.06))
 
             // Input bar
             HStack(spacing: 8) {
@@ -73,10 +87,36 @@ struct AIChatView: View {
                     .font(.system(size: 12))
                     .foregroundStyle(Theme.accent.opacity(0.6))
 
-                TextField(vm.speechService.isRecording ? "Listening..." : "Ask anything...", text: $vm.inputText, axis: .vertical)
-                    .textFieldStyle(.plain).font(.subheadline)
-                    .lineLimit(1...(vm.speechService.isRecording ? 6 : 3)).focused($inputFocused)
-                    .onSubmit { vm.sendMessage() }
+                VStack(alignment: .leading, spacing: 6) {
+                    if let jpeg = vm.pendingPhotoData, let uiImage = UIImage(data: jpeg) {
+                        HStack(spacing: 8) {
+                            Image(uiImage: uiImage)
+                                .resizable().scaledToFill()
+                                .frame(width: 52, height: 52)
+                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                            Button {
+                                vm.pendingPhotoData = nil
+                                photoPickerItem = nil
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .font(.system(size: 16))
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                            Spacer()
+                        }
+                        .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .leading)))
+                    }
+
+                    TextField(
+                        vm.speechService.isRecording ? "Listening..." :
+                            (vm.pendingPhotoData != nil ? "Describe the photo (optional)..." : "Ask anything..."),
+                        text: $vm.inputText, axis: .vertical)
+                        .textFieldStyle(.plain).font(.subheadline)
+                        .lineLimit(1...(vm.speechService.isRecording ? 6 : 3)).focused($inputFocused)
+                        .onSubmit { vm.sendMessage() }
+                }
+                .animation(.easeInOut(duration: 0.2), value: vm.pendingPhotoData != nil)
 
                 if vm.speechService.isRecording {
                     Button {
@@ -97,6 +137,26 @@ struct AIChatView: View {
                     }
                     .accessibilityLabel("Send message")
                 } else {
+                    // Camera — only when remote backend is active (local has no vision)
+                    if vm.activeBackend == .remote {
+                        PhotosPicker(selection: $photoPickerItem, matching: .images) {
+                            Image(systemName: vm.pendingPhotoData != nil ? "camera.fill" : "camera")
+                                .font(.system(size: 18))
+                                .foregroundStyle(vm.pendingPhotoData != nil ? Theme.accent : .secondary)
+                        }
+                        .disabled(vm.isGenerating)
+                        .onChange(of: photoPickerItem) { _, newItem in
+                            guard let newItem else { return }
+                            Task {
+                                if let data = try? await newItem.loadTransferable(type: Data.self) {
+                                    vm.pendingPhotoData = data
+                                }
+                                photoPickerItem = nil
+                            }
+                        }
+                        .accessibilityLabel("Attach photo")
+                    }
+
                     Button {
                         vm.speechService.toggleRecording(
                             onTranscript: { text in
@@ -115,12 +175,13 @@ struct AIChatView: View {
                     .accessibilityLabel("Voice input")
                     .disabled(vm.isGenerating)
 
+                    let canSend = !vm.inputText.isEmpty || vm.pendingPhotoData != nil
                     Button { vm.sendMessage() } label: {
                         Image(systemName: "arrow.up.circle.fill").font(.title2)
-                            .foregroundStyle(vm.inputText.isEmpty ? Color.secondary.opacity(0.5) : Theme.accent)
+                            .foregroundStyle(canSend ? Theme.accent : Color.secondary.opacity(0.5))
                     }
                     .accessibilityLabel("Send message")
-                    .disabled(vm.inputText.isEmpty || vm.isGenerating)
+                    .disabled(!canSend || vm.isGenerating)
                 }
             }
             .padding(.horizontal, 12).padding(.vertical, 10)
@@ -180,6 +241,96 @@ struct AIChatView: View {
         .onDisappear {
             vm.aiService.scheduleUnload(delay: 60)
         }
+    }
+
+    // MARK: - Backend Selector Header (#540)
+
+    /// Side-by-side Local Brain / Cloud AI selector cards shown at the top
+    /// of the chat sheet when both backends are available. Replaces the tiny
+    /// icon toggle that users couldn't find. #540.
+    private var backendSelectorHeader: some View {
+        VStack(spacing: 6) {
+            HStack(spacing: 10) {
+                backendCard(
+                    title: "Local Brain",
+                    icon: "cpu",
+                    subtitle: localBrainSubtitle,
+                    selected: vm.activeBackend != .remote,
+                    action: { vm.toggleBackend(to: .llamaCpp) }
+                )
+                backendCard(
+                    title: "Cloud AI",
+                    icon: "cloud.fill",
+                    subtitle: cloudAISubtitle,
+                    selected: vm.activeBackend == .remote,
+                    action: { vm.toggleBackend(to: .remote) }
+                )
+            }
+            .padding(.horizontal, 12)
+
+            Text(vm.activeBackend == .remote
+                ? "Cloud AI \u{00B7} routed through your own \(Preferences.photoLogProvider.rawValue.capitalized) key. Drift never sees your data."
+                : "On-device \u{00B7} runs entirely on your phone. Free, private, no internet needed.")
+                .font(.system(size: 10))
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 14)
+                .animation(.easeInOut(duration: 0.2), value: vm.activeBackend)
+        }
+        .padding(.top, 10).padding(.bottom, 6)
+        .background(Color.white.opacity(0.03))
+        .accessibilityIdentifier("ai-backend-selector")
+    }
+
+    private func backendCard(title: String, icon: String, subtitle: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(selected ? Theme.accent : .secondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(selected ? .primary : .secondary)
+                    Text(subtitle)
+                        .font(.system(size: 11))
+                        .foregroundStyle(selected ? Theme.accent.opacity(0.8) : Color.secondary.opacity(0.6))
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 12).padding(.vertical, 10)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(selected ? Theme.accent.opacity(0.08) : Color.white.opacity(0.04))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .strokeBorder(selected ? Theme.accent.opacity(0.5) : Color.white.opacity(0.08), lineWidth: 1)
+                    )
+            )
+            .animation(.easeInOut(duration: 0.18), value: selected)
+        }
+        .buttonStyle(.plain)
+        .disabled(vm.isGenerating)
+        .frame(maxWidth: .infinity)
+        .accessibilityLabel("\(title): \(subtitle). \(selected ? "Selected." : "Tap to select.")")
+    }
+
+    private var localBrainSubtitle: String {
+        switch vm.aiService.state {
+        case .notSetUp: return "Not installed"
+        case .downloading(let p): return "Downloading \(Int(p * 100))%"
+        case .loading: return "Loading..."
+        case .ready where vm.aiService.isModelLoaded: return "Loaded"
+        case .ready: return "Ready to load"
+        case .error: return "Error"
+        case .notEnoughSpace: return "Not enough space"
+        }
+    }
+
+    private var cloudAISubtitle: String {
+        AIBackendCoordinator.hasRemoteKey
+            ? "\(Preferences.photoLogProvider.rawValue.capitalized) \u{00B7} BYOK"
+            : "Setup needed"
     }
 
     // MARK: - Suggestions Row
@@ -284,6 +435,16 @@ struct AIChatView: View {
             }
 
             VStack(alignment: msg.role == .user ? .trailing : .leading, spacing: 6) {
+                // Photo thumbnail — user turns with attached image
+                if msg.role == .user, let jpeg = msg.photoAttachment,
+                   let uiImage = UIImage(data: jpeg) {
+                    Image(uiImage: uiImage)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 200, height: 150)
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                }
+
                 if !msg.text.isEmpty {
                     let isNewInstant = msg.role == .assistant
                         && msg.id != vm.streamingMessageId
@@ -352,8 +513,41 @@ struct AIChatView: View {
                 if let card = msg.biomarkerCard {
                     biomarkerConfirmationCard(card)
                 }
+                if let card = msg.helpCard {
+                    helpCardView(card)
+                }
                 if let options = msg.clarificationOptions, !options.isEmpty {
-                    clarificationChips(options)
+                    ClarificationCard(options: options, isDisabled: vm.isGenerating) { picked in
+                        vm.inputText = "\(picked.id)"
+                        vm.sendMessage()
+                    } onOther: {
+                        inputFocused = true
+                    }
+                }
+                if let provider = msg.remoteProvider {
+                    RemoteProviderBadge(provider: provider)
+                }
+                if let card = msg.proposedMealCard {
+                    proposedMealCardView(card, messageId: msg.id)
+                }
+                if let retryText = msg.retryTurn {
+                    Button {
+                        vm.inputText = retryText
+                        vm.sendMessage()
+                    } label: {
+                        HStack(spacing: 4) {
+                            Image(systemName: "arrow.clockwise")
+                                .font(.system(size: 10, weight: .medium))
+                            Text("Retry")
+                                .font(.caption.weight(.medium))
+                        }
+                        .foregroundStyle(Theme.accent)
+                        .padding(.horizontal, 12).padding(.vertical, 6)
+                        .background(Capsule().fill(Theme.accent.opacity(0.1)))
+                        .overlay(Capsule().strokeBorder(Theme.accent.opacity(0.3), lineWidth: 0.5))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel("Retry: \(retryText)")
                 }
             }
             .accessibilityLabel(msg.role == .user ? "You said: \(msg.text)" : "Assistant: \(msg.text)")
@@ -365,44 +559,120 @@ struct AIChatView: View {
         .padding(.horizontal, 10)
     }
 
-    // MARK: - Clarification Chips (#226)
+    // MARK: - Proposed Meal Card (#518)
 
-    /// Tappable chips rendered under a "Did you mean:" message. Tapping a
-    /// chip sends its label as a new user message — the VM's
-    /// `handleClarificationResponse` picks the option by label match.
-    private func clarificationChips(_ options: [ClarificationOption]) -> some View {
-        VStack(alignment: .leading, spacing: 6) {
-            ForEach(options) { opt in
-                Button {
-                    vm.inputText = "\(opt.id)"
-                    vm.sendMessage()
-                } label: {
-                    HStack(spacing: 8) {
-                        Text("\(opt.id).")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(Theme.accent)
-                        Text(opt.label)
-                            .font(.caption)
-                            .foregroundStyle(Theme.textPrimary)
-                            .lineLimit(2)
-                        Spacer(minLength: 0)
+    private func proposedMealCardView(_ card: AIChatViewModel.ProposedMealCardData, messageId: UUID) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Image(systemName: "fork.knife.circle.fill")
+                    .font(.caption).foregroundStyle(Theme.calorieBlue)
+                Text("Detected meal")
+                    .font(.caption.weight(.semibold))
+                Spacer()
+                Text("\(card.items.reduce(0) { $0 + $1.calories }) cal")
+                    .font(.caption2.monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+
+            Divider().overlay(Color.white.opacity(0.06))
+
+            ForEach(card.items) { item in
+                HStack {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(item.name)
+                            .font(.caption.weight(.medium))
+                        Text("\(item.grams)g · \(item.protein)P \(item.carbs)C \(item.fat)F")
+                            .font(.system(size: 9)).foregroundStyle(.tertiary)
                     }
-                    .padding(.horizontal, 12).padding(.vertical, 8)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(
-                        RoundedRectangle(cornerRadius: 12)
-                            .fill(Theme.accent.opacity(0.08))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 12)
-                                    .stroke(Theme.accent.opacity(0.25), lineWidth: 0.5)
-                            )
-                    )
+                    Spacer()
+                    Text("\(item.calories) cal")
+                        .font(.caption.weight(.bold).monospacedDigit())
+                        .foregroundStyle(Theme.calorieBlue)
+                }
+            }
+
+            HStack(spacing: 10) {
+                Button {
+                    vm.clearPendingProposal()
+                    vm.inputText = "Change "
+                    inputFocused = true
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "pencil")
+                            .font(.system(size: 10, weight: .medium))
+                        Text("Edit")
+                            .font(.caption.weight(.medium))
+                    }
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 12).padding(.vertical, 6)
+                    .background(Capsule().fill(Color.white.opacity(0.06)))
+                    .overlay(Capsule().strokeBorder(Color.white.opacity(0.1), lineWidth: 0.5))
+                }
+                .buttonStyle(.plain)
+
+                Spacer()
+
+                Button {
+                    vm.confirmProposedMeal(card, messageId: messageId)
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "checkmark.circle.fill")
+                            .font(.system(size: 10, weight: .medium))
+                        Text("Log all")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 14).padding(.vertical, 7)
+                    .background(Capsule().fill(Theme.calorieBlue))
                 }
                 .buttonStyle(.plain)
                 .disabled(vm.isGenerating)
+                .accessibilityLabel("Log all \(card.items.count) items")
             }
         }
-        .frame(maxWidth: 260, alignment: .leading)
+        .padding(12)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 14))
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .strokeBorder(Theme.calorieBlue.opacity(0.25), lineWidth: 0.5)
+        )
+    }
+
+    // MARK: - Remote Provider Badge (#533)
+
+    private struct RemoteProviderBadge: View {
+        let provider: String
+        @State private var showingPopover = false
+
+        var body: some View {
+            Button {
+                showingPopover = true
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "cloud.fill")
+                        .font(.system(size: 9))
+                    Text("via \(provider)")
+                        .font(.system(size: 10))
+                }
+                .foregroundStyle(.tertiary)
+                .padding(.horizontal, 6)
+                .padding(.vertical, 3)
+                .background(Color.white.opacity(0.05), in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .popover(isPresented: $showingPopover) {
+                VStack(alignment: .leading, spacing: 6) {
+                    Label("Processed by \(provider)", systemImage: "cloud.fill")
+                        .font(.subheadline.weight(.semibold))
+                    Text("Your API key, no Drift servers. Messages go directly to \(provider)'s API and are subject to their privacy policy.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(16)
+                .presentationCompactAdaptation(.popover)
+            }
+            .accessibilityLabel("Handled by \(provider). Tap for privacy details.")
+        }
     }
 
     // MARK: - Nutrition Lookup Card
@@ -880,6 +1150,44 @@ struct AIChatView: View {
         .overlay(
             RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(Color.cyan.opacity(0.2), lineWidth: 0.5)
+        )
+    }
+
+    // MARK: - Help Card
+
+    private func helpCardView(_ card: HelpCardData) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ForEach(card.categories) { (cat: HelpCardData.Category) in
+                HStack(alignment: .top, spacing: 10) {
+                    Image(systemName: cat.icon)
+                        .font(.caption)
+                        .foregroundStyle(Theme.accent)
+                        .frame(width: 18, alignment: .center)
+                        .padding(.top, 1)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(cat.title)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(Theme.textPrimary)
+                        ForEach(cat.examples, id: \.self) { example in
+                            Button {
+                                vm.inputText = example
+                            } label: {
+                                Text(example)
+                                    .font(.caption2)
+                                    .foregroundStyle(Theme.accent)
+                                    .multilineTextAlignment(.leading)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                }
+            }
+        }
+        .padding(10)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Theme.separator, lineWidth: 0.5)
         )
     }
 }

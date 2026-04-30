@@ -29,20 +29,6 @@
             buildForAnalyzing = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7E479E55896BA83608D55D3B"
-               BuildableName = "DriftLLMEvalTests.xctest"
-               BlueprintName = "DriftLLMEvalTests"
-               ReferencedContainer = "container:Drift.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "NO"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
                BlueprintIdentifier = "50A0CCC2E8C96C468D93CEF8"
                BuildableName = "DriftTests.xctest"
                BlueprintName = "DriftTests"
@@ -75,17 +61,6 @@
                BlueprintIdentifier = "50A0CCC2E8C96C468D93CEF8"
                BuildableName = "DriftTests.xctest"
                BlueprintName = "DriftTests"
-               ReferencedContainer = "container:Drift.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO"
-            parallelizable = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "7E479E55896BA83608D55D3B"
-               BuildableName = "DriftLLMEvalTests.xctest"
-               BlueprintName = "DriftLLMEvalTests"
                ReferencedContainer = "container:Drift.xcodeproj">
             </BuildableReference>
          </TestableReference>

@@ -427,6 +427,74 @@ struct OpenAIVisionClient: CloudVisionClient {
     }
 }
 
+// MARK: - Fallback chain
+
+/// Tries each provider slot in order. Transient failures (rate limit, timeout,
+/// 5xx) advance to the next slot; permanent errors (401, malformed payload,
+/// etc.) abort the chain immediately.
+///
+/// Keys are fetched lazily via `Slot.buildClient` so we only prompt biometrics
+/// for the provider that ends up serving the request, not all configured ones.
+/// `lastProvider` is set to whichever slot ultimately succeeded.
+actor FallbackVisionClient: CloudVisionClient {
+    typealias ClientBuilder = @Sendable () async throws -> CloudVisionClient
+
+    struct Slot: Sendable {
+        let provider: CloudVisionProvider
+        let buildClient: ClientBuilder
+
+        init(provider: CloudVisionProvider, buildClient: @escaping ClientBuilder) {
+            self.provider = provider
+            self.buildClient = buildClient
+        }
+
+        /// Convenience for tests: wraps a pre-built client in a no-op builder.
+        init(provider: CloudVisionProvider, client: CloudVisionClient) {
+            self.provider = provider
+            self.buildClient = { client }
+        }
+    }
+
+    let chain: [Slot]
+    private(set) var lastProvider: CloudVisionProvider?
+
+    init(chain: [Slot]) {
+        self.chain = chain
+    }
+
+    func analyze(image: Data, prompt: String) async throws -> PhotoLogResponse {
+        guard !chain.isEmpty else { throw CloudVisionError.offline }
+        var lastTransient: CloudVisionError = .offline
+        for slot in chain {
+            let client = try await slot.buildClient()
+            do {
+                print("[PhotoLog] trying \(slot.provider.rawValue)")
+                let response = try await client.analyze(image: image, prompt: prompt)
+                lastProvider = slot.provider
+                return response
+            } catch let err as CloudVisionError where err.isTransient {
+                print("[PhotoLog] transient from \(slot.provider.rawValue): \(err) — trying next")
+                lastTransient = err
+            } catch {
+                print("[PhotoLog] permanent from \(slot.provider.rawValue): \(error)")
+                throw error
+            }
+        }
+        throw lastTransient
+    }
+}
+
+private extension CloudVisionError {
+    var isTransient: Bool {
+        switch self {
+        case .rateLimited, .timeout, .transport: return true
+        case .badResponse(let code): return code >= 500
+        case .providerError(let code, _): return code >= 500
+        default: return false
+        }
+    }
+}
+
 // MARK: - Google Gemini implementation
 
 /// Google Gemini implementation (AI Studio / Generative Language API). Uses

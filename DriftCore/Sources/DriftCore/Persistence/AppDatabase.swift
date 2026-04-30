@@ -56,6 +56,7 @@ extension AppDatabase {
             try db.execute(sql: "DELETE FROM food WHERE source != 'database' AND source IS NOT NULL")
             try db.execute(sql: "DELETE FROM food_usage")
             try? db.execute(sql: "DELETE FROM chat_turn")
+            try? db.execute(sql: "DELETE FROM water_entry")
         }
         // Clear the seed hash so seedFoodsFromJSON() actually runs (hash-gated
         // skip otherwise — would leave the food table empty after the wipe).

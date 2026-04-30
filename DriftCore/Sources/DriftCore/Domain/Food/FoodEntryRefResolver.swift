@@ -12,19 +12,34 @@ enum FoodEntryRefResolver {
     /// Order of precedence:
     ///   1. `entry_id` numeric param, validated against today's recent window
     ///   2. ordinal phrase in `name` / `target_food` ("first", "last", etc.)
-    /// Returns nil when neither applies — callers fall back to name search.
+    ///   3. name-based window lookup — case-insensitive contains match; only
+    ///      resolves when exactly one window entry matches (ambiguous → nil)
+    /// Returns nil when none apply — callers fall back to DB name search.
     static func resolveEntryId(
         from params: ToolCallParams,
         phraseKeys: [String] = ["name", "target_food", "query"]
     ) -> Int64? {
         if let id = extractEntryId(params: params) { return id }
+        let window = ConversationState.shared.recentEntries
         for key in phraseKeys {
-            if let phrase = params.string(key),
-               let ref = ConversationState.shared.resolveOrdinal(phrase) {
-                return ref.id
-            }
+            guard let phrase = params.string(key) else { continue }
+            if let ref = ConversationState.shared.resolveOrdinal(phrase) { return ref.id }
+            if let id = resolveByName(phrase, in: window) { return id }
         }
         return nil
+    }
+
+    /// Match `phrase` against window entry names (case-insensitive contains in
+    /// either direction). Returns the entry id only when exactly one entry
+    /// matches — ambiguous matches return nil so the caller falls to DB search.
+    static func resolveByName(_ phrase: String, in window: [ConversationState.FoodEntryRef]) -> Int64? {
+        guard !phrase.isEmpty else { return nil }
+        let lower = phrase.lowercased()
+        let matches = window.filter {
+            let entryLower = $0.name.lowercased()
+            return entryLower.contains(lower) || lower.contains(entryLower)
+        }
+        return matches.count == 1 ? matches[0].id : nil
     }
 
     /// Validate an LLM-supplied entry_id: must be a positive integer AND

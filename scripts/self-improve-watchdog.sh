@@ -52,9 +52,23 @@ CURRENT_LOG=""
 
 mkdir -p "$LOG_DIR"
 
+# Ignore SIGPIPE — observed root cause of recurring watchdog deaths. Without
+# this, any pipeline that loses its reader (file rotation, launchd stdout
+# buffer issue, etc.) propagates SIGPIPE to the watchdog shell and bash exits
+# with 141. Each watchdog death triggers its own signal handler which kills
+# the active senior session — that's the "sessions dying every 2 min"
+# pattern observed 2026-04-28 (5 watchdog respawns / hour).
+trap '' PIPE
+
 log() {
     local msg="[$(date '+%Y-%m-%d %H:%M:%S')] $1"
-    echo "$msg" | tee -a "$WATCHDOG_LOG"
+    # Direct writes — no `tee` pipeline. Was: `echo "$msg" | tee -a "$LOG"`.
+    # The pipeline was the SIGPIPE vector: launchd captures stdout into a
+    # rotated file, and an unfortunate combination of buffering + rotation
+    # would close tee's stdout reader, propagate SIGPIPE up to the script,
+    # and kill the watchdog mid-cycle.
+    echo "$msg" >> "$WATCHDOG_LOG"
+    echo "$msg"
 }
 
 get_model() {
@@ -94,6 +108,19 @@ cleanup_dirty_state() {
     # Drop stashes left by crashed sessions
     git stash drop 2>/dev/null || true
 
+    # Fix B: stale-branch sweep. If the prior session crashed mid-report-flow
+    # (review/cycle-N or report/exec-DATE branch was created, work was done,
+    # but `report-service.sh finish` never ran to switch back), HEAD is left
+    # on the feature branch. Operator-mode sessions then accidentally land
+    # commits on the stale branch instead of main. Switch back proactively.
+    local CURRENT_BRANCH
+    CURRENT_BRANCH=$(git branch --show-current 2>/dev/null || echo "")
+    if [[ -n "$CURRENT_BRANCH" && "$CURRENT_BRANCH" != "main" ]]; then
+        log "Stale branch: HEAD on $CURRENT_BRANCH (probably from a crashed report flow). Switching back to main."
+        git checkout main 2>/dev/null || true
+        git pull --ff-only origin main 2>/dev/null || true
+    fi
+
     local DIRTY=$(git status --porcelain 2>/dev/null | head -20)
     if [[ -n "$DIRTY" ]]; then
         log "Dirty state after session exit. Discarding incomplete changes:"
@@ -111,6 +138,38 @@ cleanup_dirty_state() {
     # Remove stale TestFlight authorization — a crashed session may have left this set
     # without completing the publish. Next session gets a fresh authorization flow.
     rm -f "$HOME/drift-state/testflight-publish-authorized"
+
+    # Fix C: orphan WIP patch sweep. snapshot_wip_if_in_progress only cleans
+    # patches when the current claim's tree goes empty. Patches for issues
+    # that closed via `gh issue close` (bypassing cmd_done) or via watchdog
+    # reconcile, OR claims that got unclaimed before commit, leak forever.
+    # Observed 2026-04-28: 345.patch lingered for hours after #345 was
+    # unclaimed without going through cmd_done. Sweep at startup: any patch
+    # whose issue is closed → delete; any patch >7 days old → delete.
+    local WIP_DIR="$HOME/drift-state/wip"
+    if [[ -d "$WIP_DIR" ]]; then
+        local now_ts
+        now_ts=$(date +%s)
+        for patch in "$WIP_DIR"/*.patch; do
+            [[ -f "$patch" ]] || continue
+            local num
+            num=$(basename "$patch" .patch)
+            [[ "$num" =~ ^[0-9]+$ ]] || continue
+            local age_days
+            age_days=$(( (now_ts - $(stat -f %m "$patch" 2>/dev/null || echo "$now_ts")) / 86400 ))
+            if [[ "$age_days" -gt 7 ]]; then
+                log "WIP cleanup: $patch is ${age_days}d old, removing."
+                rm -f "$patch" "$WIP_DIR/${num}.untracked.tar.gz"
+                continue
+            fi
+            local issue_state
+            issue_state=$(gh issue view "$num" --json state --jq '.state' 2>/dev/null || echo "")
+            if [[ "$issue_state" == "CLOSED" ]]; then
+                log "WIP cleanup: #$num is CLOSED, removing $patch."
+                rm -f "$patch" "$WIP_DIR/${num}.untracked.tar.gz"
+            fi
+        done
+    fi
 }
 
 kill_claude() {
@@ -275,7 +334,13 @@ reconcile_in_progress() {
 #   2. Hung/wandering sessions that bypass the claim hook somehow — no
 #      commits, no comments, just exploration → flagged.
 #
-# Threshold: DRIFT_CLAIM_STALE_THRESHOLD_SECS env var, default 3600 (1h).
+# Threshold: DRIFT_CLAIM_STALE_THRESHOLD_SECS env var, default 5400 (90 min).
+# Was 3600 (60 min) — bumped after #426 false-positive: session shipped 7
+# real edits over 60 min, hit Anthropic API stream timeout right at the 1h
+# mark, never committed, got auto-flagged at 61 min. Complex senior tasks
+# (multi-file refactor, new tool with tests) legitimately need 60-90 min
+# before first commit. The 90-min threshold gives breathing room while
+# still catching genuinely stuck claims within 1.5h.
 check_stale_claim() {
     local SD="$HOME/drift-state"
     local STATE_FILE="$SD/sprint-state.json"
@@ -290,13 +355,28 @@ check_stale_claim() {
     local NOW AGE THRESHOLD
     NOW=$(date +%s)
     AGE=$(( NOW - CLAIM_TS ))
-    THRESHOLD=${DRIFT_CLAIM_STALE_THRESHOLD_SECS:-3600}
+    THRESHOLD=${DRIFT_CLAIM_STALE_THRESHOLD_SECS:-5400}
     (( AGE < THRESHOLD )) && return
 
     # Any commit referencing #N in its message since claim_started?
     local COMMITS
     COMMITS=$(cd "$WORK_DIR" && git log --since="@$CLAIM_TS" --grep="#$NUM" --oneline 2>/dev/null | wc -l | tr -d ' ')
     if [[ "$COMMITS" -gt 0 ]]; then
+        return
+    fi
+
+    # Any real edits in the working tree? — third progress signal alongside
+    # commits + comments. A session 60 min into a multi-file change with no
+    # commit yet should not be flagged. Filter out auto-managed paths so
+    # heartbeat/graphify churn alone doesn't count as progress (those run
+    # in the watchdog itself, unrelated to session work).
+    # Bug history: #426 + #418 both lost real work because the auto-flag
+    # fired despite legitimate file edits sitting in the working tree.
+    local REAL_EDITS
+    REAL_EDITS=$(cd "$WORK_DIR" && git status --porcelain 2>/dev/null \
+        | grep -vE 'command-center/heartbeat\.json|graphify-out/|\.xcodeproj/' \
+        | wc -l | tr -d ' ')
+    if [[ "$REAL_EDITS" -gt 0 ]]; then
         return
     fi
 
@@ -334,6 +414,56 @@ except Exception:
     "$WORK_DIR/scripts/sprint-service.sh" unclaim "$NUM" >/dev/null 2>&1 || true
 }
 
+# Periodic WIP snapshot — every tick, if there's a claimed issue and the
+# working tree has real edits, save the current diff to
+# ~/drift-state/wip/<N>.patch (overwrite). On crash, session-compliance
+# reads this file to label the issue resumable + post the recovery path.
+# On clean exit (cmd_done), sprint-service.sh deletes the patch. Keeps
+# WIP recoverable to within ~30 sec without git branch ceremony.
+snapshot_wip_if_in_progress() {
+    local SD="$HOME/drift-state"
+    local STATE_FILE="$SD/sprint-state.json"
+    [[ -f "$STATE_FILE" ]] || return
+
+    local NUM
+    NUM=$(jq -r '.in_progress // empty' "$STATE_FILE" 2>/dev/null || echo "")
+    [[ -z "$NUM" || "$NUM" == "null" ]] && return
+
+    cd "$WORK_DIR" || return
+    local REAL_EDITS
+    # `|| echo 0` because grep -vE returns 1 when nothing matches (clean tree
+    # or only whitelisted noise) — combined with set -euo pipefail at line 12,
+    # that propagates exit 1 and kills the watchdog. Latent path that fires
+    # when a session is mid-claim AND the working tree has only noise files.
+    REAL_EDITS=$( { git status --porcelain 2>/dev/null \
+        | grep -vE 'command-center/heartbeat\.json|graphify-out/|\.xcodeproj/' \
+        | wc -l | tr -d ' '; } || echo 0 )
+    if [[ "$REAL_EDITS" -eq 0 ]]; then
+        # No real edits — remove any stale patch (issue was claimed, work
+        # got committed since last tick, patch no longer reflects WIP)
+        rm -f "$SD/wip/${NUM}.patch"
+        return
+    fi
+
+    mkdir -p "$SD/wip"
+
+    # Tracked changes → standard `git apply`-compatible patch (binary-safe).
+    git diff HEAD --binary > "$SD/wip/${NUM}.patch.tmp" 2>/dev/null
+    mv "$SD/wip/${NUM}.patch.tmp" "$SD/wip/${NUM}.patch"
+
+    # Untracked files → tarball (git diff doesn't capture them). Filter out
+    # noise paths the same way as the edit-detection above.
+    local UNTRACKED
+    UNTRACKED=$(git ls-files --others --exclude-standard 2>/dev/null \
+        | grep -vE 'command-center/heartbeat\.json|graphify-out/|\.xcodeproj/' || true)
+    if [[ -n "$UNTRACKED" ]]; then
+        echo "$UNTRACKED" | tar -czf "$SD/wip/${NUM}.untracked.tar.gz.tmp" -T - 2>/dev/null
+        mv "$SD/wip/${NUM}.untracked.tar.gz.tmp" "$SD/wip/${NUM}.untracked.tar.gz"
+    else
+        rm -f "$SD/wip/${NUM}.untracked.tar.gz"
+    fi
+}
+
 # Strip orphan in-progress labels — a closed issue should never carry
 # in-progress (always wrong), and an open sprint-task we're not working on
 # shouldn't either. Planning and design-doc issues have their own lifecycle
@@ -359,9 +489,16 @@ sweep_stale_in_progress_labels() {
         --json number --jq '.[].number' 2>/dev/null || echo "")
     for num in $open_stale; do
         [[ -n "$num" ]] || continue
-        if [[ "$num" != "$current" ]]; then
+        # Re-read current right before strip — protects against the race where
+        # a session claims #N during this sweep loop. Without this, the sweep
+        # could strip a fresh claim using the stale `current` snapshot from
+        # the top of the function. (User reported "issues get into in-progress
+        # and then watchdog removes etc" — this race was a contributor.)
+        local current_now
+        current_now=$(jq -r '.in_progress // empty' "$SD/sprint-state.json" 2>/dev/null || echo "")
+        if [[ "$num" != "$current_now" ]]; then
             gh issue edit "$num" --remove-label in-progress >/dev/null 2>&1 \
-                && log "Self-heal: stripped orphan in-progress from open sprint-task #$num (current=${current:-none})"
+                && log "Self-heal: stripped orphan in-progress from open sprint-task #$num (current=${current_now:-none})"
         fi
     done
 }
@@ -697,9 +834,15 @@ fi
 # Initial start
 STATE=$(read_control)
 if [[ "$STATE" == "RUN" ]]; then
-    # Ensure override is CONTINUE
-    sed -i '' 's/_Override:_ STOP/_Override:_ CONTINUE/' "$WORK_DIR/program.md" 2>/dev/null || true
     if [[ -z "$CLAUDE_PID" ]]; then
+        # Snapshot WIP BEFORE cleanup. If the prior watchdog died with a live
+        # session that left uncommitted work in the tree, this is our only
+        # chance to capture it — `cleanup_dirty_state` below will git-checkout
+        # everything 5 lines later. Observed regression on #515: prior session
+        # died, watchdog respawned via launchd, fired cleanup straight away,
+        # the resumable patch only contained heartbeat.json + project.pbxproj
+        # noise because the real code edits had been wiped.
+        snapshot_wip_if_in_progress
         cleanup_dirty_state
         start_claude
     else
@@ -712,7 +855,6 @@ elif [[ "$STATE" == "STOP" ]]; then
     exit 0
 elif [[ "$STATE" == "DRAIN" ]]; then
     log "Control file says DRAIN at startup."
-    sed -i '' 's/_Override:_ CONTINUE/_Override:_ STOP/' "$WORK_DIR/program.md" 2>/dev/null || true
     DRAIN_STALE=600
     if is_claude_alive; then
         log "DRAIN: waiting for session to finish (PID $CLAUDE_PID)..."
@@ -779,8 +921,7 @@ while true; do
             ;;
         PAUSE)
             if is_claude_alive; then
-                log "PAUSE requested. Setting override and waiting for graceful exit..."
-                sed -i '' 's/_Override:_ CONTINUE/_Override:_ STOP/' "$WORK_DIR/program.md" 2>/dev/null || true
+                log "PAUSE requested. Waiting for graceful exit (pause-gate.sh hard-blocks claim)..."
                 PAUSE_WAIT=0
                 PAUSE_TIMEOUT=900
                 while is_claude_alive && (( PAUSE_WAIT < PAUSE_TIMEOUT )); do
@@ -802,8 +943,7 @@ while true; do
             continue
             ;;
         DRAIN)
-            sed -i '' 's/_Override:_ CONTINUE/_Override:_ STOP/' "$WORK_DIR/program.md" 2>/dev/null || true
-            log "DRAIN: set _Override: STOP in program.md"
+            log "DRAIN: waiting for current session to finish (pause-gate.sh hard-blocks new claims)."
             if is_claude_alive; then
                 log "DRAIN: waiting for session to finish (PID $CLAUDE_PID)..."
                 DRAIN_STALE=600
@@ -829,14 +969,13 @@ while true; do
             exit 0
             ;;
         RUN)
-            # Ensure override is CONTINUE
-            sed -i '' 's/_Override:_ STOP/_Override:_ CONTINUE/' "$WORK_DIR/program.md" 2>/dev/null || true
             # Reconcile state before touching anything else — catches stamps
             # that a prior session left stale, GitHub-closed tasks still
             # locking our in_progress slot, and orphan in-progress labels.
             sync_stamps_from_main
             reconcile_in_progress
             check_stale_claim
+            snapshot_wip_if_in_progress
             sweep_stale_in_progress_labels
             commit_heartbeat_if_due
             # Check if autopilot is dead

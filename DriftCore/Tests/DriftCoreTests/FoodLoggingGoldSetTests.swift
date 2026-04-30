@@ -326,6 +326,127 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(correct, voiceQueries.count - 1, "At most 1 voice-style miss after normalization")
     }
 
+    // MARK: - Cycle 7689 Eval Cases (micronutrient + goal-progress clusters)
+
+    func testCycle7689_MicronutrientQueriesNotLoggedAsFood() {
+        // These must route to food_info, not parseFoodIntent (false-positive prevention)
+        let queries = [
+            "did I get enough fiber this week",
+            "how much sodium did I have today",
+            "am I getting enough vitamins",
+            "sugar intake this week",
+            "fiber this week",
+            "how's my sodium today",
+        ]
+        var falsePositives: [String] = []
+        for q in queries {
+            let normalized = InputNormalizer.normalize(q).lowercased()
+            if AIActionExecutor.parseFoodIntent(normalized) != nil {
+                falsePositives.append(q)
+            }
+        }
+        if !falsePositives.isEmpty { print("FALSE POSITIVES (micronutrient):\n\(falsePositives.joined(separator: "\n"))") }
+        print("📊 Micronutrient non-food: \(queries.count - falsePositives.count)/\(queries.count) correctly rejected")
+        XCTAssertEqual(falsePositives.count, 0, "Micronutrient queries must not parse as food log")
+    }
+
+    func testCycle7689_GoalProgressQueriesNotLoggedAsFood() {
+        // These must route to food_info, not parseFoodIntent (false-positive prevention)
+        let queries = [
+            "am I meeting my carb target",
+            "how far off am I from my fat goal",
+            "am I on track for my protein today",
+            "did I hit my macro goals",
+            "how close am I to my calorie goal",
+            "am I below my fat target",
+        ]
+        var falsePositives: [String] = []
+        for q in queries {
+            let normalized = InputNormalizer.normalize(q).lowercased()
+            if AIActionExecutor.parseFoodIntent(normalized) != nil {
+                falsePositives.append(q)
+            }
+        }
+        if !falsePositives.isEmpty { print("FALSE POSITIVES (goal-progress):\n\(falsePositives.joined(separator: "\n"))") }
+        print("📊 Goal-progress non-food: \(queries.count - falsePositives.count)/\(queries.count) correctly rejected")
+        XCTAssertEqual(falsePositives.count, 0, "Goal-progress queries must not parse as food log")
+    }
+
+    // MARK: - Portion Scaling (#498)
+
+    func testPortionScaling_DecimalServings() {
+        // (query, foodKeyword, expectedServings or nil, expectedGramAmount or nil)
+        let cases: [(String, String, Double?, Double?)] = [
+            ("log 1.5 servings of greek yogurt", "yogurt",    1.5,   nil),
+            ("had 2.5 scoops whey protein",      "whey",      2.5,   nil),
+            ("ate half a roti",                  "roti",      0.5,   nil),
+            ("log double the dal",               "dal",       2.0,   nil),
+            ("had 1.5 cups of rice",             "rice",      nil,  360.0),
+            ("log half a cup of oats",           "oat",       nil,  120.0),
+        ]
+        var correct = 0
+        for (query, keyword, expectedServings, expectedGrams) in cases {
+            let normalized = InputNormalizer.normalize(query).lowercased()
+            if let intent = AIActionExecutor.parseFoodIntent(normalized) {
+                let keywordMatch = intent.query.lowercased().contains(keyword) || normalized.contains(keyword)
+                let servingsOk = expectedServings.map { es in intent.servings.map { abs($0 - es) < 0.01 } ?? false } ?? true
+                let gramsOk = expectedGrams.map { eg in intent.gramAmount.map { abs($0 - eg) < 1.0 } ?? false } ?? true
+                if keywordMatch && servingsOk && gramsOk { correct += 1 }
+                else { print("MISS (portion): '\(query)' → food=\(intent.query) srv=\(intent.servings ?? -1) g=\(intent.gramAmount ?? -1)") }
+            } else {
+                print("MISS (no parse): '\(query)'")
+            }
+        }
+        print("📊 Portion scaling: \(correct)/\(cases.count)")
+        XCTAssertEqual(correct, cases.count, "All portion scaling cases must parse with correct decimal amounts")
+    }
+
+    // MARK: - Zero-user-math queries (#502)
+
+    func testZeroUserMath_QueriesNotLoggedAsFood() {
+        // These must route to food_info (arithmetic queries), not parseFoodIntent
+        let queries = [
+            "how many calories do I have left today",
+            "how much more protein do I need",
+            "how much fat have I had today",
+            "what are the total macros for dal, rice, and roti",
+            "calories remaining for today",
+            "how much protein until my goal",
+        ]
+        var falsePositives: [String] = []
+        for q in queries {
+            let normalized = InputNormalizer.normalize(q).lowercased()
+            if AIActionExecutor.parseFoodIntent(normalized) != nil {
+                falsePositives.append(q)
+            }
+        }
+        if !falsePositives.isEmpty { print("FALSE POSITIVES (zero-user-math):\n\(falsePositives.joined(separator: "\n"))") }
+        print("📊 Zero-user-math non-food: \(queries.count - falsePositives.count)/\(queries.count) correctly rejected")
+        XCTAssertEqual(falsePositives.count, 0, "Zero-user-math queries must not parse as food log")
+    }
+
+    func testCycle7689_IndianRegionalEdgeCases() {
+        let cases: [(String, String)] = [
+            ("ate poha for breakfast", "poha"),
+            ("had pav bhaji tonight", "pav"),
+            ("log upma with coconut chutney", "upma"),
+            ("just had sabudana khichdi", "sabudana"),
+            ("ate 2 vada with sambar", "vada"),
+        ]
+        var correct = 0
+        for (q, keyword) in cases {
+            let normalized = InputNormalizer.normalize(q).lowercased()
+            if let intent = AIActionExecutor.parseFoodIntent(normalized),
+               intent.query.lowercased().contains(keyword) || normalized.contains(keyword) {
+                correct += 1
+            } else {
+                print("MISS (Indian regional edge): '\(q)'")
+            }
+        }
+        print("📊 Indian regional edge cases: \(correct)/\(cases.count)")
+        XCTAssertGreaterThanOrEqual(correct, cases.count - 1, "At most 1 Indian regional edge case miss")
+    }
+
     // MARK: - Summary Gold Set
 
     func testFoodLoggingGoldSetSummary() {
@@ -365,6 +486,30 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             ("how do I do a deadlift", false),
             ("am I on track for protein", false),
             ("I weigh 165 lbs", false),
+            // Cycle 7689: micronutrient cluster (must NOT be food-logged)
+            ("did I get enough fiber this week", false),
+            ("am I getting enough vitamins", false),
+            ("sugar intake this week", false),
+            // Cycle 7689: goal-progress cluster (must NOT be food-logged)
+            ("am I meeting my carb target", false),
+            ("how far off am I from my fat goal", false),
+            ("did I hit my macro goals", false),
+            // Cycle 7689: Indian regional edge cases (should log food)
+            ("ate poha for breakfast", true),
+            ("had pav bhaji tonight", true),
+            ("log upma with coconut chutney", true),
+            // #502: zero-user-math (must NOT be food-logged)
+            ("how many calories do I have left today", false),
+            ("how much more protein do I need", false),
+            ("how much fat have I had today", false),
+            ("what are the total macros for dal, rice, and roti", false),
+            ("calories remaining for today", false),
+            // #498: portion scaling (SHOULD be food-logged with decimal amounts)
+            ("log 1.5 servings of greek yogurt", true),
+            ("had 2.5 scoops whey protein", true),
+            ("ate half a roti", true),
+            ("log double the dal", true),
+            ("had 1.5 cups of rice", true),
         ]
 
         var truePositive = 0, trueNegative = 0
@@ -394,5 +539,11 @@ final class FoodLoggingGoldSetTests: XCTestCase {
 
         XCTAssertGreaterThanOrEqual(recall, 80, "Recall should be ≥80%")
         XCTAssertGreaterThanOrEqual(precision, 90, "Precision should be ≥90%")
+
+        // Per-stage failure attribution — surfaces which stage to fix next.
+        let buckets = GoldSetStageAttribution.attribute(cases: allCases.map { ($0.0, $0.1) })
+        let stageReport = GoldSetStageAttribution.report(buckets: buckets, total: allCases.count)
+        print(stageReport)
+        GoldSetStageAttribution.persist(stageReport)
     }
 }

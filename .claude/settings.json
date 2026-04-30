@@ -1,5 +1,4 @@
 {
-  "advisorModel": "opus",
   "hooks": {
     "PreToolUse": [
       {
@@ -48,6 +47,10 @@
       {
         "matcher": "Bash|Read|Grep|Glob",
         "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/require-claim-before-bash.sh", "timeout": 5 }]
+      },
+      {
+        "matcher": "Bash|Read|Grep|Glob",
+        "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/nudge-plan-comment.sh", "timeout": 5 }]
       },
       {
         "matcher": "Bash",

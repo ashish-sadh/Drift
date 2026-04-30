@@ -32,6 +32,35 @@ final class AIChatViewModel {
     var isGenerating: Bool { generatingState != .idle }
     /// Bumped when a food logging sheet dismisses so suggestion pills re-evaluate.
     var mealLogRevision = 0
+    /// True when the current turn includes a photo attachment. Local backend has
+    /// no vision, so this overrides isFallbackable to prevent auto-fallback. #519 Q7.
+    var pendingTurnHasPhoto: Bool = false
+    /// JPEG bytes of the photo the user has selected but not yet sent.
+    var pendingPhotoData: Data? = nil
+    /// ID of the assistant message that currently holds a ProposedMealCardData,
+    /// so correction turns can replace the card in place.
+    var pendingProposalTurnId: UUID? = nil
+    /// Entry IDs logged by the most recent meal-card confirm, held for 10s undo.
+    var pendingUndoEntryIds: [Int64] = []
+
+    /// True when both local and remote BYOK backends are configured. Drives
+    /// the selector visibility; with only one backend the selector is hidden.
+    var canToggleBackend: Bool { AIBackendCoordinator.bothBackendsAvailable }
+
+    /// Stored so @Observable tracks it and re-renders the selector on change.
+    /// Initialized from persisted preference; updated synchronously in toggleBackend()
+    /// before the async backend swap so the UI responds immediately. #540.
+    var activeBackend: AIBackendType = Preferences.preferredAIBackend
+
+    /// Flip the backend. Updates the stored property immediately (triggers
+    /// @Observable re-render), persists the preference, then applies it async.
+    func toggleBackend(to backend: AIBackendType? = nil) {
+        guard !isGenerating else { return }
+        let next: AIBackendType = backend ?? (activeBackend == .remote ? .llamaCpp : .remote)
+        activeBackend = next
+        Preferences.preferredAIBackend = next
+        Task { await AIBackendCoordinator.applyPreferredBackend() }
+    }
 
     /// Injectable for tests; production uses the shared singleton.
     let persistence: ConversationStatePersistence
@@ -78,9 +107,10 @@ final class AIChatViewModel {
         if snapshot.isMeaningful {
             persistence.save(snapshot)
         } else {
-            // Nothing worth persisting — drop any stale on-disk state so a later restore is clean.
             persistence.clear()
         }
+        let turns = messages.map { HistoryTurn(role: $0.role == .user ? .user : .assistant, text: $0.text) }
+        CrossSessionHistory.save(turns)
     }
 
     struct ManualFoodPrefill {
@@ -113,12 +143,37 @@ final class AIChatViewModel {
         var sleepCard: SleepCardData?
         var glucoseCard: GlucoseCardData?
         var biomarkerCard: BiomarkerCardData?
+        var helpCard: HelpCardData?
         /// When the assistant asked "Did you mean X or Y?" — each option
         /// rendered as a tappable chip. Tapping sends the label as a new
         /// user message; the VM resolves it against the active phase. #226.
         var clarificationOptions: [ClarificationOption]?
+        /// Non-nil when a cloud backend handled this turn ("Anthropic", "OpenAI",
+        /// "Gemini"). Nil means on-device — silence = privacy by default. #533.
+        var remoteProvider: String?
+        /// Non-nil when the assistant message shows a remote error. Stores the
+        /// original user turn text so the Retry chip can re-send it. #519 Q7.
+        var retryTurn: String?
+        /// JPEG bytes attached by the user. Displayed as a thumbnail in the
+        /// user bubble; sent to the remote backend as a vision turn. #518.
+        var photoAttachment: Data?
+        /// Inline proposed-meal card emitted by the AI via propose_meal. #518.
+        var proposedMealCard: ProposedMealCardData?
         let createdAt = Date()
         enum Role { case user, assistant }
+    }
+
+    struct ProposedMealCardData {
+        struct Item: Identifiable {
+            var id = UUID()
+            var name: String
+            var grams: Int
+            var calories: Int
+            var protein: Int
+            var carbs: Int
+            var fat: Int
+        }
+        var items: [Item]
     }
 
     struct NutritionLookupCardData {

@@ -9,12 +9,19 @@ public struct ClarificationOption: Equatable, Codable, Sendable, Identifiable {
     public let label: String
     public let tool: String
     public let params: [String: String]
+    /// SF Symbol name for the chip icon. Nil = show numeric badge instead.
+    public let displayIcon: String?
+    /// Short hint shown under the label (e.g. "~350 cal"). Nil = hidden.
+    public let secondaryText: String?
 
-    public init(id: Int, label: String, tool: String, params: [String: String]) {
+    public init(id: Int, label: String, tool: String, params: [String: String],
+                displayIcon: String? = nil, secondaryText: String? = nil) {
         self.id = id
         self.label = label
         self.tool = tool
         self.params = params
+        self.displayIcon = displayIcon
+        self.secondaryText = secondaryText
     }
 }
 
@@ -99,9 +106,9 @@ public enum ClarificationBuilder {
         let display = lower
         return [
             .init(id: 1, label: "Log \(display) as food", tool: "log_food",
-                  params: ["name": display]),
+                  params: ["name": display], displayIcon: "fork.knife"),
             .init(id: 2, label: "Look up calories in \(display)", tool: "food_info",
-                  params: ["query": "calories in \(display)"])
+                  params: ["query": "calories in \(display)"], displayIcon: "magnifyingglass")
         ]
     }
 
@@ -117,9 +124,9 @@ public enum ClarificationBuilder {
         }
         return [
             .init(id: 1, label: "Mark \(lower) as taken today", tool: "mark_supplement",
-                  params: ["name": lower]),
+                  params: ["name": lower], displayIcon: "pills.fill"),
             .init(id: 2, label: "Check if I've taken \(lower)", tool: "supplements",
-                  params: ["query": lower])
+                  params: ["query": lower], displayIcon: "info.circle")
         ]
     }
 
@@ -131,11 +138,11 @@ public enum ClarificationBuilder {
         let formatted = value == value.rounded() ? "\(Int(value))" : String(format: "%.1f", value)
         return [
             .init(id: 1, label: "Log weight \(formatted) lbs", tool: "log_weight",
-                  params: ["value": formatted, "unit": "lbs"]),
+                  params: ["value": formatted, "unit": "lbs"], displayIcon: "scalemass.fill"),
             .init(id: 2, label: "Log weight \(formatted) kg", tool: "log_weight",
-                  params: ["value": formatted, "unit": "kg"]),
+                  params: ["value": formatted, "unit": "kg"], displayIcon: "scalemass.fill"),
             .init(id: 3, label: "Set goal to \(formatted)", tool: "set_goal",
-                  params: ["target": formatted])
+                  params: ["target": formatted], displayIcon: "target")
         ]
     }
 
@@ -159,9 +166,9 @@ public enum ClarificationBuilder {
         if ambiguousLogLexicon.contains(rest) {
             return [
                 .init(id: 1, label: "Log \(rest) as food", tool: "log_food",
-                      params: ["name": rest]),
+                      params: ["name": rest], displayIcon: "fork.knife"),
                 .init(id: 2, label: "Log \(rest) as activity", tool: "log_activity",
-                      params: ["name": rest])
+                      params: ["name": rest], displayIcon: "figure.run")
             ]
         }
         return nil
@@ -225,7 +232,11 @@ public enum ClarificationBuilder {
         "salad", "soup", "curry", "steak", "salmon", "tuna", "yogurt", "cheese",
         "banana", "apple", "orange", "mango", "grapes", "toast", "oatmeal",
         "paneer", "samosa", "roti", "tofu", "sushi", "burrito", "taco",
-        "coffee", "tea", "milk", "juice"
+        "coffee", "tea", "milk", "juice",
+        // Indian staples — "Indian food is the bar"
+        "dosa", "idli", "vada", "upma", "poha", "chapati", "naan", "paratha",
+        "rajma", "chole", "sabzi", "khichdi", "halwa", "kheer", "lassi",
+        "uttapam", "pesarattu", "pongal", "appam", "puttu"
     ]
 
     private static func looksLikeFoodNoun(_ lower: String) -> Bool {

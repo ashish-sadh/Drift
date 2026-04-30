@@ -214,25 +214,52 @@ public enum AIActionExecutor {
 
     // MARK: - Amount Parsing
 
+    /// Converts a numeric amount + unit string to grams.
+    /// Returns nil for pure count units (scoop, piece, serving) that stay as servings.
+    /// oz→28.35g, kg→1000g, cup→240g, tbsp→15g, tsp→5g, g/ml treated 1:1.
+    static func normalizeToGrams(_ amount: Double, unit: String) -> Double? {
+        switch unit {
+        case "g", "gram", "grams", "gm": return amount
+        case "oz": return amount * 28.3495
+        case "kg": return amount * 1000
+        case "ml": return amount
+        case "cup", "cups": return amount * 240
+        case "tbsp": return amount * 15
+        case "tsp": return amount * 5
+        default: return nil
+        }
+    }
+
     /// Extract amount from beginning of string: "1/3 avocado" → (0.33, "avocado")
-    /// Also returns gram amount separately: "paneer biryani 300 gram" → (nil, "paneer biryani", 300)
+    /// Also converts weight/volume units: "2 oz chicken" → (nil, "chicken", 56.7),
+    /// "1 cup oats" → (nil, "oats", 240), "1 tbsp peanut butter" → (nil, "peanut butter", 15).
+    /// Multiplier keywords: "double the chicken" → (2.0, "chicken", nil).
     public static func extractAmount(from text: String) -> (Double?, String, Double?) {
-        let gramUnitsLeading: Set<String> = ["g", "gram", "grams", "gm", "oz", "ml", "kg"]
-        let countUnitsLeading: Set<String> = ["scoop", "scoops", "tbsp", "tsp", "cup", "cups",
-                                               "piece", "pieces", "slice", "slices", "serving", "servings",
-                                               "portion", "portions"]
+        let weightAndVolumeUnits: Set<String> = ["g", "gram", "grams", "gm", "oz", "ml", "kg", "cup", "cups", "tbsp", "tsp"]
+        let countUnitsLeading: Set<String> = ["scoop", "scoops", "piece", "pieces", "slice", "slices",
+                                               "serving", "servings", "portion", "portions"]
         let leadingWords = text.split(separator: " ").map(String.init)
+
+        let multiplierWords: [String: Double] = ["double": 2.0, "twice": 2.0, "triple": 3.0, "2x": 2.0, "3x": 3.0]
+        if let first = leadingWords.first, let multiplier = multiplierWords[first.lowercased()] {
+            var rest = Array(leadingWords.dropFirst())
+            if let next = rest.first, ["the", "a", "an", "my"].contains(next.lowercased()) {
+                rest = Array(rest.dropFirst())
+            }
+            let food = rest.joined(separator: " ")
+            if !food.isEmpty { return (multiplier, food.trimmingCharacters(in: .whitespaces), nil) }
+        }
         if leadingWords.count >= 3, let num = Double(leadingWords[0]) {
             let unit = leadingWords[1].lowercased()
-            let isGramUnit = gramUnitsLeading.contains(unit)
+            let convertedGrams = normalizeToGrams(num, unit: unit)
             let isCountUnit = countUnitsLeading.contains(unit)
-            if isGramUnit || isCountUnit {
+            if convertedGrams != nil || isCountUnit {
                 var foodStart = 2
                 if leadingWords.count > 3 && leadingWords[2].lowercased() == "of" { foodStart = 3 }
                 let food = leadingWords[foodStart...].joined(separator: " ")
                 if !food.isEmpty {
-                    if isGramUnit {
-                        return (nil, food.trimmingCharacters(in: .whitespaces), num)
+                    if let grams = convertedGrams {
+                        return (nil, food.trimmingCharacters(in: .whitespaces), grams)
                     } else {
                         return (num, food.trimmingCharacters(in: .whitespaces), nil)
                     }
@@ -242,10 +269,11 @@ public enum AIActionExecutor {
 
         if leadingWords.count >= 2 {
             let first = leadingWords[0].lowercased()
-            for unit in gramUnitsLeading {
-                if first.hasSuffix(unit), let num = Double(first.dropLast(unit.count)) {
+            for unit in weightAndVolumeUnits {
+                if first.hasSuffix(unit), let num = Double(first.dropLast(unit.count)),
+                   let grams = normalizeToGrams(num, unit: unit) {
                     let food = leadingWords[1...].joined(separator: " ")
-                    return (nil, food.trimmingCharacters(in: .whitespaces), num)
+                    return (nil, food.trimmingCharacters(in: .whitespaces), grams)
                 }
             }
         }
@@ -253,19 +281,20 @@ public enum AIActionExecutor {
         let twoWordAmounts: [(String, String, Double)] = [
             ("a", "quarter", 0.25), ("a", "half", 0.5),
             ("one", "quarter", 0.25), ("one", "half", 0.5),
+            ("half", "a", 0.5),
         ]
         if leadingWords.count >= 4 {
             for (w1, w2, amt) in twoWordAmounts {
                 if leadingWords[0].lowercased() == w1 && leadingWords[1].lowercased() == w2 {
                     let unit = leadingWords[2].lowercased()
-                    let isGramUnit = gramUnitsLeading.contains(unit)
+                    let convertedGrams = normalizeToGrams(amt, unit: unit)
                     let isCountUnit = countUnitsLeading.contains(unit)
-                    if isGramUnit || isCountUnit {
+                    if convertedGrams != nil || isCountUnit {
                         var foodStart = 3
                         if leadingWords.count > 4 && leadingWords[3].lowercased() == "of" { foodStart = 4 }
                         let food = leadingWords[foodStart...].joined(separator: " ")
                         if !food.isEmpty {
-                            if isGramUnit { return (nil, food.trimmingCharacters(in: .whitespaces), amt) }
+                            if let grams = convertedGrams { return (nil, food.trimmingCharacters(in: .whitespaces), grams) }
                             else { return (amt, food.trimmingCharacters(in: .whitespaces), nil) }
                         }
                     }
@@ -276,14 +305,14 @@ public enum AIActionExecutor {
         let wordAmountsLeading: [String: Double] = ["half": 0.5, "quarter": 0.25, "one": 1, "two": 2, "three": 3, "a": 1, "an": 1]
         if leadingWords.count >= 3, let amt = wordAmountsLeading[leadingWords[0].lowercased()] {
             let unit = leadingWords[1].lowercased()
-            let isGramUnit = gramUnitsLeading.contains(unit)
+            let convertedGrams = normalizeToGrams(amt, unit: unit)
             let isCountUnit = countUnitsLeading.contains(unit)
-            if isGramUnit || isCountUnit {
+            if convertedGrams != nil || isCountUnit {
                 var foodStart = 2
                 if leadingWords.count > 3 && leadingWords[2].lowercased() == "of" { foodStart = 3 }
                 let food = leadingWords[foodStart...].joined(separator: " ")
                 if !food.isEmpty {
-                    if isGramUnit { return (nil, food.trimmingCharacters(in: .whitespaces), amt) }
+                    if let grams = convertedGrams { return (nil, food.trimmingCharacters(in: .whitespaces), grams) }
                     else { return (amt, food.trimmingCharacters(in: .whitespaces), nil) }
                 }
             }
@@ -296,27 +325,33 @@ public enum AIActionExecutor {
             }
         }
 
-        let weightUnits: Set<String> = ["g", "gram", "grams", "gm", "oz", "ml", "kg",
-                                         "scoop", "scoops", "tbsp", "tsp", "cup", "cups",
-                                         "piece", "pieces", "slice", "slices", "serving", "servings"]
+        let allWeightUnits: Set<String> = weightAndVolumeUnits.union(countUnitsLeading)
         let allWords = text.split(separator: " ").map(String.init)
         if allWords.count >= 3 {
             let lastWord = allWords.last!.lowercased()
             let secondLast = allWords[allWords.count - 2]
-            if weightUnits.contains(lastWord), let grams = Double(secondLast) {
+            if allWeightUnits.contains(lastWord), let rawAmt = Double(secondLast) {
                 let food = allWords[0..<(allWords.count - 2)].joined(separator: " ")
                 if !food.isEmpty {
-                    return (nil, food.trimmingCharacters(in: .whitespaces), grams)
+                    if let grams = normalizeToGrams(rawAmt, unit: lastWord) {
+                        return (nil, food.trimmingCharacters(in: .whitespaces), grams)
+                    } else {
+                        return (rawAmt, food.trimmingCharacters(in: .whitespaces), nil)
+                    }
                 }
             }
         }
         if allWords.count >= 2 {
             let lastWord = allWords.last!.lowercased()
-            for unit in weightUnits {
-                if lastWord.hasSuffix(unit), let grams = Double(lastWord.dropLast(unit.count)) {
+            for unit in allWeightUnits {
+                if lastWord.hasSuffix(unit), let rawAmt = Double(lastWord.dropLast(unit.count)) {
                     let food = allWords[0..<(allWords.count - 1)].joined(separator: " ")
                     if !food.isEmpty {
-                        return (nil, food.trimmingCharacters(in: .whitespaces), grams)
+                        if let grams = normalizeToGrams(rawAmt, unit: unit) {
+                            return (nil, food.trimmingCharacters(in: .whitespaces), grams)
+                        } else {
+                            return (rawAmt, food.trimmingCharacters(in: .whitespaces), nil)
+                        }
                     }
                 }
             }
@@ -345,10 +380,14 @@ public enum AIActionExecutor {
         }
 
         let leadingLower = firstStr.lowercased()
-        for unit in weightUnits {
-            if leadingLower.hasSuffix(unit), let grams = Double(leadingLower.dropLast(unit.count)) {
+        for unit in allWeightUnits {
+            if leadingLower.hasSuffix(unit), let rawAmt = Double(leadingLower.dropLast(unit.count)) {
                 let food = parts.count > 1 ? String(parts[1]) : ""
-                return (nil, food.trimmingCharacters(in: .whitespaces), grams)
+                if let grams = normalizeToGrams(rawAmt, unit: unit) {
+                    return (nil, food.trimmingCharacters(in: .whitespaces), grams)
+                } else {
+                    return (rawAmt, food.trimmingCharacters(in: .whitespaces), nil)
+                }
             }
         }
 

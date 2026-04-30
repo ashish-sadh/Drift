@@ -268,6 +268,23 @@ write_state_with_tasks "null" \
 OUT=$(sprint_service next --senior)
 assert_eq "SENIOR sprint beats approved P2 bug for senior" "10 SENIOR sprint" "$OUT"
 
+# 2.3b P0 SENIOR feature beats regular SENIOR sprint (Priority 1.5)
+# A P0 label on a non-bug feature should jump it ahead of the queue.
+write_state_with_tasks "null" \
+    "$(task 10 'Regular SENIOR sprint' pending sprint-task SENIOR)" \
+    "$(task 20 'P0 SENIOR feature' pending sprint-task SENIOR P0)"
+OUT=$(sprint_service next --senior)
+assert_eq "P0 SENIOR feature wins over regular SENIOR sprint" "20 P0 SENIOR feature" "$OUT"
+OUT=$(sprint_service next --any)
+assert_eq "P0 SENIOR feature wins on --any too" "20 P0 SENIOR feature" "$OUT"
+
+# 2.3c P0 bug still beats P0 SENIOR feature (bugs are Priority 1, features 1.5)
+write_state_with_tasks "null" \
+    "$(task 10 'P0 SENIOR feature' pending sprint-task SENIOR P0)" \
+    "$(task 20 'P0 Bug admin' pending bug P0 sprint-task)"
+OUT=$(sprint_service next --senior)
+assert_eq "P0 bug (Priority 1) still beats P0 feature (Priority 1.5)" "20 P0 Bug admin" "$OUT"
+
 # 2.4 needs-review tasks skipped by all sessions
 write_state_with_tasks "null" \
     "$(task 10 'Needs review bug' pending bug P1 needs-review sprint-task)" \
@@ -364,9 +381,9 @@ assert_exit0 "planning-due when never run" sprint_service planning-due
 echo "$(date +%s)" > "$LAST_PLANNING_FILE"
 assert_exit_nonzero "planning-due not due when just run" sprint_service planning-due
 
-# 3.6 planning-due returns 0 (due) if 7h ago
-echo "$(( $(date +%s) - 25200 ))" > "$LAST_PLANNING_FILE"
-assert_exit0 "planning-due when 7h ago" sprint_service planning-due
+# 3.6 planning-due returns 0 (due) if 25h ago (cadence is 24h)
+echo "$(( $(date +%s) - 90000 ))" > "$LAST_PLANNING_FILE"
+assert_exit0 "planning-due when 25h ago" sprint_service planning-due
 
 # 3.7 planning-done stamps current time and clears due status
 rm -f "$LAST_PLANNING_FILE"
@@ -394,6 +411,21 @@ RESULT=$(sprint_service next --junior --claim 2>/dev/null)
 assert_eq "next --claim with empty queue prints none" "none" "$RESULT"
 IN_P=$(jq -r '.in_progress' "$STATE_FILE")
 assert_eq "next --claim with empty queue leaves in_progress null" "null" "$IN_P"
+
+# 3.10 cmd_claim prints RESUMABLE warning when issue has `resumable` label.
+# Without this warning, sessions ran bare `gh issue view N` (no comments)
+# and never saw the WIP file pointers, looping on orientation. See #516.
+write_state_with_tasks "null" \
+    "$(task 800 'Resumable claim' pending sprint-task SENIOR resumable)"
+OUT=$(sprint_service claim 800 2>&1)
+assert_contains "claim prints RESUMABLE warning when label set" "RESUMABLE" "$OUT"
+assert_contains "claim warning includes WIP patch path with issue number" "wip/800.patch" "$OUT"
+
+# 3.11 cmd_claim does NOT print RESUMABLE for non-resumable issues
+write_state_with_tasks "null" \
+    "$(task 801 'Normal claim' pending sprint-task SENIOR)"
+OUT=$(sprint_service claim 801 2>&1)
+assert_not_contains "claim silent on resumable warning for non-resumable issue" "RESUMABLE" "$OUT"
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -936,15 +968,23 @@ sprint_service session-done 202 > /dev/null 2>&1 || true
 ST=$(get_session_tasks)
 assert_eq "session-done on permanent-task increments session_tasks" "1" "$ST"
 
-# 11.5 next --junior returns "none" when session_tasks >= 5 (even with tasks available)
+# 11.5 next --junior returns "none" when session_tasks >= 10 (junior budget bumped to 10)
+write_state_with_budget "null" 10 "$(task 210 'Sprint task' pending sprint-task)"
+RESULT=$(sprint_service next --junior)
+assert_eq "next --junior returns none when session_tasks=10" "none" "$RESULT"
+# Junior at session_tasks=5 should STILL return tasks (budget is 10, not 5)
 write_state_with_budget "null" 5 "$(task 210 'Sprint task' pending sprint-task)"
 RESULT=$(sprint_service next --junior)
-assert_eq "next --junior returns none when session_tasks=5" "none" "$RESULT"
+assert_contains "next --junior at session_tasks=5 still returns task (budget is 10)" "210" "$RESULT"
 
-# 11.6 next --senior returns "none" when session_tasks >= 5
+# 11.6 next --senior returns "none" when session_tasks >= 10 (senior budget is 10)
+write_state_with_budget "null" 10 "$(task 211 'SENIOR task' pending sprint-task SENIOR)"
+RESULT=$(sprint_service next --senior)
+assert_eq "next --senior returns none when session_tasks=10" "none" "$RESULT"
+# Senior at session_tasks=5 should STILL return tasks (was a budget cap pre-bump)
 write_state_with_budget "null" 5 "$(task 211 'SENIOR task' pending sprint-task SENIOR)"
 RESULT=$(sprint_service next --senior)
-assert_eq "next --senior returns none when session_tasks=5" "none" "$RESULT"
+assert_contains "next --senior at session_tasks=5 still returns task (budget is 10)" "211" "$RESULT"
 
 # 11.7 next --any ignores session budget (unrestricted — used in tests and planning)
 write_state_with_budget "null" 5 "$(task 212 'Sprint task' pending sprint-task)"
@@ -1027,44 +1067,58 @@ run_lifecycle() {
 echo ""
 echo "══ Full Session Lifecycle Simulation ═══════════════════════════════════"
 
-# ── LC-1: Complete junior session — 5 sprint tasks, budget exhausted ──────
-# Session start → reset budget → claim 5 tasks → done 5 → next returns "none"
+# ── LC-1: Complete junior session — 10 sprint tasks, budget exhausted ─────
+# Junior budget bumped to 10 (matches senior) — sessions weren't fully
+# utilizing their productive window with a 5-task cap.
 write_state_with_budget "null" 0 \
     "$(task 501 'Task 1' pending sprint-task)" \
     "$(task 502 'Task 2' pending sprint-task)" \
     "$(task 503 'Task 3' pending sprint-task)" \
     "$(task 504 'Task 4' pending sprint-task)" \
     "$(task 505 'Task 5' pending sprint-task)" \
-    "$(task 506 'Task 6' pending sprint-task)"
+    "$(task 506 'Task 6' pending sprint-task)" \
+    "$(task 507 'Task 7' pending sprint-task)" \
+    "$(task 508 'Task 8' pending sprint-task)" \
+    "$(task 509 'Task 9' pending sprint-task)" \
+    "$(task 510 'Task 10' pending sprint-task)" \
+    "$(task 5011 'Task 11' pending sprint-task)"
 sprint_service start-session > /dev/null
-for N in 501 502 503 504 505; do
+for N in 501 502 503 504 505 506 507 508 509 510; do
     sprint_service claim $N > /dev/null 2>&1 || true
     sprint_service done $N "hash$N" > /dev/null 2>&1 || true
 done
 RESULT=$(sprint_service next --junior)
-assert_eq "LC-1: junior budget exhausted after 5 tasks → none" "none" "$RESULT"
+assert_eq "LC-1: junior budget exhausted after 10 tasks → none" "none" "$RESULT"
 ST=$(get_session_tasks)
-assert_eq "LC-1: session_tasks=5 after 5 sprint tasks" "5" "$ST"
-# Task 6 still pending but budget is done
+assert_eq "LC-1: session_tasks=10 after 10 sprint tasks" "10" "$ST"
+# Task 11 still pending but budget is done
 RESULT=$(sprint_service next --any)
-assert_contains "LC-1: task 6 still available via --any" "506" "$RESULT"
+assert_contains "LC-1: task 11 still available via --any" "5011" "$RESULT"
 
-# ── LC-2: Complete senior session — 5 SENIOR tasks, budget exhausted ──────
+# ── LC-2: Complete senior session — 10 SENIOR tasks, budget exhausted ─────
+# Senior budget is 10 (was 5; raised after observing senior sessions were
+# leaving ~half their day's productive capacity unused once they hit 5
+# fast-shipping tasks).
 write_state_with_budget "null" 0 \
     "$(task 511 'SENIOR 1' pending sprint-task SENIOR)" \
     "$(task 512 'SENIOR 2' pending sprint-task SENIOR)" \
     "$(task 513 'SENIOR 3' pending sprint-task SENIOR)" \
     "$(task 514 'SENIOR 4' pending sprint-task SENIOR)" \
-    "$(task 515 'SENIOR 5' pending sprint-task SENIOR)"
+    "$(task 515 'SENIOR 5' pending sprint-task SENIOR)" \
+    "$(task 516 'SENIOR 6' pending sprint-task SENIOR)" \
+    "$(task 517 'SENIOR 7' pending sprint-task SENIOR)" \
+    "$(task 518 'SENIOR 8' pending sprint-task SENIOR)" \
+    "$(task 519 'SENIOR 9' pending sprint-task SENIOR)" \
+    "$(task 520 'SENIOR 10' pending sprint-task SENIOR)"
 sprint_service start-session > /dev/null
-for N in 511 512 513 514 515; do
+for N in 511 512 513 514 515 516 517 518 519 520; do
     sprint_service claim $N > /dev/null 2>&1 || true
     sprint_service done $N "hash$N" > /dev/null 2>&1 || true
 done
 RESULT=$(sprint_service next --senior)
-assert_eq "LC-2: senior budget exhausted after 5 SENIOR tasks → none" "none" "$RESULT"
+assert_eq "LC-2: senior budget exhausted after 10 SENIOR tasks → none" "none" "$RESULT"
 ST=$(get_session_tasks)
-assert_eq "LC-2: session_tasks=5 after 5 SENIOR done" "5" "$ST"
+assert_eq "LC-2: session_tasks=10 after 10 SENIOR done" "10" "$ST"
 
 # ── LC-3: Mixed budget — sprint + permanent session-done exhausts budget ──
 write_state_with_budget "null" 0 \
@@ -1131,31 +1185,36 @@ sprint_service session-done 552 > /dev/null 2>&1 || true
 RESULT=$(sprint_service next --junior)
 assert_eq "LC-6: no more tasks after sprint + perm done" "none" "$RESULT"
 
-# ── LC-7: Two session handoff — session 1 does 5, session 2 picks up ──────
+# ── LC-7: Two session handoff — session 1 does 10, session 2 picks up ─────
 write_state_with_budget "null" 0 \
     "$(task 561 'Task A' pending sprint-task)" \
     "$(task 562 'Task B' pending sprint-task)" \
     "$(task 563 'Task C' pending sprint-task)" \
     "$(task 564 'Task D' pending sprint-task)" \
     "$(task 565 'Task E' pending sprint-task)" \
-    "$(task 566 'Task F' pending sprint-task)" \
-    "$(task 567 'Task G' pending sprint-task)"
-# Session 1: does 5 tasks
+    "$(task 1566 'Task F' pending sprint-task)" \
+    "$(task 1567 'Task G' pending sprint-task)" \
+    "$(task 1568 'Task H' pending sprint-task)" \
+    "$(task 1569 'Task I' pending sprint-task)" \
+    "$(task 1570 'Task J' pending sprint-task)" \
+    "$(task 566 'Task K' pending sprint-task)" \
+    "$(task 567 'Task L' pending sprint-task)"
+# Session 1: does 10 tasks (budget)
 sprint_service start-session > /dev/null
-for N in 561 562 563 564 565; do
+for N in 561 562 563 564 565 1566 1567 1568 1569 1570; do
     sprint_service claim $N > /dev/null 2>&1 || true
     sprint_service done $N "h$N" > /dev/null 2>&1 || true
 done
 assert_eq "LC-7: session 1 budget exhausted" "none" "$(sprint_service next --junior)"
 # Watchdog restarts, session 2 starts
 sprint_service start-session > /dev/null
-# Session 2 picks up remaining tasks F and G
+# Session 2 picks up remaining tasks K and L
 RESULT=$(sprint_service next --junior)
-assert_contains "LC-7: session 2 picks up task F (566)" "566" "$RESULT"
+assert_contains "LC-7: session 2 picks up task K (566)" "566" "$RESULT"
 sprint_service claim 566 > /dev/null 2>&1 || true
 sprint_service done 566 "h566" > /dev/null 2>&1 || true
 RESULT=$(sprint_service next --junior)
-assert_contains "LC-7: session 2 picks up task G (567)" "567" "$RESULT"
+assert_contains "LC-7: session 2 picks up task L (567)" "567" "$RESULT"
 
 # ── LC-8: needs-review tasks never returned (any session, any filter) ──────
 write_state_with_budget "null" 0 \
@@ -1197,11 +1256,11 @@ assert_eq "LC-10: junior gets regular sprint (after SENIOR done)" "591 Junior sp
 RESULT=$(sprint_service next --senior)
 assert_eq "LC-10: senior has nothing left (regular sprint not for senior)" "none" "$RESULT"
 
-# ── LC-11: Planning-due boundary — exactly at 6h and 6h-1s ───────────────
-echo "$(( $(date +%s) - 21600 ))" > "$LAST_PLANNING_FILE"   # exactly 6h ago
-assert_exit0    "LC-11: planning-due at exactly 6h" sprint_service planning-due
-echo "$(( $(date +%s) - 21599 ))" > "$LAST_PLANNING_FILE"   # 6h minus 1s
-assert_exit_nonzero "LC-11: planning-not-due at 6h-1s" sprint_service planning-due
+# ── LC-11: Planning-due boundary — exactly at 24h and 24h-1s ────────────
+echo "$(( $(date +%s) - 86400 ))" > "$LAST_PLANNING_FILE"   # exactly 24h ago
+assert_exit0    "LC-11: planning-due at exactly 24h" sprint_service planning-due
+echo "$(( $(date +%s) - 86399 ))" > "$LAST_PLANNING_FILE"   # 24h minus 1s
+assert_exit_nonzero "LC-11: planning-not-due at 24h-1s" sprint_service planning-due
 
 # ── LC-12: Overhead issue does not block real task claims ─────────────────
 write_state_with_budget "null" 0 \

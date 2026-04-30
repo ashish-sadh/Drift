@@ -27,19 +27,22 @@ atomic_write() {
     local content="$2"
     local tmp="${target}.tmp.$$"
 
-    # Trap to clean up tmp on any failure path (caller's set -e or our own).
-    trap 'rm -f "$tmp"' RETURN
-
-    # Print the content with a trailing newline (matches `echo > file` semantics).
-    printf '%s\n' "$content" > "$tmp" || return 1
-
-    # fsync the tmp file so its bytes are durable before the rename. macOS sync
-    # is filesystem-wide, which is overkill but cheap for the small files we
-    # write. On Linux, `sync "$tmp"` would target just that fd.
+    # Explicit cleanup on failure paths (no RETURN trap). The earlier RETURN-
+    # trap version persisted globally — bash sets the trap once and it fires
+    # on every subsequent function return in the calling chain, where the
+    # local `tmp` is out of scope. `${tmp:-}` guard didn't help on macOS bash;
+    # under `set -u` the trap still threw `tmp: unbound variable`. Cleaner
+    # to just inline the rm on failure and skip the trap altogether.
+    # (Watchdog was crash-looping 8x/day on this — see git log.)
+    if ! printf '%s\n' "$content" > "$tmp"; then
+        rm -f "$tmp"
+        return 1
+    fi
     sync "$tmp" 2>/dev/null || sync
-
-    # Atomic rename; replaces target if it existed.
-    mv -f "$tmp" "$target" || return 1
+    if ! mv -f "$tmp" "$target"; then
+        rm -f "$tmp"
+        return 1
+    fi
 }
 
 # Variant that reads from stdin — for slightly larger payloads (JSON state, etc.)
@@ -47,9 +50,13 @@ atomic_write_file() {
     local target="$1"
     local tmp="${target}.tmp.$$"
 
-    trap 'rm -f "$tmp"' RETURN
-
-    cat > "$tmp" || return 1
+    if ! cat > "$tmp"; then
+        rm -f "$tmp"
+        return 1
+    fi
     sync "$tmp" 2>/dev/null || sync
-    mv -f "$tmp" "$target" || return 1
+    if ! mv -f "$tmp" "$target"; then
+        rm -f "$tmp"
+        return 1
+    fi
 }

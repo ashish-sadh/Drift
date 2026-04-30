@@ -398,6 +398,29 @@ struct SettingsView: View {
                 }
                 .card()
 
+                // Smart Meal Reminders — #385
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "fork.knife.circle")
+                            .foregroundStyle(Theme.accent).frame(width: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Smart Meal Reminders").font(.subheadline.weight(.medium))
+                            Text("Quiet nudge ~30 min after your typical meal time, only if you haven't logged it yet")
+                                .font(.caption2).foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        Toggle("", isOn: Binding(
+                            get: { Preferences.mealRemindersEnabled },
+                            set: {
+                                Preferences.mealRemindersEnabled = $0
+                                Task { await NotificationService.refreshScheduledAlerts() }
+                            }
+                        ))
+                        .labelsHidden().tint(Theme.accent)
+                    }
+                }
+                .card()
+
                 // AI Chat Telemetry (opt-in, local only) — #261
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 12) {
@@ -609,8 +632,7 @@ struct SettingsView: View {
             UserDefaults.standard.removeObject(forKey: "drift_default_templates_v3")
             UserDefaults.standard.removeObject(forKey: "drift_default_templates_v2")
             UserDefaults.standard.removeObject(forKey: "drift_default_templates_seeded")
-            UserDefaults.standard.removeObject(forKey: "drift_default_foods_seeded_v1")
-            UserDefaults.standard.removeObject(forKey: "drift_cycle_fertile_window")
+UserDefaults.standard.removeObject(forKey: "drift_cycle_fertile_window")
             Log.app.info("Factory reset performed")
             resetDone = true
         } catch {

@@ -54,8 +54,8 @@ struct WeightInsightsView: View {
                     color: changeColor(rate),
                     direction: directionIcon(rate),
                     directionColor: changeColor(rate),
-                    tooltip: "Your typical weekly rate of change over the past \(WeightTrendCalculator.loadConfig().regressionWindowDays) days.",
-                    nudge: "Based on last \(trend.config.regressionWindowDays) days"
+                    tooltip: "Your typical weekly rate of change over the past \(trend.rateWindowDays) days.",
+                    nudge: "Based on last \(trend.rateWindowDays) days"
                 )
             }
 
@@ -72,8 +72,8 @@ struct WeightInsightsView: View {
                     color: deficitColor,
                     direction: directionIcon(deficit),
                     directionColor: deficitColor,
-                    tooltip: "Estimated daily caloric \(deficit < 0 ? "deficit" : "surplus") based on your weight trend over the past \(WeightTrendCalculator.loadConfig().regressionWindowDays) days.",
-                    nudge: "Based on last \(trend.config.regressionWindowDays) days"
+                    tooltip: "Estimated daily caloric \(deficit < 0 ? "deficit" : "surplus") based on your weight trend over the past \(trend.rateWindowDays) days.",
+                    nudge: "Based on last \(trend.rateWindowDays) days"
                 )
 
                 if let proj = trend.projection30Day {

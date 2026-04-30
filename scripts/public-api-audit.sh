@@ -34,7 +34,7 @@ set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
 
 SRC=DriftCore/Sources/DriftCore
-EXTERNAL_PATHS=(Drift DriftTests DriftCore/Tests DriftLLMEvalMacOS DriftWidget DriftIntents DriftLLMEvalTests)
+EXTERNAL_PATHS=(Drift DriftTests DriftCore/Tests DriftLLMEvalMacOS DriftWidget DriftIntents)
 
 # Collect every public/open type-level declaration.
 # Match patterns:

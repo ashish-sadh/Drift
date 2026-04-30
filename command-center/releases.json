@@ -1810,7 +1810,7 @@
     "description": "AI chat: progressive multi-item food streaming + expanded LLM eval + sprint-service claim gate",
     "features": [
       "AI chat: multi-food inputs ('rice and dal') now stream each item result as it resolves instead of batching",
-      "LLM eval expanded to 175+ cases — added sleep edge cases, glucose implicit queries, supplement advice vs status, implicit food intent",
+      "LLM eval expanded to 175+ cases \u2014 added sleep edge cases, glucose implicit queries, supplement advice vs status, implicit food intent",
       "Sprint-service: atomic next --claim command prevents double-claiming tasks",
       "Command-center: ECG-style sparkline activity chart, simpler activity dashboard",
       "Watchdog: launchd plist + install helper for supervised lifecycle, session heartbeat for reliable liveness detection",
@@ -1824,52 +1824,52 @@
   {
     "build": 171,
     "date": "2026-04-23T00:00:00-07:00",
-    "description": "chore: TestFlight build 171 — infrastructure heartbeat snapshots",
+    "description": "chore: TestFlight build 171 \u2014 infrastructure heartbeat snapshots",
     "features": [],
     "fixes": []
   },
   {
     "build": 172,
     "date": "2026-04-24T09:55:00-07:00",
-    "description": "TestFlight build 172 — strawberry overcount fixed + AI chat meal log no longer drops items",
+    "description": "TestFlight build 172 \u2014 strawberry overcount fixed + AI chat meal log no longer drops items",
     "features": [
       "AI chat \"log breakfast avocado toast and coffee\" now shows both items in the diary as separate rows (previously collapsed into one aggregated entry).",
-      "Combos & Recipes list: tap a row to edit, pencil icon next to Log — edit affordance was previously only reachable by swipe-left.",
-      "Gram figures for unit pills show \"≈\" when the weight is a guess (spray, flat-constant tbsp) vs a measured value."
+      "Combos & Recipes list: tap a row to edit, pencil icon next to Log \u2014 edit affordance was previously only reachable by swipe-left.",
+      "Gram figures for unit pills show \"\u2248\" when the weight is a guess (spray, flat-constant tbsp) vs a measured value."
     ],
     "fixes": [
-      "Strawberry \"5 pieces = 750g = 240 cal\" overcount — was 4× over real, now gated behind real piece-size data and defaults to ~19 cal.",
+      "Strawberry \"5 pieces = 750g = 240 cal\" overcount \u2014 was 4\u00d7 over real, now gated behind real piece-size data and defaults to ~19 cal.",
       "117 `gramsEquivalent: ss` sites in ServingUnit.swift no longer silently synthesize unit weights from food.servingSize; the piece unit is only offered when backed by a trusted source.",
-      "USDAFoodService stops discarding foodPortions from API responses — per-unit gram weights from USDA now propagate into Food so online fallback foods get correct piece/cup/tbsp.",
+      "USDAFoodService stops discarding foodPortions from API responses \u2014 per-unit gram weights from USDA now propagate into Food so online fallback foods get correct piece/cup/tbsp.",
       "OpenFoodFacts `piecesPerServing` now flows through to Food.pieceSizeG (was dropped at the adapter seam)."
     ]
   },
   {
     "build": 173,
     "date": "2026-04-24T11:30:00-07:00",
-    "description": "TestFlight build 173 — sprint planning cycle 5965 (no code changes, version bump)",
+    "description": "TestFlight build 173 \u2014 sprint planning cycle 5965 (no code changes, version bump)",
     "features": [],
     "fixes": []
   },
   {
     "build": 175,
     "date": "2026-04-25T00:00:00-07:00",
-    "description": "Build 175 — DriftCore extraction, harness reliability, 5-tier test architecture",
+    "description": "Build 175 \u2014 DriftCore extraction, harness reliability, 5-tier test architecture",
     "features": [
-      "DriftCore: Pure logic (AI pipeline, food/workout/weight services) now in a cross-platform Swift package — faster inner-loop builds.",
+      "DriftCore: Pure logic (AI pipeline, food/workout/weight services) now in a cross-platform Swift package \u2014 faster inner-loop builds.",
       "5-tier test architecture: pure logic tests run in ~0.1s on macOS, no simulator boot for AI pipeline changes.",
       "Harness reliability: autonomous sessions now reliably reach the task loop; gh API errors no longer silently swallowed."
     ],
     "fixes": [
       "Planning sessions no longer exit mid-session due to task-loop routing failures.",
-      "Harness state writes are now atomic — no partial state on session crash.",
+      "Harness state writes are now atomic \u2014 no partial state on session crash.",
       "DriftCore public API surface cleaned up: test-only internals no longer leaked as public symbols."
     ]
   },
   {
     "build": 176,
     "date": "2026-04-26T00:00:00-07:00",
-    "description": "Build 176 — AI chat reliability improvements, prompt quality audit cycle 7485",
+    "description": "Build 176 \u2014 AI chat reliability improvements, prompt quality audit cycle 7485",
     "features": [
       "AI chat now correctly handles conversational prefixes like 'I'd like to add...' when logging food.",
       "Improved micronutrient and goal-progress query handling in Stage 1/3 prompts."
@@ -1877,6 +1877,147 @@
     "fixes": [
       "Fixed intent routing miss for 'i'd like to add' conversational prefix (#457).",
       "Prompt quality audit: added targeted few-shot examples for micronutrient and macro goal progress queries (#458)."
+    ]
+  },
+  {
+    "build": 182,
+    "date": "2026-04-27T00:00:00-07:00",
+    "description": "Build 182 \u2014 heartbeat snapshots",
+    "features": [],
+    "fixes": []
+  },
+  {
+    "build": 183,
+    "date": "2026-04-27T00:00:00-07:00",
+    "description": "Build 183 \u2014 harness reliability fixes",
+    "features": [
+      "Autonomous session WIP is now preserved on crash/restart \u2014 resumable sessions pick up from where they left off.",
+      "Senior session task budget raised to 10 tasks per cycle."
+    ],
+    "fixes": [
+      "Fixed atomic-write RETURN trap crash that was crashing the watchdog ~8x/day.",
+      "Watchdog stale-claim threshold raised from 60min to 90min to reduce false restarts."
+    ]
+  },
+  {
+    "build": 184,
+    "date": "2026-04-28T00:00:00-07:00",
+    "description": "Build 184 \u2014 AI routing fixes and safety improvements",
+    "features": [
+      "Dual-prompt AI architecture: tight router prompt for SmolLM, richer intelligence prompt for Gemma 4.",
+      "P0/SENIOR tasks now jump the regular queue for faster iteration.",
+      "Calorie goal floor raised to 1200 kcal with UI enforcement."
+    ],
+    "fixes": [
+      "Fixed bare meal-period words (breakfast/lunch/dinner) incorrectly triggering food log instead of asking follow-up.",
+      "Fixed tool registration not wiring up on app launch (P0).",
+      "Fixed WeightTrendService not refreshing on launch.",
+      "Preflight now gates macOS LLM eval for prompt regressions."
+    ]
+  },
+  {
+    "build": 185,
+    "date": "2026-04-28T00:00:00-07:00",
+    "description": "Build 185 \u2014 watchdog stability, hook-driven test gating, resumable sprint warnings",
+    "features": [
+      "Resumable warning surfaces on issue claim so the next session knows prior WIP exists.",
+      "Sprint-service gains test coverage; safer claim/release loop."
+    ],
+    "fixes": [
+      "Watchdog no longer dies on SIGPIPE; tee removed from the supervisor pipeline.",
+      "Watchdog hardened against pipefail + grep edge case that surfaced as latent crashes.",
+      "Per-commit test/archive gate now detects compound commands (chained && or ;).",
+      "Heartbeat refresh + graphify report kept current."
+    ]
+  },
+  {
+    "build": 187,
+    "date": "2026-04-28T16:30:00-07:00",
+    "description": "Build 187 \u2014 photo-log provider fallback chain, correction-as-replacement fixes",
+    "features": [
+      "Photo Log now automatically retries with OpenAI or Gemini if Anthropic has a transient error \u2014 no more blank results when one provider is down (#359)."
+    ],
+    "fixes": [
+      "Correction-as-replacement phrases ('make it X', 'change to Y', 'update to Z') now correctly replace the previous value instead of being ignored (#346)."
+    ]
+  },
+  {
+    "build": 186,
+    "date": "2026-04-28T10:21:00-07:00",
+    "description": "Build 186 \u2014 hydration tracking, multi-intent chat, photo-log corrections + Add-item DB search",
+    "features": [
+      "Hydration tracking via AI chat \u2014 say \"log 8 oz water\" or \"how much water today?\" and the assistant handles it (#383).",
+      "Multi-intent commands now run sequentially \u2014 \"log lunch and update weight to 75kg\" executes both tools in one turn (#384).",
+      "Photo-log Add item now searches your food DB inline \u2014 type a name, tap a result, the row pre-fills with macros instead of asking you to type from scratch (#525)."
+    ],
+    "fixes": [
+      "Photo-log Fix button now actually does something for free-form corrections (was silently no-op for portion changes like \"smaller portion, half of it\") (#522).",
+      "Photo-log Fix re-run is scoped to the single item you tapped \u2014 no more wiping your manual edits on other items in the meal (#524).",
+      "AI workflows now trust the model's identification + macros directly \u2014 the local food DB stops second-guessing AI vision results which had multiple bugs (#523)."
+    ]
+  },
+  {
+    "build": 188,
+    "date": "2026-04-28T23:30:00-07:00",
+    "description": "Build 188 \u2014 clarification tap chips, glucose-food correlation, exercise volume summary, unit conversion, portion multiplier, help card",
+    "features": [
+      "Ambiguous food queries now show tappable chip cards \u2014 tap to choose instead of typing clarification (#316).",
+      "Glucose-food correlation tool \u2014 ask 'do I spike after rice?' to correlate glucose readings with foods logged \u00b12h (#324).",
+      "Exercise volume summary tool \u2014 ask 'how's my training volume?' for muscle-group breakdown (#exercise_volume_summary).",
+      "Invisible unit conversion \u2014 log in oz/cups/tbsp/tsp, stored in g/ml automatically (#532).",
+      "Portion multipliers \u2014 'double it', '1.5 servings', 'half a cup' scale macros correctly (#531).",
+      "Help card for 'what can you do?' shows structured capability overview.",
+      "Per-turn cloud provider badge visible in chat when using remote model (#533).",
+      "Backend toggle visible and privacy notice updated for model-aware display (#527)."
+    ],
+    "fixes": [
+      "Cup/tbsp unit assertion regressions fixed after unit conversion shipped (#532)."
+    ]
+  },
+  {
+    "build": 189,
+    "date": "2026-04-29T03:29:48.534896-07:00",
+    "description": "Build 189 \u2014 South Indian food DB expansion, multi-turn AI improvements",
+    "features": [
+      "34 new South Indian food entries: drumstick/tomato/radish/mixed-veg/onion sambar, tomato/puli/kollu rasam, vatha/puli/egg/chicken/mutton/vendhaya/kathirikkai/sundakkai/fish kuzhambu, beans/carrot/cabbage thoran, oats idli, puliyogare, paruppu sadam, karamani/senai-kizhangu kootu, sundal, keerai masiyal, manga pachadi, ghee pongal, ragi koozh, vazhaipoo vadai, milagai podi (#537).",
+      "Name-based window lookup for multi-turn entry references \u2014 'update my earlier idli' resolves by name, not just position (#314).",
+      "AI context window expanded from 4096 to 6144 tokens for deeper multi-turn conversations (#315).",
+      "Per-stage failure taxonomy in FoodLogging eval gold set for better regression tracking (#312)."
+    ],
+    "fixes": []
+  },
+  {
+    "build": 190,
+    "date": "2026-04-29T00:00:00Z",
+    "description": "Eval gold sets for supplement_insight + food_timing_insight; South Indian food DB expansion",
+    "features": [
+      "supplement_insight and food_timing_insight eval gold sets",
+      "South Indian food DB: 34 new entries"
+    ],
+    "fixes": []
+  },
+  {
+    "build": 191,
+    "date": "2026-04-29T00:00:00-07:00",
+    "description": "Multi-item meal macro totals + zero-user-math improvements",
+    "features": [
+      "AI chat now computes total macros for multi-item meals (e.g. 'macros for dal, rice, and sabzi') without requiring the user to add them up"
+    ],
+    "fixes": [
+      "Weight chart: clip widened regression window at logging gaps (#545)",
+      "Weight chart: enforce selected time range on chart x-axis (#544)",
+      "Food: remove hardcoded recipe seeds from DefaultFoods (#541)",
+      "Food log: move Delete combo into ellipsis menu in ComboLogSheet (#542)"
+    ]
+  },
+  {
+    "build": 192,
+    "date": "2026-04-29T00:00:00-07:00",
+    "description": "Decimal serving parsing fix + portion scaling gold set",
+    "features": [],
+    "fixes": [
+      "Food: decimal servings (e.g. 0.5 cups, 1.5 bowls) now parse correctly from chat input",
+      "Food: portion scaling gold set added to ensure serving size edge cases stay green"
     ]
   }
 ]

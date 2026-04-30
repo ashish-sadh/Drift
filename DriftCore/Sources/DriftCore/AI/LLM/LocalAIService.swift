@@ -22,7 +22,23 @@ public final class LocalAIService {
 
     public var supportsVision: Bool { backend?.supportsVision ?? false }
     public var isModelLoaded: Bool { backend?.isLoaded ?? false }
-    public var isLargeModel: Bool { modelManager.currentTier == .large }
+
+    /// Tag what kind of backend is currently installed. The chat layer reads
+    /// this to (a) pick the right system prompt via
+    /// `IntentClassifier.activeSystemPrompt(backend:)` and (b) decide whether
+    /// to display the cpu/cloud toggle. Defaults to `.llamaCpp` when no
+    /// backend is loaded yet — callers should also gate on `state == .ready`.
+    public private(set) var activeBackendType: AIBackendType = .llamaCpp
+
+    /// True when the active backend can fit the intelligencePrompt's richer
+    /// extras. Local: only Gemma 4 / large tier. Remote: always (cloud LLMs
+    /// are >10× the parameter count of Gemma 4). Used by the agent pipeline
+    /// to gate clarification / multi-step reasoning that small models can't
+    /// reliably do.
+    public var isLargeModel: Bool {
+        if activeBackendType == .remote { return true }
+        return modelManager.currentTier == .large
+    }
 
     private var systemPrompt: String {
         let screen = AIScreenTracker.shared.currentScreen.rawValue
@@ -186,6 +202,23 @@ public final class LocalAIService {
         return await backend.respondStreaming(to: message, systemPrompt: systemPrompt, onToken: onToken)
     }
 
+    /// Photo-capable variant for chat vision turns. Only works when the active
+    /// backend is `RemoteLLMBackend` — local models have no vision capability.
+    /// Returns "" (triggering the remote-error path in the VM) when no remote
+    /// backend is installed.
+    public func respondDirectWithPhoto(
+        systemPrompt: String,
+        message: String,
+        imageData: Data,
+        onToken: @escaping @Sendable (String) -> Void
+    ) async -> String {
+        guard let remote = backend as? RemoteLLMBackend else { return "" }
+        return await remote.respondStreamingWithPhoto(
+            to: message, imageData: imageData,
+            systemPrompt: systemPrompt, onToken: onToken
+        )
+    }
+
     // MARK: - Management
 
     private var unloadTimer: Timer?
@@ -234,6 +267,61 @@ public final class LocalAIService {
         backend = nil
         modelManager.deleteModel()
         state = .notSetUp
+    }
+
+    // MARK: - Remote Backend (BYOK cloud)
+
+    /// Install a remote BYOK backend (Anthropic / OpenAI / Gemini). The iOS
+    /// app supplies the API key after a Keychain unlock — DriftCore never
+    /// touches Keychain. Synchronous: cloud "load" is a no-op so we go
+    /// straight to `.ready`. Mid-thread switch is safe: existing chat history
+    /// lives in `AIChatViewModel.messages`, not in the backend. #515.
+    public func useRemoteBackend(
+        provider: RemoteLLMBackend.Provider,
+        modelID: String,
+        apiKey: String
+    ) {
+        backend?.unload()
+        backend = RemoteLLMBackend(provider: provider, modelID: modelID, apiKey: apiKey)
+        activeBackendType = .remote
+        state = .ready
+    }
+
+    /// Drop any remote backend and revert to local-model behaviour. Caller is
+    /// responsible for kicking off `loadModel()` if the local model is
+    /// already downloaded. Used when the user flips the toggle back to "On
+    /// device" mid-thread, or when the remote backend's key is cleared.
+    public func clearRemoteBackend() {
+        guard activeBackendType == .remote else { return }
+        backend?.unload()
+        backend = nil
+        activeBackendType = .llamaCpp
+        state = modelManager.isModelDownloaded ? .ready : .notSetUp
+    }
+
+    /// True when the user has an installed local model OR a configured remote
+    /// backend. Drives the empty-state chooser CTA — when this returns false,
+    /// the chat shows the cloud-vs-on-device chooser instead of the input bar.
+    /// Note: a local model that's downloaded but not yet loaded still counts
+    /// as ready — we'll lazy-load on first use. #515.
+    public var hasAnyBackendAvailable: Bool {
+        if activeBackendType == .remote && backend != nil { return true }
+        return modelManager.isModelDownloaded
+    }
+
+    /// Last error from a remote call, surfaced for the chat layer's Q7
+    /// fallback decisions. nil for local backends or success cases.
+    public var lastRemoteError: RemoteBackendError? {
+        (backend as? RemoteLLMBackend)?.lastError
+    }
+
+    /// Display name of the active remote provider ("Anthropic", "OpenAI", "Gemini"),
+    /// or nil when the local backend is in use. Stamped on assistant messages
+    /// so the UI can show a per-turn cloud badge.
+    public var remoteProviderName: String? {
+        guard activeBackendType == .remote,
+              let remote = backend as? RemoteLLMBackend else { return nil }
+        return remote.provider.rawValue.capitalized
     }
 
     /// Device info for display.

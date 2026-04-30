@@ -1446,10 +1446,10 @@ final class AIEvalHarness: XCTestCase {
         XCTAssertEqual(orSrv, 2)
         XCTAssertEqual(orName, "eggs")
 
-        // Trailing count unit: "protein 2 scoop" → treated as trailing quantity
-        let (_, trailCountName, trailCountG) = AIActionExecutor.extractAmount(from: "protein 2 scoop")
+        // Trailing count unit: "protein 2 scoop" → treated as trailing servings (scoop is a count unit)
+        let (trailCountSrv, trailCountName, _) = AIActionExecutor.extractAmount(from: "protein 2 scoop")
         XCTAssertEqual(trailCountName, "protein")
-        XCTAssertEqual(trailCountG, 2)
+        XCTAssertEqual(trailCountSrv, 2)
 
         // Word amounts: "some rice", "few eggs", "several rotis"
         let (someSrv, someName, _) = AIActionExecutor.extractAmount(from: "some rice")
@@ -1476,18 +1476,18 @@ final class AIEvalHarness: XCTestCase {
         XCTAssertEqual(coupleSrv, 2)
         XCTAssertEqual(coupleName, "eggs")
 
-        // Regression #171: "a cup of dal" must extract food="dal", not food="cup of dal"
-        let (aCupSrv, aCupName, _) = AIActionExecutor.extractAmount(from: "a cup of dal")
-        XCTAssertEqual(aCupSrv, 1)
+        // Regression #171: "a cup of dal" must extract food="dal" (not "cup of dal"), converted to grams (#532)
+        let (_, aCupName, aCupGrams) = AIActionExecutor.extractAmount(from: "a cup of dal")
         XCTAssertEqual(aCupName, "dal")
+        XCTAssertEqual(aCupGrams, 240)
 
-        let (anCupSrv, anCupName, _) = AIActionExecutor.extractAmount(from: "an cup of oats")
-        XCTAssertEqual(anCupSrv, 1)
+        let (_, anCupName, anCupGrams) = AIActionExecutor.extractAmount(from: "an cup of oats")
         XCTAssertEqual(anCupName, "oats")
+        XCTAssertEqual(anCupGrams, 240)
 
-        let (aTbspSrv, aTbspName, _) = AIActionExecutor.extractAmount(from: "a tbsp of ghee")
-        XCTAssertEqual(aTbspSrv, 1)
+        let (_, aTbspName, aTbspGrams) = AIActionExecutor.extractAmount(from: "a tbsp of ghee")
         XCTAssertEqual(aTbspName, "ghee")
+        XCTAssertEqual(aTbspGrams, 15)
     }
 
     @MainActor

@@ -61,6 +61,32 @@ public enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: healthNudgesKey) }
     }
 
+    // MARK: - Hydration
+
+    private static let waterGoalMlKey = "drift_water_goal_ml"
+
+    /// Daily water intake goal in millilitres. Default: 2000ml.
+    public static var waterGoalMl: Double {
+        get {
+            let v = UserDefaults.standard.double(forKey: waterGoalMlKey)
+            return v > 0 ? v : 2000
+        }
+        set { UserDefaults.standard.set(newValue, forKey: waterGoalMlKey) }
+    }
+
+    // MARK: - Smart Meal Reminders
+
+    private static let mealRemindersKey = "drift_meal_reminders"
+
+    /// Smart meal reminders: contextual "Time to log breakfast" notifications
+    /// fired ~30min after the user's typical meal time, only when their
+    /// timing is consistent (std dev < 45min) AND they haven't logged that
+    /// meal yet today. Default OFF — opt-in like Photo Log Beta. #385.
+    public static var mealRemindersEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: mealRemindersKey) }
+        set { UserDefaults.standard.set(newValue, forKey: mealRemindersKey) }
+    }
+
     // MARK: - Conversation History
 
     private static let conversationHistoryEnabledKey = "drift_conversation_history_enabled"
@@ -80,6 +106,33 @@ public enum Preferences {
     public static var chatTelemetryEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: chatTelemetryEnabledKey) }
         set { UserDefaults.standard.set(newValue, forKey: chatTelemetryEnabledKey) }
+    }
+
+    // MARK: - Remote Model
+
+    private static let useRemoteModelOnWiFiKey = "drift_use_remote_model_on_wifi"
+
+    /// When enabled, AI chat routes through a remote model (Anthropic/OpenAI) on Wi-Fi.
+    /// Default: OFF. Not exposed in production UI — architectural prep only.
+    public static var useRemoteModelOnWiFi: Bool {
+        get { UserDefaults.standard.bool(forKey: useRemoteModelOnWiFiKey) }
+        set { UserDefaults.standard.set(newValue, forKey: useRemoteModelOnWiFiKey) }
+    }
+
+    // MARK: - Preferred AI Backend (chat routing)
+
+    private static let preferredAIBackendKey = "drift_preferred_ai_backend"
+
+    /// User-selected AI backend for chat. Default: `.llamaCpp` (privacy-first).
+    /// Persisted across launches; flipped by the in-chat cpu/cloud toggle when
+    /// both local and remote backends are available. Mid-thread changes don't
+    /// reset history — `LocalAIService` swaps the underlying backend in place.
+    public static var preferredAIBackend: AIBackendType {
+        get {
+            let raw = UserDefaults.standard.string(forKey: preferredAIBackendKey) ?? ""
+            return AIBackendType(rawValue: raw) ?? .llamaCpp
+        }
+        set { UserDefaults.standard.set(newValue.rawValue, forKey: preferredAIBackendKey) }
     }
 
     // MARK: - Photo Log Beta opt-in

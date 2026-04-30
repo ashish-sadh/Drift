@@ -59,10 +59,12 @@ enum PhotoLogTool {
         )
     }
 
-    /// Direct invocation from the chat VM. Fetches the Keychain key once
-    /// (biometric-gated), builds a client for the stored provider, runs the
-    /// image through `PhotoLogService`, and returns a shaped `AgentOutput`.
-    /// `service` is injectable for tests.
+    /// Direct invocation from the chat VM. Builds a fallback chain of all
+    /// providers that have stored keys (preferred first), runs the image
+    /// through `PhotoLogService`, and returns a shaped `AgentOutput`.
+    /// Keys are fetched lazily per provider — biometrics only prompt for
+    /// the provider that actually serves the request. `service` is
+    /// injectable for tests.
     static func run(
         image: UIImage,
         prompt: String = defaultPrompt,
@@ -77,14 +79,20 @@ enum PhotoLogTool {
         }
         do {
             let svc: PhotoLogService
+            let fallbackRef: FallbackVisionClient?
             if let service {
                 svc = service
+                fallbackRef = nil
             } else {
-                svc = try await buildDefaultService()
+                let (built, fallback) = try await buildDefaultService()
+                svc = built
+                fallbackRef = fallback
             }
+            let primary = Preferences.photoLogProvider
             let response = try await svc.analyze(image: image, prompt: prompt)
+            let usedProvider = await fallbackRef?.lastProvider
             return AgentOutput(
-                text: summarize(response: response),
+                text: summarize(response: response, primaryProvider: primary, usedProvider: usedProvider),
                 action: nil,
                 toolsCalled: [toolName]
             )
@@ -113,26 +121,42 @@ enum PhotoLogTool {
 
     // MARK: - Default service wiring
 
-    private static func buildDefaultService() async throws -> PhotoLogService {
-        let provider = Preferences.photoLogProvider
-        guard let key = try await CloudVisionKey.get(for: provider) else {
-            throw CloudVisionKey.StorageError.notFound
+    /// Builds a `FallbackVisionClient` chain starting with the user's preferred
+    /// provider, then any other providers that have stored keys (in enum order).
+    /// Keys are fetched lazily inside each slot so we only prompt biometrics for
+    /// the provider that actually serves the request.
+    private static func buildDefaultService() async throws -> (PhotoLogService, FallbackVisionClient) {
+        let preferred = Preferences.photoLogProvider
+        let ordered = [preferred] + CloudVisionProvider.allCases.filter { $0 != preferred }
+        let available = ordered.filter { CloudVisionKey.has(provider: $0) }
+        guard !available.isEmpty else { throw CloudVisionKey.StorageError.notFound }
+
+        let chain = available.map { provider in
+            FallbackVisionClient.Slot(provider: provider) {
+                guard let key = try await CloudVisionKey.get(for: provider) else {
+                    throw CloudVisionKey.StorageError.notFound
+                }
+                let model = Preferences.photoLogModel(for: provider)
+                return switch provider {
+                case .anthropic: AnthropicVisionClient(apiKey: key, model: model)
+                case .openai:    OpenAIVisionClient(apiKey: key, model: model)
+                case .gemini:    GeminiVisionClient(apiKey: key, model: model)
+                }
+            }
         }
-        let model = Preferences.photoLogModel(for: provider)
-        let client: CloudVisionClient
-        switch provider {
-        case .anthropic: client = AnthropicVisionClient(apiKey: key, model: model)
-        case .openai:    client = OpenAIVisionClient(apiKey: key, model: model)
-        case .gemini:    client = GeminiVisionClient(apiKey: key, model: model)
-        }
-        return PhotoLogService(client: client)
+        let fallback = FallbackVisionClient(chain: chain)
+        return (PhotoLogService(client: fallback), fallback)
     }
 
     // MARK: - Summary formatting
 
     /// One-line chat summary. A richer per-item card can follow once the
     /// chat-attachment UI lands — the tool itself stays UI-agnostic.
-    nonisolated static func summarize(response: PhotoLogResponse) -> String {
+    nonisolated static func summarize(
+        response: PhotoLogResponse,
+        primaryProvider: CloudVisionProvider? = nil,
+        usedProvider: CloudVisionProvider? = nil
+    ) -> String {
         guard !response.items.isEmpty else {
             return "Couldn't identify any food in that photo. Try one with the meal centered and in good light."
         }
@@ -145,7 +169,11 @@ enum PhotoLogTool {
         case .medium: "medium confidence"
         case .low: "low confidence"
         }
-        return "Saw \(visible)\(more) — about \(totalCal) cal, \(totalP)g protein (\(conf)). Review before logging."
+        var result = "Saw \(visible)\(more) — about \(totalCal) cal, \(totalP)g protein (\(conf)). Review before logging."
+        if let used = usedProvider, used != primaryProvider {
+            result += " (via \(used.displayName))"
+        }
+        return result
     }
 
     private static func errorOutput(_ text: String) -> AgentOutput {

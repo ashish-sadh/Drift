@@ -45,6 +45,7 @@ Each entry tagged with its maintenance status. **Auto-maintained** = a script or
 | `Docs/personas/` | **Auto-maintained** (planning step 10) | Evolving Product Designer + Principal Engineer persona files. |
 | `Docs/reports/` | **Auto-maintained** (review/exec PR workflows) | Exec reports + product review reports. Published as GitHub PRs. |
 | `Docs/state.md` | Manual snapshot — may drift | Build number, test count, features. Updated periodically; check git log for freshness. |
+| `Docs/decisions.md` | **Append-only — sessions add** | Non-obvious decisions: arch changes, harness rules from incidents, design tenets from real failures. Planning step 6 reviews + appends. Read last ~10 entries before making related judgment calls. |
 | `Docs/architecture.md` | Reference (slow-moving) | AI-first dual-model architecture. Update only when architecture changes. |
 | `Docs/failing-queries.md` | Manual — appended by sessions | Real AI-chat queries that don't work, fixed systematically. |
 | `Docs/testing.md` | Reference | How to run tests, eval harness. |
@@ -100,10 +101,12 @@ The codebase is split into a multi-platform `DriftCore` Swift package + the iOS 
 
 | Touched code | Command | Wall time |
 |---|---|---|
-| Pure logic in `DriftCore/Sources/DriftCore/` | `cd DriftCore && swift test` | ~2s warm (~850 tests) |
-| AI pipeline (LLM eval) | `xcodebuild test -scheme DriftLLMEvalMacOS -destination 'platform=macOS'` | 30s deterministic per-stage / ~5min full |
-| iOS UI / HealthKit / Widget integration | `xcodebuild test -scheme Drift -destination 'iOS Simulator,name=iPhone 17 Pro' -skip-testing:DriftLLMEvalTests` | ~30s (~1200 tests) |
-| Pre-TestFlight | run all of the above |  |
+| Pure logic in `DriftCore/Sources/DriftCore/` | `cd DriftCore && swift test` | ~2s warm (~913 tests) |
+| AI pipeline (LLM eval) | `xcodebuild test -scheme DriftLLMEvalMacOS -destination 'platform=macOS'` | ~12 min full (real Gemma 4) |
+| iOS UI / HealthKit / Widget integration | `xcodebuild test -scheme Drift -destination 'iOS Simulator,name=iPhone 17 Pro'` | ~25s (~1219 tests) |
+| Pre-TestFlight | run all of the above (preflight-check.sh enforces) |  |
+
+**Note (2026-04-28):** the iOS-side `DriftLLMEvalTests` target was removed — it skipped silently on every fresh simulator (no model file in the app container) so it lied about coverage. macOS LLM eval is the real LLM gate; the iOS eval target had no unique coverage worth keeping.
 
 If you touch a file that's only Swift logic (no SwiftUI / HealthKit / WidgetKit / etc), it almost certainly belongs in DriftCore — keep the iOS target lean.
 
@@ -114,9 +117,9 @@ Five tiers by cost. Each test file MUST belong to exactly one tier; mixing tiers
 | Tier | Trigger | Wall time | Where it lives | What it tests |
 |---|---|---|---|---|
 | **0** | every save | <2s warm | `DriftCore/Tests/DriftCoreTests/` | pure logic — InputNormalizer, ToolRanker, parsers, formatters, services with in-memory DB |
-| **1** | every commit | ~30s | `DriftTests/` (iOS sim) | UI/ViewModel binding, HealthKit, Widget, Notification, Speech, OCR, Keychain |
+| **1** | every commit | ~25s | `DriftTests/` (iOS sim) | UI/ViewModel binding, HealthKit, Widget, Notification, Speech, OCR, Keychain |
 | **2** | every commit | ~30s | `DriftLLMEvalMacOS/` *(deterministic only)* | LLM-pipeline cases that don't actually call a model — IntentRouting smoke, prompt-structure asserts |
-| **3** | nightly + pre-TestFlight | ~5–10 min | `DriftLLMEvalMacOS/` *(LLM-backed)* | real Gemma 4 / Qwen3 routing, multi-turn, prompt regressions |
+| **3** | pre-TestFlight (preflight gate) | ~12 min | `DriftLLMEvalMacOS/` *(LLM-backed)* | real Gemma 4 routing, multi-turn, prompt regressions |
 | **4** | manual / weekly / opt-in | minutes–hours | gated by env var | `DRIFT_DEEP_EVAL=1`, `DRIFT_AUTORESEARCH=1`, `DRIFT_LATENCY_BENCH=1`, `DRIFT_USDA_EVAL=1` — benchmarks, optimization loops, coverage scans |
 
 **New test? Decision flow:**
@@ -144,21 +147,13 @@ cd /Users/ashishsadh/workspace/Drift
 # Build
 xcodebuild build -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 
-# iOS unit tests (~1200 tests, ~30s) — for pure DriftCore logic prefer `cd DriftCore && swift test`. ALWAYS kill stale processes first
+# iOS unit tests (~1219 tests, ~25s) — for pure DriftCore logic prefer `cd DriftCore && swift test`. ALWAYS kill stale processes first
 pkill -9 -f xcodebuild 2>/dev/null; sleep 2
-xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -skip-testing:DriftLLMEvalTests
+xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro'
 
-# LLM eval lite (3 queries per model, ~2 min) — run after AI changes
+# macOS LLM eval (real Gemma 4 routing, multi-turn, prompt regressions) — ~12 min
 pkill -9 -f xcodebuild 2>/dev/null; sleep 2
-xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:DriftLLMEvalTests 2>&1 | grep -E "📊|❌|✔|✘|passed|failed"
-
-# LLM eval deep PARALLEL (40 queries x 3 models, ~10 min) — only when asked, run in background
-pkill -9 -f xcodebuild 2>/dev/null; sleep 2
-DRIFT_DEEP_EVAL=1 xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:'DriftLLMEvalTests/ParallelLLMEval'
-
-# LLM eval deep SEQUENTIAL (100+ queries per model, ~25 min each) — full eval
-pkill -9 -f xcodebuild 2>/dev/null; sleep 2
-DRIFT_DEEP_EVAL=1 xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -only-testing:DriftLLMEvalTests
+xcodebuild test -scheme DriftLLMEvalMacOS -destination 'platform=macOS'
 
 # Check failures
 xcodebuild test ... 2>&1 | grep "✘"  # empty = all pass
@@ -169,7 +164,7 @@ cd DriftCore && swift test --filter AIEvalHarness
 # Coverage check (run after tests with coverage enabled)
 rm -rf /tmp/DriftCoverage.xcresult
 pkill -9 -f xcodebuild 2>/dev/null; sleep 2
-xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -skip-testing:DriftLLMEvalTests -enableCodeCoverage YES -resultBundlePath /tmp/DriftCoverage.xcresult
+xcodebuild test -project Drift.xcodeproj -scheme Drift -destination 'platform=iOS Simulator,name=iPhone 17 Pro' -enableCodeCoverage YES -resultBundlePath /tmp/DriftCoverage.xcresult
 ./scripts/coverage-check.sh
 ```
 

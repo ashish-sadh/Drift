@@ -4,11 +4,12 @@ import Foundation
 // MARK: - Serving Units
 
 public enum ServingUnit: String, CaseIterable, Sendable {
-    case grams, cups, tablespoons, teaspoons, pieces, ml, flOz
+    case grams, ounces, cups, tablespoons, teaspoons, pieces, ml, flOz
 
     public var label: String {
         switch self {
         case .grams: "g"
+        case .ounces: "oz"
         case .cups: "cup"
         case .tablespoons: "tbsp"
         case .teaspoons: "tsp"
@@ -21,12 +22,13 @@ public enum ServingUnit: String, CaseIterable, Sendable {
     public func toGrams(_ amount: Double, ingredient: RawIngredient) -> Double {
         switch self {
         case .grams: return amount
+        case .ounces: return amount * 28.3495
         case .cups: return amount * ingredient.gramsPerCup
         case .tablespoons: return amount * ingredient.gramsPerCup / 16
         case .teaspoons: return amount * ingredient.gramsPerCup / 48
         case .pieces: return amount * ingredient.gramsPerPiece
         case .ml: return amount
-        case .flOz: return amount * 29.5735 // 1 fl oz = 29.57 ml ≈ g for water-based liquids
+        case .flOz: return amount * 29.5735
         }
     }
 }
@@ -151,6 +153,7 @@ extension ServingUnit {
     public func toGrams(_ amount: Double, foodServingSize: Double) -> Double {
         switch self {
         case .grams: return amount
+        case .ounces: return amount * 28.3495
         case .pieces: return amount * foodServingSize
         case .cups: return amount * 240
         case .tablespoons: return amount * 15

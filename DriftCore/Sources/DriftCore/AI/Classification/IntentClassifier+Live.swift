@@ -22,15 +22,23 @@ extension IntentClassifier {
 
     /// Classify user message into intent + tool call via LLM.
     /// Returns nil only on timeout. Text responses are returned as `.text`.
+    /// Picks routerPrompt / intelligencePrompt / remotePrompt based on the
+    /// active backend — small local gets tight, large local gets rich,
+    /// remote BYOK gets rich + brevity-clamping extras.
     static func classifyFull(
         message: String, history: String, literalHint: String? = nil
     ) async -> ClassifyResult? {
         let msg = buildContextualUserMessage(
             message: message, history: history, literalHint: literalHint
         )
+        let backend = await LocalAIService.shared.activeBackendType
+        let isLarge = await LocalAIService.shared.isLargeModel
+        let prompt = backend == .remote
+            ? activeSystemPrompt(backend: .remote)
+            : activeSystemPrompt(isLargeModel: isLarge)
         let response = await withTimeout(seconds: 10) {
             await LocalAIService.shared.respondDirect(
-                systemPrompt: systemPrompt,
+                systemPrompt: prompt,
                 message: msg
             )
         }

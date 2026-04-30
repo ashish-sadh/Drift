@@ -23,11 +23,17 @@ if [ "${DRIFT_AUTONOMOUS:-}" != "1" ]; then
 fi
 
 CONTROL="$(cat "$HOME/drift-control.txt" 2>/dev/null || echo RUN)"
-[ "$CONTROL" != "PAUSE" ] && exit 0
+# PAUSE and DRAIN both mean "session, no new claims". Watchdog handles the
+# divergence (PAUSE waits for RUN, DRAIN exits) — from the session's POV
+# they're the same: finish current work, exit cleanly.
+case "$CONTROL" in
+    PAUSE|DRAIN) ;;
+    *) exit 0 ;;
+esac
 
 # Hard block on claim only — session cannot start new task
 if [[ "$COMMAND" == scripts/sprint-service.sh\ claim* ]]; then
-    echo "BLOCKED: PAUSE active — cannot claim new task. Finish current work and exit." >&2
+    echo "BLOCKED: $CONTROL active — cannot claim new task. Finish current work and exit." >&2
     exit 2
 fi
 
@@ -36,7 +42,7 @@ cat <<ENDJSON
 {
   "hookSpecificOutput": {
     "hookEventName": "PreToolUse",
-    "additionalContext": "PAUSE active (~/drift-control.txt). Do not start new work. Exit cleanly after this step."
+    "additionalContext": "$CONTROL active (~/drift-control.txt). Do not start new work. Exit cleanly after this step."
   }
 }
 ENDJSON

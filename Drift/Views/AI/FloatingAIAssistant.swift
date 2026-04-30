@@ -100,9 +100,7 @@ struct FloatingAIAssistant: View {
     @State private var pulseAnimation = false
 
     private var minimizedBubble: some View {
-        let isDownloading = modelManager.downloadState != .idle && modelManager.downloadState != .completed && modelManager.downloadState != .error("")
-
-        return Button { withAnimation { isExpanded = true } } label: {
+        Button { withAnimation { isExpanded = true } } label: {
             ZStack {
                 Circle()
                     .fill(Theme.accent)
