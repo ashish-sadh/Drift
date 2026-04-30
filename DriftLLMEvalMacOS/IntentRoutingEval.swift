@@ -816,6 +816,42 @@ final class IntentRoutingEval: XCTestCase {
         await assertRoutes("what's my average dinner time", to: "food_timing_insight")
     }
 
+    // MARK: - Historical Date Queries (food_info — #554)
+
+    func testHistoricalDateQueries_routing() async {
+        await assertRoutes("what did I eat last Tuesday", to: "food_info")
+        await assertRoutes("what did I have for dinner on Monday", to: "food_info")
+        await assertRoutes("show me my meals from last week", to: "food_info")
+        await assertRoutes("what was my total calories on Sunday", to: "food_info")
+    }
+
+    // MARK: - Calorie Goal Setting (set_goal — #554)
+
+    func testCalorieGoalSetting_routing() async {
+        await assertRoutes("set my calorie goal to 2000", to: "set_goal")
+        await assertRoutes("change my calorie target to 1800", to: "set_goal")
+        await assertRoutes("I want to eat 2500 calories a day", to: "set_goal")
+        await assertRoutes("set daily calories to 1600", to: "set_goal")
+    }
+
+    // MARK: - Macro Goal Progress (food_info — #554)
+
+    func testMacroGoalProgress_routing() async {
+        await assertRoutes("am I hitting my protein goal", to: "food_info")
+        await assertRoutes("how close am I to my fat goal", to: "food_info")
+        await assertRoutes("did I hit my carb target today", to: "food_info")
+        await assertRoutes("how's my macro balance looking", to: "food_info")
+    }
+
+    // MARK: - Micronutrient Queries (food_info — #554)
+
+    func testMicronutrientQueries_routing() async {
+        await assertRoutes("how much fiber did I eat today", to: "food_info")
+        await assertRoutes("what's my sodium intake today", to: "food_info")
+        await assertRoutes("how much vitamin C have I had", to: "food_info")
+        await assertRoutes("am I getting enough potassium", to: "food_info")
+    }
+
     // MARK: - Summary
 
     func testPrintRoutingSummary() async {
