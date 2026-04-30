@@ -44,6 +44,36 @@ final class FoodDomainExtractorTests: XCTestCase {
         XCTAssertNil(grams)
     }
 
+    // MARK: - Decimal Nx multiplier
+
+    func testExtractAmount_1point5xChicken() {
+        let (servings, food, grams) = AIActionExecutor.extractAmount(from: "1.5x chicken")
+        XCTAssertEqual(servings!, 1.5, accuracy: 0.01)
+        XCTAssertEqual(food.lowercased(), "chicken")
+        XCTAssertNil(grams)
+    }
+
+    func testExtractAmount_0point5xRice() {
+        let (servings, food, grams) = AIActionExecutor.extractAmount(from: "0.5x rice")
+        XCTAssertEqual(servings!, 0.5, accuracy: 0.01)
+        XCTAssertEqual(food.lowercased(), "rice")
+        XCTAssertNil(grams)
+    }
+
+    func testExtractAmount_2point5xOats() {
+        let (servings, food, grams) = AIActionExecutor.extractAmount(from: "2.5x oats")
+        XCTAssertEqual(servings!, 2.5, accuracy: 0.01)
+        XCTAssertEqual(food.lowercased(), "oats")
+        XCTAssertNil(grams)
+    }
+
+    func testExtractAmount_halfServingRice() {
+        let (servings, food, grams) = AIActionExecutor.extractAmount(from: "half serving rice")
+        XCTAssertEqual(servings!, 0.5, accuracy: 0.01)
+        XCTAssertEqual(food.lowercased(), "rice")
+        XCTAssertNil(grams)
+    }
+
     // MARK: - half a <unit> patterns
 
     func testExtractAmount_halfACupOfRice() {
@@ -108,5 +138,12 @@ final class FoodDomainExtractorTests: XCTestCase {
         XCTAssertNil(intent!.servings)
         XCTAssertEqual(intent!.gramAmount!, 122.0, accuracy: 0.5)
         XCTAssertTrue(intent!.query.lowercased().contains("milk"))
+    }
+
+    func testParseFoodIntent_1point5xSalmon() {
+        let intent = AIActionExecutor.parseFoodIntent("log 1.5x salmon")
+        XCTAssertNotNil(intent)
+        XCTAssertEqual(intent!.servings!, 1.5, accuracy: 0.01)
+        XCTAssertTrue(intent!.query.lowercased().contains("salmon"))
     }
 }

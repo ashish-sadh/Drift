@@ -311,6 +311,18 @@ public enum AIActionExecutor {
             let food = rest.joined(separator: " ")
             if !food.isEmpty { return (multiplier, food.trimmingCharacters(in: .whitespaces), nil) }
         }
+        // Decimal Nx multiplier: "1.5x chicken", "0.5x rice", "2.5x oats"
+        if let first = leadingWords.first {
+            let lower = first.lowercased()
+            if lower.hasSuffix("x"), let multiplier = Double(String(lower.dropLast())) {
+                var rest = Array(leadingWords.dropFirst())
+                if let next = rest.first, ["the", "a", "an", "my"].contains(next.lowercased()) {
+                    rest = Array(rest.dropFirst())
+                }
+                let food = rest.joined(separator: " ")
+                if !food.isEmpty { return (multiplier, food.trimmingCharacters(in: .whitespaces), nil) }
+            }
+        }
         if leadingWords.count >= 3, let num = Double(leadingWords[0]) {
             let unit = leadingWords[1].lowercased()
             // "N fl oz food" — two-word compound unit
