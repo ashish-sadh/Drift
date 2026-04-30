@@ -2009,5 +2009,15 @@
       "Food: remove hardcoded recipe seeds from DefaultFoods (#541)",
       "Food log: move Delete combo into ellipsis menu in ComboLogSheet (#542)"
     ]
+  },
+  {
+    "build": 192,
+    "date": "2026-04-29T00:00:00-07:00",
+    "description": "Decimal serving parsing fix + portion scaling gold set",
+    "features": [],
+    "fixes": [
+      "Food: decimal servings (e.g. 0.5 cups, 1.5 bowls) now parse correctly from chat input",
+      "Food: portion scaling gold set added to ensure serving size edge cases stay green"
+    ]
   }
 ]
