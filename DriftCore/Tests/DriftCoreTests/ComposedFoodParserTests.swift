@@ -104,7 +104,7 @@ final class ComposedFoodParserTests: XCTestCase {
         XCTAssertEqual(intents?.count, 2)
         XCTAssertEqual(intents?[0].query, "oatmeal")
         XCTAssertEqual(intents?[1].query, "honey")
-        XCTAssertEqual(intents?[1].gramAmount, 30) // 2 tbsp → 30g after #532 unit conversion
+        XCTAssertEqual(intents![1].gramAmount!, 42.5, accuracy: 0.5) // food-aware: honey = 340g/cup → 340/16*2 = 42.5g
     }
 
     func testCoffeeWith100mlMilk() {

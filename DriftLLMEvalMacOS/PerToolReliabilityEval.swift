@@ -50,7 +50,8 @@ final class PerToolReliabilityEval: XCTestCase {
     func testReliability_logWeight() async       { await runAndReport(logWeightCases,      tool: "log_weight") }
     func testReliability_markSupplement() async  { await runAndReport(markSupplementCases, tool: "mark_supplement") }
     func testReliability_foodInfo() async        { await runAndReport(foodInfoCases,       tool: "food_info") }
-    func testReliability_foodTimingInsight() async { await runAndReport(foodTimingInsightCases, tool: "food_timing_insight") }
+    func testReliability_supplementInsight() async  { await runAndReport(supplementInsightCases,  tool: "supplement_insight") }
+    func testReliability_foodTimingInsight() async  { await runAndReport(foodTimingInsightCases,  tool: "food_timing_insight") }
 
     // MARK: - Gold sets (10 cases per tool)
 
@@ -139,6 +140,19 @@ final class PerToolReliabilityEval: XCTestCase {
         Case(query: "fat intake this week",     expectedTool: "food_info", expectedParams: [:]),
         Case(query: "calories in paneer tikka", expectedTool: "food_info", expectedParams: [:]),
         Case(query: "what about protein?",      expectedTool: "food_info", expectedParams: [:]),
+    ]
+
+    private let supplementInsightCases: [Case] = [
+        Case(query: "how are my supplements affecting my recovery", expectedTool: "supplement_insight", expectedParams: [:]),
+        Case(query: "how consistent am I with creatine",            expectedTool: "supplement_insight", expectedParams: ["supplement": "creatine"]),
+        Case(query: "what's my vitamin D streak",                   expectedTool: "supplement_insight", expectedParams: ["supplement": "vitamin D"]),
+        Case(query: "did I miss any omega-3 this week",             expectedTool: "supplement_insight", expectedParams: [:]),
+        Case(query: "show my supplement adherence",                 expectedTool: "supplement_insight", expectedParams: [:]),
+        Case(query: "how often do I take magnesium",                expectedTool: "supplement_insight", expectedParams: ["supplement": "magnesium"]),
+        Case(query: "my supplement consistency last month",         expectedTool: "supplement_insight", expectedParams: [:]),
+        Case(query: "which supplements am I missing most",          expectedTool: "supplement_insight", expectedParams: [:]),
+        Case(query: "creatine adherence past 30 days",              expectedTool: "supplement_insight", expectedParams: ["supplement": "creatine"]),
+        Case(query: "have I been taking my supplements regularly",  expectedTool: "supplement_insight", expectedParams: [:]),
     ]
 
     private let foodTimingInsightCases: [Case] = [

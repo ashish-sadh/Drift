@@ -43,37 +43,37 @@ final class DomainExtractorTests: XCTestCase {
     }
 
     func test_extract_cup() {
-        // "1 cup milk" — volume → grams (240g/cup)
+        // "1 cup milk" — food-aware: milk = 244g/cup
         let (s, food, g) = AIActionExecutor.extractAmount(from: "1 cup milk")
         XCTAssertNil(s)
         XCTAssertEqual(food, "milk")
-        XCTAssertEqual(g!, 240.0, accuracy: 0.01)
+        XCTAssertEqual(g!, 244.0, accuracy: 0.5)
     }
 
     func test_extract_tbsp() {
-        // "1 tbsp ghee" — tablespoon → 15g
+        // "1 tbsp ghee" — food-aware: ghee = 218g/cup → 218/16 ≈ 13.6g/tbsp
         let (s, food, g) = AIActionExecutor.extractAmount(from: "1 tbsp ghee")
         XCTAssertNil(s)
         XCTAssertEqual(food, "ghee")
-        XCTAssertEqual(g!, 15.0, accuracy: 0.01)
+        XCTAssertEqual(g!, 218.0 / 16, accuracy: 0.5)
     }
 
     func test_extract_tsp() {
-        // "2 tsp honey" — teaspoon → 5g each
+        // "2 tsp honey" — food-aware: honey = 340g/cup → 340/48 * 2 ≈ 14.2g
         let (s, food, g) = AIActionExecutor.extractAmount(from: "2 tsp honey")
         XCTAssertNil(s)
         XCTAssertEqual(food, "honey")
-        XCTAssertEqual(g!, 10.0, accuracy: 0.01)
+        XCTAssertEqual(g!, 340.0 / 48 * 2, accuracy: 0.5)
     }
 
     // MARK: - B: extractAmount — fractions (5 cases)
 
     func test_extract_halfACup() {
-        // "half a cup rice" — two-word amount + volume unit
+        // "half a cup rice" — food-aware: rice = 185g/cup → 0.5 * 185 = 92.5g
         let (s, food, g) = AIActionExecutor.extractAmount(from: "half a cup rice")
         XCTAssertNil(s)
         XCTAssertEqual(food, "rice")
-        XCTAssertEqual(g!, 120.0, accuracy: 0.01)
+        XCTAssertEqual(g!, 92.5, accuracy: 0.5)
     }
 
     func test_extract_halfATbsp() {
@@ -187,11 +187,11 @@ final class DomainExtractorTests: XCTestCase {
     }
 
     func test_extract_halfCupOf() {
-        // "half cup of rice" — word amount + volume unit + "of" connector
+        // "half cup of rice" — food-aware: rice = 185g/cup → 0.5 * 185 = 92.5g
         let (s, food, g) = AIActionExecutor.extractAmount(from: "half cup of rice")
         XCTAssertNil(s)
         XCTAssertEqual(food.lowercased(), "rice")
-        XCTAssertEqual(g!, 120.0, accuracy: 0.01)
+        XCTAssertEqual(g!, 92.5, accuracy: 0.5)
     }
 
     // MARK: - F: extractAmount — ranges (2 cases)
@@ -251,11 +251,11 @@ final class DomainExtractorTests: XCTestCase {
     }
 
     func test_intent_halfCupOats() {
-        // "log half a cup of oats" — fraction + volume → grams, singularized
+        // "log half a cup of oats" — food-aware: oats = 80g/cup → 0.5 * 80 = 40g
         let intent = AIActionExecutor.parseFoodIntent("log half a cup of oats")
         XCTAssertNotNil(intent)
         XCTAssertEqual(intent!.query, "oat")
-        XCTAssertEqual(intent!.gramAmount!, 120.0, accuracy: 0.01)
+        XCTAssertEqual(intent!.gramAmount!, 40.0, accuracy: 0.5)
         XCTAssertNil(intent!.servings)
     }
 

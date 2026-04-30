@@ -1477,17 +1477,18 @@ final class AIEvalHarness: XCTestCase {
         XCTAssertEqual(coupleName, "eggs")
 
         // Regression #171: "a cup of dal" must extract food="dal" (not "cup of dal"), converted to grams (#532)
+        // Food-aware densities: dal=190g/cup, oats=80g/cup, ghee=218g/cup (16 tbsp/cup)
         let (_, aCupName, aCupGrams) = AIActionExecutor.extractAmount(from: "a cup of dal")
         XCTAssertEqual(aCupName, "dal")
-        XCTAssertEqual(aCupGrams, 240)
+        XCTAssertEqual(aCupGrams!, 190, accuracy: 0.5)
 
         let (_, anCupName, anCupGrams) = AIActionExecutor.extractAmount(from: "an cup of oats")
         XCTAssertEqual(anCupName, "oats")
-        XCTAssertEqual(anCupGrams, 240)
+        XCTAssertEqual(anCupGrams!, 80, accuracy: 0.5)
 
         let (_, aTbspName, aTbspGrams) = AIActionExecutor.extractAmount(from: "a tbsp of ghee")
         XCTAssertEqual(aTbspName, "ghee")
-        XCTAssertEqual(aTbspGrams, 15)
+        XCTAssertEqual(aTbspGrams!, 218.0 / 16, accuracy: 0.5)
     }
 
     @MainActor

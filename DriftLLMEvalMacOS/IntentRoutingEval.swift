@@ -790,6 +790,19 @@ final class IntentRoutingEval: XCTestCase {
         await assertRoutes("morning fasting glucose reading", to: "glucose")
     }
 
+    // MARK: - Supplement insight
+
+    func testSupplementInsight_routing() async {
+        await assertRoutes("how are my supplements affecting my recovery", to: "supplement_insight")
+        await assertRoutes("how consistent am I with creatine", to: "supplement_insight")
+        await assertRoutes("what's my vitamin D streak", to: "supplement_insight")
+        await assertRoutes("did I miss any omega-3 this week", to: "supplement_insight")
+        await assertRoutes("show my supplement adherence", to: "supplement_insight")
+        await assertRoutes("how often do I take magnesium", to: "supplement_insight")
+        await assertRoutes("my supplement consistency last month", to: "supplement_insight")
+        await assertRoutes("which supplements am I missing most", to: "supplement_insight")
+    }
+
     // MARK: - Food timing insight
 
     func testFoodTimingInsight_routing() async {
