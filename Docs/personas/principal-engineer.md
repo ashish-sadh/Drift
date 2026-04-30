@@ -357,3 +357,10 @@
 - USDA API key (#488) is pre-launch blocker — DEMO_KEY cap is 1,000 req/day. Fine for beta but a ticking clock once DAU > 10. Simple credential swap; schedule before any marketing push.
 - DriftCore migration is delivering ROI: FoodLoggingGoldSetTests at 0.1s warm makes "run gold set every session" actually happen. Guard it — any test that needs iOS Simulator for pure logic is a regression back to the 30s loop. The Tier-0 rule must be enforced at code review, not just architecture review.
 - Queue at 61 entering this cycle — healthy. Adding 10 tasks brings it to 71, below the 80 triage threshold. Active SENIOR queue at ~18 tasks; at 5 tasks/session = ~4 senior sessions to drain. Campaign tasks (photo-log, remote model, zero user math) are all SENIOR-heavy; queue depth is appropriate.
+
+### What I Learned — Review Cycle 8519 (2026-04-29)
+- Backend toggle redesign (#540) is architecturally correct: stored property with a proper setter, no stale selector capture. Pattern to reuse for any future preference-driven toggle that affects a service-layer behavior.
+- RemoteBackendError categorization (auth / rateLimited / quotaExceeded / transient / malformed) is the right abstraction. Callers decide auto-fallback (transient only) vs surface-to-user (auth/quota) without HTTP status code inspection. Apply this pattern to any future multi-provider service.
+- Unit conversion (#497) has WIP patch at ~/drift-state/wip/497.patch. `git apply` + finish is the right path — not restarting from scratch. The ServingUnit.toGrams() skeleton already exists; fill the gaps for oz/fl oz/cups/tbsp/tsp/pieces.
+- supplement_insight/food_timing_insight: crash root cause is documented in #493, WIP patches from 4 sessions exist. Reading the WIP diffs before writing a single line is mandatory — the stall points are known. Session budget of 10 tasks should be enough to ship both tools + eval cases + register in same PR.
+- State.md at build 174 is 18 builds stale (actual 192). Required fix each sprint as Step 0, not cleanup. Filed #553 this cycle.

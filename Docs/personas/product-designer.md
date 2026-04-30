@@ -14,6 +14,8 @@
 
 ### Competitive Insights
 - MFP added AI photo scanning (cloud-based) — becoming table stakes but quality varies on non-Western food
+- MFP launched free GLP-1 support (April 2026) — medication log, dose reminders, side effect tracking alongside nutrition. New health domain we don't yet cover.
+- MacroFactor shipped AI photo + text recipe import (April 2026) — directly competing with our photo log for meal-from-photo UX
 - Boostcamp's exercise presentation (videos, muscle diagrams) is the gold standard
 - Whoop's Behavior Insights connecting habits to Recovery scores is compelling
 - MacroFactor's adaptive TDEE is their killer feature — we've implemented our version
@@ -347,3 +349,9 @@
 - Active campaigns this cycle: (1) Photo logging recovery — kill the scan-again loop with in-card editing, free-text correction, and DB-hint matching. (2) Remote-model architectural prep — AIBackend conformance, BYOK Keychain, no user exposure. (3) Zero user math — invisible unit conversion, decimal servings, and automatic macro aggregation so users describe, not compute.
 - MFP competitive window remains open but closing. Their Today tab redesign is still generating complaints (April 2026). TestFlight release notes should lead with "log your lunch in one sentence — no 4-tap diary required" before they fix it.
 - State.md stale by 8 builds is a planning accuracy problem, not a docs problem. When State.md says build 174 and the actual build is 182, every session that reads it makes wrong inferences about what's been shipped. Refreshing State.md must be treated as Step 0 of every sprint, not an optional junior cleanup task.
+
+### What I Learned — Review Cycle 8519 (2026-04-29)
+- Photo-attached meal logging (propose_meal card, #518) closes the two-app problem — users who discuss meals in ChatGPT and log in Drift can now do both in one chat. MacroFactor entered this space (AI photo recipe import, April 2026); our BYOK privacy model and on-device fallback is the differentiator.
+- supplement_insight and food_timing_insight are still unshipped at review #57. Whoop Behavior Trends (habit → Recovery correlation) is live and marketed. Every cycle these stay queued, "habits → outcomes" becomes Whoop's mental model. Diagnosis is done (#493), InsightResult schema is reusable — this is a pure execution failure. Next senior session: these are the ONLY P0 priorities.
+- MFP launched free GLP-1 support (April 28, 2026) — medication log, dose reminders, side effect tracking + nutrition correlation. This is a new health domain. Drift's all-in-one identity eventually needs medication tracking. Design doc first, no implementation commitment yet.
+- Unit conversion (#497) stalled with WIP patch at ~/drift-state/wip/497.patch. Resume with git apply, don't start over. Zero-user-math campaign isn't closed until users can type oz/cups and AI converts silently.
