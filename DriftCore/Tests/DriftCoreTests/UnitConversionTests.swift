@@ -60,13 +60,15 @@ final class UnitConversionTests: XCTestCase {
     }
 
     func testExtractAmount_cup_convertsToGrams() {
+        // oats = 80g/cup (food-aware, was flat 240g)
         let (servings, food, grams) = AIActionExecutor.extractAmount(from: "1 cup oats")
         XCTAssertNil(servings)
         XCTAssertEqual(food.lowercased(), "oats")
-        XCTAssertEqual(grams!, 240, accuracy: 0.01)
+        XCTAssertEqual(grams!, 80, accuracy: 0.01)
     }
 
     func testExtractAmount_tbsp_convertsToGrams() {
+        // peanut butter has no RawIngredient match → flat 15g/tbsp
         let (servings, food, grams) = AIActionExecutor.extractAmount(from: "1 tbsp peanut butter")
         XCTAssertNil(servings)
         XCTAssertTrue(food.lowercased().contains("peanut butter"))
@@ -74,10 +76,11 @@ final class UnitConversionTests: XCTestCase {
     }
 
     func testExtractAmount_tsp_convertsToGrams() {
+        // honey = 340g/cup → 340/48 ≈ 7.08g/tsp (food-aware, was flat 5g)
         let (servings, food, grams) = AIActionExecutor.extractAmount(from: "2 tsp honey")
         XCTAssertNil(servings)
         XCTAssertEqual(food.lowercased(), "honey")
-        XCTAssertEqual(grams!, 10, accuracy: 0.01)
+        XCTAssertEqual(grams!, 340.0 / 48 * 2, accuracy: 0.5)
     }
 
     func testExtractAmount_kg_convertsToGrams() {
@@ -95,17 +98,19 @@ final class UnitConversionTests: XCTestCase {
     }
 
     func testExtractAmount_halfCup_convertsToGrams() {
+        // milk = 244g/cup (food-aware, was flat 240g → 120)
         let (servings, food, grams) = AIActionExecutor.extractAmount(from: "half cup milk")
         XCTAssertNil(servings)
         XCTAssertEqual(food.lowercased(), "milk")
-        XCTAssertEqual(grams!, 120, accuracy: 0.01)
+        XCTAssertEqual(grams!, 122, accuracy: 0.5)
     }
 
     func testExtractAmount_twoCups_convertsToGrams() {
+        // oatmeal matches oats = 80g/cup (food-aware, was flat 240g → 480)
         let (servings, food, grams) = AIActionExecutor.extractAmount(from: "2 cups oatmeal")
         XCTAssertNil(servings)
         XCTAssertEqual(food.lowercased(), "oatmeal")
-        XCTAssertEqual(grams!, 480, accuracy: 0.01)
+        XCTAssertEqual(grams!, 160, accuracy: 0.5)
     }
 
     // MARK: - ServingUnit.ounces
@@ -122,5 +127,97 @@ final class UnitConversionTests: XCTestCase {
 
     func testServingUnit_ounces_label() {
         XCTAssertEqual(ServingUnit.ounces.label, "oz")
+    }
+
+    // MARK: - Gold set: food-aware unit conversion
+
+    func testFoodAware_cup_oats() {
+        let (_, food, grams) = AIActionExecutor.extractAmount(from: "2 cups oats")
+        XCTAssertEqual(food.lowercased(), "oats")
+        XCTAssertEqual(grams!, 160, accuracy: 0.5)
+    }
+
+    func testFoodAware_cup_rice() {
+        let (_, food, grams) = AIActionExecutor.extractAmount(from: "1 cup rice")
+        XCTAssertEqual(food.lowercased(), "rice")
+        XCTAssertEqual(grams!, 185, accuracy: 0.5)
+    }
+
+    func testFoodAware_cup_milk() {
+        let (_, food, grams) = AIActionExecutor.extractAmount(from: "1 cup milk")
+        XCTAssertEqual(food.lowercased(), "milk")
+        XCTAssertEqual(grams!, 244, accuracy: 0.5)
+    }
+
+    func testFoodAware_cup_dal() {
+        let (_, food, grams) = AIActionExecutor.extractAmount(from: "1 cup dal")
+        XCTAssertEqual(food.lowercased(), "dal")
+        XCTAssertEqual(grams!, 190, accuracy: 0.5)
+    }
+
+    func testFoodAware_cup_chickpeas() {
+        let (_, food, grams) = AIActionExecutor.extractAmount(from: "1 cup chickpeas")
+        XCTAssertEqual(food.lowercased(), "chickpeas")
+        XCTAssertEqual(grams!, 164, accuracy: 0.5)
+    }
+
+    func testFoodAware_cup_unknown_fallsBackToFlat() {
+        let (_, food, grams) = AIActionExecutor.extractAmount(from: "1 cup water")
+        XCTAssertEqual(food.lowercased(), "water")
+        XCTAssertEqual(grams!, 240, accuracy: 0.5)
+    }
+
+    func testFoodAware_tbsp_honey() {
+        let (_, food, grams) = AIActionExecutor.extractAmount(from: "2 tbsp honey")
+        XCTAssertEqual(food.lowercased(), "honey")
+        XCTAssertEqual(grams!, 340.0 / 16 * 2, accuracy: 0.5)
+    }
+
+    func testFoodAware_tbsp_ghee() {
+        let (_, food, grams) = AIActionExecutor.extractAmount(from: "1 tbsp ghee")
+        XCTAssertEqual(food.lowercased(), "ghee")
+        XCTAssertEqual(grams!, 218.0 / 16, accuracy: 0.5)
+    }
+
+    func testFoodAware_tbsp_oil() {
+        let (_, food, grams) = AIActionExecutor.extractAmount(from: "2 tbsp oil")
+        XCTAssertEqual(food.lowercased(), "oil")
+        XCTAssertEqual(grams!, 218.0 / 16 * 2, accuracy: 0.5)
+    }
+
+    func testFoodAware_tsp_honey() {
+        let (_, food, grams) = AIActionExecutor.extractAmount(from: "1 tsp honey")
+        XCTAssertEqual(food.lowercased(), "honey")
+        XCTAssertEqual(grams!, 340.0 / 48, accuracy: 0.5)
+    }
+
+    func testFoodAware_oz_chicken() {
+        let (_, food, grams) = AIActionExecutor.extractAmount(from: "8 oz chicken")
+        XCTAssertEqual(food.lowercased(), "chicken")
+        XCTAssertEqual(grams!, 8 * 28.3495, accuracy: 0.5)
+    }
+
+    func testFoodAware_oz_salmon() {
+        let (_, food, grams) = AIActionExecutor.extractAmount(from: "4 oz salmon")
+        XCTAssertEqual(food.lowercased(), "salmon")
+        XCTAssertEqual(grams!, 4 * 28.3495, accuracy: 0.5)
+    }
+
+    func testFoodAware_pieces_egg() {
+        let (_, food, grams) = AIActionExecutor.extractAmount(from: "2 pieces egg")
+        XCTAssertEqual(food.lowercased(), "egg")
+        XCTAssertEqual(grams!, 100, accuracy: 0.01)
+    }
+
+    func testFoodAware_pieces_banana() {
+        let (_, food, grams) = AIActionExecutor.extractAmount(from: "1 piece banana")
+        XCTAssertEqual(food.lowercased(), "banana")
+        XCTAssertEqual(grams!, 120, accuracy: 0.01)
+    }
+
+    func testFoodAware_floz_water() {
+        let (_, food, grams) = AIActionExecutor.extractAmount(from: "8 fl oz water")
+        XCTAssertEqual(food.lowercased(), "water")
+        XCTAssertEqual(grams!, 8 * 29.5735, accuracy: 0.01)
     }
 }

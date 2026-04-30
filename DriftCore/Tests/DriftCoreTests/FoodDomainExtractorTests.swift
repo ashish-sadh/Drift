@@ -47,13 +47,15 @@ final class FoodDomainExtractorTests: XCTestCase {
     // MARK: - half a <unit> patterns
 
     func testExtractAmount_halfACupOfRice() {
+        // rice = 185g/cup → 0.5 * 185 = 92.5g (food-aware, was flat 120g)
         let (servings, food, grams) = AIActionExecutor.extractAmount(from: "half a cup of rice")
         XCTAssertNil(servings)
         XCTAssertEqual(food.lowercased(), "rice")
-        XCTAssertEqual(grams!, 120.0, accuracy: 0.01)
+        XCTAssertEqual(grams!, 92.5, accuracy: 0.5)
     }
 
     func testExtractAmount_halfATbspPeanutButter() {
+        // peanut butter has no RawIngredient match → flat 15g/tbsp → 7.5g
         let (servings, food, grams) = AIActionExecutor.extractAmount(from: "half a tbsp peanut butter")
         XCTAssertNil(servings)
         XCTAssertTrue(food.lowercased().contains("peanut butter"))
@@ -61,10 +63,11 @@ final class FoodDomainExtractorTests: XCTestCase {
     }
 
     func testExtractAmount_halfATspHoney() {
+        // honey = 340g/cup → 340/48 ≈ 7.08g/tsp → 0.5 * 7.08 ≈ 3.54g (food-aware, was flat 2.5g)
         let (servings, food, grams) = AIActionExecutor.extractAmount(from: "half a tsp honey")
         XCTAssertNil(servings)
         XCTAssertEqual(food.lowercased(), "honey")
-        XCTAssertEqual(grams!, 2.5, accuracy: 0.01)
+        XCTAssertEqual(grams!, 340.0 / 48 * 0.5, accuracy: 0.5)
     }
 
     // MARK: - Fractional servings passthrough (already worked, regression guard)
@@ -103,7 +106,7 @@ final class FoodDomainExtractorTests: XCTestCase {
         let intent = AIActionExecutor.parseFoodIntent("had half a cup of milk")
         XCTAssertNotNil(intent)
         XCTAssertNil(intent!.servings)
-        XCTAssertEqual(intent!.gramAmount!, 120.0, accuracy: 0.01)
+        XCTAssertEqual(intent!.gramAmount!, 122.0, accuracy: 0.5)
         XCTAssertTrue(intent!.query.lowercased().contains("milk"))
     }
 }
