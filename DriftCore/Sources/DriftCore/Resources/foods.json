@@ -46885,5 +46885,624 @@
       "salt"
     ],
     "nova_group": 1
+  },
+  {
+    "name": "Ragi Idli",
+    "category": "South Indian",
+    "serving_size": 40,
+    "serving_unit": "g",
+    "calories": 68,
+    "protein_g": 2.5,
+    "carbs_g": 12.0,
+    "fat_g": 1.2,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "ragi flour",
+      "urad dal",
+      "curd",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Poondu Rasam",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "ml",
+    "calories": 32,
+    "protein_g": 0.8,
+    "carbs_g": 4.0,
+    "fat_g": 1.2,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "garlic",
+      "tomato",
+      "tamarind",
+      "black pepper",
+      "cumin",
+      "curry leaves",
+      "oil",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Elumichai Rasam",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "ml",
+    "calories": 28,
+    "protein_g": 0.5,
+    "carbs_g": 3.5,
+    "fat_g": 1.0,
+    "fiber_g": 0.2,
+    "ingredients": [
+      "lemon juice",
+      "black pepper",
+      "cumin",
+      "ginger",
+      "curry leaves",
+      "oil",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Jeera Rasam",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "ml",
+    "calories": 30,
+    "protein_g": 0.8,
+    "carbs_g": 3.8,
+    "fat_g": 1.0,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "cumin",
+      "black pepper",
+      "tomato",
+      "tamarind",
+      "curry leaves",
+      "oil",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kollu Kuzhambu",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "ml",
+    "calories": 78,
+    "protein_g": 3.5,
+    "carbs_g": 8.5,
+    "fat_g": 3.5,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "horse gram",
+      "tamarind",
+      "tomato",
+      "pearl onion",
+      "coconut",
+      "red chilli",
+      "sesame oil",
+      "mustard",
+      "curry leaves"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Manathakkali Vathal Kuzhambu",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "ml",
+    "calories": 72,
+    "protein_g": 1.5,
+    "carbs_g": 7.5,
+    "fat_g": 4.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "manathakkali vathal",
+      "tamarind",
+      "tomato",
+      "pearl onion",
+      "sesame oil",
+      "mustard",
+      "curry leaves",
+      "kuzhambu powder"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Parangikai Sambar",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "ml",
+    "calories": 58,
+    "protein_g": 2.5,
+    "carbs_g": 7.0,
+    "fat_g": 1.8,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "toor dal",
+      "yellow pumpkin",
+      "tamarind",
+      "tomato",
+      "onion",
+      "sambar powder",
+      "oil",
+      "mustard",
+      "curry leaves"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Keerai Sambar",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "ml",
+    "calories": 55,
+    "protein_g": 2.8,
+    "carbs_g": 6.5,
+    "fat_g": 1.8,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "toor dal",
+      "spinach",
+      "tamarind",
+      "tomato",
+      "onion",
+      "sambar powder",
+      "oil",
+      "mustard",
+      "curry leaves"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Tomato Gothsu",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 52,
+    "protein_g": 1.2,
+    "carbs_g": 6.5,
+    "fat_g": 2.5,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "tomato",
+      "onion",
+      "green chilli",
+      "tamarind",
+      "oil",
+      "mustard",
+      "curry leaves"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kathirikai Gothsu",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 62,
+    "protein_g": 1.5,
+    "carbs_g": 7.0,
+    "fat_g": 3.0,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "brinjal",
+      "tomato",
+      "onion",
+      "tamarind",
+      "oil",
+      "mustard",
+      "curry leaves"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Karasev",
+    "category": "South Indian",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 148,
+    "protein_g": 3.5,
+    "carbs_g": 17.5,
+    "fat_g": 7.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "chickpea flour",
+      "ajwain",
+      "butter",
+      "oil",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Nei Murukku",
+    "category": "South Indian",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 158,
+    "protein_g": 2.5,
+    "carbs_g": 17.5,
+    "fat_g": 8.5,
+    "fiber_g": 0.8,
+    "ingredients": [
+      "rice flour",
+      "urad dal flour",
+      "ghee",
+      "cumin",
+      "sesame",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Kodubale",
+    "category": "South Indian",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 142,
+    "protein_g": 2.5,
+    "carbs_g": 18.0,
+    "fat_g": 6.5,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "rice flour",
+      "roasted gram",
+      "dry coconut",
+      "red chilli",
+      "oil",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Idli Upma",
+    "category": "South Indian",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 162,
+    "protein_g": 4.5,
+    "carbs_g": 28.0,
+    "fat_g": 3.8,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "leftover idli",
+      "oil",
+      "mustard",
+      "urad dal",
+      "onion",
+      "green chilli",
+      "ginger",
+      "curry leaves"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Semiya Kesari",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 278,
+    "protein_g": 3.8,
+    "carbs_g": 45.0,
+    "fat_g": 9.0,
+    "fiber_g": 0.8,
+    "ingredients": [
+      "vermicelli",
+      "sugar",
+      "ghee",
+      "cardamom",
+      "cashew",
+      "raisin"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Aval Kesari",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 268,
+    "protein_g": 2.5,
+    "carbs_g": 48.0,
+    "fat_g": 8.0,
+    "fiber_g": 0.8,
+    "ingredients": [
+      "flattened rice",
+      "sugar",
+      "ghee",
+      "cardamom",
+      "cashew",
+      "saffron"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Paal Kozhukattai",
+    "category": "South Indian",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 72,
+    "protein_g": 1.0,
+    "carbs_g": 13.5,
+    "fat_g": 1.8,
+    "fiber_g": 0.3,
+    "ingredients": [
+      "rice flour",
+      "coconut milk",
+      "jaggery",
+      "cardamom"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Karuvepilai Sadam",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 162,
+    "protein_g": 2.8,
+    "carbs_g": 28.5,
+    "fat_g": 4.2,
+    "fiber_g": 1.2,
+    "ingredients": [
+      "rice",
+      "curry leaves",
+      "sesame oil",
+      "mustard",
+      "urad dal",
+      "dry red chilli",
+      "asafoetida"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Maanga Sadam",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 172,
+    "protein_g": 2.5,
+    "carbs_g": 31.5,
+    "fat_g": 4.2,
+    "fiber_g": 0.8,
+    "ingredients": [
+      "rice",
+      "raw mango",
+      "sesame oil",
+      "mustard",
+      "urad dal",
+      "peanut",
+      "curry leaves",
+      "green chilli"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Vazhaithandu Kootu",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 62,
+    "protein_g": 2.2,
+    "carbs_g": 8.0,
+    "fat_g": 2.5,
+    "fiber_g": 3.5,
+    "ingredients": [
+      "banana stem",
+      "coconut",
+      "urad dal",
+      "cumin",
+      "mustard",
+      "curry leaves",
+      "oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Pori Urundai",
+    "category": "South Indian",
+    "serving_size": 25,
+    "serving_unit": "g",
+    "calories": 90,
+    "protein_g": 1.0,
+    "carbs_g": 20.0,
+    "fat_g": 0.8,
+    "fiber_g": 0.3,
+    "ingredients": [
+      "puffed rice",
+      "jaggery",
+      "coconut",
+      "cardamom",
+      "dry ginger"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Obbattu",
+    "category": "South Indian",
+    "serving_size": 70,
+    "serving_unit": "g",
+    "calories": 198,
+    "protein_g": 4.5,
+    "carbs_g": 34.0,
+    "fat_g": 5.5,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "wheat flour",
+      "chana dal",
+      "jaggery",
+      "cardamom",
+      "ghee"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Murungakkai Kootu",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 72,
+    "protein_g": 3.0,
+    "carbs_g": 9.0,
+    "fat_g": 2.8,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "drumstick",
+      "coconut",
+      "urad dal",
+      "cumin",
+      "mustard",
+      "oil",
+      "curry leaves"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Paruppu Payasam",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "ml",
+    "calories": 165,
+    "protein_g": 3.8,
+    "carbs_g": 28.0,
+    "fat_g": 4.5,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "moong dal",
+      "jaggery",
+      "coconut milk",
+      "cardamom",
+      "ghee",
+      "cashew"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Beans Poriyal",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 68,
+    "protein_g": 2.5,
+    "carbs_g": 8.0,
+    "fat_g": 3.2,
+    "fiber_g": 3.5,
+    "ingredients": [
+      "French beans",
+      "coconut",
+      "mustard",
+      "urad dal",
+      "oil",
+      "curry leaves"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kovakkai Poriyal",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 62,
+    "protein_g": 1.5,
+    "carbs_g": 7.5,
+    "fat_g": 3.0,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "ivy gourd",
+      "onion",
+      "coconut",
+      "mustard",
+      "oil",
+      "curry leaves"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Karunai Kilangu Kootu",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 88,
+    "protein_g": 2.0,
+    "carbs_g": 14.5,
+    "fat_g": 2.8,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "purple yam",
+      "coconut",
+      "urad dal",
+      "cumin",
+      "mustard",
+      "oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Molakootal",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 75,
+    "protein_g": 2.5,
+    "carbs_g": 9.0,
+    "fat_g": 3.2,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "mixed vegetables",
+      "coconut",
+      "urad dal",
+      "cumin",
+      "mustard",
+      "coconut oil",
+      "curry leaves"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Pineapple Rasam",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "ml",
+    "calories": 35,
+    "protein_g": 0.5,
+    "carbs_g": 6.0,
+    "fat_g": 0.8,
+    "fiber_g": 0.3,
+    "ingredients": [
+      "pineapple",
+      "tomato",
+      "black pepper",
+      "cumin",
+      "curry leaves",
+      "oil",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Murungai Keerai Poriyal",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 65,
+    "protein_g": 4.5,
+    "carbs_g": 5.5,
+    "fat_g": 3.2,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "drumstick leaves",
+      "onion",
+      "coconut",
+      "mustard",
+      "oil",
+      "red chilli"
+    ],
+    "nova_group": 1
   }
 ]
