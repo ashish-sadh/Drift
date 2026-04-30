@@ -50,6 +50,7 @@ final class PerToolReliabilityEval: XCTestCase {
     func testReliability_logWeight() async       { await runAndReport(logWeightCases,      tool: "log_weight") }
     func testReliability_markSupplement() async  { await runAndReport(markSupplementCases, tool: "mark_supplement") }
     func testReliability_foodInfo() async        { await runAndReport(foodInfoCases,       tool: "food_info") }
+    func testReliability_foodTimingInsight() async { await runAndReport(foodTimingInsightCases, tool: "food_timing_insight") }
 
     // MARK: - Gold sets (10 cases per tool)
 
@@ -138,6 +139,19 @@ final class PerToolReliabilityEval: XCTestCase {
         Case(query: "fat intake this week",     expectedTool: "food_info", expectedParams: [:]),
         Case(query: "calories in paneer tikka", expectedTool: "food_info", expectedParams: [:]),
         Case(query: "what about protein?",      expectedTool: "food_info", expectedParams: [:]),
+    ]
+
+    private let foodTimingInsightCases: [Case] = [
+        Case(query: "when do I usually eat",            expectedTool: "food_timing_insight", expectedParams: [:]),
+        Case(query: "do I eat late at night",           expectedTool: "food_timing_insight", expectedParams: [:]),
+        Case(query: "what's my eating window",          expectedTool: "food_timing_insight", expectedParams: [:]),
+        Case(query: "what time is my first meal",       expectedTool: "food_timing_insight", expectedParams: [:]),
+        Case(query: "does eating late affect my sleep", expectedTool: "food_timing_insight", expectedParams: [:]),
+        Case(query: "analyze my meal timing",           expectedTool: "food_timing_insight", expectedParams: [:]),
+        Case(query: "am I eating too late",             expectedTool: "food_timing_insight", expectedParams: [:]),
+        Case(query: "how consistent is my meal schedule", expectedTool: "food_timing_insight", expectedParams: [:]),
+        Case(query: "when do I have my biggest meal",   expectedTool: "food_timing_insight", expectedParams: [:]),
+        Case(query: "what's my average dinner time",    expectedTool: "food_timing_insight", expectedParams: [:]),
     ]
 
     // MARK: - Scoring

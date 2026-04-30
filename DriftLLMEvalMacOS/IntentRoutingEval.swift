@@ -790,6 +790,19 @@ final class IntentRoutingEval: XCTestCase {
         await assertRoutes("morning fasting glucose reading", to: "glucose")
     }
 
+    // MARK: - Food timing insight
+
+    func testFoodTimingInsight_routing() async {
+        await assertRoutes("when do I usually eat", to: "food_timing_insight")
+        await assertRoutes("do I eat late at night", to: "food_timing_insight")
+        await assertRoutes("what's my eating window", to: "food_timing_insight")
+        await assertRoutes("what time is my first meal", to: "food_timing_insight")
+        await assertRoutes("does eating late affect my sleep", to: "food_timing_insight")
+        await assertRoutes("analyze my meal timing", to: "food_timing_insight")
+        await assertRoutes("am I eating too late", to: "food_timing_insight")
+        await assertRoutes("what's my average dinner time", to: "food_timing_insight")
+    }
+
     // MARK: - Summary
 
     func testPrintRoutingSummary() async {
