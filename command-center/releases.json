@@ -2041,5 +2041,15 @@
       "AI: decimal Nx multiplier phrases ('double it', 'half serving', '1.5x') handled correctly in portion scaling"
     ],
     "fixes": []
+  },
+  {
+    "build": 196,
+    "date": "2026-04-30T08:30:00-07:00",
+    "description": "Eval expansion + USDA injectable API key",
+    "features": [
+      "AI Eval: 16 new eval cases for historical date, calorie goal, macro goal, and micronutrient queries",
+      "Food: USDA API key injectable via Preferences, falls back to DEMO_KEY for open access"
+    ],
+    "fixes": []
   }
 ]
