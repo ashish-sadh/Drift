@@ -2019,5 +2019,16 @@
       "Food: decimal servings (e.g. 0.5 cups, 1.5 bowls) now parse correctly from chat input",
       "Food: portion scaling gold set added to ensure serving size edge cases stay green"
     ]
+  },
+  {
+    "build": 193,
+    "date": "2026-04-30T03:30:00-07:00",
+    "description": "Food-aware unit conversion + supplement/timing LLM eval cases",
+    "features": [
+      "Food: food-aware unit conversion in chat (e.g. 1 cup of rice auto-converts to grams)",
+      "AI: supplement insight routing eval cases added",
+      "AI: food timing insight routing eval cases added"
+    ],
+    "fixes": []
   }
 ]
