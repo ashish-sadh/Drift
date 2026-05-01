@@ -429,15 +429,22 @@ snapshot_wip_if_in_progress() {
     NUM=$(jq -r '.in_progress // empty' "$STATE_FILE" 2>/dev/null || echo "")
     [[ -z "$NUM" || "$NUM" == "null" ]] && return
 
+    # Design-doc work has no working-tree state to snapshot — the deliverable
+    # is a PR with the doc, not local edits. Skip WIP capture entirely.
+    # Also avoids the path-with-slash bug ("design/561" → wip/design/561.patch
+    # whose subdir wasn't mkdir'd) that crash-looped the watchdog on 2026-05-01.
+    [[ "$NUM" == */* ]] && return
+
     cd "$WORK_DIR" || return
     local REAL_EDITS
-    # `|| echo 0` because grep -vE returns 1 when nothing matches (clean tree
-    # or only whitelisted noise) — combined with set -euo pipefail at line 12,
-    # that propagates exit 1 and kills the watchdog. Latent path that fires
-    # when a session is mid-claim AND the working tree has only noise files.
-    REAL_EDITS=$( { git status --porcelain 2>/dev/null \
-        | grep -vE 'command-center/heartbeat\.json|graphify-out/|\.xcodeproj/' \
-        | wc -l | tr -d ' '; } || echo 0 )
+    # Tame grep's exit-1-on-no-match (which would propagate through pipefail
+    # and kill the watchdog) by wrapping grep specifically with `|| true`.
+    # Earlier defensive wrap `{ ... } || echo 0` produced "0\n0" because the
+    # inner block had already printed "0" before failing — broke the
+    # arithmetic test below.
+    REAL_EDITS=$(git status --porcelain 2>/dev/null \
+        | { grep -vE 'command-center/heartbeat\.json|graphify-out/|\.xcodeproj/' || true; } \
+        | wc -l | tr -d ' ')
     if [[ "$REAL_EDITS" -eq 0 ]]; then
         # No real edits — remove any stale patch (issue was claimed, work
         # got committed since last tick, patch no longer reflects WIP)
