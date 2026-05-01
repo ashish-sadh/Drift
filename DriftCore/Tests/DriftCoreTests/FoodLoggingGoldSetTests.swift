@@ -412,6 +412,14 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             "what are the total macros for dal, rice, and roti",
             "calories remaining for today",
             "how much protein until my goal",
+            // supplement_insight queries must not be parsed as food log
+            "how's my vitamin D adherence",
+            "how consistent am I with creatine",
+            "did I miss any magnesium doses",
+            // food_timing_insight queries must not be parsed as food log
+            "when do I usually eat dinner",
+            "am I eating late at night",
+            "how consistent are my meal times",
         ]
         var falsePositives: [String] = []
         for q in queries {

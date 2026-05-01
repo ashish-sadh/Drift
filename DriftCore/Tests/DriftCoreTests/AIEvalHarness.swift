@@ -613,6 +613,48 @@ final class AIEvalHarness: XCTestCase {
         }
     }
 
+    // MARK: - ToolRanker: supplement_insight + food_timing_insight Routing
+
+    @MainActor
+    func testToolRanker_SupplementInsightRouting() {
+        let queries: [(String, AIScreen)] = [
+            ("how's my vitamin D adherence", .supplements),
+            ("how consistent am I with creatine", .supplements),
+            ("supplement adherence this month", .supplements),
+            ("did I miss any magnesium doses", .supplements),
+            ("vitamin streak this week", .supplements),
+            ("am I consistent with omega-3", .supplements),
+        ]
+        var correct = 0
+        for (query, screen) in queries {
+            let tools = ToolRanker.rank(query: query.lowercased(), screen: screen)
+            if tools.first?.name == "supplement_insight" { correct += 1 }
+            else { print("MISS (supplement_insight): '\(query)' → \(tools.first?.name ?? "nil")") }
+        }
+        print("📊 ToolRanker supplement_insight routing: \(correct)/\(queries.count)")
+        XCTAssertGreaterThanOrEqual(correct, queries.count - 1, "At most 1 supplement_insight routing miss")
+    }
+
+    @MainActor
+    func testToolRanker_FoodTimingInsightRouting() {
+        let queries: [(String, AIScreen)] = [
+            ("when do I usually eat dinner", .food),
+            ("am I eating late at night", .food),
+            ("what's my breakfast timing pattern", .food),
+            ("how consistent are my meal times", .food),
+            ("meal timing this week", .food),
+            ("eating schedule analysis", .food),
+        ]
+        var correct = 0
+        for (query, screen) in queries {
+            let tools = ToolRanker.rank(query: query.lowercased(), screen: screen)
+            if tools.first?.name == "food_timing_insight" { correct += 1 }
+            else { print("MISS (food_timing_insight): '\(query)' → \(tools.first?.name ?? "nil")") }
+        }
+        print("📊 ToolRanker food_timing_insight routing: \(correct)/\(queries.count)")
+        XCTAssertGreaterThanOrEqual(correct, queries.count - 1, "At most 1 food_timing_insight routing miss")
+    }
+
     // MARK: - ToolRanker.tryRulePick (High-Confidence Picks)
 
     @MainActor

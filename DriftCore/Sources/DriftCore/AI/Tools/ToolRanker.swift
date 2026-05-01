@@ -457,6 +457,26 @@ public enum ToolRanker {
             antiKeywords: ["how", "what", "trend", "show"]
         )
 
+        p["supplement_insight"] = ToolProfile(
+            triggers: [("adherence", 3.5), ("how consistent", 3), ("missed", 2.5),
+                       ("supplement streak", 4), ("vitamin streak", 3.5),
+                       ("how's my vitamin", 3), ("supplement insight", 4),
+                       ("am i consistent", 2.5), ("consistency", 2)],
+            logBoost: -1, queryBoost: 2,
+            screens: [.supplements: 0.5],
+            antiKeywords: ["add", "took", "take", "log"]
+        )
+
+        p["food_timing_insight"] = ToolProfile(
+            triggers: [("when do i eat", 4), ("meal timing", 3.5), ("late night eating", 4),
+                       ("breakfast timing", 3.5), ("eating pattern", 3), ("meal times", 3),
+                       ("eating schedule", 3), ("when do i usually", 3),
+                       ("consistent meal", 3), ("eating late", 3.5)],
+            logBoost: -1, queryBoost: 2,
+            screens: [.food: 0.3],
+            antiKeywords: ["log", "ate", "had"]
+        )
+
         return p
     }()
     // swiftlint:enable function_body_length
