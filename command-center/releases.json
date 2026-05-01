@@ -2064,5 +2064,17 @@
     "fixes": [
       "Food parsing: skip 'of' connector in attached-unit parsing (e.g. 'cup of rice' no longer misparses unit)"
     ]
+  },
+  {
+    "build": 198,
+    "date": "2026-05-01T00:00:00-07:00",
+    "description": "Watchdog fix + planning updates",
+    "features": [
+      "Planning: roadmap and personas updated for cycle 8581 review findings",
+      "Docs: product review cycle 8581 published"
+    ],
+    "fixes": [
+      "Watchdog: skip WIP snapshot for design/* in_progress tasks; fix grep-fail wrap"
+    ]
   }
 ]
