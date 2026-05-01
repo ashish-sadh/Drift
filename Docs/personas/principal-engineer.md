@@ -363,4 +363,9 @@
 - RemoteBackendError categorization (auth / rateLimited / quotaExceeded / transient / malformed) is the right abstraction. Callers decide auto-fallback (transient only) vs surface-to-user (auth/quota) without HTTP status code inspection. Apply this pattern to any future multi-provider service.
 - Unit conversion (#497) has WIP patch at ~/drift-state/wip/497.patch. `git apply` + finish is the right path — not restarting from scratch. The ServingUnit.toGrams() skeleton already exists; fill the gaps for oz/fl oz/cups/tbsp/tsp/pieces.
 - supplement_insight/food_timing_insight: crash root cause is documented in #493, WIP patches from 4 sessions exist. Reading the WIP diffs before writing a single line is mandatory — the stall points are known. Session budget of 10 tasks should be enough to ship both tools + eval cases + register in same PR.
+
+### What I Learned — Review Cycle 8581 (2026-05-01)
+- Partial ToolRanker registration creates worse UX than no registration: supplement_insight and food_timing_insight are registered (route correctly) but have no analytics engine — user's adherence query routes to a tool that returns nothing. Future rule: don't register a tool until engine + tests are in the same PR. Routing without engine = silent failure in production.
+- Two test failures found during review run: testPortionScaling_DecimalServings (4/6 pass, filed #568) and testRouterPrompt_TokenCeiling (6080 > 6000 chars, filed #569). Token ceiling failure is a correctness risk — SmolLM has 8K context; prompt at 6080 + user message + response leaves < 2K headroom. Prune router prompt before adding eval examples.
+- DriftCore test count 1,033 (up from 913 at cycle 8519). Keep the `swift test` loop under 10s warm — it's the only quality gate fast enough to run every session without friction.
 - State.md at build 174 is 18 builds stale (actual 192). Required fix each sprint as Step 0, not cleanup. Filed #553 this cycle.
