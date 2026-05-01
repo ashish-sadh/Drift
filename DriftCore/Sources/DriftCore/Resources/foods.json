@@ -48084,5 +48084,521 @@
       "mitsuba"
     ],
     "nova_group": 3
+  },
+  {
+    "name": "MuscleBlaze Raw Whey Protein (1 scoop)",
+    "category": "Indian Branded Protein",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 110,
+    "protein_g": 24.0,
+    "carbs_g": 1.8,
+    "fat_g": 1.5,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "whey protein concentrate",
+      "whey protein isolate"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "TrueBasics Whey Protein (1 scoop)",
+    "category": "Indian Branded Protein",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 115,
+    "protein_g": 24.0,
+    "carbs_g": 2.0,
+    "fat_g": 1.8,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "whey protein concentrate",
+      "whey protein isolate"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "HK Vitals Whey Protein (1 scoop)",
+    "category": "Indian Branded Protein",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 110,
+    "protein_g": 24.0,
+    "carbs_g": 1.5,
+    "fat_g": 1.5,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "whey protein concentrate",
+      "whey protein isolate"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "RiteBite Max Protein Bar",
+    "category": "Indian Branded Protein",
+    "serving_size": 75,
+    "serving_unit": "g",
+    "calories": 194,
+    "protein_g": 20.0,
+    "carbs_g": 23.0,
+    "fat_g": 4.0,
+    "fiber_g": 3.5,
+    "ingredients": [
+      "soy protein isolate",
+      "oats",
+      "dark chocolate coating",
+      "fructooligosaccharides"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Moringa Powder (1 tsp)",
+    "category": "Indian Supplements",
+    "serving_size": 5,
+    "serving_unit": "g",
+    "calories": 17,
+    "protein_g": 1.2,
+    "carbs_g": 2.5,
+    "fat_g": 0.3,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "moringa leaf powder"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Ashwagandha Latte",
+    "category": "Indian Supplements",
+    "serving_size": 240,
+    "serving_unit": "ml",
+    "calories": 130,
+    "protein_g": 5.0,
+    "carbs_g": 14.0,
+    "fat_g": 5.5,
+    "fiber_g": 0.2,
+    "ingredients": [
+      "milk",
+      "ashwagandha powder",
+      "honey",
+      "cardamom"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Chyawanprash (1 tbsp)",
+    "category": "Indian Supplements",
+    "serving_size": 10,
+    "serving_unit": "g",
+    "calories": 38,
+    "protein_g": 0.2,
+    "carbs_g": 8.0,
+    "fat_g": 0.5,
+    "fiber_g": 0.2,
+    "ingredients": [
+      "amla",
+      "ghee",
+      "honey",
+      "sesame oil",
+      "ayurvedic herbs"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Methi Seeds (1 tsp)",
+    "category": "Indian Spices",
+    "serving_size": 3,
+    "serving_unit": "g",
+    "calories": 12,
+    "protein_g": 0.9,
+    "carbs_g": 2.0,
+    "fat_g": 0.2,
+    "fiber_g": 0.9,
+    "ingredients": [
+      "fenugreek seeds"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Soya Keema",
+    "category": "Indian Protein",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 145,
+    "protein_g": 15.0,
+    "carbs_g": 7.0,
+    "fat_g": 7.0,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "soya chunks",
+      "onion",
+      "tomato",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Moth Beans Curry",
+    "category": "Indian Dal",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 266,
+    "protein_g": 18.0,
+    "carbs_g": 44.0,
+    "fat_g": 2.0,
+    "fiber_g": 9.0,
+    "ingredients": [
+      "moth beans",
+      "onion",
+      "tomato",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Horse Gram Soup (Kulthi Dal)",
+    "category": "Indian Dal",
+    "serving_size": 200,
+    "serving_unit": "ml",
+    "calories": 230,
+    "protein_g": 15.0,
+    "carbs_g": 38.0,
+    "fat_g": 1.5,
+    "fiber_g": 8.0,
+    "ingredients": [
+      "horse gram",
+      "garlic",
+      "cumin",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Spirulina Powder (1 tsp)",
+    "category": "Indian Supplements",
+    "serving_size": 5,
+    "serving_unit": "g",
+    "calories": 14,
+    "protein_g": 3.0,
+    "carbs_g": 1.0,
+    "fat_g": 0.4,
+    "fiber_g": 0.1,
+    "ingredients": [
+      "spirulina"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Pea Protein Powder (1 scoop)",
+    "category": "Indian Branded Protein",
+    "serving_size": 25,
+    "serving_unit": "g",
+    "calories": 100,
+    "protein_g": 20.0,
+    "carbs_g": 1.0,
+    "fat_g": 2.0,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "pea protein isolate"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Dry Roasted Peanuts",
+    "category": "Indian Snacks",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 173,
+    "protein_g": 7.6,
+    "carbs_g": 5.5,
+    "fat_g": 14.0,
+    "fiber_g": 2.3,
+    "ingredients": [
+      "peanuts",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Dry Roasted Black Chana",
+    "category": "Indian Snacks",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 108,
+    "protein_g": 7.0,
+    "carbs_g": 16.0,
+    "fat_g": 1.5,
+    "fiber_g": 4.5,
+    "ingredients": [
+      "black chickpeas",
+      "salt",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Sattu Ladoo",
+    "category": "Indian Sweets",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 128,
+    "protein_g": 5.0,
+    "carbs_g": 18.0,
+    "fat_g": 4.5,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "sattu",
+      "jaggery",
+      "ghee",
+      "cardamom"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Tofu Bhurji",
+    "category": "Indian Protein",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 115,
+    "protein_g": 9.0,
+    "carbs_g": 4.0,
+    "fat_g": 7.0,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "firm tofu",
+      "onion",
+      "tomato",
+      "turmeric",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Ragi Porridge (Nachni Kanji)",
+    "category": "Indian Breakfast",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 152,
+    "protein_g": 3.5,
+    "carbs_g": 33.0,
+    "fat_g": 1.0,
+    "fiber_g": 1.8,
+    "ingredients": [
+      "ragi flour",
+      "water",
+      "salt",
+      "jaggery"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Dalia (Broken Wheat Porridge)",
+    "category": "Indian Breakfast",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 198,
+    "protein_g": 6.5,
+    "carbs_g": 40.0,
+    "fat_g": 1.5,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "broken wheat",
+      "water",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Protein Ladoo (Homemade)",
+    "category": "Indian Sweets",
+    "serving_size": 35,
+    "serving_unit": "g",
+    "calories": 148,
+    "protein_g": 7.5,
+    "carbs_g": 15.0,
+    "fat_g": 6.5,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "whey protein",
+      "peanut butter",
+      "oats",
+      "honey",
+      "almonds"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Mixed Sprout Curry",
+    "category": "Indian Protein",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 72,
+    "protein_g": 5.0,
+    "carbs_g": 10.0,
+    "fat_g": 1.5,
+    "fiber_g": 3.5,
+    "ingredients": [
+      "moong sprouts",
+      "moth bean sprouts",
+      "matki sprouts",
+      "onion",
+      "tomato",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Mung Bean Sprouts (raw)",
+    "category": "Indian Protein",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 30,
+    "protein_g": 3.0,
+    "carbs_g": 5.9,
+    "fat_g": 0.2,
+    "fiber_g": 1.8,
+    "ingredients": [
+      "mung beans"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Chana Dal Cheela",
+    "category": "Indian Breakfast",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 135,
+    "protein_g": 7.5,
+    "carbs_g": 17.0,
+    "fat_g": 4.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "chana dal",
+      "onion",
+      "green chilli",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Soya Milk",
+    "category": "Indian Branded Protein",
+    "serving_size": 200,
+    "serving_unit": "ml",
+    "calories": 80,
+    "protein_g": 6.5,
+    "carbs_g": 5.0,
+    "fat_g": 3.0,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "soy protein",
+      "water",
+      "sugar"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Masoor Soup (Red Lentil Soup)",
+    "category": "Indian Dal",
+    "serving_size": 200,
+    "serving_unit": "ml",
+    "calories": 130,
+    "protein_g": 9.0,
+    "carbs_g": 20.0,
+    "fat_g": 1.0,
+    "fiber_g": 5.0,
+    "ingredients": [
+      "masoor dal",
+      "tomato",
+      "onion",
+      "cumin",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Khoya / Mawa",
+    "category": "Indian Dairy",
+    "serving_size": 50,
+    "serving_unit": "g",
+    "calories": 174,
+    "protein_g": 7.0,
+    "carbs_g": 15.0,
+    "fat_g": 9.5,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "whole milk"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Hung Curd (Chakka Dahi)",
+    "category": "Indian Dairy",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 98,
+    "protein_g": 8.0,
+    "carbs_g": 5.0,
+    "fat_g": 5.0,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "strained yogurt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Moong Dal Soup",
+    "category": "Indian Dal",
+    "serving_size": 200,
+    "serving_unit": "ml",
+    "calories": 120,
+    "protein_g": 8.5,
+    "carbs_g": 18.0,
+    "fat_g": 1.0,
+    "fiber_g": 4.5,
+    "ingredients": [
+      "moong dal",
+      "turmeric",
+      "cumin",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Roasted Rajgira (Amaranth)",
+    "category": "Indian Snacks",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 114,
+    "protein_g": 4.0,
+    "carbs_g": 19.0,
+    "fat_g": 2.5,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "amaranth"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Poha (Flattened Rice, cooked)",
+    "category": "Indian Breakfast",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 4.0,
+    "carbs_g": 46.0,
+    "fat_g": 2.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "flattened rice",
+      "onion",
+      "potato",
+      "oil",
+      "mustard seeds",
+      "curry leaves"
+    ],
+    "nova_group": 3
   }
 ]
