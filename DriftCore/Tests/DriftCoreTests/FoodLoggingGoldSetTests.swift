@@ -381,8 +381,8 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             ("had 2.5 scoops whey protein",      "whey",      2.5,   nil),
             ("ate half a roti",                  "roti",      0.5,   nil),
             ("log double the dal",               "dal",       2.0,   nil),
-            ("had 1.5 cups of rice",             "rice",      nil,  360.0),
-            ("log half a cup of oats",           "oat",       nil,  120.0),
+            ("had 1.5 cups of rice",             "rice",      nil,  277.5),  // 185g/cup (food-aware density, #552)
+            ("log half a cup of oats",           "oat",       nil,   40.0),  // 80g/cup dry oats (food-aware density, #552)
         ]
         var correct = 0
         for (query, keyword, expectedServings, expectedGrams) in cases {
