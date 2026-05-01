@@ -94,6 +94,12 @@ public enum FoodService {
         (try? AppDatabase.shared.fetchRecentFoods(limit: limit)) ?? []
     }
 
+    /// Fetch the most recently logged foods from actual food_entry records.
+    /// Returns distinct foods (same food logged multiple times appears once), ordered by most recent log date.
+    public static func recentFoods(limit: Int = 8) -> [Food] {
+        (try? AppDatabase.shared.fetchMostRecentlyLoggedFoods(limit: limit)) ?? []
+    }
+
     /// Fetch foods by category.
     public static func fetchFoodsByCategory(_ category: String) -> [Food] {
         (try? AppDatabase.shared.fetchFoodsByCategory(category)) ?? []
