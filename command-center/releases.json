@@ -2036,7 +2036,7 @@
     "date": "2026-04-30T10:00:00-07:00",
     "description": "South Indian food DB expansion + weight chart tap-to-callout",
     "features": [
-      "Food DB: 30 new South Indian foods — Ragi Idli, Poondu/Elumichai/Jeera Rasam, Kollu/Manathakkali Kuzhambu, Parangikai/Keerai Sambar, Tomato/Kathirikai Gothsu, Karasev, Nei Murukku, Kodubale, Idli Upma, Semiya/Aval Kesari, Paal Kozhukattai, Karuvepilai/Maanga Sadam, Vazhaithandu Kootu, Pori Urundai, Obbattu, Murungakkai Kootu, Paruppu Payasam, Beans/Kovakkai/Karunai Poriyal, Molakootal, Pineapple Rasam, Murungai Keerai Poriyal",
+      "Food DB: 30 new South Indian foods \u2014 Ragi Idli, Poondu/Elumichai/Jeera Rasam, Kollu/Manathakkali Kuzhambu, Parangikai/Keerai Sambar, Tomato/Kathirikai Gothsu, Karasev, Nei Murukku, Kodubale, Idli Upma, Semiya/Aval Kesari, Paal Kozhukattai, Karuvepilai/Maanga Sadam, Vazhaithandu Kootu, Pori Urundai, Obbattu, Murungakkai Kootu, Paruppu Payasam, Beans/Kovakkai/Karunai Poriyal, Molakootal, Pineapple Rasam, Murungai Keerai Poriyal",
       "Weight chart: tap-to-data-point shows callout with date and value",
       "AI: decimal Nx multiplier phrases ('double it', 'half serving', '1.5x') handled correctly in portion scaling"
     ],
@@ -2051,5 +2051,18 @@
       "Food: USDA API key injectable via Preferences, falls back to DEMO_KEY for open access"
     ],
     "fixes": []
+  },
+  {
+    "build": 197,
+    "date": "2026-05-01T00:00:00-07:00",
+    "description": "Japanese food DB + ToolRanker profiles + food parsing fix",
+    "features": [
+      "Food DB: 30 Japanese home cooking foods added",
+      "AI: ToolRanker profiles added for supplement_insight and food_timing_insight",
+      "AI: Eval cases added for supplement_insight and food_timing_insight routing"
+    ],
+    "fixes": [
+      "Food parsing: skip 'of' connector in attached-unit parsing (e.g. 'cup of rice' no longer misparses unit)"
+    ]
   }
 ]
