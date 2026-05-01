@@ -2,9 +2,9 @@ import XCTest
 @testable import DriftCore
 
 /// Tier-0 gold set for Stage 3 domain extraction — amounts, food names, weight values, exercise data.
-/// 50 typed queries covering: gram/volume units, fractions, multipliers, count units, word amounts,
+/// 56 typed queries covering: gram/volume units, fractions, multipliers, count units, word amounts,
 /// ranges, food intent parsing, weight intent parsing, workout exercise parsing, and known limits.
-/// All 45 non-limit cases are deterministic pure-function assertions. No LLM, no DB, no simulator.
+/// All 51 non-limit cases are deterministic pure-function assertions. No LLM, no DB, no simulator.
 /// Run: cd DriftCore && swift test --filter DomainExtractorTests
 final class DomainExtractorTests: XCTestCase {
 
@@ -64,6 +64,56 @@ final class DomainExtractorTests: XCTestCase {
         XCTAssertNil(s)
         XCTAssertEqual(food, "honey")
         XCTAssertEqual(g!, 340.0 / 48 * 2, accuracy: 0.5)
+    }
+
+    // MARK: - A2: unit conversion — "of" connector (invisible gram/oz/ml/cups/pieces handling)
+
+    func test_extract_gramsOf_oats() {
+        // "100g of oats" — attached unit followed by "of" connector
+        let (s, food, g) = AIActionExecutor.extractAmount(from: "100g of oats")
+        XCTAssertNil(s)
+        XCTAssertEqual(food, "oats")
+        XCTAssertEqual(g!, 100.0, accuracy: 0.01)
+    }
+
+    func test_extract_mlOf_milk() {
+        // "200ml of milk" — ml attached, "of" skipped
+        let (s, food, g) = AIActionExecutor.extractAmount(from: "200ml of milk")
+        XCTAssertNil(s)
+        XCTAssertEqual(food, "milk")
+        XCTAssertEqual(g!, 200.0, accuracy: 0.01)
+    }
+
+    func test_extract_ozOf_chicken() {
+        // "8oz of chicken" — imperial weight attached, "of" skipped
+        let (s, food, g) = AIActionExecutor.extractAmount(from: "8oz of chicken")
+        XCTAssertNil(s)
+        XCTAssertEqual(food, "chicken")
+        XCTAssertEqual(g!, 8 * 28.3495, accuracy: 0.01)
+    }
+
+    func test_extract_cup_oats_foodAware() {
+        // "1 cup oats" — food-aware: oats = 80g/cup
+        let (s, food, g) = AIActionExecutor.extractAmount(from: "1 cup oats")
+        XCTAssertNil(s)
+        XCTAssertEqual(food, "oats")
+        XCTAssertEqual(g!, 80.0, accuracy: 0.5)
+    }
+
+    func test_extract_tbsp_peanutButter() {
+        // "2 tbsp peanut butter" — no RawIngredient for peanut butter → flat 15g/tbsp
+        let (s, food, g) = AIActionExecutor.extractAmount(from: "2 tbsp peanut butter")
+        XCTAssertNil(s)
+        XCTAssertEqual(food, "peanut butter")
+        XCTAssertEqual(g!, 30.0, accuracy: 0.01)
+    }
+
+    func test_extract_pieces_egg_foodAware() {
+        // "2 pieces egg" — food-aware: egg = 50g/piece
+        let (s, food, g) = AIActionExecutor.extractAmount(from: "2 pieces egg")
+        XCTAssertNil(s)
+        XCTAssertEqual(food, "egg")
+        XCTAssertEqual(g!, 100.0, accuracy: 0.01)
     }
 
     // MARK: - B: extractAmount — fractions (5 cases)

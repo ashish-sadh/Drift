@@ -357,7 +357,9 @@ public enum AIActionExecutor {
             for unit in weightAndVolumeUnits {
                 if first.hasSuffix(unit), let num = Double(first.dropLast(unit.count)),
                    let grams = normalizeToGrams(num, unit: unit) {
-                    let food = leadingWords[1...].joined(separator: " ")
+                    var remaining = leadingWords[1...]
+                    if remaining.first?.lowercased() == "of" { remaining = remaining.dropFirst() }
+                    let food = remaining.joined(separator: " ")
                     return (nil, food.trimmingCharacters(in: .whitespaces), grams)
                 }
             }
