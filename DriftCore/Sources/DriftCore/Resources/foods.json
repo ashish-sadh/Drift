@@ -5103,7 +5103,7 @@
     "nova_group": 3
   },
   {
-    "name": "Açaí Bowl (medium)",
+    "name": "A\u00e7a\u00ed Bowl (medium)",
     "category": "US Staples",
     "serving_size": 300,
     "serving_unit": "g",
@@ -5113,7 +5113,7 @@
     "fat_g": 18,
     "fiber_g": 8,
     "ingredients": [
-      "Açaí Bowl (medium)"
+      "A\u00e7a\u00ed Bowl (medium)"
     ],
     "nova_group": 3
   },
@@ -9797,7 +9797,7 @@
     "nova_group": 3
   },
   {
-    "name": "Costco Açaí Bowl (food court)",
+    "name": "Costco A\u00e7a\u00ed Bowl (food court)",
     "category": "Costco",
     "serving_size": 355,
     "serving_unit": "g",
@@ -9807,7 +9807,7 @@
     "fat_g": 19,
     "fiber_g": 7,
     "ingredients": [
-      "Costco Açaí Bowl (food court)"
+      "Costco A\u00e7a\u00ed Bowl (food court)"
     ],
     "nova_group": 3
   },
@@ -10502,7 +10502,7 @@
     "nova_group": 4
   },
   {
-    "name": "Starbucks Caffè Latte (Grande, 2% milk)",
+    "name": "Starbucks Caff\u00e8 Latte (Grande, 2% milk)",
     "category": "Beverages",
     "serving_size": 473,
     "serving_unit": "ml",
@@ -10512,7 +10512,7 @@
     "fat_g": 7,
     "fiber_g": 0,
     "ingredients": [
-      "Starbucks Caffè Latte (Grande, 2% milk)"
+      "Starbucks Caff\u00e8 Latte (Grande, 2% milk)"
     ],
     "nova_group": 3
   },
@@ -25166,7 +25166,7 @@
     "ingredients": [
       "fries",
       "cheese sauce",
-      "jalapeños",
+      "jalape\u00f1os",
       "sour cream"
     ],
     "nova_group": 4
@@ -28737,7 +28737,7 @@
       "beef",
       "onion",
       "tomato",
-      "jalapeño",
+      "jalape\u00f1o",
       "rosemary",
       "Ethiopian spices",
       "butter"
@@ -39739,7 +39739,7 @@
     "ingredients": [
       "tortilla chips",
       "cheddar cheese sauce",
-      "jalapeño"
+      "jalape\u00f1o"
     ],
     "nova_group": 4
   },
@@ -39757,7 +39757,7 @@
       "tomato",
       "onion",
       "cilantro",
-      "jalapeño",
+      "jalape\u00f1o",
       "lime"
     ],
     "nova_group": 1
@@ -40942,7 +40942,7 @@
       "onions",
       "garlic",
       "rosemary",
-      "jalapeño"
+      "jalape\u00f1o"
     ],
     "nova_group": 1
   },
@@ -41233,7 +41233,7 @@
     "nova_group": 2
   },
   {
-    "name": "Smorrebrød",
+    "name": "Smorrebr\u00f8d",
     "category": "Scandinavian",
     "serving_size": 120,
     "serving_unit": "g",
@@ -45924,7 +45924,7 @@
     "source": "USDA"
   },
   {
-    "name": "Corn, Sweet, Yellow And White Kernels,  Fresh",
+    "name": "Corn, Sweet, Yellow And White Kernels, \u00a0Fresh",
     "category": "Vegetables",
     "serving_size": 100,
     "serving_unit": "g",
@@ -49149,6 +49149,624 @@
       "palm oil",
       "pepper",
       "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Dolmades (Stuffed Grape Leaves)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 180,
+    "protein_g": 3.5,
+    "carbs_g": 19.0,
+    "fat_g": 10.0,
+    "fiber_g": 2.0,
+    "piece_size_g": 25,
+    "ingredients": [
+      "grape leaves",
+      "rice",
+      "olive oil",
+      "onion",
+      "fresh herbs",
+      "lemon juice"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Skordalia (Greek Garlic Dip)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 3.0,
+    "carbs_g": 23.0,
+    "fat_g": 12.0,
+    "fiber_g": 1.5,
+    "tbsp_size_g": 20,
+    "ingredients": [
+      "potato",
+      "garlic",
+      "olive oil",
+      "lemon juice",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Revani (Greek Semolina Cake)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 5.5,
+    "carbs_g": 58.0,
+    "fat_g": 10.0,
+    "fiber_g": 0.5,
+    "piece_size_g": 80,
+    "ingredients": [
+      "semolina",
+      "sugar",
+      "eggs",
+      "butter",
+      "yogurt",
+      "lemon zest",
+      "syrup"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Galaktoboureko (Greek Custard Pastry)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 6.0,
+    "carbs_g": 38.0,
+    "fat_g": 12.0,
+    "fiber_g": 0.5,
+    "piece_size_g": 120,
+    "ingredients": [
+      "phyllo pastry",
+      "semolina custard",
+      "milk",
+      "eggs",
+      "sugar",
+      "butter",
+      "syrup"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Kalamata Olives",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 115,
+    "protein_g": 0.8,
+    "carbs_g": 6.0,
+    "fat_g": 10.5,
+    "fiber_g": 3.2,
+    "tbsp_size_g": 15,
+    "ingredients": [
+      "kalamata olives",
+      "olive oil",
+      "red wine vinegar"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Taramosalata (Greek Fish Roe Dip)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 298,
+    "protein_g": 3.5,
+    "carbs_g": 16.0,
+    "fat_g": 25.0,
+    "fiber_g": 0.5,
+    "tbsp_size_g": 15,
+    "ingredients": [
+      "fish roe (tarama)",
+      "bread",
+      "olive oil",
+      "lemon juice",
+      "onion"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Melitzanosalata (Greek Eggplant Dip)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 95,
+    "protein_g": 1.5,
+    "carbs_g": 8.0,
+    "fat_g": 6.5,
+    "fiber_g": 2.5,
+    "tbsp_size_g": 15,
+    "ingredients": [
+      "eggplant",
+      "garlic",
+      "olive oil",
+      "lemon juice",
+      "fresh parsley"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Spanakorizo (Greek Spinach Rice)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 120,
+    "protein_g": 3.0,
+    "carbs_g": 18.0,
+    "fat_g": 4.5,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "spinach",
+      "rice",
+      "onion",
+      "olive oil",
+      "dill",
+      "lemon juice"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Gigantes Plaki (Greek Baked Beans)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 140,
+    "protein_g": 7.5,
+    "carbs_g": 19.0,
+    "fat_g": 4.0,
+    "fiber_g": 6.0,
+    "ingredients": [
+      "giant white beans",
+      "tomato",
+      "olive oil",
+      "onion",
+      "carrot",
+      "celery",
+      "parsley"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Avgolemono Soup",
+    "category": "Greek",
+    "serving_size": 250,
+    "serving_unit": "ml",
+    "calories": 88,
+    "protein_g": 5.5,
+    "carbs_g": 9.0,
+    "fat_g": 3.0,
+    "fiber_g": 0.3,
+    "ingredients": [
+      "chicken broth",
+      "rice",
+      "eggs",
+      "lemon juice",
+      "chicken"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Keftedes (Greek Meatballs)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 225,
+    "protein_g": 16.0,
+    "carbs_g": 8.0,
+    "fat_g": 14.5,
+    "fiber_g": 0.5,
+    "piece_size_g": 30,
+    "ingredients": [
+      "ground beef",
+      "ground pork",
+      "onion",
+      "breadcrumbs",
+      "egg",
+      "fresh mint",
+      "oregano",
+      "olive oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Stifado (Greek Beef Stew)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 155,
+    "protein_g": 14.0,
+    "carbs_g": 8.0,
+    "fat_g": 7.5,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "beef",
+      "pearl onions",
+      "tomato",
+      "red wine",
+      "olive oil",
+      "cinnamon",
+      "allspice",
+      "bay leaves"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Briam (Greek Roasted Vegetables)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 90,
+    "protein_g": 2.0,
+    "carbs_g": 10.0,
+    "fat_g": 5.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "zucchini",
+      "potato",
+      "eggplant",
+      "tomato",
+      "onion",
+      "olive oil",
+      "fresh herbs"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kolokithokeftedes (Zucchini Fritters)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 185,
+    "protein_g": 7.5,
+    "carbs_g": 18.0,
+    "fat_g": 10.0,
+    "fiber_g": 1.5,
+    "piece_size_g": 40,
+    "ingredients": [
+      "zucchini",
+      "feta cheese",
+      "egg",
+      "flour",
+      "fresh mint",
+      "dill",
+      "olive oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Tirokafteri (Spicy Feta Dip)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 270,
+    "protein_g": 12.0,
+    "carbs_g": 5.0,
+    "fat_g": 22.0,
+    "fiber_g": 0.5,
+    "tbsp_size_g": 15,
+    "ingredients": [
+      "feta cheese",
+      "roasted red pepper",
+      "olive oil",
+      "chili flakes",
+      "garlic",
+      "lemon juice"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Pasteli (Greek Sesame Bar)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 485,
+    "protein_g": 10.0,
+    "carbs_g": 60.0,
+    "fat_g": 24.0,
+    "fiber_g": 3.0,
+    "piece_size_g": 25,
+    "ingredients": [
+      "sesame seeds",
+      "honey"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Dakos (Cretan Rusk Salad)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 175,
+    "protein_g": 6.0,
+    "carbs_g": 24.0,
+    "fat_g": 6.5,
+    "fiber_g": 3.0,
+    "piece_size_g": 120,
+    "ingredients": [
+      "barley rusk",
+      "tomato",
+      "feta cheese",
+      "olive oil",
+      "oregano",
+      "capers"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Phyllo Pastry (baked sheets)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 335,
+    "protein_g": 8.0,
+    "carbs_g": 60.0,
+    "fat_g": 6.5,
+    "fiber_g": 2.0,
+    "piece_size_g": 14,
+    "ingredients": [
+      "flour",
+      "water",
+      "olive oil",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Serbian Burek (Meat)",
+    "category": "Balkan",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 12.0,
+    "carbs_g": 22.0,
+    "fat_g": 16.0,
+    "fiber_g": 0.8,
+    "piece_size_g": 200,
+    "ingredients": [
+      "phyllo dough",
+      "ground beef",
+      "onion",
+      "egg",
+      "oil",
+      "salt",
+      "pepper"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Cevapi (Balkan Grilled Sausages)",
+    "category": "Balkan",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 255,
+    "protein_g": 20.0,
+    "carbs_g": 3.0,
+    "fat_g": 18.0,
+    "fiber_g": 0.0,
+    "piece_size_g": 25,
+    "ingredients": [
+      "ground beef",
+      "ground lamb",
+      "garlic",
+      "onion",
+      "salt",
+      "pepper",
+      "baking soda"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Pljeskavica (Balkan Burger)",
+    "category": "Balkan",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 265,
+    "protein_g": 19.0,
+    "carbs_g": 4.0,
+    "fat_g": 19.0,
+    "fiber_g": 0.5,
+    "piece_size_g": 150,
+    "ingredients": [
+      "ground beef",
+      "ground pork",
+      "onion",
+      "garlic",
+      "paprika",
+      "salt",
+      "pepper"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Ajvar (Roasted Red Pepper Relish)",
+    "category": "Balkan",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 68,
+    "protein_g": 1.0,
+    "carbs_g": 7.5,
+    "fat_g": 3.5,
+    "fiber_g": 2.5,
+    "tbsp_size_g": 15,
+    "ingredients": [
+      "red bell pepper",
+      "eggplant",
+      "garlic",
+      "sunflower oil",
+      "vinegar",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Shopska Salad",
+    "category": "Balkan",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 72,
+    "protein_g": 3.5,
+    "carbs_g": 6.0,
+    "fat_g": 4.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "tomato",
+      "cucumber",
+      "bell pepper",
+      "onion",
+      "sirene cheese",
+      "olive oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Sarma (Stuffed Cabbage Rolls)",
+    "category": "Balkan",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 135,
+    "protein_g": 8.0,
+    "carbs_g": 10.5,
+    "fat_g": 6.5,
+    "fiber_g": 1.5,
+    "piece_size_g": 100,
+    "ingredients": [
+      "fermented cabbage leaves",
+      "ground pork",
+      "rice",
+      "onion",
+      "paprika",
+      "smoked meat"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Gibanica (Serbian Cheese Pastry)",
+    "category": "Balkan",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 295,
+    "protein_g": 11.0,
+    "carbs_g": 24.0,
+    "fat_g": 17.5,
+    "fiber_g": 0.8,
+    "piece_size_g": 120,
+    "ingredients": [
+      "phyllo dough",
+      "white cheese",
+      "eggs",
+      "sour cream",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Punjene Paprike (Serbian Stuffed Peppers)",
+    "category": "Balkan",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 130,
+    "protein_g": 9.0,
+    "carbs_g": 11.0,
+    "fat_g": 5.5,
+    "fiber_g": 2.0,
+    "piece_size_g": 200,
+    "ingredients": [
+      "bell pepper",
+      "ground pork",
+      "rice",
+      "onion",
+      "tomato sauce",
+      "paprika"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Pasulj (Serbian Bean Stew)",
+    "category": "Balkan",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 110,
+    "protein_g": 7.0,
+    "carbs_g": 15.0,
+    "fat_g": 2.5,
+    "fiber_g": 5.5,
+    "ingredients": [
+      "white beans",
+      "smoked ribs",
+      "onion",
+      "carrot",
+      "paprika",
+      "bay leaf"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Raznjici (Balkan Pork Skewers)",
+    "category": "Balkan",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 185,
+    "protein_g": 20.0,
+    "carbs_g": 1.0,
+    "fat_g": 11.0,
+    "fiber_g": 0.0,
+    "piece_size_g": 90,
+    "ingredients": [
+      "pork neck",
+      "onion",
+      "oil",
+      "salt",
+      "pepper",
+      "paprika"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Kaymak (Balkan Clotted Cream)",
+    "category": "Balkan",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 4.0,
+    "carbs_g": 3.0,
+    "fat_g": 40.0,
+    "fiber_g": 0.0,
+    "tbsp_size_g": 15,
+    "ingredients": [
+      "whole milk",
+      "cream",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Tarator (Cold Yogurt Cucumber Soup)",
+    "category": "Balkan",
+    "serving_size": 250,
+    "serving_unit": "ml",
+    "calories": 55,
+    "protein_g": 3.0,
+    "carbs_g": 5.0,
+    "fat_g": 2.5,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "yogurt",
+      "cucumber",
+      "garlic",
+      "dill",
+      "walnuts",
+      "olive oil",
+      "water"
     ],
     "nova_group": 1
   }
