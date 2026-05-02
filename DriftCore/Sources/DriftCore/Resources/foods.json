@@ -52249,5 +52249,613 @@
       "nori"
     ],
     "nova_group": 3
+  },
+  {
+    "name": "Tarama (Greek Fish Roe Dip)",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 270,
+    "protein_g": 7,
+    "carbs_g": 28,
+    "fat_g": 15,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "fish roe",
+      "bread",
+      "olive oil",
+      "lemon juice",
+      "onion"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Grilled Octopus",
+    "category": "Greek",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 164,
+    "protein_g": 30,
+    "carbs_g": 4,
+    "fat_g": 2,
+    "fiber_g": 0,
+    "ingredients": [
+      "octopus",
+      "olive oil",
+      "lemon",
+      "garlic",
+      "oregano"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Revithada (Greek Chickpea Stew)",
+    "category": "Greek",
+    "serving_size": 300,
+    "serving_unit": "ml",
+    "calories": 250,
+    "protein_g": 12,
+    "carbs_g": 35,
+    "fat_g": 8,
+    "fiber_g": 8,
+    "ingredients": [
+      "chickpeas",
+      "onion",
+      "olive oil",
+      "rosemary",
+      "lemon",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Mahalabiya (Middle Eastern Milk Pudding)",
+    "category": "Levantine",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 195,
+    "protein_g": 5,
+    "carbs_g": 35,
+    "fat_g": 5,
+    "fiber_g": 0,
+    "ingredients": [
+      "milk",
+      "corn starch",
+      "sugar",
+      "rose water",
+      "pistachios"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Aish el Saraya (Lebanese Bread Pudding)",
+    "category": "Levantine",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 5,
+    "carbs_g": 50,
+    "fat_g": 8,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "bread",
+      "sugar syrup",
+      "heavy cream",
+      "rose water",
+      "nuts"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Sigara Boregi (Fried Cheese Rolls)",
+    "category": "Turkish",
+    "serving_size": 90,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 9,
+    "carbs_g": 24,
+    "fat_g": 15,
+    "fiber_g": 1,
+    "ingredients": [
+      "phyllo dough",
+      "white cheese",
+      "parsley",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Sutlac (Turkish Baked Rice Pudding)",
+    "category": "Turkish",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 225,
+    "protein_g": 6,
+    "carbs_g": 40,
+    "fat_g": 5,
+    "fiber_g": 0,
+    "ingredients": [
+      "rice",
+      "milk",
+      "sugar",
+      "vanilla"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Kazandibi (Caramelized Turkish Milk Pudding)",
+    "category": "Turkish",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 6,
+    "carbs_g": 38,
+    "fat_g": 5,
+    "fiber_g": 0,
+    "ingredients": [
+      "milk",
+      "chicken breast",
+      "rice flour",
+      "sugar",
+      "butter"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Basbousa (Semolina Cake)",
+    "category": "Levantine",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 4,
+    "carbs_g": 40,
+    "fat_g": 10,
+    "fiber_g": 1,
+    "ingredients": [
+      "semolina",
+      "sugar",
+      "yogurt",
+      "butter",
+      "coconut",
+      "sugar syrup"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Ashure (Turkish Wheat Pudding)",
+    "category": "Turkish",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 6,
+    "carbs_g": 58,
+    "fat_g": 3,
+    "fiber_g": 4,
+    "ingredients": [
+      "wheat berries",
+      "dried apricots",
+      "raisins",
+      "almonds",
+      "walnuts",
+      "chickpeas",
+      "white beans",
+      "sugar",
+      "cinnamon"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Arayes (Minced Meat Stuffed Flatbread)",
+    "category": "Levantine",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 350,
+    "protein_g": 18,
+    "carbs_g": 38,
+    "fat_g": 14,
+    "fiber_g": 2,
+    "ingredients": [
+      "pita bread",
+      "minced lamb",
+      "onion",
+      "parsley",
+      "cumin",
+      "allspice"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Sfeeha (Lebanese Meat Flatbread)",
+    "category": "Levantine",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 195,
+    "protein_g": 10,
+    "carbs_g": 22,
+    "fat_g": 8,
+    "fiber_g": 1,
+    "ingredients": [
+      "dough",
+      "ground lamb",
+      "tomato",
+      "onion",
+      "pine nuts",
+      "seven spice"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Shanklish (Syrian Fermented Cheese)",
+    "category": "Levantine",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 80,
+    "protein_g": 5,
+    "carbs_g": 1,
+    "fat_g": 6,
+    "fiber_g": 0,
+    "ingredients": [
+      "strained yogurt cheese",
+      "thyme",
+      "red pepper flakes",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Maamoul (Date-Filled Cookie)",
+    "category": "Levantine",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 130,
+    "protein_g": 2,
+    "carbs_g": 20,
+    "fat_g": 5,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "flour",
+      "butter",
+      "semolina",
+      "dates",
+      "rose water",
+      "orange blossom water"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Qatayef (Arabic Stuffed Pancakes)",
+    "category": "Levantine",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 285,
+    "protein_g": 7,
+    "carbs_g": 45,
+    "fat_g": 9,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "flour",
+      "yeast",
+      "water",
+      "akkawi cheese",
+      "sugar syrup",
+      "rose water"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Mulukhiyah (Jute Leaf Stew)",
+    "category": "Levantine",
+    "serving_size": 300,
+    "serving_unit": "ml",
+    "calories": 120,
+    "protein_g": 8,
+    "carbs_g": 10,
+    "fat_g": 5,
+    "fiber_g": 3,
+    "ingredients": [
+      "mulukhiyah leaves",
+      "chicken broth",
+      "garlic",
+      "coriander",
+      "lemon"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Bamia (Okra Stew with Lamb)",
+    "category": "Levantine",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 18,
+    "carbs_g": 20,
+    "fat_g": 12,
+    "fiber_g": 4,
+    "ingredients": [
+      "okra",
+      "lamb",
+      "tomatoes",
+      "garlic",
+      "coriander",
+      "olive oil",
+      "lemon"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Warak Dawali (Vegetarian Stuffed Grape Leaves)",
+    "category": "Levantine",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 145,
+    "protein_g": 3,
+    "carbs_g": 25,
+    "fat_g": 5,
+    "fiber_g": 2,
+    "ingredients": [
+      "grape leaves",
+      "rice",
+      "parsley",
+      "tomato",
+      "olive oil",
+      "lemon juice",
+      "mint"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Ouzi (Levantine Lamb and Rice)",
+    "category": "Levantine",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 560,
+    "protein_g": 28,
+    "carbs_g": 70,
+    "fat_g": 18,
+    "fiber_g": 3,
+    "ingredients": [
+      "lamb",
+      "basmati rice",
+      "almonds",
+      "pine nuts",
+      "onion",
+      "cinnamon",
+      "turmeric",
+      "allspice"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kabsa (Saudi Spiced Rice with Chicken)",
+    "category": "Levantine",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 545,
+    "protein_g": 30,
+    "carbs_g": 70,
+    "fat_g": 14,
+    "fiber_g": 3,
+    "ingredients": [
+      "basmati rice",
+      "chicken",
+      "tomatoes",
+      "onion",
+      "garlic",
+      "dried lime",
+      "cinnamon",
+      "cardamom",
+      "cloves",
+      "almonds",
+      "raisins"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kushari (Egyptian Mixed Rice Dish)",
+    "category": "Egyptian",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 480,
+    "protein_g": 14,
+    "carbs_g": 90,
+    "fat_g": 8,
+    "fiber_g": 8,
+    "ingredients": [
+      "rice",
+      "lentils",
+      "macaroni",
+      "crispy fried onions",
+      "tomato sauce",
+      "vinegar",
+      "cumin",
+      "garlic"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Molokheya (Egyptian Greens Stew)",
+    "category": "Egyptian",
+    "serving_size": 300,
+    "serving_unit": "ml",
+    "calories": 130,
+    "protein_g": 9,
+    "carbs_g": 10,
+    "fat_g": 6,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "molokheya leaves",
+      "chicken broth",
+      "garlic",
+      "coriander",
+      "butter"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Feteer Meshaltet (Egyptian Layered Pastry)",
+    "category": "Egyptian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 310,
+    "protein_g": 5,
+    "carbs_g": 42,
+    "fat_g": 14,
+    "fiber_g": 1,
+    "ingredients": [
+      "flour",
+      "butter",
+      "water",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Aish Baladi (Egyptian Flatbread)",
+    "category": "Egyptian",
+    "serving_size": 70,
+    "serving_unit": "g",
+    "calories": 170,
+    "protein_g": 7,
+    "carbs_g": 36,
+    "fat_g": 1,
+    "fiber_g": 5,
+    "ingredients": [
+      "whole wheat flour",
+      "water",
+      "yeast",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Bissara (Egyptian Fava Bean Dip)",
+    "category": "Egyptian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 155,
+    "protein_g": 9,
+    "carbs_g": 22,
+    "fat_g": 5,
+    "fiber_g": 5,
+    "ingredients": [
+      "dried fava beans",
+      "garlic",
+      "olive oil",
+      "cumin",
+      "paprika",
+      "parsley"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Harira (Moroccan Lentil Soup)",
+    "category": "North African",
+    "serving_size": 300,
+    "serving_unit": "ml",
+    "calories": 165,
+    "protein_g": 8,
+    "carbs_g": 25,
+    "fat_g": 4,
+    "fiber_g": 5,
+    "ingredients": [
+      "lamb",
+      "chickpeas",
+      "lentils",
+      "tomatoes",
+      "onion",
+      "celery",
+      "coriander",
+      "parsley",
+      "ginger",
+      "lemon"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Zaalouk (Moroccan Eggplant Salad)",
+    "category": "North African",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 70,
+    "protein_g": 1.5,
+    "carbs_g": 8,
+    "fat_g": 4,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "eggplant",
+      "tomatoes",
+      "garlic",
+      "cumin",
+      "paprika",
+      "olive oil",
+      "lemon",
+      "cilantro"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Bastilla (Moroccan Chicken Pie)",
+    "category": "North African",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 420,
+    "protein_g": 20,
+    "carbs_g": 40,
+    "fat_g": 20,
+    "fiber_g": 2,
+    "ingredients": [
+      "phyllo dough",
+      "chicken",
+      "almonds",
+      "eggs",
+      "onion",
+      "cinnamon",
+      "sugar",
+      "parsley",
+      "saffron",
+      "ginger"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Makouda (Moroccan Potato Fritters)",
+    "category": "North African",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 195,
+    "protein_g": 4,
+    "carbs_g": 28,
+    "fat_g": 8,
+    "fiber_g": 2,
+    "ingredients": [
+      "potatoes",
+      "egg",
+      "flour",
+      "parsley",
+      "cumin",
+      "salt",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Seffa (Moroccan Sweet Couscous)",
+    "category": "North African",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 9,
+    "carbs_g": 72,
+    "fat_g": 8,
+    "fiber_g": 4,
+    "ingredients": [
+      "couscous",
+      "butter",
+      "almonds",
+      "raisins",
+      "cinnamon",
+      "powdered sugar"
+    ],
+    "nova_group": 2
   }
 ]
