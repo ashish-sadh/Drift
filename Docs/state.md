@@ -4,14 +4,14 @@
 AI-first local health tracker. AI chat is the primary interface — every data entry doable through conversation. Traditional UI for visual analytics and fallback. No cloud, no accounts. Published on TestFlight as "Drift Fitness" (bundle: com.drift.health).
 
 ## Numbers
-- **Version:** 0.1.0, Build 197
-- **Tests:** ~1219 iOS DriftTests + 1033 macOS DriftCoreTests (cross-platform pure-logic suite, ~4.3s); LLM eval ~160+ cases in DriftLLMEvalMacOS
+- **Version:** 0.1.0, Build 201
+- **Tests:** ~1219 iOS DriftTests + 1039 macOS DriftCoreTests (cross-platform pure-logic suite, ~5s); LLM eval ~160+ cases in DriftLLMEvalMacOS
 - **AI Eval:** 400+ scenarios in eval harness + LLM eval (~130-case gold set in IntentRoutingEval)
 - **Per-tool Reliability (Gemma 4, 50-query gold set):** log_food 10/10 (100%), edit_meal 9/10 (90%, tuned +10% from 80%), log_weight 10/10 (100%), mark_supplement 10/10 (100%), food_info 9/10 (90%) — overall 48/50 (96%)
-- **Foods:** 2,940 (Indian, Mexican, Asian, Thai, Japanese, Korean, Mediterranean, Chinese, Middle Eastern, American classics, fitness staples, coffee drinks, seeds, Indo-Chinese, sushi rolls, meal prep bowls, South Indian, Indian street food, bowls, Kerala dishes, fast food India, Indian fruits, Indian regional, Maharashtrian, Odia, Assamese, Bihari, Rajasthani, Andhra, Karnataka, Goan, Himachal Pradesh, Northeast India, Sindhi, Madhya Pradesh, Coorg, Vietnamese, Latin American, African, Italian expanded, branded protein bars/shakes, bakery, soups, seafood, Bengali fish, Indian snacks, Indian drinks, Filipino, Turkish, Ethiopian, fast food US, supplements, South Indian breakfasts, Karnataka snacks, regional protein shakes, bubble tea/boba, poke bowls, acai bowls, specialty coffee, sports nutrition, Indian branded protein/whey, ayurvedic supplements, Japanese home cooking)
+- **Foods:** 3,150 (Indian, Mexican, Asian, Thai, Japanese, Korean, Mediterranean, Chinese, Middle Eastern, American classics, fitness staples, coffee drinks, seeds, Indo-Chinese, sushi rolls, meal prep bowls, South Indian, Indian street food, bowls, Kerala dishes, fast food India, Indian fruits, Indian regional, Maharashtrian, Odia, Assamese, Bihari, Rajasthani, Andhra, Karnataka, Goan, Himachal Pradesh, Northeast India, Sindhi, Madhya Pradesh, Coorg, Vietnamese, Latin American, African, Italian expanded, branded protein bars/shakes, bakery, soups, seafood, Bengali fish, Indian snacks, Indian drinks, Filipino, Turkish, Ethiopian, fast food US, supplements, South Indian breakfasts, Karnataka snacks, regional protein shakes, bubble tea/boba, poke bowls, acai bowls, specialty coffee, sports nutrition, Indian branded protein/whey, ayurvedic supplements, Japanese home cooking, East Asian home cooking, Mediterranean & Levantine staples, West African cuisine)
 - **Exercises:** 960 (free-exercise-db)
 - **Biomarkers:** 71 across 9 categories
-- **AI Tools:** 20 registered tools
+- **AI Tools:** 23 registered tools; 5 analytical insight engines active (cross_domain_insight, weight_trend_prediction, supplement_insight, food_timing_insight, sleep_food_correlation)
 - **TTFT Benchmark:** ChatLatencyBenchmark (20 queries × 3 runs, 1.3× regression threshold, opt-in via DRIFT_LATENCY_BENCH=1) — 4 scenarios: single-item, multi-item (gates TTFT), confirmation-card (gates completion_ms), clarify-round-trip (gates turn1+turn2 total)
 - **AI Chat Features:** 25+ (see `Docs/ai-parity.md`)
 - **Confirmation Cards:** 8 types (food, weight, workout, navigation, supplement, sleep, glucose, biomarker)
@@ -24,7 +24,7 @@ AI-first local health tracker. AI chat is the primary interface — every data e
 
 ## Module Layout
 
-Post-DriftCore extraction (Apr 25, 2026, build 174; updated build 197):
+Post-DriftCore extraction (Apr 25, 2026, build 174; updated build 201):
 
 - **`DriftCore/`** — Swift package, ~104 files, builds on iOS 17+ and macOS 14+. No `import UIKit/SwiftUI/HealthKit/WidgetKit/AVFoundation/Speech/Photos/AppIntents`.
   - `Models/` (28), `Persistence/` (5), `Adapters/` (4), `Utilities/` (5)
@@ -53,7 +53,7 @@ Stage 5: LLM fallback with context (~10-20s)                  → conversation
 
 ### Key Components
 - **IntentClassifier** — LLM-based intent detection with structured JSON output
-- **AIToolAgent** — 6-stage orchestrator with 20s timeout on all LLM calls
+- **AIToolAgent** — 6-stage orchestrator with 20s timeout on all LLM calls; 23 registered tools + 5 analytical engines
 - **StaticOverrides** — Universal deterministic handlers (no model gate)
 - **ConversationState** — State machine (idle/awaitingMealItems/awaitingExercises/planningMeals)
 - **Early JSON termination** — Bracket counting stops generation when JSON complete
@@ -69,7 +69,7 @@ Stage 5: LLM fallback with context (~10-20s)                  → conversation
 - Food: log single/multi/meal/gram, nutrition lookup, calorie estimation, macro-specific, delete/undo, suggestions, copy to today, meal planning dialogue
 - Weight: log, trend, goal progress, set goal (word numbers), cross-domain analysis
 - Exercise: start template, smart workout, log exercises, log activity, suggestion, workout history
-- Health: sleep/recovery (weekly), supplements (status/mark/add), glucose, biomarkers, body comp
+- Health: sleep/recovery (weekly), supplements (status/mark/add), glucose, biomarkers, body comp, GLP-1 medication tracking (log_medication)
 - Meta: TDEE/BMR, daily/weekly/yesterday summary, calories left, copy yesterday, topic continuation
 - Multi-turn: meal continuation ("also add X"), meal planning iteration, history-based context, pronoun resolution
 - Input: voice (on-device SpeechRecognizer), text, smart suggestion pills
