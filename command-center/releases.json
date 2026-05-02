@@ -2090,5 +2090,14 @@
         "fixes": [
             "Tests: updated gold set cup-to-gram expectations for food-aware densities"
         ]
+    },
+    {
+        "build": 200,
+        "date": "2026-05-02T00:00:00-07:00",
+        "description": "Food DB East Asian home cooking staples",
+        "features": [
+            "Food DB: 30 East Asian home cooking foods added (Japanese, Korean, Chinese)"
+        ],
+        "fixes": []
     }
 ]
