@@ -51669,5 +51669,585 @@
       "achiote"
     ],
     "nova_group": 1
+  },
+  {
+    "name": "Onigiri (Plain)",
+    "category": "Japanese",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 180,
+    "protein_g": 3.5,
+    "carbs_g": 40,
+    "fat_g": 0.4,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "white rice",
+      "nori",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Tamago Gohan (TKG)",
+    "category": "Japanese",
+    "serving_size": 220,
+    "serving_unit": "g",
+    "calories": 375,
+    "protein_g": 13,
+    "carbs_g": 64,
+    "fat_g": 8,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "white rice",
+      "egg",
+      "soy sauce"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kabocha no Nimono (Japanese Simmered Pumpkin)",
+    "category": "Japanese",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 95,
+    "protein_g": 2,
+    "carbs_g": 22,
+    "fat_g": 0.5,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "kabocha squash",
+      "dashi",
+      "soy sauce",
+      "mirin",
+      "sugar"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Tsukemen (Dipping Ramen)",
+    "category": "Japanese",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 490,
+    "protein_g": 22,
+    "carbs_g": 75,
+    "fat_g": 11,
+    "fiber_g": 3,
+    "ingredients": [
+      "ramen noodles",
+      "pork broth",
+      "chashu pork",
+      "menma",
+      "nori",
+      "egg",
+      "scallions"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Tendon (Tempura Rice Bowl)",
+    "category": "Japanese",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 580,
+    "protein_g": 16,
+    "carbs_g": 85,
+    "fat_g": 18,
+    "fiber_g": 2,
+    "ingredients": [
+      "white rice",
+      "shrimp tempura",
+      "vegetable tempura",
+      "tentsuyu sauce",
+      "nori"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Kare Raisu (Japanese Curry Rice)",
+    "category": "Japanese",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 580,
+    "protein_g": 18,
+    "carbs_g": 90,
+    "fat_g": 16,
+    "fiber_g": 4,
+    "ingredients": [
+      "white rice",
+      "curry roux",
+      "chicken",
+      "potato",
+      "carrot",
+      "onion"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Onigirazu (Japanese Rice Sandwich)",
+    "category": "Japanese",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 10,
+    "carbs_g": 58,
+    "fat_g": 8,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "white rice",
+      "nori",
+      "tuna",
+      "mayonnaise",
+      "cucumber"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Pajeon (Scallion Pancake)",
+    "category": "Korean",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 250,
+    "protein_g": 6,
+    "carbs_g": 36,
+    "fat_g": 9,
+    "fiber_g": 2,
+    "ingredients": [
+      "scallions",
+      "flour",
+      "egg",
+      "sesame oil",
+      "soy sauce"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Galbi Tang (Korean Short Rib Soup)",
+    "category": "Korean",
+    "serving_size": 500,
+    "serving_unit": "ml",
+    "calories": 360,
+    "protein_g": 26,
+    "carbs_g": 14,
+    "fat_g": 21,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "beef short ribs",
+      "daikon radish",
+      "glass noodles",
+      "scallions",
+      "garlic",
+      "egg",
+      "soy sauce"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Samgyeopsal Gui (Grilled Pork Belly)",
+    "category": "Korean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 330,
+    "protein_g": 17,
+    "carbs_g": 0,
+    "fat_g": 29,
+    "fiber_g": 0,
+    "ingredients": [
+      "pork belly"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Gyeran Jjim (Korean Steamed Eggs)",
+    "category": "Korean",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 115,
+    "protein_g": 10,
+    "carbs_g": 2,
+    "fat_g": 7,
+    "fiber_g": 0,
+    "ingredients": [
+      "eggs",
+      "water",
+      "scallions",
+      "sesame oil",
+      "soy sauce"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Miyeok Guk (Korean Seaweed Soup)",
+    "category": "Korean",
+    "serving_size": 300,
+    "serving_unit": "ml",
+    "calories": 65,
+    "protein_g": 5,
+    "carbs_g": 5,
+    "fat_g": 2,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "dried wakame seaweed",
+      "beef",
+      "garlic",
+      "sesame oil",
+      "soy sauce"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Tteokguk (Korean Rice Cake Soup)",
+    "category": "Korean",
+    "serving_size": 450,
+    "serving_unit": "g",
+    "calories": 430,
+    "protein_g": 15,
+    "carbs_g": 70,
+    "fat_g": 8,
+    "fiber_g": 1,
+    "ingredients": [
+      "sliced rice cakes",
+      "beef broth",
+      "beef",
+      "egg",
+      "scallions",
+      "nori",
+      "sesame oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Kongnamul Muchim (Seasoned Bean Sprouts)",
+    "category": "Korean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 50,
+    "protein_g": 4,
+    "carbs_g": 5,
+    "fat_g": 1.5,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "soybean sprouts",
+      "sesame oil",
+      "sesame seeds",
+      "garlic",
+      "scallions",
+      "soy sauce"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Sigeumchi Namul (Korean Seasoned Spinach)",
+    "category": "Korean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 55,
+    "protein_g": 3,
+    "carbs_g": 5,
+    "fat_g": 2,
+    "fiber_g": 2,
+    "ingredients": [
+      "spinach",
+      "sesame oil",
+      "sesame seeds",
+      "garlic",
+      "soy sauce"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Dubu Jorim (Korean Braised Spicy Tofu)",
+    "category": "Korean",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 145,
+    "protein_g": 10,
+    "carbs_g": 8,
+    "fat_g": 9,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "tofu",
+      "gochugaru",
+      "soy sauce",
+      "sesame oil",
+      "garlic",
+      "scallions",
+      "sugar"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Mul Naengmyeon (Korean Cold Buckwheat Noodles)",
+    "category": "Korean",
+    "serving_size": 500,
+    "serving_unit": "g",
+    "calories": 385,
+    "protein_g": 12,
+    "carbs_g": 75,
+    "fat_g": 4,
+    "fiber_g": 3,
+    "ingredients": [
+      "buckwheat noodles",
+      "beef broth",
+      "cucumber",
+      "asian pear",
+      "boiled egg",
+      "mustard",
+      "vinegar"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Haejang Guk (Korean Hangover Soup)",
+    "category": "Korean",
+    "serving_size": 500,
+    "serving_unit": "ml",
+    "calories": 290,
+    "protein_g": 22,
+    "carbs_g": 15,
+    "fat_g": 14,
+    "fiber_g": 2,
+    "ingredients": [
+      "beef bones",
+      "napa cabbage",
+      "coagulated ox blood",
+      "scallions",
+      "garlic",
+      "doenjang"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Ramyun (Korean Instant Noodles)",
+    "category": "Korean",
+    "serving_size": 500,
+    "serving_unit": "g",
+    "calories": 490,
+    "protein_g": 10,
+    "carbs_g": 80,
+    "fat_g": 16,
+    "fiber_g": 2,
+    "ingredients": [
+      "wheat noodles",
+      "soup base",
+      "dried vegetables"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Congee with Century Egg",
+    "category": "Chinese",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 10,
+    "carbs_g": 40,
+    "fat_g": 4,
+    "fiber_g": 1,
+    "ingredients": [
+      "rice",
+      "century egg",
+      "lean pork",
+      "ginger",
+      "scallions",
+      "sesame oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Char Siu Bao (Steamed BBQ Pork Bun)",
+    "category": "Chinese",
+    "serving_size": 65,
+    "serving_unit": "g",
+    "calories": 175,
+    "protein_g": 7,
+    "carbs_g": 28,
+    "fat_g": 4,
+    "fiber_g": 1,
+    "ingredients": [
+      "char siu pork",
+      "flour",
+      "yeast",
+      "sugar",
+      "lard",
+      "oyster sauce",
+      "soy sauce"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Youtiao (Chinese Fried Dough Stick)",
+    "category": "Chinese",
+    "serving_size": 75,
+    "serving_unit": "g",
+    "calories": 235,
+    "protein_g": 5,
+    "carbs_g": 29,
+    "fat_g": 11,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "flour",
+      "water",
+      "baking powder",
+      "salt",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Douhua (Soft Tofu Pudding)",
+    "category": "Chinese",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 100,
+    "protein_g": 9,
+    "carbs_g": 6,
+    "fat_g": 4,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "silken tofu",
+      "ginger",
+      "brown sugar"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Zongzi (Savory Sticky Rice Dumpling)",
+    "category": "Chinese",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 8,
+    "carbs_g": 58,
+    "fat_g": 7,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "glutinous rice",
+      "pork belly",
+      "salted egg yolk",
+      "dried shrimp",
+      "bamboo leaves",
+      "soy sauce"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Lo Bak Go (Turnip Cake)",
+    "category": "Chinese",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 160,
+    "protein_g": 3,
+    "carbs_g": 28,
+    "fat_g": 4,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "daikon radish",
+      "rice flour",
+      "dried shrimp",
+      "Chinese sausage",
+      "mushrooms"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Tang Yuan (Glutinous Rice Balls)",
+    "category": "Chinese",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 200,
+    "protein_g": 3,
+    "carbs_g": 40,
+    "fat_g": 4,
+    "fiber_g": 1,
+    "ingredients": [
+      "glutinous rice flour",
+      "sesame paste",
+      "sugar"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Malatang (Chinese Spicy Hot Pot)",
+    "category": "Chinese",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 400,
+    "protein_g": 18,
+    "carbs_g": 45,
+    "fat_g": 16,
+    "fiber_g": 4,
+    "ingredients": [
+      "mala broth",
+      "tofu",
+      "leafy vegetables",
+      "mushrooms",
+      "noodles",
+      "meat"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Chinese Cold Sesame Noodles",
+    "category": "Chinese",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 420,
+    "protein_g": 14,
+    "carbs_g": 55,
+    "fat_g": 17,
+    "fiber_g": 3,
+    "ingredients": [
+      "wheat noodles",
+      "sesame paste",
+      "soy sauce",
+      "rice vinegar",
+      "chili oil",
+      "cucumber",
+      "scallions",
+      "garlic"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Liangpi (Chinese Cold Skin Noodles)",
+    "category": "Chinese",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 290,
+    "protein_g": 8,
+    "carbs_g": 55,
+    "fat_g": 5,
+    "fiber_g": 2,
+    "ingredients": [
+      "wheat starch noodles",
+      "gluten",
+      "sesame paste",
+      "chili oil",
+      "rice vinegar",
+      "cucumber",
+      "bean sprouts"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Fan Tuan (Taiwanese Rice Roll)",
+    "category": "Chinese",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 14,
+    "carbs_g": 62,
+    "fat_g": 8,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "glutinous rice",
+      "youtiao",
+      "pork floss",
+      "pickled vegetables",
+      "egg",
+      "nori"
+    ],
+    "nova_group": 3
   }
 ]
