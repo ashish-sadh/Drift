@@ -53075,5 +53075,604 @@
       "sour cream"
     ],
     "nova_group": 4
+  },
+  {
+    "name": "Mattar Paneer",
+    "category": "Indian Protein",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 12,
+    "carbs_g": 18,
+    "fat_g": 18,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "paneer",
+      "green peas",
+      "tomato",
+      "onion",
+      "ghee",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Egg Masala (South Indian Style)",
+    "category": "Indian Protein",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 16,
+    "carbs_g": 10,
+    "fat_g": 18,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "eggs",
+      "coconut",
+      "tomato",
+      "onion",
+      "curry leaves",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Boiled Egg with Masala (2 eggs)",
+    "category": "Indian Protein",
+    "serving_size": 140,
+    "serving_unit": "g",
+    "calories": 180,
+    "protein_g": 14,
+    "carbs_g": 4,
+    "fat_g": 12,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "eggs",
+      "chaat masala",
+      "black pepper",
+      "salt",
+      "chili flakes"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Chhole (Chickpea Curry)",
+    "category": "Indian Protein",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 270,
+    "protein_g": 14,
+    "carbs_g": 38,
+    "fat_g": 7,
+    "fiber_g": 10.0,
+    "ingredients": [
+      "chickpeas",
+      "tomato",
+      "onion",
+      "ginger",
+      "garlic",
+      "oil",
+      "chole masala"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Mixed Dal (Panchratna)",
+    "category": "Indian Protein",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 14,
+    "carbs_g": 34,
+    "fat_g": 4,
+    "fiber_g": 8.0,
+    "ingredients": [
+      "toor dal",
+      "moong dal",
+      "masoor dal",
+      "chana dal",
+      "urad dal",
+      "ghee",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Anda Curry (Egg Curry North Indian)",
+    "category": "Indian Protein",
+    "serving_size": 220,
+    "serving_unit": "g",
+    "calories": 290,
+    "protein_g": 14,
+    "carbs_g": 12,
+    "fat_g": 20,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "eggs",
+      "tomato",
+      "onion",
+      "ghee",
+      "garam masala",
+      "ginger",
+      "garlic"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Paneer Sandwich",
+    "category": "Indian Protein",
+    "serving_size": 180,
+    "serving_unit": "g",
+    "calories": 350,
+    "protein_g": 16,
+    "carbs_g": 38,
+    "fat_g": 14,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "bread",
+      "paneer",
+      "onion",
+      "tomato",
+      "green chutney",
+      "butter",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Paneer (Raw, Amul / Homemade)",
+    "category": "Indian Protein",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 265,
+    "protein_g": 18,
+    "carbs_g": 4,
+    "fat_g": 20,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "full fat milk",
+      "lemon juice"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Mung Sprouts (Cooked)",
+    "category": "Indian Protein",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 100,
+    "protein_g": 8,
+    "carbs_g": 14,
+    "fat_g": 1,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "sprouted mung beans",
+      "water",
+      "salt",
+      "lemon"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Paneer Tikka Wrap",
+    "category": "Indian Protein",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 18,
+    "carbs_g": 42,
+    "fat_g": 14,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "whole wheat roti",
+      "paneer tikka",
+      "onion",
+      "green chutney",
+      "mint chutney"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Chicken Kebab (Grilled, 2 pieces)",
+    "category": "Indian Protein",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 28,
+    "carbs_g": 4,
+    "fat_g": 10,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "chicken",
+      "yogurt",
+      "ginger",
+      "garlic",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Chole Puri",
+    "category": "Indian Protein",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 520,
+    "protein_g": 16,
+    "carbs_g": 72,
+    "fat_g": 18,
+    "fiber_g": 8.0,
+    "ingredients": [
+      "chickpeas",
+      "puri",
+      "tomato",
+      "onion",
+      "spices",
+      "vegetable oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Aloo Palak (Potato Spinach Curry)",
+    "category": "Indian Protein",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 180,
+    "protein_g": 5,
+    "carbs_g": 24,
+    "fat_g": 8,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "spinach",
+      "potato",
+      "onion",
+      "tomato",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Baingan Masala (Brinjal Curry)",
+    "category": "Indian Protein",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 160,
+    "protein_g": 3,
+    "carbs_g": 18,
+    "fat_g": 9,
+    "fiber_g": 5.0,
+    "ingredients": [
+      "eggplant",
+      "tomato",
+      "onion",
+      "oil",
+      "spices",
+      "ginger",
+      "garlic"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Black Eyed Peas Curry (Lobia)",
+    "category": "Indian Protein",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 230,
+    "protein_g": 14,
+    "carbs_g": 36,
+    "fat_g": 4,
+    "fiber_g": 9.0,
+    "ingredients": [
+      "black eyed peas",
+      "tomato",
+      "onion",
+      "ginger",
+      "garlic",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Chawli Bhaji (Black-Eyed Pea Leaves)",
+    "category": "Indian Protein",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 120,
+    "protein_g": 7,
+    "carbs_g": 14,
+    "fat_g": 4,
+    "fiber_g": 6.0,
+    "ingredients": [
+      "chawli leaves",
+      "garlic",
+      "oil",
+      "chili",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Tuna Curry (South Indian)",
+    "category": "Indian Protein",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 250,
+    "protein_g": 30,
+    "carbs_g": 8,
+    "fat_g": 11,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "tuna",
+      "coconut milk",
+      "tomato",
+      "onion",
+      "curry leaves",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Methi Sabzi (Fenugreek Leaves Stir-Fry)",
+    "category": "Indian Protein",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 120,
+    "protein_g": 5,
+    "carbs_g": 12,
+    "fat_g": 6,
+    "fiber_g": 5.0,
+    "ingredients": [
+      "fenugreek leaves",
+      "onion",
+      "oil",
+      "garlic",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Hariyali Paneer",
+    "category": "Indian Protein",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 16,
+    "carbs_g": 10,
+    "fat_g": 24,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "paneer",
+      "spinach",
+      "coriander",
+      "mint",
+      "cream",
+      "cashew",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Achari Paneer",
+    "category": "Indian Protein",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 300,
+    "protein_g": 14,
+    "carbs_g": 12,
+    "fat_g": 22,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "paneer",
+      "yogurt",
+      "pickle spices",
+      "mustard seeds",
+      "fennel",
+      "oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Paneer Korma",
+    "category": "Indian Protein",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 360,
+    "protein_g": 14,
+    "carbs_g": 16,
+    "fat_g": 28,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "paneer",
+      "cream",
+      "cashew",
+      "yogurt",
+      "onion",
+      "spices",
+      "ghee"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Bengali Fish Fry (Bekti/Bhetki)",
+    "category": "Indian Protein",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 24,
+    "carbs_g": 14,
+    "fat_g": 12,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "bekti fish",
+      "breadcrumbs",
+      "egg",
+      "mustard",
+      "ginger",
+      "garlic",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Chicken Keema (Minced Chicken Curry)",
+    "category": "Indian Protein",
+    "serving_size": 180,
+    "serving_unit": "g",
+    "calories": 300,
+    "protein_g": 28,
+    "carbs_g": 8,
+    "fat_g": 18,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "minced chicken",
+      "onion",
+      "tomato",
+      "peas",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Mutton Keema (Minced Mutton Curry)",
+    "category": "Indian Protein",
+    "serving_size": 180,
+    "serving_unit": "g",
+    "calories": 350,
+    "protein_g": 24,
+    "carbs_g": 8,
+    "fat_g": 25,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "minced mutton",
+      "onion",
+      "tomato",
+      "peas",
+      "ghee",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Moong Khichdi",
+    "category": "Indian Protein",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 12,
+    "carbs_g": 48,
+    "fat_g": 5,
+    "fiber_g": 5.0,
+    "ingredients": [
+      "rice",
+      "moong dal",
+      "ghee",
+      "turmeric",
+      "cumin",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Paneer Roll (Kolkata Style)",
+    "category": "Indian Protein",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 400,
+    "protein_g": 16,
+    "carbs_g": 48,
+    "fat_g": 16,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "whole wheat paratha",
+      "paneer",
+      "onion",
+      "green chutney",
+      "egg"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Lamb Dal",
+    "category": "Indian Protein",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 26,
+    "carbs_g": 28,
+    "fat_g": 18,
+    "fiber_g": 6.0,
+    "ingredients": [
+      "lamb",
+      "lentils",
+      "tomato",
+      "onion",
+      "ginger",
+      "garlic",
+      "ghee",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Valor Papdi (Surti Field Beans Sabzi)",
+    "category": "Indian Protein",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 200,
+    "protein_g": 10,
+    "carbs_g": 28,
+    "fat_g": 5,
+    "fiber_g": 8.0,
+    "ingredients": [
+      "valor papdi",
+      "potato",
+      "oil",
+      "cumin",
+      "spices",
+      "grated coconut"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Egg Korma",
+    "category": "Indian Protein",
+    "serving_size": 220,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 14,
+    "carbs_g": 14,
+    "fat_g": 24,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "eggs",
+      "cream",
+      "cashew",
+      "yogurt",
+      "onion",
+      "ghee",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Chhole Bhature",
+    "category": "Indian Protein",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 620,
+    "protein_g": 18,
+    "carbs_g": 85,
+    "fat_g": 22,
+    "fiber_g": 10.0,
+    "ingredients": [
+      "chickpeas",
+      "bhature (fried bread)",
+      "yogurt",
+      "spices",
+      "oil"
+    ],
+    "nova_group": 3
   }
 ]
