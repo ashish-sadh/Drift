@@ -5107,7 +5107,7 @@
     "nova_group": 3
   },
   {
-    "name": "A\u00e7a\u00ed Bowl (medium)",
+    "name": "Açaí Bowl (medium)",
     "category": "US Staples",
     "serving_size": 300,
     "serving_unit": "g",
@@ -5117,7 +5117,7 @@
     "fat_g": 18,
     "fiber_g": 8,
     "ingredients": [
-      "A\u00e7a\u00ed Bowl (medium)"
+      "Açaí Bowl (medium)"
     ],
     "nova_group": 3
   },
@@ -9801,7 +9801,7 @@
     "nova_group": 3
   },
   {
-    "name": "Costco A\u00e7a\u00ed Bowl (food court)",
+    "name": "Costco Açaí Bowl (food court)",
     "category": "Costco",
     "serving_size": 355,
     "serving_unit": "g",
@@ -9811,7 +9811,7 @@
     "fat_g": 19,
     "fiber_g": 7,
     "ingredients": [
-      "Costco A\u00e7a\u00ed Bowl (food court)"
+      "Costco Açaí Bowl (food court)"
     ],
     "nova_group": 3
   },
@@ -10507,7 +10507,7 @@
     "nova_group": 4
   },
   {
-    "name": "Starbucks Caff\u00e8 Latte (Grande, 2% milk)",
+    "name": "Starbucks Caffè Latte (Grande, 2% milk)",
     "category": "Beverages",
     "serving_size": 473,
     "serving_unit": "ml",
@@ -10517,7 +10517,7 @@
     "fat_g": 7,
     "fiber_g": 0,
     "ingredients": [
-      "Starbucks Caff\u00e8 Latte (Grande, 2% milk)"
+      "Starbucks Caffè Latte (Grande, 2% milk)"
     ],
     "nova_group": 3
   },
@@ -25186,7 +25186,7 @@
     "ingredients": [
       "fries",
       "cheese sauce",
-      "jalape\u00f1os",
+      "jalapeños",
       "sour cream"
     ],
     "nova_group": 4
@@ -28757,7 +28757,7 @@
       "beef",
       "onion",
       "tomato",
-      "jalape\u00f1o",
+      "jalapeño",
       "rosemary",
       "Ethiopian spices",
       "butter"
@@ -39759,7 +39759,7 @@
     "ingredients": [
       "tortilla chips",
       "cheddar cheese sauce",
-      "jalape\u00f1o"
+      "jalapeño"
     ],
     "nova_group": 4
   },
@@ -39777,7 +39777,7 @@
       "tomato",
       "onion",
       "cilantro",
-      "jalape\u00f1o",
+      "jalapeño",
       "lime"
     ],
     "nova_group": 1
@@ -40962,7 +40962,7 @@
       "onions",
       "garlic",
       "rosemary",
-      "jalape\u00f1o"
+      "jalapeño"
     ],
     "nova_group": 1
   },
@@ -41253,7 +41253,7 @@
     "nova_group": 2
   },
   {
-    "name": "Smorrebr\u00f8d",
+    "name": "Smorrebrød",
     "category": "Scandinavian",
     "serving_size": 120,
     "serving_unit": "g",
@@ -45944,7 +45944,7 @@
     "source": "USDA"
   },
   {
-    "name": "Corn, Sweet, Yellow And White Kernels, \u00a0Fresh",
+    "name": "Corn, Sweet, Yellow And White Kernels,  Fresh",
     "category": "Vegetables",
     "serving_size": 100,
     "serving_unit": "g",
@@ -52877,5 +52877,597 @@
       "powdered sugar"
     ],
     "nova_group": 2
+  },
+  {
+    "name": "Crumpets",
+    "category": "International Breakfast",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 200,
+    "protein_g": 6,
+    "carbs_g": 38,
+    "fat_g": 1,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "flour",
+      "yeast",
+      "water",
+      "salt",
+      "baking powder"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Welsh Rarebit",
+    "category": "International Breakfast",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 350,
+    "protein_g": 16,
+    "carbs_g": 22,
+    "fat_g": 22,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "cheddar cheese",
+      "toast",
+      "butter",
+      "mustard",
+      "worcestershire sauce",
+      "beer"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Jianbing (Chinese Breakfast Crepe)",
+    "category": "International Breakfast",
+    "serving_size": 180,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 14,
+    "carbs_g": 55,
+    "fat_g": 11,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "mung bean flour",
+      "wheat flour",
+      "egg",
+      "scallion",
+      "hoisin sauce",
+      "chili sauce",
+      "fried wonton"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Kaya Toast",
+    "category": "International Breakfast",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 6,
+    "carbs_g": 40,
+    "fat_g": 10,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "white bread",
+      "kaya jam",
+      "butter",
+      "coconut milk",
+      "eggs",
+      "sugar"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Dutch Baby Pancake",
+    "category": "International Breakfast",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 350,
+    "protein_g": 12,
+    "carbs_g": 40,
+    "fat_g": 15,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "eggs",
+      "flour",
+      "milk",
+      "butter",
+      "vanilla",
+      "powdered sugar",
+      "lemon"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Swedish Pancakes (Pannkakor)",
+    "category": "International Breakfast",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 300,
+    "protein_g": 8,
+    "carbs_g": 45,
+    "fat_g": 9,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "flour",
+      "eggs",
+      "milk",
+      "butter",
+      "salt",
+      "lingonberry jam"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Finnish Porridge (Kaurapuuro)",
+    "category": "International Breakfast",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 180,
+    "protein_g": 6,
+    "carbs_g": 32,
+    "fat_g": 3,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "rolled oats",
+      "water",
+      "milk",
+      "salt",
+      "butter",
+      "lingonberry jam"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Boba Milk Tea",
+    "category": "International Breakfast",
+    "serving_size": 350,
+    "serving_unit": "ml",
+    "calories": 250,
+    "protein_g": 3,
+    "carbs_g": 50,
+    "fat_g": 4,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "black tea",
+      "milk",
+      "tapioca pearls",
+      "sugar"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Blini with Sour Cream",
+    "category": "International Breakfast",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 8,
+    "carbs_g": 30,
+    "fat_g": 14,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "buckwheat flour",
+      "eggs",
+      "milk",
+      "butter",
+      "sour cream",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Italian Cornetto",
+    "category": "International Breakfast",
+    "serving_size": 65,
+    "serving_unit": "g",
+    "calories": 240,
+    "protein_g": 5,
+    "carbs_g": 38,
+    "fat_g": 8,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "flour",
+      "butter",
+      "sugar",
+      "eggs",
+      "yeast",
+      "milk"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Moroccan Msemen (Flatbread)",
+    "category": "International Breakfast",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 5,
+    "carbs_g": 32,
+    "fat_g": 8,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "semolina",
+      "flour",
+      "butter",
+      "oil",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "French Tartine (Buttered Baguette)",
+    "category": "International Breakfast",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 230,
+    "protein_g": 5,
+    "carbs_g": 32,
+    "fat_g": 9,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "baguette",
+      "butter",
+      "jam"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Tunisian Brik (Egg Pastry)",
+    "category": "International Breakfast",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 9,
+    "carbs_g": 25,
+    "fat_g": 16,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "malsouka pastry",
+      "egg",
+      "tuna",
+      "harissa",
+      "parsley",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Irish Soda Bread (1 slice)",
+    "category": "International Breakfast",
+    "serving_size": 60,
+    "serving_unit": "g",
+    "calories": 160,
+    "protein_g": 4,
+    "carbs_g": 30,
+    "fat_g": 3,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "flour",
+      "buttermilk",
+      "baking soda",
+      "salt",
+      "butter"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Korean Juk (Rice Porridge)",
+    "category": "International Breakfast",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 200,
+    "protein_g": 8,
+    "carbs_g": 38,
+    "fat_g": 2,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "short grain rice",
+      "water",
+      "sesame oil",
+      "salt",
+      "sesame seeds"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Xoi (Vietnamese Sticky Rice)",
+    "category": "International Breakfast",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 6,
+    "carbs_g": 74,
+    "fat_g": 3,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "glutinous rice",
+      "coconut milk",
+      "mung beans",
+      "shallot",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Hong Kong Toast with Condensed Milk",
+    "category": "International Breakfast",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 350,
+    "protein_g": 8,
+    "carbs_g": 55,
+    "fat_g": 11,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "thick white bread",
+      "butter",
+      "sweetened condensed milk"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Thai Jok (Rice Congee with Egg)",
+    "category": "International Breakfast",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 230,
+    "protein_g": 10,
+    "carbs_g": 42,
+    "fat_g": 3,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "jasmine rice",
+      "water",
+      "egg",
+      "ginger",
+      "scallion",
+      "fish sauce",
+      "white pepper"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Knekkebrød with Cream Cheese",
+    "category": "International Breakfast",
+    "serving_size": 90,
+    "serving_unit": "g",
+    "calories": 250,
+    "protein_g": 8,
+    "carbs_g": 28,
+    "fat_g": 12,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "rye crispbread",
+      "cream cheese",
+      "cucumber",
+      "dill"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Salteña (Bolivian Breakfast Pastry)",
+    "category": "International Breakfast",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 300,
+    "protein_g": 10,
+    "carbs_g": 38,
+    "fat_g": 12,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "flour",
+      "lard",
+      "egg",
+      "beef",
+      "potato",
+      "olive",
+      "raisin",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Zopf (Swiss Braided Bread)",
+    "category": "International Breakfast",
+    "serving_size": 70,
+    "serving_unit": "g",
+    "calories": 210,
+    "protein_g": 7,
+    "carbs_g": 38,
+    "fat_g": 4,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "white flour",
+      "butter",
+      "milk",
+      "eggs",
+      "yeast",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Pain Perdu (French Toast)",
+    "category": "International Breakfast",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 10,
+    "carbs_g": 42,
+    "fat_g": 12,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "stale bread",
+      "egg",
+      "milk",
+      "butter",
+      "vanilla",
+      "cinnamon",
+      "sugar"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Greek Frappé (Iced Instant Coffee)",
+    "category": "International Breakfast",
+    "serving_size": 250,
+    "serving_unit": "ml",
+    "calories": 60,
+    "protein_g": 2,
+    "carbs_g": 10,
+    "fat_g": 1,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "instant coffee",
+      "sugar",
+      "evaporated milk",
+      "water"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Shakshuka Verde (Green Shakshuka)",
+    "category": "International Breakfast",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 16,
+    "carbs_g": 14,
+    "fat_g": 18,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "eggs",
+      "spinach",
+      "tomatillo",
+      "jalapeño",
+      "onion",
+      "garlic",
+      "olive oil",
+      "feta"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Bubur Ayam (Indonesian Chicken Porridge)",
+    "category": "International Breakfast",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 20,
+    "carbs_g": 45,
+    "fat_g": 6,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "jasmine rice",
+      "chicken",
+      "ginger",
+      "shallot",
+      "garlic",
+      "chicken broth",
+      "celery"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Tsampa (Tibetan Barley Porridge)",
+    "category": "International Breakfast",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 10,
+    "carbs_g": 68,
+    "fat_g": 5,
+    "fiber_g": 6.0,
+    "ingredients": [
+      "roasted barley flour",
+      "butter tea",
+      "yak butter",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Injera with Scrambled Eggs",
+    "category": "International Breakfast",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 20,
+    "carbs_g": 44,
+    "fat_g": 14,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "injera",
+      "eggs",
+      "butter",
+      "onion",
+      "jalapeño",
+      "tomato",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Tom Yum Congee",
+    "category": "International Breakfast",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 250,
+    "protein_g": 12,
+    "carbs_g": 45,
+    "fat_g": 3,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "jasmine rice",
+      "shrimp",
+      "mushroom",
+      "lemongrass",
+      "galangal",
+      "lime",
+      "fish sauce",
+      "chili"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Danbing (Taiwanese Egg Crepe)",
+    "category": "International Breakfast",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 10,
+    "carbs_g": 38,
+    "fat_g": 9,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "flour",
+      "egg",
+      "scallion",
+      "sesame oil",
+      "soy sauce",
+      "hot sauce"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Rye Crispbread with Smoked Salmon",
+    "category": "International Breakfast",
+    "serving_size": 90,
+    "serving_unit": "g",
+    "calories": 200,
+    "protein_g": 14,
+    "carbs_g": 18,
+    "fat_g": 7,
+    "fiber_g": 3.5,
+    "ingredients": [
+      "rye crispbread",
+      "smoked salmon",
+      "cream cheese",
+      "dill",
+      "lemon"
+    ],
+    "nova_group": 3
   }
 ]
