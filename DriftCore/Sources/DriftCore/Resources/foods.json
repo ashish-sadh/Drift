@@ -53674,5 +53674,601 @@
       "oil"
     ],
     "nova_group": 3
+  },
+  {
+    "name": "Carnitas Taco",
+    "category": "Mexican",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 14,
+    "carbs_g": 20,
+    "fat_g": 9,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "corn tortilla",
+      "carnitas pork",
+      "onion",
+      "cilantro",
+      "salsa verde"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Barbacoa Taco",
+    "category": "Mexican",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 210,
+    "protein_g": 15,
+    "carbs_g": 18,
+    "fat_g": 8,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "corn tortilla",
+      "beef barbacoa",
+      "onion",
+      "cilantro",
+      "lime"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Al Pastor Taco",
+    "category": "Mexican",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 230,
+    "protein_g": 14,
+    "carbs_g": 22,
+    "fat_g": 10,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "corn tortilla",
+      "marinated pork",
+      "pineapple",
+      "onion",
+      "cilantro",
+      "salsa roja"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Rajas Taco (Pepper & Cream)",
+    "category": "Mexican",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 190,
+    "protein_g": 5,
+    "carbs_g": 22,
+    "fat_g": 9,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "corn tortilla",
+      "poblano strips",
+      "cream",
+      "cheese",
+      "corn"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Nopal Taco (Cactus)",
+    "category": "Mexican",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 150,
+    "protein_g": 4,
+    "carbs_g": 22,
+    "fat_g": 5,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "corn tortilla",
+      "nopales",
+      "onion",
+      "tomato",
+      "serrano",
+      "cilantro"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Cheese Enchilada",
+    "category": "Mexican",
+    "serving_size": 180,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 12,
+    "carbs_g": 32,
+    "fat_g": 16,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "corn tortilla",
+      "cheddar cheese",
+      "red enchilada sauce",
+      "onion",
+      "sour cream"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Pork Tamale",
+    "category": "Mexican",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 10,
+    "carbs_g": 38,
+    "fat_g": 11,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "masa harina",
+      "pork",
+      "red chile sauce",
+      "lard",
+      "corn husk"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Sweet Tamale (Tamal de Elote)",
+    "category": "Mexican",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 250,
+    "protein_g": 4,
+    "carbs_g": 40,
+    "fat_g": 9,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "masa harina",
+      "corn",
+      "sugar",
+      "butter",
+      "raisins"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Pozole Rojo",
+    "category": "Mexican",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 24,
+    "carbs_g": 30,
+    "fat_g": 10,
+    "fiber_g": 5.0,
+    "ingredients": [
+      "pork",
+      "hominy",
+      "red chile",
+      "onion",
+      "garlic",
+      "oregano",
+      "tostadas",
+      "cabbage"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Pozole Verde",
+    "category": "Mexican",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 290,
+    "protein_g": 22,
+    "carbs_g": 28,
+    "fat_g": 9,
+    "fiber_g": 5.0,
+    "ingredients": [
+      "chicken",
+      "hominy",
+      "tomatillo",
+      "jalapeño",
+      "epazote",
+      "pepitas",
+      "cabbage"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Menudo (Tripe Soup)",
+    "category": "Mexican",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 20,
+    "carbs_g": 18,
+    "fat_g": 7,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "beef tripe",
+      "hominy",
+      "red chile",
+      "onion",
+      "garlic",
+      "oregano",
+      "lime"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Chile Verde (Pork Green Chile)",
+    "category": "Mexican",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 28,
+    "carbs_g": 14,
+    "fat_g": 16,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "pork shoulder",
+      "Hatch green chiles",
+      "tomatillo",
+      "onion",
+      "garlic",
+      "cumin"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Sopa de Fideo (Dry Noodle Soup)",
+    "category": "Mexican",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 240,
+    "protein_g": 6,
+    "carbs_g": 40,
+    "fat_g": 7,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "fideo noodles",
+      "tomato",
+      "onion",
+      "garlic",
+      "chicken broth",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Bolillo (Mexican Roll)",
+    "category": "Mexican",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 7,
+    "carbs_g": 42,
+    "fat_g": 2,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "flour",
+      "water",
+      "yeast",
+      "salt",
+      "sugar"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Pan Dulce (Concha)",
+    "category": "Mexican",
+    "serving_size": 85,
+    "serving_unit": "g",
+    "calories": 300,
+    "protein_g": 5,
+    "carbs_g": 48,
+    "fat_g": 10,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "flour",
+      "sugar",
+      "lard",
+      "egg",
+      "vanilla",
+      "cinnamon",
+      "butter"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Chiles Rellenos",
+    "category": "Mexican",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 16,
+    "carbs_g": 24,
+    "fat_g": 26,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "poblano pepper",
+      "cheese",
+      "egg batter",
+      "tomato sauce",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Chicken Flautas (3 pieces)",
+    "category": "Mexican",
+    "serving_size": 180,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 20,
+    "carbs_g": 38,
+    "fat_g": 16,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "corn tortilla",
+      "chicken",
+      "oil",
+      "sour cream",
+      "guacamole",
+      "salsa"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Caldo de Pollo (Chicken Broth Soup)",
+    "category": "Mexican",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 22,
+    "carbs_g": 18,
+    "fat_g": 6,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "chicken",
+      "zucchini",
+      "carrot",
+      "potato",
+      "cilantro",
+      "onion",
+      "garlic"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Caldo de Res (Beef Soup)",
+    "category": "Mexican",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 24,
+    "carbs_g": 22,
+    "fat_g": 9,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "beef shank",
+      "corn",
+      "chayote",
+      "carrot",
+      "cabbage",
+      "onion",
+      "cilantro"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Sopa de Lima (Yucatan Lime Soup)",
+    "category": "Mexican",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 240,
+    "protein_g": 20,
+    "carbs_g": 20,
+    "fat_g": 7,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "chicken",
+      "lime",
+      "tortilla strips",
+      "tomato",
+      "onion",
+      "habanero",
+      "cilantro"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Picadillo (Ground Beef Hash)",
+    "category": "Mexican",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 300,
+    "protein_g": 22,
+    "carbs_g": 18,
+    "fat_g": 16,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "ground beef",
+      "potato",
+      "tomato",
+      "onion",
+      "garlic",
+      "cumin",
+      "oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Sopes (Corn Masa Cups)",
+    "category": "Mexican",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 14,
+    "carbs_g": 44,
+    "fat_g": 12,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "masa harina",
+      "refried beans",
+      "chicken",
+      "lettuce",
+      "cheese",
+      "crema",
+      "salsa"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Huaraches (Oval Corn Masa)",
+    "category": "Mexican",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 420,
+    "protein_g": 18,
+    "carbs_g": 56,
+    "fat_g": 14,
+    "fiber_g": 5.0,
+    "ingredients": [
+      "masa harina",
+      "black beans",
+      "beef or chicken",
+      "cheese",
+      "salsa verde",
+      "crema"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Pambazo (Potato & Chorizo Sandwich)",
+    "category": "Mexican",
+    "serving_size": 220,
+    "serving_unit": "g",
+    "calories": 460,
+    "protein_g": 14,
+    "carbs_g": 52,
+    "fat_g": 22,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "bolillo bread",
+      "chorizo",
+      "potato",
+      "guajillo chile sauce",
+      "lettuce",
+      "crema"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Tamale de Rajas (Pepper Tamale)",
+    "category": "Mexican",
+    "serving_size": 140,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 6,
+    "carbs_g": 36,
+    "fat_g": 11,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "masa harina",
+      "poblano strips",
+      "cheese",
+      "lard",
+      "corn husk"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Gordita (Stuffed Masa Pocket)",
+    "category": "Mexican",
+    "serving_size": 180,
+    "serving_unit": "g",
+    "calories": 330,
+    "protein_g": 12,
+    "carbs_g": 42,
+    "fat_g": 13,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "masa harina",
+      "chicharrón",
+      "salsa verde",
+      "cheese",
+      "onion"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Agua Fresca (Jamaica / Hibiscus)",
+    "category": "Mexican",
+    "serving_size": 350,
+    "serving_unit": "ml",
+    "calories": 80,
+    "protein_g": 0,
+    "carbs_g": 20,
+    "fat_g": 0,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "hibiscus flowers",
+      "water",
+      "sugar"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Atole (Corn Masa Drink)",
+    "category": "Mexican",
+    "serving_size": 250,
+    "serving_unit": "ml",
+    "calories": 180,
+    "protein_g": 4,
+    "carbs_g": 36,
+    "fat_g": 3,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "masa harina",
+      "milk",
+      "piloncillo",
+      "cinnamon",
+      "vanilla"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Molcajete Salsa (Roasted Tomato Salsa)",
+    "category": "Mexican",
+    "serving_size": 60,
+    "serving_unit": "g",
+    "calories": 30,
+    "protein_g": 1,
+    "carbs_g": 6,
+    "fat_g": 0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "roasted tomato",
+      "serrano pepper",
+      "garlic",
+      "onion",
+      "cilantro",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Chile Colorado (Red Pork Stew)",
+    "category": "Mexican",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 28,
+    "carbs_g": 16,
+    "fat_g": 18,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "pork shoulder",
+      "ancho chiles",
+      "guajillo chiles",
+      "garlic",
+      "cumin",
+      "oregano"
+    ],
+    "nova_group": 1
   }
 ]
