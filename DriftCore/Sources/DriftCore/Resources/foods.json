@@ -48600,5 +48600,556 @@
       "curry leaves"
     ],
     "nova_group": 3
+  },
+  {
+    "name": "Moin Moin",
+    "category": "West African",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 160,
+    "protein_g": 9.0,
+    "carbs_g": 18.0,
+    "fat_g": 6.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "black-eyed peas",
+      "onion",
+      "red pepper",
+      "palm oil",
+      "seasoning"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Ofada Rice (cooked)",
+    "category": "West African",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 190,
+    "protein_g": 4.0,
+    "carbs_g": 41.0,
+    "fat_g": 1.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "ofada rice"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Banku",
+    "category": "West African",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 6.0,
+    "carbs_g": 62.0,
+    "fat_g": 1.0,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "fermented corn dough",
+      "cassava"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kenkey",
+    "category": "West African",
+    "serving_size": 180,
+    "serving_unit": "g",
+    "calories": 250,
+    "protein_g": 5.0,
+    "carbs_g": 54.0,
+    "fat_g": 1.5,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "fermented corn"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Waakye (Rice and Beans)",
+    "category": "West African",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 270,
+    "protein_g": 11.0,
+    "carbs_g": 48.0,
+    "fat_g": 4.0,
+    "fiber_g": 6.0,
+    "ingredients": [
+      "rice",
+      "black-eyed peas",
+      "millet stalks",
+      "palm oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kelewele (Spiced Fried Plantain)",
+    "category": "West African",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 180,
+    "protein_g": 1.0,
+    "carbs_g": 38.0,
+    "fat_g": 4.0,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "ripe plantain",
+      "ginger",
+      "chilli",
+      "oil",
+      "spices"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Red Red (Black-Eyed Peas Stew)",
+    "category": "West African",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 14.0,
+    "carbs_g": 46.0,
+    "fat_g": 9.0,
+    "fiber_g": 9.0,
+    "ingredients": [
+      "black-eyed peas",
+      "palm oil",
+      "tomato",
+      "onion",
+      "fried plantain",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Tuo Zaafi",
+    "category": "West African",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 290,
+    "protein_g": 7.0,
+    "carbs_g": 62.0,
+    "fat_g": 2.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "millet",
+      "sorghum",
+      "water"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Thieboudienne (Senegalese Fish and Rice)",
+    "category": "West African",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 28.0,
+    "carbs_g": 46.0,
+    "fat_g": 9.0,
+    "fiber_g": 3.5,
+    "ingredients": [
+      "fish",
+      "rice",
+      "tomato",
+      "onion",
+      "vegetables",
+      "palm oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Yassa Chicken",
+    "category": "West African",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 310,
+    "protein_g": 32.0,
+    "carbs_g": 18.0,
+    "fat_g": 12.0,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "chicken",
+      "lemon",
+      "onion",
+      "mustard",
+      "oil",
+      "chilli"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Bissap (Hibiscus Drink)",
+    "category": "West African",
+    "serving_size": 240,
+    "serving_unit": "ml",
+    "calories": 60,
+    "protein_g": 0.0,
+    "carbs_g": 14.0,
+    "fat_g": 0.0,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "dried hibiscus flowers",
+      "water",
+      "sugar",
+      "mint"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Garri (Cassava Flour)",
+    "category": "West African",
+    "serving_size": 50,
+    "serving_unit": "g",
+    "calories": 185,
+    "protein_g": 0.5,
+    "carbs_g": 44.0,
+    "fat_g": 0.3,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "cassava"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Eba (Garri Swallow)",
+    "category": "West African",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 250,
+    "protein_g": 1.0,
+    "carbs_g": 61.0,
+    "fat_g": 0.5,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "garri",
+      "water"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Ogbono Soup",
+    "category": "West African",
+    "serving_size": 200,
+    "serving_unit": "ml",
+    "calories": 220,
+    "protein_g": 18.0,
+    "carbs_g": 8.0,
+    "fat_g": 14.0,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "ogbono seeds",
+      "palm oil",
+      "meat",
+      "stockfish",
+      "leafy greens",
+      "crayfish",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Okra Soup (Nigerian)",
+    "category": "West African",
+    "serving_size": 200,
+    "serving_unit": "ml",
+    "calories": 150,
+    "protein_g": 14.0,
+    "carbs_g": 8.0,
+    "fat_g": 8.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "okra",
+      "palm oil",
+      "meat",
+      "crayfish",
+      "pepper",
+      "onion"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Pepper Soup (Nigerian)",
+    "category": "West African",
+    "serving_size": 300,
+    "serving_unit": "ml",
+    "calories": 180,
+    "protein_g": 24.0,
+    "carbs_g": 6.0,
+    "fat_g": 6.0,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "goat meat",
+      "pepper soup spice",
+      "utazi leaves",
+      "efirin",
+      "pepper",
+      "onion"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Groundnut Soup",
+    "category": "West African",
+    "serving_size": 200,
+    "serving_unit": "ml",
+    "calories": 310,
+    "protein_g": 22.0,
+    "carbs_g": 10.0,
+    "fat_g": 20.0,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "peanuts",
+      "chicken",
+      "tomato",
+      "onion",
+      "palm oil",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Light Soup (Ghanaian)",
+    "category": "West African",
+    "serving_size": 200,
+    "serving_unit": "ml",
+    "calories": 120,
+    "protein_g": 14.0,
+    "carbs_g": 6.0,
+    "fat_g": 4.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "chicken",
+      "tomato",
+      "onion",
+      "pepper",
+      "spices"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Puff Puff",
+    "category": "West African",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 4.0,
+    "carbs_g": 32.0,
+    "fat_g": 13.0,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "flour",
+      "yeast",
+      "sugar",
+      "oil"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Chin Chin",
+    "category": "West African",
+    "serving_size": 40,
+    "serving_unit": "g",
+    "calories": 175,
+    "protein_g": 4.0,
+    "carbs_g": 26.0,
+    "fat_g": 6.0,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "flour",
+      "egg",
+      "sugar",
+      "butter",
+      "nutmeg",
+      "oil"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Zobo Drink",
+    "category": "West African",
+    "serving_size": 240,
+    "serving_unit": "ml",
+    "calories": 45,
+    "protein_g": 0.0,
+    "carbs_g": 11.0,
+    "fat_g": 0.0,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "dried hibiscus calyces",
+      "water",
+      "sugar",
+      "ginger",
+      "cloves"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Plantain Chips (West African)",
+    "category": "West African",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 150,
+    "protein_g": 1.0,
+    "carbs_g": 20.0,
+    "fat_g": 7.5,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "unripe plantain",
+      "oil",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Ogi / Akamu (Corn Porridge)",
+    "category": "West African",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 120,
+    "protein_g": 2.0,
+    "carbs_g": 28.0,
+    "fat_g": 0.5,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "fermented corn",
+      "water"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Amala (Yam Flour Swallow)",
+    "category": "West African",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 3.0,
+    "carbs_g": 66.0,
+    "fat_g": 0.5,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "yam flour",
+      "water"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Efo Riro (Yoruba Vegetable Soup)",
+    "category": "West African",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 180,
+    "protein_g": 16.0,
+    "carbs_g": 8.0,
+    "fat_g": 10.0,
+    "fiber_g": 3.5,
+    "ingredients": [
+      "spinach",
+      "assorted meat",
+      "palm oil",
+      "tomato",
+      "pepper",
+      "crayfish",
+      "onion"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Fried Yam",
+    "category": "West African",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 2.0,
+    "carbs_g": 40.0,
+    "fat_g": 7.0,
+    "fiber_g": 3.5,
+    "ingredients": [
+      "yam",
+      "oil",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Ofada Stew (Ayamase)",
+    "category": "West African",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 12.0,
+    "carbs_g": 5.0,
+    "fat_g": 18.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "green pepper",
+      "assorted meat",
+      "palm oil",
+      "crayfish",
+      "onion",
+      "locust beans"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Abacha (African Salad)",
+    "category": "West African",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 200,
+    "protein_g": 5.0,
+    "carbs_g": 28.0,
+    "fat_g": 8.0,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "shredded cassava",
+      "ugba",
+      "palm oil",
+      "pepper",
+      "crayfish",
+      "onion"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Oha Soup",
+    "category": "West African",
+    "serving_size": 200,
+    "serving_unit": "ml",
+    "calories": 190,
+    "protein_g": 15.0,
+    "carbs_g": 7.0,
+    "fat_g": 12.0,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "oha leaves",
+      "palm oil",
+      "assorted meat",
+      "crayfish",
+      "cocoyam",
+      "pepper"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Okpa (Bambara Groundnut Pudding)",
+    "category": "West African",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 185,
+    "protein_g": 12.0,
+    "carbs_g": 22.0,
+    "fat_g": 6.0,
+    "fiber_g": 5.0,
+    "ingredients": [
+      "bambara groundnut flour",
+      "palm oil",
+      "pepper",
+      "salt"
+    ],
+    "nova_group": 1
   }
 ]
