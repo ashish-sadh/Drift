@@ -103,6 +103,12 @@ cmd_refresh() {
         --jq '[.[] | select(.labels | map(.name) | index("SENIOR") | not) | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
         > "$TMP_DIR/junior.json" 2>/dev/null || echo "[]" > "$TMP_DIR/junior.json"
 
+    # Design-doc issues without doc-ready or implementing are senior work — fetch without
+    # label filtering so Python can apply the multi-label conditions precisely.
+    gh issue list --state open --label design-doc --limit 100 --json number,title,labels \
+        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
+        > "$TMP_DIR/design_docs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/design_docs.json"
+
     gh issue list --state open --label bug --label P1 --limit 100 --json number,title,labels \
         --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
         > "$TMP_DIR/p1_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p1_bugs.json"
@@ -126,15 +132,16 @@ def load(f):
     except Exception:
         return []
 
-p0_bugs = load(f"{tmp}/p0_bugs.json")
-p1_bugs  = load(f"{tmp}/p1_bugs.json")
-p2_bugs  = load(f"{tmp}/p2_bugs.json")
-senior   = load(f"{tmp}/senior.json")
-junior   = load(f"{tmp}/junior.json")
-perm     = load(f"{tmp}/perm.json")
+p0_bugs     = load(f"{tmp}/p0_bugs.json")
+p1_bugs     = load(f"{tmp}/p1_bugs.json")
+p2_bugs     = load(f"{tmp}/p2_bugs.json")
+senior      = load(f"{tmp}/senior.json")
+junior      = load(f"{tmp}/junior.json")
+perm        = load(f"{tmp}/perm.json")
+design_docs = load(f"{tmp}/design_docs.json")
 
 seen, tasks = set(), []
-for t in p0_bugs + p1_bugs + p2_bugs + senior + junior + perm:
+for t in p0_bugs + p1_bugs + p2_bugs + senior + junior + perm + design_docs:
     if t["number"] not in seen:
         seen.add(t["number"])
         tasks.append(t)
@@ -257,6 +264,26 @@ if filter_mode in ("--senior", "--any"):
     for t in available:
         if has(t, "needs-review"): continue
         if has(t, "sprint-task") and has(t, "SENIOR"):
+            print(f"{t['number']} {t['title']}"); sys.exit(0)
+
+    # Priority 2 (cont): Design-doc issues routed to senior without sprint-task label.
+    # Routing conditions (both mean "document needs senior attention"):
+    #   - design-doc without doc-ready: document not yet written
+    #   - design-doc + approved without implementing: approved, impl tasks not yet spawned
+    # Excluded: doc-ready (awaiting PE review) and implementing (impl tasks already exist).
+    def is_senior_design_doc(t):
+        lbls = t.get("labels", [])
+        if "design-doc" not in lbls:
+            return False
+        if "doc-ready" in lbls:
+            return False
+        if "implementing" in lbls:
+            return False
+        return True
+
+    for t in available:
+        if has(t, "needs-review"): continue
+        if is_senior_design_doc(t):
             print(f"{t['number']} {t['title']}"); sys.exit(0)
 
     # Priority 3: Admin-approved P1/P2 bugs (sprint-task or approved, no SENIOR, no needs-review)
@@ -642,8 +669,11 @@ pending = [t for t in tasks if t.get("status") == "pending"]
 done    = [t for t in tasks if t.get("status") == "done"]
 perm    = [t for t in tasks if t.get("status") == "permanent"]
 ip      = d.get("in_progress")
+def _is_senior_design_doc(t):
+    lbls = t.get("labels", [])
+    return "design-doc" in lbls and "doc-ready" not in lbls and "implementing" not in lbls
 p0      = [t for t in pending if "P0" in t.get("labels", [])]
-senior  = [t for t in pending if "sprint-task" in t.get("labels", []) and "SENIOR" in t.get("labels", [])]
+senior  = [t for t in pending if ("sprint-task" in t.get("labels", []) and "SENIOR" in t.get("labels", [])) or _is_senior_design_doc(t)]
 junior  = [t for t in pending if "sprint-task" in t.get("labels", []) and "SENIOR" not in t.get("labels", [])]
 age     = int(time.time()) - d.get("refreshed", 0)
 print(f"Sprint: {len(pending)} pending ({len(p0)} P0, {len(senior)} SENIOR, {len(junior)} junior) | {len(done)} done | {len(perm)} permanent")
@@ -663,8 +693,11 @@ try:
     ip  = d.get("in_progress")
     def has(t, l): return l in t.get("labels", [])
     av  = [t for t in d["tasks"] if t.get("status") != "done" and t.get("number") != ip]
+    def is_senior_design_doc(t):
+        lbls = t.get("labels", [])
+        return "design-doc" in lbls and "doc-ready" not in lbls and "implementing" not in lbls
     if   filt == "--p0":       print(len([t for t in av if has(t,"P0")]))
-    elif filt == "--senior":   print(len([t for t in av if has(t,"sprint-task") and has(t,"SENIOR")]))
+    elif filt == "--senior":   print(len([t for t in av if (has(t,"sprint-task") and has(t,"SENIOR")) or is_senior_design_doc(t)]))
     elif filt == "--junior":   print(len([t for t in av if has(t,"sprint-task") and not has(t,"SENIOR")]))
     elif filt == "--sprint":   print(len([t for t in av if has(t,"sprint-task")]))
     elif filt == "--permanent":print(len([t for t in av if has(t,"permanent-task")]))

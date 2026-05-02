@@ -334,6 +334,45 @@ write_state_with_tasks "null" \
     "$(task 13 'P0 bug' pending bug P0)"
 OUT=$(sprint_service count --bugs)
 assert_eq "count --bugs: only unapproved P1/P2 without needs-review" "1" "$OUT"
+
+# 2.8 Design-doc auto-routing to senior queue without sprint-task label
+# 2.8a pending_design_doc_in_senior_queue: design-doc only → claimable by senior
+write_state_with_tasks "null" \
+    "$(task 10 'Write design doc' pending design-doc)"
+OUT=$(sprint_service next --senior)
+assert_eq "pending_design_doc_in_senior_queue" "10 Write design doc" "$OUT"
+
+# 2.8b doc_ready_design_doc_excluded: design-doc + doc-ready → NOT in senior queue (awaiting PE review)
+write_state_with_tasks "null" \
+    "$(task 10 'Doc ready for review' pending design-doc doc-ready)"
+OUT=$(sprint_service next --senior)
+assert_eq "doc_ready_design_doc_excluded" "none" "$OUT"
+
+# 2.8c approved_design_doc_in_senior_queue: design-doc + approved, no implementing → claimable
+write_state_with_tasks "null" \
+    "$(task 10 'Approved design doc' pending design-doc approved)"
+OUT=$(sprint_service next --senior)
+assert_eq "approved_design_doc_in_senior_queue" "10 Approved design doc" "$OUT"
+
+# 2.8d implementing_design_doc_excluded: design-doc + approved + implementing → NOT in queue
+write_state_with_tasks "null" \
+    "$(task 10 'Design doc with impl tasks' pending design-doc approved implementing)"
+OUT=$(sprint_service next --senior)
+assert_eq "implementing_design_doc_excluded" "none" "$OUT"
+
+# 2.8e count --senior includes pending design-doc but excludes doc-ready
+write_state_with_tasks "null" \
+    "$(task 10 'SENIOR sprint task' pending sprint-task SENIOR)" \
+    "$(task 11 'Pending design doc' pending design-doc)" \
+    "$(task 12 'Doc-ready design doc' pending design-doc doc-ready)"
+OUT=$(sprint_service count --senior)
+assert_eq "count --senior includes pending design-doc (excludes doc-ready)" "2" "$OUT"
+
+# 2.8f design-doc issues NOT routed to junior
+write_state_with_tasks "null" \
+    "$(task 10 'Pending design doc' pending design-doc)"
+OUT=$(sprint_service next --junior)
+assert_eq "design_doc_not_in_junior_queue" "none" "$OUT"
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
