@@ -2099,5 +2099,17 @@
             "Food DB: 30 East Asian home cooking foods added (Japanese, Korean, Chinese)"
         ],
         "fixes": []
+    },
+    {
+        "build": 201,
+        "date": "2026-05-02T09:30:00-07:00",
+        "description": "GLP-1 medication tracking + Food DB improvements",
+        "features": [
+            "Health: GLP-1 medication tracking — log_medication tool + dashboard card",
+            "Food DB: 30 Mediterranean & Levantine staples added"
+        ],
+        "fixes": [
+            "Food DB: piece_size_g added to 20 multi-piece Indian foods for accurate serving estimates"
+        ]
     }
 ]
