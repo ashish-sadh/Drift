@@ -52552,5 +52552,528 @@
       "butter"
     ],
     "nova_group": 2
+  },
+  {
+    "name": "Taco Bell Bean Burrito",
+    "category": "Fast Food",
+    "serving_size": 198,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 14,
+    "carbs_g": 55,
+    "fat_g": 11,
+    "fiber_g": 10.0,
+    "ingredients": [
+      "flour tortilla",
+      "beans",
+      "red sauce",
+      "cheddar cheese"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Starbucks Iced Americano (Grande)",
+    "category": "Fast Food",
+    "serving_size": 473,
+    "serving_unit": "ml",
+    "calories": 15,
+    "protein_g": 1,
+    "carbs_g": 2,
+    "fat_g": 0,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "espresso shots",
+      "water",
+      "ice"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Starbucks Bacon & Gruyere Egg Bites (2)",
+    "category": "Fast Food",
+    "serving_size": 170,
+    "serving_unit": "g",
+    "calories": 310,
+    "protein_g": 19,
+    "carbs_g": 11,
+    "fat_g": 21,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "egg",
+      "gruyere cheese",
+      "bacon",
+      "cottage cheese",
+      "heavy cream"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Chipotle Chicken Tacos (3 soft tacos)",
+    "category": "Fast Food",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 525,
+    "protein_g": 38,
+    "carbs_g": 54,
+    "fat_g": 16,
+    "fiber_g": 7.0,
+    "ingredients": [
+      "corn tortillas",
+      "chicken",
+      "pico de gallo",
+      "cheese",
+      "sour cream"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Burger King Veggie Burger",
+    "category": "Fast Food",
+    "serving_size": 209,
+    "serving_unit": "g",
+    "calories": 430,
+    "protein_g": 22,
+    "carbs_g": 46,
+    "fat_g": 17,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "veggie patty",
+      "sesame bun",
+      "lettuce",
+      "tomato",
+      "pickles",
+      "mayo"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Burger King Crispy Chicken Sandwich",
+    "category": "Fast Food",
+    "serving_size": 220,
+    "serving_unit": "g",
+    "calories": 660,
+    "protein_g": 26,
+    "carbs_g": 60,
+    "fat_g": 34,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "crispy chicken fillet",
+      "sesame bun",
+      "lettuce",
+      "mayo",
+      "pickles"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "McDonald's Hash Brown",
+    "category": "Fast Food",
+    "serving_size": 56,
+    "serving_unit": "g",
+    "calories": 150,
+    "protein_g": 1,
+    "carbs_g": 15,
+    "fat_g": 9,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "potatoes",
+      "vegetable oil",
+      "salt"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Starbucks Oat Milk Latte (Tall)",
+    "category": "Fast Food",
+    "serving_size": 355,
+    "serving_unit": "ml",
+    "calories": 170,
+    "protein_g": 5,
+    "carbs_g": 28,
+    "fat_g": 5,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "espresso",
+      "oat milk"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "McDonald's Chicken McNuggets (6 pc)",
+    "category": "Fast Food",
+    "serving_size": 103,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 14,
+    "carbs_g": 17,
+    "fat_g": 17,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "chicken",
+      "water",
+      "wheat flour",
+      "corn flour",
+      "vegetable oil"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "McDonald's McFlurry with Oreos (Snack)",
+    "category": "Fast Food",
+    "serving_size": 283,
+    "serving_unit": "g",
+    "calories": 410,
+    "protein_g": 10,
+    "carbs_g": 63,
+    "fat_g": 14,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "reduced fat ice cream",
+      "oreo cookie pieces"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Arby's Beef & Cheddar (Classic)",
+    "category": "Fast Food",
+    "serving_size": 198,
+    "serving_unit": "g",
+    "calories": 450,
+    "protein_g": 22,
+    "carbs_g": 44,
+    "fat_g": 20,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "roast beef",
+      "cheddar sauce",
+      "sesame onion roll"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Little Caesars Pepperoni Pizza Slice",
+    "category": "Fast Food",
+    "serving_size": 125,
+    "serving_unit": "g",
+    "calories": 290,
+    "protein_g": 13,
+    "carbs_g": 30,
+    "fat_g": 13,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "dough",
+      "tomato sauce",
+      "mozzarella cheese",
+      "pepperoni"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Jack in the Box Sourdough Jack",
+    "category": "Fast Food",
+    "serving_size": 222,
+    "serving_unit": "g",
+    "calories": 590,
+    "protein_g": 29,
+    "carbs_g": 45,
+    "fat_g": 32,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "sourdough bread",
+      "beef patty",
+      "swiss cheese",
+      "bacon",
+      "mayo",
+      "tomato"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Sonic Chili Cheese Coney",
+    "category": "Fast Food",
+    "serving_size": 175,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 14,
+    "carbs_g": 26,
+    "fat_g": 20,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "hot dog",
+      "hot dog bun",
+      "chili",
+      "cheddar cheese",
+      "mustard"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Del Taco Classic Chicken Burrito",
+    "category": "Fast Food",
+    "serving_size": 192,
+    "serving_unit": "g",
+    "calories": 490,
+    "protein_g": 28,
+    "carbs_g": 54,
+    "fat_g": 17,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "flour tortilla",
+      "grilled chicken",
+      "rice",
+      "beans",
+      "cheddar cheese",
+      "sour cream"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Chipotle Sofritas Tacos (3 soft tacos)",
+    "category": "Fast Food",
+    "serving_size": 285,
+    "serving_unit": "g",
+    "calories": 480,
+    "protein_g": 19,
+    "carbs_g": 55,
+    "fat_g": 21,
+    "fiber_g": 9.0,
+    "ingredients": [
+      "corn tortillas",
+      "sofritas tofu",
+      "pico de gallo",
+      "guacamole",
+      "salsa verde"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Dunkin' Boston Kreme Donut",
+    "category": "Fast Food",
+    "serving_size": 106,
+    "serving_unit": "g",
+    "calories": 300,
+    "protein_g": 4,
+    "carbs_g": 49,
+    "fat_g": 10,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "enriched flour",
+      "custard filling",
+      "chocolate frosting",
+      "vegetable oil",
+      "sugar"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Panera Turkey Avocado BLT",
+    "category": "Fast Food",
+    "serving_size": 290,
+    "serving_unit": "g",
+    "calories": 470,
+    "protein_g": 32,
+    "carbs_g": 39,
+    "fat_g": 20,
+    "fiber_g": 5.0,
+    "ingredients": [
+      "sourdough bread",
+      "turkey",
+      "avocado",
+      "bacon",
+      "lettuce",
+      "tomato",
+      "mayo"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Taco Bell Crunchwrap Supreme",
+    "category": "Fast Food",
+    "serving_size": 254,
+    "serving_unit": "g",
+    "calories": 540,
+    "protein_g": 17,
+    "carbs_g": 72,
+    "fat_g": 21,
+    "fiber_g": 6.0,
+    "ingredients": [
+      "flour tortilla",
+      "beef",
+      "nacho cheese sauce",
+      "tostada shell",
+      "sour cream",
+      "tomato",
+      "lettuce"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Wendy's Spicy Chicken Sandwich",
+    "category": "Fast Food",
+    "serving_size": 213,
+    "serving_unit": "g",
+    "calories": 500,
+    "protein_g": 29,
+    "carbs_g": 57,
+    "fat_g": 17,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "spicy chicken fillet",
+      "kaiser bun",
+      "lettuce",
+      "tomato",
+      "mayo"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Burger King Impossible Whopper",
+    "category": "Fast Food",
+    "serving_size": 271,
+    "serving_unit": "g",
+    "calories": 630,
+    "protein_g": 25,
+    "carbs_g": 58,
+    "fat_g": 34,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "impossible plant-based patty",
+      "sesame bun",
+      "lettuce",
+      "tomato",
+      "pickles",
+      "onion",
+      "mayo",
+      "ketchup"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Pizza Hut Stuffed Crust Pepperoni Slice",
+    "category": "Fast Food",
+    "serving_size": 145,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 18,
+    "carbs_g": 43,
+    "fat_g": 14,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "stuffed crust dough",
+      "mozzarella cheese",
+      "pepperoni",
+      "tomato sauce"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Starbucks Pike Place Coffee (Grande, 2% Milk)",
+    "category": "Fast Food",
+    "serving_size": 473,
+    "serving_unit": "ml",
+    "calories": 60,
+    "protein_g": 3,
+    "carbs_g": 6,
+    "fat_g": 2,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "brewed coffee",
+      "2% milk"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "McDonald's Spicy McChicken",
+    "category": "Fast Food",
+    "serving_size": 155,
+    "serving_unit": "g",
+    "calories": 400,
+    "protein_g": 15,
+    "carbs_g": 40,
+    "fat_g": 20,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "spicy chicken patty",
+      "sesame bun",
+      "mayo",
+      "lettuce"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Chick-fil-A Chicken Biscuit",
+    "category": "Fast Food",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 450,
+    "protein_g": 17,
+    "carbs_g": 46,
+    "fat_g": 22,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "buttermilk biscuit",
+      "chicken fillet",
+      "butter"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Panera Chocolate Chip Cookie",
+    "category": "Fast Food",
+    "serving_size": 66,
+    "serving_unit": "g",
+    "calories": 390,
+    "protein_g": 4,
+    "carbs_g": 53,
+    "fat_g": 19,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "flour",
+      "butter",
+      "chocolate chips",
+      "sugar",
+      "eggs",
+      "vanilla"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Starbucks Spinach Feta Wrap",
+    "category": "Fast Food",
+    "serving_size": 174,
+    "serving_unit": "g",
+    "calories": 290,
+    "protein_g": 20,
+    "carbs_g": 34,
+    "fat_g": 8,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "whole wheat tortilla",
+      "egg whites",
+      "spinach",
+      "feta cheese",
+      "sun-dried tomatoes"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Taco Bell Chalupa Supreme (Chicken)",
+    "category": "Fast Food",
+    "serving_size": 153,
+    "serving_unit": "g",
+    "calories": 360,
+    "protein_g": 17,
+    "carbs_g": 38,
+    "fat_g": 15,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "chalupa shell",
+      "chicken",
+      "lettuce",
+      "tomato",
+      "cheddar cheese",
+      "sour cream"
+    ],
+    "nova_group": 4
   }
 ]
