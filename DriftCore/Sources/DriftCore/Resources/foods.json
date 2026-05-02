@@ -309,7 +309,8 @@
       "rice",
       "urad dal"
     ],
-    "nova_group": 3
+    "nova_group": 3,
+    "piece_size_g": 40
   },
   {
     "name": "Upma",
@@ -1327,7 +1328,8 @@
     "ingredients": [
       "Dates (2 pieces)"
     ],
-    "nova_group": 1
+    "nova_group": 1,
+    "piece_size_g": 24
   },
   {
     "name": "Spinach (cooked)",
@@ -1882,7 +1884,8 @@
     "ingredients": [
       "Dhokla (2 pieces)"
     ],
-    "nova_group": 4
+    "nova_group": 4,
+    "piece_size_g": 40
   },
   {
     "name": "Gulab Jamun (1 piece)",
@@ -4379,7 +4382,8 @@
     "ingredients": [
       "Pakora (4 pieces)"
     ],
-    "nova_group": 4
+    "nova_group": 4,
+    "piece_size_g": 20
   },
   {
     "name": "Chicken Thigh (boneless)",
@@ -10394,7 +10398,8 @@
     "ingredients": [
       "Gulab Jamun (2 pieces)"
     ],
-    "nova_group": 4
+    "nova_group": 4,
+    "piece_size_g": 30
   },
   {
     "name": "Pav Bhaji (1 serving with 2 pav)",
@@ -10664,7 +10669,8 @@
     "ingredients": [
       "Medu Vada (2 pieces)"
     ],
-    "nova_group": 3
+    "nova_group": 3,
+    "piece_size_g": 50
   },
   {
     "name": "Rava Dosa",
@@ -10709,7 +10715,8 @@
     "ingredients": [
       "Jalebi (2 pieces)"
     ],
-    "nova_group": 4
+    "nova_group": 4,
+    "piece_size_g": 30
   },
   {
     "name": "Celsius Energy Drink (12 fl oz)",
@@ -11551,7 +11558,8 @@
     "ingredients": [
       "Pakora / Bhajia (5 pieces)"
     ],
-    "nova_group": 3
+    "nova_group": 3,
+    "piece_size_g": 16
   },
   {
     "name": "Bhel Puri",
@@ -11586,7 +11594,8 @@
     "ingredients": [
       "Pani Puri (6 pieces)"
     ],
-    "nova_group": 3
+    "nova_group": 3,
+    "piece_size_g": 20
   },
   {
     "name": "Butter Naan",
@@ -12351,7 +12360,8 @@
     "ingredients": [
       "Aloo Tikki (2 pieces)"
     ],
-    "nova_group": 3
+    "nova_group": 3,
+    "piece_size_g": 75
   },
   {
     "name": "Dahi Vada (2 pieces)",
@@ -12366,6 +12376,7 @@
     "ingredients": [
       "Dahi Vada (2 pieces)"
     ],
+    "piece_size_g": 80,
     "nova_group": 3
   },
   {
@@ -13871,7 +13882,8 @@
     "ingredients": [
       "Rava Idli (2 pieces)"
     ],
-    "nova_group": 3
+    "nova_group": 3,
+    "piece_size_g": 40
   },
   {
     "name": "Set Dosa (2 pieces)",
@@ -13886,7 +13898,8 @@
     "ingredients": [
       "Set Dosa (2 pieces)"
     ],
-    "nova_group": 3
+    "nova_group": 3,
+    "piece_size_g": 60
   },
   {
     "name": "Neer Dosa (2 pieces)",
@@ -13901,7 +13914,8 @@
     "ingredients": [
       "Neer Dosa (2 pieces)"
     ],
-    "nova_group": 3
+    "nova_group": 3,
+    "piece_size_g": 50
   },
   {
     "name": "Bisi Bele Bath",
@@ -14036,7 +14050,8 @@
     "ingredients": [
       "Sev Puri (4 pieces)"
     ],
-    "nova_group": 3
+    "nova_group": 3,
+    "piece_size_g": 30
   },
   {
     "name": "Ragda Pattice",
@@ -14096,7 +14111,8 @@
     "ingredients": [
       "Bread Pakora (2 pieces)"
     ],
-    "nova_group": 3
+    "nova_group": 3,
+    "piece_size_g": 50
   },
   {
     "name": "Besan Ladoo",
@@ -17571,7 +17587,8 @@
       "sugar syrup",
       "cardamom"
     ],
-    "nova_group": 3
+    "nova_group": 3,
+    "piece_size_g": 40
   },
   {
     "name": "Kaju Katli (2 pcs)",
@@ -17590,7 +17607,8 @@
       "cardamom",
       "silver leaf"
     ],
-    "nova_group": 3
+    "nova_group": 3,
+    "piece_size_g": 20
   },
   {
     "name": "Pesto (2 tbsp)",
@@ -17928,7 +17946,8 @@
       "rice batter",
       "urad dal batter"
     ],
-    "nova_group": 3
+    "nova_group": 3,
+    "piece_size_g": 50
   },
   {
     "name": "Medu Vada (2 pcs)",
@@ -17948,7 +17967,8 @@
       "curry leaves",
       "oil"
     ],
-    "nova_group": 3
+    "nova_group": 3,
+    "piece_size_g": 50
   },
   {
     "name": "Fish Curry (Kerala)",

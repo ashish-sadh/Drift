@@ -152,4 +152,36 @@ final class UnitConversionEndToEndTests: XCTestCase {
         XCTAssertNil(cup)
         XCTAssertNil(tbsp)
     }
+
+    // MARK: - Fix 4: multi-piece Indian foods
+
+    /// Before fix: "Idli (2 pieces)" serving_size=80g with no pieceSizeG would
+    /// cause "1 idli" to resolve to 130 kcal (2× overcount — full 2-piece serving).
+    /// After fix with pieceSizeG=40: 1 idli = 40g → 65 kcal.
+    func testIdliOnePiece_halfServingCalories() {
+        let food = Food(name: "Idli (2 pieces)", category: "Indian Staples",
+                        servingSize: 80, servingUnit: "g",
+                        calories: 130, pieceSizeG: 40)
+        let cal = kcal(food: food, unitLabel: "piece", amount: 1)
+        XCTAssertEqual(cal, 65, accuracy: 0.5,
+                       "1 idli = 40g/80g × 130 = 65 kcal, not 130 (the 2-piece serving).")
+    }
+
+    func testMeduVadaOnePiece_halfServingCalories() {
+        let food = Food(name: "Medu Vada (2 pieces)", category: "Indian Staples",
+                        servingSize: 100, servingUnit: "g",
+                        calories: 280, pieceSizeG: 50)
+        let cal = kcal(food: food, unitLabel: "piece", amount: 1)
+        XCTAssertEqual(cal, 140, accuracy: 0.5,
+                       "1 medu vada = 50g/100g × 280 = 140 kcal.")
+    }
+
+    func testGulabJamunOnePiece_halfServingCalories() {
+        let food = Food(name: "Gulab Jamun (2 pieces)", category: "Desserts",
+                        servingSize: 60, servingUnit: "g",
+                        calories: 175, pieceSizeG: 30)
+        let cal = kcal(food: food, unitLabel: "piece", amount: 1)
+        XCTAssertEqual(cal, 87.5, accuracy: 0.5,
+                       "1 gulab jamun = 30g/60g × 175 = 87.5 kcal.")
+    }
 }
