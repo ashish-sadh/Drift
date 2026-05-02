@@ -6,7 +6,9 @@
 # Usage: session-compliance.sh <session-type> <model> <exit-reason>
 #   exit-reason: normal | crash | stall
 
-set -uo pipefail
+set -uo
+# Note: pipefail intentionally omitted — this is a cleanup/summary script;
+# individual command failures should not abort the whole summary write.
 
 WORK_DIR="/Users/ashishsadh/workspace/Drift"
 STATE_DIR="$HOME/drift-state"
@@ -135,6 +137,19 @@ EOF
 # Log abnormal exits to process-feedback (planning session drains this)
 if [[ "$EXIT_REASON" == "crash" ]] || [[ "$EXIT_REASON" == "stall" ]]; then
     echo "$TS | compliance | $SESSION_TYPE ($MODEL) exited via $EXIT_REASON — interrupted: ${INTERRUPTED:-none}" >> "$FEEDBACK_LOG" 2>/dev/null || true
+fi
+
+# If a planning session crashed/stalled with a planning issue open, comment on it so the
+# state is visible. The watchdog will resume the planning session on the next cycle, but
+# the comment ensures the issue doesn't silently sit unchecked in the queue.
+if [[ "$EXIT_REASON" == "crash" || "$EXIT_REASON" == "stall" ]]; then
+    PLAN_ISSUE=$(cat "$STATE_DIR/planning-issue" 2>/dev/null | tr -d '[:space:]' || echo "")
+    if [[ -n "$PLAN_ISSUE" ]] && [[ "$PLAN_ISSUE" =~ ^[0-9]+$ ]]; then
+        gh issue comment "$PLAN_ISSUE" \
+          --body "⚠️ Planning session exited via **$EXIT_REASON** at $TS (model: $MODEL). Watchdog will resume on next cycle — no action needed unless this repeats." \
+          2>>"$STATE_DIR/gh-errors.log" || true
+        # Crash log is copied to /tmp by the watchdog (has access to CURRENT_LOG path)
+    fi
 fi
 
 echo "[$TS] session-compliance: $SESSION_TYPE ($MODEL, $EXIT_REASON) — summary written"

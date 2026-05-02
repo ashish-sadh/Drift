@@ -96,6 +96,11 @@ run_compliance() {
     COMP_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "unknown")
     local COMP_MODEL
     COMP_MODEL=$(cat "$HOME/drift-state/last-model" 2>/dev/null || echo "unknown")
+    # Copy session log to /tmp/planning-crash-log.txt for post-mortem (planning crashes only)
+    if [[ "$EXIT_REASON" == "crash" || "$EXIT_REASON" == "stall" ]] && [[ -n "$CURRENT_LOG" ]] && [[ -f "$CURRENT_LOG" ]]; then
+        cp "$CURRENT_LOG" "/tmp/planning-crash-log.txt" 2>/dev/null || true
+        log "Crash log saved to /tmp/planning-crash-log.txt"
+    fi
     "$WORK_DIR/scripts/session-compliance.sh" "$COMP_TYPE" "$COMP_MODEL" "$EXIT_REASON" 2>/dev/null || true
     log "Session compliance: $COMP_TYPE ($COMP_MODEL, $EXIT_REASON)"
 }
