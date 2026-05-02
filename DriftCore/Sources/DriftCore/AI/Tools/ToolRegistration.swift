@@ -749,6 +749,24 @@ public enum ToolRegistration {
             }
         ))
 
+        r.register(ToolSchema(
+            id: "health.log_medication", name: "log_medication", service: "medication",
+            description: "User LOGGED a medication. Use when they say 'took Ozempic', 'injected semaglutide', 'took my metformin', 'log GLP-1', 'took insulin'.",
+            parameters: [
+                ToolParam("name", "string", "Medication name (e.g. 'Ozempic', 'metformin', 'semaglutide')"),
+                ToolParam("dose", "number", "Dose amount (e.g. 0.5, 500, 2)", required: false),
+                ToolParam("unit", "string", "Dose unit: mg, mcg, ml, units, IU (default mg)", required: false)
+            ],
+            handler: { params in
+                guard let name = params.string("name") else { return .error("Which medication?") }
+                return .text(MedicationService.logMedication(
+                    name: name,
+                    doseMg: params.double("dose"),
+                    doseUnit: params.string("unit")
+                ))
+            }
+        ))
+
         // NOTE: Glucose, biomarker, and body composition tools are registered but NOT shown
         // in the default 6-tool prompt. They appear when user is on those specific screens.
         // This keeps the main prompt focused for the 1.5B model.

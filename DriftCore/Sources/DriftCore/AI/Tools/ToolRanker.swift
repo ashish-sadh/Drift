@@ -424,6 +424,16 @@ public enum ToolRanker {
             antiKeywords: ["add", "new", "what", "status"]
         )
 
+        p["log_medication"] = ToolProfile(
+            triggers: [("medication", 2.5), ("log medication", 4.5), ("took ozempic", 4.5),
+                       ("took metformin", 4.5), ("took insulin", 4), ("injected", 3),
+                       ("semaglutide", 4), ("ozempic", 4), ("wegovy", 4), ("glp-1", 3.5),
+                       ("glp1", 3.5), ("mounjaro", 4), ("tirzepatide", 4), ("metformin", 3.5)],
+            logBoost: 2, queryBoost: -1,
+            screens: [:],
+            antiKeywords: ["food", "weight", "supplement", "workout", "what", "how"]
+        )
+
         p["glucose"] = ToolProfile(
             triggers: [("glucose", 3), ("blood sugar", 3), ("spike", 2.5), ("cgm", 3),
                        ("glucose today", 4), ("any spikes", 3.5)],

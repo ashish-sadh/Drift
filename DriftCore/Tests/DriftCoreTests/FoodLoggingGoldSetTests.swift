@@ -272,6 +272,30 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(correct, queries.count - 2, "At most 2 ToolRanker log_food misses")
     }
 
+    // MARK: - ToolRanker: log_medication Routing
+
+    @MainActor
+    func testToolRanker_LogMedicationRouting() {
+        let queries = [
+            "took ozempic",
+            "log 0.5mg ozempic",
+            "took my metformin",
+            "injected semaglutide 0.5mg",
+            "took insulin 10 units",
+            "log glp-1 medication",
+            "took mounjaro",
+        ]
+        var correct = 0
+        for query in queries {
+            let normalized = InputNormalizer.normalize(query).lowercased()
+            let tools = ToolRanker.rank(query: normalized, screen: .food)
+            if tools.first?.name == "log_medication" { correct += 1 }
+            else { print("MISS (ToolRanker log_medication): '\(query)' → \(tools.first?.name ?? "nil")") }
+        }
+        print("📊 ToolRanker log_medication routing: \(correct)/\(queries.count)")
+        XCTAssertGreaterThanOrEqual(correct, queries.count - 2, "At most 2 ToolRanker log_medication misses")
+    }
+
     // MARK: - False Positive Prevention
 
     func testParseFoodIntent_NonFoodQueriesRejected() {

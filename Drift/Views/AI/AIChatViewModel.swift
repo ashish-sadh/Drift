@@ -140,6 +140,7 @@ final class AIChatViewModel {
         var workoutCard: WorkoutCardData?
         var navigationCard: NavigationCardData?
         var supplementCard: SupplementCardData?
+        var medicationCard: MedicationCardData?
         var sleepCard: SleepCardData?
         var glucoseCard: GlucoseCardData?
         var biomarkerCard: BiomarkerCardData?
@@ -225,6 +226,11 @@ final class AIChatViewModel {
         let total: Int
         let remaining: [String]
         let action: String?  // e.g. "Marked Creatine as taken"
+    }
+
+    struct MedicationCardData {
+        let name: String
+        let doseDisplay: String?   // e.g. "0.5mg" or nil
     }
 
     struct SleepCardData {

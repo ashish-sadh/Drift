@@ -442,6 +442,25 @@ extension AppDatabase {
     }
 }
 
+// MARK: - Medication Operations
+
+extension AppDatabase {
+    public func saveMedication(_ med: inout DailyMedication) throws {
+        try dbWriter.write { db in
+            try med.insert(db)
+        }
+    }
+
+    public func fetchTodayMedications(datePrefix: String) throws -> [DailyMedication] {
+        try dbWriter.read { db in
+            try DailyMedication
+                .filter(sql: "logged_at LIKE ?", arguments: ["\(datePrefix)%"])
+                .order(Column("logged_at"))
+                .fetchAll(db)
+        }
+    }
+}
+
 // MARK: - Glucose Operations
 
 extension AppDatabase {

@@ -1612,6 +1612,19 @@ extension AIChatViewModel {
             )
         }
 
+        // Medication card — for log_medication
+        if tools.contains("log_medication") {
+            let meds = MedicationService.todayMedications()
+            if let last = meds.last {
+                let doseDisplay: String? = last.doseMg.map { dose in
+                    let unit = last.doseUnit ?? "mg"
+                    let doseStr = dose == dose.rounded() ? String(Int(dose)) : String(dose)
+                    return "\(doseStr)\(unit)"
+                }
+                message.medicationCard = MedicationCardData(name: last.name, doseDisplay: doseDisplay)
+            }
+        }
+
         // Sleep & recovery card
         if tools.contains("sleep_recovery") {
             if let data = AIDataCache.shared.sleep {

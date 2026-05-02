@@ -504,6 +504,9 @@ struct AIChatView: View {
                 if let card = msg.supplementCard {
                     supplementConfirmationCard(card)
                 }
+                if let card = msg.medicationCard {
+                    medicationConfirmationCard(card)
+                }
                 if let card = msg.sleepCard {
                     sleepConfirmationCard(card)
                 }
@@ -953,6 +956,32 @@ struct AIChatView: View {
                         .font(.caption2).foregroundStyle(.secondary)
                 }
             }
+        }
+        .padding(10)
+        .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 12))
+        .overlay(
+            RoundedRectangle(cornerRadius: 12)
+                .strokeBorder(Theme.accent.opacity(0.2), lineWidth: 0.5)
+        )
+    }
+
+    // MARK: - Medication Confirmation Card
+
+    private func medicationConfirmationCard(_ card: AIChatViewModel.MedicationCardData) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "cross.vial.fill")
+                .font(.title3).foregroundStyle(Theme.accent)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(card.name)
+                    .font(.subheadline.weight(.bold))
+                if let dose = card.doseDisplay {
+                    Text(dose)
+                        .font(.caption2).foregroundStyle(.secondary)
+                }
+            }
+            Spacer()
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(.green).font(.title3)
         }
         .padding(10)
         .background(Theme.cardBackground, in: RoundedRectangle(cornerRadius: 12))
