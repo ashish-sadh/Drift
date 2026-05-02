@@ -32411,79 +32411,6 @@
     ]
   },
   {
-    "name": "Besan Chilla",
-    "category": "Indian Snacks",
-    "serving_size": 80,
-    "serving_unit": "g",
-    "calories": 145,
-    "protein_g": 7,
-    "carbs_g": 20,
-    "fat_g": 4,
-    "fiber_g": 3,
-    "ingredients": [
-      "chickpea flour",
-      "onion",
-      "tomato",
-      "green chili",
-      "oil"
-    ]
-  },
-  {
-    "name": "Moong Dal Chilla",
-    "category": "Indian Snacks",
-    "serving_size": 80,
-    "serving_unit": "g",
-    "calories": 120,
-    "protein_g": 8,
-    "carbs_g": 18,
-    "fat_g": 2.5,
-    "fiber_g": 2,
-    "ingredients": [
-      "moong dal",
-      "ginger",
-      "green chili",
-      "oil"
-    ]
-  },
-  {
-    "name": "Pav Bhaji",
-    "category": "Indian Street Food",
-    "serving_size": 300,
-    "serving_unit": "g",
-    "calories": 420,
-    "protein_g": 10,
-    "carbs_g": 62,
-    "fat_g": 14,
-    "fiber_g": 8,
-    "ingredients": [
-      "potato",
-      "tomato",
-      "onion",
-      "capsicum",
-      "butter",
-      "pav"
-    ]
-  },
-  {
-    "name": "Misal Pav",
-    "category": "Indian Street Food",
-    "serving_size": 300,
-    "serving_unit": "g",
-    "calories": 380,
-    "protein_g": 14,
-    "carbs_g": 55,
-    "fat_g": 11,
-    "fiber_g": 9,
-    "ingredients": [
-      "moth beans",
-      "potato",
-      "onion",
-      "tomato",
-      "pav",
-      "farsan"
-    ]
-  },
-  {
     "name": "Batata Vada",
     "category": "Indian Street Food",
     "serving_size": 70,
@@ -32499,194 +32426,6 @@
       "mustard seeds",
       "turmeric",
       "oil"
-    ]
-  },
-  {
-    "name": "Dal Makhani",
-    "category": "Indian Staples",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 250,
-    "protein_g": 12,
-    "carbs_g": 28,
-    "fat_g": 10,
-    "fiber_g": 7,
-    "ingredients": [
-      "black lentils",
-      "kidney beans",
-      "butter",
-      "cream",
-      "tomato",
-      "onion"
-    ]
-  },
-  {
-    "name": "Palak Paneer",
-    "category": "Indian Curries",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 280,
-    "protein_g": 14,
-    "carbs_g": 12,
-    "fat_g": 20,
-    "fiber_g": 4,
-    "ingredients": [
-      "spinach",
-      "paneer",
-      "onion",
-      "tomato",
-      "cream",
-      "garam masala"
-    ]
-  },
-  {
-    "name": "Kadai Paneer",
-    "category": "Indian Curries",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 310,
-    "protein_g": 14,
-    "carbs_g": 14,
-    "fat_g": 22,
-    "fiber_g": 3,
-    "ingredients": [
-      "paneer",
-      "capsicum",
-      "onion",
-      "tomato",
-      "oil",
-      "spices"
-    ]
-  },
-  {
-    "name": "Paneer Bhurji",
-    "category": "Indian Curries",
-    "serving_size": 150,
-    "serving_unit": "g",
-    "calories": 270,
-    "protein_g": 16,
-    "carbs_g": 8,
-    "fat_g": 20,
-    "fiber_g": 1,
-    "ingredients": [
-      "paneer",
-      "onion",
-      "tomato",
-      "capsicum",
-      "oil",
-      "spices"
-    ]
-  },
-  {
-    "name": "Sabudana Khichdi",
-    "category": "Indian Staples",
-    "serving_size": 180,
-    "serving_unit": "g",
-    "calories": 320,
-    "protein_g": 4,
-    "carbs_g": 56,
-    "fat_g": 9,
-    "fiber_g": 1,
-    "ingredients": [
-      "sabudana",
-      "peanuts",
-      "potato",
-      "ghee",
-      "cumin",
-      "green chili"
-    ]
-  },
-  {
-    "name": "Sabudana Vada",
-    "category": "Indian Snacks",
-    "serving_size": 60,
-    "serving_unit": "g",
-    "calories": 145,
-    "protein_g": 3,
-    "carbs_g": 18,
-    "fat_g": 7,
-    "fiber_g": 0.5,
-    "ingredients": [
-      "sabudana",
-      "peanuts",
-      "potato",
-      "oil"
-    ]
-  },
-  {
-    "name": "Lemon Rice",
-    "category": "Indian Staples",
-    "serving_size": 180,
-    "serving_unit": "g",
-    "calories": 235,
-    "protein_g": 4,
-    "carbs_g": 42,
-    "fat_g": 6,
-    "fiber_g": 1,
-    "ingredients": [
-      "rice",
-      "lemon",
-      "mustard seeds",
-      "curry leaves",
-      "peanuts",
-      "turmeric",
-      "oil"
-    ]
-  },
-  {
-    "name": "Dahi Puri",
-    "category": "Indian Street Food",
-    "serving_size": 120,
-    "serving_unit": "g",
-    "calories": 210,
-    "protein_g": 6,
-    "carbs_g": 30,
-    "fat_g": 7,
-    "fiber_g": 2,
-    "ingredients": [
-      "puri",
-      "potato",
-      "yogurt",
-      "tamarind chutney",
-      "sev",
-      "chaat masala"
-    ]
-  },
-  {
-    "name": "Keema Matar",
-    "category": "Indian Curries",
-    "serving_size": 180,
-    "serving_unit": "g",
-    "calories": 295,
-    "protein_g": 24,
-    "carbs_g": 12,
-    "fat_g": 18,
-    "fiber_g": 3,
-    "ingredients": [
-      "minced mutton",
-      "peas",
-      "onion",
-      "tomato",
-      "garam masala",
-      "oil"
-    ]
-  },
-  {
-    "name": "Overnight Oats",
-    "category": "Healthy Options",
-    "serving_size": 280,
-    "serving_unit": "g",
-    "calories": 380,
-    "protein_g": 15,
-    "carbs_g": 55,
-    "fat_g": 11,
-    "fiber_g": 6,
-    "ingredients": [
-      "oats",
-      "milk",
-      "chia seeds",
-      "honey",
-      "banana"
     ]
   },
   {
@@ -32917,44 +32656,6 @@
     ]
   },
   {
-    "name": "Olan",
-    "category": "South Indian",
-    "serving_size": 150,
-    "serving_unit": "g",
-    "calories": 120,
-    "protein_g": 3,
-    "carbs_g": 12,
-    "fat_g": 7,
-    "fiber_g": 2,
-    "ingredients": [
-      "ash gourd",
-      "black-eyed peas",
-      "coconut milk",
-      "coconut oil",
-      "green chili"
-    ]
-  },
-  {
-    "name": "Kootu",
-    "category": "South Indian",
-    "serving_size": 150,
-    "serving_unit": "g",
-    "calories": 160,
-    "protein_g": 5,
-    "carbs_g": 18,
-    "fat_g": 9,
-    "fiber_g": 4,
-    "ingredients": [
-      "yam",
-      "chana dal",
-      "coconut",
-      "cumin",
-      "mustard seeds",
-      "curry leaves",
-      "oil"
-    ]
-  },
-  {
     "name": "Falooda",
     "category": "Indian Drinks",
     "serving_size": 300,
@@ -32971,43 +32672,6 @@
       "basil seeds",
       "ice cream",
       "rose water"
-    ]
-  },
-  {
-    "name": "Thandai",
-    "category": "Indian Drinks",
-    "serving_size": 250,
-    "serving_unit": "ml",
-    "calories": 225,
-    "protein_g": 5,
-    "carbs_g": 38,
-    "fat_g": 7,
-    "fiber_g": 1,
-    "ingredients": [
-      "milk",
-      "almonds",
-      "poppy seeds",
-      "fennel",
-      "peppercorn",
-      "cardamom",
-      "sugar",
-      "rose water"
-    ]
-  },
-  {
-    "name": "Rose Milk",
-    "category": "Indian Drinks",
-    "serving_size": 200,
-    "serving_unit": "ml",
-    "calories": 140,
-    "protein_g": 4,
-    "carbs_g": 26,
-    "fat_g": 3,
-    "fiber_g": 0,
-    "ingredients": [
-      "milk",
-      "rose syrup",
-      "sugar"
     ]
   },
   {
@@ -33458,17 +33122,6 @@
     "carbs_g": 2,
     "fat_g": 18,
     "fiber_g": 0
-  },
-  {
-    "name": "Biscuits and Gravy",
-    "category": "American",
-    "serving_size": 250,
-    "serving_unit": "g",
-    "calories": 340,
-    "protein_g": 9,
-    "carbs_g": 37,
-    "fat_g": 17,
-    "fiber_g": 1
   },
   {
     "name": "Chicken Tortilla Soup",
@@ -34779,246 +34432,6 @@
     "nova_group": 2
   },
   {
-    "name": "Litti Chokha",
-    "category": "Indian Staples",
-    "serving_size": 350,
-    "serving_unit": "g",
-    "calories": 450,
-    "protein_g": 13,
-    "carbs_g": 62,
-    "fat_g": 17,
-    "fiber_g": 8.0,
-    "ingredients": [
-      "whole wheat flour",
-      "sattu",
-      "brinjal",
-      "tomato",
-      "mustard oil",
-      "spices"
-    ],
-    "nova_group": 1
-  },
-  {
-    "name": "Thepla",
-    "category": "Indian Bread",
-    "serving_size": 120,
-    "serving_unit": "g",
-    "calories": 280,
-    "protein_g": 8,
-    "carbs_g": 38,
-    "fat_g": 10,
-    "fiber_g": 4.0,
-    "ingredients": [
-      "whole wheat flour",
-      "fenugreek leaves",
-      "yogurt",
-      "turmeric",
-      "oil",
-      "spices"
-    ],
-    "nova_group": 2
-  },
-  {
-    "name": "Fafda",
-    "category": "Indian Snacks",
-    "serving_size": 50,
-    "serving_unit": "g",
-    "calories": 240,
-    "protein_g": 8,
-    "carbs_g": 25,
-    "fat_g": 13,
-    "fiber_g": 2.0,
-    "ingredients": [
-      "gram flour",
-      "carom seeds",
-      "turmeric",
-      "salt",
-      "oil"
-    ],
-    "nova_group": 4
-  },
-  {
-    "name": "Undhiyu",
-    "category": "Indian Curries",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 210,
-    "protein_g": 7,
-    "carbs_g": 22,
-    "fat_g": 10,
-    "fiber_g": 5.0,
-    "ingredients": [
-      "raw banana",
-      "yam",
-      "brinjal",
-      "beans",
-      "muthia",
-      "coconut",
-      "spices"
-    ],
-    "nova_group": 1
-  },
-  {
-    "name": "Khandvi",
-    "category": "Indian Snacks",
-    "serving_size": 100,
-    "serving_unit": "g",
-    "calories": 175,
-    "protein_g": 8,
-    "carbs_g": 22,
-    "fat_g": 6,
-    "fiber_g": 2.0,
-    "ingredients": [
-      "gram flour",
-      "yogurt",
-      "ginger",
-      "green chilli",
-      "mustard seeds",
-      "coconut"
-    ],
-    "nova_group": 1
-  },
-  {
-    "name": "Neer Dosa",
-    "category": "Indian Breakfast",
-    "serving_size": 120,
-    "serving_unit": "g",
-    "calories": 160,
-    "protein_g": 3,
-    "carbs_g": 33,
-    "fat_g": 2,
-    "fiber_g": 0.5,
-    "ingredients": [
-      "rice",
-      "water",
-      "salt",
-      "oil"
-    ],
-    "nova_group": 1
-  },
-  {
-    "name": "Pesarattu",
-    "category": "Indian Breakfast",
-    "serving_size": 150,
-    "serving_unit": "g",
-    "calories": 200,
-    "protein_g": 10,
-    "carbs_g": 32,
-    "fat_g": 4,
-    "fiber_g": 4.0,
-    "ingredients": [
-      "green moong dal",
-      "rice",
-      "ginger",
-      "green chilli",
-      "cumin",
-      "oil"
-    ],
-    "nova_group": 1
-  },
-  {
-    "name": "Kuzhi Paniyaram",
-    "category": "Indian Breakfast",
-    "serving_size": 150,
-    "serving_unit": "g",
-    "calories": 220,
-    "protein_g": 5,
-    "carbs_g": 38,
-    "fat_g": 6,
-    "fiber_g": 2.0,
-    "ingredients": [
-      "idli batter",
-      "onion",
-      "mustard seeds",
-      "curry leaves",
-      "oil"
-    ],
-    "nova_group": 1
-  },
-  {
-    "name": "Papdi Chaat",
-    "category": "Indian Street Food",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 300,
-    "protein_g": 7,
-    "carbs_g": 45,
-    "fat_g": 10,
-    "fiber_g": 3.0,
-    "ingredients": [
-      "papdi",
-      "boiled potatoes",
-      "chickpeas",
-      "yogurt",
-      "tamarind chutney",
-      "mint chutney",
-      "sev"
-    ],
-    "nova_group": 3
-  },
-  {
-    "name": "Bhel Puri",
-    "category": "Indian Street Food",
-    "serving_size": 150,
-    "serving_unit": "g",
-    "calories": 200,
-    "protein_g": 5,
-    "carbs_g": 35,
-    "fat_g": 5,
-    "fiber_g": 2.0,
-    "ingredients": [
-      "puffed rice",
-      "sev",
-      "onion",
-      "tomato",
-      "tamarind chutney",
-      "mint chutney",
-      "spices"
-    ],
-    "nova_group": 3
-  },
-  {
-    "name": "Tofu Scramble",
-    "category": "Healthy Options",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 180,
-    "protein_g": 15,
-    "carbs_g": 8,
-    "fat_g": 10,
-    "fiber_g": 3.0,
-    "ingredients": [
-      "firm tofu",
-      "onion",
-      "bell pepper",
-      "turmeric",
-      "nutritional yeast",
-      "olive oil"
-    ],
-    "nova_group": 1
-  },
-  {
-    "name": "Greek Salad",
-    "category": "Salads",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 180,
-    "protein_g": 5,
-    "carbs_g": 10,
-    "fat_g": 14,
-    "fiber_g": 3.0,
-    "ingredients": [
-      "tomato",
-      "cucumber",
-      "red onion",
-      "kalamata olives",
-      "feta cheese",
-      "olive oil",
-      "oregano"
-    ],
-    "nova_group": 1
-  },
-  {
     "name": "Chicken Caesar Salad",
     "category": "Salads",
     "serving_size": 300,
@@ -35038,64 +34451,6 @@
     "nova_group": 3
   },
   {
-    "name": "Avocado Toast",
-    "category": "Healthy Options",
-    "serving_size": 150,
-    "serving_unit": "g",
-    "calories": 300,
-    "protein_g": 7,
-    "carbs_g": 30,
-    "fat_g": 18,
-    "fiber_g": 8.0,
-    "ingredients": [
-      "whole grain bread",
-      "avocado",
-      "lemon juice",
-      "salt",
-      "red pepper flakes"
-    ],
-    "nova_group": 2
-  },
-  {
-    "name": "Overnight Oats",
-    "category": "Healthy Options",
-    "serving_size": 300,
-    "serving_unit": "g",
-    "calories": 350,
-    "protein_g": 12,
-    "carbs_g": 55,
-    "fat_g": 8,
-    "fiber_g": 5.0,
-    "ingredients": [
-      "rolled oats",
-      "milk",
-      "chia seeds",
-      "honey",
-      "banana"
-    ],
-    "nova_group": 2
-  },
-  {
-    "name": "Smoothie Bowl",
-    "category": "Healthy Options",
-    "serving_size": 300,
-    "serving_unit": "g",
-    "calories": 320,
-    "protein_g": 6,
-    "carbs_g": 58,
-    "fat_g": 8,
-    "fiber_g": 5.0,
-    "ingredients": [
-      "frozen banana",
-      "frozen berries",
-      "almond milk",
-      "granola",
-      "fresh fruit",
-      "chia seeds"
-    ],
-    "nova_group": 2
-  },
-  {
     "name": "Quinoa Upma",
     "category": "Healthy Options",
     "serving_size": 200,
@@ -35113,43 +34468,6 @@
       "curry leaves",
       "mixed vegetables",
       "oil"
-    ],
-    "nova_group": 1
-  },
-  {
-    "name": "Chia Pudding",
-    "category": "Healthy Options",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 230,
-    "protein_g": 8,
-    "carbs_g": 22,
-    "fat_g": 12,
-    "fiber_g": 10.0,
-    "ingredients": [
-      "chia seeds",
-      "almond milk",
-      "vanilla extract",
-      "honey"
-    ],
-    "nova_group": 2
-  },
-  {
-    "name": "Egg White Omelette",
-    "category": "Eggs",
-    "serving_size": 150,
-    "serving_unit": "g",
-    "calories": 100,
-    "protein_g": 18,
-    "carbs_g": 4,
-    "fat_g": 1,
-    "fiber_g": 1.0,
-    "ingredients": [
-      "egg whites",
-      "spinach",
-      "bell pepper",
-      "onion",
-      "salt"
     ],
     "nova_group": 1
   },
@@ -36576,62 +35894,6 @@
     "nova_group": 2
   },
   {
-    "name": "Naan",
-    "category": "Indian Bread",
-    "serving_size": 90,
-    "serving_unit": "g",
-    "calories": 262,
-    "protein_g": 8.7,
-    "carbs_g": 45.4,
-    "fat_g": 5.1,
-    "fiber_g": 1.8,
-    "ingredients": [
-      "all-purpose flour",
-      "yogurt",
-      "yeast",
-      "butter",
-      "salt"
-    ],
-    "nova_group": 3
-  },
-  {
-    "name": "Puri",
-    "category": "Indian Bread",
-    "serving_size": 40,
-    "serving_unit": "g",
-    "calories": 151,
-    "protein_g": 2.7,
-    "carbs_g": 16.8,
-    "fat_g": 8.4,
-    "fiber_g": 0.5,
-    "ingredients": [
-      "whole wheat flour",
-      "oil",
-      "water",
-      "salt"
-    ],
-    "nova_group": 2
-  },
-  {
-    "name": "Bhatura",
-    "category": "Indian Bread",
-    "serving_size": 80,
-    "serving_unit": "g",
-    "calories": 248,
-    "protein_g": 5.4,
-    "carbs_g": 34.5,
-    "fat_g": 9.5,
-    "fiber_g": 0.6,
-    "ingredients": [
-      "all-purpose flour",
-      "yogurt",
-      "oil",
-      "baking soda",
-      "salt"
-    ],
-    "nova_group": 3
-  },
-  {
     "name": "Scrambled Eggs",
     "category": "Eggs",
     "serving_size": 120,
@@ -36647,77 +35909,6 @@
       "salt"
     ],
     "nova_group": 1
-  },
-  {
-    "name": "Fried Egg",
-    "category": "Eggs",
-    "serving_size": 46,
-    "serving_unit": "g",
-    "calories": 90,
-    "protein_g": 6.3,
-    "carbs_g": 0.4,
-    "fat_g": 7.0,
-    "fiber_g": 0.0,
-    "ingredients": [
-      "egg",
-      "oil"
-    ],
-    "nova_group": 1
-  },
-  {
-    "name": "Hard Boiled Egg",
-    "category": "Eggs",
-    "serving_size": 50,
-    "serving_unit": "g",
-    "calories": 78,
-    "protein_g": 6.3,
-    "carbs_g": 0.6,
-    "fat_g": 5.3,
-    "fiber_g": 0.0,
-    "ingredients": [
-      "egg"
-    ],
-    "nova_group": 1
-  },
-  {
-    "name": "Aloo Gobi",
-    "category": "Indian Vegetables",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 150,
-    "protein_g": 4.2,
-    "carbs_g": 22.5,
-    "fat_g": 5.1,
-    "fiber_g": 4.5,
-    "ingredients": [
-      "potato",
-      "cauliflower",
-      "onion",
-      "tomato",
-      "oil",
-      "spices"
-    ],
-    "nova_group": 2
-  },
-  {
-    "name": "Baingan Bharta",
-    "category": "Indian Vegetables",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 134,
-    "protein_g": 3.0,
-    "carbs_g": 14.5,
-    "fat_g": 7.5,
-    "fiber_g": 5.5,
-    "ingredients": [
-      "eggplant",
-      "tomato",
-      "onion",
-      "garlic",
-      "oil",
-      "spices"
-    ],
-    "nova_group": 2
   },
   {
     "name": "Lauki Ki Sabzi",
@@ -36737,169 +35928,6 @@
       "spices"
     ],
     "nova_group": 2
-  },
-  {
-    "name": "Jeera Aloo",
-    "category": "Indian Vegetables",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 195,
-    "protein_g": 3.5,
-    "carbs_g": 31.0,
-    "fat_g": 6.0,
-    "fiber_g": 3.5,
-    "ingredients": [
-      "potato",
-      "cumin seeds",
-      "oil",
-      "spices"
-    ],
-    "nova_group": 2
-  },
-  {
-    "name": "Quinoa (cooked)",
-    "category": "Grains & Pasta",
-    "serving_size": 185,
-    "serving_unit": "g",
-    "calories": 222,
-    "protein_g": 8.1,
-    "carbs_g": 39.4,
-    "fat_g": 3.6,
-    "fiber_g": 5.2,
-    "ingredients": [
-      "quinoa",
-      "water"
-    ],
-    "nova_group": 1
-  },
-  {
-    "name": "Couscous (cooked)",
-    "category": "Grains & Pasta",
-    "serving_size": 157,
-    "serving_unit": "g",
-    "calories": 176,
-    "protein_g": 6.0,
-    "carbs_g": 36.5,
-    "fat_g": 0.3,
-    "fiber_g": 2.2,
-    "ingredients": [
-      "couscous",
-      "water"
-    ],
-    "nova_group": 2
-  },
-  {
-    "name": "Soba Noodles (cooked)",
-    "category": "Grains & Pasta",
-    "serving_size": 113,
-    "serving_unit": "g",
-    "calories": 113,
-    "protein_g": 5.8,
-    "carbs_g": 24.4,
-    "fat_g": 0.1,
-    "fiber_g": 0.0,
-    "ingredients": [
-      "buckwheat flour",
-      "wheat flour",
-      "water"
-    ],
-    "nova_group": 2
-  },
-  {
-    "name": "Chicken Tikka",
-    "category": "Chicken",
-    "serving_size": 150,
-    "serving_unit": "g",
-    "calories": 255,
-    "protein_g": 35.0,
-    "carbs_g": 4.5,
-    "fat_g": 11.0,
-    "fiber_g": 0.5,
-    "ingredients": [
-      "chicken breast",
-      "yogurt",
-      "tikka masala",
-      "oil",
-      "lemon juice"
-    ],
-    "nova_group": 2
-  },
-  {
-    "name": "Butter Chicken",
-    "category": "Chicken",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 310,
-    "protein_g": 28.0,
-    "carbs_g": 10.5,
-    "fat_g": 18.0,
-    "fiber_g": 1.5,
-    "ingredients": [
-      "chicken",
-      "tomato",
-      "cream",
-      "butter",
-      "spices"
-    ],
-    "nova_group": 3
-  },
-  {
-    "name": "Tandoori Chicken",
-    "category": "Chicken",
-    "serving_size": 150,
-    "serving_unit": "g",
-    "calories": 240,
-    "protein_g": 33.0,
-    "carbs_g": 5.0,
-    "fat_g": 10.0,
-    "fiber_g": 0.5,
-    "ingredients": [
-      "chicken",
-      "yogurt",
-      "tandoori masala",
-      "lemon juice"
-    ],
-    "nova_group": 2
-  },
-  {
-    "name": "Cobb Salad",
-    "category": "Salads",
-    "serving_size": 300,
-    "serving_unit": "g",
-    "calories": 378,
-    "protein_g": 25.0,
-    "carbs_g": 9.5,
-    "fat_g": 27.5,
-    "fiber_g": 3.5,
-    "ingredients": [
-      "romaine lettuce",
-      "chicken",
-      "bacon",
-      "avocado",
-      "egg",
-      "blue cheese",
-      "tomato"
-    ],
-    "nova_group": 3
-  },
-  {
-    "name": "Caprese Salad",
-    "category": "Salads",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 272,
-    "protein_g": 15.0,
-    "carbs_g": 5.5,
-    "fat_g": 21.5,
-    "fiber_g": 0.5,
-    "ingredients": [
-      "fresh mozzarella",
-      "tomato",
-      "basil",
-      "olive oil",
-      "salt"
-    ],
-    "nova_group": 1
   },
   {
     "name": "Puliyodarai",
@@ -38818,25 +37846,6 @@
     "nova_group": 3
   },
   {
-    "name": "CLIF Bar (Chocolate Chip)",
-    "category": "Protein Bars",
-    "serving_size": 68,
-    "serving_unit": "g",
-    "calories": 250,
-    "protein_g": 11.0,
-    "carbs_g": 44.0,
-    "fat_g": 6.0,
-    "fiber_g": 5.0,
-    "ingredients": [
-      "oats",
-      "soy protein",
-      "chocolate chips",
-      "cane syrup",
-      "tapioca syrup"
-    ],
-    "nova_group": 4
-  },
-  {
     "name": "Osso Buco (Braised Veal Shanks)",
     "category": "Italian",
     "serving_size": 300,
@@ -39452,60 +38461,6 @@
     "nova_group": 3
   },
   {
-    "name": "Mac and Cheese (homemade)",
-    "category": "American",
-    "serving_size": 250,
-    "serving_unit": "g",
-    "calories": 440,
-    "protein_g": 17,
-    "carbs_g": 52,
-    "fat_g": 18,
-    "fiber_g": 2,
-    "ingredients": [
-      "pasta",
-      "cheddar cheese",
-      "butter",
-      "milk"
-    ],
-    "nova_group": 2
-  },
-  {
-    "name": "Grilled Cheese Sandwich",
-    "category": "American",
-    "serving_size": 150,
-    "serving_unit": "g",
-    "calories": 380,
-    "protein_g": 14,
-    "carbs_g": 34,
-    "fat_g": 21,
-    "fiber_g": 2,
-    "ingredients": [
-      "bread",
-      "cheddar cheese",
-      "butter"
-    ],
-    "nova_group": 2
-  },
-  {
-    "name": "French Toast",
-    "category": "American",
-    "serving_size": 150,
-    "serving_unit": "g",
-    "calories": 310,
-    "protein_g": 11,
-    "carbs_g": 42,
-    "fat_g": 11,
-    "fiber_g": 2,
-    "ingredients": [
-      "bread",
-      "egg",
-      "milk",
-      "butter",
-      "cinnamon"
-    ],
-    "nova_group": 2
-  },
-  {
     "name": "Pancakes (plain)",
     "category": "American",
     "serving_size": 100,
@@ -39542,61 +38497,6 @@
     "nova_group": 3
   },
   {
-    "name": "Biscuits and Gravy",
-    "category": "American",
-    "serving_size": 250,
-    "serving_unit": "g",
-    "calories": 490,
-    "protein_g": 13,
-    "carbs_g": 45,
-    "fat_g": 29,
-    "fiber_g": 2,
-    "ingredients": [
-      "biscuit",
-      "sausage gravy",
-      "flour",
-      "milk"
-    ],
-    "nova_group": 3
-  },
-  {
-    "name": "Chicken Pot Pie",
-    "category": "American",
-    "serving_size": 250,
-    "serving_unit": "g",
-    "calories": 450,
-    "protein_g": 18,
-    "carbs_g": 40,
-    "fat_g": 24,
-    "fiber_g": 3,
-    "ingredients": [
-      "chicken",
-      "pie crust",
-      "vegetables",
-      "cream sauce"
-    ],
-    "nova_group": 3
-  },
-  {
-    "name": "Clam Chowder",
-    "category": "American",
-    "serving_size": 240,
-    "serving_unit": "ml",
-    "calories": 190,
-    "protein_g": 10,
-    "carbs_g": 18,
-    "fat_g": 9,
-    "fiber_g": 1,
-    "ingredients": [
-      "clams",
-      "potatoes",
-      "cream",
-      "onion",
-      "bacon"
-    ],
-    "nova_group": 2
-  },
-  {
     "name": "Walnut",
     "category": "Nuts & Seeds",
     "serving_size": 30,
@@ -39627,71 +38527,6 @@
     "nova_group": 1
   },
   {
-    "name": "Pumpkin Seeds",
-    "category": "Nuts & Seeds",
-    "serving_size": 30,
-    "serving_unit": "g",
-    "calories": 170,
-    "protein_g": 9,
-    "carbs_g": 4.2,
-    "fat_g": 14.5,
-    "fiber_g": 1.8,
-    "ingredients": [
-      "pumpkin seeds"
-    ],
-    "nova_group": 1
-  },
-  {
-    "name": "Sunflower Seeds",
-    "category": "Nuts & Seeds",
-    "serving_size": 30,
-    "serving_unit": "g",
-    "calories": 164,
-    "protein_g": 5.8,
-    "carbs_g": 6.5,
-    "fat_g": 14.1,
-    "fiber_g": 2.4,
-    "ingredients": [
-      "sunflower seeds"
-    ],
-    "nova_group": 1
-  },
-  {
-    "name": "Hemp Seeds",
-    "category": "Nuts & Seeds",
-    "serving_size": 30,
-    "serving_unit": "g",
-    "calories": 166,
-    "protein_g": 9.5,
-    "carbs_g": 2.6,
-    "fat_g": 13.8,
-    "fiber_g": 1.2,
-    "ingredients": [
-      "hemp seeds"
-    ],
-    "nova_group": 1
-  },
-  {
-    "name": "Burrito (chicken)",
-    "category": "Mexican",
-    "serving_size": 300,
-    "serving_unit": "g",
-    "calories": 490,
-    "protein_g": 30,
-    "carbs_g": 52,
-    "fat_g": 16,
-    "fiber_g": 5,
-    "ingredients": [
-      "flour tortilla",
-      "chicken",
-      "rice",
-      "beans",
-      "cheese",
-      "sour cream"
-    ],
-    "nova_group": 3
-  },
-  {
     "name": "Tacos (beef, 2 tacos)",
     "category": "Mexican",
     "serving_size": 170,
@@ -39711,78 +38546,6 @@
     "nova_group": 3
   },
   {
-    "name": "Quesadilla (cheese)",
-    "category": "Mexican",
-    "serving_size": 170,
-    "serving_unit": "g",
-    "calories": 430,
-    "protein_g": 20,
-    "carbs_g": 34,
-    "fat_g": 24,
-    "fiber_g": 2,
-    "ingredients": [
-      "flour tortilla",
-      "cheddar cheese",
-      "butter"
-    ],
-    "nova_group": 2
-  },
-  {
-    "name": "Guacamole",
-    "category": "Mexican",
-    "serving_size": 60,
-    "serving_unit": "g",
-    "calories": 96,
-    "protein_g": 1.2,
-    "carbs_g": 5.2,
-    "fat_g": 8.6,
-    "fiber_g": 3.5,
-    "ingredients": [
-      "avocado",
-      "lime juice",
-      "cilantro",
-      "onion",
-      "tomato"
-    ],
-    "nova_group": 1
-  },
-  {
-    "name": "Nachos with Cheese",
-    "category": "Mexican",
-    "serving_size": 150,
-    "serving_unit": "g",
-    "calories": 380,
-    "protein_g": 10,
-    "carbs_g": 40,
-    "fat_g": 20,
-    "fiber_g": 3,
-    "ingredients": [
-      "tortilla chips",
-      "cheddar cheese sauce",
-      "jalapeño"
-    ],
-    "nova_group": 4
-  },
-  {
-    "name": "Salsa",
-    "category": "Mexican",
-    "serving_size": 60,
-    "serving_unit": "g",
-    "calories": 16,
-    "protein_g": 0.8,
-    "carbs_g": 3.5,
-    "fat_g": 0.1,
-    "fiber_g": 1,
-    "ingredients": [
-      "tomato",
-      "onion",
-      "cilantro",
-      "jalapeño",
-      "lime"
-    ],
-    "nova_group": 1
-  },
-  {
     "name": "Enchiladas (chicken, 2)",
     "category": "Mexican",
     "serving_size": 280,
@@ -39797,41 +38560,6 @@
       "chicken",
       "enchilada sauce",
       "cheese"
-    ],
-    "nova_group": 3
-  },
-  {
-    "name": "Ketchup",
-    "category": "Condiments",
-    "serving_size": 15,
-    "serving_unit": "g",
-    "calories": 15,
-    "protein_g": 0.2,
-    "carbs_g": 3.8,
-    "fat_g": 0,
-    "fiber_g": 0.1,
-    "ingredients": [
-      "tomato",
-      "vinegar",
-      "sugar",
-      "salt"
-    ],
-    "nova_group": 3
-  },
-  {
-    "name": "Mayonnaise",
-    "category": "Condiments",
-    "serving_size": 15,
-    "serving_unit": "g",
-    "calories": 94,
-    "protein_g": 0.1,
-    "carbs_g": 0.4,
-    "fat_g": 10.3,
-    "fiber_g": 0,
-    "ingredients": [
-      "soybean oil",
-      "egg yolk",
-      "vinegar"
     ],
     "nova_group": 3
   },
@@ -39854,23 +38582,6 @@
     "nova_group": 2
   },
   {
-    "name": "Soy Sauce",
-    "category": "Condiments",
-    "serving_size": 15,
-    "serving_unit": "ml",
-    "calories": 9,
-    "protein_g": 1.3,
-    "carbs_g": 0.8,
-    "fat_g": 0,
-    "fiber_g": 0.1,
-    "ingredients": [
-      "soybean",
-      "wheat",
-      "salt"
-    ],
-    "nova_group": 2
-  },
-  {
     "name": "Hot Sauce",
     "category": "Condiments",
     "serving_size": 5,
@@ -39884,61 +38595,6 @@
       "chili peppers",
       "vinegar",
       "salt"
-    ],
-    "nova_group": 2
-  },
-  {
-    "name": "Gulab Jamun",
-    "category": "Indian Sweets",
-    "serving_size": 60,
-    "serving_unit": "g",
-    "calories": 175,
-    "protein_g": 3.5,
-    "carbs_g": 30,
-    "fat_g": 5,
-    "fiber_g": 0.3,
-    "ingredients": [
-      "khoya",
-      "flour",
-      "sugar syrup",
-      "ghee"
-    ],
-    "nova_group": 3
-  },
-  {
-    "name": "Jalebi",
-    "category": "Indian Sweets",
-    "serving_size": 60,
-    "serving_unit": "g",
-    "calories": 205,
-    "protein_g": 2,
-    "carbs_g": 42,
-    "fat_g": 4,
-    "fiber_g": 0.5,
-    "ingredients": [
-      "maida",
-      "sugar syrup",
-      "ghee",
-      "saffron"
-    ],
-    "nova_group": 3
-  },
-  {
-    "name": "Kheer",
-    "category": "Indian Sweets",
-    "serving_size": 150,
-    "serving_unit": "g",
-    "calories": 210,
-    "protein_g": 6,
-    "carbs_g": 35,
-    "fat_g": 6,
-    "fiber_g": 0.5,
-    "ingredients": [
-      "milk",
-      "rice",
-      "sugar",
-      "cardamom",
-      "nuts"
     ],
     "nova_group": 2
   },
@@ -39998,26 +38654,6 @@
     "nova_group": 3
   },
   {
-    "name": "Egusi Soup",
-    "category": "African",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 360,
-    "protein_g": 18,
-    "carbs_g": 10,
-    "fat_g": 28,
-    "fiber_g": 3,
-    "ingredients": [
-      "melon seeds",
-      "palm oil",
-      "leafy greens",
-      "fish",
-      "meat",
-      "onion"
-    ],
-    "nova_group": 2
-  },
-  {
     "name": "Suya (spiced grilled meat)",
     "category": "African",
     "serving_size": 100,
@@ -40035,21 +38671,6 @@
       "pepper"
     ],
     "nova_group": 2
-  },
-  {
-    "name": "Pounded Yam",
-    "category": "African",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 265,
-    "protein_g": 3,
-    "carbs_g": 62,
-    "fat_g": 0.5,
-    "fiber_g": 4,
-    "ingredients": [
-      "yam"
-    ],
-    "nova_group": 1
   },
   {
     "name": "Fufu (cassava)",
@@ -40221,25 +38842,6 @@
     "nova_group": 2
   },
   {
-    "name": "Banh Cuon (steamed rice rolls)",
-    "category": "Vietnamese",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 270,
-    "protein_g": 14,
-    "carbs_g": 40,
-    "fat_g": 6,
-    "fiber_g": 1,
-    "ingredients": [
-      "rice flour",
-      "minced pork",
-      "wood ear mushroom",
-      "shallot",
-      "fish sauce"
-    ],
-    "nova_group": 2
-  },
-  {
     "name": "Ca Kho To (caramelized fish)",
     "category": "Vietnamese",
     "serving_size": 150,
@@ -40293,26 +38895,6 @@
       "pandan jelly",
       "coconut milk",
       "sugar"
-    ],
-    "nova_group": 3
-  },
-  {
-    "name": "Khao Pad (Thai fried rice)",
-    "category": "Thai",
-    "serving_size": 250,
-    "serving_unit": "g",
-    "calories": 370,
-    "protein_g": 14,
-    "carbs_g": 52,
-    "fat_g": 12,
-    "fiber_g": 2,
-    "ingredients": [
-      "jasmine rice",
-      "egg",
-      "fish sauce",
-      "oyster sauce",
-      "vegetables",
-      "oil"
     ],
     "nova_group": 3
   },
@@ -40374,25 +38956,6 @@
       "fish sauce"
     ],
     "nova_group": 2
-  },
-  {
-    "name": "Mango Sticky Rice",
-    "category": "Thai",
-    "serving_size": 200,
-    "serving_unit": "g",
-    "calories": 340,
-    "protein_g": 5,
-    "carbs_g": 68,
-    "fat_g": 6,
-    "fiber_g": 2,
-    "ingredients": [
-      "sticky rice",
-      "mango",
-      "coconut milk",
-      "sugar",
-      "salt"
-    ],
-    "nova_group": 3
   },
   {
     "name": "Pupusa (stuffed masa patty)",
@@ -40488,21 +39051,6 @@
       "caramel"
     ],
     "nova_group": 3
-  },
-  {
-    "name": "Ghee",
-    "category": "Oils & Fats",
-    "serving_size": 14,
-    "serving_unit": "g",
-    "calories": 123,
-    "protein_g": 0,
-    "carbs_g": 0,
-    "fat_g": 14,
-    "fiber_g": 0,
-    "ingredients": [
-      "butter"
-    ],
-    "nova_group": 1
   },
   {
     "name": "Coconut Cream",
@@ -41944,25 +40492,6 @@
     ]
   },
   {
-    "name": "Acai Bowl",
-    "category": "Bowls",
-    "serving_size": 350,
-    "serving_unit": "g",
-    "calories": 450,
-    "protein_g": 8,
-    "carbs_g": 75,
-    "fat_g": 13,
-    "fiber_g": 8.0,
-    "ingredients": [
-      "acai",
-      "banana",
-      "granola",
-      "strawberries",
-      "blueberries",
-      "honey"
-    ]
-  },
-  {
     "name": "Pitaya Bowl",
     "category": "Bowls",
     "serving_size": 350,
@@ -42054,20 +40583,6 @@
     ]
   },
   {
-    "name": "Cold Brew Coffee",
-    "category": "Beverages",
-    "serving_size": 360,
-    "serving_unit": "ml",
-    "calories": 4,
-    "protein_g": 1,
-    "carbs_g": 0,
-    "fat_g": 0,
-    "fiber_g": 0.0,
-    "ingredients": [
-      "coffee"
-    ]
-  },
-  {
     "name": "Nitro Cold Brew",
     "category": "Beverages",
     "serving_size": 360,
@@ -42147,41 +40662,6 @@
     "ingredients": [
       "espresso",
       "milk"
-    ]
-  },
-  {
-    "name": "Kombucha",
-    "category": "Beverages",
-    "serving_size": 480,
-    "serving_unit": "ml",
-    "calories": 60,
-    "protein_g": 0,
-    "carbs_g": 14,
-    "fat_g": 0,
-    "fiber_g": 0.0,
-    "ingredients": [
-      "black tea",
-      "sugar",
-      "live cultures"
-    ]
-  },
-  {
-    "name": "Overnight Oats",
-    "category": "Breakfast",
-    "serving_size": 300,
-    "serving_unit": "g",
-    "calories": 370,
-    "protein_g": 15,
-    "carbs_g": 55,
-    "fat_g": 9,
-    "fiber_g": 7.0,
-    "ingredients": [
-      "oats",
-      "milk",
-      "chia seeds",
-      "banana",
-      "honey",
-      "almonds"
     ]
   },
   {
@@ -53469,5 +51949,608 @@
       "lemon"
     ],
     "nova_group": 3
+  },
+  {
+    "name": "Eggs Florentine",
+    "category": "American Brunch",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 18,
+    "carbs_g": 28,
+    "fat_g": 22,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "english muffin",
+      "eggs",
+      "spinach",
+      "hollandaise sauce",
+      "butter"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Country Gravy",
+    "category": "American Brunch",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 180,
+    "protein_g": 4,
+    "carbs_g": 14,
+    "fat_g": 12,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "pork sausage",
+      "flour",
+      "whole milk",
+      "black pepper",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Denver Omelette",
+    "category": "American Brunch",
+    "serving_size": 230,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 26,
+    "carbs_g": 6,
+    "fat_g": 24,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "eggs",
+      "ham",
+      "green pepper",
+      "onion",
+      "cheddar cheese",
+      "butter"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Lox Bagel",
+    "category": "American Brunch",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 22,
+    "carbs_g": 48,
+    "fat_g": 10,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "bagel",
+      "cream cheese",
+      "smoked salmon",
+      "capers",
+      "red onion",
+      "cucumber",
+      "dill"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Patty Melt",
+    "category": "American Diner",
+    "serving_size": 280,
+    "serving_unit": "g",
+    "calories": 650,
+    "protein_g": 35,
+    "carbs_g": 40,
+    "fat_g": 38,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "ground beef patty",
+      "rye bread",
+      "swiss cheese",
+      "caramelized onion",
+      "butter"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "French Dip Sandwich",
+    "category": "American Diner",
+    "serving_size": 310,
+    "serving_unit": "g",
+    "calories": 480,
+    "protein_g": 38,
+    "carbs_g": 38,
+    "fat_g": 18,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "hoagie roll",
+      "roast beef",
+      "provolone cheese",
+      "beef au jus",
+      "butter"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Potato Wedges",
+    "category": "American Diner",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 270,
+    "protein_g": 4,
+    "carbs_g": 42,
+    "fat_g": 10,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "russet potato",
+      "vegetable oil",
+      "paprika",
+      "garlic powder",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Macaroni Salad",
+    "category": "American Diner",
+    "serving_size": 180,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 5,
+    "carbs_g": 36,
+    "fat_g": 17,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "elbow macaroni",
+      "mayonnaise",
+      "celery",
+      "red bell pepper",
+      "onion",
+      "mustard",
+      "vinegar"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Banana Split",
+    "category": "American Diner",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 700,
+    "protein_g": 10,
+    "carbs_g": 110,
+    "fat_g": 25,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "banana",
+      "vanilla ice cream",
+      "chocolate ice cream",
+      "strawberry ice cream",
+      "hot fudge",
+      "strawberry topping",
+      "pineapple topping",
+      "whipped cream",
+      "maraschino cherry",
+      "chopped nuts"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Fried Green Tomatoes",
+    "category": "American Diner",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 5,
+    "carbs_g": 32,
+    "fat_g": 15,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "green tomatoes",
+      "cornmeal",
+      "flour",
+      "egg",
+      "buttermilk",
+      "vegetable oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Hush Puppies",
+    "category": "American Diner",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 290,
+    "protein_g": 5,
+    "carbs_g": 40,
+    "fat_g": 12,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "cornmeal",
+      "flour",
+      "egg",
+      "buttermilk",
+      "onion",
+      "vegetable oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Po' Boy Sandwich",
+    "category": "American Diner",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 520,
+    "protein_g": 28,
+    "carbs_g": 58,
+    "fat_g": 18,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "french roll",
+      "fried shrimp",
+      "lettuce",
+      "tomato",
+      "mayo",
+      "hot sauce",
+      "pickles"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Muffaletta Sandwich",
+    "category": "American Diner",
+    "serving_size": 320,
+    "serving_unit": "g",
+    "calories": 580,
+    "protein_g": 32,
+    "carbs_g": 48,
+    "fat_g": 28,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "round italian bread",
+      "salami",
+      "ham",
+      "provolone",
+      "olive salad",
+      "roasted peppers"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Country Fried Steak",
+    "category": "American Diner",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 580,
+    "protein_g": 28,
+    "carbs_g": 42,
+    "fat_g": 34,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "cube steak",
+      "flour",
+      "egg",
+      "buttermilk",
+      "vegetable oil",
+      "country gravy"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Chicken and Waffles",
+    "category": "American Brunch",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 720,
+    "protein_g": 38,
+    "carbs_g": 68,
+    "fat_g": 32,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "fried chicken",
+      "waffle",
+      "maple syrup",
+      "butter",
+      "hot sauce"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Shrimp and Grits",
+    "category": "American Brunch",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 480,
+    "protein_g": 28,
+    "carbs_g": 42,
+    "fat_g": 20,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "shrimp",
+      "stone-ground grits",
+      "cheddar cheese",
+      "butter",
+      "bacon",
+      "garlic",
+      "lemon"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Sloppy Joe",
+    "category": "American Diner",
+    "serving_size": 240,
+    "serving_unit": "g",
+    "calories": 420,
+    "protein_g": 22,
+    "carbs_g": 48,
+    "fat_g": 16,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "ground beef",
+      "tomato sauce",
+      "ketchup",
+      "brown sugar",
+      "worcestershire",
+      "hamburger bun"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Cheese Fries",
+    "category": "American Diner",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 480,
+    "protein_g": 12,
+    "carbs_g": 52,
+    "fat_g": 25,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "french fries",
+      "cheddar cheese sauce",
+      "salt"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Hoagie (Italian Beef Sub)",
+    "category": "American Diner",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 520,
+    "protein_g": 30,
+    "carbs_g": 50,
+    "fat_g": 22,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "hoagie roll",
+      "roast beef",
+      "giardiniera",
+      "sweet peppers",
+      "au jus",
+      "provolone"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Peach Pie (1 slice)",
+    "category": "American Diner",
+    "serving_size": 125,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 3,
+    "carbs_g": 50,
+    "fat_g": 13,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "pie crust",
+      "peaches",
+      "sugar",
+      "cinnamon",
+      "flour",
+      "butter"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Apple Cobbler",
+    "category": "American Diner",
+    "serving_size": 180,
+    "serving_unit": "g",
+    "calories": 360,
+    "protein_g": 4,
+    "carbs_g": 58,
+    "fat_g": 14,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "apples",
+      "flour",
+      "butter",
+      "sugar",
+      "cinnamon",
+      "baking powder",
+      "milk"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Pecan Pie (1 slice)",
+    "category": "American Diner",
+    "serving_size": 113,
+    "serving_unit": "g",
+    "calories": 503,
+    "protein_g": 6,
+    "carbs_g": 64,
+    "fat_g": 27,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "pie crust",
+      "pecans",
+      "corn syrup",
+      "eggs",
+      "butter",
+      "sugar",
+      "vanilla"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Mississippi Mud Pie (1 slice)",
+    "category": "American Diner",
+    "serving_size": 130,
+    "serving_unit": "g",
+    "calories": 480,
+    "protein_g": 6,
+    "carbs_g": 62,
+    "fat_g": 24,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "chocolate cookie crust",
+      "chocolate fudge",
+      "marshmallows",
+      "pecans",
+      "ice cream"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Red Velvet Cake (1 slice)",
+    "category": "American Diner",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 420,
+    "protein_g": 5,
+    "carbs_g": 58,
+    "fat_g": 19,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "flour",
+      "cocoa powder",
+      "buttermilk",
+      "red food coloring",
+      "cream cheese frosting",
+      "butter"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Jalapeño Poppers (4 pieces)",
+    "category": "American Diner",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 290,
+    "protein_g": 9,
+    "carbs_g": 22,
+    "fat_g": 19,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "jalapeños",
+      "cream cheese",
+      "cheddar cheese",
+      "bread crumbs",
+      "egg",
+      "vegetable oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Steak and Eggs",
+    "category": "American Brunch",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 580,
+    "protein_g": 52,
+    "carbs_g": 2,
+    "fat_g": 40,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "sirloin steak",
+      "eggs",
+      "butter",
+      "salt",
+      "pepper"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Corned Beef Hash",
+    "category": "American Brunch",
+    "serving_size": 220,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 18,
+    "carbs_g": 28,
+    "fat_g": 22,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "corned beef",
+      "russet potato",
+      "onion",
+      "bell pepper",
+      "butter",
+      "salt",
+      "pepper"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Buttermilk Pancakes (3 stack)",
+    "category": "American Brunch",
+    "serving_size": 210,
+    "serving_unit": "g",
+    "calories": 450,
+    "protein_g": 10,
+    "carbs_g": 72,
+    "fat_g": 14,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "flour",
+      "buttermilk",
+      "egg",
+      "butter",
+      "baking powder",
+      "sugar",
+      "maple syrup"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Smothered Burrito",
+    "category": "American Brunch",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 680,
+    "protein_g": 32,
+    "carbs_g": 72,
+    "fat_g": 28,
+    "fiber_g": 8.0,
+    "ingredients": [
+      "flour tortilla",
+      "ground beef",
+      "rice",
+      "beans",
+      "cheddar cheese",
+      "sour cream",
+      "green chili sauce"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Breakfast Skillet (Eggs, Potatoes, Peppers)",
+    "category": "American Brunch",
+    "serving_size": 320,
+    "serving_unit": "g",
+    "calories": 480,
+    "protein_g": 22,
+    "carbs_g": 40,
+    "fat_g": 26,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "eggs",
+      "hash browns",
+      "bell pepper",
+      "onion",
+      "sausage",
+      "cheddar cheese",
+      "butter"
+    ],
+    "nova_group": 2
   }
 ]
