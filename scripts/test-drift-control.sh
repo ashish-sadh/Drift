@@ -661,6 +661,22 @@ assert_eq "review[-/]cycle pattern matches hyphen" "matched" "$MATCHED2"
 NO_MATCH="abc123 feat: something unrelated"
 MATCHED3=$(echo "$NO_MATCH" | grep -qE "review[-/]cycle" && echo "matched" || echo "no match")
 assert_eq "review[-/]cycle pattern does NOT match unrelated commit" "no match" "$MATCHED3"
+
+# 6.5 food_db_dup_skipped — Rule 1: pre-staged open Food DB +N → skip
+OUT=$(export _GUARD_FOOD_DB_COUNT=1; planning_service guard-sprint-task "Food DB +30 — Indian branded protein foods" "")
+assert_contains "food_db_dup_skipped: existing open task triggers skip" "skip" "$OUT"
+
+# 6.6 unjustified_plus_n_deferred — Rule 2: +N title with no justification → defer
+OUT=$(planning_service guard-sprint-task "MultiTurnRegression +8 — extra edge cases" "Add 8 more test cases to cover edge conditions.")
+assert_contains "unjustified_plus_n_deferred: no cite triggers defer" "defer" "$OUT"
+
+# 6.7 justified_plus_n_proceeds — Rule 2: +N title with Docs/failing-queries cite → proceed
+OUT=$(planning_service guard-sprint-task "FoodLoggingGoldSet +12 — sattu queries" "Motivated by Docs/failing-queries.md: user searched 'sattu' and got 0 results.")
+assert_contains "justified_plus_n_proceeds: failing-query cite allows proceed" "proceed" "$OUT"
+
+# 6.8 food_db_no_dup_proceeds — Rule 1: no existing Food DB task → falls through to Rule 2 check
+OUT=$(export _GUARD_FOOD_DB_COUNT=0; planning_service guard-sprint-task "Food DB +30 — West African" "Motivated by Docs/failing-queries.md: user searched 'jollof rice' and got 0 results.")
+assert_contains "food_db_no_dup_proceeds: no duplicate + justified → proceed" "proceed" "$OUT"
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════

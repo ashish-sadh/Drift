@@ -156,6 +156,47 @@ cmd_reset() {
     echo "planning-service: reset all checkboxes in issue #$N"
 }
 
+# _food_db_open_count — injectable for tests via _GUARD_FOOD_DB_COUNT env var
+_food_db_open_count() {
+    if [[ -n "${_GUARD_FOOD_DB_COUNT:-}" ]]; then
+        echo "$_GUARD_FOOD_DB_COUNT"
+        return
+    fi
+    gh issue list --state open --label sprint-task \
+        --search 'in:title "Food DB +"' --json number --jq length 2>/dev/null || echo "0"
+}
+
+# guard-sprint-task TITLE BODY
+# Outputs one of: skip / defer / proceed
+# Rule 1 — one active Food DB +N at a time
+# Rule 2 — any +N task requires a failing-query, friend-cite, or UX-gap justification
+cmd_guard_sprint_task() {
+    local TITLE="$1"
+    local BODY="${2:-}"
+
+    # Rule 1: duplicate Food DB +N gate
+    if [[ "$TITLE" =~ Food[[:space:]]DB[[:space:]]\+[0-9]+ ]]; then
+        local EXISTING
+        EXISTING=$(_food_db_open_count)
+        if [[ "$EXISTING" -gt 0 ]]; then
+            echo "skip: Food DB +N task already open ($EXISTING open) — skipping"
+            return 0
+        fi
+    fi
+
+    # Rule 2: +N tasks require concrete justification in body
+    if [[ "$TITLE" =~ \+[0-9]+ ]]; then
+        if ! echo "$BODY" | grep -qiE \
+            'failing-quer|Docs/failing-queries|friend[[:space:]-]+(asked|reported|said)|user[[:space:]-]+(searched|tried|asked|got)'; then
+            echo "defer: +N task missing concrete justification (failing-query, friend-cite, or UX-gap)"
+            return 0
+        fi
+    fi
+
+    echo "proceed"
+    return 0
+}
+
 COMMAND="${1:-}"
 
 case "$COMMAND" in
@@ -178,8 +219,15 @@ case "$COMMAND" in
     reset)
         cmd_reset
         ;;
+    guard-sprint-task)
+        if [[ -z "${2:-}" ]]; then
+            echo "Usage: planning-service.sh guard-sprint-task <title> [body]" >&2
+            exit 1
+        fi
+        cmd_guard_sprint_task "$2" "${3:-}"
+        ;;
     *)
-        echo "Usage: planning-service.sh <checkpoint <step>|remaining|validate|issue-number|reset>" >&2
+        echo "Usage: planning-service.sh <checkpoint <step>|remaining|validate|issue-number|reset|guard-sprint-task <title> [body]>" >&2
         exit 1
         ;;
 esac
