@@ -1,7 +1,7 @@
 # Graph Report - /Users/ashishsadh/workspace/Drift  (2026-05-03)
 
 ## Corpus Check
-- 452 files · ~1,976,816 words
+- 452 files · ~1,976,819 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
@@ -1058,9 +1058,11 @@ Nodes (0):
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `date` connect `Community 1` to `Community 32`, `Community 0`, `Community 2`, `Community 35`, `Community 3`, `Community 5`, `Community 4`, `Community 7`, `Community 36`, `Community 9`, `Community 10`, `Community 8`, `Community 14`, `Community 16`, `Community 19`, `Community 20`, `Community 23`, `Community 25`?**
-  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+  _High betweenness centrality (0.036) - this node is a cross-community bridge._
 - **Why does `date` connect `Community 1` to `Community 0`, `Community 2`, `Community 3`, `Community 4`, `Community 5`, `Community 36`, `Community 7`, `Community 8`, `Community 9`, `Community 10`, `Community 11`, `Community 14`, `Community 16`, `Community 19`, `Community 20`, `Community 23`, `Community 25`?**
-  _High betweenness centrality (0.043) - this node is a cross-community bridge._
+  _High betweenness centrality (0.029) - this node is a cross-community bridge._
+- **Why does `ServingUnit` connect `Community 15` to `Community 1`, `Community 5`, `Community 6`?**
+  _High betweenness centrality (0.021) - this node is a cross-community bridge._
 - **Are the 382 inferred relationships involving `String` (e.g. with `.classify()` and `.extractTool()`) actually correct?**
   _`String` has 382 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 330 inferred relationships involving `date` (e.g. with `.measureTTFT()` and `.testSingleItemTTFTSmoke()`) actually correct?**
@@ -1069,5 +1071,3 @@ _Questions this graph is uniquely positioned to answer:_
   _`date` has 307 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 250 inferred relationships involving `empty` (e.g. with `barcodeCacheSaveAndRetrieve()` and `barcodeCacheReturnsNilOnMiss()`) actually correct?**
   _`empty` has 250 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 183 inferred relationships involving `food` (e.g. with `seedFoodDB()` and `foodEntryConvenienceInitCopiesMicronutrients()`) actually correct?**
-  _`food` has 183 INFERRED edges - model-reasoned connections that need verification._
