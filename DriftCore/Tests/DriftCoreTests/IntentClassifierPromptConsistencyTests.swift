@@ -27,7 +27,7 @@ import Testing
 
 @MainActor
 private func assertPromptToolsAreRegistered(_ prompt: String, name: String) throws {
-    if ToolRegistry.shared.allTools().isEmpty { ToolRegistration.registerAll() }
+    ToolRegistration.registerAll()
     let registered = Set(ToolRegistry.shared.allTools().map(\.name))
 
     guard let toolsLine = prompt.split(separator: "\n").first(where: { $0.hasPrefix("Tools:") }) else {
