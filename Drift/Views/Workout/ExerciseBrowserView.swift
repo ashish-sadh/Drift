@@ -117,6 +117,7 @@ struct ExerciseBrowserView: View {
                     Button { showingCustom = true } label: {
                         Image(systemName: "plus.circle.fill").foregroundStyle(Theme.accent)
                     }
+                    .accessibilityLabel("Add custom exercise")
                 }
             }
             .sheet(isPresented: $showingCustom) {

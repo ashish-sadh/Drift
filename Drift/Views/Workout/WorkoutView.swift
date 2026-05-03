@@ -312,6 +312,7 @@ struct WorkoutView: View {
                         .font(.body.weight(.semibold))
                         .foregroundStyle(Theme.accent)
                 }
+                .accessibilityLabel("Back")
             }
         }
         .sheet(isPresented: $showingNewWorkout) {
