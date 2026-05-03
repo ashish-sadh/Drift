@@ -475,10 +475,13 @@ public enum ToolRanker {
         )
 
         p["supplement_insight"] = ToolProfile(
-            triggers: [("adherence", 3.5), ("how consistent", 3), ("missed", 2.5),
+            triggers: [("adherence", 3.5), ("how consistent", 3), ("missed", 2.5), ("miss", 2.0),
                        ("supplement streak", 4), ("vitamin streak", 3.5),
                        ("how's my vitamin", 3), ("supplement insight", 4),
-                       ("am i consistent", 2.5), ("consistency", 2)],
+                       ("am i consistent", 2.5), ("consistency", 2),
+                       // "did i miss" overrides logBoost penalty — net 5.5-1=4.5 beats mark_supplement 2.0
+                       ("did i miss", 5.5), ("did i forget to take", 5.5),
+                       ("forget to take", 4.0), ("miss any", 3.5)],
             logBoost: -1, queryBoost: 2,
             screens: [.supplements: 0.5],
             antiKeywords: ["add", "took", "take", "log"]

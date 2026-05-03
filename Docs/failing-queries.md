@@ -11,13 +11,14 @@ Real queries that don't work well. Fix systematically, then move to Fixed.
 
 ## Failing
 
-### Supplement Insight Routing
-- **"did I miss any magnesium doses"** — Routes to `mark_supplement` instead of `supplement_insight`. Root cause: `classifyIntent` includes `"did"` in `logVerbs` (ToolRanker.swift:229), so the intent is classified as `.log`, giving `mark_supplement` a +2 logBoost. `supplement_insight` has a `"missed"` trigger but not `"miss"` (word form), and its `-1` logBoost on a `.log` intent drops it below zero. Fix tier: 0 — add `"did i miss"` as a multi-word trigger for `supplement_insight` (score ≥ 4.5 to overcome logBoost gap). Variants: "have I logged zinc this week" (same issue — "have" not in logVerbs so actually routes OK), "did I forget to take magnesium".
 
 ### Medication History Queries
 - **"when did I last take my ozempic shot"** — CATEGORY: medication history / last-dose lookup. `log_medication` exists for logging but there is no query/history tool. Query routes to `log_medication` (high score due to "ozempic" trigger), which logs another dose instead of returning last-dose time. `MedicationService.lastDoseTime(for:)` has the data but nothing surfaces it in the AI pipeline. Fix tier: 2 (add `medication_info` tool backed by `MedicationService.lastDoseTime`/`weekMedications`). Variants: "how many times did I take metformin this week", "what time did I inject semaglutide", "am I consistent with my GLP-1 shots".
 
 ## Fixed
+
+### Cycle (2026-05-03)
+- [x] **"did I miss any magnesium doses"** — `supplement_insight` routing fix. Added `("did i miss", 5.5)`, `("did i forget to take", 5.5)`, `("forget to take", 4.0)`, `("miss any", 3.5)`, `("miss", 2.0)` triggers. Net score 4.5 beats `mark_supplement` 2.0 even with -1 logBoost from "did" being in logVerbs. Variants: "did I forget to take magnesium", "miss any zinc doses".
 
 ### Cycle 8666–8789
 - [x] **"how much fiber did I eat today"** — `food_info` handler now checks `query.contains("fiber")` and returns `n.fiberG` from the daily nutrition summary, with a 25g default target. `02b6c27`. Variants: "how much sodium today", "what's my sugar intake".
