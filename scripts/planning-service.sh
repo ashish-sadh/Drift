@@ -90,6 +90,14 @@ cmd_validate() {
     local N
     N=$(get_issue_number) || exit 1
 
+    # If the planning issue is already closed, validation is moot — exit cleanly.
+    local ISSUE_STATE
+    ISSUE_STATE=$(gh issue view "$N" --json state --jq '.state' 2>/dev/null || echo "open")
+    if [[ "${ISSUE_STATE,,}" == "closed" ]]; then
+        echo "planning-service: planning issue #$N is closed — skipping validation"
+        exit 0
+    fi
+
     local BODY
     BODY=$(gh issue view "$N" --json body --jq '.body' 2>/dev/null || echo "")
 
