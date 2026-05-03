@@ -78,4 +78,26 @@ struct AIToolAgentTelemetryTests {
         out.clarificationOptions = [ClarificationOption(id: 1, label: "A", tool: "log_food", params: [:])]
         #expect(AIToolAgent.telemetryIntent(for: out) == .clarification)
     }
+
+    @Test func intentForClassifierIsText() {
+        let out = AgentOutput(text: "Hi!", action: nil, toolsCalled: ["classifier"], didFail: false)
+        #expect(AIToolAgent.telemetryIntent(for: out) == .text)
+    }
+
+    @Test func intentForClarifierToolIsClarification() {
+        let out = AgentOutput(text: "which one?", action: nil, toolsCalled: ["clarifier"], didFail: false)
+        #expect(AIToolAgent.telemetryIntent(for: out) == .clarification)
+    }
+
+    @Test func intentForEmptyToolsIsNil() {
+        let out = AgentOutput(text: "hello", action: nil, toolsCalled: [], didFail: false)
+        #expect(AIToolAgent.telemetryIntent(for: out) == nil)
+    }
+
+    @Test func clarificationOptionsBeatsToolsCalled() {
+        // clarificationOptions non-empty → always .clarification, regardless of toolsCalled
+        var out = AgentOutput(text: "which?", action: nil, toolsCalled: ["log_food"], didFail: false)
+        out.clarificationOptions = [ClarificationOption(id: 1, label: "A", tool: "log_food", params: [:])]
+        #expect(AIToolAgent.telemetryIntent(for: out) == .clarification)
+    }
 }
