@@ -56145,5 +56145,614 @@
       "cardamom"
     ],
     "nova_group": 1
+  },
+  {
+    "name": "Zhajiangmian (Beijing noodles with bean paste)",
+    "category": "Chinese",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 500,
+    "protein_g": 18.0,
+    "carbs_g": 70.0,
+    "fat_g": 12.0,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "noodles",
+      "ground pork",
+      "doubanjiang",
+      "soybean paste",
+      "cucumber",
+      "sesame oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Beef Chow Fun (stir-fried rice noodles with beef)",
+    "category": "Chinese",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 450,
+    "protein_g": 22.0,
+    "carbs_g": 55.0,
+    "fat_g": 14.0,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "rice noodles",
+      "beef",
+      "bean sprouts",
+      "scallions",
+      "soy sauce",
+      "oyster sauce",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Hong Kong Milk Tea",
+    "category": "Chinese",
+    "serving_size": 240,
+    "serving_unit": "ml",
+    "calories": 80,
+    "protein_g": 3.0,
+    "carbs_g": 13.0,
+    "fat_g": 2.0,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "black tea",
+      "evaporated milk",
+      "condensed milk"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Ratatouille",
+    "category": "French",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 150,
+    "protein_g": 3.0,
+    "carbs_g": 18.0,
+    "fat_g": 8.0,
+    "fiber_g": 4.5,
+    "ingredients": [
+      "eggplant",
+      "zucchini",
+      "tomato",
+      "bell pepper",
+      "onion",
+      "olive oil",
+      "garlic",
+      "herbs"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Bouillabaisse",
+    "category": "French",
+    "serving_size": 300,
+    "serving_unit": "ml",
+    "calories": 220,
+    "protein_g": 22.0,
+    "carbs_g": 10.0,
+    "fat_g": 8.0,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "fish",
+      "shellfish",
+      "tomato",
+      "saffron",
+      "fennel",
+      "olive oil",
+      "garlic",
+      "bread"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Croque Monsieur",
+    "category": "French",
+    "serving_size": 180,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 18.0,
+    "carbs_g": 28.0,
+    "fat_g": 20.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "bread",
+      "ham",
+      "gruyere cheese",
+      "bechamel sauce",
+      "butter",
+      "dijon mustard"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Quiche Lorraine",
+    "category": "French",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 400,
+    "protein_g": 14.0,
+    "carbs_g": 28.0,
+    "fat_g": 26.0,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "pastry crust",
+      "eggs",
+      "cream",
+      "bacon",
+      "gruyere cheese",
+      "nutmeg"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Boeuf Bourguignon",
+    "category": "French",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 350,
+    "protein_g": 30.0,
+    "carbs_g": 18.0,
+    "fat_g": 16.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "beef",
+      "red wine",
+      "bacon",
+      "mushrooms",
+      "pearl onions",
+      "carrots",
+      "thyme",
+      "bay leaf"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Gado-gado (Indonesian peanut salad)",
+    "category": "Indonesian",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 350,
+    "protein_g": 12.0,
+    "carbs_g": 35.0,
+    "fat_g": 18.0,
+    "fiber_g": 6.0,
+    "ingredients": [
+      "vegetables",
+      "tofu",
+      "tempeh",
+      "hard boiled egg",
+      "peanut sauce",
+      "rice cake"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Sayur Lodeh (Indonesian coconut vegetable soup)",
+    "category": "Indonesian",
+    "serving_size": 250,
+    "serving_unit": "ml",
+    "calories": 150,
+    "protein_g": 4.0,
+    "carbs_g": 16.0,
+    "fat_g": 8.0,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "long beans",
+      "eggplant",
+      "chayote",
+      "tofu",
+      "coconut milk",
+      "shrimp paste",
+      "lemongrass"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Tempe Orek (sweet soy-glazed tempeh)",
+    "category": "Indonesian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 16.0,
+    "carbs_g": 22.0,
+    "fat_g": 14.0,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "tempeh",
+      "kecap manis",
+      "chili",
+      "shallots",
+      "garlic",
+      "oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Otak-otak (grilled spiced fish cake)",
+    "category": "Indonesian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 140,
+    "protein_g": 10.0,
+    "carbs_g": 10.0,
+    "fat_g": 7.0,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "fish paste",
+      "coconut milk",
+      "lemongrass",
+      "galangal",
+      "chili",
+      "banana leaf"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Bolani (Afghan stuffed flatbread)",
+    "category": "Afghan",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 250,
+    "protein_g": 7.0,
+    "carbs_g": 38.0,
+    "fat_g": 7.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "flatbread",
+      "potato",
+      "leek",
+      "cilantro",
+      "chili",
+      "oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Shorwa (Afghan lamb and vegetable stew)",
+    "category": "Afghan",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 18.0,
+    "carbs_g": 12.0,
+    "fat_g": 10.0,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "lamb",
+      "potato",
+      "tomato",
+      "onion",
+      "chickpeas",
+      "turmeric",
+      "coriander"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Ashak (Afghan leek dumplings)",
+    "category": "Afghan",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 300,
+    "protein_g": 14.0,
+    "carbs_g": 36.0,
+    "fat_g": 10.0,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "dumpling wrapper",
+      "leek",
+      "chives",
+      "ground beef",
+      "tomato sauce",
+      "yogurt",
+      "dried mint"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Black Pudding",
+    "category": "British",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 300,
+    "protein_g": 13.0,
+    "carbs_g": 20.0,
+    "fat_g": 20.0,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "pig's blood",
+      "oats",
+      "pork fat",
+      "onion",
+      "spices"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Cornish Pasty",
+    "category": "British",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 500,
+    "protein_g": 20.0,
+    "carbs_g": 55.0,
+    "fat_g": 20.0,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "shortcrust pastry",
+      "beef skirt",
+      "potato",
+      "swede",
+      "onion",
+      "salt",
+      "pepper"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Bubble and Squeak",
+    "category": "British",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 170,
+    "protein_g": 4.0,
+    "carbs_g": 22.0,
+    "fat_g": 7.0,
+    "fiber_g": 3.5,
+    "ingredients": [
+      "potato",
+      "cabbage",
+      "Brussels sprouts",
+      "onion",
+      "oil",
+      "butter"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Żurek (Polish sour rye soup)",
+    "category": "Polish",
+    "serving_size": 300,
+    "serving_unit": "ml",
+    "calories": 180,
+    "protein_g": 8.0,
+    "carbs_g": 18.0,
+    "fat_g": 8.0,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "sour rye starter",
+      "sausage",
+      "hard boiled egg",
+      "potato",
+      "horseradish",
+      "garlic"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Kopytka (Polish potato dumplings)",
+    "category": "Polish",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 230,
+    "protein_g": 5.0,
+    "carbs_g": 40.0,
+    "fat_g": 6.0,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "potato",
+      "flour",
+      "egg",
+      "salt",
+      "butter"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Gołąbki (Polish stuffed cabbage rolls)",
+    "category": "Polish",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 16.0,
+    "carbs_g": 22.0,
+    "fat_g": 14.0,
+    "fiber_g": 3.5,
+    "ingredients": [
+      "cabbage",
+      "ground pork",
+      "rice",
+      "onion",
+      "tomato sauce",
+      "paprika"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Shish Taouk (Lebanese grilled chicken skewers)",
+    "category": "Levantine",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 230,
+    "protein_g": 28.0,
+    "carbs_g": 4.0,
+    "fat_g": 11.0,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "chicken",
+      "yogurt",
+      "lemon",
+      "garlic",
+      "paprika",
+      "cumin",
+      "turmeric"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Chermoula (Moroccan herb sauce)",
+    "category": "North African",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 80,
+    "protein_g": 1.0,
+    "carbs_g": 2.0,
+    "fat_g": 8.0,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "cilantro",
+      "parsley",
+      "garlic",
+      "cumin",
+      "paprika",
+      "lemon juice",
+      "olive oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Sfenj (Moroccan doughnuts)",
+    "category": "North African",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 200,
+    "protein_g": 4.0,
+    "carbs_g": 28.0,
+    "fat_g": 9.0,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "flour",
+      "yeast",
+      "water",
+      "salt",
+      "oil for frying"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Mohinga (Burmese fish noodle soup)",
+    "category": "Asian",
+    "serving_size": 350,
+    "serving_unit": "ml",
+    "calories": 300,
+    "protein_g": 16.0,
+    "carbs_g": 38.0,
+    "fat_g": 8.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "rice noodles",
+      "catfish",
+      "lemongrass",
+      "ginger",
+      "shrimp paste",
+      "banana stem",
+      "egg",
+      "fish sauce"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Laphet Thoke (Burmese tea leaf salad)",
+    "category": "Asian",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 250,
+    "protein_g": 8.0,
+    "carbs_g": 18.0,
+    "fat_g": 16.0,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "fermented tea leaves",
+      "fried garlic",
+      "fried peas",
+      "sesame seeds",
+      "tomato",
+      "green chili",
+      "lime juice"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Nasi Padang (Indonesian/Malaysian mixed rice plate)",
+    "category": "Malaysian",
+    "serving_size": 350,
+    "serving_unit": "g",
+    "calories": 600,
+    "protein_g": 28.0,
+    "carbs_g": 75.0,
+    "fat_g": 20.0,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "rice",
+      "rendang",
+      "sambal",
+      "vegetables",
+      "egg",
+      "fried tofu"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Laksa Lemak (creamy coconut curry noodle soup)",
+    "category": "Malaysian",
+    "serving_size": 400,
+    "serving_unit": "ml",
+    "calories": 450,
+    "protein_g": 18.0,
+    "carbs_g": 45.0,
+    "fat_g": 20.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "rice noodles",
+      "coconut milk",
+      "shrimp",
+      "tofu",
+      "bean sprouts",
+      "laksa paste",
+      "fish cake"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Gaeng Keow Wan (Thai green curry)",
+    "category": "Thai",
+    "serving_size": 250,
+    "serving_unit": "ml",
+    "calories": 350,
+    "protein_g": 22.0,
+    "carbs_g": 12.0,
+    "fat_g": 22.0,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "coconut milk",
+      "chicken",
+      "green curry paste",
+      "Thai eggplant",
+      "bamboo shoots",
+      "Thai basil",
+      "kaffir lime leaves"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Teh Tarik (Malaysian pulled milk tea)",
+    "category": "Malaysian",
+    "serving_size": 240,
+    "serving_unit": "ml",
+    "calories": 100,
+    "protein_g": 3.0,
+    "carbs_g": 15.0,
+    "fat_g": 3.0,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "black tea",
+      "condensed milk",
+      "evaporated milk"
+    ],
+    "nova_group": 3
   }
 ]
