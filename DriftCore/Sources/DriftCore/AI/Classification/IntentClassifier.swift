@@ -189,7 +189,7 @@ public enum IntentClassifier {
         "delete", "remove", "undo", "edit", "change", "update",
         "replace", "swap", "the one", "the first", "the second",
         "the last", "the 500", "just logged", "just added",
-        "instead", "actually i had", "no, i had", "no i had",
+        "instead", "actually i had", "actually i took", "no, i had", "no i had",
         "wait it was", "wait, it was", "no, that was", "no that was",
         "that was actually", "replace that with", "not that"
     ]
