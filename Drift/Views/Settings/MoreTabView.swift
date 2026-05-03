@@ -449,6 +449,29 @@ struct SettingsView: View {
                 }
                 .card()
 
+                // Medication Dose Reminders — #592
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "pill.circle")
+                            .foregroundStyle(Theme.accent).frame(width: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Medication Dose Reminders").font(.subheadline.weight(.medium))
+                            Text("Quiet nudge ~2h after your typical dose time, only if you haven't logged it yet today")
+                                .font(.caption2).foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        Toggle("", isOn: Binding(
+                            get: { Preferences.medicationRemindersEnabled },
+                            set: {
+                                Preferences.medicationRemindersEnabled = $0
+                                Task { await NotificationService.refreshScheduledAlerts() }
+                            }
+                        ))
+                        .labelsHidden().tint(Theme.accent)
+                    }
+                }
+                .card()
+
                 // AI Chat Telemetry (opt-in, local only) — #261
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 12) {

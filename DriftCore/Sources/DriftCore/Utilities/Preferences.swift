@@ -87,6 +87,18 @@ public enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: mealRemindersKey) }
     }
 
+    // MARK: - Medication Reminders
+
+    private static let medicationRemindersKey = "drift_medication_reminders"
+
+    /// Smart medication reminders: contextual dose nudge fired ~2h after the
+    /// user's typical log time, only when they've logged a medication 3+ times
+    /// (consistent pattern) and haven't logged it yet today. Default OFF. #592.
+    public static var medicationRemindersEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: medicationRemindersKey) }
+        set { UserDefaults.standard.set(newValue, forKey: medicationRemindersKey) }
+    }
+
     // MARK: - Conversation History
 
     private static let conversationHistoryEnabledKey = "drift_conversation_history_enabled"

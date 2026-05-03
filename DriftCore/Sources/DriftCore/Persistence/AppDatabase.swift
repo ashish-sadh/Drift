@@ -459,6 +459,32 @@ extension AppDatabase {
                 .fetchAll(db)
         }
     }
+
+    /// Fetch all logs for a named medication within the last `days` days.
+    /// Used by MedicationService to compute typical dose time for reminders.
+    public func fetchMedications(for name: String, days: Int) throws -> [DailyMedication] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        let cutoffStr = ISO8601DateFormatter().string(from: cutoff)
+        return try dbWriter.read { db in
+            try DailyMedication
+                .filter(sql: "LOWER(name) = LOWER(?) AND logged_at >= ?", arguments: [name, cutoffStr])
+                .order(Column("logged_at").desc)
+                .fetchAll(db)
+        }
+    }
+
+    /// Fetch all medication logs within the last `days` days, across all names.
+    /// Used by MedicationService to identify consistently-logged medications.
+    public func fetchAllRecentMedications(days: Int) throws -> [DailyMedication] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        let cutoffStr = ISO8601DateFormatter().string(from: cutoff)
+        return try dbWriter.read { db in
+            try DailyMedication
+                .filter(sql: "logged_at >= ?", arguments: [cutoffStr])
+                .order(Column("logged_at").desc)
+                .fetchAll(db)
+        }
+    }
 }
 
 // MARK: - Glucose Operations
