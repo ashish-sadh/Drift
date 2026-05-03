@@ -54906,5 +54906,620 @@
       "saffron"
     ],
     "nova_group": 1
+  },
+  {
+    "name": "Budae Jjigae (Army Stew)",
+    "category": "Korean",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 24,
+    "carbs_g": 38,
+    "fat_g": 14,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "spam",
+      "sausage",
+      "kimchi",
+      "ramen noodles",
+      "tofu",
+      "baked beans",
+      "gochugaru",
+      "garlic"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Jjamppong (Spicy Seafood Noodle Soup)",
+    "category": "Korean",
+    "serving_size": 500,
+    "serving_unit": "g",
+    "calories": 350,
+    "protein_g": 18,
+    "carbs_g": 52,
+    "fat_g": 8,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "wheat noodles",
+      "squid",
+      "shrimp",
+      "mussels",
+      "cabbage",
+      "gochugaru",
+      "garlic",
+      "sesame oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Oi Muchim (Spicy Cucumber Kimchi)",
+    "category": "Korean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 35,
+    "protein_g": 1,
+    "carbs_g": 7,
+    "fat_g": 0.5,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "cucumber",
+      "gochugaru",
+      "garlic",
+      "green onion",
+      "sesame oil",
+      "fish sauce",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Sigeumchi Namul (Seasoned Spinach)",
+    "category": "Korean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 50,
+    "protein_g": 3,
+    "carbs_g": 6,
+    "fat_g": 2,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "spinach",
+      "sesame oil",
+      "garlic",
+      "soy sauce",
+      "sesame seeds",
+      "green onion"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kkakdugi (Cubed Radish Kimchi)",
+    "category": "Korean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 25,
+    "protein_g": 1,
+    "carbs_g": 5,
+    "fat_g": 0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "korean radish",
+      "gochugaru",
+      "garlic",
+      "ginger",
+      "fish sauce",
+      "green onion",
+      "sugar"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Gyeran Mari (Korean Rolled Omelette)",
+    "category": "Korean",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 140,
+    "protein_g": 10,
+    "carbs_g": 2,
+    "fat_g": 10,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "eggs",
+      "green onion",
+      "carrot",
+      "salt",
+      "sesame oil",
+      "oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Hotteok (Sweet Stuffed Pancake)",
+    "category": "Korean",
+    "serving_size": 70,
+    "serving_unit": "g",
+    "calories": 180,
+    "protein_g": 3,
+    "carbs_g": 30,
+    "fat_g": 6,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "flour",
+      "yeast",
+      "brown sugar",
+      "cinnamon",
+      "chopped peanuts",
+      "oil",
+      "milk"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Odeng (Fish Cake Skewer)",
+    "category": "Korean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 100,
+    "protein_g": 8,
+    "carbs_g": 12,
+    "fat_g": 2.5,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "fish cake",
+      "flour",
+      "starch",
+      "egg white",
+      "soy sauce broth"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Songpyeon (Half-Moon Rice Cake)",
+    "category": "Korean",
+    "serving_size": 50,
+    "serving_unit": "g",
+    "calories": 120,
+    "protein_g": 2,
+    "carbs_g": 25,
+    "fat_g": 1.5,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "glutinous rice flour",
+      "sesame seeds",
+      "honey",
+      "pine needles",
+      "sugar"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Gamjatang (Pork Bone & Potato Stew)",
+    "category": "Korean",
+    "serving_size": 500,
+    "serving_unit": "g",
+    "calories": 400,
+    "protein_g": 30,
+    "carbs_g": 24,
+    "fat_g": 20,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "pork spine",
+      "potato",
+      "napa cabbage",
+      "perilla leaves",
+      "gochugaru",
+      "doenjang",
+      "garlic"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Galbitang (Short Rib Soup)",
+    "category": "Korean",
+    "serving_size": 500,
+    "serving_unit": "g",
+    "calories": 350,
+    "protein_g": 28,
+    "carbs_g": 10,
+    "fat_g": 22,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "beef short ribs",
+      "daikon radish",
+      "green onion",
+      "garlic",
+      "salt",
+      "rice noodles"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Danmuji (Yellow Pickled Radish)",
+    "category": "Korean",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 15,
+    "protein_g": 0,
+    "carbs_g": 4,
+    "fat_g": 0,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "daikon radish",
+      "turmeric",
+      "vinegar",
+      "sugar",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Jangjorim (Soy-Braised Beef)",
+    "category": "Korean",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 150,
+    "protein_g": 20,
+    "carbs_g": 6,
+    "fat_g": 5,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "beef brisket",
+      "soy sauce",
+      "sugar",
+      "garlic",
+      "ginger",
+      "quail eggs",
+      "shishito peppers"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Bindaetteok (Mung Bean Pancake)",
+    "category": "Korean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 200,
+    "protein_g": 9,
+    "carbs_g": 22,
+    "fat_g": 9,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "mung beans",
+      "pork",
+      "kimchi",
+      "green onion",
+      "garlic",
+      "sesame oil",
+      "oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Korean Corn Dog",
+    "category": "Korean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 8,
+    "carbs_g": 32,
+    "fat_g": 14,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "hotdog",
+      "mozzarella",
+      "rice flour batter",
+      "panko",
+      "sugar",
+      "ketchup",
+      "mustard",
+      "oil"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Patbingsu (Red Bean Shaved Ice)",
+    "category": "Korean",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 5,
+    "carbs_g": 58,
+    "fat_g": 4,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "shaved ice",
+      "sweetened red beans",
+      "rice cake",
+      "condensed milk",
+      "mochi",
+      "ice cream"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Kimchi Bokkeumbap (Kimchi Fried Rice)",
+    "category": "Korean",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 350,
+    "protein_g": 10,
+    "carbs_g": 52,
+    "fat_g": 10,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "cooked rice",
+      "kimchi",
+      "pork belly",
+      "sesame oil",
+      "soy sauce",
+      "egg",
+      "green onion"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Ssamjang (Korean Dipping Sauce)",
+    "category": "Korean",
+    "serving_size": 20,
+    "serving_unit": "g",
+    "calories": 35,
+    "protein_g": 2,
+    "carbs_g": 4,
+    "fat_g": 1.5,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "doenjang",
+      "gochujang",
+      "garlic",
+      "sesame oil",
+      "green onion",
+      "sugar"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Sikhye (Sweet Rice Punch)",
+    "category": "Korean",
+    "serving_size": 250,
+    "serving_unit": "ml",
+    "calories": 110,
+    "protein_g": 1,
+    "carbs_g": 27,
+    "fat_g": 0,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "malted barley",
+      "cooked rice",
+      "sugar",
+      "ginger",
+      "water",
+      "pine nuts"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Dakdoritang (Spicy Braised Chicken)",
+    "category": "Korean",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 26,
+    "carbs_g": 14,
+    "fat_g": 14,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "chicken",
+      "potato",
+      "carrot",
+      "gochugaru",
+      "soy sauce",
+      "garlic",
+      "ginger",
+      "sugar"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Hobakjuk (Pumpkin Rice Porridge)",
+    "category": "Korean",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 160,
+    "protein_g": 3,
+    "carbs_g": 32,
+    "fat_g": 2,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "kabocha squash",
+      "glutinous rice flour",
+      "sugar",
+      "salt",
+      "water"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Gamja Jeon (Potato Pancake)",
+    "category": "Korean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 190,
+    "protein_g": 4,
+    "carbs_g": 28,
+    "fat_g": 7,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "grated potato",
+      "starch",
+      "salt",
+      "oil",
+      "green onion"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kimchi Jeon (Kimchi Pancake)",
+    "category": "Korean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 200,
+    "protein_g": 5,
+    "carbs_g": 26,
+    "fat_g": 9,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "kimchi",
+      "flour",
+      "egg",
+      "green onion",
+      "gochugaru",
+      "oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Gukbap (Rice in Bone Broth)",
+    "category": "Korean",
+    "serving_size": 400,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 18,
+    "carbs_g": 48,
+    "fat_g": 6,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "cooked rice",
+      "pork bone broth",
+      "pork brisket",
+      "green onion",
+      "salt",
+      "doenjang"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Yachae Bokkeum (Stir-Fried Vegetables)",
+    "category": "Korean",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 90,
+    "protein_g": 3,
+    "carbs_g": 12,
+    "fat_g": 4,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "zucchini",
+      "carrot",
+      "onion",
+      "mushroom",
+      "bell pepper",
+      "soy sauce",
+      "sesame oil",
+      "garlic"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Ddeok Galbi (Grilled Beef Patties)",
+    "category": "Korean",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 200,
+    "protein_g": 16,
+    "carbs_g": 8,
+    "fat_g": 12,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "ground beef",
+      "soy sauce",
+      "sugar",
+      "sesame oil",
+      "garlic",
+      "ginger",
+      "green onion"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Tteok (Plain Steamed Rice Cake)",
+    "category": "Korean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 3,
+    "carbs_g": 50,
+    "fat_g": 0.5,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "rice flour",
+      "water",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Eomuk Bokkeum (Stir-Fried Fish Cake)",
+    "category": "Korean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 120,
+    "protein_g": 9,
+    "carbs_g": 14,
+    "fat_g": 3,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "fish cake",
+      "bell pepper",
+      "onion",
+      "carrot",
+      "soy sauce",
+      "sugar",
+      "sesame oil",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Ojingeo Bokkeum (Spicy Stir-Fried Squid)",
+    "category": "Korean",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 160,
+    "protein_g": 18,
+    "carbs_g": 10,
+    "fat_g": 5,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "squid",
+      "gochugaru",
+      "gochujang",
+      "garlic",
+      "onion",
+      "green onion",
+      "sesame oil",
+      "soy sauce"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Baechu Kimchi (Napa Cabbage Kimchi)",
+    "category": "Korean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 30,
+    "protein_g": 2,
+    "carbs_g": 5,
+    "fat_g": 0.5,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "napa cabbage",
+      "gochugaru",
+      "garlic",
+      "ginger",
+      "fish sauce",
+      "green onion",
+      "salt"
+    ],
+    "nova_group": 1
   }
 ]
