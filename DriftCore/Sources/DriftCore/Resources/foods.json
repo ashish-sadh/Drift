@@ -56754,5 +56754,530 @@
       "evaporated milk"
     ],
     "nova_group": 3
+  },
+  {
+    "name": "Makhana (Fox Nuts)",
+    "category": "Indian Snacks",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 347,
+    "protein_g": 9.7,
+    "carbs_g": 76.9,
+    "fat_g": 0.1,
+    "fiber_g": 14.5,
+    "ingredients": [
+      "fox nuts",
+      "lotus seeds"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Makhana (Fox Nuts, per cup)",
+    "category": "Indian Snacks",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 104,
+    "protein_g": 2.9,
+    "carbs_g": 23.1,
+    "fat_g": 0.0,
+    "fiber_g": 4.4,
+    "ingredients": [
+      "fox nuts",
+      "lotus seeds"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Sattu (Roasted Gram Flour)",
+    "category": "Indian Staples",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 406,
+    "protein_g": 22.5,
+    "carbs_g": 65.2,
+    "fat_g": 6.0,
+    "fiber_g": 18.6,
+    "ingredients": [
+      "roasted chickpeas",
+      "roasted barley"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Sattu (Roasted Gram Flour, 1 tbsp)",
+    "category": "Indian Staples",
+    "serving_size": 10,
+    "serving_unit": "g",
+    "calories": 41,
+    "protein_g": 2.3,
+    "carbs_g": 6.5,
+    "fat_g": 0.6,
+    "fiber_g": 1.9,
+    "ingredients": [
+      "roasted chickpeas",
+      "roasted barley"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "MuscleBlaze Whey Gold (1 scoop)",
+    "category": "Indian Branded Protein",
+    "serving_size": 36,
+    "serving_unit": "g",
+    "calories": 130,
+    "protein_g": 25.0,
+    "carbs_g": 3.0,
+    "fat_g": 2.5,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "whey protein concentrate",
+      "whey protein isolate",
+      "cocoa powder",
+      "flavours"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "AS-IT-IS Whey Protein (1 scoop)",
+    "category": "Indian Branded Protein",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 112,
+    "protein_g": 24.0,
+    "carbs_g": 1.5,
+    "fat_g": 1.0,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "whey protein concentrate"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Moth Dal (Matki, cooked)",
+    "category": "Indian Dals",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 107,
+    "protein_g": 7.0,
+    "carbs_g": 19.0,
+    "fat_g": 0.4,
+    "fiber_g": 4.5,
+    "ingredients": [
+      "moth beans"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kala Chana (Black Chickpeas, boiled)",
+    "category": "Indian Dals",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 164,
+    "protein_g": 9.0,
+    "carbs_g": 27.4,
+    "fat_g": 2.6,
+    "fiber_g": 7.6,
+    "ingredients": [
+      "black chickpeas"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Masoor Sprouts (Lentil Sprouts)",
+    "category": "Indian Sprouts",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 106,
+    "protein_g": 9.0,
+    "carbs_g": 22.1,
+    "fat_g": 0.5,
+    "fiber_g": 6.0,
+    "ingredients": [
+      "red lentils"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Horse Gram (Kulthi Dal, cooked)",
+    "category": "Indian Dals",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 114,
+    "protein_g": 6.8,
+    "carbs_g": 20.3,
+    "fat_g": 0.5,
+    "fiber_g": 5.0,
+    "ingredients": [
+      "horse gram"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Kali Dal (Whole Urad Dal, cooked)",
+    "category": "Indian Dals",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 127,
+    "protein_g": 9.0,
+    "carbs_g": 23.0,
+    "fat_g": 0.4,
+    "fiber_g": 3.5,
+    "ingredients": [
+      "whole black lentils"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Palak Dal (Spinach Lentil Curry)",
+    "category": "Indian Dals",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 120,
+    "protein_g": 7.0,
+    "carbs_g": 18.0,
+    "fat_g": 2.5,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "toor dal",
+      "spinach",
+      "onion",
+      "tomato",
+      "spices",
+      "ghee"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Moong Dal Khichdi",
+    "category": "Indian Khichdi",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 220,
+    "protein_g": 9.5,
+    "carbs_g": 40.0,
+    "fat_g": 3.5,
+    "fiber_g": 3.5,
+    "ingredients": [
+      "moong dal",
+      "rice",
+      "ghee",
+      "cumin",
+      "turmeric",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Basa Fish (cooked)",
+    "category": "Seafood",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 90,
+    "protein_g": 19.0,
+    "carbs_g": 0.0,
+    "fat_g": 1.5,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "basa fish"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Tandoori Prawns (per piece)",
+    "category": "Indian Seafood",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 28,
+    "protein_g": 5.5,
+    "carbs_g": 0.5,
+    "fat_g": 0.5,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "prawns",
+      "yogurt",
+      "tandoori masala",
+      "lemon"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Bheja Fry (Goat Brain Fry)",
+    "category": "Indian Non-Veg",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 218,
+    "protein_g": 12.6,
+    "carbs_g": 2.8,
+    "fat_g": 17.8,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "goat brain",
+      "onion",
+      "tomato",
+      "spices",
+      "oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Chicken Liver Masala",
+    "category": "Indian Non-Veg",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 165,
+    "protein_g": 20.0,
+    "carbs_g": 5.0,
+    "fat_g": 7.5,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "chicken liver",
+      "onion",
+      "tomato",
+      "spices",
+      "oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Dahi Chicken (Yogurt Chicken Curry)",
+    "category": "Indian Chicken",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 285,
+    "protein_g": 30.0,
+    "carbs_g": 6.0,
+    "fat_g": 16.0,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "chicken",
+      "dahi",
+      "onion",
+      "spices",
+      "oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Methi Chicken (Fenugreek Chicken)",
+    "category": "Indian Chicken",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 28.0,
+    "carbs_g": 8.0,
+    "fat_g": 14.0,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "chicken",
+      "fenugreek leaves",
+      "onion",
+      "tomato",
+      "spices",
+      "oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Hariyali Chicken (Green Chicken Curry)",
+    "category": "Indian Chicken",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 250,
+    "protein_g": 28.0,
+    "carbs_g": 5.0,
+    "fat_g": 13.0,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "chicken",
+      "mint",
+      "coriander",
+      "spinach",
+      "onion",
+      "spices",
+      "oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Malabar Chicken Curry",
+    "category": "South Indian Non-Veg",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 290,
+    "protein_g": 24.0,
+    "carbs_g": 8.0,
+    "fat_g": 19.0,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "chicken",
+      "coconut milk",
+      "onion",
+      "tomato",
+      "Kerala spices",
+      "coconut oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Rogan Josh (Kashmiri Lamb Curry)",
+    "category": "Indian Non-Veg",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 320,
+    "protein_g": 24.0,
+    "carbs_g": 7.0,
+    "fat_g": 22.0,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "lamb",
+      "yogurt",
+      "Kashmiri red chilli",
+      "whole spices",
+      "mustard oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Dhansak (Parsi Lentil Mutton Curry)",
+    "category": "Indian Non-Veg",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 360,
+    "protein_g": 22.0,
+    "carbs_g": 35.0,
+    "fat_g": 14.0,
+    "fiber_g": 6.0,
+    "ingredients": [
+      "mutton",
+      "toor dal",
+      "masoor dal",
+      "mixed vegetables",
+      "Dhansak masala"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Paneer Kalimirch (Black Pepper Paneer)",
+    "category": "Indian Paneer Dishes",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 245,
+    "protein_g": 14.0,
+    "carbs_g": 5.0,
+    "fat_g": 19.0,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "paneer",
+      "black pepper",
+      "cream",
+      "onion",
+      "spices"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Lobia Sundal (Black-Eyed Pea Stir Fry)",
+    "category": "South Indian",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 120,
+    "protein_g": 7.5,
+    "carbs_g": 19.5,
+    "fat_g": 2.0,
+    "fiber_g": 6.0,
+    "ingredients": [
+      "black-eyed peas",
+      "coconut",
+      "mustard seeds",
+      "curry leaves",
+      "oil"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Poha with Sprouts (Protein Poha)",
+    "category": "Indian Breakfast",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 10.0,
+    "carbs_g": 40.0,
+    "fat_g": 5.0,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "flattened rice",
+      "moong sprouts",
+      "peanuts",
+      "onion",
+      "mustard seeds",
+      "curry leaves"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Multigrain Roti",
+    "category": "Indian Breads",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 90,
+    "protein_g": 3.5,
+    "carbs_g": 16.5,
+    "fat_g": 1.5,
+    "fiber_g": 2.5,
+    "ingredients": [
+      "whole wheat flour",
+      "soy flour",
+      "flaxseed",
+      "oat flour"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Makki Roti (Cornmeal Roti)",
+    "category": "Indian Breads",
+    "serving_size": 60,
+    "serving_unit": "g",
+    "calories": 158,
+    "protein_g": 3.0,
+    "carbs_g": 32.0,
+    "fat_g": 2.0,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "maize flour",
+      "water",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Amul Gold Milk (full cream)",
+    "category": "Dairy",
+    "serving_size": 250,
+    "serving_unit": "ml",
+    "calories": 175,
+    "protein_g": 8.5,
+    "carbs_g": 12.5,
+    "fat_g": 10.5,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "full cream milk"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Amul Greek Yogurt",
+    "category": "Dairy",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 105,
+    "protein_g": 10.0,
+    "carbs_g": 9.5,
+    "fat_g": 3.5,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "skimmed milk",
+      "live cultures"
+    ],
+    "nova_group": 1
   }
 ]
