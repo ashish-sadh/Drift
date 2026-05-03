@@ -366,19 +366,25 @@ struct AIChatView: View {
 
             VStack(alignment: .leading, spacing: 4) {
                 TypingDotsView()
-                let stageLabel: String = switch vm.generatingState {
+                let baseLabel: String = switch vm.generatingState {
                 case .thinking(let step): step
                 case .generating: "Writing response..."
                 case .idle: ""
                 }
-                if !stageLabel.isEmpty {
-                    Text(stageLabel)
-                        .font(.caption2).foregroundStyle(.tertiary)
-                        .id(stageLabel)
-                        .transition(.asymmetric(
-                            insertion: .opacity.combined(with: .move(edge: .bottom)),
-                            removal: .opacity
-                        ))
+                if !baseLabel.isEmpty {
+                    TimelineView(.periodic(from: .now, by: 0.1)) { context in
+                        let elapsed = vm.stageStarted.map { context.date.timeIntervalSince($0) } ?? 0
+                        let display = elapsed > 0.8
+                            ? "\(baseLabel)… \(String(format: "%.1f", elapsed))s"
+                            : baseLabel
+                        Text(display)
+                            .font(.caption2).foregroundStyle(.tertiary)
+                    }
+                    .id(baseLabel)
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .move(edge: .bottom)),
+                        removal: .opacity
+                    ))
                 }
             }
             .animation(.easeInOut(duration: 0.2), value: vm.generatingState)

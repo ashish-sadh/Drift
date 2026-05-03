@@ -10,6 +10,7 @@ final class AIChatViewModel {
     var messages: [ChatMessage] = []
     var inputText = ""
     var generatingState: GeneratingState = .idle
+    var stageStarted: Date? = nil
     var streamingMessageId: UUID? = nil
     // Incremented on each new request, then bumped again in defer to invalidate stale onStep callbacks.
     var generationEpoch: Int = 0

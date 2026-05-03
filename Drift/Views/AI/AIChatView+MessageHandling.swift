@@ -1178,6 +1178,7 @@ extension AIChatViewModel {
         let responseId = placeholder.id
         streamingMessageId = responseId
         generatingState = .thinking(step: thinkingLabel)
+        stageStarted = Date()
         generationEpoch += 1
         let myEpoch = generationEpoch
         let systemPrompt = IntentClassifier.activeSystemPrompt(backend: .remote)
@@ -1187,6 +1188,7 @@ extension AIChatViewModel {
                 if generationEpoch == myEpoch { generationEpoch += 1 }
                 streamingMessageId = nil
                 generatingState = .idle
+                stageStarted = nil
                 pendingTurnHasPhoto = false
             }
 
@@ -1417,6 +1419,7 @@ extension AIChatViewModel {
         let responseId = placeholder.id
         streamingMessageId = responseId
         generatingState = .thinking(step: "Understanding your question...")
+        stageStarted = Date()
 
         generationEpoch += 1
         let myEpoch = generationEpoch
@@ -1432,6 +1435,7 @@ extension AIChatViewModel {
                 if generationEpoch == myEpoch { generationEpoch += 1 }
                 streamingMessageId = nil
                 generatingState = .idle
+                stageStarted = nil
             }
 
             let output = await AIToolAgent.run(
@@ -1442,6 +1446,7 @@ extension AIChatViewModel {
                     Task { @MainActor in
                         guard let self, self.generationEpoch == epoch else { return }
                         self.generatingState = .thinking(step: step)
+                        self.stageStarted = Date()
                     }
                 },
                 onToken: { [weak self] token in
