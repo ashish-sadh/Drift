@@ -1,14 +1,14 @@
-# Drift — Current State (April 2026)
+# Drift — Current State (May 2026)
 
 ## Overview
 AI-first local health tracker. AI chat is the primary interface — every data entry doable through conversation. Traditional UI for visual analytics and fallback. No cloud, no accounts. Published on TestFlight as "Drift Fitness" (bundle: com.drift.health).
 
 ## Numbers
-- **Version:** 0.1.0, Build 201
-- **Tests:** ~1219 iOS DriftTests + 1039 macOS DriftCoreTests (cross-platform pure-logic suite, ~5s); LLM eval ~160+ cases in DriftLLMEvalMacOS
+- **Version:** 0.1.0, Build 203
+- **Tests:** ~1219 iOS DriftTests + 1141 macOS DriftCoreTests (cross-platform pure-logic suite, ~8s); LLM eval ~160+ cases in DriftLLMEvalMacOS
 - **AI Eval:** 400+ scenarios in eval harness + LLM eval (~130-case gold set in IntentRoutingEval)
 - **Per-tool Reliability (Gemma 4, 50-query gold set):** log_food 10/10 (100%), edit_meal 9/10 (90%, tuned +10% from 80%), log_weight 10/10 (100%), mark_supplement 10/10 (100%), food_info 9/10 (90%) — overall 48/50 (96%)
-- **Foods:** 3,335 (Indian, Mexican, Asian, Thai, Japanese, Korean, Mediterranean, Chinese, Middle Eastern, American classics, fitness staples, coffee drinks, seeds, Indo-Chinese, sushi rolls, meal prep bowls, South Indian, Indian street food, bowls, Kerala dishes, fast food India, Indian fruits, Indian regional, Maharashtrian, Odia, Assamese, Bihari, Rajasthani, Andhra, Karnataka, Goan, Himachal Pradesh, Northeast India, Sindhi, Madhya Pradesh, Coorg, Vietnamese, Latin American, African, Italian expanded, branded protein bars/shakes, bakery, soups, seafood, Bengali fish, Indian snacks, Indian drinks, Filipino, Turkish, Ethiopian, fast food US, supplements, South Indian breakfasts, Karnataka snacks, regional protein shakes, bubble tea/boba, poke bowls, acai bowls, specialty coffee, sports nutrition, Indian branded protein/whey, ayurvedic supplements, Japanese home cooking, East Asian home cooking, Mediterranean & Levantine staples, West African cuisine, French, Indonesian, Afghan, British, Polish, Levantine/Moroccan, Burmese, Malaysian)
+- **Foods:** 3,365 (Indian, Mexican, Asian, Thai, Japanese, Korean, Mediterranean, Chinese, Middle Eastern, American classics, fitness staples, coffee drinks, seeds, Indo-Chinese, sushi rolls, meal prep bowls, South Indian, Indian street food, bowls, Kerala dishes, fast food India, Indian fruits, Indian regional, Maharashtrian, Odia, Assamese, Bihari, Rajasthani, Andhra, Karnataka, Goan, Himachal Pradesh, Northeast India, Sindhi, Madhya Pradesh, Coorg, Vietnamese, Latin American, African, Italian expanded, branded protein bars/shakes, bakery, soups, seafood, Bengali fish, Indian snacks, Indian drinks, Filipino, Turkish, Ethiopian, fast food US, supplements, South Indian breakfasts, Karnataka snacks, regional protein shakes, bubble tea/boba, poke bowls, acai bowls, specialty coffee, sports nutrition, Indian branded protein/whey, ayurvedic supplements, Japanese home cooking, East Asian home cooking, Mediterranean & Levantine staples, West African cuisine, French, Indonesian, Afghan, British, Polish, Levantine/Moroccan, Burmese, Malaysian, Indian protein staples: makhana, sattu, moth dal, kala chana, masoor sprouts, horse gram, MuscleBlaze Whey Gold, AS-IT-IS Whey)
 - **Exercises:** 960 (free-exercise-db)
 - **Biomarkers:** 71 across 9 categories
 - **AI Tools:** 23 registered tools; 5 analytical insight engines active (cross_domain_insight, weight_trend_prediction, supplement_insight, food_timing_insight, sleep_food_correlation)
@@ -24,7 +24,7 @@ AI-first local health tracker. AI chat is the primary interface — every data e
 
 ## Module Layout
 
-Post-DriftCore extraction (Apr 25, 2026, build 174; updated build 201):
+Post-DriftCore extraction (Apr 25, 2026, build 174; updated build 203):
 
 - **`DriftCore/`** — Swift package, ~104 files, builds on iOS 17+ and macOS 14+. No `import UIKit/SwiftUI/HealthKit/WidgetKit/AVFoundation/Speech/Photos/AppIntents`.
   - `Models/` (28), `Persistence/` (5), `Adapters/` (4), `Utilities/` (5)
