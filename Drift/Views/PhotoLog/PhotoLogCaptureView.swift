@@ -143,6 +143,7 @@ struct PhotoLogCaptureView: View {
                         .font(.system(size: 14))
                         .foregroundStyle(Theme.textTertiary)
                 }
+                .accessibilityLabel("Dismiss tip")
             }
             HStack {
                 Spacer()
