@@ -11,11 +11,10 @@ Real queries that don't work well. Fix systematically, then move to Fixed.
 
 ## Failing
 
-
-### Medication History Queries
-- **"when did I last take my ozempic shot"** — CATEGORY: medication history / last-dose lookup. `log_medication` exists for logging but there is no query/history tool. Query routes to `log_medication` (high score due to "ozempic" trigger), which logs another dose instead of returning last-dose time. `MedicationService.lastDoseTime(for:)` has the data but nothing surfaces it in the AI pipeline. Fix tier: 2 (add `medication_info` tool backed by `MedicationService.lastDoseTime`/`weekMedications`). Variants: "how many times did I take metformin this week", "what time did I inject semaglutide", "am I consistent with my GLP-1 shots".
-
 ## Fixed
+
+### Cycle (2026-05-03)
+- [x] **"when did I last take my ozempic shot"** — Added `medication_info` tool backed by `MedicationService.lastDoseTime`/`recentDoseHours`. ToolRanker profile beats `log_medication` on history-framed queries ("when did", "last dose", "last time i took") via high-score phrase triggers + antiKeywords ("when", "last", "did", "time") on `log_medication`. Router prompt updated. 7/7 routing cases pass. Variants: "last time i took insulin", "when did i inject ozempic", "how often do i take mounjaro", "medication history".
 
 ### Cycle (2026-05-03)
 - [x] **"did I miss any magnesium doses"** — `supplement_insight` routing fix. Added `("did i miss", 5.5)`, `("did i forget to take", 5.5)`, `("forget to take", 4.0)`, `("miss any", 3.5)`, `("miss", 2.0)` triggers. Net score 4.5 beats `mark_supplement` 2.0 even with -1 logBoost from "did" being in logVerbs. Variants: "did I forget to take magnesium", "miss any zinc doses".

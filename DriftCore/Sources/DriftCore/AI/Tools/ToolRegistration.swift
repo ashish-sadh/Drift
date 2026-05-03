@@ -849,6 +849,9 @@ public enum ToolRegistration {
         // OLS regression on last 30 days → projected date + R² confidence. #402.
         WeightTrendPredictionTool.syncRegistration(registry: r)
 
+        // Medication history — last dose time, typical timing, recent pattern.
+        MedicationInfoTool.syncRegistration(registry: r)
+
         // Supplement adherence — streak, adherence %, last missed date. #417.
         SupplementInsightTool.syncRegistration(registry: r)
 

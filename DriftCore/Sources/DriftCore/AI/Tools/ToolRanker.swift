@@ -438,7 +438,24 @@ public enum ToolRanker {
                        ("took my wegovy", 6.5), ("took my tirzepatide", 6.5)],
             logBoost: 2, queryBoost: -1,
             screens: [:],
-            antiKeywords: ["food", "weight", "supplement", "workout", "what", "how"]
+            antiKeywords: ["food", "weight", "supplement", "workout", "what", "how", "when", "last", "history", "how often", "pattern", "did", "time"]
+        )
+
+        p["medication_info"] = ToolProfile(
+            triggers: [("when did i last take", 6.5), ("last dose", 5), ("last time i took", 7.5),
+                       ("when did i take", 5.5), ("when did i inject", 5.5),
+                       ("how often do i take", 5), ("how often am i taking", 5),
+                       ("medication history", 5), ("dose history", 4.5),
+                       ("my medication pattern", 4.5), ("injection history", 4.5),
+                       ("last ozempic", 5), ("last metformin", 5), ("last semaglutide", 5),
+                       ("last mounjaro", 5), ("last insulin", 5), ("last glp", 4.5),
+                       // med name boosts — combine with phrase triggers to beat log_medication logBoost
+                       ("ozempic", 2.5), ("semaglutide", 2.5), ("metformin", 2.5),
+                       ("insulin", 2.5), ("mounjaro", 2.5), ("tirzepatide", 2.5),
+                       ("wegovy", 2.5), ("glp-1", 2.5), ("glp1", 2.5)],
+            logBoost: -2, queryBoost: 3,
+            screens: [:],
+            antiKeywords: ["log", "took", "injected", "add", "record"]
         )
 
         p["glucose"] = ToolProfile(
