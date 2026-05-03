@@ -960,3 +960,29 @@ private func dateStr(_ d: Date) -> String {
     #expect(abs(m.calorieTarget - expectedCal) < 1, "Should report honest macro sum, not TDEE anchor 2000")
     #expect(m.calorieTarget > 2000, "Extreme protein pushes intake above TDEE anchor")
 }
+
+// MARK: - TrendDirection (6 tests)
+
+@Test func trendDirectionDisplayTextLosing() {
+    #expect(WeightTrendCalculator.TrendDirection.losing.displayText == "Decrease")
+}
+
+@Test func trendDirectionDisplayTextMaintaining() {
+    #expect(WeightTrendCalculator.TrendDirection.maintaining.displayText == "Stable")
+}
+
+@Test func trendDirectionDisplayTextGaining() {
+    #expect(WeightTrendCalculator.TrendDirection.gaining.displayText == "Increase")
+}
+
+@Test func trendDirectionSystemImageLosing() {
+    #expect(WeightTrendCalculator.TrendDirection.losing.systemImage == "arrow.down.right")
+}
+
+@Test func trendDirectionSystemImageMaintaining() {
+    #expect(WeightTrendCalculator.TrendDirection.maintaining.systemImage == "arrow.right")
+}
+
+@Test func trendDirectionSystemImageGaining() {
+    #expect(WeightTrendCalculator.TrendDirection.gaining.systemImage == "arrow.up.right")
+}

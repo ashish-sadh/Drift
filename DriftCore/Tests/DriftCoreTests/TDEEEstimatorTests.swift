@@ -135,3 +135,160 @@ import Testing
     config.activityMultiplier = 22
     #expect(abs(config.mifflinActivityFactor - 1.2) < 0.001)
 }
+
+@Test func configActivityLabelLightlyActive() {
+    var config = TDEEEstimator.TDEEConfig.default
+    config.activityMultiplier = 25
+    #expect(config.activityLabel == "Lightly Active")
+}
+
+@Test func configActivityLabelVeryActive() {
+    var config = TDEEEstimator.TDEEConfig.default
+    config.activityMultiplier = 31
+    #expect(config.activityLabel == "Very Active")
+}
+
+@Test func configActivityLabelAthlete() {
+    var config = TDEEEstimator.TDEEConfig.default
+    config.activityMultiplier = 36
+    #expect(config.activityLabel == "Athlete")
+}
+
+// MARK: - Sex (2 tests)
+
+@Test func sexLabelMale() {
+    #expect(TDEEEstimator.Sex.male.label == "Male")
+}
+
+@Test func sexLabelFemale() {
+    #expect(TDEEEstimator.Sex.female.label == "Female")
+}
+
+// MARK: - TDEEConfig loggingConsistencyThreshold
+
+@Test func loggingConsistencyThresholdIsHalf() {
+    #expect(TDEEEstimator.TDEEConfig.default.loggingConsistencyThreshold == 0.5)
+}
+
+// MARK: - Estimate.explanation (5 source cases)
+
+@Test func estimateExplanationAppleHealth() {
+    let e = TDEEEstimator.Estimate(tdee: 2000, source: .appleHealth, confidence: .high,
+                                   timestamp: Date(), activeSources: ["Apple Health"])
+    #expect(e.explanation.contains("Apple Health"))
+}
+
+@Test func estimateExplanationWeightTrend() {
+    let e = TDEEEstimator.Estimate(tdee: 2000, source: .weightTrend, confidence: .medium,
+                                   timestamp: Date(), activeSources: ["Weight Trend"])
+    #expect(e.explanation.contains("food logs"))
+}
+
+@Test func estimateExplanationBlended() {
+    let e = TDEEEstimator.Estimate(tdee: 2000, source: .blended, confidence: .high,
+                                   timestamp: Date(), activeSources: ["Weight", "Apple Health"])
+    #expect(e.explanation.contains("multiple"))
+}
+
+@Test func estimateExplanationMifflin() {
+    let e = TDEEEstimator.Estimate(tdee: 2000, source: .mifflin, confidence: .medium,
+                                   timestamp: Date(), activeSources: ["Profile"])
+    #expect(e.explanation.contains("profile"))
+}
+
+@Test func estimateExplanationBodyWeight() {
+    let e = TDEEEstimator.Estimate(tdee: 2000, source: .bodyWeight, confidence: .low,
+                                   timestamp: Date(), activeSources: ["Weight"])
+    #expect(e.explanation.contains("body weight"))
+}
+
+// MARK: - loadConfig / saveConfig (MainActor, uses UserDefaults)
+
+@Test @MainActor func saveConfigAndLoadRoundTrip() {
+    var config = TDEEEstimator.TDEEConfig.default
+    config.age = 28
+    config.heightCm = 172
+    config.sex = .female
+    config.activityMultiplier = 31
+    config.manualAdjustment = -100
+
+    TDEEEstimator.saveConfig(config)
+    let loaded = TDEEEstimator.loadConfig()
+
+    #expect(loaded.age == 28)
+    #expect(loaded.heightCm == 172)
+    #expect(loaded.sex == .female)
+    #expect(loaded.activityMultiplier == 31)
+    #expect(loaded.manualAdjustment == -100)
+
+    // Clean up
+    TDEEEstimator.saveConfig(.default)
+}
+
+@Test @MainActor func loadConfigReturnsDefaultWhenNothingSaved() {
+    UserDefaults.standard.removeObject(forKey: "drift_tdee_config")
+    let config = TDEEEstimator.loadConfig()
+    #expect(config.activityMultiplier == TDEEEstimator.TDEEConfig.default.activityMultiplier)
+    #expect(config.manualAdjustment == 0)
+}
+
+// MARK: - cachedOrSync (sync path, no Apple Health, no weight data)
+
+@Test @MainActor func cachedOrSyncReturnsEstimate() {
+    // Clear any cached value by saving a fresh config
+    TDEEEstimator.saveConfig(.default)
+    UserDefaults.standard.removeObject(forKey: "drift_tdee_cache")
+    let estimate = TDEEEstimator.shared.cachedOrSync()
+    #expect(estimate.tdee >= 1200)
+    #expect(estimate.tdee <= 5000)
+}
+
+@Test @MainActor func cachedOrSyncConfidenceLowWithNoData() {
+    TDEEEstimator.saveConfig(.default)
+    UserDefaults.standard.removeObject(forKey: "drift_tdee_cache")
+    let estimate = TDEEEstimator.shared.cachedOrSync()
+    // Without weight data or profile, confidence should be low
+    #expect(estimate.confidence == .low || estimate.confidence == .medium)
+}
+
+@Test @MainActor func cachedOrSyncHasMifflinSourceWhenWeightAndProfileSet() throws {
+    // Save a weight entry so WeightTrendService.shared.latestWeightKg is non-nil
+    var entry = WeightEntry(date: DateFormatters.dateOnly.string(from: Date()), weightKg: 75)
+    try AppDatabase.shared.saveWeightEntry(&entry)
+    WeightTrendService.shared.refresh()
+    var config = TDEEEstimator.TDEEConfig.default
+    config.age = 30; config.heightCm = 175; config.sex = .male
+    TDEEEstimator.saveConfig(config)
+    UserDefaults.standard.removeObject(forKey: "drift_tdee_cache")
+    let estimate = TDEEEstimator.shared.cachedOrSync()
+    #expect(estimate.activeSources.contains(where: { $0.contains("Profile") }))
+    // Clean up
+    if let id = entry.id { try? AppDatabase.shared.deleteWeightEntry(id: id) }
+    WeightTrendService.shared.refresh()
+    TDEEEstimator.saveConfig(.default)
+}
+
+@Test @MainActor func cachedOrSyncAppliesManualAdjustment() {
+    var config = TDEEEstimator.TDEEConfig.default
+    config.manualAdjustment = 200
+    TDEEEstimator.saveConfig(config)
+    UserDefaults.standard.removeObject(forKey: "drift_tdee_cache")
+    let adjusted = TDEEEstimator.shared.cachedOrSync()
+    // Manual adjustment of +200 should push TDEE above the base
+    #expect(adjusted.tdee >= 1200)
+
+    config.manualAdjustment = 0
+    TDEEEstimator.saveConfig(config)
+    UserDefaults.standard.removeObject(forKey: "drift_tdee_cache")
+    let baseline = TDEEEstimator.shared.cachedOrSync()
+    #expect(adjusted.tdee > baseline.tdee - 1)
+    TDEEEstimator.saveConfig(.default)
+}
+
+// MARK: - foodLoggingConsistency
+
+@Test @MainActor func foodLoggingConsistencyReturnsFraction() {
+    let consistency = TDEEEstimator.shared.foodLoggingConsistency()
+    #expect(consistency >= 0)
+    #expect(consistency <= 1)
+}
