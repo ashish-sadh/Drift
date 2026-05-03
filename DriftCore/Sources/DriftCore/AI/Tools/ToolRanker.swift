@@ -421,14 +421,21 @@ public enum ToolRanker {
                        ("creatine", 1.5), ("fish oil", 1.5), ("vitamin d", 1.5)],
             logBoost: 2, queryBoost: -1,
             screens: [.supplements: 0.3],
-            antiKeywords: ["add", "new", "what", "status"]
+            antiKeywords: ["add", "new", "what", "status",
+                           "ozempic", "semaglutide", "glp1", "glp-1",
+                           "metformin", "mounjaro", "tirzepatide", "wegovy",
+                           "insulin", "medication"]
         )
 
         p["log_medication"] = ToolProfile(
             triggers: [("medication", 2.5), ("log medication", 4.5), ("took ozempic", 4.5),
                        ("took metformin", 4.5), ("took insulin", 4), ("injected", 3),
                        ("semaglutide", 4), ("ozempic", 4), ("wegovy", 4), ("glp-1", 3.5),
-                       ("glp1", 3.5), ("mounjaro", 4), ("tirzepatide", 4), ("metformin", 3.5)],
+                       ("glp1", 3.5), ("mounjaro", 4), ("tirzepatide", 4), ("metformin", 3.5),
+                       // "took my <med>" phrases — outscores mark_supplement "took my" trigger
+                       ("took my ozempic", 6.5), ("took my glp", 6.5), ("took my semaglutide", 6.5),
+                       ("took my metformin", 6.5), ("took my mounjaro", 6.5), ("took my insulin", 6.5),
+                       ("took my wegovy", 6.5), ("took my tirzepatide", 6.5)],
             logBoost: 2, queryBoost: -1,
             screens: [:],
             antiKeywords: ["food", "weight", "supplement", "workout", "what", "how"]
