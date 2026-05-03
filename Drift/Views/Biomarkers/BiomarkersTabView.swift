@@ -35,6 +35,7 @@ struct BiomarkersTabView: View {
                 Button { showingUpload = true } label: {
                     Image(systemName: "doc.badge.plus").foregroundStyle(Theme.accent)
                 }
+                .accessibilityLabel("Upload lab report")
             }
         }
         .sheet(isPresented: $showingUpload) {

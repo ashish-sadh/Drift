@@ -100,6 +100,7 @@ struct GoalView: View {
                         .font(.body.weight(.semibold))
                         .foregroundStyle(Theme.accent)
                 }
+                .accessibilityLabel("Back")
             }
         }
         .sheet(isPresented: $showingSetup) {
