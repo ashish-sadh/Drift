@@ -11,16 +11,17 @@ Real queries that don't work well. Fix systematically, then move to Fixed.
 
 ## Failing
 
-### Micronutrient Queries
-- **"how much fiber did I eat today"** — CATEGORY: micronutrient queries (fiber, sodium, sugar, vitamins). `food_info` handler exposes cal/protein/carbs/fat per entry but fiber_g is only used in the nutrition estimation flow (Gemma 4 food lookup), not stored per logged entry. Query routes to `food_info(query:"fiber today")` but the handler returns a daily macro summary that omits fiber — user gets a non-answer. Fix tier: 2 (store fiber_g on FoodEntry, surface in `food_info` daily summary). Variants: "did I get enough fiber this week", "how much sodium today", "what's my sugar intake".
-
-### Macro Goal Progress Queries
-- **"am I hitting my protein goal"** — CATEGORY: macro goal tracking / goal-vs-actual comparison. There is no protein goal in the data model (`WeightGoal` stores only target weight). The system prompt routes protein queries to `food_info`, which shows today's protein intake, but there is no goal to compare against — so the response is just "you had X g protein" with no benchmark. User question goes half-answered. Fix tier: 3 (add macro targets to user prefs; expose them in `food_info` so it can compare intake vs. goal). Variants: "did I hit my fat goal today", "am I on track for carbs", "how far off am I from my protein target".
-
 ### Supplement Insight Routing
-- **"did I miss any magnesium doses"** — Routes to `mark_supplement` instead of `supplement_insight`. Query contains "magnesium" (supplement name) and "miss any doses" (review/history intent), but ToolRanker picks the logging tool. Fix tier: 0 (add dose-history patterns to supplement_insight ranker). Variants: "did I take my vitamins today", "have I logged zinc this week".
+- **"did I miss any magnesium doses"** — Routes to `mark_supplement` instead of `supplement_insight`. Root cause: `classifyIntent` includes `"did"` in `logVerbs` (ToolRanker.swift:229), so the intent is classified as `.log`, giving `mark_supplement` a +2 logBoost. `supplement_insight` has a `"missed"` trigger but not `"miss"` (word form), and its `-1` logBoost on a `.log` intent drops it below zero. Fix tier: 0 — add `"did i miss"` as a multi-word trigger for `supplement_insight` (score ≥ 4.5 to overcome logBoost gap). Variants: "have I logged zinc this week" (same issue — "have" not in logVerbs so actually routes OK), "did I forget to take magnesium".
+
+### Medication History Queries
+- **"when did I last take my ozempic shot"** — CATEGORY: medication history / last-dose lookup. `log_medication` exists for logging but there is no query/history tool. Query routes to `log_medication` (high score due to "ozempic" trigger), which logs another dose instead of returning last-dose time. `MedicationService.lastDoseTime(for:)` has the data but nothing surfaces it in the AI pipeline. Fix tier: 2 (add `medication_info` tool backed by `MedicationService.lastDoseTime`/`weekMedications`). Variants: "how many times did I take metformin this week", "what time did I inject semaglutide", "am I consistent with my GLP-1 shots".
 
 ## Fixed
+
+### Cycle 8666–8789
+- [x] **"how much fiber did I eat today"** — `food_info` handler now checks `query.contains("fiber")` and returns `n.fiberG` from the daily nutrition summary, with a 25g default target. `02b6c27`. Variants: "how much sodium today", "what's my sugar intake".
+- [x] **"am I hitting my protein goal"** — `food_info` handler compares today's protein against `goal.proteinGoal` (user-set) or macro-breakdown target, showing a % progress line with suggestions for top protein foods. `31be180` (#284), `eeab10b` (#441). Variants: "did I hit my fat goal today", "how far off am I from my protein target".
 
 ### Cycle 8581 (builds 196–197)
 - [x] **"of" connector in unit parsing** — "100g of oats", "200ml of milk", "8oz of chicken" returned food="of oats/of milk". Skip leading "of" after extracting unit. `d265f85` (#497)
