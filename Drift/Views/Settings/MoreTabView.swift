@@ -12,26 +12,54 @@ struct MoreTabView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
-                    // Report a Bug — prominent at top
-                    Link(destination: URL(string: "https://ashish-sadh.github.io/Drift/")!) {
-                        HStack(spacing: 12) {
-                            Image(systemName: "ant.fill")
-                                .foregroundStyle(.red)
-                                .frame(width: 24)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Report a Bug")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(.primary)
-                                Text("Found something wrong? Let us know")
-                                    .font(.caption2)
+                    // Report a Bug / Send Feedback — prominent at top
+                    VStack(spacing: 0) {
+                        Link(destination: URL(string: "https://ashish-sadh.github.io/Drift/")!) {
+                            HStack(spacing: 12) {
+                                Image(systemName: "ant.fill")
+                                    .foregroundStyle(.red)
+                                    .frame(width: 24)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Report a Bug")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(.primary)
+                                    Text("Found something wrong? Let us know")
+                                        .font(.caption2)
+                                        .foregroundStyle(.tertiary)
+                                }
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption)
                                     .foregroundStyle(.tertiary)
                             }
-                            Spacer()
-                            Image(systemName: "arrow.up.right")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
+                            .padding(.vertical, 10)
                         }
-                        .padding(.vertical, 10)
+                        Divider().overlay(Theme.separator)
+                        Button {
+                            if let url = URL(string: "mailto:asheesh.sadh@gmail.com?subject=Drift%20Feedback") {
+                                UIApplication.shared.open(url)
+                            }
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "envelope.fill")
+                                    .foregroundStyle(Theme.accent)
+                                    .frame(width: 24)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Send Feedback")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(.primary)
+                                    Text("Tell us what's working and what isn't")
+                                        .font(.caption2)
+                                        .foregroundStyle(.tertiary)
+                                }
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.tertiary)
+                            }
+                            .padding(.vertical, 10)
+                        }
+                        .buttonStyle(.plain)
                     }
                     .card()
 
