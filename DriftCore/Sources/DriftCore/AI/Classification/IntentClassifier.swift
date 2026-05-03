@@ -117,7 +117,8 @@ public enum IntentClassifier {
 
     Recovery patterns:
     - If two tools fit nearly equally, prefer the safer one: info > log (don't log without clear intent), supplements() > mark_supplement, food_info > delete_food.
-    - If user says something that maps to no tool ("what's the weather"), reply naturally as text — do not invent a fake tool call.
+    - No matching tool ("what's the weather") → reply as text, never invent a tool call.
+    "I plan to have idli tomorrow morning"→{"tool":"chat"}
 
     JSON ALWAYS uses double-quoted keys + values. Single quotes / bare keys are invalid.
     """
