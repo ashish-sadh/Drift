@@ -2105,7 +2105,7 @@
         "date": "2026-05-02T09:30:00-07:00",
         "description": "GLP-1 medication tracking + Food DB improvements",
         "features": [
-            "Health: GLP-1 medication tracking — log_medication tool + dashboard card",
+            "Health: GLP-1 medication tracking \u2014 log_medication tool + dashboard card",
             "Food DB: 30 Mediterranean & Levantine staples added"
         ],
         "fixes": [
@@ -2122,8 +2122,28 @@
             "Food DB: 30 American fast food branded items added (Taco Bell, BK, Starbucks, Arby's, Jack in the Box, and more)"
         ],
         "fixes": [
-            "Infra: hardened planning session crash path — removed pipefail from compliance, added crash comment and log",
+            "Infra: hardened planning session crash path \u2014 removed pipefail from compliance, added crash comment and log",
             "Infra: design-doc issues auto-route to senior queue without sprint-task label"
+        ]
+    },
+    {
+        "build": 203,
+        "date": "2026-05-03T02:01:44.011542-07:00",
+        "description": "Per-stage chat timing, test coverage, accessibility fixes, food DB expansion",
+        "features": [
+            "Chat typing indicator now shows per-stage elapsed time (routing, parsing, executing)",
+            "Food DB: +30 Persian/Iranian foods (Ghormeh Sabzi, Fesenjan, Zereshk Polo, Tahdig, Joojeh Kabab, and more)",
+            "Food DB: +30 Brazilian foods (Feijoada, Pao de Queijo, Coxinha, Brigadeiro, Churrasco, Moqueca, and more)",
+            "Food DB: +10 Filipino/Vietnamese/West African/Afghan/Argentinian/Ethiopian foods",
+            "Food DB: +30 Korean home-cooking foods (from previous build)",
+            "Voice transcription repair: +20 biomarker and lab terms recognized accurately"
+        ],
+        "fixes": [
+            "AI router: routerPrompt trimmed to stay under 6000-char limit (prevented routing failures)",
+            "Accessibility: BiomarkersTabView upload button now has VoiceOver label",
+            "Accessibility: GoalView back button now has VoiceOver label",
+            "Accessibility: PhotoLogReviewView item checkbox now announces select/deselect state",
+            "PhotoLogReviewView: search commit button icon changed from xmark to checkmark (was visually misleading)"
         ]
     }
 ]
