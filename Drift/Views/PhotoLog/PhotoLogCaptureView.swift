@@ -16,11 +16,17 @@ struct PhotoLogCaptureView: View {
     @State private var showingCameraDeniedAlert = false
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var libraryLoadError: String? = nil
+    @State private var showTip: Bool = !Preferences.hasSeenPhotoLogTip &&
+        !CloudVisionProvider.allCases.contains(where: { CloudVisionKey.has(provider: $0) })
+    @State private var showingSettings = false
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 16) {
                 header
+                if showTip {
+                    byokTipBanner
+                }
                 privacyBanner
                 costBanner
                 Spacer()
@@ -40,6 +46,23 @@ struct PhotoLogCaptureView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { dismiss() }
+                }
+            }
+            .sheet(isPresented: $showingSettings) {
+                NavigationStack {
+                    PhotoLogBetaSettingsView()
+                        .toolbar {
+                            ToolbarItem(placement: .cancellationAction) {
+                                Button("Done") { showingSettings = false }
+                            }
+                        }
+                }
+                .preferredColorScheme(.dark)
+            }
+            .onChange(of: showingSettings) { _, isShowing in
+                if !isShowing {
+                    let hasProvider = CloudVisionProvider.allCases.contains { CloudVisionKey.has(provider: $0) }
+                    if hasProvider { showTip = false }
                 }
             }
             .fullScreenCover(isPresented: $showingCamera) {
@@ -100,6 +123,48 @@ struct PhotoLogCaptureView: View {
         }
         .padding(10)
         .background(Color.white.opacity(0.03), in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    private var byokTipBanner: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(alignment: .top, spacing: 8) {
+                Image(systemName: "key.fill")
+                    .font(.caption)
+                    .foregroundStyle(Theme.accent)
+                Text("Drift supports BYOK — bring your own OpenAI, Gemini, or Anthropic API key for AI food photo scanning. Tap ⚙️ to add a key.")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Button {
+                    Preferences.hasSeenPhotoLogTip = true
+                    withAnimation { showTip = false }
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(Theme.textTertiary)
+                }
+            }
+            HStack {
+                Spacer()
+                Button("Got it") {
+                    Preferences.hasSeenPhotoLogTip = true
+                    withAnimation { showTip = false }
+                }
+                .font(.caption.weight(.medium))
+                .foregroundStyle(Theme.textSecondary)
+                Button("Set Up Key") {
+                    showingSettings = true
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(Theme.accent)
+            }
+        }
+        .padding(10)
+        .background(Theme.accent.opacity(0.06), in: RoundedRectangle(cornerRadius: 10))
+        .overlay(
+            RoundedRectangle(cornerRadius: 10)
+                .strokeBorder(Theme.accent.opacity(0.25), lineWidth: 0.5)
+        )
     }
 
     private var captureButtons: some View {
