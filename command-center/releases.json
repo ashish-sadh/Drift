@@ -2111,5 +2111,19 @@
         "fixes": [
             "Food DB: piece_size_g added to 20 multi-piece Indian foods for accurate serving estimates"
         ]
+    },
+    {
+        "build": 202,
+        "date": "2026-05-02T14:30:00-07:00",
+        "description": "Food DB expansions + infra hardening",
+        "features": [
+            "Food DB: 30 Mexican home cooking foods added (carnitas, barbacoa, al pastor, pozole, menudo, birria, tamales, sopes, and more)",
+            "Food DB: 30 Indian protein staples added (mattar paneer, chhole, mixed dal, anda curry, paneer korma, chicken keema, and more)",
+            "Food DB: 30 American fast food branded items added (Taco Bell, BK, Starbucks, Arby's, Jack in the Box, and more)"
+        ],
+        "fixes": [
+            "Infra: hardened planning session crash path — removed pipefail from compliance, added crash comment and log",
+            "Infra: design-doc issues auto-route to senior queue without sprint-task label"
+        ]
     }
 ]
