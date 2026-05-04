@@ -451,10 +451,16 @@ extension AppDatabase {
         }
     }
 
-    public func fetchTodayMedications(datePrefix: String) throws -> [DailyMedication] {
-        try dbWriter.read { db in
+    public func fetchTodayMedications() throws -> [DailyMedication] {
+        let cal = Calendar.current
+        let startOfDay = cal.startOfDay(for: Date())
+        let startOfTomorrow = cal.date(byAdding: .day, value: 1, to: startOfDay) ?? startOfDay
+        let fmt = ISO8601DateFormatter()
+        let startStr = fmt.string(from: startOfDay)
+        let endStr = fmt.string(from: startOfTomorrow)
+        return try dbWriter.read { db in
             try DailyMedication
-                .filter(sql: "logged_at LIKE ?", arguments: ["\(datePrefix)%"])
+                .filter(sql: "logged_at >= ? AND logged_at < ?", arguments: [startStr, endStr])
                 .order(Column("logged_at"))
                 .fetchAll(db)
         }

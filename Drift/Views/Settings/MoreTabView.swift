@@ -31,6 +31,7 @@ struct MoreTabView: View {
                                 Image(systemName: "arrow.up.right")
                                     .font(.caption)
                                     .foregroundStyle(.tertiary)
+                                    .accessibilityHidden(true)
                             }
                             .padding(.vertical, 10)
                         }
@@ -56,6 +57,7 @@ struct MoreTabView: View {
                                 Image(systemName: "arrow.up.right")
                                     .font(.caption)
                                     .foregroundStyle(.tertiary)
+                                    .accessibilityHidden(true)
                             }
                             .padding(.vertical, 10)
                         }
@@ -230,6 +232,7 @@ struct MoreTabView: View {
                 Image(systemName: "chevron.right")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
+                    .accessibilityHidden(true)
             }
             .contentShape(Rectangle())
             .padding(.vertical, 10)
@@ -582,6 +585,7 @@ struct SettingsView: View {
                         }
                         Spacer()
                         Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
                     }
                     .padding(.vertical, 10)
                 }
@@ -683,7 +687,7 @@ struct SettingsView: View {
             UserDefaults.standard.removeObject(forKey: "drift_default_templates_v3")
             UserDefaults.standard.removeObject(forKey: "drift_default_templates_v2")
             UserDefaults.standard.removeObject(forKey: "drift_default_templates_seeded")
-UserDefaults.standard.removeObject(forKey: "drift_cycle_fertile_window")
+            UserDefaults.standard.removeObject(forKey: "drift_cycle_fertile_window")
             Log.app.info("Factory reset performed")
             resetDone = true
         } catch {

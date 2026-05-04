@@ -103,6 +103,7 @@ struct AIChatView: View {
                                     .foregroundStyle(.secondary)
                             }
                             .buttonStyle(.plain)
+                            .accessibilityLabel("Remove photo")
                             Spacer()
                         }
                         .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .leading)))

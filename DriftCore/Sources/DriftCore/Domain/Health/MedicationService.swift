@@ -20,8 +20,7 @@ public enum MedicationService {
     }
 
     public static func todayMedications() -> [DailyMedication] {
-        let today = DateFormatters.todayString
-        return (try? AppDatabase.shared.fetchTodayMedications(datePrefix: today)) ?? []
+        (try? AppDatabase.shared.fetchTodayMedications()) ?? []
     }
 
     /// Most recent log timestamp for a named medication, or nil if never logged.
