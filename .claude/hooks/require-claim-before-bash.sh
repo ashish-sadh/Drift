@@ -55,6 +55,15 @@ case "$SESSION_TYPE" in
     *) exit 0 ;;
 esac
 
+# TestFlight publish escape hatch: when testflight-check.sh has marked the
+# publish authorized, allow xcodebuild/xcodegen/git/gh through even with no
+# claim. Without this, an empty queue + a due TestFlight deadlocks the
+# session — the hook forbids the publish commands the *other* hook just
+# mandated. Marker is removed by step 5a of the publish flow.
+if [ -f "$HOME/drift-state/testflight-publish-authorized" ]; then
+    exit 0
+fi
+
 # Already claimed? exit 0.
 STATE_FILE="$HOME/drift-state/sprint-state.json"
 [ -f "$STATE_FILE" ] || exit 0

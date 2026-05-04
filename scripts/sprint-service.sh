@@ -463,6 +463,30 @@ cmd_done() {
     local COMMIT="${2:-}"
     if [ -z "$NUM" ]; then echo "Usage: sprint-service.sh done <number> <commit>" >&2; exit 1; fi
 
+    # Permanent-task guard: `done` would close the issue, but permanents must
+    # recur. PreToolUse hook (guard-permanent-close.sh) can't see internal
+    # `gh issue close` calls from this script, so enforce here. Redirect to
+    # session-done semantics: post a Progress comment, never close.
+    # Without this, closed permanents drained the junior queue and armed the
+    # TestFlight/require-claim deadlock (#49 #50 #51 #52 #193, 2026-05-03/04).
+    local IS_PERM
+    IS_PERM=$(gh issue view "$NUM" --json labels --jq '[.labels[].name] | index("permanent-task") != null' 2>/dev/null || echo "false")
+    if [ "$IS_PERM" = "true" ]; then
+        local PROGRESS_NOTE=""
+        if [ -f "/tmp/done-note-$NUM" ]; then
+            PROGRESS_NOTE=$(cat "/tmp/done-note-$NUM")
+            rm -f "/tmp/done-note-$NUM"
+        fi
+        local PROGRESS_REF=""
+        [ -n "$COMMIT" ] && PROGRESS_REF=" Commit: $COMMIT"
+        local PROGRESS_COMMENT="Progress.${PROGRESS_REF}"
+        [ -n "$PROGRESS_NOTE" ] && PROGRESS_COMMENT="Progress: $PROGRESS_NOTE${PROGRESS_REF}"
+        gh_loud "comment progress on permanent #$NUM" -- issue comment "$NUM" --body "$PROGRESS_COMMENT" || true
+        echo "WARN: #$NUM is a permanent-task — redirecting 'done' to 'session-done'. Use 'session-done' next time." >&2
+        cmd_session_done "$NUM"
+        return
+    fi
+
     local NOTE=""
     if [ -f "/tmp/done-note-$NUM" ]; then
         NOTE=$(cat "/tmp/done-note-$NUM")
