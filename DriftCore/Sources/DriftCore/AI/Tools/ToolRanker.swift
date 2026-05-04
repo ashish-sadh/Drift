@@ -477,7 +477,8 @@ public enum ToolRanker {
         p["body_comp"] = ToolProfile(
             triggers: [("body fat", 3), ("bmi", 2.5), ("lean mass", 3), ("dexa", 3),
                        ("muscle mass", 3), ("body composition", 3), ("recomposition", 3),
-                       ("how's my body fat", 4)],
+                       ("how's my body fat", 4), ("muscle gained", 3.5), ("how much muscle", 3.5),
+                       ("muscle", 2.0)],
             logBoost: -0.5, queryBoost: 2,
             screens: [.bodyComposition: 0.5],
             antiKeywords: ["log", "is"]

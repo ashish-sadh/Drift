@@ -115,13 +115,14 @@ final class MultiTurnRegressionTests: XCTestCase {
     }
 
     @MainActor func testHistoryBuilder_EleventhTurn_DroppedByWindow() {
-        // Turns beyond maxTurnWindow (10) must be dropped — oldest falls off.
+        // Turns beyond maxTurnWindow (10 rounds = 20 messages) must be dropped — oldest falls off.
+        // Zero-padded ids avoid substring collisions: "msg01" is not a substring of "msg10"/"msg11".
         let turns = (1...11).flatMap { i -> [HistoryTurn] in [
-            HistoryTurn(role: .user, text: "msg\(i)"),
-            HistoryTurn(role: .assistant, text: "ack\(i)")
+            HistoryTurn(role: .user, text: String(format: "msg%02d", i)),
+            HistoryTurn(role: .assistant, text: String(format: "ack%02d", i))
         ]}
         let history = ConversationHistoryBuilder.build(turns: turns, maxTokens: 5000)
-        XCTAssertFalse(history.contains("msg1"), "11th-oldest turn should be outside the 10-turn window")
+        XCTAssertFalse(history.contains("msg01"), "11th-oldest round should be outside the 10-round window")
         XCTAssertTrue(history.contains("msg11"), "Most recent turn must always be present")
     }
 
