@@ -81,6 +81,42 @@ final class MedicationInfoToolTests: XCTestCase {
         }
     }
 
+    // MARK: - supplement_insight must not steal medication adherence queries (#bug-hunt)
+
+    @MainActor func testMedicationAdherenceRoutes_ToMedicationInfo_NotSupplementInsight() {
+        // Regression: supplement_insight "did i miss" triggers (score 5.5) were beating
+        // medication_info (score 3.0) for medication-framed adherence queries.
+        // Fix: "medication"/"prescription" are antiKeywords on supplement_insight (-1.5),
+        // and medication_info has dedicated missed-dose triggers (+6.5).
+        let cases = [
+            "did i miss my medication dose",
+            "missed my medication today",
+            "did i forget my medication",
+            "forgot my medication this morning",
+        ]
+        for query in cases {
+            let tools = ToolRanker.rank(query: query.lowercased(), screen: .food)
+            let top = tools.first?.name
+            XCTAssertEqual(top, "medication_info",
+                "'\(query)' should route to medication_info, not supplement_insight (got \(top ?? "nil"))")
+        }
+    }
+
+    @MainActor func testSupplementMissedDose_StaysOnSupplementInsight() {
+        // Supplement adherence queries (no medication keyword) must still route to supplement_insight.
+        let cases = [
+            "did i miss any magnesium doses",
+            "did i forget to take my zinc",
+            "supplement streak",
+        ]
+        for query in cases {
+            let tools = ToolRanker.rank(query: query.lowercased(), screen: .supplements)
+            let top = tools.first?.name
+            XCTAssertEqual(top, "supplement_insight",
+                "'\(query)' should route to supplement_insight (got \(top ?? "nil"))")
+        }
+    }
+
     // MARK: - Tool registration
 
     @MainActor func testMedicationInfoToolIsRegistered() {

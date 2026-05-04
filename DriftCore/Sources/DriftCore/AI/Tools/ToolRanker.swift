@@ -449,6 +449,10 @@ public enum ToolRanker {
                        ("my medication pattern", 4.5), ("injection history", 4.5),
                        ("last ozempic", 5), ("last metformin", 5), ("last semaglutide", 5),
                        ("last mounjaro", 5), ("last insulin", 5), ("last glp", 4.5),
+                       // missed-dose adherence — beats supplement_insight for medication-framed queries
+                       ("miss my medication", 6.5), ("missed my medication", 6.5),
+                       ("medication dose", 5.0), ("prescription dose", 5.0),
+                       ("forget my medication", 5.5), ("forgot my medication", 5.5),
                        // med name boosts — combine with phrase triggers to beat log_medication logBoost
                        ("ozempic", 2.5), ("semaglutide", 2.5), ("metformin", 2.5),
                        ("insulin", 2.5), ("mounjaro", 2.5), ("tirzepatide", 2.5),
@@ -502,7 +506,8 @@ public enum ToolRanker {
                        ("forget to take", 4.0), ("miss any", 3.5)],
             logBoost: -1, queryBoost: 2,
             screens: [.supplements: 0.5],
-            antiKeywords: ["add", "took", "take", "log"]
+            // "medication"/"prescription" prevent stealing from medication_info on adherence queries
+            antiKeywords: ["add", "took", "take", "log", "medication", "prescription"]
         )
 
         p["food_timing_insight"] = ToolProfile(
