@@ -155,6 +155,7 @@ struct FloatingAIAssistant: View {
                     Image(systemName: "xmark.circle.fill")
                         .font(.title3).foregroundStyle(.secondary)
                 }
+                .accessibilityLabel("Dismiss")
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)

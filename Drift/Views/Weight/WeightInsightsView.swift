@@ -112,6 +112,7 @@ struct WeightInsightsView: View {
                 Button { showTrendInfo = true } label: {
                     Image(systemName: "info.circle").font(.caption2).foregroundStyle(.quaternary)
                 }.buttonStyle(.plain)
+                .accessibilityLabel("Trend weight info")
                 Spacer()
             }
             .padding(.horizontal, 8).padding(.vertical, 6)
