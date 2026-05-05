@@ -2178,5 +2178,16 @@
             "Infra: planning crash fix \u2014 missing checklist items + resilient checkpoint handling",
             "Infra: watchdog backoff \u2014 skip testflight-due when archive is broken"
         ]
+    },
+    {
+        "build": 218,
+        "date": "2026-05-05T08:00:00-07:00",
+        "description": "West African, Ethiopian, Turkish, Persian cuisine foods; design-service fixes",
+        "features": [
+            "Food DB: 30 new foods from West African, Ethiopian, Turkish, and Persian cuisines"
+        ],
+        "fixes": [
+            "Design service: in-review missed inline and review-body comments"
+        ]
     }
 ]
