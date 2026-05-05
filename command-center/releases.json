@@ -2151,18 +2151,32 @@
         "date": "2026-05-05T00:00:00-07:00",
         "description": "Fix TestFlight archive blocker + medication history AI + food DB expansion + accessibility",
         "features": [
-            "AI: medication_info tool — 'when did I last take ozempic' now returns full dose history",
+            "AI: medication_info tool \u2014 'when did I last take ozempic' now returns full dose history",
             "Food DB: +30 Rajasthani, Gujarati, Andhra, German, Russian, Cambodian, Laotian, Venezuelan, Colombian foods",
             "Food DB: +30 Singaporean, Maharashtrian, Sri Lankan, Nepali, Portuguese, Spanish, SE Asian, Caribbean foods",
             "Food DB: +31 Bengali, Odia, Kashmiri, Japanese, Korean, fitness dairy foods (DB now 3396+ items)",
             "Food DB: +30 Indian protein staples and branded foods"
         ],
         "fixes": [
-            "TestFlight: archive compile error on iOS 26.4 SDK (NotificationService API mismatch) — unblocks builds 204–215",
+            "TestFlight: archive compile error on iOS 26.4 SDK (NotificationService API mismatch) \u2014 unblocks builds 204\u2013215",
             "AI routing: supplement_insight no longer steals medication adherence queries",
             "AI routing: 'did I miss any magnesium doses' routes correctly",
             "AI: medication today query timezone bug fixed",
             "Accessibility: missing accessibilityLabel on 5+ icon-only buttons across chat, settings, photo log, lab report views"
+        ]
+    },
+    {
+        "build": 217,
+        "date": "2026-05-05T00:00:00-07:00",
+        "description": "Exercise muscle-highlight card, GLP-1 adherence AI, USDA food DB expansion (+7556 foods)",
+        "features": [
+            "Workout: exercise muscle-highlight card \u2014 Canvas body map shows primary/secondary muscle zones",
+            "AI: glp1_insight tool \u2014 GLP-1 adherence streak, missed doses, weight delta tracking",
+            "Food DB: USDA Phase 2 batch import SR Legacy (+7,556 foods; DB now 11,042 items)"
+        ],
+        "fixes": [
+            "Infra: planning crash fix \u2014 missing checklist items + resilient checkpoint handling",
+            "Infra: watchdog backoff \u2014 skip testflight-due when archive is broken"
         ]
     }
 ]
