@@ -252,6 +252,13 @@ struct ExerciseDetailView: View {
                                     .font(.caption).foregroundStyle(.tertiary)
                             }
                         }
+
+                        if !info.primaryMuscles.isEmpty || !info.secondaryMuscles.isEmpty {
+                            MuscleHighlightCard(
+                                primaryMuscles: info.primaryMuscles,
+                                secondaryMuscles: info.secondaryMuscles
+                            )
+                        }
                     }
 
                     if let pr {
