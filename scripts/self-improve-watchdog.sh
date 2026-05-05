@@ -673,7 +673,11 @@ start_claude() {
 - [ ] Sprint tasks — 8+ sprint-task issues created
 - [ ] Personas updated — appended \"What I learned\" to persona files
 - [ ] Roadmap updated — applied agreed changes
-- [ ] Sprint refreshed — scripts/sprint-service.sh refresh called" \
+- [ ] Sprint refreshed — scripts/sprint-service.sh refresh called
+- [ ] Bug triage — P0/P1/P2 bugs reviewed, needs-review or approved labels applied
+- [ ] Design docs — pending design-doc issues noted, doc-ready ones reviewed
+- [ ] Feature requests — untriaged FRs reviewed, deferred or sprint-tasked
+- [ ] State assessed — Docs/state.md checked, build/test counts verified" \
             --json number --jq '.number' 2>/dev/null || echo "")
         if [[ -n "$PLAN_ISSUE" ]]; then
             log "Created planning tracking Issue #$PLAN_ISSUE"

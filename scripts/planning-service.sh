@@ -62,8 +62,8 @@ cmd_checkpoint() {
     UPDATED=$(echo "$BODY" | sed "s/- \\[ \\] \\(${LINE_PREFIX}[^\\n]*\\)/- [x] \\1/")
 
     if [[ "$UPDATED" == "$BODY" ]]; then
-        echo "planning-service: step '$STEP' line not found or already checked in issue #$N" >&2
-        exit 1
+        echo "planning-service: step '$STEP' line not found or already checked in issue #$N — continuing" >&2
+        exit 0
     fi
 
     gh issue edit "$N" --body "$UPDATED" > /dev/null 2>&1 || true
