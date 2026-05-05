@@ -370,6 +370,12 @@
 - Two test failures (#568, #569) sitting on main are a trust issue, not just a quality issue. A product that ships broken tests and doesn't fix them signals "we don't care about quality." Fix both before any new feature work.
 - Food DB at ~3,150 with 7 new cuisine batches since build 197 — Indian branded protein coverage (MuscleBlaze, sattu, makhana) is the highest-value recent addition for the target user base. Food DB cap policy (#575) is the right call: stop generating +30 tasks when existing ones aren't claimed.
 
+### What I Learned — Planning Cycle 8945 (2026-05-04)
+- TestFlight archive has been blocked for 10 consecutive builds (204–213) because Xcode's iOS 26.4 *platform support files* are not installed — distinct from the CLI SDK which is present. No autonomous session can fix this; human must open Xcode > Settings > Platforms > iOS > Download. P0 #614 filed. Until this ships, testers have had no update in ~10 days despite significant feature work landing.
+- Planning session stalled 3 times at the previous cycle. Likely a Sonnet-vs-Opus issue — planning is rated for Opus in program.md; running on Sonnet causes stall. The watchdog model selection matters for long planning sessions.
+- Competitive snapshot: MFP's free GLP-1 support (April 28) remains the live competitive signal. Drift GLP-1 logging is shipped; reminders and correlation analytics are still in queue (#620, #603). Don't let the competitive advantage slip while archive is broken.
+- New direction this cycle: expanding beyond logging intelligence into proactive health coaching (protein adherence alerts, workout consistency, glucose spike detection). This is the "Drift as health coach, not data logger" transition. Three new proactive intelligence tasks (#627, #631, #633, #635) advance this.
+
 ### What I Learned — Review Cycle 8789 (2026-05-03)
 - GLP-1 tracking shipped (#580) as a same-sprint response to MFP's April 28 launch. The supplement architecture pattern made this a one-session task — supplement → medication is the pattern to replicate for any future health domain addition (hormones, sleep aids, etc.). Ship the logging foundation first; let user feedback drive reminders, dose tracking, and correlation analytics.
 - Settings → Feedback (#329) is now 10+ cycles deferred — it has crossed from prioritization failure into structural product failure. The rule: any feedback mechanism deferred 3+ cycles becomes a P0 that blocks all other junior work. This is now enforced, not recommended.
