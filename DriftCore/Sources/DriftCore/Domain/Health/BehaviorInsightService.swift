@@ -108,6 +108,63 @@ public enum BehaviorInsightService {
             isPositive: false)
     }
 
+    // MARK: - Weekly Workout Consistency Card
+
+    /// Pure function: given weekly counts and the current goal, return the appropriate
+    /// consistency card variant, or nil if there is nothing useful to show.
+    /// - weeklyCounts: sorted ascending by weekStart; last entry = current week
+    /// - weeklyGoal: workouts/week target (default 3)
+    /// - daysLeftInWeek: calendar days remaining (0 = week over)
+    public static func workoutConsistencyVariant(
+        weeklyCounts: [(weekStart: Date, count: Int)],
+        weeklyGoal: Int,
+        daysLeftInWeek: Int
+    ) -> BehaviorInsight? {
+        guard !weeklyCounts.isEmpty else { return nil }
+        guard weeklyCounts.contains(where: { $0.count > 0 }) else { return nil }
+
+        let sorted = weeklyCounts.sorted { $0.weekStart < $1.weekStart }
+        let currentCount = sorted.last?.count ?? 0
+        let priorWeeks = Array(sorted.dropLast().map { $0.count })
+
+        // Consecutive prior weeks meeting goal (from most recent backward)
+        let priorStreak = priorWeeks.reversed().prefix(while: { $0 >= weeklyGoal }).count
+
+        if currentCount >= weeklyGoal {
+            let totalStreak = priorStreak + 1
+            if totalStreak >= 2 {
+                return BehaviorInsight(
+                    icon: "figure.strengthtraining.traditional",
+                    title: "\(totalStreak) weeks in a row",
+                    detail: "You've hit your \(weeklyGoal)/week workout goal for \(totalStreak) consecutive weeks.",
+                    isPositive: true)
+            }
+            return BehaviorInsight(
+                icon: "figure.strengthtraining.traditional",
+                title: "Workout goal hit",
+                detail: "\(currentCount) workouts this week — you've hit your \(weeklyGoal)/week goal.",
+                isPositive: true)
+        }
+
+        // Week over and goal not met — no nagging after the fact
+        if daysLeftInWeek == 0 { return nil }
+
+        if currentCount == 0 {
+            return BehaviorInsight(
+                icon: "figure.strengthtraining.traditional",
+                title: "Start your workout week",
+                detail: "No workouts yet this week. Your \(weeklyGoal)/week goal is within reach.",
+                isPositive: false)
+        }
+
+        let remaining = weeklyGoal - currentCount
+        return BehaviorInsight(
+            icon: "figure.strengthtraining.traditional",
+            title: "Workout goal in reach",
+            detail: "\(currentCount) workout\(currentCount == 1 ? "" : "s") this week — \(remaining) to go for your \(weeklyGoal)/week goal. \(daysLeftInWeek) days left.",
+            isPositive: false)
+    }
+
     /// Alert when no workouts logged in 5+ days and no Apple Health workouts in that window.
     private static func workoutConsistencyAlert(recentAppleWorkouts: [Date] = []) -> BehaviorInsight? {
         let calendar = Calendar.current
