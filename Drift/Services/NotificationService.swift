@@ -132,10 +132,9 @@ enum NotificationService {
     /// For each medication logged 3+ times in the last 60 days, compute the
     /// typical dose time and return a reminder slot — unless the medication
     /// has already been logged today. Returns slots for repeating daily reminders.
-    static func computeMedicationReminderSlots(now: Date = Date()) -> [MedicationReminderSlot] {
-        let todayStr = DateFormatters.dateOnly.string(from: now)
+    static func computeMedicationReminderSlots() -> [MedicationReminderSlot] {
         let todayLogged = Set(
-            (try? AppDatabase.shared.fetchTodayMedications(datePrefix: todayStr))?.map { $0.name.lowercased() } ?? []
+            (try? AppDatabase.shared.fetchTodayMedications())?.map { $0.name.lowercased() } ?? []
         )
 
         let names = MedicationService.consistentMedicationNames(days: medicationLookbackDays)
