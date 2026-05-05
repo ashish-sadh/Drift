@@ -1037,8 +1037,14 @@ while true; do
                 _TF_LAST=$(cat "$HOME/drift-state/last-testflight-publish" 2>/dev/null || echo "0")
                 _TF_ELAPSED=$(( $(date +%s) - _TF_LAST ))
                 if [[ "$_TF_ELAPSED" -ge 10800 ]] && [[ ! -f "$HOME/drift-state/testflight-due" ]]; then
-                    echo "$(date +%s)" > "$HOME/drift-state/testflight-due"
-                    log "TestFlight publish due (${_TF_ELAPSED}s since last) — marked for next commit"
+                    # Gate: archive is known-broken + P0 bugs still open → skip to avoid guaranteed-failure loop
+                    if [[ -f "$HOME/drift-state/testflight-archive-failed" ]] && [[ -s "$HOME/drift-state/cache-p0-bugs" ]]; then
+                        _P0_BUGS=$(cat "$HOME/drift-state/cache-p0-bugs")
+                        log "TestFlight skipped — archive-failure flag set and P0 bugs open: $_P0_BUGS"
+                    else
+                        echo "$(date +%s)" > "$HOME/drift-state/testflight-due"
+                        log "TestFlight publish due (${_TF_ELAPSED}s since last) — marked for next commit"
+                    fi
                 fi
 
                 # Check per-session stall threshold (no commits/progress)
