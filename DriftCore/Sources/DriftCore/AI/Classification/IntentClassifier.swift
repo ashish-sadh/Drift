@@ -208,14 +208,18 @@ public enum IntentClassifier {
         composeUserMessage(message: message, history: history, recentBlock: nil)
     }
 
-    /// Pure composer. Order of precedence: `<recent_entries>` → `Chat:` → `User:`.
-    /// Falls back to the bare message when neither recent-entries nor history applies.
+    /// Pure composer. Order of precedence: `<recent_entries>` → profile → `Chat:` → `User:`.
+    /// Falls back to the bare message when no context applies.
     public static func composeUserMessage(
-        message: String, history: String, recentBlock: String?, literalHint: String? = nil
+        message: String, history: String, recentBlock: String?,
+        literalHint: String? = nil, profileContext: String? = nil
     ) -> String {
-        if recentBlock == nil && history.isEmpty && literalHint == nil { return message }
+        if recentBlock == nil && history.isEmpty && literalHint == nil && profileContext == nil {
+            return message
+        }
         var parts: [String] = []
         if let recentBlock { parts.append(recentBlock) }
+        if let profileContext { parts.append(profileContext) }
         if !history.isEmpty { parts.append("Chat:\n\(String(history.prefix(400)))") }
         if let literalHint { parts.append("Hint: \(literalHint)") }
         parts.append("User: \(message)")

@@ -7,6 +7,7 @@ extension IntentClassifier {
 
     /// MainActor variant used by the live pipeline. Prepends the recent-entries
     /// block when the message looks like a delete/edit turn AND the window has rows.
+    /// Injects the user profile preamble when one exists.
     /// `literalHint` is used by the #240 auto-retry path to nudge the extractor.
     static func buildContextualUserMessage(
         message: String, history: String, literalHint: String? = nil
@@ -14,9 +15,10 @@ extension IntentClassifier {
         let recentBlock = needsRecentEntries(message)
             ? ConversationState.shared.recentEntriesContextBlock()
             : nil
+        let profile = AIProfileService.buildSummary()
         return composeUserMessage(
             message: message, history: history,
-            recentBlock: recentBlock, literalHint: literalHint
+            recentBlock: recentBlock, literalHint: literalHint, profileContext: profile
         )
     }
 
