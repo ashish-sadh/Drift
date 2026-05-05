@@ -158,7 +158,7 @@ session-start.sh has injected your context, created the overhead tracking issue,
 
 4. **Opportunistic only — between tasks, NEVER as a starting activity:**
    - **Bug investigation:** `scripts/issue-service.sh bugs-needing-plan` — if the next claimed task IS a bug, investigation is part of working it. Don't pre-investigate.
-   - **Design docs:** `scripts/design-service.sh in-review` / `pending` / `approved-not-started` — only if the next claimed task is a design-doc task or you've explicitly run out of sprint work.
+   - **Design docs:** `scripts/design-service.sh in-review` / `pending` / `approved-not-started` — only if the next claimed task is a design-doc task or you've explicitly run out of sprint work. For each PR `in-review` lists, run `scripts/design-service.sh address-pr <PR>` — it dumps issue-level + inline + review-body comments and walks reply + revise + push (`gh pr view --comments` does NOT show inline review threads or review summary bodies; easy to miss them).
 
    **Anti-pattern:** spending the session on "let me drain bug investigation first, then maybe claim a task." This is what's been killing sessions — they exhaust budget on orientation and never reach step 1.
 
