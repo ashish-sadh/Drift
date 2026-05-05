@@ -462,6 +462,23 @@ public enum ToolRanker {
             antiKeywords: ["log", "took", "injected", "add", "record"]
         )
 
+        p["glp1_insight"] = ToolProfile(
+            triggers: [("glp1 adherence", 6), ("glp-1 adherence", 6),
+                       ("ozempic progress", 5.5), ("semaglutide progress", 5.5),
+                       ("mounjaro progress", 5.5), ("tirzepatide progress", 5.5),
+                       ("semaglutide streak", 5.5), ("ozempic streak", 5.5),
+                       ("injection streak", 5.5), ("glp1 streak", 5.5),
+                       ("how's my glp", 6), ("how is my glp", 6),
+                       ("glp-1 progress", 5.5), ("glp1 progress", 5.5),
+                       ("since starting ozempic", 5.5), ("since starting semaglutide", 5.5),
+                       ("since starting mounjaro", 5.5), ("since i started ozempic", 5.5),
+                       ("weight since ozempic", 5.5), ("weight since semaglutide", 5.5),
+                       ("how consistent am i with ozempic", 5), ("how consistent am i with glp", 5)],
+            logBoost: -2, queryBoost: 3,
+            screens: [:],
+            antiKeywords: ["log", "took", "inject", "add", "when did", "last dose", "last time"]
+        )
+
         p["glucose"] = ToolProfile(
             triggers: [("glucose", 3), ("blood sugar", 3), ("spike", 2.5), ("cgm", 3),
                        ("glucose today", 4), ("any spikes", 3.5)],

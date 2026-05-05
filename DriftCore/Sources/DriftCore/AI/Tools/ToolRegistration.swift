@@ -852,6 +852,9 @@ public enum ToolRegistration {
         // Medication history — last dose time, typical timing, recent pattern.
         MedicationInfoTool.syncRegistration(registry: r)
 
+        // GLP-1 insight — adherence streak, missed doses, weight delta since first dose.
+        GLP1InsightTool.syncRegistration(registry: r)
+
         // Supplement adherence — streak, adherence %, last missed date. #417.
         SupplementInsightTool.syncRegistration(registry: r)
 
