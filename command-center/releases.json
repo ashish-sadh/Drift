@@ -2204,5 +2204,14 @@
       "Design service \u2014 in-review now picks up inline + review-body comments",
       "Watchdog backoff \u2014 skip testflight-due when archive is broken"
     ]
+  },
+  {
+    "build": 222,
+    "date": "2026-05-06T09:42:00-07:00",
+    "description": "Build 222 \u2014 internal AI chat code-quality refactor",
+    "features": [],
+    "fixes": [
+      "Internal: split AIChatView into focused extension files (1229 \u2192 157 lines)"
+    ]
   }
 ]
