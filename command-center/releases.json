@@ -2213,5 +2213,14 @@
     "fixes": [
       "Internal: split AIChatView into focused extension files (1229 \u2192 157 lines)"
     ]
+  },
+  {
+    "build": 223,
+    "date": "2026-05-06T15:00:00-07:00",
+    "description": "Build 223 \u2014 archive-failure version-bump guard",
+    "features": [],
+    "fixes": [
+      "Infra: stop bumping CURRENT_PROJECT_VERSION when the previous archive failed"
+    ]
   }
 ]
