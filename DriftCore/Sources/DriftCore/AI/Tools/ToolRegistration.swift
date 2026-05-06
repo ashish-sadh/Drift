@@ -867,6 +867,9 @@ public enum ToolRegistration {
         // Exercise volume by muscle group — training volume, undertrained groups. #335.
         ExerciseVolumeSummaryTool.syncRegistration(registry: r)
 
+        // Progressive overload plateau detection — which lifts are stalling + suggestions. #633.
+        ProgressiveOverloadCheckTool.syncRegistration(registry: r)
+
         // Glucose-food correlation — which foods spike glucose? ±2h window analysis. #324.
         GlucoseFoodCorrelationTool.syncRegistration(registry: r)
 
