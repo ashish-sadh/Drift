@@ -7,7 +7,7 @@ import AudioToolbox
 struct WorkoutView: View {
     @Binding var selectedTab: Int
     @State private var workouts: [WorkoutSummary] = []
-    @State private var overloadAlerts: [ProgressiveOverloadInfo] = []
+    @State private var overloadAlerts: [PlateauResult] = []
     @State private var showAllOverload = false
     @State private var weeklyCounts: [(weekStart: Date, count: Int)] = []
     @State private var templates: [WorkoutTemplate] = []
@@ -443,14 +443,13 @@ struct WorkoutView: View {
     }
 
     private var overloadCard: some View {
-        let wu = Preferences.weightUnit
         let maxVisible = 5
         let visible = showAllOverload ? overloadAlerts : Array(overloadAlerts.prefix(maxVisible))
         let hasMore = overloadAlerts.count > maxVisible
         return VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Image(systemName: "chart.line.uptrend.xyaxis").font(.caption).foregroundStyle(Theme.accent)
-                Text("Progressive Overload").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
+                Text("Plateau Alert").font(.subheadline.weight(.semibold)).foregroundStyle(.secondary)
                 Spacer()
                 if hasMore {
                     Text("\(overloadAlerts.count)").font(.caption2).foregroundStyle(.tertiary)
@@ -459,20 +458,21 @@ struct WorkoutView: View {
 
             ForEach(visible, id: \.exercise) { info in
                 HStack(spacing: 8) {
-                    Image(systemName: info.status == .stalling ? "exclamationmark.triangle.fill" : "arrow.down.circle.fill")
+                    Image(systemName: "exclamationmark.triangle.fill")
                         .font(.caption)
-                        .foregroundStyle(info.status == .stalling ? Theme.fatYellow : Theme.surplus)
+                        .foregroundStyle(Theme.fatYellow)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(info.exercise).font(.caption.weight(.semibold))
-                        if info.status == .stalling, let current = info.sessions.first {
-                            let suggestion = Int(wu.convertFromLbs(current * 1.025))
-                            Text("Same weight for \(info.sessions.count) sessions — try \(suggestion) \(wu.displayName)")
-                                .font(.caption2).foregroundStyle(.secondary)
-                        } else {
-                            Text(info.trend).font(.caption2).foregroundStyle(.secondary)
-                        }
+                        Text("\(info.sessionsChecked) sessions without progress — \(info.suggestion)")
+                            .font(.caption2).foregroundStyle(.secondary)
                     }
                     Spacer()
+                    Button {
+                        ProgressiveOverloadService.dismiss(exercise: info.exercise)
+                        overloadAlerts = ProgressiveOverloadService.allPlateaus()
+                    } label: {
+                        Image(systemName: "xmark").font(.caption2).foregroundStyle(.tertiary)
+                    }
                 }
             }
 
@@ -576,11 +576,7 @@ struct WorkoutView: View {
         do {
             templates = try WorkoutService.fetchTemplates()
         } catch { Log.app.error("Templates load: \(error.localizedDescription)") }
-        // Progressive overload: check unique exercises from recent workouts
-        let recentExercises = Array(Set(workouts.prefix(10).flatMap(\.exercises))).prefix(20)
-        overloadAlerts = recentExercises.compactMap { ExerciseService.getProgressiveOverload(exercise: $0) }
-            .filter { $0.status == .stalling || $0.status == .declining }
-            .sorted { $0.status == .stalling && $1.status != .stalling }
+        overloadAlerts = ProgressiveOverloadService.allPlateaus()
         isLoading = false
     }
 
