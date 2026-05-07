@@ -776,6 +776,11 @@ struct FoodTabView: View {
         }
         .contextMenu {
             Button {
+                editingEntry = entry
+            } label: {
+                Label("Edit", systemImage: "pencil")
+            }
+            Button {
                 viewModel.toggleFavorite(name: entry.foodName, foodId: entry.foodId)
                 viewModel.loadSuggestions()
             } label: {
