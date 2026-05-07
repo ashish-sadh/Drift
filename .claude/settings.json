@@ -136,6 +136,11 @@
             "type": "command",
             "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/daily-report.sh",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/state-md-freshness-check.sh",
+            "timeout": 5
           }
         ]
       }
