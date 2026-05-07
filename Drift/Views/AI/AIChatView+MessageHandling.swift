@@ -1233,8 +1233,29 @@ extension AIChatViewModel {
     /// Parse a `propose_meal` tool-call JSON emitted by the remote backend
     /// into a `ProposedMealCardData`. Returns nil for plain text responses.
     func parseProposedMealCard(from response: String) -> ProposedMealCardData? {
-        guard response.contains("propose_meal"),
-              let data = response.data(using: .utf8),
+        guard response.contains("propose_meal") else { return nil }
+        // Scan for the first balanced JSON object — LLM may wrap it in prose or markdown fences.
+        var depth = 0
+        var jsonStart: String.Index? = nil
+        for idx in response.indices {
+            switch response[idx] {
+            case "{":
+                if depth == 0 { jsonStart = idx }
+                depth += 1
+            case "}":
+                if depth > 0 { depth -= 1 }
+                if depth == 0, let start = jsonStart {
+                    if let card = parseMealCardJSON(String(response[start...idx])) { return card }
+                    jsonStart = nil
+                }
+            default: break
+            }
+        }
+        return nil
+    }
+
+    private func parseMealCardJSON(_ jsonString: String) -> ProposedMealCardData? {
+        guard let data = jsonString.data(using: .utf8),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               (json["tool"] as? String) == "propose_meal",
               let rawItems = json["items"] as? [[String: Any]],
@@ -1255,8 +1276,7 @@ extension AIChatViewModel {
                 fat: intVal("fat")
             )
         }
-        guard !items.isEmpty else { return nil }
-        return ProposedMealCardData(items: items)
+        return items.isEmpty ? nil : ProposedMealCardData(items: items)
     }
 
     /// Apply a photo-turn or followup response to the streaming placeholder:
