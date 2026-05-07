@@ -1,7 +1,25 @@
 #!/bin/bash
 
 # Silent for non-autonomous (human) sessions — these hooks are autopilot-only.
+# DRIFT_AUTONOMOUS env var is the primary signal but can leak via process
+# inheritance (e.g. a watchdog-spawned shell that the user takes over). The
+# session-type file is the authoritative signal session-start.sh owns and
+# refreshes — belt-and-suspenders.
 [[ "${DRIFT_AUTONOMOUS:-0}" != "1" ]] && exit 0
+[[ "$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null)" == "human" ]] && exit 0
+
+# If a recent archive failed, suppress the publish injection entirely. The
+# previous build number didn't ship; re-archiving on every commit just floods
+# the session with retry prompts. Wait for the watchdog (or a human) to clear
+# the flag before resuming TestFlight publishes.
+ARCHIVE_FAILED_FLAG="$HOME/drift-state/testflight-archive-failed"
+if [ -f "$ARCHIVE_FAILED_FLAG" ]; then
+  FAIL_MTIME=$(stat -f %m "$ARCHIVE_FAILED_FLAG" 2>/dev/null || stat -c %Y "$ARCHIVE_FAILED_FLAG" 2>/dev/null || echo "0")
+  if (( $(date +%s) - FAIL_MTIME < 86400 )); then
+    exit 0
+  fi
+fi
+
 # Hook: PostToolUse on Bash(git commit *)
 # Publishes TestFlight when watchdog has marked it due (every 3h).
 # Watchdog writes ~/drift-state/testflight-due in its heartbeat loop.
@@ -39,21 +57,7 @@ HOURS=$(( ELAPSED / 3600 ))
 
 touch "$HOME/drift-state/testflight-publish-authorized"
 
-# If the previous archive failed within the last 24h, the existing build number
-# never shipped — bumping again would just widen the gap between project.yml
-# and what's actually on TestFlight (this is what created the 211–219 ghost-bump
-# stretch). Reuse the same number; TestFlight rejects duplicates so a re-archive
-# of an already-shipped build is a no-op.
-ARCHIVE_FAILED_FLAG="$HOME/drift-state/testflight-archive-failed"
 STEP1="1. Bump CURRENT_PROJECT_VERSION in project.yml (increment by 1)"
-if [ -f "$ARCHIVE_FAILED_FLAG" ]; then
-  FAIL_MTIME=$(stat -f %m "$ARCHIVE_FAILED_FLAG" 2>/dev/null || stat -c %Y "$ARCHIVE_FAILED_FLAG" 2>/dev/null || echo "0")
-  FAIL_AGE=$(( $(date +%s) - FAIL_MTIME ))
-  if [ "$FAIL_AGE" -lt 86400 ]; then
-    FAIL_TS=$(date -r "$FAIL_MTIME" '+%Y-%m-%d %H:%M' 2>/dev/null || echo "recently")
-    STEP1="1. Reuse the current CURRENT_PROJECT_VERSION (last archive failed at ${FAIL_TS}) — do not bump until upload succeeds"
-  fi
-fi
 
 FORCE_STEP=""
 if [ -n "$FORCE_ISSUE_NUM" ]; then
