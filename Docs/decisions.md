@@ -30,6 +30,16 @@ Append-only record of non-obvious decisions: architecture changes, harness rules
 
 ---
 
+## 2026-05-07
+
+### launch-watchdog-budget — defer notification + widget refresh, do not await before syncComplete
+After #620 (GLP-1 weekly slot) + #627 (protein adherence 4-of-7), `NotificationService.refreshScheduledAlerts()` issues ~35 DB fetches per launch (5 BehaviorInsight alerts × 7-day windows + medication + GLP-1). Adding HealthKit sync + weight trend + TDEE puts cold launch within iOS's ~20s watchdog kill. New rule: any work that doesn't gate first frame goes in `Task { @MainActor in ... }`, not awaited inline in `DriftApp.task`. Notifications fire on schedule and widget pushes are fire-and-forget — neither gates UI. Commit `36f0cb12`.
+
+### gh-search-index-bypass — sprint listings use REST list, not search
+GitHub's `?labels=X` REST calls route through the search index, which had >27-min propagation lag on 2026-05-07 — newly-filed P0 bugs were invisible to both `sprint-service.sh refresh` and the command-center for almost half an hour. Both code paths now do unfiltered fetches (`state=open per_page=100` etc.) and filter client-side. Pattern: when correctness depends on seeing an issue right after it was created/labeled, never depend on `--search` or `?q=label:`. Commits `607c1398`, `e4e757a5`.
+
+---
+
 ## 2026-04-28
 
 ### remove-db-matching-from-ai — AI workflows trust LLM output directly, no local DB second-guess
