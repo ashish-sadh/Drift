@@ -36,6 +36,7 @@ public enum BehaviorInsightService {
     public static func computeProactiveAlerts(recentAppleWorkouts: [Date] = []) -> [BehaviorInsight] {
         var alerts: [BehaviorInsight] = []
         if let protein = proteinStreakAlert() { alerts.append(protein) }
+        if let glucose = glucoseSpikeAlert() { alerts.append(glucose) }
         if let supplement = supplementGapAlert() { alerts.append(supplement) }
         if let workout = workoutConsistencyAlert(recentAppleWorkouts: recentAppleWorkouts) { alerts.append(workout) }
         if let logging = loggingGapAlert() { alerts.append(logging) }
@@ -71,6 +72,32 @@ public enum BehaviorInsightService {
             icon: "exclamationmark.triangle.fill",
             title: "Protein below target",
             detail: "\(missedStreak) days in a row under \(Int(targets.proteinG))g protein. Try adding a protein shake or eggs.",
+            isPositive: false)
+    }
+
+    /// Alert when glucose readings show spikes (>140 mg/dL) on 3+ of the last 7 days.
+    /// Only fires when glucose data is present — users without a CGM see nothing.
+    private static func glucoseSpikeAlert() -> BehaviorInsight? {
+        let db = AppDatabase.shared
+        let calendar = Calendar.current
+        var spikeDays = 0
+        var datadays = 0
+
+        for dayOffset in 1...7 {
+            guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: Date()) else { break }
+            let dateStr = DateFormatters.dateOnly.string(from: date)
+            guard let readings = try? db.fetchGlucoseReadings(from: dateStr, to: dateStr),
+                  !readings.isEmpty else { continue }
+            datadays += 1
+            if readings.contains(where: { $0.glucoseMgdl > 140 }) { spikeDays += 1 }
+        }
+
+        guard datadays >= 3, spikeDays >= 3 else { return nil }
+
+        return BehaviorInsight(
+            icon: "waveform.path.ecg",
+            title: "Recurring glucose spikes",
+            detail: "\(spikeDays) of the last 7 days had readings above 140 mg/dL. Ask Drift AI which meals correlate.",
             isPositive: false)
     }
 
