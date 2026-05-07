@@ -65,7 +65,15 @@ public enum WeightTrendCalculator {
         public static let `default` = AlgorithmConfig(
             emaHalfLifeDays: 14,
             regressionWindowDays: 21,
-            widenSlopeThresholdKgPerWeek: 0.227,  // ≈ 0.5 lbs/wk
+            // Tightened 0.227 → 0.10 (2026-05-06): the prior 0.5 lbs/wk
+            // threshold meant any sub-half-pound-per-week slope triggered
+            // widening to 42 days, which routinely pulled in pre-regime-change
+            // data and flipped the sign on users mid-direction-change. A real
+            // user gaining at +0.18 kg/wk got reported as a -0.55 lbs/wk loser
+            // because the 42-day widen reached into a prior losing phase.
+            // 0.10 kg/wk (~0.22 lbs/wk) still filters genuine near-zero noise
+            // but lets a real, consistent small slope survive without widening.
+            widenSlopeThresholdKgPerWeek: 0.10,
             widenWindowDays: 42,
             kcalPerKg: 6000,
             maintainingThresholdKgPerWeek: 0.05
@@ -74,7 +82,7 @@ public enum WeightTrendCalculator {
         public static let conservative = AlgorithmConfig(
             emaHalfLifeDays: 21,
             regressionWindowDays: 21,
-            widenSlopeThresholdKgPerWeek: 0.227,
+            widenSlopeThresholdKgPerWeek: 0.10,
             widenWindowDays: 42,
             kcalPerKg: 5500,
             maintainingThresholdKgPerWeek: 0.05
@@ -268,8 +276,25 @@ public enum WeightTrendCalculator {
                     ? daysBetween(usablePoints.first!.date, usablePoints.last!.date)
                     : 0
                 if let widened = weeklyRateForWindow(dataPoints: usablePoints, windowDays: config.widenWindowDays) {
-                    weeklyRateKg = widened
-                    rateWindowDays = max(usableSpan, config.regressionWindowDays)
+                    // Regime-change guard (no-gap variant): if the widened
+                    // slope flips sign relative to a meaningful primary, trust
+                    // the primary. The widen path is for noise reduction at
+                    // near-zero slopes — not for overruling a real recent
+                    // direction change. Without this, a user who switched
+                    // from losing to gaining (or vice versa) and logs
+                    // continuously (no gap to trigger pointsAfterLastGap)
+                    // gets the wrong sign on weekly rate and deficit. The
+                    // gap-based regime detection above only handles the
+                    // discontinuous case.
+                    let primaryIsMeaningful = abs(primary ?? 0) >= config.maintainingThresholdKgPerWeek
+                    let signsDiffer = primary.map { ($0 > 0) != (widened > 0) } ?? false
+                    if primaryIsMeaningful, signsDiffer, let p = primary {
+                        weeklyRateKg = p
+                        rateWindowDays = config.regressionWindowDays
+                    } else {
+                        weeklyRateKg = widened
+                        rateWindowDays = max(usableSpan, config.regressionWindowDays)
+                    }
                 } else {
                     weeklyRateKg = primary ?? 0
                     rateWindowDays = config.regressionWindowDays
