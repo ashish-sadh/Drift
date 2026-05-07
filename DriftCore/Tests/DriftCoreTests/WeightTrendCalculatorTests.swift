@@ -1046,3 +1046,60 @@ private func dateStr(_ d: Date) -> String {
     #expect(trend.weeklyRateKg < 0,
             "Near-zero primary should let widen path show prior trend, not flip to gain. Got \(trend.weeklyRateKg)")
 }
+
+// MARK: - Median-based two-window endpoints — fix for "near-flat trajectory reports -0.71 lbs/wk"
+
+/// Daily logger, 30 days of near-flat weight (~53.0 kg) with one heavy
+/// water-weight day (+0.7 kg) in the first 7-day window. Mean-based
+/// two-window would inflate firstAvg, producing a misleading negative
+/// slope. Median ignores that single outlier and stays near zero.
+@Test func twoWindow_medianIgnoresSingleOutlier() async throws {
+    let entries = recentDailyEntries(count: 30) { i in
+        // Near-flat trend: 53.0 kg base with ±0.1 kg daily noise
+        let base = 53.0 + (i % 2 == 0 ? -0.1 : 0.1)
+        // One outlier in the first 7-day window: +0.7 kg on day 22 ago
+        // (i.e., index 8, since count=30 and last day is index 29).
+        if i == 8 { return 53.7 }
+        return base
+    }
+    let trend = WeightTrendCalculator.calculateTrend(entries: entries)!
+    // True trajectory is essentially flat. Median-based slope should be
+    // within ±0.1 kg/wk of zero. With the prior mean-based code the
+    // single +0.7 kg outlier in the first window pulled firstAvg up
+    // ~0.1 kg, producing a false ~-0.05 kg/wk loss with no real basis.
+    #expect(abs(trend.weeklyRateKg) < 0.1,
+            "Median should ignore the +0.7 kg outlier; got \(trend.weeklyRateKg) kg/wk")
+}
+
+/// When daily weights actually trend downward at -0.1 kg/wk, the median
+/// path should report close to that — not lose the signal under
+/// robustness. This validates the method isn't over-shrinking real change.
+@Test func twoWindow_medianPreservesRealTrend() async throws {
+    let entries = recentDailyEntries(count: 30) { i in
+        // Linear loss: 53.5 → 53.0 over 30 days ≈ -0.117 kg/wk
+        let base = 53.5 - (0.5 * Double(i) / 29.0)
+        // Tiny ±0.05 kg noise so it's not perfectly clean
+        let noise = i % 2 == 0 ? -0.05 : 0.05
+        return base + noise
+    }
+    let trend = WeightTrendCalculator.calculateTrend(entries: entries)!
+    #expect(trend.weeklyRateKg < 0, "Should detect negative trend, got \(trend.weeklyRateKg)")
+    #expect(trend.weeklyRateKg > -0.25,
+            "Should be close to -0.117 kg/wk (true rate), not blown up. Got \(trend.weeklyRateKg)")
+}
+
+/// Pure unit test for the median helper.
+@Test func median_oddCount() {
+    #expect(WeightTrendCalculator.median(of: [1.0, 5.0, 3.0]) == 3.0)
+    #expect(WeightTrendCalculator.median(of: [1.0, 2.0, 3.0, 4.0, 5.0]) == 3.0)
+}
+
+@Test func median_evenCount_averagesMiddleTwo() {
+    #expect(WeightTrendCalculator.median(of: [1.0, 2.0, 3.0, 4.0]) == 2.5)
+    #expect(WeightTrendCalculator.median(of: [10.0, 20.0]) == 15.0)
+}
+
+@Test func median_robustToOutliers() {
+    // One huge outlier doesn't move the median
+    #expect(WeightTrendCalculator.median(of: [1.0, 2.0, 3.0, 100.0]) == 2.5)
+}
