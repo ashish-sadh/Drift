@@ -1038,7 +1038,13 @@ while true; do
             check_stale_claim
             snapshot_wip_if_in_progress
             sweep_stale_in_progress_labels
-            # heartbeat commits removed (#642) — heartbeat.json written to disk only
+            # heartbeat.json must be committed so the deployed Command Center
+            # (GitHub Pages) can fetch it. #642 removed this call to stop log
+            # pollution but broke the deployed UI — Pages and raw.githubusercontent
+            # both 404'd, JSON.parse choked on the 404 body. Restored with the
+            # original hybrid cadence (commit when elapsed > 10 min OR HEAD moved
+            # for piggyback). Worst-case noise: ~6 standalone heartbeat commits/hr.
+            commit_heartbeat_if_due
             # Check if autopilot is dead
             if ! is_claude_alive; then
                 stop_monitor

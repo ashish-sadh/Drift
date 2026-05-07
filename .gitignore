@@ -48,8 +48,7 @@ graphify-out/graph.html
 *.anthropic-key
 /tmp/drift-test-*
 
-# Heartbeat snapshot is written to disk by the watchdog on each tick but
-# NOT committed — avoids polluting git log (#642). command-center reads
-# it from disk locally; the file stays tracked for backwards compat but
-# the watchdog no longer creates standalone heartbeat commits.
-command-center/heartbeat.json
+# NOTE: command-center/heartbeat.json IS tracked. #642 ignored it to stop
+# git-log pollution but broke the deployed Command Center (Pages 404). Now
+# committed via commit_heartbeat_if_due() with hybrid cadence (≥10 min or
+# HEAD-moved piggyback) to keep noise low without breaking the UI.
