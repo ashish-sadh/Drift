@@ -475,6 +475,29 @@ struct SettingsView: View {
                 }
                 .card()
 
+                // GLP-1 Weekly Reminders — #620
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "syringe")
+                            .foregroundStyle(Theme.accent).frame(width: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("GLP-1 Weekly Reminders").font(.subheadline.weight(.medium))
+                            Text("Weekly notification on your injection day — only fires if you haven't logged a dose in the last 7 days")
+                                .font(.caption2).foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        Toggle("", isOn: Binding(
+                            get: { Preferences.glp1RemindersEnabled },
+                            set: {
+                                Preferences.glp1RemindersEnabled = $0
+                                Task { await NotificationService.refreshScheduledAlerts() }
+                            }
+                        ))
+                        .labelsHidden().tint(Theme.accent)
+                    }
+                }
+                .card()
+
                 // AI Chat Telemetry (opt-in, local only) — #261
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 12) {

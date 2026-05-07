@@ -10,6 +10,7 @@ enum NotificationService {
     private static let categoryID = "drift_health_nudge"
     private static let mealReminderCategoryID = "drift_meal_reminder"
     private static let medicationReminderCategoryID = "drift_medication_reminder"
+    private static let glp1ReminderCategoryID = "drift_glp1_reminder"
     private static let dailyNudgeIdentifier = "drift_daily_nudge"
 
     /// Lookback window for "what time does the user typically eat?" stats.
@@ -29,8 +30,9 @@ enum NotificationService {
         let nudgesOn = Preferences.healthNudgesEnabled
         let mealsOn = Preferences.mealRemindersEnabled
         let medsOn = Preferences.medicationRemindersEnabled
+        let glp1On = Preferences.glp1RemindersEnabled
 
-        guard nudgesOn || mealsOn || medsOn else {
+        guard nudgesOn || mealsOn || medsOn || glp1On else {
             center.removeAllPendingNotificationRequests()
             return
         }
@@ -41,9 +43,10 @@ enum NotificationService {
         let alerts = nudgesOn ? BehaviorInsightService.computeProactiveAlerts() : []
         let mealSlots = mealsOn ? computeMealReminderSlots() : []
         let medSlots = medsOn ? computeMedicationReminderSlots() : []
+        let glp1Slot = glp1On ? computeGLP1ReminderSlot() : nil
 
         // No work? Don't pester for permission.
-        guard !alerts.isEmpty || !mealSlots.isEmpty || !medSlots.isEmpty else { return }
+        guard !alerts.isEmpty || !mealSlots.isEmpty || !medSlots.isEmpty || glp1Slot != nil else { return }
 
         // Request permission if not yet determined (only when we have something to send)
         let settings = await center.notificationSettings()
@@ -108,6 +111,22 @@ enum NotificationService {
             )
             try? await center.add(request)
         }
+
+        // GLP-1 weekly reminder — fired once per week on injection day
+        if let slot = glp1Slot {
+            let content = UNMutableNotificationContent()
+            content.title = "Time for your \(slot.medicationName) dose"
+            content.body = slot.notificationBody
+            content.sound = .default
+            content.categoryIdentifier = glp1ReminderCategoryID
+
+            let request = UNNotificationRequest(
+                identifier: slot.notificationIdentifier,
+                content: content,
+                trigger: weeklyTrigger(weekday: slot.weekday, hour: slot.triggerHour, minute: slot.triggerMinute)
+            )
+            try? await center.add(request)
+        }
     }
 
     // MARK: - Meal Reminder Pipeline (testable seam)
@@ -131,17 +150,21 @@ enum NotificationService {
 
     /// For each medication logged 3+ times in the last 60 days, compute the
     /// typical dose time and return a reminder slot — unless the medication
-    /// has already been logged today. Returns slots for repeating daily reminders.
+    /// has already been logged today. GLP-1 medications are excluded here;
+    /// they get a weekly reminder via `computeGLP1ReminderSlot()` instead.
     static func computeMedicationReminderSlots() -> [MedicationReminderSlot] {
         let todayLogged = Set(
             (try? AppDatabase.shared.fetchTodayMedications())?.map { $0.name.lowercased() } ?? []
         )
+        let allMeds = (try? AppDatabase.shared.fetchAllRecentMedications(days: medicationLookbackDays)) ?? []
+        let glp1Name = GLP1InsightTool.autoDetectGLP1(from: allMeds)?.lowercased()
 
         let names = MedicationService.consistentMedicationNames(days: medicationLookbackDays)
         var slots: [MedicationReminderSlot] = []
 
         for name in names {
             guard !todayLogged.contains(name.lowercased()) else { continue }
+            if let glp1 = glp1Name, name.lowercased() == glp1 { continue }
             let hours = MedicationService.recentDoseHours(for: name, days: medicationLookbackDays)
             guard hours.count >= 3 else { continue }
             let mean = hours.reduce(0, +) / Double(hours.count)
@@ -154,6 +177,42 @@ enum NotificationService {
             ))
         }
         return slots.sorted { $0.triggerHour * 60 + $0.triggerMinute < $1.triggerHour * 60 + $1.triggerMinute }
+    }
+
+    // MARK: - GLP-1 Weekly Reminder Pipeline
+
+    /// Returns a weekly reminder slot for the user's GLP-1 medication, or nil when:
+    /// - no GLP-1 detected, - fewer than 3 logged doses (no pattern yet), or
+    /// - a dose was already logged in the last 7 days.
+    static func computeGLP1ReminderSlot(now: Date = Date()) -> GLP1ReminderSlot? {
+        let allMeds = (try? AppDatabase.shared.fetchAllRecentMedications(days: medicationLookbackDays)) ?? []
+        guard let glp1Name = GLP1InsightTool.autoDetectGLP1(from: allMeds) else { return nil }
+
+        let logs = (try? AppDatabase.shared.fetchMedications(for: glp1Name, days: medicationLookbackDays)) ?? []
+        guard logs.count >= 3 else { return nil }
+
+        let isoFmt = ISO8601DateFormatter()
+        let doseDates = logs.compactMap { isoFmt.date(from: $0.loggedAt) }.sorted()
+
+        guard !GLP1InsightTool.isLoggedThisWeek(dates: doseDates, now: now),
+              let lastDose = doseDates.last else { return nil }
+
+        let cal = Calendar.current
+        return GLP1ReminderSlot(
+            medicationName: glp1Name,
+            weekday: cal.component(.weekday, from: lastDose),
+            triggerHour: cal.component(.hour, from: lastDose),
+            triggerMinute: cal.component(.minute, from: lastDose)
+        )
+    }
+
+    /// Repeating weekly calendar trigger at the given weekday and local time.
+    static func weeklyTrigger(weekday: Int, hour: Int, minute: Int) -> UNCalendarNotificationTrigger {
+        var components = DateComponents()
+        components.weekday = weekday
+        components.hour = hour
+        components.minute = minute
+        return UNCalendarNotificationTrigger(dateMatching: components, repeats: true)
     }
 
     // MARK: - Shared Helpers
@@ -245,5 +304,23 @@ struct MedicationReminderSlot: Sendable, Equatable {
     var notificationIdentifier: String {
         let safeName = medicationName.lowercased().replacingOccurrences(of: " ", with: "_")
         return "drift_medication_reminder_\(safeName)"
+    }
+}
+
+// MARK: - GLP1ReminderSlot
+
+struct GLP1ReminderSlot: Sendable, Equatable {
+    let medicationName: String
+    let weekday: Int       // 1 = Sunday … 7 = Saturday (Calendar.current weekday)
+    let triggerHour: Int
+    let triggerMinute: Int
+
+    var notificationBody: String {
+        "Your weekly \(medicationName) injection is due today. Tap to log your dose."
+    }
+
+    var notificationIdentifier: String {
+        let safeName = medicationName.lowercased().replacingOccurrences(of: " ", with: "_")
+        return "drift_glp1_reminder_\(safeName)"
     }
 }

@@ -77,6 +77,13 @@ public enum GLP1InsightTool {
 
     // MARK: - Pure helpers (nonisolated for testability)
 
+    /// True if at least one dose was logged within the last 7 days (strictly after now - 7d).
+    /// Used by the notification pipeline to skip scheduling when already dosed this week.
+    nonisolated public static func isLoggedThisWeek(dates: [Date], now: Date = Date()) -> Bool {
+        guard let cutoff = Calendar.current.date(byAdding: .day, value: -7, to: now) else { return false }
+        return dates.contains { $0 > cutoff }
+    }
+
     nonisolated public static func autoDetectGLP1(from meds: [DailyMedication]) -> String? {
         for pattern in glp1Patterns {
             if let found = meds.first(where: { $0.name.lowercased().contains(pattern) }) {

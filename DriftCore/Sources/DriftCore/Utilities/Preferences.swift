@@ -99,6 +99,17 @@ public enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: medicationRemindersKey) }
     }
 
+    // MARK: - GLP-1 Reminders
+
+    private static let glp1RemindersKey = "drift_glp1_reminders"
+
+    /// Weekly notification on the user's injection day, only when no dose logged in the last 7 days.
+    /// Default OFF. #620.
+    public static var glp1RemindersEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: glp1RemindersKey) }
+        set { UserDefaults.standard.set(newValue, forKey: glp1RemindersKey) }
+    }
+
     // MARK: - Conversation History
 
     private static let conversationHistoryEnabledKey = "drift_conversation_history_enabled"

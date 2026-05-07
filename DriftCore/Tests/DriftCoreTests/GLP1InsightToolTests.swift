@@ -48,6 +48,34 @@ struct GLP1InsightToolTests {
         #expect(top != "health.glp1_insight")
     }
 
+    // MARK: - isLoggedThisWeek
+
+    @Test func isLoggedThisWeek_doseYesterday_isTrue() {
+        let yesterday = Calendar.current.date(byAdding: .day, value: -1, to: Date())!
+        #expect(GLP1InsightTool.isLoggedThisWeek(dates: [yesterday]) == true)
+    }
+
+    @Test func isLoggedThisWeek_dose8DaysAgo_isFalse() {
+        let eightDaysAgo = Calendar.current.date(byAdding: .day, value: -8, to: Date())!
+        #expect(GLP1InsightTool.isLoggedThisWeek(dates: [eightDaysAgo]) == false)
+    }
+
+    @Test func isLoggedThisWeek_noDoses_isFalse() {
+        #expect(GLP1InsightTool.isLoggedThisWeek(dates: []) == false)
+    }
+
+    @Test func isLoggedThisWeek_doseExactlySevenDaysAgo_isFalse() {
+        // Boundary: exactly 7 days ago is NOT within the last 7 days (cutoff is strictly >)
+        let sevenDaysAgo = Calendar.current.date(byAdding: .day, value: -7, to: Date())!
+        #expect(GLP1InsightTool.isLoggedThisWeek(dates: [sevenDaysAgo]) == false)
+    }
+
+    @Test func isLoggedThisWeek_multipleDosesOldAndRecent_isTrue() {
+        let old = Calendar.current.date(byAdding: .day, value: -14, to: Date())!
+        let recent = Calendar.current.date(byAdding: .day, value: -3, to: Date())!
+        #expect(GLP1InsightTool.isLoggedThisWeek(dates: [old, recent]) == true)
+    }
+
     // MARK: - autoDetectGLP1
 
     @Test func autoDetect_findsOzempic() {
