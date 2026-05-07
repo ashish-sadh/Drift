@@ -456,6 +456,21 @@ except Exception:
         echo "  Run \`gh issue edit ${NUM} --remove-label resumable\` after committing."
         echo ""
     fi
+
+    # Surface any orphan WIP from a prior dead session (snapshot_orphan_wip).
+    # Even if it's not for this exact issue, the diff may be relevant —
+    # senior protocol says read it before redoing work from scratch.
+    local LAST_ORPHAN="$HOME/drift-state/wip/last-orphan.patch"
+    if [ -L "$LAST_ORPHAN" ] || [ -f "$LAST_ORPHAN" ]; then
+        echo ""
+        echo "ℹ️  Orphan WIP exists at $LAST_ORPHAN (a prior unclaimed session died with"
+        echo "  uncommitted edits). Inspect: git apply --stat $LAST_ORPHAN"
+        echo "  If the diff is for this task, apply + continue. If unrelated, ignore + delete."
+        echo ""
+    fi
+
+    # Reset pre-claim Read budget so the next claim cycle starts fresh.
+    rm -f "$HOME/drift-state/preclaim-reads"
 }
 
 cmd_done() {
