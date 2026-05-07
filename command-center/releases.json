@@ -2247,5 +2247,21 @@
       "Glucose spike proactive alert — dashboard surfaces a card when blood glucose rises sharply after a meal"
     ],
     "fixes": []
+  },
+  {
+    "build": 225,
+    "date": "2026-05-07T00:00:00-07:00",
+    "description": "Build 225 — macro rings goal-aware color + tap tooltip + collapsible food diary",
+    "features": [
+      "Macro rings: goal-aware fill color (green = under calorie target for weight loss, red = any macro over target)",
+      "Macro rings: tap the rings to show a breakdown tooltip with consumed/target, remaining, and % of calories per macro",
+      "Macro rings: smooth fill animation on appear",
+      "Food diary: collapsible meal-type sections (breakfast/lunch/dinner/snacks)",
+      "Food diary: inline edit — Edit in context menu"
+    ],
+    "fixes": [
+      "Photo logging: extract JSON object from AI response, not the whole string",
+      "Recipe builder: bypass for single confirmed meal items"
+    ]
   }
 ]
