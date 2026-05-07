@@ -2279,5 +2279,17 @@
       "Protein adherence proactive alert \u2014 fires for 4-of-7 missed days or 3+ consecutive missed days, with 24h dismiss"
     ],
     "fixes": []
+  },
+  {
+    "build": 227,
+    "date": "2026-05-07T11:00:00-07:00",
+    "description": "Build 227 \u2014 Send Feedback prefill, weight-trend midpoint fix, launch watchdog budget",
+    "features": [
+      "Send Feedback now prefills device/build/iOS info and shows a mail fallback alert if Mail is not configured"
+    ],
+    "fixes": [
+      "Weight trend two-window endpoints now use median + actual time centers (smoother, less skew on sparse weeks)",
+      "App launch defers notification scheduling + widget refresh so cold start stays under the iOS watchdog budget"
+    ]
   }
 ]
