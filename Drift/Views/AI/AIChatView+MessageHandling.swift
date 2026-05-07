@@ -162,6 +162,13 @@ extension AIChatViewModel {
                 messages[statusIdx] = ChatMessage(role: .assistant, text: "Searching for \(text)...")
                 foodSearchQuery = text
                 showingFoodSearch = true
+            } else if recipeItems.count == 1 && notFound.isEmpty {
+                let item = recipeItems[0]
+                let vm = FoodLogViewModel()
+                let mealType = MealType(rawValue: mealName.lowercased()) ?? vm.autoMealType
+                vm.logRecipeItems(recipeItems, mealType: mealType)
+                messages[statusIdx] = ChatMessage(role: .assistant,
+                    text: "Logged \(item.name) (\(Int(item.calories)) cal) for \(mealName.capitalized)!")
             } else {
                 var msg = "Building \(mealName): \(recipeItems.map { "\($0.name) (\(Int($0.calories)) cal)" }.joined(separator: ", "))."
                 if !notFound.isEmpty {
