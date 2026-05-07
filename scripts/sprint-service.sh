@@ -85,41 +85,61 @@ cmd_refresh() {
     local NOW
     NOW=$(date +%s)
 
-    # Write each issue list to temp files (avoids shell quoting fragility)
-    # --limit 100 on all calls: gh default is 30, which truncates busy repos
-    gh issue list --state open --label bug --label P0 --limit 100 --json number,title,labels \
-        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
-        > "$TMP_DIR/p0_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p0_bugs.json"
+    # Fetch ONE unfiltered list, then derive every bucket via jq. The previous
+    # code did 8 separate `gh issue list --label X` calls — each routed through
+    # GitHub's search index, which has a propagation lag (typically <5 min,
+    # observed up to 27+ min on 2026-05-07). Newly-labeled P0 bugs (#650, #651)
+    # were invisible to refresh until the index caught up, hiding both from
+    # sprint-state for nearly half an hour. Client-side filtering bypasses the
+    # search index entirely — slower per call but immune to lag.
+    # --limit 200 covers the cap of 100 sprint-tasks plus permanents/design
+    # docs/bugs comfortably.
+    gh issue list --state open --limit 200 --json number,title,labels,updatedAt \
+        > "$TMP_DIR/all.json" 2>/dev/null || echo "[]" > "$TMP_DIR/all.json"
 
-    gh issue list --state open --label feature-request --label P0 --limit 100 --json number,title,labels \
-        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
-        > "$TMP_DIR/p0_feats.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p0_feats.json"
+    # Each derivation: one jq pass over all.json. Keep `status: "pending"` for
+    # sprint/queue tasks, `status: "permanent"` for permanents (rotation
+    # logic depends on the tag). Permanents preserve updatedAt for ordering.
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select(($L|index("bug")) and ($L|index("P0")))
+        | {number, title, labels: $L, status: "pending"}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/p0_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p0_bugs.json"
 
-    gh issue list --state open --label sprint-task --label SENIOR --limit 100 --json number,title,labels \
-        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
-        > "$TMP_DIR/senior.json" 2>/dev/null || echo "[]" > "$TMP_DIR/senior.json"
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select(($L|index("feature-request")) and ($L|index("P0")))
+        | {number, title, labels: $L, status: "pending"}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/p0_feats.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p0_feats.json"
 
-    gh issue list --state open --label sprint-task --limit 100 --json number,title,labels \
-        --jq '[.[] | select(.labels | map(.name) | index("SENIOR") | not) | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
-        > "$TMP_DIR/junior.json" 2>/dev/null || echo "[]" > "$TMP_DIR/junior.json"
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select(($L|index("sprint-task")) and ($L|index("SENIOR")))
+        | {number, title, labels: $L, status: "pending"}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/senior.json" 2>/dev/null || echo "[]" > "$TMP_DIR/senior.json"
 
-    # Design-doc issues without doc-ready or implementing are senior work — fetch without
-    # label filtering so Python can apply the multi-label conditions precisely.
-    gh issue list --state open --label design-doc --limit 100 --json number,title,labels \
-        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
-        > "$TMP_DIR/design_docs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/design_docs.json"
+    # Junior = sprint-task without SENIOR (matches old --label sprint-task + jq filter)
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select(($L|index("sprint-task")) and (($L|index("SENIOR")) | not))
+        | {number, title, labels: $L, status: "pending"}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/junior.json" 2>/dev/null || echo "[]" > "$TMP_DIR/junior.json"
 
-    gh issue list --state open --label bug --label P1 --limit 100 --json number,title,labels \
-        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
-        > "$TMP_DIR/p1_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p1_bugs.json"
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select($L|index("design-doc"))
+        | {number, title, labels: $L, status: "pending"}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/design_docs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/design_docs.json"
 
-    gh issue list --state open --label bug --label P2 --limit 100 --json number,title,labels \
-        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
-        > "$TMP_DIR/p2_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p2_bugs.json"
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select(($L|index("bug")) and ($L|index("P1")))
+        | {number, title, labels: $L, status: "pending"}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/p1_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p1_bugs.json"
 
-    gh issue list --state open --label permanent-task --limit 100 --json number,title,labels,updatedAt \
-        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "permanent", "updatedAt": .updatedAt}]' \
-        > "$TMP_DIR/perm.json" 2>/dev/null || echo "[]" > "$TMP_DIR/perm.json"
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select(($L|index("bug")) and ($L|index("P2")))
+        | {number, title, labels: $L, status: "pending"}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/p2_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p2_bugs.json"
+
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select($L|index("permanent-task"))
+        | {number, title, labels: $L, status: "permanent", updatedAt}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/perm.json" 2>/dev/null || echo "[]" > "$TMP_DIR/perm.json"
 
     local NEW_STATE
     NEW_STATE=$(python3 - <<PYEOF
