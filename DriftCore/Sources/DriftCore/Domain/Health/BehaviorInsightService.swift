@@ -81,19 +81,24 @@ public enum BehaviorInsightService {
         let db = AppDatabase.shared
         let calendar = Calendar.current
         var spikeDays = 0
-        var datadays = 0
+        var dataDays = 0
 
         for dayOffset in 1...7 {
             guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: Date()) else { break }
             let dateStr = DateFormatters.dateOnly.string(from: date)
             guard let readings = try? db.fetchGlucoseReadings(from: dateStr, to: dateStr),
                   !readings.isEmpty else { continue }
-            datadays += 1
+            dataDays += 1
             if readings.contains(where: { $0.glucoseMgdl > 140 }) { spikeDays += 1 }
         }
 
-        guard datadays >= 3, spikeDays >= 3 else { return nil }
+        return glucoseSpikeAlertVariant(spikeDays: spikeDays, dataDays: dataDays)
+    }
 
+    /// Pure: given counted spike days and data days from the last 7, return the alert or nil.
+    /// Separated from DB access so the decision logic is unit-testable.
+    public static func glucoseSpikeAlertVariant(spikeDays: Int, dataDays: Int) -> BehaviorInsight? {
+        guard dataDays >= 3, spikeDays >= 3 else { return nil }
         return BehaviorInsight(
             icon: "waveform.path.ecg",
             title: "Recurring glucose spikes",
