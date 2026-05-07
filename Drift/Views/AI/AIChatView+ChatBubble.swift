@@ -28,10 +28,10 @@ extension AIChatView {
                 case .idle: ""
                 }
                 if !baseLabel.isEmpty {
-                    TimelineView(.periodic(from: .now, by: 0.1)) { context in
+                    TimelineView(.periodic(from: .now, by: 0.5)) { context in
                         let elapsed = vm.stageStarted.map { context.date.timeIntervalSince($0) } ?? 0
-                        let display = elapsed > 0.8
-                            ? "\(baseLabel)… \(String(format: "%.1f", elapsed))s"
+                        let display = elapsed > 0.5
+                            ? "\(baseLabel) (\(String(format: "%.1f", elapsed))s)"
                             : baseLabel
                         Text(display)
                             .font(.caption2).foregroundStyle(.tertiary)
