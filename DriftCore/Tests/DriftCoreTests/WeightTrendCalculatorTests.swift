@@ -986,3 +986,60 @@ private func dateStr(_ d: Date) -> String {
 @Test func trendDirectionSystemImageGaining() {
     #expect(WeightTrendCalculator.TrendDirection.gaining.systemImage == "arrow.up.right")
 }
+
+// MARK: - Regime change (no-gap variant) — fix for "+1.2 lbs but -213 kcal deficit" bug
+
+/// User who lost ~3 kg over the prior 30 days then started gaining ~0.18 kg/wk
+/// in the recent 21 days. Logs daily (no gap). Before the fix, the small
+/// 21-day slope (< 0.227 kg/wk) widened to 42 days, which reached back into
+/// the losing phase and produced a NEGATIVE weekly rate — wrong sign.
+/// After the fix: lower widen threshold (0.10 kg/wk) lets +0.18 kg/wk
+/// survive without widening; sign-flip guard catches edge cases below 0.10.
+@Test func regimeChange_recentGain_afterLongLoss_preservesPositiveSign() async throws {
+    let entries = recentDailyEntries(count: 42) { i in
+        if i < 21 {
+            return 60.0 - (3.0 * Double(i) / 20.0)        // lose 60→57 over first 21 days
+        } else {
+            return 57.0 + (0.55 * Double(i - 21) / 20.0)  // gain 57→57.55 over last 21 days
+        }
+    }
+    let trend = WeightTrendCalculator.calculateTrend(entries: entries)!
+    #expect(trend.weeklyRateKg > 0, "Recent 21-day gain must dominate; widening into prior loss must not flip the sign. Got \(trend.weeklyRateKg) kg/wk")
+    #expect(trend.estimatedDailyDeficit > 0, "Positive rate ⇒ surplus, not deficit. Got \(trend.estimatedDailyDeficit) kcal/day")
+    #expect(trend.trendDirection == .gaining)
+}
+
+/// Mirror case: user gained then started losing. Recent slope must win.
+@Test func regimeChange_recentLoss_afterLongGain_preservesNegativeSign() async throws {
+    let entries = recentDailyEntries(count: 42) { i in
+        if i < 21 {
+            return 60.0 + (3.0 * Double(i) / 20.0)        // gain 60→63
+        } else {
+            return 63.0 - (0.55 * Double(i - 21) / 20.0)  // lose 63→62.45
+        }
+    }
+    let trend = WeightTrendCalculator.calculateTrend(entries: entries)!
+    #expect(trend.weeklyRateKg < 0, "Recent 21-day loss must dominate. Got \(trend.weeklyRateKg) kg/wk")
+    #expect(trend.estimatedDailyDeficit < 0, "Negative rate ⇒ deficit. Got \(trend.estimatedDailyDeficit) kcal/day")
+    #expect(trend.trendDirection == .losing)
+}
+
+/// True maintenance after a long loss SHOULD allow widen path. Sign-flip
+/// guard only fires when |primary| ≥ maintainingThreshold (0.05 kg/wk),
+/// so a near-zero primary doesn't suppress widening.
+@Test func regimeChange_recentMaintenance_afterLongLoss_doesNotFlipToGain() async throws {
+    let entries = recentDailyEntries(count: 42) { i in
+        if i < 21 {
+            return 60.0 - (3.0 * Double(i) / 20.0)        // lose 60→57
+        } else {
+            return 57.0 + (0.01 * Double(i - 21))         // tiny noise around 57
+        }
+    }
+    let trend = WeightTrendCalculator.calculateTrend(entries: entries)!
+    // Primary near zero (< maintainingThreshold) → guard does not fire →
+    // widened slope (still negative from the prior loss) is used. The user
+    // hasn't established a new direction; surfacing the long-term trend is
+    // the right call here.
+    #expect(trend.weeklyRateKg < 0.05,
+            "Near-zero primary should let widen path show prior trend, not flip to gain. Got \(trend.weeklyRateKg)")
+}
