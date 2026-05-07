@@ -35,6 +35,11 @@ final class DashboardViewModel {
     var workoutConsistencyInsight: BehaviorInsight? = nil
     var isLoading = false
 
+    func dismissProactiveAlert(key: String) {
+        Preferences.setAlertDismissedUntil(key: key, until: Date().timeIntervalSince1970 + 86400)
+        proactiveAlerts.removeAll { $0.dismissKey == key }
+    }
+
     var calorieBalance: Double {
         todayNutrition.calories - caloriesBurned
     }

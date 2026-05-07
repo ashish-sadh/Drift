@@ -159,6 +159,16 @@ public enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: usdaApiKeyKey) }
     }
 
+    // MARK: - Alert dismissed-until timestamps (Unix epoch seconds; 0 = never dismissed)
+
+    public static func alertDismissedUntil(key: String) -> Double {
+        UserDefaults.standard.double(forKey: "drift_alert_dismissed_\(key)")
+    }
+
+    public static func setAlertDismissedUntil(key: String, until: Double) {
+        UserDefaults.standard.set(until, forKey: "drift_alert_dismissed_\(key)")
+    }
+
     // MARK: - Photo Log Beta opt-in
 
     private static let photoLogEnabledKey = "drift_photo_log_enabled"

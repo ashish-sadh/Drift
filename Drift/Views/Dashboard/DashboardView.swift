@@ -125,6 +125,16 @@ struct DashboardView: View {
                                     Text(alert.detail).font(.caption2).foregroundStyle(.secondary)
                                 }
                                 Spacer()
+                                if let key = alert.dismissKey {
+                                    Button {
+                                        withAnimation { viewModel.dismissProactiveAlert(key: key) }
+                                    } label: {
+                                        Image(systemName: "xmark")
+                                            .font(.caption2)
+                                            .foregroundStyle(.tertiary)
+                                    }
+                                    .accessibilityLabel("Dismiss alert")
+                                }
                             }.card()
                         }
                     }

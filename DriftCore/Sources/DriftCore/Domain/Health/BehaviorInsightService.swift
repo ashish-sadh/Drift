@@ -7,12 +7,15 @@ public struct BehaviorInsight: Sendable, Identifiable {
     public let title: String
     public let detail: String
     public let isPositive: Bool
+    /// Non-nil when this alert supports 24h dismissal. The key maps to a Preferences dismissed-until timestamp.
+    public let dismissKey: String?
 
-    public init(icon: String, title: String, detail: String, isPositive: Bool) {
+    public init(icon: String, title: String, detail: String, isPositive: Bool, dismissKey: String? = nil) {
         self.icon = icon
         self.title = title
         self.detail = detail
         self.isPositive = isPositive
+        self.dismissKey = dismissKey
     }
 }
 
@@ -43,8 +46,9 @@ public enum BehaviorInsightService {
         return alerts
     }
 
-    /// Alert when protein target has been missed 3+ consecutive days.
+    /// Alert when protein target has been missed 3+ consecutive days OR 4+ of last 7 days.
     private static func proteinStreakAlert() -> BehaviorInsight? {
+        guard Preferences.alertDismissedUntil(key: "protein_streak") < Date().timeIntervalSince1970 else { return nil }
         guard let goal = WeightGoal.load(),
               let targets = goal.macroTargets(),
               targets.proteinG > 0 else { return nil }
@@ -52,27 +56,64 @@ public enum BehaviorInsightService {
         let db = AppDatabase.shared
         let calendar = Calendar.current
         var missedStreak = 0
+        var streakActive = true
+        var missedOf7 = 0
+        var loggedDays = 0
+        var totalProtein = 0.0
 
         for dayOffset in 1...7 {
             guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: Date()) else { break }
             let dateStr = DateFormatters.dateOnly.string(from: date)
             guard let nutrition = try? db.fetchDailyNutrition(for: dateStr),
                   nutrition.calories > 200,
-                  nutrition.proteinG > 0 else { break }  // no logging or no protein data = can't judge
-            if nutrition.proteinG < targets.proteinG * 0.8 {
-                missedStreak += 1
-            } else {
-                break
+                  nutrition.proteinG > 0 else {
+                streakActive = false
+                continue
+            }
+            loggedDays += 1
+            totalProtein += nutrition.proteinG
+            let missed = nutrition.proteinG < targets.proteinG * 0.8
+            if missed { missedOf7 += 1 }
+            if streakActive {
+                if missed { missedStreak += 1 } else { streakActive = false }
             }
         }
 
-        guard missedStreak >= 3 else { return nil }
+        guard loggedDays >= 3 else { return nil }
+        let consecutive = missedStreak
+        guard consecutive >= 3 || missedOf7 >= 4 else { return nil }
+
+        let avgProtein = loggedDays > 0 ? totalProtein / Double(loggedDays) : 0
+        return proteinAdherenceAlertVariant(
+            missedDays: missedOf7,
+            loggedDays: loggedDays,
+            consecutiveStreak: consecutive,
+            avgProtein: avgProtein,
+            proteinTarget: targets.proteinG)
+    }
+
+    /// Pure: given protein stats for the last 7 days, return the alert or nil.
+    /// Separated from DB access so the decision logic is unit-testable.
+    public static func proteinAdherenceAlertVariant(
+        missedDays: Int,
+        loggedDays: Int,
+        consecutiveStreak: Int,
+        avgProtein: Double,
+        proteinTarget: Double
+    ) -> BehaviorInsight? {
+        guard consecutiveStreak >= 3 || missedDays >= 4 else { return nil }
+
+        let dayDesc = consecutiveStreak >= 3
+            ? "\(consecutiveStreak) days in a row"
+            : "\(missedDays) of the last \(loggedDays) days"
+        let suggestions = "Try paneer, dal, eggs, or Greek yogurt."
 
         return BehaviorInsight(
             icon: "exclamationmark.triangle.fill",
             title: "Protein below target",
-            detail: "\(missedStreak) days in a row under \(Int(targets.proteinG))g protein. Try adding a protein shake or eggs.",
-            isPositive: false)
+            detail: "You've been under your \(Int(proteinTarget))g protein goal \(dayDesc) — averaging \(Int(avgProtein))g. \(suggestions)",
+            isPositive: false,
+            dismissKey: "protein_streak")
     }
 
     /// Alert when glucose readings show spikes (>140 mg/dL) on 3+ of the last 7 days.
