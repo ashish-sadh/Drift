@@ -7,6 +7,7 @@ struct MoreTabView: View {
     @State private var hasCycleData = false
     @State private var showingAIRemoveConfirm = false
     @State private var showingAIRemoved = false
+    @State private var showingMailFallback = false
 
     var body: some View {
         NavigationStack {
@@ -37,8 +38,19 @@ struct MoreTabView: View {
                         }
                         Divider().overlay(Theme.separator)
                         Button {
-                            if let url = URL(string: "mailto:asheesh.sadh@gmail.com?subject=Drift%20Feedback") {
-                                UIApplication.shared.open(url)
+                            let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+                            let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+                            let ios = UIDevice.current.systemVersion
+                            let model = UIDevice.current.model
+                            let body = "\n\n\n---\nDrift \(version) (\(build)) · \(model) · iOS \(ios)"
+                            let encoded = body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                            let urlStr = "mailto:asheesh.sadh@gmail.com?subject=Drift%20Feedback&body=\(encoded)"
+                            if let url = URL(string: urlStr) {
+                                UIApplication.shared.open(url) { success in
+                                    if !success { showingMailFallback = true }
+                                }
+                            } else {
+                                showingMailFallback = true
                             }
                         } label: {
                             HStack(spacing: 12) {
@@ -203,6 +215,11 @@ struct MoreTabView: View {
             .navigationTitle("More")
             .toolbarColorScheme(.dark, for: .navigationBar)
             .task { hasCycleData = await HealthKitService.shared.hasCycleData() }
+            .alert("Send Feedback", isPresented: $showingMailFallback) {
+                Button("OK") {}
+            } message: {
+                Text("Mail isn't set up on this device. Send feedback to: asheesh.sadh@gmail.com")
+            }
         }
         .id(navId)
         .onChange(of: selectedTab) { oldTab, newTab in
