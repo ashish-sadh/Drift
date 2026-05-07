@@ -363,12 +363,14 @@ public enum ExerciseService {
         return nil
     }
 
-    /// Formatted exercise instructions from the DB: form tip, muscles, equipment, level.
+    /// Formatted exercise instructions from the DB: structured cues when available, form tip fallback, muscles, equipment.
     public static func exerciseInstructions(_ exercise: ExerciseDatabase.ExerciseInfo) -> String {
         var lines: [String] = []
         lines.append("**\(exercise.name)** (\(exercise.category), \(exercise.level))")
 
-        if let tip = formTip(for: exercise.name) {
+        if let cues = exercise.instructions, !cues.isEmpty {
+            lines.append(contentsOf: cues)
+        } else if let tip = formTip(for: exercise.name) {
             lines.append("Form: \(tip)")
         }
 

@@ -364,3 +364,32 @@ import Testing
     let result = ExerciseService.resolveExerciseName("xyzunknown9999")
     #expect(result == nil)
 }
+
+// MARK: - Compound lift instructions (top 20)
+
+private let compoundLifts = [
+    "Barbell Full Squat", "Barbell Deadlift", "Barbell Bench Press - Medium Grip",
+    "Overhead Press", "Bent Over Barbell Row", "Pull-Up", "Dips - Triceps Version",
+    "Romanian Deadlift", "Front Squat (Clean Grip)", "Sumo Deadlift",
+    "Barbell Incline Bench Press - Medium Grip", "Close-Grip Barbell Bench Press",
+    "Seated Cable Rows", "Lat Pulldown", "Leg Press", "Lying Leg Curls",
+    "Leg Extensions", "Barbell Hip Thrust", "Face Pull", "Arnold Press",
+]
+
+@Test @MainActor func allCompoundLiftsHaveInstructions() {
+    for name in compoundLifts {
+        let info = ExerciseDatabase.info(for: name)
+        #expect(info != nil, "Exercise not found: \(name)")
+        #expect((info?.instructions?.count ?? 0) >= 3,
+                "\(name) should have ≥3 instruction bullets, got \(info?.instructions?.count ?? 0)")
+    }
+}
+
+@Test @MainActor func exerciseInstructionsIncludesFormCues() {
+    let info = ExerciseDatabase.info(for: "Barbell Deadlift")
+    #expect(info != nil)
+    let text = ExerciseService.exerciseInstructions(info!)
+    #expect(text.contains("Setup:"), "Should include Setup cue")
+    #expect(text.contains("Execution:"), "Should include Execution cue")
+    #expect(text.contains("Common error:"), "Should include Common error cue")
+}
