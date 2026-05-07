@@ -12,6 +12,9 @@
     <div id="auth-area"></div>
   </div>
 
+  <!-- Blockers requiring human action — loaded from blockers.json, hidden when empty -->
+  <div id="blockers-panel" style="display:none;background:linear-gradient(135deg, rgba(255,165,0,0.15), rgba(255,100,0,0.08));border-bottom:2px solid rgba(255,140,0,0.5);padding:16px 24px;"></div>
+
   <!-- Sign-in prompt — visible by default, JS hides when signed in -->
   <div id="signin-prompt" style="background:linear-gradient(135deg, rgba(88,166,255,0.1), rgba(88,166,255,0.03));border-bottom:1px solid rgba(88,166,255,0.2);padding:16px 24px;text-align:center;">
     <p style="margin:0 0 10px;font-size:15px;">Sign in with GitHub to view reports, sprint, and more</p>
@@ -1236,6 +1239,7 @@
     }
 
     showUser();
+    loadBlockers();
     if (getToken()) {
       loadIssues();
       loadFixedBugs();
@@ -1639,6 +1643,40 @@
         }).join('');
         events.innerHTML = rows;
       }
+    }
+    async function loadBlockers() {
+      const panel = document.getElementById('blockers-panel');
+      if (!panel) return;
+      let data;
+      try {
+        try {
+          const resp = await fetch('blockers.json', { cache: 'no-store' });
+          if (!resp.ok) throw new Error();
+          data = await resp.json();
+        } catch {
+          const resp = await fetch(`https://raw.githubusercontent.com/${OWNER}/${REPO}/main/command-center/blockers.json`, { cache: 'no-store' });
+          data = await resp.json();
+        }
+      } catch {
+        return; // no blockers.json — silently skip
+      }
+      const blockers = (data && data.blockers) || [];
+      if (!blockers.length) { panel.style.display = 'none'; return; }
+      panel.style.display = 'block';
+      panel.innerHTML = blockers.map(b => {
+        const darkNote = (b.last_successful_build && b.current_build)
+          ? ` — ${b.current_build - b.last_successful_build} build${b.current_build - b.last_successful_build === 1 ? '' : 's'} dark (last published: ${b.last_successful_build})`
+          : '';
+        return `<div style="display:flex;align-items:flex-start;gap:14px;max-width:860px;margin:0 auto;">
+          <span style="font-size:24px;flex-shrink:0;">&#9888;</span>
+          <div>
+            <div style="font-weight:700;font-size:15px;color:#ffaa00;margin-bottom:4px;">${b.title}${darkNote}</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:6px;">Action required (human only):</div>
+            <div style="font-size:14px;background:rgba(255,140,0,0.12);border:1px solid rgba(255,140,0,0.3);border-radius:8px;padding:10px 14px;font-family:monospace;color:#ffcc66;">${b.action}</div>
+            ${b.created_at ? `<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">Blocker since ${new Date(b.created_at).toLocaleDateString()}</div>` : ''}
+          </div>
+        </div>`;
+      }).join('<hr style="border-color:rgba(255,140,0,0.2);margin:12px 0;">');
     }
   </script>
 </body>
