@@ -48,7 +48,8 @@ graphify-out/graph.html
 *.anthropic-key
 /tmp/drift-test-*
 
-# Heartbeat snapshot is committed by the watchdog on a rate-limited
-# schedule (max once per 10 min, plus piggybacking on any new commit on
-# main), so no gitignore — keep it in-tree so the deployed Pages view
-# can read it.
+# Heartbeat snapshot is written to disk by the watchdog on each tick but
+# NOT committed — avoids polluting git log (#642). command-center reads
+# it from disk locally; the file stays tracked for backwards compat but
+# the watchdog no longer creates standalone heartbeat commits.
+command-center/heartbeat.json

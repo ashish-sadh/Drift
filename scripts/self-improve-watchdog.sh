@@ -953,9 +953,10 @@ while true; do
 
     # Snapshot runs every tick regardless of state so the activity graph
     # keeps advancing even while paused — flatlining is then a signal
-    # that nothing is running, not that the snapshot is stale. The commit
-    # + push stays RUN-only (see commit_heartbeat_if_due) so paused time
-    # doesn't spam the remote.
+    # that nothing is running, not that the snapshot is stale.
+    # heartbeat.json is intentionally NOT committed — it's written to disk
+    # and the command-center reads it locally. Standalone heartbeat commits
+    # polluted git log; removed per #642.
     "$WORK_DIR/scripts/heartbeat-snapshot.sh" 2>/dev/null || true
 
     # React to STOP/PAUSE/DRAIN immediately (every 30s)
@@ -1037,7 +1038,7 @@ while true; do
             check_stale_claim
             snapshot_wip_if_in_progress
             sweep_stale_in_progress_labels
-            commit_heartbeat_if_due
+            # heartbeat commits removed (#642) — heartbeat.json written to disk only
             # Check if autopilot is dead
             if ! is_claude_alive; then
                 stop_monitor
