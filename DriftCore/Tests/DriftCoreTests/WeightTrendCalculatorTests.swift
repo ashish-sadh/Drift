@@ -1026,20 +1026,23 @@ private func dateStr(_ d: Date) -> String {
 
 /// True maintenance after a long loss SHOULD allow widen path. Sign-flip
 /// guard only fires when |primary| ≥ maintainingThreshold (0.05 kg/wk),
-/// so a near-zero primary doesn't suppress widening.
+/// so a primary that's near zero (oscillating noise, not a consistent
+/// drift) doesn't suppress widening.
 @Test func regimeChange_recentMaintenance_afterLongLoss_doesNotFlipToGain() async throws {
     let entries = recentDailyEntries(count: 42) { i in
         if i < 21 {
             return 60.0 - (3.0 * Double(i) / 20.0)        // lose 60→57
         } else {
-            return 57.0 + (0.01 * Double(i - 21))         // tiny noise around 57
+            // Recent 21 days: oscillate ±0.05 kg around 57 — net-flat noise.
+            // Even-i entries are 56.95, odd-i are 57.05; mean stays at 57.
+            return 57.0 + (i % 2 == 0 ? -0.05 : 0.05)
         }
     }
     let trend = WeightTrendCalculator.calculateTrend(entries: entries)!
-    // Primary near zero (< maintainingThreshold) → guard does not fire →
+    // Primary slope ≈ 0 (< maintainingThreshold) → guard does not fire →
     // widened slope (still negative from the prior loss) is used. The user
-    // hasn't established a new direction; surfacing the long-term trend is
-    // the right call here.
-    #expect(trend.weeklyRateKg < 0.05,
+    // hasn't established a new direction; the long-term trend is the right
+    // signal until they do.
+    #expect(trend.weeklyRateKg < 0,
             "Near-zero primary should let widen path show prior trend, not flip to gain. Got \(trend.weeklyRateKg)")
 }
