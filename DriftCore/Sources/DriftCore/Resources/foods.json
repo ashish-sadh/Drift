@@ -5107,7 +5107,7 @@
     "nova_group": 3
   },
   {
-    "name": "A\u00e7a\u00ed Bowl (medium)",
+    "name": "Açaí Bowl (medium)",
     "category": "US Staples",
     "serving_size": 300,
     "serving_unit": "g",
@@ -5117,7 +5117,7 @@
     "fat_g": 18,
     "fiber_g": 8,
     "ingredients": [
-      "A\u00e7a\u00ed Bowl (medium)"
+      "Açaí Bowl (medium)"
     ],
     "nova_group": 3
   },
@@ -9801,7 +9801,7 @@
     "nova_group": 3
   },
   {
-    "name": "Costco A\u00e7a\u00ed Bowl (food court)",
+    "name": "Costco Açaí Bowl (food court)",
     "category": "Costco",
     "serving_size": 355,
     "serving_unit": "g",
@@ -9811,7 +9811,7 @@
     "fat_g": 19,
     "fiber_g": 7,
     "ingredients": [
-      "Costco A\u00e7a\u00ed Bowl (food court)"
+      "Costco Açaí Bowl (food court)"
     ],
     "nova_group": 3
   },
@@ -10507,7 +10507,7 @@
     "nova_group": 4
   },
   {
-    "name": "Starbucks Caff\u00e8 Latte (Grande, 2% milk)",
+    "name": "Starbucks Caffè Latte (Grande, 2% milk)",
     "category": "Beverages",
     "serving_size": 473,
     "serving_unit": "ml",
@@ -10517,7 +10517,7 @@
     "fat_g": 7,
     "fiber_g": 0,
     "ingredients": [
-      "Starbucks Caff\u00e8 Latte (Grande, 2% milk)"
+      "Starbucks Caffè Latte (Grande, 2% milk)"
     ],
     "nova_group": 3
   },
@@ -25186,7 +25186,7 @@
     "ingredients": [
       "fries",
       "cheese sauce",
-      "jalape\u00f1os",
+      "jalapeños",
       "sour cream"
     ],
     "nova_group": 4
@@ -28757,7 +28757,7 @@
       "beef",
       "onion",
       "tomato",
-      "jalape\u00f1o",
+      "jalapeño",
       "rosemary",
       "Ethiopian spices",
       "butter"
@@ -39510,7 +39510,7 @@
       "onions",
       "garlic",
       "rosemary",
-      "jalape\u00f1o"
+      "jalapeño"
     ],
     "nova_group": 1
   },
@@ -39801,7 +39801,7 @@
     "nova_group": 2
   },
   {
-    "name": "Smorrebr\u00f8d",
+    "name": "Smorrebrød",
     "category": "Scandinavian",
     "serving_size": 120,
     "serving_unit": "g",
@@ -44424,7 +44424,7 @@
     "source": "USDA"
   },
   {
-    "name": "Corn, Sweet, Yellow And White Kernels, \u00a0Fresh",
+    "name": "Corn, Sweet, Yellow And White Kernels,  Fresh",
     "category": "Vegetables",
     "serving_size": 100,
     "serving_unit": "g",
@@ -51709,7 +51709,7 @@
     "nova_group": 1
   },
   {
-    "name": "Knekkebr\u00f8d with Cream Cheese",
+    "name": "Knekkebrød with Cream Cheese",
     "category": "International Breakfast",
     "serving_size": 90,
     "serving_unit": "g",
@@ -51727,7 +51727,7 @@
     "nova_group": 3
   },
   {
-    "name": "Salte\u00f1a (Bolivian Breakfast Pastry)",
+    "name": "Salteña (Bolivian Breakfast Pastry)",
     "category": "International Breakfast",
     "serving_size": 120,
     "serving_unit": "g",
@@ -51790,7 +51790,7 @@
     "nova_group": 3
   },
   {
-    "name": "Greek Frapp\u00e9 (Iced Instant Coffee)",
+    "name": "Greek Frappé (Iced Instant Coffee)",
     "category": "International Breakfast",
     "serving_size": 250,
     "serving_unit": "ml",
@@ -51821,7 +51821,7 @@
       "eggs",
       "spinach",
       "tomatillo",
-      "jalape\u00f1o",
+      "jalapeño",
       "onion",
       "garlic",
       "olive oil",
@@ -51883,7 +51883,7 @@
       "eggs",
       "butter",
       "onion",
-      "jalape\u00f1o",
+      "jalapeño",
       "tomato",
       "spices"
     ],
@@ -52431,7 +52431,7 @@
     "nova_group": 4
   },
   {
-    "name": "Jalape\u00f1o Poppers (4 pieces)",
+    "name": "Jalapeño Poppers (4 pieces)",
     "category": "American Diner",
     "serving_size": 100,
     "serving_unit": "g",
@@ -52441,7 +52441,7 @@
     "fat_g": 19,
     "fiber_g": 1.5,
     "ingredients": [
-      "jalape\u00f1os",
+      "jalapeños",
       "cream cheese",
       "cheddar cheese",
       "bread crumbs",
@@ -53865,7 +53865,7 @@
       "chicken",
       "hominy",
       "tomatillo",
-      "jalape\u00f1o",
+      "jalapeño",
       "epazote",
       "pepitas",
       "cabbage"
@@ -54188,7 +54188,7 @@
     "fiber_g": 4.0,
     "ingredients": [
       "masa harina",
-      "chicharr\u00f3n",
+      "chicharrón",
       "salsa verde",
       "cheese",
       "onion"
@@ -55756,7 +55756,7 @@
     "nova_group": 1
   },
   {
-    "name": "P\u00e3o de Queijo (Brazilian Cheese Bread, 3 pieces)",
+    "name": "Pão de Queijo (Brazilian Cheese Bread, 3 pieces)",
     "category": "Brazilian",
     "serving_size": 90,
     "serving_unit": "g",
@@ -55854,7 +55854,7 @@
     "nova_group": 1
   },
   {
-    "name": "Vatap\u00e1 (Brazilian Shrimp Bread Paste)",
+    "name": "Vatapá (Brazilian Shrimp Bread Paste)",
     "category": "Brazilian",
     "serving_size": 200,
     "serving_unit": "g",
@@ -55876,7 +55876,7 @@
     "nova_group": 1
   },
   {
-    "name": "Acaraj\u00e9 (Black-Eyed Pea Fritter)",
+    "name": "Acarajé (Black-Eyed Pea Fritter)",
     "category": "Brazilian",
     "serving_size": 120,
     "serving_unit": "g",
@@ -55890,7 +55890,7 @@
       "onion",
       "palm oil",
       "dried shrimp",
-      "vatap\u00e1",
+      "vatapá",
       "caruru"
     ],
     "nova_group": 1
@@ -56514,7 +56514,7 @@
     "nova_group": 1
   },
   {
-    "name": "\u017burek (Polish sour rye soup)",
+    "name": "Żurek (Polish sour rye soup)",
     "category": "Polish",
     "serving_size": 300,
     "serving_unit": "ml",
@@ -56553,7 +56553,7 @@
     "nova_group": 2
   },
   {
-    "name": "Go\u0142\u0105bki (Polish stuffed cabbage rolls)",
+    "name": "Gołąbki (Polish stuffed cabbage rolls)",
     "category": "Polish",
     "serving_size": 200,
     "serving_unit": "g",
@@ -58265,7 +58265,7 @@
     "nova_group": 3
   },
   {
-    "name": "Cocido Madrile\u00f1o",
+    "name": "Cocido Madrileño",
     "category": "Spanish",
     "serving_size": 400,
     "serving_unit": "g",
@@ -58639,7 +58639,7 @@
     "nova_group": 2
   },
   {
-    "name": "Oyster Vermicelli (\u00d4-\u00e1-m\u012b-su\u00e0nn)",
+    "name": "Oyster Vermicelli (Ô-á-mī-suànn)",
     "category": "Taiwanese",
     "serving_size": 300,
     "serving_unit": "g",
@@ -58678,7 +58678,7 @@
     "nova_group": 3
   },
   {
-    "name": "Pineapple Cake (F\u00e8ngl\u00eds\u016b)",
+    "name": "Pineapple Cake (Fènglísū)",
     "category": "Taiwanese",
     "serving_size": 50,
     "serving_unit": "g",
@@ -58883,7 +58883,7 @@
     "nova_group": 3
   },
   {
-    "name": "Guly\u00e1s (Hungarian Goulash)",
+    "name": "Gulyás (Hungarian Goulash)",
     "category": "Hungarian",
     "serving_size": 300,
     "serving_unit": "g",
@@ -58906,7 +58906,7 @@
     "nova_group": 1
   },
   {
-    "name": "L\u00e1ngos",
+    "name": "Lángos",
     "category": "Hungarian",
     "serving_size": 150,
     "serving_unit": "g",
@@ -58927,7 +58927,7 @@
     "nova_group": 4
   },
   {
-    "name": "T\u00f6lt\u00f6tt K\u00e1poszta (Stuffed Cabbage)",
+    "name": "Töltött Káposzta (Stuffed Cabbage)",
     "category": "Hungarian",
     "serving_size": 300,
     "serving_unit": "g",
@@ -58949,7 +58949,7 @@
     "nova_group": 1
   },
   {
-    "name": "Hal\u00e1szl\u00e9 (Hungarian Fisherman's Soup)",
+    "name": "Halászlé (Hungarian Fisherman's Soup)",
     "category": "Hungarian",
     "serving_size": 300,
     "serving_unit": "g",
@@ -59079,7 +59079,7 @@
     "nova_group": 3
   },
   {
-    "name": "Carne de Porco \u00e0 Alentejana",
+    "name": "Carne de Porco à Alentejana",
     "category": "Portuguese",
     "serving_size": 300,
     "serving_unit": "g",
@@ -59498,7 +59498,7 @@
     "nova_group": 2
   },
   {
-    "name": "Flammkuchen (Tarte Flamb\u00e9e)",
+    "name": "Flammkuchen (Tarte Flambée)",
     "category": "German",
     "serving_size": 200,
     "serving_unit": "g",
@@ -59509,7 +59509,7 @@
     "fiber_g": 2,
     "ingredients": [
       "thin dough",
-      "cr\u00e8me fra\u00eeche",
+      "crème fraîche",
       "onion",
       "lardons (bacon)",
       "flour",
@@ -59720,7 +59720,7 @@
     "nova_group": 2
   },
   {
-    "name": "Pabell\u00f3n Criollo",
+    "name": "Pabellón Criollo",
     "category": "Venezuelan",
     "serving_size": 400,
     "serving_unit": "g",
@@ -59756,7 +59756,7 @@
       "red beans",
       "white rice",
       "ground beef",
-      "chicharr\u00f3n (fried pork belly)",
+      "chicharrón (fried pork belly)",
       "chorizo",
       "fried egg",
       "plantain",
@@ -166220,5 +166220,585 @@
       "oil"
     ],
     "nova_group": 3
+  },
+  {
+    "name": "Arroz con Gandules",
+    "category": "Caribbean",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 8,
+    "carbs_g": 52,
+    "fat_g": 5,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "rice",
+      "pigeon peas",
+      "pork",
+      "sofrito",
+      "sazon",
+      "olives",
+      "tomato paste"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Sorrel Drink (Hibiscus)",
+    "category": "Caribbean Drinks",
+    "serving_size": 240,
+    "serving_unit": "ml",
+    "calories": 80,
+    "protein_g": 0,
+    "carbs_g": 20,
+    "fat_g": 0,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "sorrel (hibiscus flowers)",
+      "ginger",
+      "sugar",
+      "cloves",
+      "water"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Boiled Plantain",
+    "category": "Caribbean",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 175,
+    "protein_g": 1.5,
+    "carbs_g": 44,
+    "fat_g": 0.5,
+    "fiber_g": 3.2,
+    "ingredients": [
+      "plantain",
+      "water",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Johnny Cake (Jamaican)",
+    "category": "Caribbean Breads",
+    "serving_size": 80,
+    "serving_unit": "g",
+    "calories": 240,
+    "protein_g": 4,
+    "carbs_g": 38,
+    "fat_g": 8,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "flour",
+      "baking powder",
+      "salt",
+      "butter",
+      "milk"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Hard Dough Bread",
+    "category": "Caribbean Breads",
+    "serving_size": 60,
+    "serving_unit": "g",
+    "calories": 170,
+    "protein_g": 5,
+    "carbs_g": 32,
+    "fat_g": 2.5,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "flour",
+      "yeast",
+      "salt",
+      "sugar",
+      "shortening",
+      "water"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Coco Bread (Jamaican)",
+    "category": "Caribbean Breads",
+    "serving_size": 90,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 6,
+    "carbs_g": 44,
+    "fat_g": 8,
+    "fiber_g": 1.5,
+    "ingredients": [
+      "flour",
+      "coconut milk",
+      "butter",
+      "yeast",
+      "sugar",
+      "salt"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Jerk Fish",
+    "category": "Caribbean",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 210,
+    "protein_g": 30,
+    "carbs_g": 3,
+    "fat_g": 8,
+    "fiber_g": 0.5,
+    "ingredients": [
+      "fish fillet",
+      "jerk seasoning",
+      "scotch bonnet pepper",
+      "allspice",
+      "thyme",
+      "garlic"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Bake and Shark (Trinidadian)",
+    "category": "Caribbean",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 520,
+    "protein_g": 28,
+    "carbs_g": 52,
+    "fat_g": 22,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "shark fillet",
+      "fried bake (flatbread)",
+      "pepper sauce",
+      "lettuce",
+      "tomato",
+      "chadon beni"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Cook-Up Rice (Guyanese)",
+    "category": "Caribbean",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 12,
+    "carbs_g": 58,
+    "fat_g": 7,
+    "fiber_g": 5.0,
+    "ingredients": [
+      "rice",
+      "black-eyed peas",
+      "coconut milk",
+      "chicken",
+      "herbs",
+      "onion"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Dhal (Caribbean)",
+    "category": "Caribbean",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 180,
+    "protein_g": 11,
+    "carbs_g": 28,
+    "fat_g": 3,
+    "fiber_g": 8.0,
+    "ingredients": [
+      "split peas",
+      "turmeric",
+      "cumin",
+      "garlic",
+      "onion",
+      "oil"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Oil Down (Grenadian)",
+    "category": "Caribbean",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 420,
+    "protein_g": 18,
+    "carbs_g": 42,
+    "fat_g": 20,
+    "fiber_g": 8.0,
+    "ingredients": [
+      "breadfruit",
+      "coconut milk",
+      "salted meat",
+      "dasheen leaves",
+      "callaloo",
+      "turmeric",
+      "onion"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Souse (Barbadian)",
+    "category": "Caribbean",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 180,
+    "protein_g": 20,
+    "carbs_g": 8,
+    "fat_g": 7,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "pork feet",
+      "lime juice",
+      "cucumber",
+      "onion",
+      "hot pepper",
+      "parsley"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Pigtail Soup",
+    "category": "Caribbean",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 16,
+    "carbs_g": 22,
+    "fat_g": 13,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "salted pigtail",
+      "split peas",
+      "root vegetables",
+      "thyme",
+      "onion"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Mannish Water (Jamaican Goat Soup)",
+    "category": "Caribbean",
+    "serving_size": 350,
+    "serving_unit": "ml",
+    "calories": 150,
+    "protein_g": 14,
+    "carbs_g": 8,
+    "fat_g": 6,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "goat head",
+      "green banana",
+      "yam",
+      "scotch bonnet",
+      "thyme",
+      "garlic"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Foo Foo (Trinidadian)",
+    "category": "Caribbean",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 210,
+    "protein_g": 2,
+    "carbs_g": 50,
+    "fat_g": 0.5,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "green plantain",
+      "salt"
+    ],
+    "nova_group": 2
+  },
+  {
+    "name": "Alcapurrias (Puerto Rican)",
+    "category": "Caribbean",
+    "serving_size": 90,
+    "serving_unit": "g",
+    "calories": 230,
+    "protein_g": 8,
+    "carbs_g": 26,
+    "fat_g": 10,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "green banana",
+      "yautia (taro)",
+      "ground beef",
+      "sofrito",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Empanadillas (Puerto Rican)",
+    "category": "Caribbean",
+    "serving_size": 90,
+    "serving_unit": "g",
+    "calories": 260,
+    "protein_g": 9,
+    "carbs_g": 28,
+    "fat_g": 13,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "flour dough",
+      "ground beef",
+      "sofrito",
+      "olives",
+      "oil"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Coquito (Puerto Rican)",
+    "category": "Caribbean Drinks",
+    "serving_size": 120,
+    "serving_unit": "ml",
+    "calories": 220,
+    "protein_g": 2,
+    "carbs_g": 18,
+    "fat_g": 12,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "coconut cream",
+      "evaporated milk",
+      "rum",
+      "cinnamon",
+      "vanilla",
+      "sugar"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Pasteles en Hoja (Puerto Rican)",
+    "category": "Caribbean",
+    "serving_size": 200,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 12,
+    "carbs_g": 42,
+    "fat_g": 18,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "green banana",
+      "yautia",
+      "pork filling",
+      "sofrito",
+      "banana leaf",
+      "achiote oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Boiled Breadfruit",
+    "category": "Caribbean",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 165,
+    "protein_g": 1.5,
+    "carbs_g": 40,
+    "fat_g": 0.5,
+    "fiber_g": 5.0,
+    "ingredients": [
+      "breadfruit",
+      "water",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Dasheen (cooked)",
+    "category": "Caribbean",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 140,
+    "protein_g": 2,
+    "carbs_g": 33,
+    "fat_g": 0.5,
+    "fiber_g": 4.0,
+    "ingredients": [
+      "dasheen (taro root)",
+      "water",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Eddoe (cooked)",
+    "category": "Caribbean",
+    "serving_size": 150,
+    "serving_unit": "g",
+    "calories": 130,
+    "protein_g": 2,
+    "carbs_g": 30,
+    "fat_g": 0.5,
+    "fiber_g": 3.5,
+    "ingredients": [
+      "eddoe",
+      "water",
+      "salt"
+    ],
+    "nova_group": 1
+  },
+  {
+    "name": "Mauby Drink",
+    "category": "Caribbean Drinks",
+    "serving_size": 240,
+    "serving_unit": "ml",
+    "calories": 70,
+    "protein_g": 0,
+    "carbs_g": 18,
+    "fat_g": 0,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "mauby bark",
+      "sugar",
+      "cinnamon",
+      "star anise",
+      "water"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Ginger Beer (Caribbean)",
+    "category": "Caribbean Drinks",
+    "serving_size": 240,
+    "serving_unit": "ml",
+    "calories": 90,
+    "protein_g": 0,
+    "carbs_g": 22,
+    "fat_g": 0,
+    "fiber_g": 0.0,
+    "ingredients": [
+      "ginger",
+      "sugar",
+      "lime juice",
+      "water",
+      "yeast"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Trinidadian Pone",
+    "category": "Caribbean",
+    "serving_size": 100,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 3,
+    "carbs_g": 48,
+    "fat_g": 8,
+    "fiber_g": 3.0,
+    "ingredients": [
+      "cassava",
+      "coconut",
+      "pumpkin",
+      "sugar",
+      "butter",
+      "vanilla",
+      "mixed spice"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Run Down (Jamaican)",
+    "category": "Caribbean",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 330,
+    "protein_g": 25,
+    "carbs_g": 14,
+    "fat_g": 20,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "mackerel",
+      "coconut milk",
+      "tomato",
+      "scotch bonnet",
+      "onion",
+      "thyme",
+      "garlic"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Curry Duck (Caribbean)",
+    "category": "Caribbean",
+    "serving_size": 250,
+    "serving_unit": "g",
+    "calories": 380,
+    "protein_g": 30,
+    "carbs_g": 6,
+    "fat_g": 26,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "duck",
+      "curry powder",
+      "hot pepper",
+      "onion",
+      "garlic",
+      "herbs",
+      "oil"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Breadfruit Chips",
+    "category": "Caribbean Snacks",
+    "serving_size": 30,
+    "serving_unit": "g",
+    "calories": 140,
+    "protein_g": 1,
+    "carbs_g": 20,
+    "fat_g": 6,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "breadfruit",
+      "salt",
+      "oil"
+    ],
+    "nova_group": 4
+  },
+  {
+    "name": "Pepper Pot (Caribbean)",
+    "category": "Caribbean",
+    "serving_size": 300,
+    "serving_unit": "g",
+    "calories": 340,
+    "protein_g": 28,
+    "carbs_g": 12,
+    "fat_g": 20,
+    "fiber_g": 2.0,
+    "ingredients": [
+      "beef",
+      "cassareep",
+      "hot pepper",
+      "cinnamon",
+      "cloves",
+      "onion"
+    ],
+    "nova_group": 3
+  },
+  {
+    "name": "Conch Fritters",
+    "category": "Caribbean",
+    "serving_size": 120,
+    "serving_unit": "g",
+    "calories": 280,
+    "protein_g": 14,
+    "carbs_g": 28,
+    "fat_g": 12,
+    "fiber_g": 1.0,
+    "ingredients": [
+      "conch meat",
+      "flour",
+      "egg",
+      "onion",
+      "hot pepper",
+      "celery",
+      "oil"
+    ],
+    "nova_group": 4
   }
 ]
