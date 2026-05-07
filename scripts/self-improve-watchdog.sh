@@ -27,11 +27,16 @@ LOG_DIR="$HOME/drift-self-improve-logs"
 WATCHDOG_LOG="$LOG_DIR/watchdog.log"
 PID_FILE="$LOG_DIR/claude.pid"
 CHECK_INTERVAL=60   # 1 minute — heartbeat: sprint refresh + health check
-STALE_THRESHOLD=1800  # 30 minutes — no heartbeat/log output = definitely dead
+# Bumped 1800→3600 (2026-05-06): the 30-min threshold was killing genuinely
+# productive deep investigation. Issue #641 alone burned 3 senior sessions
+# because each stalled at 30 min mid-trace. 60 min is generous enough that
+# only truly-hung sessions trip it. Combined with snapshot_orphan_wip(),
+# even sessions that DO trip it leave a recoverable diff for the next.
+STALE_THRESHOLD=3600  # 60 minutes — no heartbeat/log output = definitely dead
 # Per-session stall thresholds (no commits/progress before nudge)
 STALL_PLANNING=3600  # 1 hour
-STALL_SENIOR=1800    # 30 minutes
-STALL_JUNIOR=1800    # 30 minutes
+STALL_SENIOR=3600    # 1 hour (was 30 min — see STALE_THRESHOLD note)
+STALL_JUNIOR=3600    # 1 hour
 NUDGE_WAIT=300       # 5 minutes after nudge before killing
 # Commit-rate stall: senior/junior that has produced 0 commits to main this long = stuck
 COMMIT_STALL=10800   # 3 hours — genuinely-hard bugs sometimes take this long, but 0 commits past this is a tarpit
@@ -105,6 +110,42 @@ run_compliance() {
     log "Session compliance: $COMP_TYPE ($COMP_MODEL, $EXIT_REASON)"
 }
 
+snapshot_orphan_wip() {
+    # Capture dirty state for an UNCLAIMED session before cleanup discards it.
+    # Distinct from snapshot_wip_if_in_progress (which only fires when a claim
+    # is active). Investigation work on issue #641 burned 3+ sessions because
+    # each stall triggered `git checkout .` and the next session restarted
+    # from zero. Save the orphan diff so the next senior can `git apply` it
+    # and continue, even though the issue number isn't known.
+    local SD="$HOME/drift-state"
+    cd "$WORK_DIR" || return
+    local REAL_EDITS
+    REAL_EDITS=$(git status --porcelain 2>/dev/null \
+        | { grep -vE 'command-center/heartbeat\.json|graphify-out/|\.xcodeproj/' || true; } \
+        | wc -l | tr -d ' ')
+    [[ "$REAL_EDITS" -eq 0 ]] && return
+
+    mkdir -p "$SD/wip"
+    local STAMP
+    STAMP=$(date -u +%Y%m%dT%H%M%SZ)
+    local PATCH="$SD/wip/orphan-${STAMP}.patch"
+    git diff HEAD --binary > "${PATCH}.tmp" 2>/dev/null
+    mv "${PATCH}.tmp" "$PATCH"
+
+    local UNTRACKED
+    UNTRACKED=$(git ls-files --others --exclude-standard 2>/dev/null \
+        | grep -vE 'command-center/heartbeat\.json|graphify-out/|\.xcodeproj/' || true)
+    if [[ -n "$UNTRACKED" ]]; then
+        echo "$UNTRACKED" | tar -czf "$SD/wip/orphan-${STAMP}.untracked.tar.gz.tmp" -T - 2>/dev/null
+        mv "$SD/wip/orphan-${STAMP}.untracked.tar.gz.tmp" "$SD/wip/orphan-${STAMP}.untracked.tar.gz"
+    fi
+
+    # Newest-orphan symlink for easy discovery by next session-start.
+    ln -sf "orphan-${STAMP}.patch" "$SD/wip/last-orphan.patch"
+
+    log "Orphan WIP saved: $PATCH (${REAL_EDITS} dirty file(s)). Next session can: git apply $PATCH"
+}
+
 cleanup_dirty_state() {
     cd "$WORK_DIR"
     # Abort interrupted merges/rebases
@@ -130,6 +171,9 @@ cleanup_dirty_state() {
     if [[ -n "$DIRTY" ]]; then
         log "Dirty state after session exit. Discarding incomplete changes:"
         log "$DIRTY"
+        # Save orphan WIP first — git checkout below would otherwise discard
+        # legitimate investigation work for sessions that died before claim.
+        snapshot_orphan_wip
         git checkout . 2>/dev/null || true
         git clean -fd --exclude=.claude/ 2>/dev/null || true
         log "Working tree cleaned."
