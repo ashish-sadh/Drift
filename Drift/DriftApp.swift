@@ -6,6 +6,7 @@ import WidgetKit
 struct DriftApp: App {
     @State private var hasRequestedHealthKit = false
     @State private var syncComplete = false
+    @State private var launchStage: LaunchStage = .starting
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -24,7 +25,7 @@ struct DriftApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView(syncComplete: $syncComplete)
+            ContentView(syncComplete: $syncComplete, launchStage: launchStage)
                 .preferredColorScheme(.dark)
                 .onChange(of: scenePhase) { _, newPhase in
                     // Broadcast to any listening AIChatViewModel so it can snapshot state.
@@ -42,6 +43,11 @@ struct DriftApp: App {
                         // DebugSeedData.seedNormalGoal()        // normal losing goal (correct)
                         // DebugSeedData.seedGainingGoal()       // gaining goal scenario
                         #endif
+                        // Stage transitions ALWAYS fire (even on simulator where the
+                        // HealthKit calls are #if'd out) so the splash shows the same
+                        // sequence in dev and prod — otherwise the simulator skips
+                        // ".syncingHealth" and we'd never visually rehearse that frame.
+                        launchStage = .syncingHealth
                         #if !targetEnvironment(simulator)
                         do {
                             try await HealthKitService.shared.requestAuthorization()
@@ -59,9 +65,16 @@ struct DriftApp: App {
                         // by Dashboard's onAppear — non-Dashboard launch paths got stale
                         // values. Must run before TDEEEstimator.refresh() since TDEE
                         // reads WeightTrendService.shared.latestWeightKg.
+                        launchStage = .calculatingTrends
                         WeightTrendService.shared.refresh()
                         // Refresh TDEE estimate (uses Apple Health + weight trend + food data)
+                        launchStage = .estimatingEnergy
                         await TDEEEstimator.shared.refresh()
+                        // ".almostThere" sticks on the splash through the 0.25s crossfade
+                        // — both state changes commit in one MainActor tick so the user
+                        // sees the final stage text fading out with the splash. Don't add
+                        // a ".complete" assignment after — it'd race the crossfade.
+                        launchStage = .almostThere
                         syncComplete = true
 
                         // Notifications + widget — fire-and-forget. iOS has a ~20s

@@ -3,10 +3,12 @@ import DriftCore
 
 struct ContentView: View {
     @Binding var syncComplete: Bool
+    var launchStage: LaunchStage
     @State private var selectedTab = 0
 
-    init(syncComplete: Binding<Bool>) {
+    init(syncComplete: Binding<Bool>, launchStage: LaunchStage = .starting) {
         self._syncComplete = syncComplete
+        self.launchStage = launchStage
 
         let tabAppearance = UITabBarAppearance()
         tabAppearance.configureWithOpaqueBackground()
@@ -75,7 +77,7 @@ struct ContentView: View {
             // sequence in DriftApp.task finishes (HealthKit auth + sync,
             // weight trend, TDEE refresh).
             if !syncComplete {
-                LaunchSplashView()
+                LaunchSplashView(stage: launchStage)
                     .transition(.opacity)
                     .zIndex(1)
             }
@@ -84,10 +86,16 @@ struct ContentView: View {
     }
 }
 
-/// Static splash shown until DriftApp's launch sequence completes. Matches
-/// app theme (dark background) so the iOS UILaunchScreen → splash → tabs
-/// transition has no jarring color flash.
+/// Splash shown until DriftApp's launch sequence completes. Matches the app
+/// theme (dark background) so the iOS UILaunchScreen → splash → tabs
+/// transition has no jarring color flash. Animates a subtle icon pulse and
+/// shows progressive status text per launch stage so a 5–15s cold launch
+/// reads as deliberate progress, not a frozen frame.
 private struct LaunchSplashView: View {
+    let stage: LaunchStage
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var iconPulse = false
+
     var body: some View {
         ZStack {
             Theme.background.ignoresSafeArea()
@@ -95,17 +103,28 @@ private struct LaunchSplashView: View {
                 Image(systemName: "chart.line.uptrend.xyaxis")
                     .font(.system(size: 56, weight: .semibold))
                     .foregroundStyle(Theme.accent)
+                    .scaleEffect(iconPulse ? 1.05 : 1.0)
+                    .animation(reduceMotion ? nil : .easeInOut(duration: 0.6).repeatForever(autoreverses: true), value: iconPulse)
                 Text("Drift")
                     .font(.system(size: 28, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.primary)
-                ProgressView()
-                    .controlSize(.regular)
-                    .tint(Theme.accent)
+                    .foregroundStyle(Theme.textPrimary)
+                Text(stage.statusText)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(Theme.textSecondary)
+                    .contentTransition(.opacity)
+                    .animation(.easeInOut(duration: 0.2), value: stage)
                     .padding(.top, 8)
+                    .frame(minHeight: 18)
             }
         }
+        .onAppear { if !reduceMotion { iconPulse = true } }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Drift is loading")
+        .accessibilityLabel(accessibilityLabel)
+    }
+
+    private var accessibilityLabel: String {
+        let text = stage.statusText
+        return text.isEmpty ? "Drift is loading" : "Drift is loading. \(text)"
     }
 }
 
