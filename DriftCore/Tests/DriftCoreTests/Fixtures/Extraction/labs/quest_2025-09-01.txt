@@ -1,0 +1,24 @@
+Quest Diagnostics
+Patient ID: SYNTHETIC-0002
+Specimen Drawn: 09/01/2025 07:43
+
+LIPID PANEL
+Cholesterol, Total                  Final    192 mg/dL          (<200)
+HDL Cholesterol                     Final    55 mg/dL           (>=40)
+Triglycerides                       Final    134 mg/dL          (<150)
+LDL-Cholesterol                     Final    110 mg/dL  H       (<100)
+
+COMPREHENSIVE METABOLIC PANEL
+Glucose                             Final    105 mg/dL  H       (65-99)
+BUN                                 Final    14  mg/dL          (7-25)
+Creatinine                          Final    0.92 mg/dL         (0.60-1.35)
+
+THYROID PANEL
+TSH                                 Final    1.85 mIU/L         (0.40-4.50)
+Free T4                             Final    1.10 ng/dL         (0.82-1.77)
+
+HEMATOLOGY
+Hemoglobin                          Final    14.2 g/dL          (13.5-17.5)
+Ferritin                            Final    65   ng/mL         (20-380)
+
+End of report

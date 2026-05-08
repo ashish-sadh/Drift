@@ -1,0 +1,20 @@
+LabCorp
+Patient: SYNTHETIC TEST 0001
+Account #: 99999999
+Specimen ID: 0810-AAAA-BBBB
+Specimen collected: 08/10/2025
+
+TESTS                          RESULT     UNITS         REFERENCE INTERVAL
+Glucose                        92         mg/dL         65-99
+Hemoglobin A1c                 5.2        %             4.8-5.6
+Total Cholesterol              178        mg/dL         100-199
+LDL Cholesterol Calc           96         mg/dL         0-99
+HDL Cholesterol                62         mg/dL         >39
+Triglycerides                  102        mg/dL         0-149
+Vitamin D, 25-Hydroxy          34         ng/mL         30-100
+Ferritin                       110        ng/mL         30-400
+TSH                            2.05       uIU/mL        0.450-4.500
+Vitamin B12                    480        pg/mL         232-1245
+
+Lab Director: SYNTHETIC PROVIDER, MD
+Page 1 of 1

@@ -1,0 +1,14 @@
+BodySpec
+Whole Body Composition Report
+
+SUMMARY RESULTS
+Measured Date  Total Mass (lbs)  Total Body Fat %  Fat Tissue (lbs)  Lean Tissue (lbs)  Bone Mineral Content (lbs)
+3/06/2026  158.7  19.4%  30.8  123.6  4.3
+9/15/2025  165.4  22.1%  36.6  124.4  4.4
+
+REGIONAL ANALYSIS
+Arm Left  3.4  17.8%
+Arm Right  3.4  17.6%
+Leg Left  10.1  19.3%
+Leg Right  10.2  19.1%
+Trunk  17.2  20.0%
