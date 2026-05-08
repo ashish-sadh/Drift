@@ -40,6 +40,35 @@ final class NotificationServiceTests: XCTestCase {
         XCTAssertTrue(Preferences.onlineFoodSearchEnabled)
     }
 
+    // MARK: - #690 Eating-pattern reminder toggle
+
+    /// New install gets the smart-reminder path on by default — under the
+    /// parent `mealRemindersEnabled` opt-in. Below threshold falls back to
+    /// fixed defaults transparently, so default-on is safe.
+    func testUseEatingPatternsForRemindersDefaultsToOn() {
+        let key = "drift_meal_reminders_use_patterns"
+        let original = UserDefaults.standard.object(forKey: key)
+        UserDefaults.standard.removeObject(forKey: key)
+        defer {
+            if let o = original { UserDefaults.standard.set(o, forKey: key) }
+            else { UserDefaults.standard.removeObject(forKey: key) }
+        }
+        XCTAssertTrue(Preferences.useEatingPatternsForReminders)
+    }
+
+    func testUseEatingPatternsForRemindersToggle() {
+        let key = "drift_meal_reminders_use_patterns"
+        let original = UserDefaults.standard.object(forKey: key)
+        defer {
+            if let o = original { UserDefaults.standard.set(o, forKey: key) }
+            else { UserDefaults.standard.removeObject(forKey: key) }
+        }
+        Preferences.useEatingPatternsForReminders = false
+        XCTAssertFalse(Preferences.useEatingPatternsForReminders)
+        Preferences.useEatingPatternsForReminders = true
+        XCTAssertTrue(Preferences.useEatingPatternsForReminders)
+    }
+
     // MARK: - Notification Composition
 
     func testComposeNotificationSingleAlert() {

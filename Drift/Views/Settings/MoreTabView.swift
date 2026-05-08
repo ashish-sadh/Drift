@@ -400,7 +400,7 @@ struct SettingsView: View {
                 }
                 .card()
 
-                // Smart Meal Reminders — #385
+                // Smart Meal Reminders — #385 / #690
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 12) {
                         Image(systemName: "fork.knife.circle")
@@ -419,6 +419,25 @@ struct SettingsView: View {
                             }
                         ))
                         .labelsHidden().tint(Theme.accent)
+                    }
+                    if Preferences.mealRemindersEnabled {
+                        HStack(spacing: 12) {
+                            Spacer().frame(width: 24)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Use my eating patterns").font(.caption.weight(.medium))
+                                Text("Learn from the last 30 days. Needs 10+ entries per meal — falls back to defaults below threshold.")
+                                    .font(.caption2).foregroundStyle(.tertiary)
+                            }
+                            Spacer()
+                            Toggle("", isOn: Binding(
+                                get: { Preferences.useEatingPatternsForReminders },
+                                set: {
+                                    Preferences.useEatingPatternsForReminders = $0
+                                    Task { await NotificationService.refreshScheduledAlerts() }
+                                }
+                            ))
+                            .labelsHidden().tint(Theme.accent)
+                        }
                     }
                 }
                 .card()

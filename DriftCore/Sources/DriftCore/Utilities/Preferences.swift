@@ -79,12 +79,27 @@ public enum Preferences {
     private static let mealRemindersKey = "drift_meal_reminders"
 
     /// Smart meal reminders: contextual "Time to log breakfast" notifications
-    /// fired ~30min after the user's typical meal time, only when their
-    /// timing is consistent (std dev < 45min) AND they haven't logged that
-    /// meal yet today. Default OFF — opt-in like Photo Log Beta. #385.
+    /// fired ~30min after the user's typical meal time, only when they
+    /// haven't logged that meal yet today. Default OFF — opt-in like
+    /// Photo Log Beta. #385 / #690.
     public static var mealRemindersEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: mealRemindersKey) }
         set { UserDefaults.standard.set(newValue, forKey: mealRemindersKey) }
+    }
+
+    private static let useEatingPatternsForRemindersKey = "drift_meal_reminders_use_patterns"
+
+    /// Sub-toggle for `mealRemindersEnabled`. When ON (default), reminders
+    /// fire at the median of the user's recent meal times + 30 min — but
+    /// only when 10+ entries exist for that meal in the last 30 days.
+    /// When OFF, reminders use fixed defaults (8:30 / 13:00 / 19:30). #690.
+    public static var useEatingPatternsForReminders: Bool {
+        get {
+            // Absent → default to true. New install gets the smart path.
+            if UserDefaults.standard.object(forKey: useEatingPatternsForRemindersKey) == nil { return true }
+            return UserDefaults.standard.bool(forKey: useEatingPatternsForRemindersKey)
+        }
+        set { UserDefaults.standard.set(newValue, forKey: useEatingPatternsForRemindersKey) }
     }
 
     // MARK: - Medication Reminders

@@ -3,7 +3,7 @@ import DriftCore
 
 /// Schedules local push notifications for health nudges (protein, supplements, workouts),
 /// smart meal reminders, and medication dose reminders. All logic is on-device — no cloud,
-/// no tracking. Reuses BehaviorInsightService detection + MealReminderScheduler. #385 #592.
+/// no tracking. Reuses BehaviorInsightService detection + MealTimingService. #385 #592 #690.
 @MainActor
 enum NotificationService {
 
@@ -14,7 +14,9 @@ enum NotificationService {
     private static let dailyNudgeIdentifier = "drift_daily_nudge"
 
     /// Lookback window for "what time does the user typically eat?" stats.
-    private static let mealLookbackDays = 14
+    /// 30 days lets the median absorb weekday/weekend variance without
+    /// being dominated by last week's holiday. #690.
+    private static let mealLookbackDays = 30
     /// Lookback window for medication dose-time stats. 60 days covers weekly GLP-1 injections.
     private static let medicationLookbackDays = 60
     /// Nudge fires this many minutes after the typical dose time.
@@ -131,18 +133,19 @@ enum NotificationService {
 
     // MARK: - Meal Reminder Pipeline (testable seam)
 
-    /// Pull the last 14 days of food entries, compute the user's typical
-    /// meal times, then drop any periods already logged today (no point
-    /// nudging at 1pm if lunch is already in the log). Returns the slots
-    /// that should fire as repeating daily reminders.
-    static func computeMealReminderSlots(now: Date = Date()) -> [MealReminderScheduler.ReminderSlot] {
+    /// Pull the last 30 days of food entries and compute reminder slots.
+    /// When `useEatingPatternsForReminders` is on, slots use the median
+    /// of the user's logged meal times + 30 min for any meal with 10+
+    /// entries; below threshold (or with the toggle off) we fall back to
+    /// fixed defaults. Periods already logged today are excluded — no
+    /// point nudging for a meal that's already in the log. #690.
+    static func computeMealReminderSlots(now: Date = Date()) -> [MealTimingService.ReminderSlot] {
         let entries = recentFoodEntries(now: now, days: mealLookbackDays)
-        let candidates = MealReminderScheduler.computeSlots(from: entries)
-
         let loggedToday = loggedMealPeriods(now: now)
-        return MealReminderScheduler.slotsToFire(
-            candidates: candidates,
-            loggedPeriodsToday: loggedToday
+        return MealTimingService.reminderSlots(
+            entries: entries,
+            usePatterns: Preferences.useEatingPatternsForReminders,
+            loggedToday: loggedToday
         )
     }
 
