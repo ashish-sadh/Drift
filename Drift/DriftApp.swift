@@ -37,6 +37,7 @@ struct DriftApp: App {
                 .task {
                     if !hasRequestedHealthKit {
                         hasRequestedHealthKit = true
+                        let launchStart = Date()
 #if targetEnvironment(simulator)
                         // 🧪 Uncomment ONE to test on simulator:
                         // DebugSeedData.seedWeightGoalBug()    // reproduces "gain 14.1 kg" bug
@@ -50,10 +51,18 @@ struct DriftApp: App {
                         launchStage = .syncingHealth
                         #if !targetEnvironment(simulator)
                         do {
+                            let authStart = Date()
                             try await HealthKitService.shared.requestAuthorization()
+                            LaunchTrace.logStep("healthkit_auth", elapsedMs: LaunchTrace.elapsedMs(since: authStart))
+
+                            let weightStart = Date()
                             let count = try await HealthKitService.shared.syncWeight()
+                            LaunchTrace.logStep("sync_weight", elapsedMs: LaunchTrace.elapsedMs(since: weightStart))
                             Log.app.info("Initial sync: \(count) weight entries")
+
+                            let bodyCompStart = Date()
                             let bodyComp = try await HealthKitService.shared.syncBodyComposition()
+                            LaunchTrace.logStep("sync_body_composition", elapsedMs: LaunchTrace.elapsedMs(since: bodyCompStart))
                             Log.app.info("Initial sync: \(bodyComp) body composition entries")
                         } catch {
                             Log.app.error("Initial sync failed: \(error.localizedDescription)")
@@ -66,15 +75,22 @@ struct DriftApp: App {
                         // values. Must run before TDEEEstimator.refresh() since TDEE
                         // reads WeightTrendService.shared.latestWeightKg.
                         launchStage = .calculatingTrends
+                        let trendStart = Date()
                         WeightTrendService.shared.refresh()
+                        LaunchTrace.logStep("weight_trend_refresh", elapsedMs: LaunchTrace.elapsedMs(since: trendStart))
                         // Refresh TDEE estimate (uses Apple Health + weight trend + food data)
                         launchStage = .estimatingEnergy
+                        let tdeeStart = Date()
                         await TDEEEstimator.shared.refresh()
+                        LaunchTrace.logStep("tdee_refresh", elapsedMs: LaunchTrace.elapsedMs(since: tdeeStart))
                         // ".almostThere" sticks on the splash through the 0.25s crossfade
                         // — both state changes commit in one MainActor tick so the user
                         // sees the final stage text fading out with the splash. Don't add
                         // a ".complete" assignment after — it'd race the crossfade.
                         launchStage = .almostThere
+                        // Log end-to-end *before* flipping syncComplete so the trace
+                        // captures the actual splash-visible duration.
+                        LaunchTrace.logTotal(elapsedMs: LaunchTrace.elapsedMs(since: launchStart))
                         syncComplete = true
 
                         // Notifications + widget — fire-and-forget. iOS has a ~20s
@@ -87,10 +103,14 @@ struct DriftApp: App {
                         // Both services are @MainActor so we use Task (not detached)
                         // — they yield between awaits so UI stays responsive.
                         Task { @MainActor in
+                            let notifStart = Date()
                             await NotificationService.refreshScheduledAlerts()
+                            LaunchTrace.logStep("notifications_refresh", elapsedMs: LaunchTrace.elapsedMs(since: notifStart))
                         }
                         Task { @MainActor in
+                            let widgetStart = Date()
                             WidgetDataProvider.refreshWidgetData()
+                            LaunchTrace.logStep("widget_refresh", elapsedMs: LaunchTrace.elapsedMs(since: widgetStart))
                         }
                     }
                 }
