@@ -8,405 +8,87 @@
 
 ### Architecture Decisions
 - SwiftUI + GRDB is the right stack. GRDB handles all data needs without ORM migration risk.
-- Tiered AI pipeline (Tier 0 instant rules → Tier 1 normalizer → Tier 2 tool pick → Tier 3 stream) keeps latency low while handling complex queries.
-- Dual-model (SmolLM 360M + Gemma 4 2B) with automatic RAM-based selection works well.
-- Raw llama.cpp C API, CPU-only (Metal broken on A19 Pro) — performance is acceptable.
+- Tiered AI pipeline (StaticOverrides → IntentClassifier → DomainExtractor → Validate → Execute → Present) keeps latency low while handling complex queries.
+- Dual-model (SmolLM 360M + Gemma 4 2B) with automatic RAM-based selection works well. Raw llama.cpp C API, CPU-only (Metal broken on A19 Pro).
+- DriftCore for pure logic; iOS target only for UIKit/SwiftUI/HealthKit/WidgetKit/AVFoundation/Speech/Photos/AppIntents/Keychain code.
+- `ConversationState.Phase` FSM with associated values is the canonical multi-turn state pattern (meal planning, workout split builder, planningWorkout). New multi-turn flows slot in as new phases.
+- Multi-stage focused prompts beat one large multi-task prompt on 2B models — two 3s calls with correct results > one 3s call with the wrong result.
+- `attachToolCards` pattern (check toolsCalled at consumption point) scales card types without touching the tool pipeline; current 8 types, threshold ~10 before migrating to a `ConfirmationCard` enum with associated values.
+- NotificationCenter is the default for decoupled one-way signals between overlay/sheet components — three components, one notification, zero shared state.
+- Analytical tools follow `InsightResult: Codable` schema: read 2+ domain services → compute aggregate → return structured JSON. Five live (cross_domain, weight_trend, glucose_food, supplement_insight, food_timing_insight) makes the "AI health coach" positioning credible.
+- Photo Log uses BYOK multi-provider (Anthropic + OpenAI + Gemini) with a fallback chain. Each provider adds its own failure modes; clients shouldn't know which served them.
+- BYOK Keychain for cloud features; on-device by default. RemoteLLMBackend conforms to the existing AIBackend protocol so the pipeline is unchanged regardless of backend.
+- Per-domain confidence thresholds replaced the single global threshold — separate false-clarify and false-guess rates per domain.
+- Health-domain extension via mirror pattern: SupplementLog → DailyMedication, mark_supplement → log_medication, supplement card → medication card. Stateful records with titration/scheduling need a separate architecture conversation.
+- Voice routes through the existing chat input — speech text goes straight into `sendMessage()`, no separate pipeline. All intent handling works automatically.
 
 ### Technical Debt & Patterns
-- **Stale preference pattern** was a systemic bug — ViewModels capturing `Preferences.*` at init instead of reading dynamically. Fixed for weight, need to audit everywhere.
-- **AIChatView** is still 400+ lines — needs ViewModel extraction, but should be done alongside a feature that requires it (state machine refactor).
-- Business logic in views (DDD violations) exists but is being cleaned up organically via boy scout rule.
-- StaticOverrides at 421 lines is large but appropriate — deterministic handlers don't benefit from LLM.
+- Stale-preference pattern (ViewModels capturing `Preferences.*` at init instead of reading dynamically) was systemic; permanently closed via 7-instance audit. All weight display paths now go through `Preferences.weightUnit.convertFromLbs()`.
+- AIChatView ViewModel extraction is partial; remaining ~400-line view rides on the next chat feature touch, not speculative refactoring. `sendMessage` already went 491→8 handlers — the pipeline has a clean code surface for future changes.
+- 6 optional card fields on ChatMessage are at threshold; the next card addition migrates to an enum with associated values.
+- Heartbeat commits don't belong on main — operational state goes in a separate stream (separate ref, daily squash, or no-commit). Currently 30+ heartbeats per real ship commit on main is archaeology, not history.
+- StaticOverrides are appropriate for deterministic handlers, but adding overrides as the FIRST response to a routing failure is the antipattern. Fix order: prompt → pipeline → override (last resort).
+- Mode-unaware hooks (PAUSE/DRAIN enforcement firing for human sessions, testflight-check.sh ignoring `session-type=human`) is a subtle bug class. Grep `PAUSE\|DRAIN\|autopilot` checks in hook scripts to audit other instances.
+- GitHub search index lag (>27 min observed) is load-bearing infra. Standing pattern: fetch unfiltered, filter client-side anywhere correctness depends on seeing a just-created issue.
+- Documented suppressions (e.g. testflight-check.sh respect-human-session) need integration tests, not just code review — silent regressions in hooks are invisible until they bite.
 
 ### Performance & Scalability
-- Context window is 2048 tokens — constrains multi-turn conversations. Increasing needs memory profiling.
+- Context window progression 2048 → 4096 → 6144 tokens. Every n_ctx bump ships with a prompt audit — without it, growth is absorbed by sloppy prompts instead of conversation history.
+- iOS launch watchdog is a real budget constraint. Notification + widget refresh + ~35 DB fetches must run in `Task { @MainActor in ... }`, not awaited in `DriftApp.task`. Standing rule: any work that doesn't gate first frame goes in a detached Task.
 - Auto-unload after 60s idle keeps memory in check.
-- 873 exercises are text-only — adding images will increase app size significantly. Consider on-demand download.
+- 873 exercises text-only — adding images means significant app-size growth. Consider on-demand download.
 
 ### Testing & Quality
-- 743+ tests is healthy but coverage has gaps. AIToolAgent was at 0% — critical path with no tests.
-- Coverage-check hook is the right forcing function — catches regressions.
+- Test infrastructure is 5-tier: Tier 0 DriftCore `swift test` (~0.1s warm, every save) → Tier 1 iOS DriftTests + ChatPathSmokeTests (~25s, every commit) → Tier 2 deterministic LLM eval → Tier 3 real-LLM `DriftLLMEvalMacOS` (~12 min, pre-TestFlight) → Tier 4 env-gated benchmarks. One tier per file.
+- Coverage gate (80% pure logic, 50% services/viewmodels/database) caught the state machine refactor regressions cleanly. Boy scout rule + coverage gate is sufficient for ongoing maintenance — no dedicated coverage sprints needed.
+- The "stochastic LLM coverage ceiling" is a myth. IntentClassifier 63% → 99% via extracting `buildUserMessage` and `mapResponse` as pure functions — test deterministic wrappers, not stochastic calls. Apply to any future ML-adjacent code.
+- Eval coverage ships in the same commit as the feature, not as a follow-up task. "File eval cases later" is the root cause of eval coverage debt — it never gets claimed because the feature is "done."
+- Don't register a tool until engine + tests + eval cases are in the same PR. Routing without an engine = silent failure in production.
+- Per-stage failure attribution (StaticOverride/Intent/Extract/Validate/Execute/Present) is required for systematic regression diagnosis. The DomainExtractor (Stage 3) gold set closed the last eval-infra gap.
+- ChatPathSmokeTests (5 deterministic flows: meal log, photo log, edit_meal, navigate, analytical query) is the Tier-1 gate that catches chat regressions iOS/DriftCore tests miss.
+- Telemetry-driven prompt refresh is a standing per-cycle SENIOR ritual: read persisted failures → cluster by stage → add 2-3 examples per cluster → verify with eval.
+- Fixtures travel with their tests; gold sets are Tier 0 unless they call the LLM. Don't orphan fixtures — assert non-empty in setup.
 - Pre-flight checklist before TestFlight prevents broken builds reaching users.
 
 ### What Broke & Why
-- LB/KG bug: stale preference capture pattern. Lesson: audit all @Observable classes for captured-at-init preferences.
-- Build failures in autonomous loop: editing files without reading them first. Lesson: READ-before-EDIT hook was necessary.
+- LB/KG bug: stale-preference capture pattern. Audit `@Observable` classes for captured-at-init preferences.
+- Build failures in autonomous loop: editing files without reading them first. Hook: READ-before-EDIT.
 - Code-improvement loop ran dry after 12 meaningful cycles. Lesson: blanket refactoring has diminishing returns — do it alongside feature work.
-- **Telemetry-dependent sprint-tasks** got filed (e.g. #535 "read telemetry failures, update prompt examples"). They cannot run — Drift's chat telemetry is **strictly on-device** at `~/Library/Containers/<bundle>/Data/Documents/drift_telemetry.db`, scoped per-user, no aggregate pipeline by design (privacy-first tenet, #111). Lesson: never decompose a campaign into work that needs central data Drift doesn't collect. Prompt-quality audits use `DriftLLMEvalMacOS` gold sets (deterministic, reproducible). User-reported regressions come in via bugs, not sweeps. Closed #535 2026-04-29.
+- Three P0 data-accuracy bugs: integer JSON params silently dropped (servings always defaulted to 1), "calcium" matching the calorie regex (phantom calorie logs), undo always deleting food. Fixes: Int branch in `parseResponse`, `\b` word boundary, `lastWriteAction` switch on `UndoableAction` enum.
+- Voice crash (`AVAudioEngine.prepare()` required before `inputNode.outputFormat`) only surfaces on real hardware. Real-device testing is non-negotiable for hardware features.
+- iOS 26.4 SDK archive blocker (17 builds dark): CLI SDK ≠ Xcode platform support files. Watchdog kept bumping `CURRENT_PROJECT_VERSION` despite zero successful archives — silent build counter lying. Fix: don't bump build when `testflight-archive-failed` flag exists.
+- Two recent chat regressions (photo log JSON, recipe builder) shipped because no end-to-end chat smoke test existed. Fix: ChatPathSmokeTests Tier-1.
+- Telemetry-dependent sprint tasks (#535) are infeasible by design. Drift's chat telemetry is strictly on-device at `~/Library/Containers/<bundle>/Data/Documents/drift_telemetry.db`; no central pipeline aggregates it (privacy-first tenet, #111). Lesson: never decompose a campaign into work that needs central data Drift doesn't collect.
+- Planning session crashes (#381, #354, #407, #408): root cause is exit hook timing when DOD isn't cleanly reached. Manual restart cost every 6 hours. Fix is isolated to `planning-service.sh` exit path.
+- Five consecutive analytical-tool implementation crashes (#417, #418): WIP patches at `~/drift-state/wip/{id}.patch`. Reading the WIP diff before retry (~15 min) prevents N+1 crashes — blind retry is guaranteed to fail at the same point.
 
-### What I Learned — Review #11 (Cycle 199, 2026-04-12)
-- DDD routing is done and clean. 83+ DB calls eliminated. No more blanket refactoring — only alongside feature work.
-- Coverage at 23.17% overall, AIToolAgent at 20%. The "coverage before refactor" gate works — it correctly blocked the state machine refactor. But 6 reviews flagging it means we need to actually close it, not just acknowledge it.
-- Autopilot consolidation removed the split-brain problem. Single loop + hooks + PR reports is the right architecture for autonomous operation.
-- Food DB manual enrichment doesn't scale. Focus on the 50 most-wanted foods by search miss frequency, not bulk additions.
-- Context window (2048 tokens) is a hard ceiling on multi-turn quality. Worth profiling on 6GB devices to see if we can safely increase.
+### Process & Discipline
+- 500-cycle re-validation rule: any task created >500 cycles ago requires re-validation (root cause may have been partially addressed; referenced code may be renamed). Aggressive pruning is healthier than deferral — 32 stale closures in one cycle (113→81 queue) was net positive.
+- Queue cap 70; senior queue ≤15 = healthy drain. Senior task additions ≤2 per planning cycle when SENIOR queue >15. More tickets ≠ more throughput; senior drain rate is the only lever.
+- State.md refresh is Step 0 of every sprint, not cleanup. Stale State.md = wrong planning inferences about what's shipped.
+- Anything deferred 3+ cycles becomes P0. Single-feature isolation when slipping: make it the ONLY P0 with zero competing priorities (push notifications shipped this way after 4 deferrals).
+- Quarterly systematic bug-hunt with an analysis agent: surfaces silent data-accuracy bugs that test suites miss. Standing practice.
+- WIP patches from crashed sessions: read the diff before retry. The stall point is in the diff.
+- Run eval before AND after every AI change. If accuracy drops, revert — no exceptions.
 
-### What I Learned — Review #12 (Cycle 291, 2026-04-12)
-- Coverage gate proved its value. State machine refactor went cleanly because AIToolAgent had test coverage. Keep the gate.
-- ConversationState.Phase enum is the right FSM pattern. Next: consolidate remaining @State data vars into Phase associated values.
-- Theme propagation via `.card()` ViewModifier is the ideal pattern — single source of truth for 46 views. Apply this pattern to future cross-cutting concerns.
-- MacroRingsView in Shared/ is well-isolated. Reusable components in Shared/ should be the default for anything used in 2+ views.
-- Food DB additions are zero-risk high-value. JSON-only changes that don't touch code. Ideal autopilot work.
-- Adaptive TDEE revert was the right call. Lesson: features that affect user health (calorie targets) need extra validation before shipping.
+## What I Learned (recent, not yet sedimented)
 
-### What I Learned — Review #13 (Cycle 358, 2026-04-12)
-- ConversationState.Phase is proving its value — multi-turn fixes were clean because state transitions are explicit. Next: meal planning needs `awaitingMealPlan` phase.
-- Prompt consolidation + token budget safety is important infrastructure. Context window (2048) remains the hard ceiling on multi-turn quality. Voice input will add pressure.
-- Voice input via SpeechRecognizer is low technical risk. The real risk is pipeline compatibility — spoken input is messier than typed. Route speech through existing chat input, don't build separate pipeline.
-- `.card()` ViewModifier pattern continues to pay dividends for cross-cutting style changes. Color harmony should be one cycle because of this pattern.
-- Zero open bugs, zero open issues. Clean operational state. Don't break this by rushing voice input — prototype on branch.
-- AIChatView ViewModel extraction should happen alongside chat UI work (bubbles, typing indicators). Don't do it as standalone refactoring.
+### Review Cycle 9441 (2026-05-07)
+- When a fix ships, file a verification task within 1-2 cycles to confirm the fix actually fixed the problem. Documented fixes that didn't land are worse than open issues because they look closed.
 
-### What I Learned — Review #14 (Cycle 429, 2026-04-12)
-- Voice input routing through existing chat pipeline was the right call. Zero new infrastructure — speech text goes straight into sendMessage(). All intent handling works automatically.
-- Bug #5 ("Can you log lunch") exposed brittle prefix matching in intent handlers. Conversational prefix stripping fixes the immediate issue, but a centralized normalizer before all matchers would be more robust.
-- Command Center (GitHub Pages + Cloudflare Worker OAuth) consumed more cycles than expected. Simple architecture, but OAuth edge cases and deployment issues added up. Keep internal tooling minimal going forward.
+### Planning Cycle 8945 (2026-05-04)
+- Planning checkpoints (`planning-service.sh checkpoint`) silently no-op when the planning issue body has no checklist format. Future planning issues should be created with the step checklist pre-populated.
 
-### What I Learned — Review #15 (Cycle 450, 2026-04-12)
-- UnevenRoundedRectangle + onStep callback = chat UI shipped without new infrastructure. Reusing existing hooks is always the right first move.
-- ViewModel extraction was correctly deferred — it wasn't needed for bubbles/feedback. Do it when meal planning adds new state phases.
-- Product review hook fired every cycle once triggered. The hook checks `cycle > last-review + 20` but the counter increments per tool call, not per commit. Need to update last-review-cycle promptly.
+### Review Cycle 8938 (2026-05-04)
+- cycle-counter and commit-counter diverged silently because `report-service.sh start-review` defaulted to cycle-counter without an argument. Surfaced silent counter drift as an infra problem — anything that auto-defaults across two state sources can drift without a fault signal.
 
-### What I Learned — Review #16 (Cycle 535, 2026-04-12)
-- Extensions pattern (`+MessageHandling`, `+Suggestions`) absorbed meal planning code cleanly without ViewModel extraction. Defer refactoring until it actually blocks.
-- Voice crash (`AVAudioEngine.prepare()` required before `inputNode.outputFormat`) only surfaces on real hardware. Simulator stubs audio. Real-device testing is non-negotiable for hardware features.
-- Meal planning is 7 distinct behaviors (state phase, suggestion loop, number selection, pagination, topic switch, food search fallback, smart pills). Break complex features into independently shippable pieces.
-
-### What I Learned — Review #17 (Cycle 620, 2026-04-12)
-- Coverage sprint paid off: 3→1 files below threshold. ExerciseService 47%→92% via formTip/buildSmartSession/progressiveOverload tests. Coverage maintenance via boy scout rule is now sufficient.
-- Systematic bug analysis agent found real issues: greedy regex (carb/fat patterns matching "cal"/"for"), empty food queries in multi-food parser, word-number teen-hundred gap. Run this quarterly.
-- `resolveWordNumbers` is only applied before goal parsing. If we want it everywhere (quick-add, calorie targets), move it to the top of StaticOverrides.match(). Architecture note for when it matters.
-
-### What I Learned — Review #18 (Cycle 650, 2026-04-12)
-- Meal hint bug was a real data accuracy issue — AI ignored explicit "for lunch" meal specification. The `initialMealType` passthrough pattern was clean and non-invasive. Always thread user intent through the full pipeline.
-- Workout unit hardcoding was another instance of the stale preference pattern from Review #12. Recommend one final audit: grep for hardcoded "lb" or "lbs" across all views.
-- USDA API would be the first external network call in the app. Needs careful design: offline-first cache, rate limiting, privacy implications (search queries leave the device). Architecturally significant — design doc before code.
-
-### What I Learned — Review #19 (Cycle 670, 2026-04-12)
-- Hardcoded unit audit found 7 instances across views and services — the stale preference pattern is now permanently closed. All weight display paths go through `Preferences.weightUnit.convertFromLbs()`.
-- Progressive overload implementation reuses existing service cleanly. Potential concern: 20+ DB queries on tab load for users with many exercises. SQLite is fast enough now but worth monitoring.
-- AI chat workout intelligence is ideal next task — connects existing service to chat pipeline, no new infrastructure needed.
-
-### What I Learned — Review #20 (Cycle 699, 2026-04-12)
-- Systematic bug hunting found three P0 data-accuracy bugs live in production: integer JSON params silently dropped by intent classifier (servings always defaulted to 1), "calcium" matching the calorie regex (phantom calorie logs), and undo always deleting food regardless of what was last logged. These are one-line fixes each — the hard part was finding them.
-- `ConversationState.lastWriteAction` is declared but never written — dead infrastructure. Either implement it properly (set at each write point, use in undo handler) or remove it. Dead code that looks live is the most dangerous kind.
-- The product review hook fired 10+ times in one session because `last-review-cycle` was written at the END of the process. Fix: write the counter as the very first step of the review, before any git operations that re-trigger the hook.
-
-### What I Learned — Review #21 (Cycle 719, 2026-04-12)
-- All 3 P0 bugs from Review #20 fixed with regression tests: integer JSON (added Int branch before Double in parseResponse), calorie regex (added `\b` word boundary), undo handler (rewrote to use `lastWriteAction` with switch on UndoableAction enum). The `lastWriteAction` dead-code concern is now resolved — it's properly set at each write point and consumed in undo.
-- 942 tests (+6 regression/feature). Only IntentClassifier (63%) below 80% threshold — but this is LLM-dependent code where deterministic testing is inherently limited. Accept 63% as floor for this file.
-- USDA API implementation is the next significant architectural change. Key risk is scope creep — ship Phase 1 (USDAClient + cache table + searchWithFallback) in one sprint behind the opt-in toggle. The hard part is nutrient mapping (USDA uses numeric nutrient IDs, not names).
-- Systematic bug hunting validated as a permanent every-sprint practice. Continue focusing on new code paths each sprint.
-
-### What I Learned — Review #22 (Cycle 739, 2026-04-12)
-- USDA integration was architecturally simpler than expected because the client and OpenFoodFacts service already existed — they were just ungated. The real work was the privacy layer: preference toggle, rate limiting (`@MainActor` for concurrency-safe static state), and FoodService.searchWithFallback() for the chat pipeline.
-- DEMO_KEY has lower rate limits than a registered USDA key. Low-urgency for TestFlight but should be addressed before App Store launch.
-- Swift 6 strict concurrency caught the mutable static state in USDAFoodService immediately. `@MainActor` isolation was the right fix since search is always called from MainActor contexts.
-
-### What I Learned — Review #23 (Cycle 785, 2026-04-12)
-- Chat navigation uses NotificationCenter for tab switching — pragmatic over Observable coordinator or binding threading. One-way signals between overlay components are a good fit for notifications.
-- Added `openBarcodeScanner` to ToolAction to fix a pre-existing hack (barcode used `.navigate(tab: 0)` as placeholder). Compiler exhaustive switch catches all callsites. Clean separation of concerns.
-- Static overrides + LLM tool is the right layered approach for navigation: deterministic for common phrases, LLM for natural language variations. Same tier pattern as food logging.
-
-### What I Learned — Review #24 (Cycle 806, 2026-04-12)
-- NotificationCenter for cross-overlay tab switching validated in practice. The navigate notification fires from AIChatView, ContentView updates selectedTab, FloatingAIAssistant collapses. Three components, zero shared state, one notification.
-- ToolAction enum growing (6 cases) is manageable because Swift compiler enforces exhaustive switches. No missed callsites. The enum is the right abstraction for UI actions triggered by AI tools.
-
-### What I Learned — Review #25 (Cycle 829, 2026-04-12)
-- NotificationCenter for cross-overlay tab switching is validated. Three components, one notification, zero shared state. This pattern should be the default for decoupled one-way signals between overlay/sheet components.
-- `IntentClassifier.withTimeout(seconds: 5)` wrapping network calls in AI tool handlers is the right defensive pattern. Any tool handler that touches the network should have a timeout cap to prevent chat from hanging.
-- Swift 6 strict concurrency caught `var name` captured in `@Sendable` closure. The fix (`let searchName = name`) is trivial but the compiler catch prevents a real data race. Swift 6 is earning its keep.
-- IntentClassifier coverage at 63% should be accepted as floor. Four reviews of deferral is a signal — the file contains LLM-dependent code where deterministic testing has diminishing returns past ~65%.
-
-### What I Learned — Review #26 (Cycle 849, 2026-04-12)
-- Review-to-feature ratio inverted: 20 cycles of process, 0 of product. Review mechanism counts review commits toward next trigger — self-reinforcing loop. Fix: time-based or milestone-based triggers.
-- IntentClassifier 63% formally accepted as floor. LLM-dependent code has diminishing returns past ~65%. Remove from all sprint and review tracking.
-- Workout split builder should reuse `ConversationState.Phase` pattern. Add `planningWorkout` phase, follow meal planning state machine transitions. Minimal new infrastructure.
-
-### What I Learned — Review #27 (Cycle 869, 2026-04-12)
-- Review hook's commit-based trigger is a design flaw when reviews generate commits. Fix options: (1) skip until feature ships, (2) milestone-based trigger, (3) exclude doc-only commits from counter. Chose option 1 for now.
-- Three reviews with zero features proves process overhead can exceed product output. The hook should be modified to only count `.swift` file commits long-term.
-
-### What I Learned — Review #28 (Cycle 918, 2026-04-13)
-- Workout split builder validated `ConversationState.Phase` architecture — `planningWorkout` phase followed the exact pattern from meal planning. Architecture investment pays off when new features slot in cleanly.
-- Voice UX bug (eaten words) was a partial-vs-final transcription result handling issue in SpeechRecognizer. Simulator doesn't surface audio pipeline bugs — real-device testing is mandatory for voice features.
-- AIChatView is approaching the complexity threshold where ViewModel extraction becomes necessary. Rich confirmation cards across all action types will likely force it. Plan proactively.
-
-### What I Learned — Review #29 (Cycle 983, 2026-04-13)
-- NavigationCardData addition was clean — optional card fields on ChatMessage scale well. But 4 card types is the threshold; adding 2-3 more means ViewModel extraction is no longer optional.
-- Pre-existing SpeechRecognition test failure (method rename not caught in test target) is a process gap. Test target should be built even when tests aren't run, to catch compile errors.
-- Cost at $0.06/cycle with 94% cache read ratio shows prompt caching is working optimally for iterative development patterns.
-
-### What I Learned — Review #30 (Cycle 1038, 2026-04-13)
-- ViewModel extraction went cleanly. `[weak self]` in closures was the only surprise from struct→class migration. 981 tests still passing.
-- `attachToolCards` pattern (check toolsCalled, fetch current service data) keeps the tool pipeline unchanged while adding card creation at the consumption point. Scales to glucose/biomarkers trivially.
-- 6 optional card fields on ChatMessage is approaching the threshold. If we add 3 more, consider a `ConfirmationCard` enum with associated values. Not urgent yet.
-
-### What I Learned — Review #31 (Cycle 1088, 2026-04-13)
-- `attachToolCards` pattern scaled cleanly from 4→8 card types without touching tool pipeline. Architecture is sound. Next threshold: if we exceed 10 card types, migrate to `ConfirmationCard` enum with associated values.
-- 981 tests with 19 new card-specific tests. Coverage on new code is solid. The boy scout rule + coverage gate workflow is maintaining quality without dedicated coverage sprints.
-- Food search pipeline (SpellCorrectService + ranked search + synonym expansion + USDA fallback) is well-layered but has no telemetry on search misses. Adding a `search_miss` table is the lowest-risk, highest-value infrastructure investment for food DB quality.
-
-### What I Learned — Review #32 (Cycle 1120, 2026-04-13)
-- IntentClassifier 63% coverage is NOT an inherent ceiling. Extracting `buildUserMessage` and `mapResponse` as pure functions makes the deterministic logic testable without mocking the LLM. The right pattern: don't test stochastic code, test the deterministic wrappers around it.
-- `attachToolCards` pattern scaled cleanly to 4 more card types (supplement, sleep, glucose, biomarker). The 6 optional card fields on ChatMessage are at threshold — next card type addition should migrate to `ConfirmationCard` enum.
-- Dual-model cost optimization is a good infrastructure investment. Automatic RAM-based model selection reduces battery impact on lower-end devices without losing capability on capable ones.
-
-### What I Learned — Review #33 (Cycle 1180, 2026-04-13)
-- Timestamp-swapping for food reorder is architecturally fragile — same-timestamp entries (common in AI multi-item logging) cause no-op swaps. A `sortOrder` column is the clean fix: explicit ordering independent of timestamps. Small migration, permanent fix.
-- IntentClassifier pure-function extraction approach validated: 63→78% in one sprint. The pattern "don't test stochastic code, test deterministic wrappers" reversed a 4-review-old assumption that 63% was the ceiling.
-- Design doc workflow (issue → PR → review → approved label → sprint) is good process infrastructure. Prevents unreviewed features from landing in sprint.
-
-### What I Learned — Review #34 (Cycle 1248, 2026-04-13)
-- IntentClassifier at 99% validates: test the deterministic wrappers, not stochastic LLM behavior. This pattern should be applied to any future ML-adjacent code — pure functions are always testable.
-- AIChatView.sendMessage at 491 lines is past the maintainability threshold. Every AI feature added now makes it worse. One decomposition cycle now prevents three times the work later.
-- Push notifications via local UserNotifications framework (no cloud) is architecturally clean. Risk is permission UX — prompt timing matters. One wrong prompt = permission denied forever.
-
-### What I Learned — Review #35 (Cycle 1289, 2026-04-13)
-- Review hook double-firing is a confirmed design flaw: commit-based counter counts review commits toward the next trigger. Pre-writing the counter is the mitigation. Long-term fix: filter to only `.swift` file commits, or switch to time-based cadence.
-- BodyMapView set count enhancement was ~20 lines, single file, zero architectural risk. Small UI data wins like this are ideal autopilot work — low risk, visible user value.
-- For muscle heatmap intensity, `volumeIntensity(for:)` as a computed property (sets/week normalized 0–1 against max across groups) keeps data logic in the view since it's presentation-only. No service layer needed.
-
-### What I Learned — Review #36 (Cycle 1380, 2026-04-13)
-- `volumeIntensity(for:)` normalized 0–1 driving opacity is the right presentation-layer pattern. No service layer needed for view-only computed data.
-- Push notifications via `UserNotifications` framework is architecturally trivial. The only real risk is permission UX — prompt after first food log, not on launch. One wrong prompt = denied forever.
-- sendMessage at 491 lines is past threshold but not actively blocking. Defer decomposition until a feature requires touching that code. Don't refactor for its own sake.
-
-### What I Learned — Review #37 (Cycle 1483, 2026-04-13)
-- Push notification architecture was clean — BehaviorInsightService detection reused directly, UserNotifications framework is the right local-only approach. Zero new infrastructure needed.
-- Regex-based exercise name extraction has a natural ceiling for natural language. The retry-with-singular-fallback is pragmatic for now, but long-term, routing through LLM intent classifier is the answer if edge cases proliferate.
-- Tests 981→1,037 (+56). NotificationService and BehaviorInsightService alert logic have zero dedicated tests — harden in next sprint.
-
-### What I Learned — Review #40 (Cycle 2277, 2026-04-14)
-- sendMessage decomposition shipped (Review #39) — 491→8 handlers. The architecture is clean for new chat features. No more tech debt blocking AI chat improvements.
-- P0s #67-69 exposed a pattern: voice input produces text that breaks rule-based matchers (no punctuation, filler words, implicit lists). A centralized InputNormalizer before all matchers is the right architectural fix — normalize once, match everywhere.
-- Coverage: WeightTrendService at 61%, AIRuleEngine at 50%. Both should be 80%+. NotificationService has 15 tests but edge paths (permission denial, empty data) are untested.
-- The user's request for a "gold set" (#65) aligns with the PE principle: measure before you optimize. Build the eval framework, get pass rates per category, then fix the worst categories systematically.
-- Tests 1077, foods 1532, 20 AI tools, 8 card types. The codebase is mature enough that the primary risk is regression, not missing features. Coverage investment pays dividends.
-
-### What I Learned — Review #41 (Cycle 3200, 2026-04-15)
-- Owner's feedback on PR #112 is architecturally sound: "Break prompt and have highly specialized prompts, even if you have to run multiple." For a 2B on-device model with 2048 token context, smaller focused prompts outperform one large multi-task prompt. Two 3s calls (6s total) for correct results beats one 3s call for wrong results.
-- Gold set eval at 55 queries with 100% baseline is the safety net for the pipeline refactor. Run before AND after every change. If accuracy drops, revert — no exceptions.
-- sendMessage decomposition from Review #39 (491→8 handlers) means the pipeline refactor has a clean code surface to work with. No monolithic code blocking the change.
-- The `mark-in-progress.sh` hook re-adds `in-progress` labels via PostToolUse on every Bash call (not just git commit as intended). The `if` condition doesn't filter properly. Technical debt in the hook system — low priority but causes friction.
-
-### What I Learned — Review #42 (Cycle 3250, 2026-04-16)
-- **LLM eval principles for on-device 2B models**: Static overrides (StaticOverrides.swift) should be used sparingly — they grow without bound and mask routing failures instead of fixing them. The right fix order: (1) improve the prompt (examples, RULES wording, example placement), (2) improve the pipeline structure (decompose into multiple focused prompts), (3) as last resort, add a StaticOverride. Never add a static override as the first response to a routing failure.
-- **Prompt example placement matters**: For short bare-keyword phrases ("daily summary", "lab results"), placing the example immediately after RULES dramatically improves routing reliability. Gemma 4 attention is front-loaded — early examples outweigh later ones for ambiguous inputs.
-- **Eval as source of truth**: `DriftLLMEvalMacOS/IntentRoutingEval.swift` is the canonical eval. Any routing regression must be caught here before it reaches users. Run before AND after every IntentClassifier change. Test cases should use natural phrasings, not bare keywords, since users type naturally.
-- **Duplicate examples confuse models**: Adding an example at the top without removing from the middle creates two competing signals. Always remove from original position when relocating an example.
-- **Pipeline structure principle**: For complex multi-domain classification, consider multi-stage prompts — a domain router first ("is this food/weight/exercise/sleep/supplement?"), then domain-specific extraction. Fewer tokens per prompt = higher accuracy per token for 2B models.
-- **PipelineE2EEval is the integration gate**: IntentRoutingEval tests routing in isolation; PipelineE2EEval (InputNormalizer → LLM classify → MockToolExecutor → Presentation LLM) tests the full chain. Both must be 100% before any AI merge.
-
-### What I Learned — Planning Cycle 341 (2026-04-18)
-- Four new P0 bugs landed same-session from real TestFlight use (#186 fiber-as-macro, #187 multi-select on previous foods, #191 recipe Done button, #192 recipe ingredient editing). Recipe mutation path is underspecified — every write needs an edit/delete counterpart at the same layer, not a UI-only fallback.
-- Bug #195 (coffee-with-milk zero calories) suggests the composed-food lookup path may be dropping additive calories. Candidate failure modes: (a) USDA fallback returning base "coffee" with 0 kcal, (b) "with milk" parsed as modifier but not as ingredient with macros. Audit the composed-food logic end-to-end.
-- Sprint queue jumped to ~21 items (10 carry-over + 8 new + 3 P1 bug promotions). Senior budget is 5/session so full drain is ~4 senior sessions. Keep future planning sessions honest — don't pile on if the queue isn't drained.
-- Product focus directive explicitly forbids new StaticOverrides/keyword rules — every new AI task must improve the LLM prompt, pipeline stage, or tool set. This session's 8 new tasks all comply (new tools, new card types, prompt threading, eval expansion, persistence). Reinforces the "static overrides are a symptom, not a cure" lesson from Review #42.
-
-### What I Learned — Planning Cycle 1159 (2026-04-19)
-- AI chat depth list from cycle 341 is mostly closed in one sprint: time-aware pills, meal-period auto-detect, streamed stage labels, nutrition lookup card, 25-turn multi-turn regression all shipped. The three remaining items (pipeline threading, edit_meal, session-persistent state) are the hardest — they touch architecture, not just prompts/eval. Budgeting 4 senior sessions for them.
-- Routing win came from a *simpler* intent prompt (44/47 → 46/47, +4.3%). Reinforces the "smaller focused prompts outperform larger multi-task prompts" lesson from Review #41. Next prompt shrink (task #214) should continue the direction — less is more on a 2B model.
-- Context window doubled 2048→4096 tokens and long-context eval added (#176). This unblocks pipeline threading (task #208) without token panic — last 3 turns now fit comfortably with the classifier prompt.
-- Progressive multi-item disclosure (#178) is the first pipeline-level UX win from streaming per-item resolution. Perceived latency dropped materially; the pattern should extend to multi-step confirmations (edit_meal result, workout split builder).
-- The "no new StaticOverrides" directive continues to shape task design — every AI task this sprint is prompt/stage/tool-level, not keyword-rule. Confidence calibration (#209) is the natural next layer: the LLM should admit uncertainty rather than be force-routed by overrides.
-
-### What I Learned — Planning Cycle 2000 (2026-04-19)
-- Cycle 1159 sprint fully landed (threading #208, edit_meal #207, persistent state #210, confidence calibration #209, per-stage eval #212). The calibration ticket shipped the confidence *signal* but did not wire it to behavior — we still guess on low-confidence input. New ticket #226 closes that loop. Shipping a signal without a response to it is an incomplete feature.
-- Per-stage isolated eval (#212) gives us the harness but no *per-tool* success rate. You can still regress one tool behind aggregate pass rate. Ticket #228 adds a 10-query gold set per top-5 tool — this is the missing granularity for routing/extraction trust.
-- Delete/edit by reference is the real trust gap now that `edit_meal` has shipped. A user who logs "chicken" twice today and says "delete the first one" gets the wrong row. Named-lookup is insufficient once multi-item logging is common. Ticket #227 treats entry references as first-class state, not strings.
-- Compression round 1 (intent, -16%) left room in the other stages that we haven't measured since context window doubled to 4096. More tokens ≠ more prompt — bigger window is for *conversation* context, not larger instructions. Round 2 (#229) should keep the stage prompts tight.
-- Food DB growth is still zero-risk high-value work for junior sessions (#230, #231). Restaurant chains are a new axis — USDA doesn't cover Starbucks/Chipotle, and those are the meals users log most often.
-- Flake hygiene matters now that FoodLoggingGoldSetTests is a session-start gate (#235). A flaky gate becomes ignored; a stable gate becomes trusted. Audit before adding more fixtures.
-
-### What I Learned — Planning Cycle 2605 (2026-04-19)
-- Cycle 2000 sprint (trust & precision) landed cleanly: clarification dialogue #226, multi-turn entry refs #227, per-tool 50-query gold set #228, prompt compression round 2 #229. Pipeline is in its cleanest state since the state-machine refactor — per-stage reliability is now measurable at 4 levels (intent, per-tool, pipeline eval, latency benchmark).
-- New gap: DomainExtractor (Stage 3) has no isolated gold set. Every other stage does. It's the invisible middleware between routing and tool call — a 5% extraction drift shows up as "wrong quantities" to the user with no clear signal. Ticket #239 closes the gap with a 50-query eval.
-- Tool-call retry (#240) is the next reliability play. Per-tool gold sets shipped at ≥90% post-tune. The tail 10% is where retry pays off — pipeline currently gives up and falls through to slow fallback. A single variant-prompt retry should halve the failure rate.
-- False-positive clarifications are the new risk from shipping #226. Friction for no reason on the success path is worse than a silent guess. #242 consults extractor completeness before triggering clarify.
-- P0 bug #238 (Gemma 4 download failure) filed by user mid-planning — real user is hitting a first-run blocker. Senior must investigate as first task post-planning. This is why the sprint-task + P0 auto-labeling matters — no routing delay.
-- Crash hardening landed twice in 2 cycles (ForEach(indices) + force-unwraps). Pattern to watch: SwiftUI ForEach over mutable collections without stable IDs. Worth a boy-scout rule: grep for `ForEach.*indices` quarterly.
-
-### What I Learned — Planning Cycle 3585 (2026-04-20)
-- Watchdog commit-rate detector (3h / 0 commits → kill) shipped cleanly — 1 downstream "exited via stall" feedback entry observed post-ship, which is the detector *working*, not a regression. Silent non-productive sessions are worse than crashes; this closes that failure mode.
-- Telemetry (#261) is live but still open-loop until the daily-summary aggregation ticket (#281) lands. A signal without a consumption path is shelfware. Any new telemetry emission should ship with its reader in the same sprint.
-- Test infrastructure is now at 4-layer maturity: FoodLoggingGoldSetTests (intent), PerToolReliabilityEval (tool selection), MultiTurnRegressionTests (state machine), ChatLatencyBenchmark (perf). The two gaps this planning session addressed: no cross-model parity eval (new #286) and latency smoke is opt-in, not default (#287). Default-path coverage matters — opt-in gates get skipped.
-- Photolog ships via BYOK cloud vision — architecturally this is the first feature that uses an *off-device* model. The privacy story still holds because the user brings their own key, but we now have to care about outage modes we didn't have before (rate limits, user's key revoked, vendor API change). Needs its own per-category accuracy eval (covered implicitly by #276 — the eval gold set).
-- Voice transcription misrecognition of health terms (metformin, creatine, whey) is a deterministic post-processing problem, not a model quality problem. Fixing at the string level (dictionary pass on final transcript) is the right layer — cheaper than trying to train or fine-tune SpeechRecognizer.
-- Queue depth: entered cycle at 16 pending tasks, closed at ~26 post-planning. The 5-senior-task budget means full drain is ~5 sessions. Honest capacity signal — don't pile on next cycle unless queue drops.
-
-### What I Learned — Planning Cycle 3985 (2026-04-21)
-- Photo Log went from single-provider (Anthropic) to three (Anthropic + OpenAI + Gemini) in #298. Each provider adds its own failure modes (auth shape, rate-limit header, transient-vs-permanent error semantics). The *next* architectural move is making the provider choice invisible: fallback chain (#300) so a user with three BYOK keys effectively never sees "AI unavailable". This is the same pattern as multi-region database reads — clients shouldn't know which replica served them.
-- Telemetry raw-text persistence (#297) landed but is still open-loop, same class of problem I flagged last cycle with #261. Ticket #301 (`/debug last-failures` chat command) closes the loop by turning the persistence layer into an on-device consumer. Lesson is restated: every new telemetry emission needs its reader on the same sprint, else it's shelfware.
-- IntentClassifier still uses one global confidence threshold. The telemetry now in place lets us measure per-domain false-clarify and false-guess rates — #302 replaces the single number with per-domain thresholds. Calibration you couldn't justify pre-telemetry is now defensible at review with evidence.
-- Hooks fix #296 (PAUSE/DRAIN enforcement only fires for autopilot sessions) shipped after a human-takeover session hit autopilot hooks. Mode-unaware behavior is a subtle bug class — grep for \`PAUSE\|DRAIN\|autopilot\` checks in hook scripts to audit other instances.
-- Queue closed this cycle at ~30 (20 in + 10 new). Not runaway growth, but the tail on SENIOR is now 8 tasks — that's 2 full senior sessions of drain before we should add more. Next planning cycle should look at queue-drain-rate before adding anything.
-
-### What I Learned — Planning Cycle 4247 (2026-04-21)
-- Entering cycle at 29 pending / 7 SENIOR — queue neither drained nor grew materially since cycle 3985 despite #302 shipping (domain-aware clarify policy). Senior drain rate is the binding constraint, not task supply. Keep new-task volume ≤ drain rate per cycle.
-- Two *independent* clarify levers: IntentThresholds (shipped #302) handles low *confidence*; the new tie-break task (#313) handles high-confidence *confusion* between top-1 and top-2. A 'high' confidence guess on the wrong tool is a different failure class than a 'low' confidence guess on the right tool — previously conflated. Telemetry will tell us which one dominates real misroutes.
-- Per-stage failure attribution (#312) is the eval-infra move I've been circling for two cycles. Current FoodLoggingGoldSet reports aggregate pass/fail — so a regression could be in StaticOverride, Intent, Extract, Validate, Execute, or Present, and we ship the fix for the wrong stage half the time. Once attribution lands, every subsequent AI task can claim a stage-specific success metric, not just aggregate.
-- Context window progression 2048 → 4096 → 6144 (#315) follows a rule I want to make explicit: every n_ctx bump ships with its prompt audit. Without the audit, growth is absorbed by sloppy prompts instead of conversation history — the opposite of the intended win. The audit is the feature, not the bump.
-- First truly *analytical* AI tool lands this sprint: cross_domain_insight (#317). The previous 20 are transactional (log/fetch/edit). An analytical tool combines 2+ domain services read-only and returns correlation + summary. This is a new tool category, not a new tool — I expect 3-5 more analytical tools over the next few sprints (correlate glucose/food, correlate sleep/recovery, correlate supplements/biomarkers).
-- Multi-turn entry-ref is a staircase: 2-turn pronouns (shipped #227) → 3+ turn ordinal + attribute (#314) → cross-session persistence (future). Each step requires state model changes, not just prompt tweaks. The staircase matters because users don't perceive 2-turn as "working" — they perceive 2-turn as "mostly broken the same way 3-turn is broken" until the whole staircase is built.
-
-### What I Learned — Planning Cycle 4487 (2026-04-21)
-- DomainExtractor Stage 3 gold set (#325) closes the last eval infra gap. Eval coverage now: StaticOverrides → IntentClassifier → DomainExtractor → per-tool → pipeline E2E → latency. Without Stage 3 isolation, per-stage attribution (#312) can attribute a failure to "extraction" but can't quantify the extraction stage's baseline accuracy. Both tickets must ship together to be meaningful.
-- Queue at 46 pending / 11 SENIOR after this cycle. 11 SENIOR ÷ 5 tasks/session = minimum 3 senior sessions to drain SENIOR queue. If two senior sessions per day, SENIOR backlog clears in 2 days. This is the planning-to-drain ratio I want to maintain: ≤ 2 planning cycles' worth of SENIOR tasks in queue at any time.
-- Glucose-food correlation tool (#324) follows the cross_domain_insight pattern exactly: read 2+ services, compute aggregate, return summary. The test here is how well GlucoseService and FoodService support date-windowed queries. If they don't, the tool implementation will expose the gap — which is fine, the PE principle is "ship reveals debt better than analysis."
-- Telemetry-driven prompt refresh (#326) is the first data-driven prompt improvement in the history of this project. Previous prompt changes were hypothesis-driven (Review #42 example-placement insight). This cycle we have real failing queries persisted (#297). Using them to update examples is the "measure, then optimize" principle in practice.
-- Photo Log review screen complexity is approaching extraction threshold. Four feature additions in two builds (editable macros, serving units, ingredients, plant badge). If #331 (onboarding tip) adds more state to this view, extract PhotoLogReviewViewModel. Keep the threshold rule: 4+ feature-additions to one view = extraction time.
-
-### What I Learned — Planning Cycle 4815 (2026-04-22)
-- SENIOR queue at 28 pending means ~6 senior sessions to drain. Adding new SENIOR tasks faster than drain rate creates an ever-growing backlog where the oldest tasks are architecturally stale by the time they're reached. Hard rule: SENIOR additions ≤ 2 per planning cycle until queue is below 15.
-- Cross-session context persistence (#371) is architecturally simpler than it sounds: TurnRecord: Codable, ring buffer capped at 5, JSON to app support dir, inject as system-prompt prefix at session start. No new infrastructure — the existing ConversationState already has the data. Risk: context prefix could bloat the prompt if stored verbatim. Compress to user message + AI summary only.
-- LLM prompt audit via telemetry (#372) is the right discipline for on-device 2B models. Static overrides grow without bound; prompt example improvements amortize across all inputs. The pattern: read telemetry failures → cluster by failure mode → add 2-3 targeted examples per cluster → verify with eval harness. Each audit cycle should show ≥10 new eval cases, otherwise the failure data wasn't mined deeply enough.
-- Analytical tool architecture (#369 supplement_insight, #370 food_timing_insight) follows the cross_domain_insight pattern exactly: query 2+ domain services → compute aggregate → return structured JSON → format readable response. Both new tools can reuse the same JSON schema pattern. No new infrastructure needed — SupplementService and FoodService both have the required query methods or need only 1-2 new ones.
-- Portion language ambiguity ("a bowl of", "a handful of") is handled in FoodDomainExtractor at Stage 3 extraction. Adding 12 gold set cases (#375) without first checking whether the extractor has logic for these is backwards. Implementation path: add extractor logic first, then write the test cases. Whoever picks up #375 should check FoodDomainExtractor before writing any Swift test fixtures.
-- Queue at 75 pending is the highest it's ever been. Oldest tasks (#253, #256, #258) are from cycle 3022 — that's 1793 cycles of age. Stale tasks accumulate context drift: the code they reference may have changed, the failing queries may have been fixed by adjacent work. When implementing a task older than 500 cycles, always re-validate the root cause before writing any code.
-
-### What I Learned — Review Cycle 4877 (2026-04-22)
-- Planning service stall on exit (#382) was the last session failure mode. Session ended without closing the planning issue because the exit hook triggered correctly but the process didn't terminate cleanly after DOD was met. Fix: add heartbeat check + forced exit after DOD completion. This is an infra-improvement ticket, not a planning-process ticket.
-- Multi-intent splitting (#384) has real architectural complexity: "log lunch and update weight" requires sequential tool execution, result threading, and confirmation for each action. This is the first time the pipeline must execute two tools in a single turn. Architecture: parse multi-intent → [Intents], execute serially, collect results, present in order with per-action confirmation cards.
-- Hydration tracking (#383) adds a new domain to the 6-stage pipeline. `log_water` tool follows the `log_food` pattern (quantity + unit → daily aggregation). Key difference: hydration is additive throughout the day, not meal-period-grouped. Daily hydration in summary card requires a new DailyHydration aggregate query.
-- SmartMealReminderService (#385) must be pattern-aware, not time-fixed. Requires FoodLogService query for lastMealTime(period:), UserNotifications scheduling, and comparison against user's typical meal pattern. Don't use fixed 9am/12pm/6pm defaults — infer from actual log history. Same "infer intent from history" principle as meal-period auto-detect.
-- State.md staleness is a systemic issue flagged in review #51 and again in #52. The PE rule: state.md must be refreshed before every product review. This should be part of the planning checklist, not reactive. Junior task: state.md refresh is now a required pre-condition before generating any product review.
-- Queue at 95 pending (37 SENIOR) is the largest it's ever been. Any task >500 cycles old must be re-validated before implementation. Tasks #253-#258 from cycle 3022 are now ~1900 cycles old — the code surface they target may have changed significantly. Re-validate root cause before writing any code for these.
-
-### What I Learned — Review Cycle 4975 (2026-04-22)
-- Four zero-feature reviews in a row with zero regressions confirms the codebase is clean and stable. The architectural investments (6-stage pipeline, ConversationState FSM, per-stage eval, ViewModel extraction) are paying off — no structural debt blocking new feature work. The gap is execution bandwidth, not technical fitness.
-- State.md staleness has been flagged four consecutive reviews and never fixed. Root cause: it's not on the planning checklist — it's treated as optional cleanup. Fix: add State.md refresh as a mandatory step in the planning process, required before the scorecard in any product review can be written. Junior task, 15 minutes.
-- Queue cap at 70 is the right constraint. The PE principle: a 95-item queue where the oldest items are 2000 cycles old is not a backlog — it's technical debt in planning form. Old tasks carry stale root-cause assumptions. The 500-cycle re-validation rule is now standing policy: before implementing any task created >500 cycles ago, re-validate that the referenced code path still exists and the failure mode hasn't been partially addressed by adjacent work.
-- `weight_trend_prediction` tool (#402) is architecturally straightforward — linear regression over weight entries, project goal date. The implementation risk is edge cases: users with no goal set, insufficient data (<7 entries), flat trends. All three must be handled gracefully before the tool ships. The tool schema should return `projectedDate: String?, weeklyRate: Double, confidence: Double, insufficientData: Bool`.
-- IntentClassifier tie-break (#396) closes a silent wrong-tool routing issue. The existing code always picks top-1 score. Adding a gap threshold (0.15) before confirming top-1 creates the clarification path for ambiguous inputs. Implementation risk: threshold too low → too many clarification prompts; too high → no change from current behavior. Default 0.15 is starting point — tune against eval harness.
-- Telemetry prompt refresh (#399) is the discipline that improves the model without changing it. For on-device 2B with fixed weights, prompt examples ARE the tuning mechanism. The ritual: read persisted failures → cluster by stage → add 2-3 examples per cluster → verify with eval. This is now a recurring sprint task, not a one-off.
-
-### What I Learned — Planning Cycle 5351 (2026-04-23)
-- `weight_trend_prediction` shipped cleanly — linear regression + edge-case handling (insufficient data, no goal, flat trend) all handled. The `InsightResult: Codable` return schema is the right abstraction to carry forward into `supplement_insight` and `food_timing_insight`. Both #417 and #418 can share the same JSON schema pattern; no new infrastructure needed beyond 1-2 new service query methods each.
-- Five consecutive planning crashes (#408) is a systemic infra problem. Root cause is likely the session-compliance hook timing or planning-service.sh exit path when DOD isn't met. Created as infra-improvement to investigate. Pattern to watch: any script that blocks on DOD completion without a timeout will cause stall-on-exit.
-- State.md is now showing build 133, 2048 tokens — actual is build 169, 4096 tokens. Created explicit JUNIOR task #410 to fix. Adding State.md refresh to planning checklist is the right permanent fix — it's not a cleanup item, it's a pre-condition for every product review scorecard.
-- Queue at 101 with cap at 70 means we've been running over the cap for multiple cycles without enforcement. The diverging series (10 added, ~2 drained per cycle) will reach 150 by cycle 5800 at current rate. Hard rule: this cycle added 9 tasks (minimum needed for DOD), but 4 of them (#410, #412, #415, #411) are hygiene tasks that either close issues or produce no new queue debt. Net queue impact should be neutral once stale tasks #253–#258 are pruned.
-- Re-created `supplement_insight` (#417) and `food_timing_insight` (#418) as this cycle's P1 tasks after originals (#369, #370) aged past 160 cycles without execution. The original tickets should be closed as superseded once new ones are implemented — avoid double-tracking.
-
-### What I Learned — Planning Cycle 5590 (2026-04-23)
-- 32 stale/duplicate tasks closed in one planning cycle (113→81). The 500-cycle re-validation rule is now empirically validated — tasks from cycle 3022 were 2500 cycles old and many targeted code that had been rewritten, superseded, or completed by adjacent work. Aggressive pruning is healthier than deferral.
-- `sleep_food_correlation` (#426) follows the same InsightResult schema as `weight_trend_prediction` — query a date-windowed FoodEntry last-meal-time, correlate against SleepEntry duration/HRV, return structured JSON. No new service infrastructure needed beyond a `lastMealTime(for:)` query in FoodService. The analytical tool pattern is now fully reusable.
-- Queue at 81 pending after pruning + 9 new = 90. Still above the 70 cap target. The pruning rate (32) vs add rate (9) is the right direction — queue is trending down for the first time in 10 cycles. Next planning session: if queue is below 70, normal additions allowed; if above 70, hygiene-only additions.
-- Failing-queries.md refresh has been through 8 sequential task versions (#292→#412). Going forward: when creating a new refresh task, immediately close the prior one in the same planning action. The "superseded by" close is now a planning-time action, not a cleanup item.
-- LLM prompt audit should be cycle-numbered: "cycle 5590 prompt audit" is a different artifact than "cycle 4949 prompt audit." If the queue already has an unnumbered version, close it and create a cycle-specific one. Cycle-specific naming prevents indefinite deferral.
-
-### What I Learned — Planning Cycle 4734 (2026-04-22)
-- state.md is outdated — says build 133, context 2048 tokens, tests 1677+. Actual: build 166, context 4096 (post-#176), foods 2511. Stale docs are worse than no docs — they mislead planning. Junior task: refresh state.md before every product review. This should be part of the planning checklist, not reactive.
-- Five-bug batch (zero-cal, stale DB, photo log review, default amount, key UX) surfaced from real device use, not the test suite. The stale DB and composed-food zero-cal bugs should have been catchable. Quarterly audit: which structural categories of bugs do our 1677+ tests systematically miss? Answer shapes the next test investment.
-- Photo Log review screen is past the extraction threshold — five feature additions total (editable macros, serving units, ingredients, plant badge, and the prior model picker). `PhotoLogReviewViewModel` extraction is now mandatory before any further additions to that view. The threshold rule was 4+ feature-additions; we're at 5.
-- Queue grew to 64 pending / 24 SENIOR. 24 SENIOR ÷ 5 tasks/session = ~5 senior sessions to drain. At 2 senior sessions/day, SENIOR backlog clears in ~3 days if no new SENIOR tasks are added. Cap new SENIOR tasks at ≤2 per planning cycle until SENIOR queue drops below 15.
-- USDA DEMO_KEY in production is a latent risk before App Store launch. 1000 req/hour is fine for TestFlight; public release without a registered key will hit rate limits. Junior task: swap DEMO_KEY for registered key + document the API key setup in dev setup docs.
+### Review Cycle 8666 (2026-05-02)
+- Proposal: pre-commit hook reading `CURRENT_PROJECT_VERSION` from project.yml and comparing to State.md build number. Diverge >1 → warning (not block). Makes State.md lag a commit-time signal rather than a review-cycle finding.
 
 ## Preferences & Approach
-- Prefer boring, proven solutions over clever abstractions
-- Prefer fixing patterns over fixing instances (fix the stale-preference pattern, not just one ViewModel)
-- Prefer tests that catch real bugs over tests that achieve coverage numbers
-- Prefer small, shippable increments over large, risky rewrites
-- When in doubt, ship — perfect is the enemy of good
-
-### What I Learned — Planning Cycle 5965 (2026-04-24)
-- The 4 remaining failing query categories all require service/data-model changes, not just prompt tweaks: (1) historical dates need Calendar arithmetic + date-range query in food_info handler; (2) macro goals need UserPrefs extension + DB migration + set_goal tool extension; (3) macro goal progress depends on #440 landing first before food_info can compare intake vs goal; (4) micronutrients need a DB migration v35 adding fiber_g/sodium_mg/sugar_g columns to FoodEntry with nil-safe reads for pre-migration rows.
-- #440 (non-weight goals) and #441 (macro goal progress) are strictly ordered — #441 reads the calorieGoal/proteinGoal columns that #440 creates. Senior sessions must implement in that order. Claim #440 first, verify migration lands cleanly, then claim #441.
-- Micronutrient migration (#442) must guard against nil reads for all FoodEntry rows logged before the migration. Pattern: `fiber_g ?? 0.0` at the aggregation layer. The DB migration should NOT backfill historical entries from the Food table — too slow, and historical data accuracy is unknowable.
-- Context-aware tie-break (#449) reads ConversationState.phase at classification time. IntentClassifier runs on the LLM inference thread; ConversationState is @MainActor. Thread safety requires reading phase as a copied value before entering LLM inference, not during. Pass it as a parameter, not a captured reference.
-- `/debug last-failures` (#447) must be gated to DEBUG builds. A PreToolUse hook on git commit should verify no /debug routes are reachable in release target. Pattern: `#if DEBUG` around the debug command handler, plus an XCTest that verifies DebugCommandService is unreachable from the release scheme.
-- Queue at 30 entering this cycle means full drain is 6 junior sessions + 2 senior sessions — the most executable queue state in recent memory. Adding 14 new tasks (439–452) brings it to 44, which is below the 70 cap. Maintain this loading level.
-
-### What I Learned — Planning Cycle 7564 (2026-04-26)
-- All 4 failing-query categories closed. Historical date and calorie goal fixes are in StaticOverrides + service layer. Micro-nutrient tracking added DB migration v35 with nullable columns and COALESCE aggregation — the right pattern for additive migrations. Macro goal progress (#441) depends strictly on #440 (calorieGoal/proteinGoal columns) landing first.
-- DriftCore migration is now fully delivering: FoodLoggingGoldSetTests runs in 0.1s. This makes the "run gold set every session" product focus practical. The eval gate is only useful if it's fast enough to run without friction.
-- Gold set coverage gap: macro goal and micronutrient features shipped but have zero gold set cases. A shipped feature without eval coverage is unverified — it can silently regress. New task #470 closes this gap with 12 cases.
-- Planning session crash (#381, #354, #407, #408) has been deferred 10+ cycles and costs human time every 6 hours. Root cause (exit hook timing when DOD isn't cleanly reached) is identified but unresolved. This must be fixed — it's not optional infra debt when it breaks every planning cycle.
-- State.md at build 174 while actual is 176 — two builds behind after one planning session. State.md must be refreshed as part of every sprint, not just occasionally. New task #472 closes it this cycle; future cycles should treat it as planning step 0.
-- Queue at 67 after creating 8 tasks (59 + 8). Still below 70 cap. Maintaining discipline on NORMAL mode additions is working — queue has stayed manageable.
-
-### What I Learned — Planning Cycle 7689 (2026-04-26)
-- Context-aware tie-break (#449) was correctly implemented: ConversationState.phase read as a copied value before LLM inference, not a captured reference. Thread-safety pattern is now established — any future feature that reads @MainActor state inside an LLM inference call must copy the value first, not capture a reference.
-- Planning session crash (#407) has been deferred 10+ cycles and costs human manual restart every 6 hours. Root cause (exit hook timing when DOD isn't cleanly reached) is identified. Fix is isolated to planning-service.sh exit path — estimated 2 hours. This is infra debt with a human cost, not just a code quality issue. Must ship next session.
-- DriftCore pure-logic test migration delivers its ROI every session now. FoodLoggingGoldSetTests at 0.1s means the "run gold set every session" directive is actually being followed. Architecture investment with compounding returns — don't let the Tier-0 suite grow back to iOS-only tests.
-- USDA batch import (offline JSON dumps → foods.json) is architecturally simpler than Phase 2 proactive search. Parse USDA Foundation Foods JSON, map numeric nutrient IDs to our Food model fields, deduplicate by fuzzy name match, append with `source: "USDA"`. No new infrastructure, no runtime API calls, one junior session. Start here; proactive search tier is Phase 3.
-- Eval coverage must ship in the same commit as the feature. `supplement_insight` and `food_timing_insight` both need ≥5 eval cases each shipped alongside the tool implementation. The pattern of filing "add eval cases" as a follow-up task is the root cause of our eval coverage debt — it never gets claimed because the feature is already "done."
-
-### What I Learned — Planning Cycle 7485 (2026-04-26)
-- DriftCore pure-logic test migration is the highest-leverage architectural improvement in recent cycles. Moving all pure-logic tests from iOS simulator (30s boot) to `swift test` (0.1s warm) makes the AI quality iteration loop feasible in practice. Every session that touches a prompt or tool can verify instantly — previously you'd defer because 30s feels expensive. This is the forcing function that enables the "run FoodLoggingGoldSetTests every session" product focus.
-- DriftRegressionTests target retired cleanly into DriftCoreTests — zero duplicate coverage, tests moved by logical domain. Pattern for future migrations: move by file, run `swift test` after each file, commit after each passing batch. Don't move all at once.
-- Micronutrient schema (#442): DB migration v35 adds nullable `fiber_g REAL`, `sodium_mg REAL`, `sugar_g REAL` to FoodEntry. All aggregation must use `SUM(COALESCE(fiber_g, 0))` — never `SUM(fiber_g)` which drops pre-migration rows. The Food table has these fields; FoodEntry did not. Backfill at log-time from Food.fiber_g when a food is identified; never backfill historical FoodEntry rows.
-- Macro goals strict ordering restated: #440 (calorieGoal, proteinGoal to UserPrefs + set_goal extension) must commit and tests pass before #441 (macro goal progress queries) is started. If both claimed in same session, #441 will fail to compile. Planning notes this dependency; executor must check.
-- weight_trend_prediction (#463) added this cycle: linear regression on 30-day weight history, project days-to-goal. Edge cases: <7 entries → "not enough data" message, goal already reached → affirm, slope ≈ 0 → "at current rate, goal date is unknown." Return schema: `{ trend_kg_per_week, days_to_goal?, predicted_date?, r2, insufficient_data }`. InsightResult pattern from #417/#418 is the right return schema to reuse.
-- Planning session crash pattern: 6+ consecutive planning crashes documented in #381, #354, #407, #408. Root cause is still open — likely exit hook timing when DOD isn't cleanly reached. The human manually restarts planning sessions as a workaround. Fix must be in the planning service exit path, not the feature code.
-- Queue at 70 after this cycle's 8 new tasks — exactly at the 70 cap. Strict discipline required: no new tasks until drain occurs. SENIOR queue at ~28 is the binding constraint (28 ÷ 5 tasks/session = ~6 senior sessions). If queue grows, oldest SENIOR tasks >500 cycles will need re-validation before execution.
-- Harness reliability improvements (sessions reaching task loop, non-swallowed gh errors, commit scoping) shipped in prior cycle. These are foundational — silent failures in the harness are worse than crashes. The harness must surface every error before returning "success."
-
-### What I Learned — Review Cycle 7784 (2026-04-27)
-- `supplement_insight` and `food_timing_insight` WIP patch files live at `~/drift-state/wip/417.patch` and `~/drift-state/wip/418.patch` from the crashed sessions. Reading these before the next implementation attempt costs 15 minutes and prevents a 5th crash. Diagnosis issue #493 MUST precede implementation.
-- RemoteLLMBackend (#494) integration needs a mock-HTTP test suite (#512) that exercises the full streaming + tool-call path through AIToolAgent without a real API key. Make URLSession injectable in RemoteLLMBackend.init for testability. This is the architectural correctness gate for the entire campaign.
-- Cross-session context (#506) compression rule: store user message text + AI summary (max 200 chars each), not full cards. Full verbatim storage would bloat the prompt to the 512-token prefix limit within 2 turns. Ring buffer capped at 5 turns, truncate oldest first.
-- State.md is now 9 builds stale. Task #510 filed as mandatory Step 0 of next sprint — not cleanup. Any session reading build 174 state makes wrong assumptions about shipped AI tools, context window size, and test infrastructure.
-- Senior task budget raised to 10 (from 5) per session. This means SENIOR queue at ~15 tasks is now a 2-session drain instead of 3. The binding constraint shifted from task supply to session count.
-
-### What I Learned — Planning Cycle 7724 (2026-04-27)
-- Analytical tool crash root cause is undiagnosed — two sessions each on #417 (supplement_insight) and #418 (food_timing_insight) crashed before completion. Hypothesis: these tasks exceed a single session's budget. The crashed/ branches exist; reading the diffs costs 15 minutes and tells us whether the sessions stalled on registration, execution, or tests. Diagnose before the next implementation attempt — blind retry is guaranteed to fail at the same point.
-- RemoteLLMBackend architectural prep (campaign 2) must conform to the existing AIBackend protocol, not fork the pipeline. The clean constraint: streaming + tool calls go through AIToolAgent unchanged; only the backend differs. BYOK via Keychain means `RemoteLLMBackend` lives in DriftCore (no UIKit/AppKit) and reads the key at call time. `Preferences.useRemoteModelOnWiFi` defaults false — no user-facing toggle until validation is complete.
-- Zero user math (campaign 3) spans two layers: (1) ServingUnit.swift already has a `toGrams()` conversion skeleton — audit coverage for oz, fl oz, cups, tbsp, tsp, pieces, then fill gaps; (2) FoodParser needs to detect multiplier phrases ("double it", "1.5 servings", "half") and pass a float quantity multiplier through the extraction stage. Don't build new infrastructure; extend what's there.
-- State.md is stale by 8 builds (says 174, actual 182). A session reading State.md saying "20 AI tools" when there are actually more makes wrong backfill decisions. The fix is a hook that warns if State.md build number hasn't been updated in >7 days. The task itself is a 30-minute junior session — block task #481 supersedes to build 182 now.
-- USDA API key (#488) is pre-launch blocker — DEMO_KEY cap is 1,000 req/day. Fine for beta but a ticking clock once DAU > 10. Simple credential swap; schedule before any marketing push.
-- DriftCore migration is delivering ROI: FoodLoggingGoldSetTests at 0.1s warm makes "run gold set every session" actually happen. Guard it — any test that needs iOS Simulator for pure logic is a regression back to the 30s loop. The Tier-0 rule must be enforced at code review, not just architecture review.
-- Queue at 61 entering this cycle — healthy. Adding 10 tasks brings it to 71, below the 80 triage threshold. Active SENIOR queue at ~18 tasks; at 5 tasks/session = ~4 senior sessions to drain. Campaign tasks (photo-log, remote model, zero user math) are all SENIOR-heavy; queue depth is appropriate.
-
-### What I Learned — Review Cycle 8519 (2026-04-29)
-- Backend toggle redesign (#540) is architecturally correct: stored property with a proper setter, no stale selector capture. Pattern to reuse for any future preference-driven toggle that affects a service-layer behavior.
-- RemoteBackendError categorization (auth / rateLimited / quotaExceeded / transient / malformed) is the right abstraction. Callers decide auto-fallback (transient only) vs surface-to-user (auth/quota) without HTTP status code inspection. Apply this pattern to any future multi-provider service.
-- Unit conversion (#497) has WIP patch at ~/drift-state/wip/497.patch. `git apply` + finish is the right path — not restarting from scratch. The ServingUnit.toGrams() skeleton already exists; fill the gaps for oz/fl oz/cups/tbsp/tsp/pieces.
-- supplement_insight/food_timing_insight: crash root cause is documented in #493, WIP patches from 4 sessions exist. Reading the WIP diffs before writing a single line is mandatory — the stall points are known. Session budget of 10 tasks should be enough to ship both tools + eval cases + register in same PR.
-
-### What I Learned — Review Cycle 8581 (2026-05-01)
-- Partial ToolRanker registration creates worse UX than no registration: supplement_insight and food_timing_insight are registered (route correctly) but have no analytics engine — user's adherence query routes to a tool that returns nothing. Future rule: don't register a tool until engine + tests are in the same PR. Routing without engine = silent failure in production.
-- Two test failures found during review run: testPortionScaling_DecimalServings (4/6 pass, filed #568) and testRouterPrompt_TokenCeiling (6080 > 6000 chars, filed #569). Token ceiling failure is a correctness risk — SmolLM has 8K context; prompt at 6080 + user message + response leaves < 2K headroom. Prune router prompt before adding eval examples.
-- DriftCore test count 1,033 (up from 913 at cycle 8519). Keep the `swift test` loop under 10s warm — it's the only quality gate fast enough to run every session without friction.
-- State.md at build 174 is 18 builds stale (actual 192). Required fix each sprint as Step 0, not cleanup. Filed #553 this cycle.
-
-### What I Learned — Review Cycle 8666 (2026-05-02)
-- supplement_insight and food_timing_insight engines shipped after 3 consecutive reviews. The "don't register until engine + tests are in the same PR" rule (from review 8581) is now standing policy. InsightResult schema shared across all 5 analytical tools — each new analytical tool is 1-2 new service queries + format wrapper. No new infrastructure needed for new analytical tools going forward.
-- testRouterPrompt_TokenCeiling (#569) is on main and is a correctness risk: router prompt at 6,080 chars leaves < 2,000 chars headroom for SmolLM (8K context). This affects real users on 6GB devices. Fix is prompt pruning (remove dead examples, tighten RULES wording) — not adding more eval examples until it's under 6,000. Don't add new router prompt content until #569 is closed.
-- Planning session crash (#407) has been deferred 10+ cycles and costs human manual restart every 6 hours. Root cause is identified (planning-service.sh exit path). Estimated fix: 2 hours. The continued deferral has no engineering justification — it's pure prioritization failure. Ships in next senior session.
-- GLP-1 implementation (#580) should use supplement architecture exactly: `SupplementLog` → `DailyMedication`, `mark_supplement` → `log_medication`, supplement card → medication card. No new infrastructure. The InsightResult pattern from analytical tools is reusable for any future medication analytics. Don't build dose tracking, side effects, or nutrition correlation in this sprint — logging foundation only.
-- State.md at build 197 (actual 200) after one planning cycle confirms the pattern is structural. A pre-commit hook warning when State.md's build number lags project.yml by >1 would make this self-correcting. Filed #581 for the immediate refresh; propose the hook as an infra improvement.
-- Food DB cap policy (#575) is architecturally correct: 14 pending +30 tasks in queue with 0 being claimed is queue debt, not product investment. The right signal is "claim existing food tasks before creating new ones" — autopilot was generating them faster than they could be executed.
-
-### What I Learned — Planning Cycle 8945 (2026-05-04)
-- TestFlight archive failure root cause confirmed: `xcodebuild -showsdks` reports iOS 26.4 SDK (command-line tools), but archive fails because Xcode's iOS 26.4 *platform support files* are a separate package. Error: "iOS 26.4 is not installed. Please download and install the platform from Xcode > Settings > Components." These are two different things — CLI SDK ≠ Xcode platform. Fix requires human to open Xcode GUI.
-- Watchdog creates `testflight-due` every 3h based purely on elapsed time, independent of whether archiving is possible. When the archive is broken, every Bash PostToolUse fires the TestFlight hook with "mandatory publish" instructions — burning session budget on a guaranteed failure. New task #626 adds a circuit-breaker: write `testflight-archive-failed` flag on failure; watchdog skips testflight-due creation while flag exists.
-- Planning checkpoints (planning-service.sh checkpoint) silently no-op when the planning issue body has no checklist format. Issue #600 body is just a timestamp — all step line lookups fail with "not found". This is a harness issue worth filing: new planning issues should be created with the step checklist pre-populated.
-- Build 213 bumped to 214 in project.yml this session but was not shipped (archive blocked). The version bump is committed via xcodegen; the next successful archive will ship build 214 correctly.
-
-### What I Learned — Review Cycle 8789 (2026-05-03)
-- GLP-1 tracking (#580) validated the supplement architecture as a reusable health-domain pattern: new domain = mirror existing model + tool + card. `DailyMedication` mirrors `SupplementLog`, `log_medication` mirrors `mark_supplement`. This is the pattern for any future domain addition (hormones, sleep aids, custom supplements). Eval cases for `log_medication` must ship in the same PR — tools without eval are unverified.
-- Router prompt fix (#569) closed — staying under 6,000 chars is a standing constraint, not a one-time fix. Any future router prompt additions must include a token audit. The ceiling check in the test is the enforcement mechanism; don't remove it.
-- testPortionScaling_DecimalServings (#568) status must be verified immediately. If 4/6 decimal serving cases are still wrong, ServingUnit.swift decimal quantity parsing has a live correctness bug. Pattern: grep for `decimalServingSize` and `quantityMultiplier` in ServingUnit.swift to find the failure site.
-- Coverage improvements on critical services (ExerciseService 5%→67%) came cheaply via `swift test` 0.1s loop. Services that generate AI tool responses (ExerciseService, FoodService, WeightService) should have ≥50% coverage as a standing target — they're the correctness layer for the entire chat experience.
-- Planning crash (#407) must ship next senior session. 10+ cycle deferral on a 2-hour fix is the definition of irrational technical debt. The human manual restart is a real operational cost, not an acceptable workaround.
-- State.md structural fix: propose a pre-commit hook that reads `CURRENT_PROJECT_VERSION` from project.yml and compares it to the build number in State.md. If they diverge by >1, print a warning (not a block). This makes State.md lag a commit-time signal rather than a review-cycle finding. Low-risk infra improvement.
-
-### What I Learned — Review Cycle 8938 (2026-05-04)
-- iOS 26.4 SDK archive blocker (builds 204–213 all fail) is an infra problem, not a code problem. Bumping build numbers without a successful archive is false progress — it creates a build number gap in releases.json and confuses the TestFlight cadence tracker. The fix: either install the iOS 26.4 SDK (Xcode beta) or pin deployment target to a known-good SDK. Never bump the build counter without verifying the archive succeeds.
-- cycle-counter (8666) and commit-counter (8938) diverged silently. `report-service.sh start-review` defaulted to cycle-counter when called without an argument, generating stale branch names. Root cause: cycle-counter.sh and commit-counter.sh write to different files and one wasn't kept in sync. Fix: report-service.sh should prefer commit-counter over cycle-counter (already coded this way in cmd_review_due), and start-review should use commit-counter as the default arg, not cycle-counter.
-- GLP-1 validated the supplement architecture as the canonical health-domain extension pattern: mirror model + tool + card, no new infrastructure. This is deliberately constrained — the pattern works because SupplementLog/DailyMedication are both append-only event tables, not stateful entities. Any future domain that needs stateful records (e.g., ongoing prescriptions with titration schedules) will require a separate architecture conversation.
-- AIChatView is approaching the complexity threshold (400+ lines). The forcing function for extraction should be the next major chat feature (e.g., exercise muscle map inline card) — don't extract speculatively, but don't add another 100 lines without extracting first.
-
-### What I Learned — Review Cycle 8999 (2026-05-06)
-- The TestFlight gap widened from "10 builds blocked" (cycle 8938) to "17 builds blocked" (cycle 8999). project.yml is at build 220 against last-published build 203. The watchdog kept bumping CURRENT_PROJECT_VERSION on every commit despite zero successful archives — this is silent technical debt accruing in 0.1-second increments per commit. Filed #641: stop bumping CURRENT_PROJECT_VERSION when testflight-archive-failed flag exists. The principle: a build counter that lies is worse than a build counter that's stuck.
-- TestFlight publish hook is firing aggressively in human-driven sessions despite CLAUDE.md claiming "session-start hook resets session type to 'human' so auto-publish hooks are suppressed." This planning session received >12 "MANDATORY publish" injections from PostToolUse Bash hooks. The suppression isn't actually wired. Filed #640: respect session-type=human and the testflight-archive-failed flag in testflight-check.sh. Lesson: documented suppressions need integration tests, not just code review — silent regressions in hooks are invisible until they bite.
-- Heartbeat commits dominate `git log -20` (30+ heartbeats per real ship commit). The watchdog is committing operational state to main branch at minute granularity. Filed #642 with three options (squash daily / separate ref / no-commit). Operational state belongs in a separate stream — committing it to main makes "what shipped" archaeology rather than scanning.
-- decisions.md at 83 lines is healthy — well under the 300-line ceiling. Pruning in a planning cycle would be premature; let the file grow until it hits the ceiling, then prune the oldest entries that are now common knowledge.
-
-### What I Learned — Review Cycle 9441 (2026-05-07)
-- iOS launch watchdog is now a real budget constraint. After #620 (GLP-1 weekly slot) + #627 (protein adherence 4-of-7), `NotificationService.refreshScheduledAlerts()` issues ~35 DB fetches per launch. Combined with HealthKit sync + weight trend + TDEE awaited inline in `DriftApp.task`, cold launch was creeping past iOS's ~20s watchdog kill. Fix: notification + widget refresh moved to `Task { @MainActor in ... }` (commit 36f0cb12). New rule: any work that doesn't gate first frame goes in a detached Task, not awaited in `DriftApp.task`. Document this in CLAUDE.md when next touching DriftApp.swift.
-- GitHub search index lag is now load-bearing infra. Two fixes this cycle (sprint-service.sh refresh, command-center) bypass `?labels=X` REST calls because index propagation is unreliable (>27 min observed on 2026-05-07). The right pattern is "fetch unfiltered, filter client-side" anywhere correctness depends on seeing a just-created issue. Vendor problem we can't fix; standing pattern documented in decisions.md.
-- Two recent regressions (#650 photo log JSON extract, #651 recipe builder bypass) both shipped on the chat path. Chat regressions are not caught by current iOS or DriftCore tests because there's no end-to-end smoke test. Filed #655 (SENIOR) to add a Tier-1 ChatPathSmokeTests with 5 deterministic flow assertions (meal log, photo log, edit_meal, navigate, analytical query). Cost: ~60 lines + ~3s test runtime. ROI: every future TestFlight publish.
-- Heartbeat batching (#642) shipped but `git log` still shows recent heartbeats interleaved with feature commits. Filed #658 to verify the batching is actually working — possibly the window is too short or there's an unbatched code path. Pattern: when a fix ships, file a verification task within 1-2 cycles to confirm the fix actually fixed the problem; documented fixes that didn't land are worse than open issues because they look closed.
-- AIChatView ViewModel extraction (#647) shipped, but AIChatView is still ~400+ lines. The extraction was partial — followups should ride on the next chat feature touch (per cycle 8938 rule), not be filed as their own task. Don't speculatively refactor.
+- Prefer boring, proven solutions over clever abstractions.
+- Prefer fixing patterns over fixing instances (fix the stale-preference pattern, not just one ViewModel).
+- Prefer tests that catch real bugs over tests that achieve coverage numbers.
+- Prefer small, shippable increments over large, risky rewrites.
+- Prefer deterministic wrappers around stochastic logic so the wrappers are testable.
+- When in doubt, ship — perfect is the enemy of good.

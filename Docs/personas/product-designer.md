@@ -8,395 +8,75 @@
 
 ### Users & Feedback
 - Primary user is the developer (dogfooding). Friends testing via TestFlight provide real-world feedback.
-- Indian food coverage matters — users log dal, paneer, biryani, not just Western foods.
-- Users want to type naturally in chat and have AI handle everything — "log breakfast: 2 eggs, toast, coffee with milk"
+- Indian food coverage matters — users log dal, paneer, biryani, not just Western foods. Indian branded protein foods (MuscleBlaze, RiteBite, sattu, makhana) are the target user base's daily search.
+- Users want to type naturally in chat and have AI handle everything — "log breakfast: 2 eggs, toast, coffee with milk".
 - Privacy is a real selling point — users explicitly appreciate no-cloud, no-account.
+- Settings → Feedback is structurally load-bearing. Five+ consecutive zero-feedback cycles = signal channel broken; deferral 3+ cycles = P0 blocker. Fast response to user-filed bugs creates more bug filing; slow response kills it.
+- Five-bug batches from real-device dogfooding are the highest-quality signal we get. Protect the loop — respond same cycle.
+- TestFlight reach is part of the product. Features merged but invisible aren't shipped. Any infra blocker keeping the app off TestFlight >3 days is a P0 (the 17-build dark stretch was a credibility cliff).
+- Drift's chat telemetry is on-device only (privacy-first tenet, #111). No autopilot session can read user telemetry; no central pipeline aggregates it. Prompt-quality audits use `DriftLLMEvalMacOS` gold sets — deterministic, reproducible. User-reported regressions come in via bugs, not sweeps.
 
 ### Competitive Insights
-- MFP added AI photo scanning (cloud-based) — becoming table stakes but quality varies on non-Western food
-- MFP launched free GLP-1 support (April 2026) — medication log, dose reminders, side effect tracking alongside nutrition. New health domain we don't yet cover.
-- MacroFactor shipped AI photo + text recipe import (April 2026) — directly competing with our photo log for meal-from-photo UX
-- Boostcamp's exercise presentation (videos, muscle diagrams) is the gold standard
-- Whoop's Behavior Insights connecting habits to Recovery scores is compelling
-- MacroFactor's adaptive TDEE is their killer feature — we've implemented our version
-- Strong stays minimal and focused — clean UX is their moat
+- MFP launched free GLP-1 support (April 2026) — medication log, dose reminders, side effects. Drift responded same-sprint with `log_medication` mirroring supplement architecture.
+- MFP's Today tab redesign (April 2026) backfired — heavy complaints about "4-tap diary." Chat-first removes friction while they add it. Lead TestFlight release notes with "log your lunch in one sentence" while their window is open.
+- MFP's Premium AI tools (photo scan, voice log, ChatGPT Health) sit behind a $20/mo paywall. Drift: free, on-device, BYOK keys for cloud quality.
+- Whoop Behavior Trends (habits → Recovery correlation after 5+ entries) is the analytical-correlation pattern — Drift's 5 analytical tools (cross_domain, weight_trend, glucose_food, supplement_insight, food_timing_insight) match it.
+- Whoop 5.0 launched Healthspan (WHOOP Age, ECG, Blood Pressure Insights) — sensor hardware play. Counter is depth of analytical intelligence on data users already log, not new sensors.
+- MacroFactor's recipe photo scanning (cookbook → ingredient pre-fill) and Jeff Nippard programs make them the gold standard for structured workout + nutrition planning. Drift wins on day-to-day chat-first logging speed; they win on program design depth. Compete on depth (cookbook foods: banana bread, chicken pot pie, lasagna, stir-fry varieties), not on cloud-backed photo recognition we lack the infra for.
+- Boostcamp's exercise videos + muscle diagrams are the visual gold standard. Drift's angle: AI-powered workout intelligence in chat ("how's my bench?") over content volume.
+- Strong stays minimal and focused — clean UX is their moat.
 
 ### Design Decisions & Rationale
-- Chose NOT to do photo food logging yet — on-device ML accuracy for Indian/mixed dishes is poor. Voice input is higher ROI.
-- Adaptive TDEE implemented with EMA smoothing — simpler than MacroFactor but effective
-- Behavior insight cards on dashboard — started with 3 hardcoded insights, plan to expand
+- Chose NOT to do photo food logging on-device. Voice input via SpeechRecognizer is higher ROI given on-device ML accuracy gaps for Indian/mixed dishes. Cloud photo logging via BYOK keys (Anthropic/OpenAI/Gemini) gives premium capability without subscription.
+- Adaptive TDEE implemented with EMA smoothing — simpler than MacroFactor but effective.
 - Theme is open — not tied to dark-only. Bold redesigns welcome as long as app-wide.
+- Goal-aware color: green = aligned with goal direction, red = against. Default goal: losing weight.
+- AI chat is the primary surface, not a feature: every action reachable via conversation. 8 confirmation card types cover all health domains (food, weight, exercise, supplement, sleep, glucose, biomarker, navigation).
+- Read-only info cards (nutrition lookup, weight trend, "how many steps today") give glanceable answers without forcing a commit.
+- BYOK Photo Log is "premium capability without subscription" — user brings their own AI vision key, key lives in biometric Keychain. Differentiator vs MFP Premium+ at $20/mo.
+- Health-domain extension via mirror pattern: SupplementLog → DailyMedication, mark_supplement → log_medication. Logging foundation first, depth via user feedback.
+- Behavior insight cards on dashboard — proactive intelligence (protein adherence alerts, glucose spike detection, workout consistency, progressive overload) is the difference between "data logger" and "health coach."
+
+### AI Chat UX Patterns
+- Multi-stage focused prompts beat one monolithic prompt on the 2B model. Smaller prompts = higher accuracy per token.
+- Per-stage elapsed indicator ("Classifying intent… 1.8s") reassures users on slow devices vs a static spinner. Apply to any operation >1s.
+- Streaming per-item resolution ("eggs, toast, coffee" → each resolves live) drops perceived latency materially. Pattern extends to multi-step confirmations and multi-item logging.
+- Time-aware suggestion pills + meal-period auto-detect = "had oatmeal" at 8am becomes a 1-tap log without an explicit meal name. Infer intent from history; don't make users repeat themselves.
+- Confirmation cards complete the "chat is a real messaging app" feel. Card pattern is extensible across health domains.
+- Clarification dialogue converts ambiguity from a stall into a 1-tap fork. Every AI decision a user would otherwise type, the app should offer as a tap. Privilege extractor completeness over verb-shape keyword signals to avoid false-positive clarifies.
+- Multi-turn entry references are a staircase: 2-turn pronouns → 3+ turn ordinal/attribute → cross-session persistence. Users perceive 2-turn as "broken in the same way 3-turn is broken" until the full staircase is built.
+- Voice transcription health-term correction (metformin, creatine, whey) is a deterministic post-processing problem. Fix at the string level (dictionary pass on final transcript), cheaper than tuning the recognizer.
+- Recent foods quick-log: empty search → habitual foods, zero query for repeat meals. Apply to supplements, weight logging.
 
 ### Mistakes & Course Corrections
 - Spent too many cycles on blanket code refactoring (code-improvement loop) instead of user-facing features. Merged into single autopilot loop.
-- Initial food DB was too small (1000 foods). Ongoing enrichment is critical.
-- **Don't file tasks that depend on aggregate telemetry.** Drift's telemetry is on-device only (privacy-first tenet, #111). The chat telemetry DB lives in each user's app container — no autopilot session can read it, no central pipeline aggregates it. Tasks like "read telemetry failures and update prompt examples" are infeasible by design. The right surface for prompt-quality audits is the `DriftLLMEvalMacOS` gold set — deterministic, reproducible, auditable. If a real-user failure surfaces, it surfaces via a bug filed by the operator or a TestFlight friend, not a telemetry sweep. Source: #535 (closed 2026-04-29).
+- Initial food DB was too small (1,000 foods). Now ~3,335 via external data sources (USDA batch JSON dumps) not manual curation. Prioritize cuisines primary user eats weekly, not geography matrix completion.
+- Push notifications deferred 4 reviews → made the ONLY P0 with zero competing priorities → shipped. Apply this isolation rule to any feature that keeps slipping.
+- Process can exceed product. Three consecutive zero-feature reviews was a real signal — review hook commit-counter included review commits in the trigger. Drain before planning when queue >60.
+- Hidden gem features = effectively unshipped if no discoverability. Onboarding tips part of any feature's DoD; dashboard tip strip with 'Try: X' biased to unused features.
+- Don't file tasks that depend on aggregate telemetry. Drift's telemetry is on-device only — tasks like "read telemetry failures and update prompt examples" are infeasible by design.
+- Eval coverage ships in the same commit as the feature. Features without eval can silently regress.
 
-### What I Learned — Review #11 (Cycle 199, 2026-04-12)
-- MFP acquired Cal AI (March 2026) — photo food scanning is now table stakes for nutrition apps.
-- Whoop launched AI Strength Trainer: describe a workout in text → structured plan. Cloud-based but shows the direction.
-- 29 cycles of infrastructure with zero user-visible improvements is too long. DDD was necessary but the pendulum swung too far. Must rebalance to 80% user-facing, 20% infra.
-- Theme overhaul has been "Now" for 6+ reviews — credibility issue. Must ship in one cycle, not iterate.
-- Voice input (SpeechRecognizer) is higher ROI than photo logging for our on-device constraints.
+### Process & Discipline
+- Sprint scope: 4-5 items max drives 100% completion; tighter scope is the formula for the third+ perfect sprint in a row.
+- One large P0 = full sprint. Honest sizing prevents P1/P2 slip.
+- Refresh sprint as soon as the last P0/P1 ships, don't wait for P2 to drag.
+- If the same gap appears in 3 consecutive reviews, it becomes a P0 regardless of competing priorities (exercise vertical, push notifications precedent).
+- Same-sprint response to user-filed bug batches; same-sprint response to competitive market signals (GLP-1 shipped one sprint after MFP's launch).
 
-### What I Learned — Review #12 (Cycle 291, 2026-04-12)
-- 100% sprint completion rate is possible when items are scoped right. 6/6 delivered.
-- Macro rings on dashboard are the kind of visual differentiator that makes users say "this looks like a real app." Ship visual wins early.
-- Food DB at 1,075 is still a trust issue. Every "not found" = user opens MFP instead. Prioritize by search miss frequency.
-- Chat UI is the next visual frontier. Text-only responses feel dated. One structured card type (food confirmation) is the minimum viable upgrade.
-- Voice input keeps getting deferred. Set a hard deadline: research in this sprint, go/no-go at next review.
+## What I Learned (recent, not yet sedimented)
 
-### What I Learned — Review #13 (Cycle 358, 2026-04-12)
-- MFP made 3 acquisitions in 12 months (Cal AI, Intent, ChatGPT Health). They're building an AI moat with cloud + 20M DB. We can't match DB size — compete on privacy, on-device, chat quality.
-- Whoop's Passive MSK (auto-detect muscular load) removes manual logging friction. Our text→structured data pattern is the same philosophy. Double down on it.
-- MacroFactor expanding into exercise (Workouts app, Jan 2026). All-in-one is our advantage but we need to stay ahead on each vertical.
-- Voice input deferred 3 reviews is a credibility problem. Set as P0 — prototype or kill, no more research-only.
-- Food confirmation card proved structured chat UI works. The path is clear: bubbles → typing indicators → tool feedback → rich cards for every action.
-- Color harmony is the most visible remaining quality gap. Every user sees the disjointed palette on every screen.
+### Review Cycle 9441 (2026-05-07)
+- Settings → Feedback is shipped but activation isn't done. Mailto channel works; getting testers to actually use it is the next problem. In-app "what's new" sheet + release-notes proactive-coach narrative are the activation levers.
 
-### What I Learned — Review #14 (Cycle 429, 2026-04-12)
-- Voice input and color harmony both shipped — 2/6 sprint items. The P0s got done but P1/P2 items were displaced by Command Center tooling. Internal tooling has diminishing returns; must resist the pull.
-- Chat UI is now the most visible quality gap. Plain text responses with no bubbles feel like a prototype. This is the #1 thing to fix for perceived quality.
-- The market is consolidating toward all-in-one platforms (MacroFactor Workouts, MFP acquisitions). Our all-in-one + on-device privacy is the differentiator, but chat polish is what makes it feel real.
+### Review Cycle 8999 (2026-05-06)
+- The "proactive coach" identity is now coherent: protein adherence + glucose spike + workout consistency + progressive overload. The TestFlight diff testers see should read as "Drift now coaches you," not "we shipped 30 unrelated things."
 
-### What I Learned — Review #15 (Cycle 450, 2026-04-12)
-- Chat bubble UI closed the biggest perceived-quality gap. The app went from "prototype" to "could be a real product" in one sprint. Ship visual wins aggressively — they compound.
-- 50% sprint completion (4/8) is better than 33% but the P1/P2 slip pattern persists. Scope sprints tighter — 5 items max.
-- MFP making barcode scanning paid-only is an opportunity signal. Free on-device barcode scanning could be a differentiator, but not until chat-first features are complete.
-
-### What I Learned — Review #16 (Cycle 535, 2026-04-12)
-- Sprint velocity dropped to 21% (1.5/7) when a complex feature (meal planning) wasn't broken into phases. Scope sprints to 5 items max and split complex features into "basic flow" + "polish."
-- MFP acquired Cal AI (photo scanning + body comp from photos) and integrated with ChatGPT Health. They're building a cloud AI moat. Our counter: on-device privacy + chat quality + all-in-one experience.
-- Meal planning dialogue ("plan my meals today") is exactly the kind of sticky daily-use feature that differentiates. Iterative meal-by-meal based on remaining macros — no competitor does this on-device.
-
-### What I Learned — Review #17 (Cycle 620, 2026-04-12)
-- 100% sprint completion is achievable when items are scoped right (5 items, all shipped). The pattern: clear scope, no P1/P2 overcommit.
-- Systematic bug hunting (running an analysis agent across pipeline files) found 4 silent data-accuracy bugs. This should be a quarterly ritual, not just reactive.
-- Whoop's $10.1B valuation and MFP's GLP-1 tracking show the health market is consolidating around data density + AI. Our moat is privacy + on-device chat quality — double down on that.
-
-### What I Learned — Review #18 (Cycle 650, 2026-04-12)
-- Food diary now has a complete editing story (inline macro editing + meal re-log + copy from past days). This is table stakes and we finally have it. The "I do this every day" features are what build habits.
-- Exercise is our weakest vertical — MacroFactor launched Workouts with progressive overload automation and Jeff Nippard videos. We can't compete on content volume, but AI-powered workout intelligence (progressive overload alerts, form tips in chat) is our angle.
-- Food DB gap (1,500 vs MFP's 20M) is less concerning with chat-first logging — users type "chicken biryani 300g" and it works. USDA API integration is the right next investment, not manual enrichment.
-
-### What I Learned — Review #19 (Cycle 670, 2026-04-12)
-- Progressive overload alerts are the pattern I want replicated: proactive intelligence that tells users when something needs attention, not just displays data. Extend to protein adherence, supplement streaks, workout consistency.
-- AI-powered workout intelligence in chat is more aligned with our AI-first identity than static exercise images. "How's my bench?" is a natural user behavior.
-- Two P0s in 20 cycles is modest but high-quality. P1 items keep slipping — keep sprint scope tight.
-
-### What I Learned — Review #20 (Cycle 699, 2026-04-12)
-- All four P0s from the last sprint shipped: workout intelligence in chat, USDA API design, unit audit, overload alerts. 100% on P0s is the bar — hold it.
-- The systematic bug hunt found three silent data-accuracy issues that were live in production. This ritual belongs in every sprint, not just quarterly. Assign it as a named P1 task.
-- Proactive alerts (protein adherence, supplement streaks) have been deferred twice. The pattern is proven with overload alerts — the next step is applying it to nutrition and recovery. This is the difference between a data logger and a health coach.
-
-### What I Learned — Review #21 (Cycle 719, 2026-04-12)
-- 100% sprint completion (6/6) — every P0, P1, and P2 shipped. This is the second consecutive perfect sprint. The formula: tight scope (6 items max), clear priority tiers, no mid-sprint additions.
-- Proactive alerts shipped and they change how the app feels. Opening the dashboard and seeing "You've missed protein 3 days in a row" is the health coach pattern I've been pushing since Review #19. This is what separates Drift from data loggers.
-- Muscle group chips on workout cards add visual information density without clutter. Small UI wins compound — users can now see at a glance what they trained.
-- USDA API design doc is solid. Phase 1 (search + cache behind opt-in toggle) is the 80/20 — implement it next sprint before spending more time on manual food DB enrichment.
-- The app is transitioning from data logger to proactive health coach. No competitor does this holistically across nutrition, exercise, and supplements on-device.
-
-### What I Learned — Review #22 (Cycle 739, 2026-04-12)
-- USDA API integration shipped behind opt-in toggle. This is the right UX pattern for any feature that sends data off-device: default OFF, clear description, privacy note visible when enabled.
-- Sprint completion was 1/5 — but that one P0 was the most impactful infrastructure change since launch. Sometimes one high-impact item is better than five small ones. Still, sprint sizing needs to be honest: if a P0 takes a full sprint, don't plan four P1s alongside it.
-- WHOOP's AI Coach now has conversation memory and contextual guidance. Our proactive alerts serve a similar user need (the app watching out for you) without the privacy cost. Extend the alert pattern to workout consistency and logging gaps.
-
-### What I Learned — Review #23 (Cycle 785, 2026-04-12)
-- Proactive alerts are now the defining UX pattern. Six behavioral signals on the dashboard change Drift from "open and log" to "open and learn." This is the health coach identity.
-- Chat navigation is the last major parity gap in the AI-first story. Every action users take by tapping tabs should be reachable by saying it in chat. Implementation is half-done — finish it.
-- Sprint velocity pattern is persistent: 1/6 shipped. Scope to 4 items max. One large P0 is a full sprint.
-
-### What I Learned — Review #24 (Cycle 806, 2026-04-12)
-- Chat navigation shipped and closes the AI-first loop. Every major app action is now conversational. This is what "AI-first" means — not just logging through chat, but navigating, querying, and controlling the entire app through conversation.
-- The layered approach (static overrides for speed, LLM tool for flexibility) is the pattern to replicate for future AI features. Users get instant response for common phrases and intelligent handling for edge cases.
-
-### What I Learned — Review #25 (Cycle 829, 2026-04-12)
-- 75% sprint velocity (3/4) is a real improvement over the persistent 17-25% pattern. The fix was scoping to 4 items max (Review #23's recommendation) — it works. Hold this sprint size.
-- USDA chat integration closes the last food discovery gap. Users who type "log acai bowl" in chat now get USDA results automatically. The AI-first promise is fully realized: log, query, navigate, plan, discover — all conversational.
-- IntentClassifier at 63% has been deferred 4 consecutive reviews. Accept it. LLM-dependent code has a natural coverage ceiling — deterministic tests can't meaningfully cover stochastic behavior. Remove from sprint, stop tracking.
-- Sprint refreshes should happen more often. 3/4 items shipped in the first ~8 cycles; the remaining 21 cycles had no sprint-level direction. Refresh the sprint as soon as the last P0/P1 ships, don't wait for the P2 to drag.
-
-### What I Learned — Review #26 (Cycle 849, 2026-04-12)
-- Twenty cycles of zero user-visible output is a red flag. Reviews are important but they shouldn't consume the cycles they're meant to measure. Consider time-based or milestone-based review cadence.
-- Whoop's Women's Health panel (11 biomarkers, cycle-hormone integration) is the cross-domain insight pattern we should be doing. Our biomarker + cycle tracking data exists — we need the correlation layer.
-- Workout split builder should be the next sticky feature. "Plan my meals today" proved multi-turn dialogue drives daily engagement. "Build me a PPL split" is the same pattern for exercise.
-
-### What I Learned — Review #27 (Cycle 869, 2026-04-12)
-- Three consecutive zero-feature reviews proved the review loop is broken. Reviews suspended until next feature ships. Process must serve product, not the reverse.
-- Sprint plan from Review #26 is solid and untouched. Execute it — don't re-plan.
-
-### What I Learned — Review #28 (Cycle 918, 2026-04-13)
-- Suspending reviews until features shipped was the right call. Two features delivered in 49 cycles vs zero in the previous 70. Process must serve product velocity, not substitute for it.
-- Whoop's AI Coach now does photo-to-workout parsing and proactive push nudges. MFP integrated ChatGPT Health. The cloud AI gap is widening — our privacy moat must be paired with experience quality to matter.
-- Workout split builder proves the multi-turn dialogue pattern drives engagement. Two sticky daily-use features (meal planning + workout design) entirely on-device — no competitor matches this.
-
-### What I Learned — Review #29 (Cycle 983, 2026-04-13)
-- Confirmation cards complete the "chat feels like a real messaging app" story. Every major action type now has structured visual feedback. The card pattern is extensible — supplements, sleep, glucose can follow.
-- The all-in-one market positioning is being externally validated. Industry roundups in 2026 call out that "most serious fitness people run three apps that don't talk to each other." That's our pitch — but polish must match.
-- P1/P2 slip pattern persists (1/4 items shipped). Sprint scope of 4 items is right, but we need to protect P1 time by finishing P0s faster.
-
-### What I Learned — Review #30 (Cycle 1038, 2026-04-13)
-- MacroFactor launched Workouts app with auto-progression, cardio, Apple Health write, and AI recipe photo logging at $72/year. They're becoming a serious all-in-one competitor. Our edge: free, on-device, privacy-first.
-- The ViewModel extraction was necessary but invisible to users. Next sprint must be 100% user-visible — card extensions, exercise visual polish, fresh TestFlight build.
-- MFP's Premium AI tools (meal scan, voice log) are behind paywall. Our free on-device voice + AI chat remains a differentiator worth marketing.
-
-### What I Learned — Review #31 (Cycle 1088, 2026-04-13)
-- 100% sprint completion for the third time. Eight card types now cover every health domain — the "chat feels like a real health app" moment. The card pattern is proven and extensible; hold at 8, focus on polish.
-- Food DB search miss telemetry is a critical blind spot. We can't improve what we can't measure. A lightweight local table for zero-result queries would make food additions data-driven instead of guesswork.
-- MFP's Winter 2026 release (photo-to-log, Instacart partnership, Cal AI integration) is all behind Premium+ paywall ($20/mo). WHOOP's AI Strength Trainer requires $30/mo. Our entire feature set is free and private — that's the marketing story.
-
-### What I Learned — Review #32 (Cycle 1120, 2026-04-13)
-- Eight confirmation card types complete the "chat is a real app" story. Every major health action has structured visual feedback. This is the milestone — from here, depth matters more than breadth.
-- 100% sprint completion on P0/P1 items (4/4 shipped, only P2 deferred). The formula holds: 4 items max, clear priority tiers. This is the third perfect sprint in a row.
-- Food search quality is the highest-friction user moment. Every "not found" = user opens MFP. Prefix matching ("chick" → "chicken") is the minimum viable fix.
-
-### What I Learned — Review #33 (Cycle 1180, 2026-04-13)
-- Food diary reorder bugs surfacing means users are actually using diary daily. Fix reliability issues in "every day" interactions immediately — they compound trust.
-- Muscle group heatmap deferred twice is a credibility issue. Exercise remains our weakest visual vertical while competitors (Boostcamp, MacroFactor) invest heavily. Ship it or cut it.
-- Whoop's proactive push nudges (AI detects stress/sleep debt → notification) are gaining traction. Our dashboard alerts are passive. Local push notifications for health patterns could be high-impact without compromising privacy.
-
-### What I Learned — Review #34 (Cycle 1248, 2026-04-13)
-- Muscle group heatmap deferred three times is a credibility collapse. "Ship it or cut it" rule set last review — it must ship this sprint. Credibility requires follow-through.
-- Push notifications are the difference between "health tracker" and "health coach." Passive dashboard alerts are invisible to users who don't open the app. Three timely nudges (protein, supplements, workouts) on-device and free is a genuine competitive differentiator.
-- Exercise remains the weakest visual vertical. Boostcamp and MacroFactor users see diagrams and videos; Drift users see text. The heatmap is step one — not the destination.
-
-### What I Learned — Review #35 (Cycle 1289, 2026-04-13)
-- Muscle Recovery card set counts are a good start but the card still feels passive. Real heatmap = intensity through opacity or fill, not just a number. Volume should be *visible*, not just readable.
-- Whoop's Behavior Trends (habits → Recovery correlation after 5+ entries) is the cross-domain intelligence pattern we should aspire to. We have the data — hardcoded insights are the current ceiling.
-- Push notifications cannot slip again. "3 days low protein" as a notification vs. a dashboard card is the difference between a tool and a coach. This is the #1 product gap right now.
-
-### What I Learned — Review #36 (Cycle 1380, 2026-04-13)
-- Muscle heatmap with opacity intensity finally shipped after 4 reviews of pushing. Volume as visual weight is the right pattern — apply to all data-heavy views.
-- Push notifications deferred a 4th time is a systemic prioritization failure, not a scoping problem. Making it the ONLY P0 with no competing priorities is the fix.
-- Exercise instructions via chat ("how do I deadlift?") is more aligned with our AI-first identity than static images. Lean into conversational exercise coaching over Boostcamp-style media content.
-
-### What I Learned — Review #37 (Cycle 1483, 2026-04-13)
-- Push notifications shipped after 4 reviews of deferral. Making it the ONLY P0 with zero competing priorities was the fix. Apply this pattern to any feature that keeps slipping: isolate it, remove distractions.
-- All Phase 3c "Now" items are complete. The product is at a natural inflection point — decide whether to deepen polish or expand to new surfaces (widgets, Apple Watch).
-- Exercise query bug (plurals, trailing phrases failing silently) is a reminder that AI-first products must handle natural language gracefully. Silent failures erode trust more than visible errors.
-
-### What I Learned — Review #40 (Cycle 2277, 2026-04-14)
-- User filed #65 calling AI chat "really brittle" — this is the strongest product signal we've gotten. When the developer/primary user explicitly says the core feature doesn't work well, that's P0. The sprint is entirely oriented around measuring and fixing this.
-- Three design docs (#65, #66, #74) from the user show clear product direction: AI chat reliability, exercise visual enrichment, LLM-powered lab reports. These are the user's priorities — respect them.
-- iOS widget shipped (Phase 4 begins) but the user's attention is on AI chat quality, not surface expansion. Product direction follows user pain, not roadmap sequence.
-- "Have a gold set and see what works or not" (#65) — the user wants measurement before action. Build the eval framework first, then fix based on data.
-
-### What I Learned — Review #41 (Cycle 3200, 2026-04-15)
-- Food confirmation flow (prefilled review before logging) is the right UX pattern for AI-first apps. Every AI action that writes data should show a confirmation step. This prevents the trust erosion that happens when wrong data gets logged silently.
-- Gold set eval (55 queries, 100% baseline) is the first real measurement of chat quality. "Have a gold set and see what works" was the owner's ask — now we have it. Every pipeline change must show before/after delta.
-- Design doc #65 owner feedback is the strongest product signal: multi-stage specialized prompts, not one unified classifier. The owner sees wrong data extraction even on clear input. The fix is domain-specific extraction (food prompt, exercise prompt) — not better generic classification.
-- Feature request #74 (lab reports + LLM) benefits from the same multi-stage architecture. Defer implementation until the pipeline pattern is proven on food/exercise.
-
-### What I Learned — Planning Cycle 341 (2026-04-18)
-- User filed 7 bugs the same day (186-192, 195) after dogfooding voice + chat on TestFlight. This is the highest-quality signal we get — batch-filed bugs after a single session mean the feature is being used seriously. Every recipe flow gap (#191, #192) and every food-list friction (#187 multi-select, #189 meal-name auto-detect) is a real trust erosion.
-- Mental model gap, #189: users don't think in flat food lists. They think "this is breakfast." MFP's meal-period grouping is the baseline; auto-detection from time + explicit override on the card is the chat-first version. Don't make users say "for breakfast" — infer it, let them correct.
-- #190 ("food logging group") vs existing saved-meals: the feature exists via context menu but is invisible to this user. That's a discoverability failure. Before building a second grouping feature, surface the existing one — or build the new one only if it's obviously distinct.
-- #188 South Indian cuisine is a recurring signal. Our Indian base is the target audience; any gap vs MFP is a direct competitive loss. Prioritize 20–30 specific dishes (idli varieties, dosa types, sambar, rasam, kuzhambu, thoran, aviyal, puliyogare) over breadth across other cuisines.
-- New sprint intentionally has zero "photo food" or "widgets" items — product focus is pure AI chat quality this cycle. Resist surface expansion until current chat polish (context threading, edit_meal tool, persistent state, multi-turn eval) is shipped.
-
-### What I Learned — Planning Cycle 1159 (2026-04-19)
-- Streaming per-item resolution (#178) is a real UX leap. Users typing "eggs, toast, coffee" see each resolve live instead of a long wait. Extend the pattern to any chat action that takes > 1s — the perceived-latency win is bigger than any model speedup.
-- Time-aware suggestion pills + meal-period auto-detect together mean "had oatmeal" at 8am becomes a 1-tap log without any explicit meal name. This is the AI-first promise made concrete — remove every friction the model can infer.
-- Nutrition lookup card (#196) is the first structured info-only card (no logging involved). Gives users an instant answer without forcing a commit. Build more read-only cards for "how many steps today", "weight trend this month", etc. — conversational glanceable answers.
-- User hasn't filed new bugs this cycle despite 14 feature commits since cycle 341. Either dogfooding paused or the recent fixes stuck. Next cycle, proactively solicit feedback — don't assume silence = satisfaction.
-- `edit_meal` tool is the most overdue chat capability. Today a user who logs the wrong item must leave chat and edit in the diary — breaking the chat-first promise on the most common mutation.
-
-### What I Learned — Planning Cycle 2000 (2026-04-19)
-- Two silent failure modes remain the biggest trust-erosion risks even after a strong sprint: (1) ambiguous input where the app silently picks one interpretation, (2) delete/edit that removes the *wrong* entry because it matched by name. Both produce a worse outcome than a one-tap "Did you mean X or Y?" — users accept friction when it prevents mistakes. Sprint adds clarification dialogue (#226) and entry-reference resolution (#227) to plug both.
-- Restaurant chain foods are the hardest-to-log meals and the fastest to drive drop-off. USDA can't fill this gap — we curate. Adding Starbucks/Chipotle/Subway (#231) directly addresses the "I can't find my breakfast" moment.
-- A stable FoodLoggingGoldSetTests matters more than a big one. Product focus makes it a per-session gate; a flaky gate teaches the team to ignore it. Audit before growth (#235).
-- Accessibility is still frame-by-frame polish work. AIChatView icons are the primary interaction surface; missing labels mean VO users can't drive the product at all (#234). Ship this cycle.
-- Per-tool reliability (#228) is a product-quality metric, not just an engineering metric. If `edit_meal` works 60% of the time, the entire "chat-first" promise cracks. A public per-tool number forces focus.
-- Prefer opinionated design over configurability — make good defaults, don't add settings
-- Prefer chat-first interactions — every feature should be reachable from conversation
-- Prefer clean, scannable dashboards over dense data displays
-
-### What I Learned — Planning Cycle 2605 (2026-04-19)
-- Clarification dialogue (#226) is live; early risk: we now intrude on the success path. If a user says "log 3 eggs" and we still show a clarify chip, the feature flipped from helpful to annoying. Calibration v2 (#242) must privilege extractor completeness over verb-shape keyword signals.
-- Combos feature shipped fast but needed four fix commits to land cleanly (autopilot seed data, label rename, migration cleanup, sheet confirm). Takeaway: when we introduce a new first-class domain object (combos ≈ saved meals v2), invest 30 minutes in naming + 30 minutes in migration before shipping. Half the fix cycle was those two decisions not being pinned upfront.
-- User-filed P0 bug #238 (Gemma 4 download failure) is a first-run experience blocker. Nothing else we ship matters if new users can't load the model. Senior must treat this as first task.
-- Bubble tea / poke / acai bowls are a visible food-DB gap vs competitors (#244). This is the "modern beverage culture" cohort we're losing silently — users who don't find their boba don't file bugs, they just stop logging.
-- Cross-domain pronoun resolution (#241) closes a natural-conversation gap: "I ate 150g chicken" → "how much protein is in that" shouldn't force the user to repeat themselves. Within-domain refs shipped last sprint; cross-domain is the next tier of "chat-first" credibility.
-- Zero user-filed feature requests this cycle (one P0 bug). Either the dogfood pace dropped or the current product is coherent enough that new asks are rare. Treat silence with caution — explicitly ask for feedback in next TestFlight notes.
-
-### What I Learned — Planning Cycle 3585 (2026-04-20)
-- Photolog shipped behind beta gate with BYOK cloud keys — "premium capability without a subscription" is a new UX pattern: user brings their own Anthropic/OpenAI key, gets cloud-quality food scanning, pays the vendor directly. Privacy story intact (key lives in biometric keychain, no Drift server). Worth marketing this angle explicitly — it's a genuine differentiator vs MFP Premium+ at $20/mo.
-- Zero open bugs AND zero open feature requests for a full day is unusual. Two readings: (a) TestFlight dogfood paused, (b) recent fixes stuck. We should not assume (b). Next TestFlight release notes must explicitly request feedback on voice accuracy and recipe mutations — the two areas most prone to silent failure.
-- 25+ chat features but typical user discovers only 3-4. Dashboard tip strip (#293) is the minimum-viable discoverability intervention — rotating 'Try: X' suggestions biased toward features this specific user hasn't used. Low risk (killable via feature flag), high ceiling (actual adoption of workout split builder, meal planning, export).
-- "Export my food log" (#291) closes the last P3 parity gap in `ai-parity.md`. After it ships, every UI-triggerable action has a chat equivalent. That's the milestone where we can honestly say "AI chat does everything."
-- Voice transcription health-term correction (#285) is invisible quality — users don't realize the app fixed 'mutter in' to 'metformin' before sending to AI. This kind of unseen correctness work is where trust is built silently. Competitors won't match it because they route voice through cloud; we benefit from the constraint.
-- Macro goal progress (#284) follows the same structural pattern as weight goal progress we shipped earlier: input (set_goal) → persistence (MacroGoal) → query surface (food_info comparison). Replicating proven patterns is higher ROI than novel architectures.
-- Sprint queue at 26 after adding 10 — senior budget (5/session) means this cycle's tickets fully drain in 2–3 autonomous sessions. Reasonable loading.
-
-### What I Learned — Planning Cycle 3985 (2026-04-21)
-- Photo Log went multi-provider (OpenAI + Gemini added alongside Anthropic via #298). The user-facing story shifted from "bring Claude key" to "bring your favorite AI vision key" — a meaningfully broader proposition. With #300 fallback chain, the invisible improvement is even better: users won't see "AI failed" on transient network blips if they've configured more than one provider. This is the kind of UX where the product works *because* the user chose to invest (pay for 2 APIs), and we reward them with reliability.
-- Third cycle in a row with zero user-filed bugs or feature requests. Previous cycles read silence as ambiguous (paused dogfooding vs actually-fine). With three data points, the more likely story is that the active dogfood pool has reduced — or that recent users don't know how to file. Next TestFlight release notes should include a direct "Reply to this email if anything failed" nudge, plus an in-app Settings → Feedback entry. Unactioned silence is a product risk.
-- `/debug last-failures` (#301) is a UX experiment I didn't anticipate: it turns a debug tool into an implicit education surface. A power user running it sees 5 failing queries — they now know what the app can't do. That's competitive for power users who currently complain to competitors silently because they never surface the shortfall. Market it as "See what Drift's AI struggles with" in the beta channel.
-- Branded food names (#304) are the largest perceived-quality gap after exotic cuisine. 'chobani' returning nothing looks like a broken app. Gold set + DB pairing closes both axes — the routing should handle brand prefixes, the DB should resolve them.
-- Per-stage elapsed indicator (#309) is the "don't look dead" move. Current typing indicator is static — users with slow devices watching "Classifying intent…" sit for 3s wondering if the app froze. Showing "Classifying intent… 1.8s" is a tiny UX gesture with outsized reassurance. Every messaging app does this for a reason.
-- Sprint queue at ~30 after adding 10 — same loading level as last cycle. Consistent pace, no runaway. If queue stays flat two more cycles I'll advocate for adding more speculative/design work instead of pure tactical tasks.
-
-### What I Learned — Planning Cycle 4247 (2026-04-21)
-- Fourth consecutive cycle with zero new user-filed bugs or feature requests. The "please actually give us feedback" nudge in TestFlight release notes has not yet landed (it's a content change, trivial to slot in to build 160's release notes). Silence isn't signal, but a four-cycle gap is. Stop assuming "no bugs = good" — ship the feedback nudge this cycle.
-- Clarification card (#316) is the UX counterpart to every AI confirmation card we've shipped: instead of "I logged X" → "Did you mean A or B? [A] [B]". This turns ambiguity from a stall into a 1-tap decision. Key design principle: every AI decision a user would otherwise type, the app should offer as a tap. Text input is the failure mode, not the primary surface.
-- cross_domain_insight (#317) is a product-category move disguised as a feature ticket. Today Drift answers transactional questions ("how much protein did I eat today"); tomorrow it answers analytical questions ("is my protein correlated with my lifting frequency"). This is the "AI health coach" direction from roadmap Later — but grounded in the user's own data, not generic advice. Not marketing this as "AI coaching" yet — we need 3-5 analytical tools before that positioning holds.
-- The tie-break problem is invisible to users but erodes trust silently. A user who asks 'pizza 1 slice' gets log_food (right tool, wrong defaults — fast food vs home-made kcal delta is 2x). They don't know the app was 52% confident vs 48%. They just know the number's wrong. Tie-break clarify (#313) converts that silent failure into a visible 1-tap fork — better UX than silent wrong.
-- Food DB is still the longest-tail effort. Korean home cooking (#320) this cycle, following Caribbean / Japanese home / Mexican regional from #305/#289/#288. Each +30 adds cuisines the model *couldn't* answer before, not marginal coverage on existing cuisines. Prioritize cuisines the primary audience eats weekly, not cuisines that round out a matrix.
-- Queue closed at ~39 pending after adding 10 — first planning cycle this week where total queue grew (29 → 39). If we want AI chat quality shipped *faster*, the lever is more senior sessions per day from the watchdog, not more tickets per planning cycle. Called this out to engineering persona: drain rate is the constraint.
-
-### What I Learned — Planning Cycle 4487 (2026-04-21)
-- Product review #49 confirms the analytical tools category is a real product-category shift. cross_domain_insight (#317) shipped; glucose_food_correlation (#324) and sleep/exercise correlation are next. The bar for claiming "AI health coach" identity: 3-5 analytical tools live AND power users discovering them organically. We're at 1/5 — the pattern is proven, execution is the constraint.
-- Settings → Feedback row (#329) is long overdue. Five consecutive zero-feedback cycles is not "no news is good news" — it's a signal the feedback loop is broken. Adding a mailto row costs 30 minutes of code and recovers a signal channel that influences the entire product direction. Never let the feedback loop stay broken for more than 2 cycles.
-- PhotoLog BYOK first-use onboarding tip (#331) is the right discoverability intervention. The feature shipped in builds 158-162 but zero users have mentioned it in TestFlight notes. If a shipped feature has zero discoverability events, treat it as unshipped for product purposes. Add onboarding tips as part of any "hidden gem" feature's definition of done.
-- Queue is at 46 pending after this cycle's +8 (38 → 46). Cap confirmed at ≤8 new tasks per planning cycle until queue drops below 25. More tickets don't equal more throughput — senior drain rate is the only lever that matters.
-
-### What I Learned — Planning Cycle 4734 (2026-04-22)
-- USDA FoodData Central API is confirmed free (400k+ verified foods, 1000 req/hour, no cost) — admin confirmed this in PR #333. The current USDA integration is fallback-only for chat search misses. Expanding to USDA as a proactive food DB source (Phase 2) is the highest-ROI food quality move available. Manual curation got us to 2,511; USDA gives access to 400k+ immediately. This must be a sprint task this cycle.
-- Five-bug batch from a single TestFlight session (photo log review, stale DB, key UX, zero-cal food, default amount) is the best-quality signal we get. Protect the feedback loop — every time a user files bugs, respond in the same cycle. Fast response creates more filing. Slow response kills it.
-- Settings → Feedback has now been deferred 6+ planning cycles. This is a credibility failure, not a prioritization decision. An in-app mailto row is 30 minutes. Every cycle without it is a blind spot on real user pain. This cycle: ship it as P0-priority JUNIOR task regardless of queue pressure.
-- Queue grew from 46 → 64 (18 net new) in one planning cycle. This is the largest single-cycle queue increase in recent history. Cut new task cap to ≤6 per planning cycle until queue drops below 30. Analytical tools (1/5 of target) are the highest-value new additions; everything else is secondary.
-
-### What I Learned — Planning Cycle 4815 (2026-04-22)
-- Queue is now 75 pending (28 SENIOR, 47 junior) after adding 10 this cycle. This is the largest queue we've had. Senior drain rate (5/session) means SENIOR backlog alone is 6 sessions away. Hard cap enforced: ≤5 new SENIOR tasks per planning cycle until SENIOR queue drops below 15.
-- Analytical tools category is maturing: supplement_insight (#369) and food_timing_insight (#370) extend the analytical layer beyond cross_domain_insight. When we hit 4+ analytical tools live, the "AI health coach" positioning becomes defensible. Track as a milestone, not an afterthought.
-- Cross-session conversation context persistence (#371) is the UX gap that makes the AI feel like it "forgets" users between sessions. This is the most-noticed multi-turn limitation that doesn't require model improvement — it's purely persistence. Should be a P1 priority for the next senior session.
-- LLM prompt quality audit (#372) from telemetry is the first data-driven prompt work. Five cycles of telemetry persistence have been "shelfware" — this task turns them into product improvements. The pattern: measure → identify clusters → improve examples → verify with eval. Every subsequent prompt audit should follow this ritual.
-- German/Balkan food coverage (#373, #374) addresses a cohort we've never explicitly targeted. The database now covers Indian, East Asian, Latin, South Asian, and African — Central/Eastern European is the last major gap relative to Western user base.
-- Informal portion language gold set (#375) is a long-overdue test category. Users type "a bowl of", "a handful of" — these have no dedicated test coverage. If the AI guesses wrong on these, users lose portion accuracy without knowing why.
-
-### What I Learned — Review Cycle 4877 (2026-04-22)
-- Three consecutive zero-feature cycles (4734→4774→4815→4877) is the credibility failure pattern from reviews 26 and 27 repeating. Each time this happened before, the fix was suspending new planning and executing. Apply that fix: drain before planning. Hard rule: no new sprint tasks until queue drops below 60.
-- MFP Winter 2026 launched photo-upload logging (Cal AI integration), Blue Check dietitian-reviewed recipes, GLP-1 tracking, and a redesigned Today tab. They're deepening AI food logging and adding cross-domain health coaching — our exact lane. Counter: free, on-device, privacy-first, broader chat interface. Their entire AI/coaching stack is behind Premium+ ($20/mo); ours is BYOK-free.
-- Whoop Behavior Trends ships the analytical correlation pattern (habits → Recovery) after 5 entries — the same pattern as our `cross_domain_insight`. Every cycle that `supplement_insight` and `food_timing_insight` stay unexecuted, Whoop widens the gap in user-facing analytical depth. These two analytical tools must be treated as P0 for the next senior session.
-- Queue at 95 pending (37 SENIOR, 58 junior) is the highest ever. Senior queue at 37 ÷ 5 tasks/session = ~8 senior sessions to drain. Cap new SENIOR tasks at ≤2 per planning cycle until SENIOR queue is below 15.
-- Hydration tracking (#383) and multi-intent splitting (#384) are new AI chat capabilities that extend the "AI does everything" promise — hydration is one of the last major daily health signals without chat support.
-- Smart meal reminders (#385) is the evolution from scheduled static nudges to contextual, timing-pattern-aware notifications. This is the difference between "alarm clock" and "health coach" — coach knows when you usually eat and notices when you haven't.
-- Dashboard food variety score (#389) is the first insight card measuring *breadth* of diet rather than quantity. Novel signal — complements protein/calorie tracking with a diversity dimension.
-- American fast food (#388) and Indian protein staples (#387) address the highest-frequency meal logging gaps for the target user base. Dal/paneer/egg curry users who hit "not found" every day are the first to switch to MFP.
-
-### What I Learned — Review Cycle 4975 (2026-04-22)
-- Four consecutive zero-feature reviews (#50–#53) confirms the structural diagnosis from reviews 26 and 27: when planning cycles outpace execution cycles, the product stalls. The queue cap of 70 sprint tasks (hard limit, blocks new planning) is now the enforced policy. The lever to pull is not more tickets — it's more senior sessions per watchdog day.
-- Whoop Behavior Trends continues to widen the analytical gap. Our `supplement_insight` (#369) and `food_timing_insight` (#370) are the same pattern — habit → outcome correlation — but unshipped. Every planning cycle they stay queued, Whoop cements this pattern as "theirs" in the market. These two tools must be treated as P0 for the very next senior session, no exceptions.
-- Queue at 95 is a quality signal, not a planning success. Old tasks accumulate context drift. Tasks #253–#256 from cycle 3022 are now ~2000 cycles old — the code they target has likely evolved. Hard rule: any task >500 cycles old requires re-validation before implementation. Executor must grep for referenced symbols before writing any code.
-- State.md has been stale for four consecutive reviews. This is no longer a minor doc gap — it's an active planning risk. Executor who reads build 133 and 2048-token context makes wrong decisions. Require State.md refresh as step zero of every product review, before the scorecard is written.
-- Queue cap recommendation from this review: 70 sprint tasks max. When queue exceeds 70, next planning session may NOT add new tasks until queue drops below 70. Only P0 bugs bypass this cap.
-
-### What I Learned — Planning Cycle 5351 (2026-04-23)
-- `weight_trend_prediction` analytical tool shipped — first user-facing win in five reviews. The "when will I reach my goal?" query is exactly the kind of forward-looking insight that makes Drift feel like a coach, not just a logger. Two analytical tools now live (cross_domain_insight + weight_trend_prediction); need 3 more for the "AI health coach" positioning to hold.
-- Whoop Behavior Trends (habit → Recovery correlation) is now live in April 2026. Our `supplement_insight` (#417) and `food_timing_insight` (#418) are the same pattern. Every planning cycle they stay queued, Whoop cements this pattern as theirs. Re-created both as this cycle's P1 tasks with updated priority signal.
-- Queue at 101 is structurally broken. The 70-task cap was set at cycle 4949 and has never been enforced — queue grew from 95 → 101. Hard enforcement next: planning DOD should explicitly require queue < 70 before creating non-P0 tasks (raise with human in Decisions section).
-- State.md stale for 6 consecutive reviews is no longer a doc debt item — it's a planning accuracy risk. Created #410 as a JUNIOR task. Until it's fixed, every senior session reading build 133 + 2048-token context is making wrong assumptions.
-- Telemetry-driven prompt refresh (#399) shipped — the "measure → cluster → improve examples → verify" ritual is now proven for on-device 2B models. Must be a standing per-cycle SENIOR task, not a one-off.
-
-### What I Learned — Planning Cycle 5590 (2026-04-23)
-- Queue hygiene (32 stale closures) is as impactful as creating new tasks. 113 tasks was paralysis — the oldest ones (cycles 3022–4500) carried stale root-cause assumptions and duplicate coverage. Hard rule: any task >500 cycles old requires re-validation before the queue can grow. "100 focused tasks" beats "113 scattered ones."
-- sleep_food_correlation (#426) completes the analytical tool progression: cross_domain_insight → weight_trend_prediction → glucose_food_correlation → sleep_food_correlation. Four analytical tools is approaching the threshold where "AI health coach" positioning becomes defensible. Need one more (supplement outcome correlation?) to make the claim credible.
-- Three analytical tools shipped so far; two more queued (supplement_insight #417, food_timing_insight #418). When those ship + sleep_food_correlation, the analytical suite will cover food, weight, glucose, sleep, and supplements — every major domain. That's the "health coach" milestone.
-- LLM prompt quality audit must be a standing per-cycle SENIOR task (cycle-numbered), not re-created ad-hoc. Every planning cycle should check that a "prompt audit cycle N" is in queue. Telemetry only has value if consumed.
-- State.md freshness is now a trust issue with the AI, not just a documentation gap. Senior sessions reading 6-cycle-stale state make wrong architectural decisions. Until State.md refresh is done in the first 24h of every cycle, the PE persona cannot write a reliable scorecard.
-
-### What I Learned — Planning Cycle 4774 (2026-04-22)
-- Queue is now ~75 pending (65 before + 10 added this cycle). This exceeds the ≤6 cap set last cycle. Queue size is now the #1 product planning problem — more tasks ≠ more throughput. Senior sessions drain 5 tasks each; junior sessions drain 5. At current rate, the oldest tasks are weeks stale before they get touched. Hard cap: ≤5 new tasks per planning cycle until queue is below 40.
-- Photo Log hardening (fallback chain + eval) finally tasked. Cycle 3985 sprint items have been in the roadmap for 3 planning cycles without all corresponding tasks. When a roadmap sprint has untasked items, explicitly create those tasks — don't assume they're implicit.
-- FoodLoggingGoldSetTests run + fix failures (#358) is now explicitly in the sprint queue as a SENIOR task. The product focus requirement ("run gold set every sprint") was being treated as ambient background work; it needs an actual issue to guarantee it claims budget.
-- `/debug last-failures` (#360) turns internal telemetry into a product feature for power users. This is the "make invisible quality visible" pattern — surface what the AI struggles with so dogfooders know where to probe. Low build cost, high feedback-loop value.
-- Caribbean and breakfast cereals both address clear daily-use food gaps (#364, #365). Priority rule: add food categories the primary user eats frequently, not ones that complete a spreadsheet matrix. Breakfast cereal is logged every day by large cohorts; Caribbean is underrepresented relative to diaspora user base.
-- East Asian home cooking (#367) follows the same principle — onigiri, congee, tteokbokki are everyday foods not restaurant dishes. Everyday-food coverage → fewer "not found" moments → fewer MFP escapes.
-
-### What I Learned — Planning Cycle 5965 (2026-04-24)
-- The 4 remaining failing query categories (historical dates, non-weight goals, macro goal progress, micronutrients) are the highest-value AI chat investments this cycle. Each represents a real user moment where chat fails visibly — "how many calories last Tuesday?" returning today's data is trust-eroding. Systematic closure is more impactful than any new analytical tool.
-- Macro goal tracking (#440 + #441) is the most-wanted missing feature. Users track protein and calories daily but Drift has no goal for either — only weight goals exist. Adding calorieGoal and proteinGoal to UserPrefs unlocks the "am I on track?" query class, the most common nutrition coaching question.
-- Context-aware IntentClassifier tie-break (#449) is smarter than the naive "ask to clarify" approach. Most tie-break situations are resolvable from ConversationState.phase — "add 50" during a meal logging session is clearly a food edit. Only escalate to clarification when context genuinely can't resolve it.
-- `/debug last-failures` (#447) turns internal telemetry into a user-visible quality signal for power users. Dogfooders who run it know exactly where to probe the AI — improving feedback quality without requiring a formal bug report flow.
-- Southeast Asian (#450), Caribbean (#446), and East Asian home cooking (#445) are the three highest-frequency missing cuisine families for the non-Western user base. Adding all three this sprint closes the major global cuisine gaps.
-- Queue at 30 tasks entering this cycle is the healthiest queue state in 10+ planning cycles. Maintain discipline — don't add more than 15 new tasks without corresponding drain.
-
-### What I Learned — Planning Cycle 7564 (2026-04-26)
-- All 4 failing-query categories from cycle 5965 are now closed (historical dates, calorie goal, macro goal progress, micronutrients). The "trust restoration" sprint worked — the pattern of closing week-1 test queries is the right prioritization principle.
-- Micronutrient tracking (#442) and macro goal progress (#441) shipped but have no gold set coverage yet. A feature that's shipped but not eval-verified is half-done. Every failing-query category fix must be paired with gold set cases in the same sprint.
-- Analytical tools at 3 of 5 needed for "AI health coach" positioning. Whoop Behavior Trends is now live — every cycle supplement_insight and food_timing_insight stay unshipped, Whoop cements that positioning. These two must be P0 SENIOR in the next session, no exceptions.
-- Food DB at 2,511 flat for multiple cycles is a silent daily loss. Users who don't find their meal log it elsewhere and habitually return there. USDA Phase 2 (#345) has been deferred 15+ cycles; needs a hard ship deadline (cycle 7600) or it becomes dead weight in the queue.
-- MFP's Today tab redesign is backfiring (more taps, user complaints). Our chat-first removes friction while they add it. This is a brief competitive window — use it in TestFlight release notes: "log lunch in one sentence, not 4 taps."
-- West African and Japanese home cooking added to food DB queue — closing global cuisine gaps beyond Indian/South Asian/East Asian that are already covered.
-
-### What I Learned — Planning Cycle 7689 (2026-04-26)
-- All 4 failing-query categories closed in one sprint is the highest-trust product move in Drift's history. The pattern: close the queries week-1 users test before anything else. "How many calories last Tuesday?" and "am I hitting my protein goal?" returning correct answers is the difference between a user staying and switching to MFP after day 1.
-- Whoop Behavior Trends shipped April 2026 — behavior→Recovery correlation after 5+ logs. This is the same pattern as `supplement_insight` and `food_timing_insight`. Every cycle these two stay queued, Whoop's version cements as the mental model for this feature type. Both must be SENIOR P0 — no exceptions next session.
-- MFP Today tab redesign backfired (April 2026) — users complaining food logging takes more taps. This is a brief competitive window. The next TestFlight build's release notes should explicitly market "log your lunch in one sentence — no 4-tap diary required." Competitive windows close; use them.
-- Eval coverage must ship with every feature, in the same PR. Features shipped without eval cases (macro goal progress, micronutrient tracking, context-aware tie-break) can silently regress. New rule: no task is marked Done without ≥5 eval cases for any AI pipeline feature.
-- Food DB flat at 2,511 for multiple cycles is a silent daily loss. USDA batch import (offline JSON → foods.json, no runtime API) is the right first step — one junior session, ≥300 new verified foods, closes the most-common "not found" gaps. Proactive search tier in the following sprint.
-
-### What I Learned — Planning Cycle 7485 (2026-04-26)
-- 2 of 4 failing query categories closed since last review (historical dates, calorie goal setting) — trust restoration is working. The pattern: close the queries users test in week-1, because silent wrong answers end the relationship before it starts. Still open: micronutrient queries (#442) and macro goal progress (#440, #441).
-- DriftCore pure-logic test migration (pure Swift → `swift test`, 0.1s) is the highest-leverage engineering improvement in recent cycles. Every AI prompt change can now be validated in seconds instead of waiting 30s for simulator boot. This makes the "improve → verify → commit" loop fast enough to actually happen every session.
-- MFP's Today tab redesign (April 2026) backfired — heavy user complaints, food logging takes more taps. This is a concrete competitive gift: chat-first removes friction while they add it. Message to marketing: "logging your lunch shouldn't require 4 taps."
-- MacroFactor is deepening its all-in-one story (Favorites for serving sizes, Expenditure Modifiers, Apple Health write coming). Same lane as Drift. Our edge: free, on-device, privacy-first. Their coaching stack costs $72/year; ours costs $0 plus optional BYOK keys.
-- Food DB at 2,511 has been flat for multiple cycles. USDA Phase 2 (#345) is in queue but keeps getting deferred. At current trajectory, food-not-found moments drive users to MFP daily. This is the compound loss — they log one meal elsewhere and habitually continue.
-- weight_trend_prediction analytical tool (#463) added this cycle — "at this rate, when will I hit 75kg?" is exactly the forward-looking coaching query that transforms Drift from a data logger to a health coach. Third analytical tool after cross_domain_insight and weight_trend_prediction (which previously shipped in cycle 5351). Need 2 more for the "AI coach" positioning to hold.
-- Indian meal combination gold set (#464) — South Asian logging patterns are a core use case for the primary user base. Adding 10 eval cases for dal chawal, rajma chawal, biryani, dosa, idli sambar closes the gap between what users type and what the eval suite verifies.
-
-### What I Learned — Review Cycle 7784 (2026-04-27)
-- `supplement_insight` (#417) and `food_timing_insight` (#418) crashed 4 sessions total — 2 each. Whoop Behavior Trends is live and being actively marketed. Diagnosis (#493) must land before the next implementation attempt. Agreed: after #493, ship both tools in one senior session.
-- MFP Today tab redesign complaints persist as of April 2026. TestFlight release notes should lead with "log your lunch in one sentence" before MFP ships their fix. Competitive windows close.
-- Photo logging recovery campaign is the most user-visible unshipped work. The scan-again loop is still live. Three tasks queued (#495 card editing, #496 free-text correction, #505 DB-hint matching) — campaign isn't done until all three ship.
-- State.md at build 174 while actual is 183 — now a hard planning blocker. Filed #510 as mandatory Step 0 of next sprint. Any planning session reading stale state makes wrong inferences about what's been shipped.
-- The one-sentence logging vs MFP 4-tap gap is the sharpest competitive differentiator right now. Use it aggressively in TestFlight release notes while the window is open.
-
-### What I Learned — Planning Cycle 7724 (2026-04-27)
-- supplement_insight (#417) and food_timing_insight (#418) crashed two consecutive senior sessions each. This is no longer a technical debt issue — Whoop Behavior Trends is live and being actively marketed. Every cycle these stay unshipped, Whoop's version cements as the user's mental model for habit→outcome correlation. The agreed direction: diagnose crash root cause first (15 min reading the crashed branches), then implement with diagnosis in hand. No blind retry.
-- All 4 failing-query categories from cycle 5965 are closed (historical dates, calorie goal, macro goal progress, micronutrients). The highest-trust moment for a new user now works. This is the right prioritization principle validated: close week-1 queries before adding new features.
-- USDA Phase 2 batch import shipped — 500+ verified USDA foods added in one session. The growth model for food DB is now external data sources (USDA JSON dumps), not manual curation. Every future food DB sprint should look for structured data sources before adding entries by hand.
-- Active campaigns this cycle: (1) Photo logging recovery — kill the scan-again loop with in-card editing, free-text correction, and DB-hint matching. (2) Remote-model architectural prep — AIBackend conformance, BYOK Keychain, no user exposure. (3) Zero user math — invisible unit conversion, decimal servings, and automatic macro aggregation so users describe, not compute.
-- MFP competitive window remains open but closing. Their Today tab redesign is still generating complaints (April 2026). TestFlight release notes should lead with "log your lunch in one sentence — no 4-tap diary required" before they fix it.
-- State.md stale by 8 builds is a planning accuracy problem, not a docs problem. When State.md says build 174 and the actual build is 182, every session that reads it makes wrong inferences about what's been shipped. Refreshing State.md must be treated as Step 0 of every sprint, not an optional junior cleanup task.
-
-### What I Learned — Review Cycle 8519 (2026-04-29)
-- Photo-attached meal logging (propose_meal card, #518) closes the two-app problem — users who discuss meals in ChatGPT and log in Drift can now do both in one chat. MacroFactor entered this space (AI photo recipe import, April 2026); our BYOK privacy model and on-device fallback is the differentiator.
-- supplement_insight and food_timing_insight are still unshipped at review #57. Whoop Behavior Trends (habit → Recovery correlation) is live and marketed. Every cycle these stay queued, "habits → outcomes" becomes Whoop's mental model. Diagnosis is done (#493), InsightResult schema is reusable — this is a pure execution failure. Next senior session: these are the ONLY P0 priorities.
-- MFP launched free GLP-1 support (April 28, 2026) — medication log, dose reminders, side effect tracking + nutrition correlation. This is a new health domain. Drift's all-in-one identity eventually needs medication tracking. Design doc first, no implementation commitment yet.
-
-### What I Learned — Review Cycle 8581 (2026-05-01)
-- supplement_insight and food_timing_insight have routing (done #487) and eval (done #550/#551) but no analytics engine — two consecutive reviews with the same finding. Tools are partially live in ToolRanker and silently fail when triggered. Either ship the engine next senior session or unregister until ready. This is the most urgent product gap.
-- Zero-user-math campaign made real progress: unit conversion (#552) + decimal Nx phrases (#559) + "of" connector fix = users can now type "1.5 cups of oats" or "double the chicken" and get correct numbers. Campaign is materially done.
-- Food DB at ~2,910 — 90 short of 3,000. High-value gap: Indian branded protein foods (MuscleBlaze, RiteBite, TrueBasics, sattu, makhana) that Indian fitness users actually search for. Two 30-food sessions reach the milestone.
-- GLP-1 tracking design doc filed (#574). MFP launched free support April 28. Design doc is the right first step — understand the domain before committing implementation cycles.
-- Unit conversion (#497) stalled with WIP patch at ~/drift-state/wip/497.patch. Resume with git apply, don't start over. Zero-user-math campaign isn't closed until users can type oz/cups and AI converts silently.
-
-### What I Learned — Review Cycle 8666 (2026-05-02)
-- "AI health coach" identity is now credible with 5 analytical tools live. supplement_insight + food_timing_insight engines finally shipped after 3 consecutive reviews flagging them. The milestone of 5 analytical tools (cross_domain, weight_trend, glucose_food, supplement_insight, food_timing_insight) is reached — this is the threshold where "health coach" positioning holds in competitive comparisons.
-- Recent foods quick-log is the kind of micro-friction removal users notice without knowing why the app feels faster. Empty search → habitual foods is the right UX — zero query needed for repeated meals. Apply this pattern to other repeat-action surfaces (supplements, weight logging).
-- Settings → Feedback (#329) has been deferred 9 planning cycles. A product without a functional feedback loop cannot improve for its users. The rule going forward: any feedback mechanism that's deferred 3+ cycles becomes a P0 — it blocks everything else. #329 ships before any new feature work in the next junior session.
-- MFP's free GLP-1 support (April 28, 2026) is the competitive signal that forces our hand. The all-in-one story requires medication tracking. GLP-1 users are exactly the intersection of "health-conscious" + "tech-forward" that Drift targets. Implementation task #580 filed using supplement architecture — `log_medication` tool + `DailyMedication` model + medication card. Don't wait for side-effect tracking to be designed before shipping the logging foundation.
-- Two test failures (#568, #569) sitting on main are a trust issue, not just a quality issue. A product that ships broken tests and doesn't fix them signals "we don't care about quality." Fix both before any new feature work.
-- Food DB at ~3,150 with 7 new cuisine batches since build 197 — Indian branded protein coverage (MuscleBlaze, sattu, makhana) is the highest-value recent addition for the target user base. Food DB cap policy (#575) is the right call: stop generating +30 tasks when existing ones aren't claimed.
-
-### What I Learned — Planning Cycle 8945 (2026-05-04)
-- TestFlight archive has been blocked for 10 consecutive builds (204–213) because Xcode's iOS 26.4 *platform support files* are not installed — distinct from the CLI SDK which is present. No autonomous session can fix this; human must open Xcode > Settings > Platforms > iOS > Download. P0 #614 filed. Until this ships, testers have had no update in ~10 days despite significant feature work landing.
-- Planning session stalled 3 times at the previous cycle. Likely a Sonnet-vs-Opus issue — planning is rated for Opus in program.md; running on Sonnet causes stall. The watchdog model selection matters for long planning sessions.
-- Competitive snapshot: MFP's free GLP-1 support (April 28) remains the live competitive signal. Drift GLP-1 logging is shipped; reminders and correlation analytics are still in queue (#620, #603). Don't let the competitive advantage slip while archive is broken.
-- New direction this cycle: expanding beyond logging intelligence into proactive health coaching (protein adherence alerts, workout consistency, glucose spike detection). This is the "Drift as health coach, not data logger" transition. Three new proactive intelligence tasks (#627, #631, #633, #635) advance this.
-
-### What I Learned — Review Cycle 8789 (2026-05-03)
-- GLP-1 tracking shipped (#580) as a same-sprint response to MFP's April 28 launch. The supplement architecture pattern made this a one-session task — supplement → medication is the pattern to replicate for any future health domain addition (hormones, sleep aids, etc.). Ship the logging foundation first; let user feedback drive reminders, dose tracking, and correlation analytics.
-- Settings → Feedback (#329) is now 10+ cycles deferred — it has crossed from prioritization failure into structural product failure. The rule: any feedback mechanism deferred 3+ cycles becomes a P0 that blocks all other junior work. This is now enforced, not recommended.
-- Whoop 5.0 launched Healthspan (WHOOP Age, ECG, Blood Pressure Insights) — they're positioning as a full health platform, not just recovery. Our response is depth of analytical intelligence on existing data (GLP-1 + weight correlation, medication adherence patterns), not sensor hardware. Focus: make the data users already log more insightful, not more data.
-- MacroFactor's recipe photo scanning improvement (snap cookbook → pre-fill ingredients) and Jeff Nippard program upload make them the gold standard for structured workout + nutrition planning. Our chat-first logging remains faster for day-to-day use; their app wins on program design depth. Lean into the "log in 1 sentence, not 4 taps" differentiator in TestFlight release notes.
-- Food DB at ~3,335 with global cuisine coverage improving. The growth model is now external data sources (USDA batches, cuisine-specific research) not manual curation. Prioritize cuisines the primary user eats weekly, not ones that complete a geography matrix.
-
-### What I Learned — Review Cycle 8938 (2026-05-04)
-- TestFlight broken for ~10 days (builds 204–213, "iOS 26.4 SDK missing") means all GLP-1 work, recent foods quick-log, and accessibility fixes are invisible to users. This is the highest-priority product gap: features that never reach users generate zero feedback and zero trust. Any infra blocker that keeps the app off TestFlight for >3 days is a P0.
-- GLP-1 parity with MFP achieved in one sprint from a market signal — this is the execution pattern to replicate. When a competitor ships a health domain we're missing, the right response is: file design doc → implement logging foundation in one senior session → let user feedback drive depth. Don't wait for full feature parity before shipping.
-- Exercise vertical has been flagged as weakest for 5+ consecutive reviews. Design docs (#250, #274) are filed but not executed. The credibility rule: if the same gap appears in 3 consecutive reviews, it becomes a P0 regardless of competing priorities. Exercise muscle map from #274 ships before UX/theme redesign from #250.
-- Per-stage elapsed time indicator shows the AI pipeline stages to users — this is the right transparency pattern. Apply it to any operation that takes >1s. Users who understand "Searching foods… 0.8s" are more patient than users who see a spinner with no feedback.
-
-### What I Learned — Review Cycle 8999 (2026-05-06)
-- 17 builds dark on TestFlight is a credibility cliff, not a tracking item. Users who installed in late April have seen no updates in 10+ days; from their perspective the app is dead. Every cycle we ship features into a void devalues the engineering work behind them. The right product framing: TestFlight reach is part of the product; a feature merged but invisible is not shipped.
-- Six consecutive cycles with zero user-filed feedback. Settings → Feedback (#329 → #588 → #617) is at ~12 cycles deferred. A product without a working feedback channel is making every decision blind. Filed #617 stays at JUNIOR P0 — no excuses for another cycle.
-- The "proactive coach" identity is now coherent on paper: protein adherence (#627) + glucose spike (#631) + workout consistency (#635) + progressive overload (shipped #633). When TestFlight unblocks, the diff testers see should read as "Drift now coaches you," not "we shipped 30 unrelated things." Filed #648 to verify the triad renders together.
-- Reliability + delivery sprint is the right cycle theme. New analytical tools and food DB grinds are deferred — none matter if the app doesn't reach users. Discipline: every PR this cycle maps to (a) TestFlight unblock, (b) feedback loop, or (c) a 2026-05-04 review finding.
-
-### What I Learned — Review Cycle 9441 (2026-05-07)
-- The reliability + delivery sprint thesis was correct. Three TestFlight builds (224, 225, 226) shipped in 18 hours, ending the 17-build dark stretch. The proactive triad is now in users' hands. The constraint was always the publish path — the queue had real value waiting.
-- Settings → Feedback is shipped but the activation work isn't done. Mailto-prefilled email is the channel; getting testers to actually use it is the next problem. The plan: in-app "what's new" sheet (forces eyes on new value) + release-notes framing (proactive-coach narrative, not feature dump). Without these, the 17-build catch-up is invisible to anyone who didn't already know what changed.
-- Two regressions shipped on chat (photo log JSON #650, recipe builder #651) before user-impacting smoke caught them. Chat is our most-marketed surface — shipping it broken on a TestFlight that just unblocked is the worst possible timing for first-impression-from-testers. A 5-minute manual smoke walkthrough or a Tier-1 ChatPathSmokeTest would have caught both. The discipline matters more than the tool.
-- MacroFactor's April 2026 release (cookbook photo → ingredient pre-fill) is a direct hit at our chat-first logging differentiator. We can't match the feature without hosted infra, but we can deepen the foods most people photograph from cookbooks (banana bread, chicken pot pie, lasagna, stir-fry varieties). Compete on what we're good at — depth — not what they're good at (cloud-backed photo recognition).
+## Preferences & Approach
+- Prefer opinionated design over configurability — make good defaults, don't add settings.
+- Prefer chat-first interactions — every feature should be reachable from conversation.
+- Prefer clean, scannable dashboards over dense data displays.
+- Prefer inferred intent (time, history, context) over user-typed restatement.
+- Prefer 1-tap clarification over silent wrong choice when ambiguity is high.
+- Prefer in-app activation (release-notes "what's new", onboarding tips) over assuming users discover features organically.
+- Prefer competing on the lane we own (chat-first speed, on-device privacy, depth of analytical intelligence on user-logged data) over chasing competitor strengths.
