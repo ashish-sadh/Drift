@@ -564,6 +564,42 @@ cmd_done() {
     local COMMENT="Done.${COMMIT_REF}"
     [ -n "$NOTE" ] && COMMENT="$NOTE${COMMIT_REF}"
 
+    # Reachability guard: refuse to close the issue if the commit isn't on
+    # origin/main. Drift is trunk-based for sprint tasks (see program.md);
+    # branches are reserved for design-doc / report / review. Sessions that
+    # drift off-protocol and use a feature branch (e.g. PR #671 / #669,
+    # 2026-05-08) leave the fix unmerged while cmd_done closes the issue —
+    # the work looks shipped but isn't. Refusing the close forces the
+    # session to either merge the PR or use session-done.
+    #
+    # The test harness passes synthetic hashes ("abc123", "hash999", etc.)
+    # that aren't real git objects — `cat-file -e` returns false, and we
+    # skip the reachability check in that case (preserves harness behavior).
+    if [ -n "$COMMIT" ] && git -C "$WORK_DIR" cat-file -e "$COMMIT" 2>/dev/null; then
+        # Refresh remote refs so the check sees freshly-pushed-to-origin
+        # commits (low-cost, just updates origin/main).
+        git -C "$WORK_DIR" fetch origin main --quiet 2>/dev/null || true
+        if ! git -C "$WORK_DIR" merge-base --is-ancestor "$COMMIT" origin/main 2>/dev/null; then
+            local CURRENT_BRANCH
+            CURRENT_BRANCH=$(git -C "$WORK_DIR" branch --show-current 2>/dev/null || echo "?")
+            cat >&2 <<EOF
+REFUSED: commit $COMMIT is not on origin/main (current branch: $CURRENT_BRANCH).
+
+Drift is trunk-based for sprint tasks. Branches are only for:
+  design/<N>-<slug>   — design docs (PR with --label design-doc)
+  report/exec-DATE    — daily exec reports (PR with --label report)
+  review/cycle-N      — product reviews (PR with --label report)
+
+If you used a feature branch by mistake:
+  - Merge the PR, then re-run done: gh pr merge <PR> --squash --delete-branch && git checkout main && git pull && sprint-service.sh done $NUM \$(git rev-parse HEAD)
+  - Or keep work-in-progress: sprint-service.sh session-done $NUM   (does not close)
+
+Refusing to close #$NUM until commit reaches origin/main.
+EOF
+            exit 2
+        fi
+    fi
+
     # Defensive check: if the GitHub issue is already CLOSED, skip the
     # duplicate comment + close calls. Prevents the "Done. Commit: reconcile"
     # noise pattern observed on #440 (2026-04-26) where a session worked on
