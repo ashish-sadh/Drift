@@ -966,7 +966,16 @@
     async function loadDesignDocs() {
       const el = document.getElementById('designs-list');
       try {
-        const all = await api(`/repos/${OWNER}/${REPO}/issues?labels=design-doc&state=all&per_page=30`);
+        // Fetch unfiltered open + closed lists, filter design-doc client-side.
+        // The previous ?labels=design-doc query routed through GitHub's search
+        // index which has propagation lag (observed 27+ min on 2026-05-07).
+        // Same fix as getSprintPlan in app.js (commit e4e757a5).
+        const [openAll, closedAll] = await Promise.all([
+          api(`/repos/${OWNER}/${REPO}/issues?state=open&per_page=100`),
+          api(`/repos/${OWNER}/${REPO}/issues?state=closed&per_page=30&sort=updated&direction=desc`)
+        ]);
+        const hasDesignDocLabel = i => i.labels && i.labels.some(l => l.name === 'design-doc');
+        const all = [...openAll, ...closedAll].filter(hasDesignDocLabel);
         const issues = all.filter(i => !i.pull_request);
         const prs = all.filter(i => i.pull_request);
 
