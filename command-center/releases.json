@@ -2316,5 +2316,20 @@
     "fixes": [
       "Sprint-service cmd_done now refuses to close an issue if the cited commit isn't on origin/main \u2014 prevents premature closes when local commits haven't pushed"
     ]
+  },
+  {
+    "build": 232,
+    "date": "2026-05-08T09:15:00-07:00",
+    "description": "Build 232 \u2014 .driftbackup restore + splash view + Settings cleanup (no Send Feedback)",
+    "features": [
+      "Atomic .driftbackup restore with manifest validation and integrity check (#675)",
+      "Splash view shown on first frame so app launch no longer flashes a black screen"
+    ],
+    "fixes": [
+      "Settings: removed 'Send Feedback' row \u2014 email was a useless channel (#684)",
+      "Calorie overlay query window now uses the oldest entry as chartStart so the overlay renders on the right date range (#669)",
+      "Calorie overlay visibility tweaks \u2014 opacity bump + empty-state caption (#669)",
+      "Calorie overlay flame toggle is now observable (was failing to update view) (#669)"
+    ]
   }
 ]
