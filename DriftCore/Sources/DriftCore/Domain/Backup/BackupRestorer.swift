@@ -176,7 +176,23 @@ public struct BackupRestorer {
         let dict = (try? JSONSerialization.jsonObject(with: data)) as? [String: Any] ?? [:]
         let allow = Set(BackupKeys.userDefaultsAllowlist)
         for (key, value) in dict where allow.contains(key) {
-            defaults.set(value, forKey: key)
+            // JSON `null` deserializes to NSNull, which is NOT property-list
+            // compatible — `defaults.set(NSNull(), forKey:)` raises an
+            // uncatchable NSInvalidArgumentException. Drift-produced backups
+            // can't contain null (the Packager's `jsonSafeValue` strips it),
+            // but a hand-crafted or cross-version backup would crash here.
+            // Symmetric primitive filter mirrors `BackupPackager.jsonSafeValue`.
+            guard let safe = primitiveValue(value) else { continue }
+            defaults.set(safe, forKey: key)
         }
+    }
+
+    private func primitiveValue(_ value: Any) -> Any? {
+        if value is NSNull { return nil }
+        if let v = value as? Bool { return v }
+        if let v = value as? Int { return v }
+        if let v = value as? Double { return v }
+        if let v = value as? String { return v }
+        return nil
     }
 }

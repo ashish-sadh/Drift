@@ -171,6 +171,50 @@ final class BackupRestorerTests: XCTestCase {
         XCTAssertEqual(appliedCount, Migrations.currentVersion)
     }
 
+    // MARK: - Crash defense: hand-crafted preferences
+
+    /// Regression test for the crash audit (#687). JSON `null` deserializes
+    /// to `NSNull`, which is NOT property-list compatible; calling
+    /// `UserDefaults.set(NSNull(), forKey:)` raises an uncatchable Obj-C
+    /// exception. The Restorer must filter such values rather than blindly
+    /// forwarding them.
+    func testApplyPreferencesIgnoresNullAndComplexValuesAndDoesNotCrash() throws {
+        let backupURL = try makeBackupWithRawPreferencesJSON(
+            seedRows: 1,
+            schemaVersion: Migrations.currentVersion,
+            rawPrefsJSON: """
+            {
+              "drift.weightGoal": null,
+              "drift.dailyCalorieTarget": 2200,
+              "drift.backupEnabled": true,
+              "drift.preferredUnits": "kg",
+              "drift.tdeeConfig": {"nested": "object"},
+              "drift.foodSortOrder": ["array", "value"],
+              "drift.notAllowlisted": "leaked"
+            }
+            """
+        )
+
+        let dest = workDir.appendingPathComponent("dest.sqlite")
+        // Restore must complete without throwing or raising an Obj-C exception.
+        XCTAssertNoThrow(try BackupRestorer().restore(
+            from: backupURL,
+            toDatabasePath: dest,
+            userDefaults: defaults
+        ))
+
+        // Primitive values restored.
+        XCTAssertEqual(defaults.integer(forKey: "drift.dailyCalorieTarget"), 2200)
+        XCTAssertTrue(defaults.bool(forKey: "drift.backupEnabled"))
+        XCTAssertEqual(defaults.string(forKey: "drift.preferredUnits"), "kg")
+        // Null + complex values dropped silently — Restorer must not crash on them.
+        XCTAssertNil(defaults.object(forKey: "drift.weightGoal"))
+        XCTAssertNil(defaults.object(forKey: "drift.tdeeConfig"))
+        XCTAssertNil(defaults.object(forKey: "drift.foodSortOrder"))
+        // Allowlist still enforced.
+        XCTAssertNil(defaults.object(forKey: "drift.notAllowlisted"))
+    }
+
     // MARK: - Atomic swap failure
 
     func testAtomicReplaceFailureLeavesOriginalDBIntact() throws {
@@ -259,6 +303,62 @@ final class BackupRestorerTests: XCTestCase {
             destination: destination
         )
         return destination
+    }
+
+    /// Build a backup whose `preferences.json` is the literal `rawPrefsJSON`
+    /// rather than the Packager's filtered output. Used by the crash-audit
+    /// test (#687) to verify the Restorer doesn't crash on null / complex
+    /// values that a hand-crafted backup could contain.
+    ///
+    /// We reuse the standard packager to produce a valid archive, then swap
+    /// the prefs entry + recompute its manifest hash so integrity passes.
+    private func makeBackupWithRawPreferencesJSON(
+        seedRows: Int,
+        schemaVersion: Int,
+        rawPrefsJSON: String
+    ) throws -> URL {
+        let backupURL = try makeBackup(seedRows: seedRows, schemaVersion: schemaVersion)
+        guard let archive = Archive(url: backupURL, accessMode: .update) else {
+            throw NSError(domain: "test", code: 10)
+        }
+        // Swap the preferences entry for the raw JSON.
+        if let oldPrefs = archive[BackupKeys.preferencesFileName] {
+            try archive.remove(oldPrefs)
+        }
+        let prefsData = Data(rawPrefsJSON.utf8)
+        try archive.addEntry(
+            with: BackupKeys.preferencesFileName,
+            type: .file,
+            uncompressedSize: Int64(prefsData.count),
+            compressionMethod: .deflate,
+            provider: { position, size in
+                prefsData.subdata(in: Int(position) ..< Int(position) + size)
+            }
+        )
+        // Recompute the manifest's prefs entry so checksum validation passes.
+        guard let manifestEntry = archive[BackupKeys.manifestFileName] else {
+            throw NSError(domain: "test", code: 11)
+        }
+        var manifestData = Data()
+        _ = try archive.extract(manifestEntry) { manifestData.append($0) }
+        var manifest = try BackupManifest.decoder().decode(BackupManifest.self, from: manifestData)
+        let newHash = SHA256.hash(data: prefsData).map { String(format: "%02x", $0) }.joined()
+        manifest.files[BackupKeys.preferencesFileName] = .init(
+            sha256: newHash,
+            sizeBytes: Int64(prefsData.count)
+        )
+        let updated = try BackupManifest.encoder().encode(manifest)
+        try archive.remove(manifestEntry)
+        try archive.addEntry(
+            with: BackupKeys.manifestFileName,
+            type: .file,
+            uncompressedSize: Int64(updated.count),
+            compressionMethod: .deflate,
+            provider: { position, size in
+                updated.subdata(in: Int(position) ..< Int(position) + size)
+            }
+        )
+        return backupURL
     }
 
     /// Recompose the archive with a deliberately-wrong manifest checksum for the
