@@ -84,7 +84,14 @@ scripts/planning-service.sh remaining
 
    Then: `scripts/planning-service.sh checkpoint tasks_created`
 
-10. **Update personas + roadmap.** `scripts/planning-service.sh checkpoint personas_updated` / `roadmap_updated`
+10. **Update personas + roadmap.** **You are the editor of `Docs/personas/{principal-engineer,product-designer}.md`** — same role as for `Docs/decisions.md` in step 6. The personas are *character*, not *log*: dated lessons sediment INTO the stable sections, they don't pile up as an append-only journal.
+    - **Read** the current persona file before writing. Find where it stands.
+    - **Append** today's "What I Learned" entry only if the lesson is *new* and *non-obvious*. If it's "still trunk-based" or "privacy-first matters" — that's already in the persona, don't restate.
+    - **Sediment** every planning cycle: distill any dated "What I Learned" lessons that have proven durable (referenced or upheld in subsequent cycles) into the stable sections (Preferences & Approach, Architecture Decisions, Testing & Quality, etc.) and **delete the dated entry** once absorbed.
+    - **Prune.** Any dated entry >30 days old that didn't sediment is by definition not durable — delete it. Routine "I implemented X" lines without a *why* the next planner needs → delete. Don't keep noise.
+    - **Stay ≤300 lines per persona file.** If growing past, sediment + prune harder.
+    - The test: a future planner reading the persona cold should get sharp *character* in 2 minutes, not wade through dated logs.
+    - Then: `scripts/planning-service.sh checkpoint personas_updated` / `roadmap_updated`
 
 11. **Reset senior sprint_done:** `scripts/sprint-service.sh reset-sprint-done`
 
