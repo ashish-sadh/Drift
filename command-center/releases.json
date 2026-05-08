@@ -2298,5 +2298,12 @@
     "description": "Build 228 \u2014 docs-only refresh (no user-visible changes)",
     "features": [],
     "fixes": []
+  },
+  {
+    "build": 230,
+    "date": "2026-05-08T00:00:00-07:00",
+    "description": "Build 230 \u2014 forced release; infra/command-center fixes only (no user-visible changes)",
+    "features": [],
+    "fixes": []
   }
 ]
