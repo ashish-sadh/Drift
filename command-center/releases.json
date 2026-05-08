@@ -2305,5 +2305,16 @@
     "description": "Build 230 \u2014 forced release; infra/command-center fixes only (no user-visible changes)",
     "features": [],
     "fixes": []
+  },
+  {
+    "build": 231,
+    "date": "2026-05-08T03:52:01-07:00",
+    "description": "chore: TestFlight build 231 \u2014 opt-in calorie overlay for weight chart + sprint-service cmd_done guard",
+    "features": [
+      "Weight chart: opt-in calorie overlay toggle (#669, #671) \u2014 calorie deficit/surplus rendered alongside weight points so users can correlate intake with weight movement"
+    ],
+    "fixes": [
+      "Sprint-service cmd_done now refuses to close an issue if the cited commit isn't on origin/main \u2014 prevents premature closes when local commits haven't pushed"
+    ]
   }
 ]
