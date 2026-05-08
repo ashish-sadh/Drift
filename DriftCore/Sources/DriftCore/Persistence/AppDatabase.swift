@@ -22,6 +22,15 @@ public struct AppDatabase: @unchecked Sendable {
         Migrations.registerAll(&migrator)
         return migrator
     }
+
+    /// Run forward migrations against an arbitrary DB writer. Used during backup
+    /// restore to upgrade an older snapshot to the current app's schema before
+    /// swapping it into place.
+    public static func runMigrations(on dbWriter: any DatabaseWriter) throws {
+        var migrator = DatabaseMigrator()
+        Migrations.registerAll(&migrator)
+        try migrator.migrate(dbWriter)
+    }
 }
 
 // MARK: - Database Access
