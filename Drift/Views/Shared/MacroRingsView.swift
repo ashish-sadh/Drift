@@ -105,6 +105,12 @@ struct MacroRingsView: View {
     }
 
     private var tooltipView: some View {
+        // The parent ZStack pins MacroRingsView at 140×140, so the tooltip would
+        // inherit that width and wrap each row character-by-character (#699).
+        // `.fixedSize(horizontal:)` lets the tooltip take its natural width
+        // (~260pt) and overflow the ring's frame, which is the desired UX.
+        // Own `onTapGesture` so taps on the overflowing region (outside the
+        // ring's `.contentShape(Circle())` hit-region) still dismiss it.
         VStack(alignment: .leading, spacing: 4) {
             ForEach(Array(rings.enumerated()), id: \.offset) { _, ring in
                 tooltipRow(for: ring)
@@ -114,27 +120,36 @@ struct MacroRingsView: View {
         .padding(.vertical, 8)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 10))
         .shadow(radius: 4)
+        .fixedSize(horizontal: true, vertical: false)
+        .onTapGesture {
+            withAnimation(.easeOut(duration: 0.15)) { showTooltip = false }
+        }
     }
 
     private func tooltipRow(for ring: RingSpec) -> some View {
         let remaining = ring.target - ring.value
         let calPct = caloriePercent(for: ring)
 
+        // `.lineLimit(1)` per-Text is defensive: a future ancestor that
+        // re-constrains width can't bring back the per-character wrap (#699).
         return HStack(spacing: 6) {
             Circle().fill(ring.identityColor).frame(width: 6, height: 6)
             Text(ring.label)
                 .font(.system(size: 9, weight: .semibold))
                 .foregroundStyle(ring.identityColor)
+                .lineLimit(1)
                 .frame(width: 46, alignment: .leading)
             Text("\(Int(ring.value))/\(Int(ring.target))\(ring.unit)")
                 .font(.system(size: 9).monospacedDigit())
                 .foregroundStyle(.secondary)
+                .lineLimit(1)
             if calPct > 0 {
                 Text("·")
                     .font(.system(size: 9)).foregroundStyle(.tertiary)
                 Text("\(Int(calPct))%")
                     .font(.system(size: 9).monospacedDigit())
                     .foregroundStyle(.tertiary)
+                    .lineLimit(1)
             }
             Spacer(minLength: 0)
             if ring.target > 0 {
@@ -143,6 +158,7 @@ struct MacroRingsView: View {
                      : "\(Int(-remaining))\(ring.unit) over")
                     .font(.system(size: 8).monospacedDigit())
                     .foregroundStyle(remaining >= 0 ? Color.secondary.opacity(0.6) : Theme.surplus)
+                    .lineLimit(1)
             }
         }
     }
