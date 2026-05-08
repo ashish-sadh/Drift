@@ -498,6 +498,36 @@ cmd_done() {
     local COMMIT="${2:-}"
     if [ -z "$NUM" ]; then echo "Usage: sprint-service.sh done <number> <commit>" >&2; exit 1; fi
 
+    # Fetch labels once — reused by the permanent-task guard and the
+    # design-doc guard below.
+    local LABELS_JSON
+    LABELS_JSON=$(gh issue view "$NUM" --json labels --jq '[.labels[].name]' 2>/dev/null || echo "[]")
+
+    # Design-doc guard: writing the doc is one step in a multi-stage lifecycle
+    # (doc-ready → approved → implementing → close). Auto-closing skips human
+    # review and impl-task creation. Senior should add doc-ready and stop —
+    # but if they call `done` (because senior protocol's recipe is uniform),
+    # redirect to that path. Without this, design-doc issues #665 #666 got
+    # auto-closed on 2026-05-07 with the doc unreviewed.
+    local IS_DESIGN_DOC
+    IS_DESIGN_DOC=$(echo "$LABELS_JSON" | jq -r 'index("design-doc") != null' 2>/dev/null || echo "false")
+    if [ "$IS_DESIGN_DOC" = "true" ]; then
+        local DD_NOTE=""
+        if [ -f "/tmp/done-note-$NUM" ]; then
+            DD_NOTE=$(cat "/tmp/done-note-$NUM")
+            rm -f "/tmp/done-note-$NUM"
+        fi
+        local DD_REF=""
+        [ -n "$COMMIT" ] && DD_REF=" Commit: $COMMIT"
+        local DD_COMMENT="Doc-ready. Design doc filed; awaiting human \`approved\` label before impl tasks file.${DD_REF}"
+        [ -n "$DD_NOTE" ] && DD_COMMENT="Doc-ready: $DD_NOTE${DD_REF}"
+        gh_loud "comment doc-ready on design #$NUM" -- issue comment "$NUM" --body "$DD_COMMENT" || true
+        gh_loud "add doc-ready label on #$NUM" -- issue edit "$NUM" --add-label doc-ready || true
+        echo "WARN: #$NUM is a design-doc — redirecting 'done' to 'session-done' + doc-ready label. Use 'session-done' next time." >&2
+        cmd_session_done "$NUM"
+        return
+    fi
+
     # Permanent-task guard: `done` would close the issue, but permanents must
     # recur. PreToolUse hook (guard-permanent-close.sh) can't see internal
     # `gh issue close` calls from this script, so enforce here. Redirect to
@@ -505,7 +535,7 @@ cmd_done() {
     # Without this, closed permanents drained the junior queue and armed the
     # TestFlight/require-claim deadlock (#49 #50 #51 #52 #193, 2026-05-03/04).
     local IS_PERM
-    IS_PERM=$(gh issue view "$NUM" --json labels --jq '[.labels[].name] | index("permanent-task") != null' 2>/dev/null || echo "false")
+    IS_PERM=$(echo "$LABELS_JSON" | jq -r 'index("permanent-task") != null' 2>/dev/null || echo "false")
     if [ "$IS_PERM" = "true" ]; then
         local PROGRESS_NOTE=""
         if [ -f "/tmp/done-note-$NUM" ]; then
