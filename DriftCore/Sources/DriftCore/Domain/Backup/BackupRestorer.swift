@@ -192,7 +192,18 @@ public struct BackupRestorer {
         if let v = value as? Bool { return v }
         if let v = value as? Int { return v }
         if let v = value as? Double { return v }
-        if let v = value as? String { return v }
+        if let v = value as? String {
+            // Sentinel-prefixed strings carry base64-encoded `Data` (Codable
+            // blobs like WeightGoal). Bad base64 is dropped silently — the
+            // alternative (crashing on a hand-crafted backup) was the #687
+            // failure mode we already paid the price for once.
+            if v.hasPrefix(BackupKeys.dataB64Prefix) {
+                let payload = String(v.dropFirst(BackupKeys.dataB64Prefix.count))
+                return Data(base64Encoded: payload)
+            }
+            return v
+        }
+        if let v = value as? [String] { return v }
         return nil
     }
 }

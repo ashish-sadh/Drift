@@ -3,14 +3,10 @@ import Foundation
 public enum BackupKeys {
     /// UserDefaults keys included in `.driftbackup` archives.
     ///
-    /// **Primitive-only.** The Packager / Restorer JSON pipeline currently
-    /// supports Bool / Int / Double / String. Codable-Data preferences
-    /// (`drift_weight_goal`, `drift_tdee_config`, `drift_algorithm_config`,
-    /// `drift_custom_exercises`) and `[String]` arrays
-    /// (`drift_exercise_favorites`) are NOT yet round-trippable and are
-    /// excluded — see #701 for the follow-up to add Data/array support.
-    /// Adding a non-primitive key here without first lifting that limit
-    /// silently drops it on package via `BackupPackager.jsonSafeValue`.
+    /// **Supported shapes** (mirrored in `BackupPackager.jsonSafeValue` /
+    /// `BackupRestorer.primitiveValue`): Bool / Int / Double / String /
+    /// `[String]` / `Data` (transported as a base64 string with the
+    /// `dataB64Prefix` sentinel).
     ///
     /// **Real keys only.** Each entry MUST match a key actually used by
     /// production code (grep `forKey: "..."` to verify). Adding a fictional
@@ -42,7 +38,24 @@ public enum BackupKeys {
 
         // Hydration
         "drift_water_goal_ml",                          // Preferences.waterGoalMl (Double)
+
+        // Goal / planning state — Codable Data blobs (round-trip via dataB64Prefix)
+        "drift_weight_goal",                            // WeightGoal Codable Data (Models/WeightGoal.swift)
+        "drift_tdee_config",                            // TDEEEstimator.TDEEConfig Codable Data (Domain/Weight/TDEEEstimator.swift)
+        "drift_algorithm_config",                       // WeightTrendCalculator.AlgorithmConfig Codable Data (Domain/Weight/WeightTrendCalculator.swift)
+
+        // Workout state
+        "drift_custom_exercises",                       // [ExerciseDatabase.ExerciseInfo] Codable Data (Domain/Workout/ExerciseDatabase.swift)
+        "drift_exercise_favorites",                     // [String] (Domain/Workout/WorkoutService.swift)
     ]
+
+    /// Sentinel marking a String value in `preferences.json` that decodes back
+    /// to `Data`. Chosen to be unambiguous: no production user-facing string
+    /// (weight unit, AI backend enum raw, USDA API key) starts with double
+    /// underscores. The Restorer treats any String beginning with this prefix
+    /// as a base64-encoded payload; on decode failure it drops the entry
+    /// silently rather than crashing.
+    public static let dataB64Prefix = "__drift_b64__:"
 
     public static let manifestFileName = "manifest.json"
     public static let databaseFileName = "drift.sqlite"

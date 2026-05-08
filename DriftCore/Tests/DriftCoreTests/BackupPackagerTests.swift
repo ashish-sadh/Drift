@@ -162,13 +162,11 @@ final class BackupPackagerTests: XCTestCase {
         UserDefaults().removePersistentDomain(forName: suite)
     }
 
-    /// Regression for #700 — allowlist must contain only real keys that the
-    /// JSON pipeline can serialize (Bool / Int / Double / String). A future
-    /// session adding `drift_weight_goal` or similar Codable-Data key without
-    /// first lifting that limit would silently drop the value.
-    func testAllowlistContainsOnlyRealAndPrimitiveKeys() {
-        // Curated set as of #700. If you add a key, also add a writer in
-        // production code AND verify Packager.jsonSafeValue accepts the type.
+    /// Regression for #700 / #701 — allowlist must contain only real keys
+    /// that the JSON pipeline can serialize (primitive / `[String]` / `Data`
+    /// via `dataB64Prefix`). If you add a key, also add a writer in
+    /// production code AND verify `Packager.jsonSafeValue` accepts the type.
+    func testAllowlistContainsOnlyRealAndSerializableKeys() {
         let expected: Set<String> = [
             "weight_unit",
             "drift_weight_chart_calories",
@@ -186,6 +184,11 @@ final class BackupPackagerTests: XCTestCase {
             "drift_online_food_search",
             "drift_usda_api_key",
             "drift_water_goal_ml",
+            "drift_weight_goal",
+            "drift_tdee_config",
+            "drift_algorithm_config",
+            "drift_custom_exercises",
+            "drift_exercise_favorites",
         ]
         XCTAssertEqual(Set(BackupKeys.userDefaultsAllowlist), expected)
         // No dotted-camelCase keys (the pre-#700 fictional set used these).
@@ -195,6 +198,58 @@ final class BackupPackagerTests: XCTestCase {
                 "Allowlist key \(key) is dotted-camelCase — production code uses snake_case."
             )
         }
+    }
+
+    /// #701 — Codable `Data` blobs (WeightGoal, TDEEConfig, etc.) and
+    /// `[String]` arrays are JSON-encoded into `preferences.json`. This test
+    /// asserts the Packager-side encoding shape: `Data` becomes a single
+    /// String prefixed with `dataB64Prefix`; `[String]` is a JSON array.
+    func testPackageEncodesDataAndStringArrayShapes() throws {
+        let dbURL = workDir.appendingPathComponent("source.sqlite")
+        let dbQueue = try DatabaseQueue(path: dbURL.path)
+        try dbQueue.write { db in
+            try db.execute(sql: "CREATE TABLE x (id INTEGER PRIMARY KEY)")
+        }
+
+        let goal = WeightGoal(
+            targetWeightKg: 65,
+            monthsToAchieve: 6,
+            startDate: "2026-01-01",
+            startWeightKg: 75,
+            proteinTargetG: 150,
+            dietPreference: .highProtein,
+            calorieTargetOverride: 2000,
+            proteinGoal: 150
+        )
+        let goalData = try JSONEncoder().encode(goal)
+        let favorites = ["bench_press", "deadlift", "back_squat"]
+
+        let suite = "BackupPackagerTests-\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suite)!
+        defer { UserDefaults().removePersistentDomain(forName: suite) }
+        defaults.set(goalData, forKey: "drift_weight_goal")
+        defaults.set(favorites, forKey: "drift_exercise_favorites")
+
+        let destination = workDir.appendingPathComponent("shapes.driftbackup")
+        try BackupPackager().package(
+            dbWriter: dbQueue,
+            userDefaults: defaults,
+            appMetadata: .init(appBuild: "1", appVersion: "0.1", schemaVersion: 1),
+            destination: destination
+        )
+
+        let archive = try XCTUnwrap(Archive(url: destination, accessMode: .read))
+        let prefsEntry = try XCTUnwrap(archive["preferences.json"])
+        var data = Data()
+        _ = try archive.extract(prefsEntry) { data.append($0) }
+        let prefs = try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
+
+        let encodedGoal = try XCTUnwrap(prefs["drift_weight_goal"] as? String)
+        XCTAssertTrue(encodedGoal.hasPrefix(BackupKeys.dataB64Prefix))
+        let payload = String(encodedGoal.dropFirst(BackupKeys.dataB64Prefix.count))
+        XCTAssertEqual(Data(base64Encoded: payload), goalData)
+
+        XCTAssertEqual(prefs["drift_exercise_favorites"] as? [String], favorites)
     }
 }
 

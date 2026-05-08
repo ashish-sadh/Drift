@@ -214,6 +214,99 @@ final class BackupRestorerTests: XCTestCase {
         XCTAssertNil(defaults.object(forKey: "drift_not_allowlisted"))
     }
 
+    // MARK: - #701 Codable Data + array round-trips
+
+    /// Round-trip the user's most-valuable state — the WeightGoal — through
+    /// package + restore. `WeightGoal` is `Codable` but not `Equatable`, so we
+    /// compare the raw `Data` (set via `defaults.set(_:Data, forKey:)`) which
+    /// is what the restore must reproduce byte-for-byte.
+    func testRoundtripRestoresWeightGoalData() throws {
+        let goal = WeightGoal(
+            targetWeightKg: 62,
+            monthsToAchieve: 5,
+            startDate: "2026-02-01",
+            startWeightKg: 78,
+            proteinTargetG: 140,
+            dietPreference: .balanced,
+            calorieTargetOverride: 1900,
+            proteinGoal: 140
+        )
+        let goalData = try JSONEncoder().encode(goal)
+
+        let backupURL = try makeBackup(
+            seedRows: 1,
+            schemaVersion: Migrations.currentVersion,
+            withDefaults: ["drift_weight_goal": goalData]
+        )
+
+        let dest = workDir.appendingPathComponent("restored.sqlite")
+        try BackupRestorer().restore(
+            from: backupURL,
+            toDatabasePath: dest,
+            userDefaults: defaults
+        )
+
+        let restoredData = try XCTUnwrap(defaults.data(forKey: "drift_weight_goal"))
+        XCTAssertEqual(restoredData, goalData, "WeightGoal Data must round-trip byte-identical")
+        let restoredGoal = try JSONDecoder().decode(WeightGoal.self, from: restoredData)
+        XCTAssertEqual(restoredGoal.targetWeightKg, 62)
+        XCTAssertEqual(restoredGoal.monthsToAchieve, 5)
+        XCTAssertEqual(restoredGoal.startDate, "2026-02-01")
+        XCTAssertEqual(restoredGoal.startWeightKg, 78)
+        XCTAssertEqual(restoredGoal.dietPreference, .balanced)
+        XCTAssertEqual(restoredGoal.calorieTargetOverride, 1900)
+    }
+
+    /// `[String]` arrays are JSON-native — the round-trip is straightforward,
+    /// but worth covering because `defaults.set(_:[String], forKey:)` is the
+    /// production write path for `drift_exercise_favorites`.
+    func testRoundtripRestoresStringArrayFavorites() throws {
+        let favorites = ["bench_press", "deadlift", "back_squat", "overhead_press"]
+        let backupURL = try makeBackup(
+            seedRows: 1,
+            schemaVersion: Migrations.currentVersion,
+            withDefaults: ["drift_exercise_favorites": favorites]
+        )
+
+        let dest = workDir.appendingPathComponent("restored.sqlite")
+        try BackupRestorer().restore(
+            from: backupURL,
+            toDatabasePath: dest,
+            userDefaults: defaults
+        )
+
+        XCTAssertEqual(
+            defaults.stringArray(forKey: "drift_exercise_favorites"),
+            favorites
+        )
+    }
+
+    /// Hand-crafted backup with a malformed base64 payload behind the
+    /// `dataB64Prefix` sentinel must drop the entry silently — same defense
+    /// posture as #687 NSNull / nested-dict / nested-array.
+    func testApplyPreferencesDropsMalformedBase64WithoutCrashing() throws {
+        let backupURL = try makeBackupWithRawPreferencesJSON(
+            seedRows: 1,
+            schemaVersion: Migrations.currentVersion,
+            rawPrefsJSON: """
+            {
+              "drift_weight_goal": "\(BackupKeys.dataB64Prefix)not-base64-!!!",
+              "weight_unit": "lb"
+            }
+            """
+        )
+
+        let dest = workDir.appendingPathComponent("dest.sqlite")
+        XCTAssertNoThrow(try BackupRestorer().restore(
+            from: backupURL,
+            toDatabasePath: dest,
+            userDefaults: defaults
+        ))
+
+        XCTAssertNil(defaults.object(forKey: "drift_weight_goal"))
+        XCTAssertEqual(defaults.string(forKey: "weight_unit"), "lb")
+    }
+
     // MARK: - Atomic swap failure
 
     func testAtomicReplaceFailureLeavesOriginalDBIntact() throws {

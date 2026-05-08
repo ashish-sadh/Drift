@@ -101,6 +101,10 @@ public struct BackupPackager {
         if let v = value as? Int { return v }
         if let v = value as? Double { return v }
         if let v = value as? String { return v }
+        if let v = value as? Data { return BackupKeys.dataB64Prefix + v.base64EncodedString() }
+        // Strict cast — any non-String element drops the whole array rather
+        // than partially serializing. Mirrors the Restorer's strict acceptance.
+        if let v = value as? [String] { return v }
         return nil
     }
 
