@@ -2331,5 +2331,17 @@
       "Calorie overlay visibility tweaks \u2014 opacity bump + empty-state caption (#669)",
       "Calorie overlay flame toggle is now observable (was failing to update view) (#669)"
     ]
+  },
+  {
+    "build": 233,
+    "date": "2026-05-08T13:59:00-07:00",
+    "description": "Build 233 \u2014 backup restore reliability + macro ring tooltip + splash polish",
+    "features": [],
+    "fixes": [
+      "Backup restore: filter NSNull and non-primitive values so corrupted entries no longer abort restore (#687)",
+      "Backup allowlist: corrected to match real production preference keys (weightGoal, tdeeConfig, custom_exercises, etc.) (#700)",
+      "Macro ring tooltip: now readable on overflow and dismissable with tap (#699)",
+      "Splash screen: animated icon + progressive status text on cold launch (#686)"
+    ]
   }
 ]
