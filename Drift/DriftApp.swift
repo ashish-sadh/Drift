@@ -62,10 +62,23 @@ struct DriftApp: App {
                         WeightTrendService.shared.refresh()
                         // Refresh TDEE estimate (uses Apple Health + weight trend + food data)
                         await TDEEEstimator.shared.refresh()
-                        // Schedule health nudge notifications (protein, supplements, workouts)
-                        await NotificationService.refreshScheduledAlerts()
-                        WidgetDataProvider.refreshWidgetData()
                         syncComplete = true
+
+                        // Notifications + widget — fire-and-forget. iOS has a ~20s
+                        // launch-watchdog kill; refreshScheduledAlerts() does ~35 DB
+                        // reads (5 alerts × 7-day fetches in BehaviorInsightService
+                        // plus medication + GLP-1 slot computation) and was blocking
+                        // syncComplete inside that budget. The schedule registers
+                        // asynchronously regardless of when this finishes — there is
+                        // no UI affordance waiting on it. Same for widget data.
+                        // Both services are @MainActor so we use Task (not detached)
+                        // — they yield between awaits so UI stays responsive.
+                        Task { @MainActor in
+                            await NotificationService.refreshScheduledAlerts()
+                        }
+                        Task { @MainActor in
+                            WidgetDataProvider.refreshWidgetData()
+                        }
                     }
                 }
         }

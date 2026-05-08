@@ -126,3 +126,65 @@ import Testing
     let text = SupplementInsightTool.formatSingle(name: "Vitamin D", stats: stats, windowDays: 7)
     #expect(text.contains("same time each day"))
 }
+
+@Test func supplementInsight_formatSingle_greatConsistencyLabel() {
+    let stats = SupplementInsightTool.AdherenceStats(
+        takenDays: 6, totalDays: 7, adherencePct: 85,
+        currentStreak: 6, longestStreak: 6, lastMissedDate: "2026-04-01")
+    let text = SupplementInsightTool.formatSingle(name: "Omega 3", stats: stats, windowDays: 7)
+    #expect(text.contains("Great consistency"), "80–99% should show encouragement, got: \(text)")
+    #expect(text.contains("Last missed: 2026-04-01"), "lastMissedDate should appear")
+}
+
+@Test func supplementInsight_formatSingle_midRangeNoLabel() {
+    // 50–79%: no trailing encouragement or tip
+    let stats = SupplementInsightTool.AdherenceStats(
+        takenDays: 4, totalDays: 7, adherencePct: 57,
+        currentStreak: 1, longestStreak: 2, lastMissedDate: "2026-04-06")
+    let text = SupplementInsightTool.formatSingle(name: "Creatine", stats: stats, windowDays: 7)
+    #expect(!text.contains("Perfect"), "mid-range should not show perfect label")
+    #expect(!text.contains("Great consistency"), "mid-range should not show great label")
+    #expect(!text.contains("same time each day"), "mid-range should not show habit tip")
+}
+
+@Test func supplementInsight_formatSingle_singularStreak() {
+    let stats = SupplementInsightTool.AdherenceStats(
+        takenDays: 1, totalDays: 7, adherencePct: 14,
+        currentStreak: 1, longestStreak: 1, lastMissedDate: "2026-04-06")
+    let text = SupplementInsightTool.formatSingle(name: "Zinc", stats: stats, windowDays: 7)
+    #expect(text.contains("Current streak: 1 day."), "singular streak should not pluralize")
+    #expect(text.contains("Longest streak: 1 day."), "singular longest should not pluralize")
+}
+
+// MARK: - dateWindow and datesInRange
+
+@Test func supplementInsight_dateWindow_endsToday() {
+    let (start, end) = SupplementInsightTool.dateWindow(windowDays: 7)
+    let todayStr = DateFormatters.dateOnly.string(from: Date())
+    #expect(end == todayStr)
+    #expect(start < end)
+}
+
+@Test func supplementInsight_datesInRange_sevenDays() {
+    let dates = SupplementInsightTool.datesInRange(startDate: "2026-04-01", endDate: "2026-04-07")
+    #expect(dates.count == 7)
+    #expect(dates.first == "2026-04-01")
+    #expect(dates.last == "2026-04-07")
+}
+
+@Test func supplementInsight_datesInRange_invalidReturnsEmpty() {
+    let dates = SupplementInsightTool.datesInRange(startDate: "bad", endDate: "2026-04-07")
+    #expect(dates.isEmpty)
+}
+
+// MARK: - adherenceStats: future-date skipping
+
+@Test func supplementInsight_adherenceStats_futureDaysNotCountedInStreak() {
+    // Window includes future dates — only dates ≤ today should count for currentStreak
+    let taken: Set<String> = ["2026-04-04", "2026-04-05"]
+    // today = Apr 5, but window extends to Apr 7 (future days)
+    let stats = SupplementInsightTool.adherenceStats(
+        takenDates: taken, startDate: "2026-04-01", endDate: "2026-04-07", today: "2026-04-05")
+    #expect(stats.currentStreak == 2, "only Apr 4+5 should count; Apr 6+7 are future")
+    #expect(stats.totalDays == 7, "totalDays counts the full range")
+}

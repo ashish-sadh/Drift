@@ -13,6 +13,7 @@ public enum ExerciseDatabase {
         public let level: String
         public var imageUrl: String? = nil
         public var youtubeUrl: String? = nil
+        public var instructions: [String]? = nil
     }
 
     nonisolated(unsafe) private static var _exercises: [ExerciseInfo]?

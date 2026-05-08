@@ -24,12 +24,12 @@ private func makeService(db: AppDatabase) -> ChatTelemetryService {
 
 /// Force a synchronous barrier onto the service's internal queue so we can
 /// observe the result of a fire-and-forget record().
-private func drain(_ service: ChatTelemetryService) {
+private func drain(_ service: ChatTelemetryService, expecting n: Int = 1) {
     // record() dispatches async on a private serial queue. Reflection
     // approach is brittle; instead we poll the DB with a short timeout.
     let deadline = Date().addingTimeInterval(2.0)
     while Date() < deadline {
-        if service.count() > 0 || !Preferences.chatTelemetryEnabled { return }
+        if service.count() >= n || !Preferences.chatTelemetryEnabled { return }
         Thread.sleep(forTimeInterval: 0.02)
     }
 }
@@ -192,7 +192,7 @@ private func drain(_ service: ChatTelemetryService) {
             outcome: .success, latencyMs: 10, turnIndex: i
         )
     }
-    drain(service)
+    drain(service, expecting: 3)
     #expect(service.count() == 3)
     service.deleteAll()
     #expect(service.count() == 0)

@@ -222,4 +222,91 @@ final class FoodSearchGoldSetTests: XCTestCase {
         print("📊 Snacks & shakes new foods: \(correct)/\(cases.count)")
         XCTAssertGreaterThanOrEqual(correct, cases.count - 1, "At most 1 snack/shake new food miss")
     }
+
+    // MARK: - New Foods Sprint #634 (West African, Ethiopian, Turkish, Persian)
+
+    func testNewFoodsWestAfrican() {
+        let cases: [(query: String, keyword: String)] = [
+            ("jollof rice", "jollof"),
+            ("fried plantain", "plantain"),
+            ("suya", "suya"),
+            ("egusi soup", "egusi"),
+            ("akara", "akara"),
+            ("puff puff", "puff"),
+            ("fufu", "fufu"),
+            ("groundnut soup", "groundnut"),
+            ("moi moi", "moi moi"),
+            ("chin chin", "chin chin"),
+        ]
+        let correct = searchHitCount(cases, label: "west-african")
+        print("📊 West African foods: \(correct)/\(cases.count)")
+        XCTAssertGreaterThanOrEqual(correct, cases.count - 1, "At most 1 West African food miss")
+    }
+
+    func testNewFoodsEthiopian() {
+        let cases: [(query: String, keyword: String)] = [
+            ("injera", "injera"),
+            ("doro wat", "doro"),
+            ("misir wat", "misir"),
+            ("shiro wat", "shiro"),
+            ("tibs", "tibs"),
+            ("gomen", "gomen"),
+            ("kitfo", "kitfo"),
+            ("ful medames", "ful"),
+        ]
+        let correct = searchHitCount(cases, label: "ethiopian")
+        print("📊 Ethiopian foods: \(correct)/\(cases.count)")
+        XCTAssertGreaterThanOrEqual(correct, cases.count - 1, "At most 1 Ethiopian food miss")
+    }
+
+    func testNewFoodsTurkish() {
+        let cases: [(query: String, keyword: String)] = [
+            ("chicken doner", "doner"),
+            ("lahmacun", "lahmacun"),
+            ("menemen", "menemen"),
+            ("simit", "simit"),
+            ("ayran", "ayran"),
+            ("cacik", "cacik"),
+            ("kofte", "kofte"),
+        ]
+        let correct = searchHitCount(cases, label: "turkish")
+        print("📊 Turkish foods: \(correct)/\(cases.count)")
+        XCTAssertGreaterThanOrEqual(correct, cases.count - 1, "At most 1 Turkish food miss")
+    }
+
+    func testNewFoodsPersian() {
+        let cases: [(query: String, keyword: String)] = [
+            ("chelo kabab", "chelo"),
+            ("ghormeh sabzi", "ghormeh"),
+            ("fesenjan", "fesenjan"),
+            ("mast-o-khiar", "mast"),
+            ("tahdig", "tahdig"),
+        ]
+        let correct = searchHitCount(cases, label: "persian")
+        print("📊 Persian foods: \(correct)/\(cases.count)")
+        XCTAssertGreaterThanOrEqual(correct, cases.count - 1, "At most 1 Persian food miss")
+    }
+
+    func testNewFoodsMacroSanity() {
+        // All new foods must have plausible macros: calories > 0, no single macro > calories
+        let newFoodNames = [
+            "Jollof Rice", "Fried Plantain", "Suya", "Egusi Soup", "Akara", "Puff Puff",
+            "Fufu", "Groundnut Soup", "Moi Moi", "Chin Chin",
+            "Injera", "Doro Wat", "Misir Wat", "Shiro Wat", "Tibs", "Gomen", "Kitfo", "Ful Medames",
+            "Chicken Doner Kebab", "Lahmacun", "Menemen", "Simit", "Ayran", "Cacik", "Kofte",
+            "Chelo Kabab", "Ghormeh Sabzi", "Fesenjan", "Mast-o-Khiar", "Tahdig",
+        ]
+        var found = 0
+        for name in newFoodNames {
+            let results = FoodService.searchFood(query: name)
+            if let food = results.first(where: { $0.name == name }) {
+                found += 1
+                XCTAssertGreaterThan(food.calories, 0, "\(name): calories must be > 0")
+                let macroCalories = food.proteinG * 4 + food.carbsG * 4 + food.fatG * 9
+                XCTAssertLessThan(abs(macroCalories - food.calories), food.calories * 0.35 + 50,
+                    "\(name): macro-derived calories should be within 35% of listed calories")
+            }
+        }
+        XCTAssertGreaterThanOrEqual(found, 28, "At least 28 of 30 new foods must be findable by exact name")
+    }
 }

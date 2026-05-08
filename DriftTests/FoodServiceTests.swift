@@ -46,6 +46,14 @@ import Testing
     #expect(recents.count <= 5)
 }
 
+@Test @MainActor func testRecentFoods_returnsDistinctByFood() {
+    let recents = FoodService.recentFoods(limit: 10)
+    #expect(recents.count <= 10)
+    // Distinct-by-food_id: no two entries share the same database id
+    let ids = recents.compactMap(\.id)
+    #expect(Set(ids).count == ids.count)
+}
+
 @Test @MainActor func foodServiceFetchFoodsByCategoryIndianStaples() {
     let foods = FoodService.fetchFoodsByCategory("Indian Staples")
     #expect(!foods.isEmpty, "Indian Staples category should have entries")

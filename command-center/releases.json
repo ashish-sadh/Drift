@@ -2064,5 +2064,257 @@
     "fixes": [
       "Food parsing: skip 'of' connector in attached-unit parsing (e.g. 'cup of rice' no longer misparses unit)"
     ]
+  },
+  {
+    "build": 198,
+    "date": "2026-05-01T00:00:00-07:00",
+    "description": "Watchdog fix + planning updates",
+    "features": [
+      "Planning: roadmap and personas updated for cycle 8581 review findings",
+      "Docs: product review cycle 8581 published"
+    ],
+    "fixes": [
+      "Watchdog: skip WIP snapshot for design/* in_progress tasks; fix grep-fail wrap"
+    ]
+  },
+  {
+    "build": 199,
+    "date": "2026-05-01T20:00:00-07:00",
+    "description": "Food DB West African + planning infra + food search UX",
+    "features": [
+      "Food DB: 30 West African cuisine foods added",
+      "Food search: recent foods quick-log at top of food search",
+      "Planning: cap Food DB grind with guard-sprint-task gate",
+      "Food DB: 30 Indian branded protein foods added"
+    ],
+    "fixes": [
+      "Tests: updated gold set cup-to-gram expectations for food-aware densities"
+    ]
+  },
+  {
+    "build": 200,
+    "date": "2026-05-02T00:00:00-07:00",
+    "description": "Food DB East Asian home cooking staples",
+    "features": [
+      "Food DB: 30 East Asian home cooking foods added (Japanese, Korean, Chinese)"
+    ],
+    "fixes": []
+  },
+  {
+    "build": 201,
+    "date": "2026-05-02T09:30:00-07:00",
+    "description": "GLP-1 medication tracking + Food DB improvements",
+    "features": [
+      "Health: GLP-1 medication tracking \u2014 log_medication tool + dashboard card",
+      "Food DB: 30 Mediterranean & Levantine staples added"
+    ],
+    "fixes": [
+      "Food DB: piece_size_g added to 20 multi-piece Indian foods for accurate serving estimates"
+    ]
+  },
+  {
+    "build": 202,
+    "date": "2026-05-02T14:30:00-07:00",
+    "description": "Food DB expansions + infra hardening",
+    "features": [
+      "Food DB: 30 Mexican home cooking foods added (carnitas, barbacoa, al pastor, pozole, menudo, birria, tamales, sopes, and more)",
+      "Food DB: 30 Indian protein staples added (mattar paneer, chhole, mixed dal, anda curry, paneer korma, chicken keema, and more)",
+      "Food DB: 30 American fast food branded items added (Taco Bell, BK, Starbucks, Arby's, Jack in the Box, and more)"
+    ],
+    "fixes": [
+      "Infra: hardened planning session crash path \u2014 removed pipefail from compliance, added crash comment and log",
+      "Infra: design-doc issues auto-route to senior queue without sprint-task label"
+    ]
+  },
+  {
+    "build": 203,
+    "date": "2026-05-03T02:01:44.011542-07:00",
+    "description": "Per-stage chat timing, test coverage, accessibility fixes, food DB expansion",
+    "features": [
+      "Chat typing indicator now shows per-stage elapsed time (routing, parsing, executing)",
+      "Food DB: +30 Persian/Iranian foods (Ghormeh Sabzi, Fesenjan, Zereshk Polo, Tahdig, Joojeh Kabab, and more)",
+      "Food DB: +30 Brazilian foods (Feijoada, Pao de Queijo, Coxinha, Brigadeiro, Churrasco, Moqueca, and more)",
+      "Food DB: +10 Filipino/Vietnamese/West African/Afghan/Argentinian/Ethiopian foods",
+      "Food DB: +30 Korean home-cooking foods (from previous build)",
+      "Voice transcription repair: +20 biomarker and lab terms recognized accurately"
+    ],
+    "fixes": [
+      "AI router: routerPrompt trimmed to stay under 6000-char limit (prevented routing failures)",
+      "Accessibility: BiomarkersTabView upload button now has VoiceOver label",
+      "Accessibility: GoalView back button now has VoiceOver label",
+      "Accessibility: PhotoLogReviewView item checkbox now announces select/deselect state",
+      "PhotoLogReviewView: search commit button icon changed from xmark to checkmark (was visually misleading)"
+    ]
+  },
+  {
+    "build": 216,
+    "date": "2026-05-05T00:00:00-07:00",
+    "description": "Fix TestFlight archive blocker + medication history AI + food DB expansion + accessibility",
+    "features": [
+      "AI: medication_info tool \u2014 'when did I last take ozempic' now returns full dose history",
+      "Food DB: +30 Rajasthani, Gujarati, Andhra, German, Russian, Cambodian, Laotian, Venezuelan, Colombian foods",
+      "Food DB: +30 Singaporean, Maharashtrian, Sri Lankan, Nepali, Portuguese, Spanish, SE Asian, Caribbean foods",
+      "Food DB: +31 Bengali, Odia, Kashmiri, Japanese, Korean, fitness dairy foods (DB now 3396+ items)",
+      "Food DB: +30 Indian protein staples and branded foods"
+    ],
+    "fixes": [
+      "TestFlight: archive compile error on iOS 26.4 SDK (NotificationService API mismatch) \u2014 unblocks builds 204\u2013215",
+      "AI routing: supplement_insight no longer steals medication adherence queries",
+      "AI routing: 'did I miss any magnesium doses' routes correctly",
+      "AI: medication today query timezone bug fixed",
+      "Accessibility: missing accessibilityLabel on 5+ icon-only buttons across chat, settings, photo log, lab report views"
+    ]
+  },
+  {
+    "build": 217,
+    "date": "2026-05-05T00:00:00-07:00",
+    "description": "Exercise muscle-highlight card, GLP-1 adherence AI, USDA food DB expansion (+7556 foods)",
+    "features": [
+      "Workout: exercise muscle-highlight card \u2014 Canvas body map shows primary/secondary muscle zones",
+      "AI: glp1_insight tool \u2014 GLP-1 adherence streak, missed doses, weight delta tracking",
+      "Food DB: USDA Phase 2 batch import SR Legacy (+7,556 foods; DB now 11,042 items)"
+    ],
+    "fixes": [
+      "Infra: planning crash fix \u2014 missing checklist items + resilient checkpoint handling",
+      "Infra: watchdog backoff \u2014 skip testflight-due when archive is broken"
+    ]
+  },
+  {
+    "build": 218,
+    "date": "2026-05-05T08:00:00-07:00",
+    "description": "West African, Ethiopian, Turkish, Persian cuisine foods; design-service fixes",
+    "features": [
+      "Food DB: 30 new foods from West African, Ethiopian, Turkish, and Persian cuisines"
+    ],
+    "fixes": [
+      "Design service: in-review missed inline and review-body comments"
+    ]
+  },
+  {
+    "build": 219,
+    "date": "2026-05-05T18:13:00-07:00",
+    "description": "Internal WIP build \u2014 never published to TestFlight (progressive overload in progress)",
+    "features": [
+      "WIP: ProgressiveOverloadService plateau detection and suggestion logic (shipped in build 221)"
+    ],
+    "fixes": []
+  },
+  {
+    "build": 220,
+    "date": "2026-05-06T01:00:00-07:00",
+    "description": "Internal version bump \u2014 never published to TestFlight. Cumulative gap note: builds 204\u2013215 skipped (iOS 26.4 SDK archive blocker, resolved in build 216); builds 219\u2013220 skipped (in-progress work, content shipped in build 221).",
+    "features": [],
+    "fixes": []
+  },
+  {
+    "build": 221,
+    "date": "2026-05-06T03:13:29-0700",
+    "description": "Build 221 \u2014 cycle 8999 reliability + delivery sprint",
+    "features": [
+      "Progressive overload plateau detection \u2014 AI tool surfaces stalled lifts and recommends increments",
+      "Plateau card wired to ProgressiveOverloadService on Workout dashboard",
+      "30 new foods across West African, Ethiopian, Turkish, Persian cuisines"
+    ],
+    "fixes": [
+      "Planning crash \u2014 missing checklist items + resilient checkpoint",
+      "Design service \u2014 in-review now picks up inline + review-body comments",
+      "Watchdog backoff \u2014 skip testflight-due when archive is broken"
+    ]
+  },
+  {
+    "build": 222,
+    "date": "2026-05-06T09:42:00-07:00",
+    "description": "Build 222 \u2014 internal AI chat code-quality refactor",
+    "features": [],
+    "fixes": [
+      "Internal: split AIChatView into focused extension files (1229 \u2192 157 lines)"
+    ]
+  },
+  {
+    "build": 223,
+    "date": "2026-05-06T15:00:00-07:00",
+    "description": "Build 223 \u2014 archive-failure version-bump guard",
+    "features": [],
+    "fixes": [
+      "Infra: stop bumping CURRENT_PROJECT_VERSION when the previous archive failed"
+    ]
+  },
+  {
+    "build": 224,
+    "date": "2026-05-06T21:30:00-07:00",
+    "description": "Build 224 \u2014 glucose spike proactive alert on dashboard",
+    "features": [
+      "Glucose spike proactive alert \u2014 dashboard surfaces a card when blood glucose rises sharply after a meal"
+    ],
+    "fixes": []
+  },
+  {
+    "build": 225,
+    "date": "2026-05-07T00:00:00-07:00",
+    "description": "Build 225 \u2014 macro rings goal-aware color + tap tooltip + collapsible food diary",
+    "features": [
+      "Macro rings: goal-aware fill color (green = under calorie target for weight loss, red = any macro over target)",
+      "Macro rings: tap the rings to show a breakdown tooltip with consumed/target, remaining, and % of calories per macro",
+      "Macro rings: smooth fill animation on appear",
+      "Food diary: collapsible meal-type sections (breakfast/lunch/dinner/snacks)",
+      "Food diary: inline edit \u2014 Edit in context menu"
+    ],
+    "fixes": [
+      "Photo logging: extract JSON object from AI response, not the whole string",
+      "Recipe builder: bypass for single confirmed meal items"
+    ]
+  },
+  {
+    "build": 226,
+    "date": "2026-05-07T03:00:00-07:00",
+    "description": "Build 226 \u2014 food DB expansion, GLP-1 reminders, compound lift form cues, protein alerts",
+    "features": [
+      "Food DB +30 East Asian home cooking (Japanese, Korean, Chinese)",
+      "Food DB +30 compound lift form cues and exercise instructions for top 20 lifts",
+      "Food DB +30 Caribbean and island cuisine (Jamaican, Trinidadian, Puerto Rican, Guyanese)",
+      "Food DB +30 Indian protein staples (dals, kebabs, fish, plant protein)",
+      "GLP-1 weekly dose reminder notifications \u2014 weekly nudge on injection day when no dose logged in 7 days",
+      "Settings: GLP-1 Weekly Reminders toggle",
+      "Chat typing indicator: per-stage elapsed time shown after 0.5s in parenthetical format",
+      "Protein adherence proactive alert \u2014 fires for 4-of-7 missed days or 3+ consecutive missed days, with 24h dismiss"
+    ],
+    "fixes": []
+  },
+  {
+    "build": 227,
+    "date": "2026-05-07T11:00:00-07:00",
+    "description": "Build 227 \u2014 Send Feedback prefill, weight-trend midpoint fix, launch watchdog budget",
+    "features": [
+      "Send Feedback now prefills device/build/iOS info and shows a mail fallback alert if Mail is not configured"
+    ],
+    "fixes": [
+      "Weight trend two-window endpoints now use median + actual time centers (smoother, less skew on sparse weeks)",
+      "App launch defers notification scheduling + widget refresh so cold start stays under the iOS watchdog budget"
+    ]
+  },
+  {
+    "build": 228,
+    "date": "2026-05-07T16:15:00-07:00",
+    "description": "Build 228 \u2014 docs-only refresh (no user-visible changes)",
+    "features": [],
+    "fixes": []
+  },
+  {
+    "build": 230,
+    "date": "2026-05-08T00:00:00-07:00",
+    "description": "Build 230 \u2014 forced release; infra/command-center fixes only (no user-visible changes)",
+    "features": [],
+    "fixes": []
+  },
+  {
+    "build": 231,
+    "date": "2026-05-08T03:52:01-07:00",
+    "description": "chore: TestFlight build 231 \u2014 opt-in calorie overlay for weight chart + sprint-service cmd_done guard",
+    "features": [
+      "Weight chart: opt-in calorie overlay toggle (#669, #671) \u2014 calorie deficit/surplus rendered alongside weight points so users can correlate intake with weight movement"
+    ],
+    "fixes": [
+      "Sprint-service cmd_done now refuses to close an issue if the cited commit isn't on origin/main \u2014 prevents premature closes when local commits haven't pushed"
+    ]
   }
 ]

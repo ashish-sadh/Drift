@@ -237,6 +237,24 @@ extension AppDatabase {
         }
     }
 
+    public func fetchMostRecentlyLoggedFoods(limit: Int) throws -> [Food] {
+        try dbWriter.read { db in
+            try Food.fetchAll(db, sql: """
+                SELECT f.*
+                FROM food f
+                JOIN (
+                    SELECT food_id, MAX(logged_at) AS last_logged
+                    FROM food_entry
+                    WHERE food_id IS NOT NULL
+                    GROUP BY food_id
+                    ORDER BY last_logged DESC
+                    LIMIT ?
+                ) AS recent ON f.id = recent.food_id
+                ORDER BY recent.last_logged DESC
+                """, arguments: [limit])
+        }
+    }
+
     public func fetchDailyNutrition(for date: String) throws -> DailyNutrition {
         try dbWriter.read { db in
             let row = try Row.fetchOne(db, sql: """
@@ -420,6 +438,57 @@ extension AppDatabase {
                 )
                 try log.insert(db)
             }
+        }
+    }
+}
+
+// MARK: - Medication Operations
+
+extension AppDatabase {
+    public func saveMedication(_ med: inout DailyMedication) throws {
+        try dbWriter.write { db in
+            try med.insert(db)
+        }
+    }
+
+    public func fetchTodayMedications() throws -> [DailyMedication] {
+        let cal = Calendar.current
+        let startOfDay = cal.startOfDay(for: Date())
+        let startOfTomorrow = cal.date(byAdding: .day, value: 1, to: startOfDay) ?? startOfDay
+        let fmt = ISO8601DateFormatter()
+        let startStr = fmt.string(from: startOfDay)
+        let endStr = fmt.string(from: startOfTomorrow)
+        return try dbWriter.read { db in
+            try DailyMedication
+                .filter(sql: "logged_at >= ? AND logged_at < ?", arguments: [startStr, endStr])
+                .order(Column("logged_at"))
+                .fetchAll(db)
+        }
+    }
+
+    /// Fetch all logs for a named medication within the last `days` days.
+    /// Used by MedicationService to compute typical dose time for reminders.
+    public func fetchMedications(for name: String, days: Int) throws -> [DailyMedication] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        let cutoffStr = ISO8601DateFormatter().string(from: cutoff)
+        return try dbWriter.read { db in
+            try DailyMedication
+                .filter(sql: "LOWER(name) = LOWER(?) AND logged_at >= ?", arguments: [name, cutoffStr])
+                .order(Column("logged_at").desc)
+                .fetchAll(db)
+        }
+    }
+
+    /// Fetch all medication logs within the last `days` days, across all names.
+    /// Used by MedicationService to identify consistently-logged medications.
+    public func fetchAllRecentMedications(days: Int) throws -> [DailyMedication] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        let cutoffStr = ISO8601DateFormatter().string(from: cutoff)
+        return try dbWriter.read { db in
+            try DailyMedication
+                .filter(sql: "logged_at >= ?", arguments: [cutoffStr])
+                .order(Column("logged_at").desc)
+                .fetchAll(db)
         }
     }
 }

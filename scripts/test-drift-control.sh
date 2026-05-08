@@ -334,6 +334,45 @@ write_state_with_tasks "null" \
     "$(task 13 'P0 bug' pending bug P0)"
 OUT=$(sprint_service count --bugs)
 assert_eq "count --bugs: only unapproved P1/P2 without needs-review" "1" "$OUT"
+
+# 2.8 Design-doc auto-routing to senior queue without sprint-task label
+# 2.8a pending_design_doc_in_senior_queue: design-doc only → claimable by senior
+write_state_with_tasks "null" \
+    "$(task 10 'Write design doc' pending design-doc)"
+OUT=$(sprint_service next --senior)
+assert_eq "pending_design_doc_in_senior_queue" "10 Write design doc" "$OUT"
+
+# 2.8b doc_ready_design_doc_excluded: design-doc + doc-ready → NOT in senior queue (awaiting PE review)
+write_state_with_tasks "null" \
+    "$(task 10 'Doc ready for review' pending design-doc doc-ready)"
+OUT=$(sprint_service next --senior)
+assert_eq "doc_ready_design_doc_excluded" "none" "$OUT"
+
+# 2.8c approved_design_doc_in_senior_queue: design-doc + approved, no implementing → claimable
+write_state_with_tasks "null" \
+    "$(task 10 'Approved design doc' pending design-doc approved)"
+OUT=$(sprint_service next --senior)
+assert_eq "approved_design_doc_in_senior_queue" "10 Approved design doc" "$OUT"
+
+# 2.8d implementing_design_doc_excluded: design-doc + approved + implementing → NOT in queue
+write_state_with_tasks "null" \
+    "$(task 10 'Design doc with impl tasks' pending design-doc approved implementing)"
+OUT=$(sprint_service next --senior)
+assert_eq "implementing_design_doc_excluded" "none" "$OUT"
+
+# 2.8e count --senior includes pending design-doc but excludes doc-ready
+write_state_with_tasks "null" \
+    "$(task 10 'SENIOR sprint task' pending sprint-task SENIOR)" \
+    "$(task 11 'Pending design doc' pending design-doc)" \
+    "$(task 12 'Doc-ready design doc' pending design-doc doc-ready)"
+OUT=$(sprint_service count --senior)
+assert_eq "count --senior includes pending design-doc (excludes doc-ready)" "2" "$OUT"
+
+# 2.8f design-doc issues NOT routed to junior
+write_state_with_tasks "null" \
+    "$(task 10 'Pending design doc' pending design-doc)"
+OUT=$(sprint_service next --junior)
+assert_eq "design_doc_not_in_junior_queue" "none" "$OUT"
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -661,6 +700,22 @@ assert_eq "review[-/]cycle pattern matches hyphen" "matched" "$MATCHED2"
 NO_MATCH="abc123 feat: something unrelated"
 MATCHED3=$(echo "$NO_MATCH" | grep -qE "review[-/]cycle" && echo "matched" || echo "no match")
 assert_eq "review[-/]cycle pattern does NOT match unrelated commit" "no match" "$MATCHED3"
+
+# 6.5 food_db_dup_skipped — Rule 1: pre-staged open Food DB +N → skip
+OUT=$(export _GUARD_FOOD_DB_COUNT=1; planning_service guard-sprint-task "Food DB +30 — Indian branded protein foods" "")
+assert_contains "food_db_dup_skipped: existing open task triggers skip" "skip" "$OUT"
+
+# 6.6 unjustified_plus_n_deferred — Rule 2: +N title with no justification → defer
+OUT=$(planning_service guard-sprint-task "MultiTurnRegression +8 — extra edge cases" "Add 8 more test cases to cover edge conditions.")
+assert_contains "unjustified_plus_n_deferred: no cite triggers defer" "defer" "$OUT"
+
+# 6.7 justified_plus_n_proceeds — Rule 2: +N title with Docs/failing-queries cite → proceed
+OUT=$(planning_service guard-sprint-task "FoodLoggingGoldSet +12 — sattu queries" "Motivated by Docs/failing-queries.md: user searched 'sattu' and got 0 results.")
+assert_contains "justified_plus_n_proceeds: failing-query cite allows proceed" "proceed" "$OUT"
+
+# 6.8 food_db_no_dup_proceeds — Rule 1: no existing Food DB task → falls through to Rule 2 check
+OUT=$(export _GUARD_FOOD_DB_COUNT=0; planning_service guard-sprint-task "Food DB +30 — West African" "Motivated by Docs/failing-queries.md: user searched 'jollof rice' and got 0 results.")
+assert_contains "food_db_no_dup_proceeds: no duplicate + justified → proceed" "proceed" "$OUT"
 }
 
 # ═══════════════════════════════════════════════════════════════════════════════

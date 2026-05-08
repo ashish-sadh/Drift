@@ -117,6 +117,7 @@ struct ExerciseBrowserView: View {
                     Button { showingCustom = true } label: {
                         Image(systemName: "plus.circle.fill").foregroundStyle(Theme.accent)
                     }
+                    .accessibilityLabel("Add custom exercise")
                 }
             }
             .sheet(isPresented: $showingCustom) {
@@ -250,6 +251,13 @@ struct ExerciseDetailView: View {
                                 Text(info.secondaryMuscles.map(\.capitalized).joined(separator: ", "))
                                     .font(.caption).foregroundStyle(.tertiary)
                             }
+                        }
+
+                        if !info.primaryMuscles.isEmpty || !info.secondaryMuscles.isEmpty {
+                            MuscleHighlightCard(
+                                primaryMuscles: info.primaryMuscles,
+                                secondaryMuscles: info.secondaryMuscles
+                            )
                         }
                     }
 

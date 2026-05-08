@@ -578,5 +578,17 @@ enum Migrations {
             }
             try db.create(index: "idx_water_entry_date", on: "water_entry", columns: ["date"])
         }
+
+        // v37: GLP-1 / medication logging
+        migrator.registerMigration("v37_medications") { db in
+            try db.create(table: "daily_medication") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("name", .text).notNull()
+                t.column("dose_mg", .double)
+                t.column("dose_unit", .text)
+                t.column("logged_at", .text).notNull()
+            }
+            try db.create(index: "idx_daily_medication_logged_at", on: "daily_medication", columns: ["logged_at"])
+        }
     }
 }

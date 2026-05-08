@@ -27,11 +27,16 @@ LOG_DIR="$HOME/drift-self-improve-logs"
 WATCHDOG_LOG="$LOG_DIR/watchdog.log"
 PID_FILE="$LOG_DIR/claude.pid"
 CHECK_INTERVAL=60   # 1 minute — heartbeat: sprint refresh + health check
-STALE_THRESHOLD=1800  # 30 minutes — no heartbeat/log output = definitely dead
+# Bumped 1800→3600 (2026-05-06): the 30-min threshold was killing genuinely
+# productive deep investigation. Issue #641 alone burned 3 senior sessions
+# because each stalled at 30 min mid-trace. 60 min is generous enough that
+# only truly-hung sessions trip it. Combined with snapshot_orphan_wip(),
+# even sessions that DO trip it leave a recoverable diff for the next.
+STALE_THRESHOLD=3600  # 60 minutes — no heartbeat/log output = definitely dead
 # Per-session stall thresholds (no commits/progress before nudge)
 STALL_PLANNING=3600  # 1 hour
-STALL_SENIOR=1800    # 30 minutes
-STALL_JUNIOR=1800    # 30 minutes
+STALL_SENIOR=3600    # 1 hour (was 30 min — see STALE_THRESHOLD note)
+STALL_JUNIOR=3600    # 1 hour
 NUDGE_WAIT=300       # 5 minutes after nudge before killing
 # Commit-rate stall: senior/junior that has produced 0 commits to main this long = stuck
 COMMIT_STALL=10800   # 3 hours — genuinely-hard bugs sometimes take this long, but 0 commits past this is a tarpit
@@ -96,8 +101,49 @@ run_compliance() {
     COMP_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "unknown")
     local COMP_MODEL
     COMP_MODEL=$(cat "$HOME/drift-state/last-model" 2>/dev/null || echo "unknown")
+    # Copy session log to /tmp/planning-crash-log.txt for post-mortem (planning crashes only)
+    if [[ "$EXIT_REASON" == "crash" || "$EXIT_REASON" == "stall" ]] && [[ -n "$CURRENT_LOG" ]] && [[ -f "$CURRENT_LOG" ]]; then
+        cp "$CURRENT_LOG" "/tmp/planning-crash-log.txt" 2>/dev/null || true
+        log "Crash log saved to /tmp/planning-crash-log.txt"
+    fi
     "$WORK_DIR/scripts/session-compliance.sh" "$COMP_TYPE" "$COMP_MODEL" "$EXIT_REASON" 2>/dev/null || true
     log "Session compliance: $COMP_TYPE ($COMP_MODEL, $EXIT_REASON)"
+}
+
+snapshot_orphan_wip() {
+    # Capture dirty state for an UNCLAIMED session before cleanup discards it.
+    # Distinct from snapshot_wip_if_in_progress (which only fires when a claim
+    # is active). Investigation work on issue #641 burned 3+ sessions because
+    # each stall triggered `git checkout .` and the next session restarted
+    # from zero. Save the orphan diff so the next senior can `git apply` it
+    # and continue, even though the issue number isn't known.
+    local SD="$HOME/drift-state"
+    cd "$WORK_DIR" || return
+    local REAL_EDITS
+    REAL_EDITS=$(git status --porcelain 2>/dev/null \
+        | { grep -vE 'command-center/heartbeat\.json|graphify-out/|\.xcodeproj/' || true; } \
+        | wc -l | tr -d ' ')
+    [[ "$REAL_EDITS" -eq 0 ]] && return
+
+    mkdir -p "$SD/wip"
+    local STAMP
+    STAMP=$(date -u +%Y%m%dT%H%M%SZ)
+    local PATCH="$SD/wip/orphan-${STAMP}.patch"
+    git diff HEAD --binary > "${PATCH}.tmp" 2>/dev/null
+    mv "${PATCH}.tmp" "$PATCH"
+
+    local UNTRACKED
+    UNTRACKED=$(git ls-files --others --exclude-standard 2>/dev/null \
+        | grep -vE 'command-center/heartbeat\.json|graphify-out/|\.xcodeproj/' || true)
+    if [[ -n "$UNTRACKED" ]]; then
+        echo "$UNTRACKED" | tar -czf "$SD/wip/orphan-${STAMP}.untracked.tar.gz.tmp" -T - 2>/dev/null
+        mv "$SD/wip/orphan-${STAMP}.untracked.tar.gz.tmp" "$SD/wip/orphan-${STAMP}.untracked.tar.gz"
+    fi
+
+    # Newest-orphan symlink for easy discovery by next session-start.
+    ln -sf "orphan-${STAMP}.patch" "$SD/wip/last-orphan.patch"
+
+    log "Orphan WIP saved: $PATCH (${REAL_EDITS} dirty file(s)). Next session can: git apply $PATCH"
 }
 
 cleanup_dirty_state() {
@@ -125,6 +171,9 @@ cleanup_dirty_state() {
     if [[ -n "$DIRTY" ]]; then
         log "Dirty state after session exit. Discarding incomplete changes:"
         log "$DIRTY"
+        # Save orphan WIP first — git checkout below would otherwise discard
+        # legitimate investigation work for sessions that died before claim.
+        snapshot_orphan_wip
         git checkout . 2>/dev/null || true
         git clean -fd --exclude=.claude/ 2>/dev/null || true
         log "Working tree cleaned."
@@ -429,15 +478,22 @@ snapshot_wip_if_in_progress() {
     NUM=$(jq -r '.in_progress // empty' "$STATE_FILE" 2>/dev/null || echo "")
     [[ -z "$NUM" || "$NUM" == "null" ]] && return
 
+    # Design-doc work has no working-tree state to snapshot — the deliverable
+    # is a PR with the doc, not local edits. Skip WIP capture entirely.
+    # Also avoids the path-with-slash bug ("design/561" → wip/design/561.patch
+    # whose subdir wasn't mkdir'd) that crash-looped the watchdog on 2026-05-01.
+    [[ "$NUM" == */* ]] && return
+
     cd "$WORK_DIR" || return
     local REAL_EDITS
-    # `|| echo 0` because grep -vE returns 1 when nothing matches (clean tree
-    # or only whitelisted noise) — combined with set -euo pipefail at line 12,
-    # that propagates exit 1 and kills the watchdog. Latent path that fires
-    # when a session is mid-claim AND the working tree has only noise files.
-    REAL_EDITS=$( { git status --porcelain 2>/dev/null \
-        | grep -vE 'command-center/heartbeat\.json|graphify-out/|\.xcodeproj/' \
-        | wc -l | tr -d ' '; } || echo 0 )
+    # Tame grep's exit-1-on-no-match (which would propagate through pipefail
+    # and kill the watchdog) by wrapping grep specifically with `|| true`.
+    # Earlier defensive wrap `{ ... } || echo 0` produced "0\n0" because the
+    # inner block had already printed "0" before failing — broke the
+    # arithmetic test below.
+    REAL_EDITS=$(git status --porcelain 2>/dev/null \
+        | { grep -vE 'command-center/heartbeat\.json|graphify-out/|\.xcodeproj/' || true; } \
+        | wc -l | tr -d ' ')
     if [[ "$REAL_EDITS" -eq 0 ]]; then
         # No real edits — remove any stale patch (issue was claimed, work
         # got committed since last tick, patch no longer reflects WIP)
@@ -661,7 +717,11 @@ start_claude() {
 - [ ] Sprint tasks — 8+ sprint-task issues created
 - [ ] Personas updated — appended \"What I learned\" to persona files
 - [ ] Roadmap updated — applied agreed changes
-- [ ] Sprint refreshed — scripts/sprint-service.sh refresh called" \
+- [ ] Sprint refreshed — scripts/sprint-service.sh refresh called
+- [ ] Bug triage — P0/P1/P2 bugs reviewed, needs-review or approved labels applied
+- [ ] Design docs — pending design-doc issues noted, doc-ready ones reviewed
+- [ ] Feature requests — untriaged FRs reviewed, deferred or sprint-tasked
+- [ ] State assessed — Docs/state.md checked, build/test counts verified" \
             --json number --jq '.number' 2>/dev/null || echo "")
         if [[ -n "$PLAN_ISSUE" ]]; then
             log "Created planning tracking Issue #$PLAN_ISSUE"
@@ -893,9 +953,10 @@ while true; do
 
     # Snapshot runs every tick regardless of state so the activity graph
     # keeps advancing even while paused — flatlining is then a signal
-    # that nothing is running, not that the snapshot is stale. The commit
-    # + push stays RUN-only (see commit_heartbeat_if_due) so paused time
-    # doesn't spam the remote.
+    # that nothing is running, not that the snapshot is stale.
+    # heartbeat.json is intentionally NOT committed — it's written to disk
+    # and the command-center reads it locally. Standalone heartbeat commits
+    # polluted git log; removed per #642.
     "$WORK_DIR/scripts/heartbeat-snapshot.sh" 2>/dev/null || true
 
     # React to STOP/PAUSE/DRAIN immediately (every 30s)
@@ -977,6 +1038,12 @@ while true; do
             check_stale_claim
             snapshot_wip_if_in_progress
             sweep_stale_in_progress_labels
+            # heartbeat.json must be committed so the deployed Command Center
+            # (GitHub Pages) can fetch it. #642 removed this call to stop log
+            # pollution but broke the deployed UI — Pages and raw.githubusercontent
+            # both 404'd, JSON.parse choked on the 404 body. Restored with the
+            # original hybrid cadence (commit when elapsed > 10 min OR HEAD moved
+            # for piggyback). Worst-case noise: ~6 standalone heartbeat commits/hr.
             commit_heartbeat_if_due
             # Check if autopilot is dead
             if ! is_claude_alive; then
@@ -1025,8 +1092,14 @@ while true; do
                 _TF_LAST=$(cat "$HOME/drift-state/last-testflight-publish" 2>/dev/null || echo "0")
                 _TF_ELAPSED=$(( $(date +%s) - _TF_LAST ))
                 if [[ "$_TF_ELAPSED" -ge 10800 ]] && [[ ! -f "$HOME/drift-state/testflight-due" ]]; then
-                    echo "$(date +%s)" > "$HOME/drift-state/testflight-due"
-                    log "TestFlight publish due (${_TF_ELAPSED}s since last) — marked for next commit"
+                    # Gate: archive is known-broken + P0 bugs still open → skip to avoid guaranteed-failure loop
+                    if [[ -f "$HOME/drift-state/testflight-archive-failed" ]] && [[ -s "$HOME/drift-state/cache-p0-bugs" ]]; then
+                        _P0_BUGS=$(cat "$HOME/drift-state/cache-p0-bugs")
+                        log "TestFlight skipped — archive-failure flag set and P0 bugs open: $_P0_BUGS"
+                    else
+                        echo "$(date +%s)" > "$HOME/drift-state/testflight-due"
+                        log "TestFlight publish due (${_TF_ELAPSED}s since last) — marked for next commit"
+                    fi
                 fi
 
                 # Check per-session stall threshold (no commits/progress)

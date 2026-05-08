@@ -7,12 +7,15 @@ public struct BehaviorInsight: Sendable, Identifiable {
     public let title: String
     public let detail: String
     public let isPositive: Bool
+    /// Non-nil when this alert supports 24h dismissal. The key maps to a Preferences dismissed-until timestamp.
+    public let dismissKey: String?
 
-    public init(icon: String, title: String, detail: String, isPositive: Bool) {
+    public init(icon: String, title: String, detail: String, isPositive: Bool, dismissKey: String? = nil) {
         self.icon = icon
         self.title = title
         self.detail = detail
         self.isPositive = isPositive
+        self.dismissKey = dismissKey
     }
 }
 
@@ -36,14 +39,16 @@ public enum BehaviorInsightService {
     public static func computeProactiveAlerts(recentAppleWorkouts: [Date] = []) -> [BehaviorInsight] {
         var alerts: [BehaviorInsight] = []
         if let protein = proteinStreakAlert() { alerts.append(protein) }
+        if let glucose = glucoseSpikeAlert() { alerts.append(glucose) }
         if let supplement = supplementGapAlert() { alerts.append(supplement) }
         if let workout = workoutConsistencyAlert(recentAppleWorkouts: recentAppleWorkouts) { alerts.append(workout) }
         if let logging = loggingGapAlert() { alerts.append(logging) }
         return alerts
     }
 
-    /// Alert when protein target has been missed 3+ consecutive days.
+    /// Alert when protein target has been missed 3+ consecutive days OR 4+ of last 7 days.
     private static func proteinStreakAlert() -> BehaviorInsight? {
+        guard Preferences.alertDismissedUntil(key: "protein_streak") < Date().timeIntervalSince1970 else { return nil }
         guard let goal = WeightGoal.load(),
               let targets = goal.macroTargets(),
               targets.proteinG > 0 else { return nil }
@@ -51,26 +56,94 @@ public enum BehaviorInsightService {
         let db = AppDatabase.shared
         let calendar = Calendar.current
         var missedStreak = 0
+        var streakActive = true
+        var missedOf7 = 0
+        var loggedDays = 0
+        var totalProtein = 0.0
 
         for dayOffset in 1...7 {
             guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: Date()) else { break }
             let dateStr = DateFormatters.dateOnly.string(from: date)
             guard let nutrition = try? db.fetchDailyNutrition(for: dateStr),
                   nutrition.calories > 200,
-                  nutrition.proteinG > 0 else { break }  // no logging or no protein data = can't judge
-            if nutrition.proteinG < targets.proteinG * 0.8 {
-                missedStreak += 1
-            } else {
-                break
+                  nutrition.proteinG > 0 else {
+                streakActive = false
+                continue
+            }
+            loggedDays += 1
+            totalProtein += nutrition.proteinG
+            let missed = nutrition.proteinG < targets.proteinG * 0.8
+            if missed { missedOf7 += 1 }
+            if streakActive {
+                if missed { missedStreak += 1 } else { streakActive = false }
             }
         }
 
-        guard missedStreak >= 3 else { return nil }
+        guard loggedDays >= 3 else { return nil }
+        let consecutive = missedStreak
+        guard consecutive >= 3 || missedOf7 >= 4 else { return nil }
+
+        let avgProtein = loggedDays > 0 ? totalProtein / Double(loggedDays) : 0
+        return proteinAdherenceAlertVariant(
+            missedDays: missedOf7,
+            loggedDays: loggedDays,
+            consecutiveStreak: consecutive,
+            avgProtein: avgProtein,
+            proteinTarget: targets.proteinG)
+    }
+
+    /// Pure: given protein stats for the last 7 days, return the alert or nil.
+    /// Separated from DB access so the decision logic is unit-testable.
+    public static func proteinAdherenceAlertVariant(
+        missedDays: Int,
+        loggedDays: Int,
+        consecutiveStreak: Int,
+        avgProtein: Double,
+        proteinTarget: Double
+    ) -> BehaviorInsight? {
+        guard consecutiveStreak >= 3 || missedDays >= 4 else { return nil }
+
+        let dayDesc = consecutiveStreak >= 3
+            ? "\(consecutiveStreak) days in a row"
+            : "\(missedDays) of the last \(loggedDays) days"
+        let suggestions = "Try paneer, dal, eggs, or Greek yogurt."
 
         return BehaviorInsight(
             icon: "exclamationmark.triangle.fill",
             title: "Protein below target",
-            detail: "\(missedStreak) days in a row under \(Int(targets.proteinG))g protein. Try adding a protein shake or eggs.",
+            detail: "You've been under your \(Int(proteinTarget))g protein goal \(dayDesc) — averaging \(Int(avgProtein))g. \(suggestions)",
+            isPositive: false,
+            dismissKey: "protein_streak")
+    }
+
+    /// Alert when glucose readings show spikes (>140 mg/dL) on 3+ of the last 7 days.
+    /// Only fires when glucose data is present — users without a CGM see nothing.
+    private static func glucoseSpikeAlert() -> BehaviorInsight? {
+        let db = AppDatabase.shared
+        let calendar = Calendar.current
+        var spikeDays = 0
+        var dataDays = 0
+
+        for dayOffset in 1...7 {
+            guard let date = calendar.date(byAdding: .day, value: -dayOffset, to: Date()) else { break }
+            let dateStr = DateFormatters.dateOnly.string(from: date)
+            guard let readings = try? db.fetchGlucoseReadings(from: dateStr, to: dateStr),
+                  !readings.isEmpty else { continue }
+            dataDays += 1
+            if readings.contains(where: { $0.glucoseMgdl > 140 }) { spikeDays += 1 }
+        }
+
+        return glucoseSpikeAlertVariant(spikeDays: spikeDays, dataDays: dataDays)
+    }
+
+    /// Pure: given counted spike days and data days from the last 7, return the alert or nil.
+    /// Separated from DB access so the decision logic is unit-testable.
+    public static func glucoseSpikeAlertVariant(spikeDays: Int, dataDays: Int) -> BehaviorInsight? {
+        guard dataDays >= 3, spikeDays >= 3 else { return nil }
+        return BehaviorInsight(
+            icon: "waveform.path.ecg",
+            title: "Recurring glucose spikes",
+            detail: "\(spikeDays) of the last 7 days had readings above 140 mg/dL. Ask Drift AI which meals correlate.",
             isPositive: false)
     }
 
@@ -105,6 +178,63 @@ public enum BehaviorInsightService {
             icon: "pill.fill",
             title: "Supplements missed",
             detail: "\(names)\(extra) — not taken in 3+ days.",
+            isPositive: false)
+    }
+
+    // MARK: - Weekly Workout Consistency Card
+
+    /// Pure function: given weekly counts and the current goal, return the appropriate
+    /// consistency card variant, or nil if there is nothing useful to show.
+    /// - weeklyCounts: sorted ascending by weekStart; last entry = current week
+    /// - weeklyGoal: workouts/week target (default 3)
+    /// - daysLeftInWeek: calendar days remaining (0 = week over)
+    public static func workoutConsistencyVariant(
+        weeklyCounts: [(weekStart: Date, count: Int)],
+        weeklyGoal: Int,
+        daysLeftInWeek: Int
+    ) -> BehaviorInsight? {
+        guard !weeklyCounts.isEmpty else { return nil }
+        guard weeklyCounts.contains(where: { $0.count > 0 }) else { return nil }
+
+        let sorted = weeklyCounts.sorted { $0.weekStart < $1.weekStart }
+        let currentCount = sorted.last?.count ?? 0
+        let priorWeeks = Array(sorted.dropLast().map { $0.count })
+
+        // Consecutive prior weeks meeting goal (from most recent backward)
+        let priorStreak = priorWeeks.reversed().prefix(while: { $0 >= weeklyGoal }).count
+
+        if currentCount >= weeklyGoal {
+            let totalStreak = priorStreak + 1
+            if totalStreak >= 2 {
+                return BehaviorInsight(
+                    icon: "figure.strengthtraining.traditional",
+                    title: "\(totalStreak) weeks in a row",
+                    detail: "You've hit your \(weeklyGoal)/week workout goal for \(totalStreak) consecutive weeks.",
+                    isPositive: true)
+            }
+            return BehaviorInsight(
+                icon: "figure.strengthtraining.traditional",
+                title: "Workout goal hit",
+                detail: "\(currentCount) workouts this week — you've hit your \(weeklyGoal)/week goal.",
+                isPositive: true)
+        }
+
+        // Week over and goal not met — no nagging after the fact
+        if daysLeftInWeek == 0 { return nil }
+
+        if currentCount == 0 {
+            return BehaviorInsight(
+                icon: "figure.strengthtraining.traditional",
+                title: "Start your workout week",
+                detail: "No workouts yet this week. Your \(weeklyGoal)/week goal is within reach.",
+                isPositive: false)
+        }
+
+        let remaining = weeklyGoal - currentCount
+        return BehaviorInsight(
+            icon: "figure.strengthtraining.traditional",
+            title: "Workout goal in reach",
+            detail: "\(currentCount) workout\(currentCount == 1 ? "" : "s") this week — \(remaining) to go for your \(weeklyGoal)/week goal. \(daysLeftInWeek) days left.",
             isPositive: false)
     }
 

@@ -176,9 +176,9 @@ final class NormalizerGoldSetTests: XCTestCase {
             ("log 2 eggs", 2.0, false),
             ("had 100g chicken", 100.0, true),
             ("ate 200 gram rice", 200.0, true),
-            ("log 1.5 cups of oatmeal", 360.0, true),  // 1.5 cups → 360g after #532 unit conversion
+            ("log 1.5 cups of oatmeal", 120.0, true),  // 1.5 cups × 80g/cup (oats density)
             ("had half an avocado", 0.5, false),
-            ("ate a quarter cup of almonds", 60.0, true),  // 0.25 cups → 60g after #532 unit conversion
+            ("ate a quarter cup of almonds", 35.75, true),  // 0.25 cups × 143g/cup (almonds density)
             ("log 3 scoops of protein", 3.0, false),
             ("had 2 slices of pizza", 2.0, false),
             ("ate 2 to 3 bananas", 3.0, false), // takes higher

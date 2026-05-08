@@ -155,4 +155,99 @@ final class VoiceTranscriptionPostFixerTests: XCTestCase {
             "metformin 500mg"
         )
     }
+
+    // MARK: - Biomarker / lab term repairs (#321)
+
+    func testA1CRepair() {
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix("a one see was 5.7"), "A1C was 5.7")
+    }
+
+    func testA1CVariantC() {
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix("a one c is 6.2"), "A1C is 6.2")
+    }
+
+    func testTriglyceridesRepair() {
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix("my tri glycerides are high"), "my triglycerides are high")
+    }
+
+    func testTriglycerideThreeVariant() {
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix("three glycerides 180"), "triglycerides 180")
+    }
+
+    func testLDLRepair() {
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix("l d l is 110"), "LDL is 110")
+    }
+
+    func testLDLElDeeElVariant() {
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix("el dee el was 95"), "LDL was 95")
+    }
+
+    func testHDLRepair() {
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix("h d l is 55"), "HDL is 55")
+    }
+
+    func testTSHRepair() {
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix("t s h came back normal"), "TSH came back normal")
+    }
+
+    func testFerritinFairTin() {
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix("fair tin was low"), "ferritin was low")
+    }
+
+    func testFerritinFerretIn() {
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix("ferret in levels"), "ferritin levels")
+    }
+
+    func testB12Repair() {
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix("b twelve deficient"), "B12 deficient")
+    }
+
+    func testCortisolRepair() {
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix("cortex all was elevated"), "cortisol was elevated")
+    }
+
+    func testHomocysteineRepair() {
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix("homo scist ein is high"), "homocysteine is high")
+    }
+
+    func testCRPSeeVariant() {
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix("see reactive protein is 3"), "CRP is 3")
+    }
+
+    func testCRPCVariant() {
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix("c reactive protein elevated"), "CRP elevated")
+    }
+
+    // MARK: - No-op: already-correct biomarker terms pass through unchanged
+
+    func testA1CAlreadyCorrectNoOp() {
+        let input = "my A1C is 5.4"
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix(input), input)
+    }
+
+    func testLDLAlreadyCorrectNoOp() {
+        let input = "LDL is 120"
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix(input), input)
+    }
+
+    func testFerritinAlreadyCorrectNoOp() {
+        let input = "ferritin levels are normal"
+        XCTAssertEqual(VoiceTranscriptionPostFixer.fix(input), input)
+    }
+
+    // MARK: - Context: biomarker term embedded in longer phrase
+
+    func testA1CInPhrase() {
+        XCTAssertEqual(
+            VoiceTranscriptionPostFixer.fix("my a one see was 5.4 last month"),
+            "my A1C was 5.4 last month"
+        )
+    }
+
+    func testLDLInPhrase() {
+        XCTAssertEqual(
+            VoiceTranscriptionPostFixer.fix("doctor said l d l was 130 and h d l was 60"),
+            "doctor said LDL was 130 and HDL was 60"
+        )
+    }
 }

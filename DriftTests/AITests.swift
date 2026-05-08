@@ -2489,7 +2489,9 @@ import Testing
 }
 
 @Test @MainActor func intentClassifierPromptHasMuscleRecoveryExample() {
-    let prompt = IntentClassifier.systemPrompt
+    // muscle_recovery disambiguation lives in intelligenceExtras (Gemma's richer prompt)
+    // because SmolLM's tighter routerPrompt uses simpler one-line tool descriptions.
+    let prompt = IntentClassifier.intelligencePrompt
     #expect(prompt.contains("muscle recovery"), "Prompt should include muscle recovery → exercise_info example")
 }
 

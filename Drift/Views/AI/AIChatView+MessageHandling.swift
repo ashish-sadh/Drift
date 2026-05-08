@@ -162,6 +162,13 @@ extension AIChatViewModel {
                 messages[statusIdx] = ChatMessage(role: .assistant, text: "Searching for \(text)...")
                 foodSearchQuery = text
                 showingFoodSearch = true
+            } else if recipeItems.count == 1 && notFound.isEmpty {
+                let item = recipeItems[0]
+                let vm = FoodLogViewModel()
+                let mealType = MealType(rawValue: mealName.lowercased()) ?? vm.autoMealType
+                vm.logRecipeItems(recipeItems, mealType: mealType)
+                messages[statusIdx] = ChatMessage(role: .assistant,
+                    text: "Logged \(item.name) (\(Int(item.calories)) cal) for \(mealName.capitalized)!")
             } else {
                 var msg = "Building \(mealName): \(recipeItems.map { "\($0.name) (\(Int($0.calories)) cal)" }.joined(separator: ", "))."
                 if !notFound.isEmpty {
@@ -1178,6 +1185,7 @@ extension AIChatViewModel {
         let responseId = placeholder.id
         streamingMessageId = responseId
         generatingState = .thinking(step: thinkingLabel)
+        stageStarted = Date()
         generationEpoch += 1
         let myEpoch = generationEpoch
         let systemPrompt = IntentClassifier.activeSystemPrompt(backend: .remote)
@@ -1187,6 +1195,7 @@ extension AIChatViewModel {
                 if generationEpoch == myEpoch { generationEpoch += 1 }
                 streamingMessageId = nil
                 generatingState = .idle
+                stageStarted = nil
                 pendingTurnHasPhoto = false
             }
 
@@ -1224,8 +1233,29 @@ extension AIChatViewModel {
     /// Parse a `propose_meal` tool-call JSON emitted by the remote backend
     /// into a `ProposedMealCardData`. Returns nil for plain text responses.
     func parseProposedMealCard(from response: String) -> ProposedMealCardData? {
-        guard response.contains("propose_meal"),
-              let data = response.data(using: .utf8),
+        guard response.contains("propose_meal") else { return nil }
+        // Scan for the first balanced JSON object — LLM may wrap it in prose or markdown fences.
+        var depth = 0
+        var jsonStart: String.Index? = nil
+        for idx in response.indices {
+            switch response[idx] {
+            case "{":
+                if depth == 0 { jsonStart = idx }
+                depth += 1
+            case "}":
+                if depth > 0 { depth -= 1 }
+                if depth == 0, let start = jsonStart {
+                    if let card = parseMealCardJSON(String(response[start...idx])) { return card }
+                    jsonStart = nil
+                }
+            default: break
+            }
+        }
+        return nil
+    }
+
+    private func parseMealCardJSON(_ jsonString: String) -> ProposedMealCardData? {
+        guard let data = jsonString.data(using: .utf8),
               let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
               (json["tool"] as? String) == "propose_meal",
               let rawItems = json["items"] as? [[String: Any]],
@@ -1246,8 +1276,7 @@ extension AIChatViewModel {
                 fat: intVal("fat")
             )
         }
-        guard !items.isEmpty else { return nil }
-        return ProposedMealCardData(items: items)
+        return items.isEmpty ? nil : ProposedMealCardData(items: items)
     }
 
     /// Apply a photo-turn or followup response to the streaming placeholder:
@@ -1417,6 +1446,7 @@ extension AIChatViewModel {
         let responseId = placeholder.id
         streamingMessageId = responseId
         generatingState = .thinking(step: "Understanding your question...")
+        stageStarted = Date()
 
         generationEpoch += 1
         let myEpoch = generationEpoch
@@ -1432,6 +1462,7 @@ extension AIChatViewModel {
                 if generationEpoch == myEpoch { generationEpoch += 1 }
                 streamingMessageId = nil
                 generatingState = .idle
+                stageStarted = nil
             }
 
             let output = await AIToolAgent.run(
@@ -1442,6 +1473,7 @@ extension AIChatViewModel {
                     Task { @MainActor in
                         guard let self, self.generationEpoch == epoch else { return }
                         self.generatingState = .thinking(step: step)
+                        self.stageStarted = Date()
                     }
                 },
                 onToken: { [weak self] token in
@@ -1610,6 +1642,19 @@ extension AIChatViewModel {
                 remaining: remaining,
                 action: action
             )
+        }
+
+        // Medication card — for log_medication
+        if tools.contains("log_medication") {
+            let meds = MedicationService.todayMedications()
+            if let last = meds.last {
+                let doseDisplay: String? = last.doseMg.map { dose in
+                    let unit = last.doseUnit ?? "mg"
+                    let doseStr = dose == dose.rounded() ? String(Int(dose)) : String(dose)
+                    return "\(doseStr)\(unit)"
+                }
+                message.medicationCard = MedicationCardData(name: last.name, doseDisplay: doseDisplay)
+            }
         }
 
         // Sleep & recovery card

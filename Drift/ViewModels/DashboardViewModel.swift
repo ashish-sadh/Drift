@@ -32,7 +32,13 @@ final class DashboardViewModel {
 
     var behaviorInsights: [BehaviorInsight] = []
     var proactiveAlerts: [BehaviorInsight] = []
+    var workoutConsistencyInsight: BehaviorInsight? = nil
     var isLoading = false
+
+    func dismissProactiveAlert(key: String) {
+        Preferences.setAlertDismissedUntil(key: key, until: Date().timeIntervalSince1970 + 86400)
+        proactiveAlerts.removeAll { $0.dismissKey == key }
+    }
 
     var calorieBalance: Double {
         todayNutrition.calories - caloriesBurned
@@ -151,6 +157,17 @@ final class DashboardViewModel {
         let newAlerts = BehaviorInsightService.computeProactiveAlerts(recentAppleWorkouts: recentAppleWorkoutDates)
         if newAlerts.map(\.title) != proactiveAlerts.map(\.title) {
             proactiveAlerts = newAlerts
+        }
+
+        // Weekly workout consistency card
+        if let weeklyCounts = try? WorkoutService.weeklyWorkoutCounts(weeks: 5) {
+            let cal = Calendar.current
+            let daysLeft = cal.dateComponents([.day], from: Date(),
+                to: cal.dateInterval(of: .weekOfYear, for: Date())?.end ?? Date()).day ?? 0
+            workoutConsistencyInsight = BehaviorInsightService.workoutConsistencyVariant(
+                weeklyCounts: weeklyCounts, weeklyGoal: 3, daysLeftInWeek: daysLeft)
+        } else {
+            workoutConsistencyInsight = nil
         }
     }
 }

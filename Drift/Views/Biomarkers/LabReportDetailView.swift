@@ -35,6 +35,7 @@ struct LabReportDetailView: View {
                 Button(role: .destructive) { showingDeleteAlert = true } label: {
                     Image(systemName: "trash").foregroundStyle(Theme.surplus)
                 }
+                .accessibilityLabel("Delete report")
             }
         }
         .alert("Delete Report?", isPresented: $showingDeleteAlert) {

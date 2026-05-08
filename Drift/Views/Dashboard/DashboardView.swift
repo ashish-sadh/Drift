@@ -7,7 +7,12 @@ struct DashboardView: View {
     @State var viewModel = DashboardViewModel()
     @State var showDeficitExplainer = false
     @AppStorage("drift_ai_enabled") private var aiEnabled = false
+    @AppStorage("workout_consistency_dismissed_until") private var workoutConsistencyDismissedUntil: Double = 0
     @State private var showingWeightEntry = false
+
+    private var isWorkoutConsistencyDismissed: Bool {
+        Date().timeIntervalSince1970 < workoutConsistencyDismissedUntil
+    }
 
     var body: some View {
         NavigationStack {
@@ -120,6 +125,16 @@ struct DashboardView: View {
                                     Text(alert.detail).font(.caption2).foregroundStyle(.secondary)
                                 }
                                 Spacer()
+                                if let key = alert.dismissKey {
+                                    Button {
+                                        withAnimation { viewModel.dismissProactiveAlert(key: key) }
+                                    } label: {
+                                        Image(systemName: "xmark")
+                                            .font(.caption2)
+                                            .foregroundStyle(.tertiary)
+                                    }
+                                    .accessibilityLabel("Dismiss alert")
+                                }
                             }.card()
                         }
                     }
@@ -139,6 +154,13 @@ struct DashboardView: View {
                     // Apple Health Workouts — show if any today
                     if !viewModel.todayWorkouts.isEmpty {
                         Button { selectedTab = 3 } label: { workoutCard }.buttonStyle(.plain)
+                    }
+
+                    // Weekly workout consistency card
+                    if let insight = viewModel.workoutConsistencyInsight, !isWorkoutConsistencyDismissed {
+                        WorkoutConsistencyCard(insight: insight) {
+                            workoutConsistencyDismissedUntil = Date().addingTimeInterval(86400).timeIntervalSince1970
+                        }
                     }
 
                     // ── Recovery ──

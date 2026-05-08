@@ -749,6 +749,24 @@ public enum ToolRegistration {
             }
         ))
 
+        r.register(ToolSchema(
+            id: "health.log_medication", name: "log_medication", service: "medication",
+            description: "User LOGGED a medication. Use when they say 'took Ozempic', 'injected semaglutide', 'took my metformin', 'log GLP-1', 'took insulin'.",
+            parameters: [
+                ToolParam("name", "string", "Medication name (e.g. 'Ozempic', 'metformin', 'semaglutide')"),
+                ToolParam("dose", "number", "Dose amount (e.g. 0.5, 500, 2)", required: false),
+                ToolParam("unit", "string", "Dose unit: mg, mcg, ml, units, IU (default mg)", required: false)
+            ],
+            handler: { params in
+                guard let name = params.string("name") else { return .error("Which medication?") }
+                return .text(MedicationService.logMedication(
+                    name: name,
+                    doseMg: params.double("dose"),
+                    doseUnit: params.string("unit")
+                ))
+            }
+        ))
+
         // NOTE: Glucose, biomarker, and body composition tools are registered but NOT shown
         // in the default 6-tool prompt. They appear when user is on those specific screens.
         // This keeps the main prompt focused for the 1.5B model.
@@ -831,6 +849,12 @@ public enum ToolRegistration {
         // OLS regression on last 30 days → projected date + R² confidence. #402.
         WeightTrendPredictionTool.syncRegistration(registry: r)
 
+        // Medication history — last dose time, typical timing, recent pattern.
+        MedicationInfoTool.syncRegistration(registry: r)
+
+        // GLP-1 insight — adherence streak, missed doses, weight delta since first dose.
+        GLP1InsightTool.syncRegistration(registry: r)
+
         // Supplement adherence — streak, adherence %, last missed date. #417.
         SupplementInsightTool.syncRegistration(registry: r)
 
@@ -843,8 +867,14 @@ public enum ToolRegistration {
         // Exercise volume by muscle group — training volume, undertrained groups. #335.
         ExerciseVolumeSummaryTool.syncRegistration(registry: r)
 
+        // Progressive overload plateau detection — which lifts are stalling + suggestions. #633.
+        ProgressiveOverloadCheckTool.syncRegistration(registry: r)
+
         // Glucose-food correlation — which foods spike glucose? ±2h window analysis. #324.
         GlucoseFoodCorrelationTool.syncRegistration(registry: r)
+
+        // Glucose spike analysis — peak-based spike detection per meal, >30 mg/dL threshold. #631.
+        GlucoseSpikeAnalysisTool.syncRegistration(registry: r)
 
         // PhotoLog tool is registered separately by the iOS Drift app
         // after this base registration runs (it depends on iOS-only

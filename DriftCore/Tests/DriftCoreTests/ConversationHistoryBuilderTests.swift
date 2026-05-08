@@ -76,19 +76,20 @@ import Testing
     #expect(assistantLine.count <= perMsgChars + 3)
 }
 
-@Test @MainActor func historyBuilderKeepsRecentWhenWindowExceedsTen() {
+@Test @MainActor func historyBuilderKeepsRecentWhenWindowExceedsTwenty() {
     Preferences.conversationHistoryEnabled = true
     ConversationState.shared.reset()
-    // 12 turns: builder only considers the last 10 (maxTurnWindow).
-    let msgs = (0..<12).map { i -> HistoryTurn in
+    // 22 messages: builder considers last 20 (maxTurnWindow = 20 messages = 10 rounds).
+    // turn0 and turn1 fall outside the window.
+    // "turn0" is safe: not a substring of turn10–turn21 (checked char-by-char).
+    let msgs = (0..<22).map { i -> HistoryTurn in
         HistoryTurn(
             role: i % 2 == 0 ? .user : .assistant,
             text: "turn\(i)")
     }
     let result = ConversationHistoryBuilder.build(turns: msgs, maxTokens: 800)
-    // "turn0" is safe: not a substring of turn10/turn11 (those have '1' at position 4)
     #expect(!result.contains("turn0"))
-    #expect(result.contains("turn11"))
+    #expect(result.contains("turn21"))
     #expect(result.contains("turn2"))
 }
 

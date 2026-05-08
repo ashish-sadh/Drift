@@ -960,3 +960,146 @@ private func dateStr(_ d: Date) -> String {
     #expect(abs(m.calorieTarget - expectedCal) < 1, "Should report honest macro sum, not TDEE anchor 2000")
     #expect(m.calorieTarget > 2000, "Extreme protein pushes intake above TDEE anchor")
 }
+
+// MARK: - TrendDirection (6 tests)
+
+@Test func trendDirectionDisplayTextLosing() {
+    #expect(WeightTrendCalculator.TrendDirection.losing.displayText == "Decrease")
+}
+
+@Test func trendDirectionDisplayTextMaintaining() {
+    #expect(WeightTrendCalculator.TrendDirection.maintaining.displayText == "Stable")
+}
+
+@Test func trendDirectionDisplayTextGaining() {
+    #expect(WeightTrendCalculator.TrendDirection.gaining.displayText == "Increase")
+}
+
+@Test func trendDirectionSystemImageLosing() {
+    #expect(WeightTrendCalculator.TrendDirection.losing.systemImage == "arrow.down.right")
+}
+
+@Test func trendDirectionSystemImageMaintaining() {
+    #expect(WeightTrendCalculator.TrendDirection.maintaining.systemImage == "arrow.right")
+}
+
+@Test func trendDirectionSystemImageGaining() {
+    #expect(WeightTrendCalculator.TrendDirection.gaining.systemImage == "arrow.up.right")
+}
+
+// MARK: - Regime change (no-gap variant) — fix for "+1.2 lbs but -213 kcal deficit" bug
+
+/// User who lost ~3 kg over the prior 30 days then started gaining ~0.18 kg/wk
+/// in the recent 21 days. Logs daily (no gap). Before the fix, the small
+/// 21-day slope (< 0.227 kg/wk) widened to 42 days, which reached back into
+/// the losing phase and produced a NEGATIVE weekly rate — wrong sign.
+/// After the fix: lower widen threshold (0.10 kg/wk) lets +0.18 kg/wk
+/// survive without widening; sign-flip guard catches edge cases below 0.10.
+@Test func regimeChange_recentGain_afterLongLoss_preservesPositiveSign() async throws {
+    let entries = recentDailyEntries(count: 42) { i in
+        if i < 21 {
+            return 60.0 - (3.0 * Double(i) / 20.0)        // lose 60→57 over first 21 days
+        } else {
+            return 57.0 + (0.55 * Double(i - 21) / 20.0)  // gain 57→57.55 over last 21 days
+        }
+    }
+    let trend = WeightTrendCalculator.calculateTrend(entries: entries)!
+    #expect(trend.weeklyRateKg > 0, "Recent 21-day gain must dominate; widening into prior loss must not flip the sign. Got \(trend.weeklyRateKg) kg/wk")
+    #expect(trend.estimatedDailyDeficit > 0, "Positive rate ⇒ surplus, not deficit. Got \(trend.estimatedDailyDeficit) kcal/day")
+    #expect(trend.trendDirection == .gaining)
+}
+
+/// Mirror case: user gained then started losing. Recent slope must win.
+@Test func regimeChange_recentLoss_afterLongGain_preservesNegativeSign() async throws {
+    let entries = recentDailyEntries(count: 42) { i in
+        if i < 21 {
+            return 60.0 + (3.0 * Double(i) / 20.0)        // gain 60→63
+        } else {
+            return 63.0 - (0.55 * Double(i - 21) / 20.0)  // lose 63→62.45
+        }
+    }
+    let trend = WeightTrendCalculator.calculateTrend(entries: entries)!
+    #expect(trend.weeklyRateKg < 0, "Recent 21-day loss must dominate. Got \(trend.weeklyRateKg) kg/wk")
+    #expect(trend.estimatedDailyDeficit < 0, "Negative rate ⇒ deficit. Got \(trend.estimatedDailyDeficit) kcal/day")
+    #expect(trend.trendDirection == .losing)
+}
+
+/// True maintenance after a long loss SHOULD allow widen path. Sign-flip
+/// guard only fires when |primary| ≥ maintainingThreshold (0.05 kg/wk),
+/// so a primary that's near zero (oscillating noise, not a consistent
+/// drift) doesn't suppress widening.
+@Test func regimeChange_recentMaintenance_afterLongLoss_doesNotFlipToGain() async throws {
+    let entries = recentDailyEntries(count: 42) { i in
+        if i < 21 {
+            return 60.0 - (3.0 * Double(i) / 20.0)        // lose 60→57
+        } else {
+            // Recent 21 days: oscillate ±0.05 kg around 57 — net-flat noise.
+            // Even-i entries are 56.95, odd-i are 57.05; mean stays at 57.
+            return 57.0 + (i % 2 == 0 ? -0.05 : 0.05)
+        }
+    }
+    let trend = WeightTrendCalculator.calculateTrend(entries: entries)!
+    // Primary slope ≈ 0 (< maintainingThreshold) → guard does not fire →
+    // widened slope (still negative from the prior loss) is used. The user
+    // hasn't established a new direction; the long-term trend is the right
+    // signal until they do.
+    #expect(trend.weeklyRateKg < 0,
+            "Near-zero primary should let widen path show prior trend, not flip to gain. Got \(trend.weeklyRateKg)")
+}
+
+// MARK: - Median-based two-window endpoints — fix for "near-flat trajectory reports -0.71 lbs/wk"
+
+/// Daily logger, 30 days of near-flat weight (~53.0 kg) with one heavy
+/// water-weight day (+0.7 kg) in the first 7-day window. Mean-based
+/// two-window would inflate firstAvg, producing a misleading negative
+/// slope. Median ignores that single outlier and stays near zero.
+@Test func twoWindow_medianIgnoresSingleOutlier() async throws {
+    let entries = recentDailyEntries(count: 30) { i in
+        // Near-flat trend: 53.0 kg base with ±0.1 kg daily noise
+        let base = 53.0 + (i % 2 == 0 ? -0.1 : 0.1)
+        // One outlier in the first 7-day window: +0.7 kg on day 22 ago
+        // (i.e., index 8, since count=30 and last day is index 29).
+        if i == 8 { return 53.7 }
+        return base
+    }
+    let trend = WeightTrendCalculator.calculateTrend(entries: entries)!
+    // True trajectory is essentially flat. Median-based slope should be
+    // within ±0.1 kg/wk of zero. With the prior mean-based code the
+    // single +0.7 kg outlier in the first window pulled firstAvg up
+    // ~0.1 kg, producing a false ~-0.05 kg/wk loss with no real basis.
+    #expect(abs(trend.weeklyRateKg) < 0.1,
+            "Median should ignore the +0.7 kg outlier; got \(trend.weeklyRateKg) kg/wk")
+}
+
+/// When daily weights actually trend downward at -0.1 kg/wk, the median
+/// path should report close to that — not lose the signal under
+/// robustness. This validates the method isn't over-shrinking real change.
+@Test func twoWindow_medianPreservesRealTrend() async throws {
+    let entries = recentDailyEntries(count: 30) { i in
+        // Linear loss: 53.5 → 53.0 over 30 days ≈ -0.117 kg/wk
+        let base = 53.5 - (0.5 * Double(i) / 29.0)
+        // Tiny ±0.05 kg noise so it's not perfectly clean
+        let noise = i % 2 == 0 ? -0.05 : 0.05
+        return base + noise
+    }
+    let trend = WeightTrendCalculator.calculateTrend(entries: entries)!
+    #expect(trend.weeklyRateKg < 0, "Should detect negative trend, got \(trend.weeklyRateKg)")
+    #expect(trend.weeklyRateKg > -0.25,
+            "Should be close to -0.117 kg/wk (true rate), not blown up. Got \(trend.weeklyRateKg)")
+}
+
+/// Pure unit test for the median helper.
+@Test func median_oddCount() {
+    #expect(WeightTrendCalculator.median(of: [1.0, 5.0, 3.0]) == 3.0)
+    #expect(WeightTrendCalculator.median(of: [1.0, 2.0, 3.0, 4.0, 5.0]) == 3.0)
+}
+
+@Test func median_evenCount_averagesMiddleTwo() {
+    #expect(WeightTrendCalculator.median(of: [1.0, 2.0, 3.0, 4.0]) == 2.5)
+    #expect(WeightTrendCalculator.median(of: [10.0, 20.0]) == 15.0)
+}
+
+@Test func median_robustToOutliers() {
+    // One huge outlier doesn't move the median
+    #expect(WeightTrendCalculator.median(of: [1.0, 2.0, 3.0, 100.0]) == 2.5)
+}

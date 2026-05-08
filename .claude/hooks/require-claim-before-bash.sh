@@ -55,6 +55,15 @@ case "$SESSION_TYPE" in
     *) exit 0 ;;
 esac
 
+# TestFlight publish escape hatch: when testflight-check.sh has marked the
+# publish authorized, allow xcodebuild/xcodegen/git/gh through even with no
+# claim. Without this, an empty queue + a due TestFlight deadlocks the
+# session — the hook forbids the publish commands the *other* hook just
+# mandated. Marker is removed by step 5a of the publish flow.
+if [ -f "$HOME/drift-state/testflight-publish-authorized" ]; then
+    exit 0
+fi
+
 # Already claimed? exit 0.
 STATE_FILE="$HOME/drift-state/sprint-state.json"
 [ -f "$STATE_FILE" ] || exit 0
@@ -99,14 +108,44 @@ EOF
     Read)
         FP=$(echo "$INPUT" | jq -r '.tool_input.file_path // empty' 2>/dev/null || echo "")
         [ -z "$FP" ] && exit 0
-        # Read allowlist — paths we permit pre-claim
+
+        # Pre-claim Read budget. The allowlist below permits Docs/scripts/.claude
+        # so sessions can orient — but in practice senior sessions used those
+        # categories to do *deep tracing* of harness files (e.g. tracking down
+        # where CURRENT_PROJECT_VERSION gets bumped across testflight-check.sh,
+        # watchdog, archive flow). That investigation routinely ran past the
+        # 30-min stall timer and got killed mid-trace. Cap at 15 reads pre-claim
+        # — enough to read the issue + roadmap + a few orienting scripts, not
+        # enough to redo the entire harness audit. session-start.sh resets the
+        # counter at the start of every session.
+        BUDGET_FILE="$HOME/drift-state/preclaim-reads"
+        BUDGET_MAX=15
+        # Atomic-enough increment: append a line, count lines.
+        echo "x" >> "$BUDGET_FILE" 2>/dev/null
+        BUDGET_COUNT=$(wc -l < "$BUDGET_FILE" 2>/dev/null | tr -d ' ' || echo "0")
+
+        # Read allowlist — paths we permit pre-claim (subject to budget)
         case "$FP" in
-            */Docs/*) exit 0 ;;
-            */CLAUDE.md|*/README.md|*/program.md|*/MEMORY.md|*/roadmap.md) exit 0 ;;
-            */scripts/*) exit 0 ;;
-            */.claude/*) exit 0 ;;
-            */drift-state/*) exit 0 ;;
-            */.claude/projects/*/memory/*) exit 0 ;;
+            */Docs/*|*/CLAUDE.md|*/README.md|*/program.md|*/MEMORY.md|*/roadmap.md|*/scripts/*|*/.claude/*|*/drift-state/*|*/.claude/projects/*/memory/*)
+                if [ "$BUDGET_COUNT" -le "$BUDGET_MAX" ]; then
+                    exit 0
+                fi
+                cat >&2 <<EOF
+BLOCKED (Read): Pre-claim Read budget exhausted ($BUDGET_COUNT/$BUDGET_MAX).
+
+You've been orienting for $BUDGET_COUNT reads without claiming. The allowlist
+permits Docs/scripts/.claude/drift-state for orientation, but past the budget
+this becomes deep-investigation wandering — the pattern that burned 3+ senior
+sessions on issue #641 (each stalled mid-trace, work discarded, restart).
+
+If you have enough context: claim now.
+    TASK=\$(scripts/sprint-service.sh next --senior --claim)
+
+If you genuinely need more orientation: post a comment on the issue
+explaining what's missing, then exit. Planning will surface it next cycle.
+EOF
+                exit 2
+                ;;
         esac
         cat >&2 <<EOF
 BLOCKED (Read): Claim an issue before reading source files.

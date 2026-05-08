@@ -27,6 +27,7 @@ struct FoodSearchView: View {
     @State private var onlineResults: [Food] = []
     @State private var isSearchingOnline = false
     @State private var onlineSearchTask: Task<Void, Never>?
+    @State private var recentlyLoggedFoods: [Food] = []
     @FocusState private var searchFocused: Bool
 
     private var effectiveMealType: MealType { initialMealType ?? viewModel.autoMealType }
@@ -121,6 +122,7 @@ struct FoodSearchView: View {
             }
             .onAppear {
                 viewModel.loadSuggestions()
+                recentlyLoggedFoods = FoodService.recentFoods(limit: 8)
                 if !initialQuery.isEmpty {
                     query = initialQuery
                     results = FoodService.searchFood(query: initialQuery)
@@ -172,6 +174,15 @@ struct FoodSearchView: View {
                 }
                 .padding(.horizontal, 16)
 
+                // Recent foods — from actual logged entries, shown first for 1-tap re-logging
+                if !recentlyLoggedFoods.isEmpty {
+                    suggestionSection("RECENT") {
+                        ForEach(recentlyLoggedFoods) { food in
+                            foodSuggestionRow(food)
+                        }
+                    }
+                }
+
                 // Combos & recipes
                 if !viewModel.combos.isEmpty {
                     suggestionSection("COMBOS") {
@@ -200,15 +211,6 @@ struct FoodSearchView: View {
                 if !viewModel.favoriteFoods.isEmpty {
                     suggestionSection("\u{2B50} FAVORITES") {
                         ForEach(viewModel.favoriteFoods) { entry in
-                            recentEntryRow(entry)
-                        }
-                    }
-                }
-
-                // Recent — everything you've logged (foods + recipes)
-                if !viewModel.recentEntries.isEmpty {
-                    suggestionSection("RECENT") {
-                        ForEach(viewModel.recentEntries) { entry in
                             recentEntryRow(entry)
                         }
                     }

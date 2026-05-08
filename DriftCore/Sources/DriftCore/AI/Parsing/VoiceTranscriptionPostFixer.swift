@@ -89,6 +89,44 @@ public enum VoiceTranscriptionPostFixer {
         Rule(#"\bo\s*zen\s*pick\b"#, "ozempic"),
         Rule(#"\bwe\s+go\s+v\b"#, "wegovy"),
         Rule(#"\bmount\s*jarrow\b"#, "mounjaro"),
+
+        // A1C — "a one see" / "a one c".
+        Rule(#"\ba\s+one\s+(?:see|c)\b"#, "A1C"),
+
+        // Triglycerides — "tri glycerides" / "three glycerides".
+        Rule(#"\btri\s+glycerides\b"#, "triglycerides"),
+        Rule(#"\bthree\s+glycerides\b"#, "triglycerides"),
+
+        // LDL — "l d l" / "el dee el".
+        Rule(#"\bl\s+d\s+l\b"#, "LDL"),
+        Rule(#"\bel\s+dee\s+el\b"#, "LDL"),
+
+        // HDL — "h d l" / "aich dee el".
+        Rule(#"\bh\s+d\s+l\b"#, "HDL"),
+        Rule(#"\baich\s+dee\s+el\b"#, "HDL"),
+
+        // TSH (thyroid) — "t s h".
+        Rule(#"\bt\s+s\s+h\b"#, "TSH"),
+
+        // Ferritin — "fair tin" / "ferret in".
+        Rule(#"\bfair\s*tin\b"#, "ferritin"),
+        Rule(#"\bferret\s+in\b"#, "ferritin"),
+
+        // B12 — "b twelve" / "bee 12".
+        Rule(#"\bb\s+twelve\b"#, "B12"),
+        Rule(#"\bbee\s+12\b"#, "B12"),
+
+        // Cortisol — "cortex all" / "court is all".
+        Rule(#"\bcortex\s+all\b"#, "cortisol"),
+        Rule(#"\bcourt\s+is\s+all\b"#, "cortisol"),
+
+        // Homocysteine — "homo scist ein" / "home o cysteine".
+        Rule(#"\bhomo\s+scist\s+ein\b"#, "homocysteine"),
+        Rule(#"\bhome\s+o\s+cysteine\b"#, "homocysteine"),
+
+        // CRP (C-reactive protein) — "see reactive protein" / "c reactive protein".
+        Rule(#"\bsee\s+reactive\s+protein\b"#, "CRP"),
+        Rule(#"\bc\s+reactive\s+protein\b"#, "CRP"),
     ]
 
     /// Context-guarded: only rewrite when a disambiguator sits adjacent, so we don't

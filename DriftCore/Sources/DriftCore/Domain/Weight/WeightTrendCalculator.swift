@@ -65,7 +65,15 @@ public enum WeightTrendCalculator {
         public static let `default` = AlgorithmConfig(
             emaHalfLifeDays: 14,
             regressionWindowDays: 21,
-            widenSlopeThresholdKgPerWeek: 0.227,  // ≈ 0.5 lbs/wk
+            // Tightened 0.227 → 0.10 (2026-05-06): the prior 0.5 lbs/wk
+            // threshold meant any sub-half-pound-per-week slope triggered
+            // widening to 42 days, which routinely pulled in pre-regime-change
+            // data and flipped the sign on users mid-direction-change. A real
+            // user gaining at +0.18 kg/wk got reported as a -0.55 lbs/wk loser
+            // because the 42-day widen reached into a prior losing phase.
+            // 0.10 kg/wk (~0.22 lbs/wk) still filters genuine near-zero noise
+            // but lets a real, consistent small slope survive without widening.
+            widenSlopeThresholdKgPerWeek: 0.10,
             widenWindowDays: 42,
             kcalPerKg: 6000,
             maintainingThresholdKgPerWeek: 0.05
@@ -74,7 +82,7 @@ public enum WeightTrendCalculator {
         public static let conservative = AlgorithmConfig(
             emaHalfLifeDays: 21,
             regressionWindowDays: 21,
-            widenSlopeThresholdKgPerWeek: 0.227,
+            widenSlopeThresholdKgPerWeek: 0.10,
             widenWindowDays: 42,
             kcalPerKg: 5500,
             maintainingThresholdKgPerWeek: 0.05
@@ -243,11 +251,15 @@ public enum WeightTrendCalculator {
         let currentEMA = lastPoint.emaWeight
         let previousEMA = dataPoints.count >= 2 ? dataPoints[dataPoints.count - 2].emaWeight : currentEMA
 
-        // Slope: two-window endpoint method (preferred) → OLS fallback →
-        // 2-point fallback. Adaptive widening when the default-window slope
-        // is below threshold and we have enough history. Gap detection clips
-        // the widened window to post-regime data so a logging pause doesn't
-        // blend stale pre-gap data into the slope.
+        // Slope: median-based two-window endpoint method on raw weights.
+        // (median + actual time centers — see slopeViaTwoWindowEndpoints).
+        // Median is robust to single-day water-weight outliers; actual time
+        // centers reflect real elapsed time, not nominal window arithmetic.
+        // EMA-based regression considered for dense loggers but rejected:
+        // re-introduces the lag-on-regime-change bug that drove the original
+        // move away from EMA. Median two-window already produces smooth,
+        // responsive output without that tradeoff. Adaptive widen still
+        // applies for sub-threshold slopes.
         let primary = weeklyRateForWindow(
             dataPoints: dataPoints, windowDays: config.regressionWindowDays
         )
@@ -268,8 +280,25 @@ public enum WeightTrendCalculator {
                     ? daysBetween(usablePoints.first!.date, usablePoints.last!.date)
                     : 0
                 if let widened = weeklyRateForWindow(dataPoints: usablePoints, windowDays: config.widenWindowDays) {
-                    weeklyRateKg = widened
-                    rateWindowDays = max(usableSpan, config.regressionWindowDays)
+                    // Regime-change guard (no-gap variant): if the widened
+                    // slope flips sign relative to a meaningful primary, trust
+                    // the primary. The widen path is for noise reduction at
+                    // near-zero slopes — not for overruling a real recent
+                    // direction change. Without this, a user who switched
+                    // from losing to gaining (or vice versa) and logs
+                    // continuously (no gap to trigger pointsAfterLastGap)
+                    // gets the wrong sign on weekly rate and deficit. The
+                    // gap-based regime detection above only handles the
+                    // discontinuous case.
+                    let primaryIsMeaningful = abs(primary ?? 0) >= config.maintainingThresholdKgPerWeek
+                    let signsDiffer = primary.map { ($0 > 0) != (widened > 0) } ?? false
+                    if primaryIsMeaningful, signsDiffer, let p = primary {
+                        weeklyRateKg = p
+                        rateWindowDays = config.regressionWindowDays
+                    } else {
+                        weeklyRateKg = widened
+                        rateWindowDays = max(usableSpan, config.regressionWindowDays)
+                    }
                 } else {
                     weeklyRateKg = primary ?? 0
                     rateWindowDays = config.regressionWindowDays
@@ -356,6 +385,8 @@ public enum WeightTrendCalculator {
     /// Slope (kg/day) of the EMA-smoothed series. Public for tests and
     /// algorithm-preview tools, but **not** used to compute weeklyRate /
     /// surplus / projection — see linearRegressionSlopeOnActualWeight.
+    /// EMA-based regression lags on regime changes by half-life; the
+    /// production path uses two-window-on-raw-weights to stay responsive.
     public static func linearRegressionSlope(points: [WeightDataPoint]) -> Double {
         slopeOfSeries(points.map { (date: $0.date, weight: $0.emaWeight) })
     }
@@ -373,12 +404,20 @@ public enum WeightTrendCalculator {
         return slopeOfSeries(samples)
     }
 
-    /// Two-window endpoint slope: average the first 7-day window's weights
-    /// vs the last 7-day window's weights, take the difference per week.
-    /// Robust to daily noise (sqrt(7) variance reduction within each
-    /// window) AND catches regime changes (compares actual endpoints, not
-    /// a lagging EMA). Returns nil if either endpoint window has fewer
-    /// than 2 entries — caller should fall back to plain OLS.
+    /// Two-window endpoint slope: median of first 7-day window vs median of
+    /// last 7-day window, scaled by the actual time delta between window
+    /// centers. Two robustness fixes vs. the original mean-based version:
+    /// 1. **Median, not mean** — daily weight is noisy (water/glycogen swings
+    ///    of ±1.5 lb common). With 7 samples per window, one outlier shifts
+    ///    the mean by 0.21 lb but leaves the median unchanged. A single
+    ///    after-salty-meal weighing was producing -0.71 lbs/wk reports on
+    ///    near-flat trajectories before this change.
+    /// 2. **Actual time-weighted centers** — the original assumed window
+    ///    centers were exactly `(windowDays - 7)/7` weeks apart. If the
+    ///    first window has 3 entries clustered at one end and the last has
+    ///    7 evenly spread, real centers can be ~17 days apart, not 14.
+    /// Returns nil if either endpoint window has fewer than 2 entries —
+    /// caller should fall back to OLS.
     ///
     /// Returns slope in **kg/week** (not kg/day, unlike slopeOfSeries).
     static func slopeViaTwoWindowEndpoints(
@@ -399,14 +438,32 @@ public enum WeightTrendCalculator {
         let lastWeights = lastWindow.compactMap { $0.actualWeight }
         guard firstWeights.count >= 2, lastWeights.count >= 2 else { return nil }
 
-        let firstAvg = firstWeights.reduce(0, +) / Double(firstWeights.count)
-        let lastAvg = lastWeights.reduce(0, +) / Double(lastWeights.count)
+        // Median: robust to single-day water-weight outliers.
+        let firstMedian = median(of: firstWeights)
+        let lastMedian = median(of: lastWeights)
 
-        // Distance between window centers (in weeks). For a 21-day window
-        // with 7-day endpoints, the centers are ~14 days apart (2 weeks).
-        let weeksBetweenCenters = Double(windowDays - endpointSpan) / 7.0
-        guard weeksBetweenCenters > 0 else { return nil }
-        return (lastAvg - firstAvg) / weeksBetweenCenters
+        // Actual time centers (mean of timestamps inside each window).
+        let firstCenter = meanDate(of: firstWindow)
+        let lastCenter = meanDate(of: lastWindow)
+        let weeksBetween = lastCenter.timeIntervalSince(firstCenter) / (7 * 86400)
+        guard weeksBetween > 0 else { return nil }
+        return (lastMedian - firstMedian) / weeksBetween
+    }
+
+    /// Median of a numeric array. For even-count, returns mean of the two
+    /// middle elements. Caller guarantees non-empty.
+    static func median(of values: [Double]) -> Double {
+        let sorted = values.sorted()
+        let n = sorted.count
+        if n % 2 == 1 { return sorted[n / 2] }
+        return (sorted[n / 2 - 1] + sorted[n / 2]) / 2.0
+    }
+
+    /// Mean of timestamps in a points array. Caller guarantees non-empty.
+    static func meanDate(of points: [WeightDataPoint]) -> Date {
+        let avg = points.map { $0.date.timeIntervalSinceReferenceDate }
+            .reduce(0, +) / Double(points.count)
+        return Date(timeIntervalSinceReferenceDate: avg)
     }
 
     /// Whole-day count between two dates (positive when `b` is after `a`).

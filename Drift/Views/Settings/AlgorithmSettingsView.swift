@@ -98,6 +98,7 @@ struct AlgorithmSettingsView: View {
                 Button { dismiss() } label: {
                     Image(systemName: "chevron.left").font(.body.weight(.semibold)).foregroundStyle(Theme.accent)
                 }
+                .accessibilityLabel("Back")
             }
         }
         .onAppear { prefillFromAppleHealth() }

@@ -37,6 +37,11 @@ fi
 # Read session type early — used throughout for role-specific output
 SESSION_TYPE=$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null || echo "junior")
 
+# Reset pre-claim Read budget. require-claim-before-bash.sh uses this to cap
+# orient-mode wandering at 15 Reads before forcing a claim. Counter must be
+# zero at every session start.
+rm -f "$HOME/drift-state/preclaim-reads"
+
 COUNT=$(cat "$COUNTER_FILE" 2>/dev/null || echo "0")
 LAST_REVIEW=$(cat "$LAST_REVIEW_FILE" 2>/dev/null || echo "0")
 NEXT_REVIEW=$((LAST_REVIEW + 10))

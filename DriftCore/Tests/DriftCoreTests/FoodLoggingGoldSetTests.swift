@@ -272,6 +272,30 @@ final class FoodLoggingGoldSetTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(correct, queries.count - 2, "At most 2 ToolRanker log_food misses")
     }
 
+    // MARK: - ToolRanker: log_medication Routing
+
+    @MainActor
+    func testToolRanker_LogMedicationRouting() {
+        let queries = [
+            "took ozempic",
+            "log 0.5mg ozempic",
+            "took my metformin",
+            "injected semaglutide 0.5mg",
+            "took insulin 10 units",
+            "log glp-1 medication",
+            "took mounjaro",
+        ]
+        var correct = 0
+        for query in queries {
+            let normalized = InputNormalizer.normalize(query).lowercased()
+            let tools = ToolRanker.rank(query: normalized, screen: .food)
+            if tools.first?.name == "log_medication" { correct += 1 }
+            else { print("MISS (ToolRanker log_medication): '\(query)' → \(tools.first?.name ?? "nil")") }
+        }
+        print("📊 ToolRanker log_medication routing: \(correct)/\(queries.count)")
+        XCTAssertGreaterThanOrEqual(correct, queries.count - 2, "At most 2 ToolRanker log_medication misses")
+    }
+
     // MARK: - False Positive Prevention
 
     func testParseFoodIntent_NonFoodQueriesRejected() {
@@ -381,8 +405,8 @@ final class FoodLoggingGoldSetTests: XCTestCase {
             ("had 2.5 scoops whey protein",      "whey",      2.5,   nil),
             ("ate half a roti",                  "roti",      0.5,   nil),
             ("log double the dal",               "dal",       2.0,   nil),
-            ("had 1.5 cups of rice",             "rice",      nil,  360.0),
-            ("log half a cup of oats",           "oat",       nil,  120.0),
+            ("had 1.5 cups of rice",             "rice",      nil,  277.5),  // 185g/cup (food-aware density, #552)
+            ("log half a cup of oats",           "oat",       nil,   40.0),  // 80g/cup dry oats (food-aware density, #552)
         ]
         var correct = 0
         for (query, keyword, expectedServings, expectedGrams) in cases {

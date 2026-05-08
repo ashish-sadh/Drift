@@ -636,15 +636,12 @@ extension HardEvalSet {
     static let validTools: Set<String> = [
         "log_food", "food_info", "log_weight", "weight_info", "start_workout",
         "log_activity", "exercise_info", "sleep_recovery", "mark_supplement",
-        "supplements", "set_goal", "delete_food", "body_comp", "glucose",
+        "supplements", "set_goal", "delete_food", "edit_meal", "body_comp", "glucose",
         "biomarkers", "navigate_to", "chat"
     ]
 
     static func validate() -> [String] {
         var errors: [String] = []
-        let trainCount = all.filter(\.isTrainSet).count
-        let heldCount = all.filter { !$0.isTrainSet }.count
-        if trainCount + heldCount != all.count { errors.append("Count mismatch") }
         for c in all {
             if !validTools.contains(c.expectedTool) {
                 errors.append("Invalid tool '\(c.expectedTool)' in: \(c.description)")

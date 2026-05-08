@@ -270,16 +270,25 @@ async function showUser() {
 // Sprint: sprint-task Issues + permanent-task Issues + bugs by priority + needs-review
 async function getSprintPlan() {
   try {
-    const [sprintOpen, sprintClosed, permanent, p0Bugs, p0Closed, p1Bugs, p2Bugs, needsReview] = await Promise.all([
-      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=sprint-task&state=open&per_page=30`),
-      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=sprint-task&state=closed&per_page=10&sort=updated&direction=desc`),
-      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=permanent-task&state=open&per_page=10`),
-      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=bug,P0&state=open&per_page=10`),
-      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=bug,P0&state=closed&per_page=10&sort=updated&direction=desc`),
-      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=bug,P1&state=open&per_page=10`),
-      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=bug,P2&state=open&per_page=10`),
-      smartApi(`/repos/${OWNER}/${REPO}/issues?labels=needs-review&state=open&per_page=20`)
+    // Fetch unfiltered open + closed lists, filter buckets client-side. The
+    // previous code did 8 separate `?labels=X` calls — each routed through
+    // GitHub's search index which has propagation lag (typically <5 min,
+    // observed at 27+ min on 2026-05-07). Newly-labeled P0 bugs were
+    // invisible to this UI for the full window. Client-side filtering reads
+    // from the live issue store and is immune to indexing whims.
+    const [openAll, closedAll] = await Promise.all([
+      smartApi(`/repos/${OWNER}/${REPO}/issues?state=open&per_page=100`),
+      smartApi(`/repos/${OWNER}/${REPO}/issues?state=closed&per_page=30&sort=updated&direction=desc`)
     ]);
+    const has = (i, name) => i.labels.some(l => l.name === name);
+    const sprintOpen   = openAll.filter(i => has(i, 'sprint-task'));
+    const permanent    = openAll.filter(i => has(i, 'permanent-task'));
+    const p0Bugs       = openAll.filter(i => has(i, 'bug') && has(i, 'P0'));
+    const p1Bugs       = openAll.filter(i => has(i, 'bug') && has(i, 'P1'));
+    const p2Bugs       = openAll.filter(i => has(i, 'bug') && has(i, 'P2'));
+    const needsReview  = openAll.filter(i => has(i, 'needs-review'));
+    const sprintClosed = closedAll.filter(i => has(i, 'sprint-task')).slice(0, 10);
+    const p0Closed     = closedAll.filter(i => has(i, 'bug') && has(i, 'P0')).slice(0, 10);
 
     const mapIssue = i => ({
       name: i.title.replace(/^(Sprint|Permanent|Bug):\s*/i, ''),

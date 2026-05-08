@@ -421,7 +421,62 @@ public enum ToolRanker {
                        ("creatine", 1.5), ("fish oil", 1.5), ("vitamin d", 1.5)],
             logBoost: 2, queryBoost: -1,
             screens: [.supplements: 0.3],
-            antiKeywords: ["add", "new", "what", "status"]
+            antiKeywords: ["add", "new", "what", "status",
+                           "ozempic", "semaglutide", "glp1", "glp-1",
+                           "metformin", "mounjaro", "tirzepatide", "wegovy",
+                           "insulin", "medication"]
+        )
+
+        p["log_medication"] = ToolProfile(
+            triggers: [("medication", 2.5), ("log medication", 4.5), ("took ozempic", 4.5),
+                       ("took metformin", 4.5), ("took insulin", 4), ("injected", 3),
+                       ("semaglutide", 4), ("ozempic", 4), ("wegovy", 4), ("glp-1", 3.5),
+                       ("glp1", 3.5), ("mounjaro", 4), ("tirzepatide", 4), ("metformin", 3.5),
+                       // "took my <med>" phrases — outscores mark_supplement "took my" trigger
+                       ("took my ozempic", 6.5), ("took my glp", 6.5), ("took my semaglutide", 6.5),
+                       ("took my metformin", 6.5), ("took my mounjaro", 6.5), ("took my insulin", 6.5),
+                       ("took my wegovy", 6.5), ("took my tirzepatide", 6.5)],
+            logBoost: 2, queryBoost: -1,
+            screens: [:],
+            antiKeywords: ["food", "weight", "supplement", "workout", "what", "how", "when", "last", "history", "how often", "pattern", "did", "time"]
+        )
+
+        p["medication_info"] = ToolProfile(
+            triggers: [("when did i last take", 6.5), ("last dose", 5), ("last time i took", 7.5),
+                       ("when did i take", 5.5), ("when did i inject", 5.5),
+                       ("how often do i take", 5), ("how often am i taking", 5),
+                       ("medication history", 5), ("dose history", 4.5),
+                       ("my medication pattern", 4.5), ("injection history", 4.5),
+                       ("last ozempic", 5), ("last metformin", 5), ("last semaglutide", 5),
+                       ("last mounjaro", 5), ("last insulin", 5), ("last glp", 4.5),
+                       // missed-dose adherence — beats supplement_insight for medication-framed queries
+                       ("miss my medication", 6.5), ("missed my medication", 6.5),
+                       ("medication dose", 5.0), ("prescription dose", 5.0),
+                       ("forget my medication", 5.5), ("forgot my medication", 5.5),
+                       // med name boosts — combine with phrase triggers to beat log_medication logBoost
+                       ("ozempic", 2.5), ("semaglutide", 2.5), ("metformin", 2.5),
+                       ("insulin", 2.5), ("mounjaro", 2.5), ("tirzepatide", 2.5),
+                       ("wegovy", 2.5), ("glp-1", 2.5), ("glp1", 2.5)],
+            logBoost: -2, queryBoost: 3,
+            screens: [:],
+            antiKeywords: ["log", "took", "injected", "add", "record"]
+        )
+
+        p["glp1_insight"] = ToolProfile(
+            triggers: [("glp1 adherence", 6), ("glp-1 adherence", 6),
+                       ("ozempic progress", 5.5), ("semaglutide progress", 5.5),
+                       ("mounjaro progress", 5.5), ("tirzepatide progress", 5.5),
+                       ("semaglutide streak", 5.5), ("ozempic streak", 5.5),
+                       ("injection streak", 5.5), ("glp1 streak", 5.5),
+                       ("how's my glp", 6), ("how is my glp", 6),
+                       ("glp-1 progress", 5.5), ("glp1 progress", 5.5),
+                       ("since starting ozempic", 5.5), ("since starting semaglutide", 5.5),
+                       ("since starting mounjaro", 5.5), ("since i started ozempic", 5.5),
+                       ("weight since ozempic", 5.5), ("weight since semaglutide", 5.5),
+                       ("how consistent am i with ozempic", 5), ("how consistent am i with glp", 5)],
+            logBoost: -2, queryBoost: 3,
+            screens: [:],
+            antiKeywords: ["log", "took", "inject", "add", "when did", "last dose", "last time"]
         )
 
         p["glucose"] = ToolProfile(
@@ -443,7 +498,8 @@ public enum ToolRanker {
         p["body_comp"] = ToolProfile(
             triggers: [("body fat", 3), ("bmi", 2.5), ("lean mass", 3), ("dexa", 3),
                        ("muscle mass", 3), ("body composition", 3), ("recomposition", 3),
-                       ("how's my body fat", 4)],
+                       ("how's my body fat", 4), ("muscle gained", 3.5), ("how much muscle", 3.5),
+                       ("muscle", 2.0)],
             logBoost: -0.5, queryBoost: 2,
             screens: [.bodyComposition: 0.5],
             antiKeywords: ["log", "is"]
@@ -458,13 +514,17 @@ public enum ToolRanker {
         )
 
         p["supplement_insight"] = ToolProfile(
-            triggers: [("adherence", 3.5), ("how consistent", 3), ("missed", 2.5),
+            triggers: [("adherence", 3.5), ("how consistent", 3), ("missed", 2.5), ("miss", 2.0),
                        ("supplement streak", 4), ("vitamin streak", 3.5),
                        ("how's my vitamin", 3), ("supplement insight", 4),
-                       ("am i consistent", 2.5), ("consistency", 2)],
+                       ("am i consistent", 2.5), ("consistency", 2),
+                       // "did i miss" overrides logBoost penalty — net 5.5-1=4.5 beats mark_supplement 2.0
+                       ("did i miss", 5.5), ("did i forget to take", 5.5),
+                       ("forget to take", 4.0), ("miss any", 3.5)],
             logBoost: -1, queryBoost: 2,
             screens: [.supplements: 0.5],
-            antiKeywords: ["add", "took", "take", "log"]
+            // "medication"/"prescription" prevent stealing from medication_info on adherence queries
+            antiKeywords: ["add", "took", "take", "log", "medication", "prescription"]
         )
 
         p["food_timing_insight"] = ToolProfile(

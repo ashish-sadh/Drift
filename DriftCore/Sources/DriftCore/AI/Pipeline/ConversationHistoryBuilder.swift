@@ -25,8 +25,9 @@ public enum ConversationHistoryBuilder {
     /// consuming the whole budget. 60 tokens ≈ 240 chars.
     public static let perMessageTokens = 60
 
-    /// How many trailing turns to consider.
-    public static let maxTurnWindow = 10
+    /// How many trailing HistoryTurn items (messages) to consider.
+    /// 20 items = 10 full conversation rounds (user+assistant pairs).
+    public static let maxTurnWindow = 20
 
     /// Chars reserved for the `[LAST ACTION: …]` prefix.
     public static let lastActionTokens = 100

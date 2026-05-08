@@ -295,6 +295,7 @@ private struct PhotoLogItemRow: View {
                         .foregroundStyle(item.selected ? Theme.accent : Theme.textTertiary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel(item.selected ? "Deselect \(item.name)" : "Select \(item.name)")
 
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 6) {
@@ -362,10 +363,11 @@ private struct PhotoLogItemRow: View {
                     }
                     .onSubmit { commitSearch() }
                 Button { commitSearch() } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(Theme.textTertiary)
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(Theme.accent)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("Done")
             }
             .padding(.vertical, 8)
             .padding(.horizontal, 12)

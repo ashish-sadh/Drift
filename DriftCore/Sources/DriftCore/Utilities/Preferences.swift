@@ -87,6 +87,29 @@ public enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: mealRemindersKey) }
     }
 
+    // MARK: - Medication Reminders
+
+    private static let medicationRemindersKey = "drift_medication_reminders"
+
+    /// Smart medication reminders: contextual dose nudge fired ~2h after the
+    /// user's typical log time, only when they've logged a medication 3+ times
+    /// (consistent pattern) and haven't logged it yet today. Default OFF. #592.
+    public static var medicationRemindersEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: medicationRemindersKey) }
+        set { UserDefaults.standard.set(newValue, forKey: medicationRemindersKey) }
+    }
+
+    // MARK: - GLP-1 Reminders
+
+    private static let glp1RemindersKey = "drift_glp1_reminders"
+
+    /// Weekly notification on the user's injection day, only when no dose logged in the last 7 days.
+    /// Default OFF. #620.
+    public static var glp1RemindersEnabled: Bool {
+        get { UserDefaults.standard.bool(forKey: glp1RemindersKey) }
+        set { UserDefaults.standard.set(newValue, forKey: glp1RemindersKey) }
+    }
+
     // MARK: - Conversation History
 
     private static let conversationHistoryEnabledKey = "drift_conversation_history_enabled"
@@ -147,6 +170,16 @@ public enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: usdaApiKeyKey) }
     }
 
+    // MARK: - Alert dismissed-until timestamps (Unix epoch seconds; 0 = never dismissed)
+
+    public static func alertDismissedUntil(key: String) -> Double {
+        UserDefaults.standard.double(forKey: "drift_alert_dismissed_\(key)")
+    }
+
+    public static func setAlertDismissedUntil(key: String, until: Double) {
+        UserDefaults.standard.set(until, forKey: "drift_alert_dismissed_\(key)")
+    }
+
     // MARK: - Photo Log Beta opt-in
 
     private static let photoLogEnabledKey = "drift_photo_log_enabled"
@@ -155,5 +188,28 @@ public enum Preferences {
     public static var photoLogEnabled: Bool {
         get { UserDefaults.standard.bool(forKey: photoLogEnabledKey) }
         set { UserDefaults.standard.set(newValue, forKey: photoLogEnabledKey) }
+    }
+
+    // MARK: - Weight Chart calorie overlay
+
+    private static let weightChartCaloriesKey = "drift_weight_chart_calories"
+
+    /// Show daily-calorie bars in the background of the weight chart. When the
+    /// user has not explicitly set a value, the default is ON if they've logged
+    /// calories on at least 4 of the last 7 days (i.e. they're a regular calorie
+    /// tracker, per #669); otherwise OFF.
+    public static func weightChartCaloriesEnabled(daysWithCaloriesInLastWeek: Int) -> Bool {
+        if let raw = UserDefaults.standard.object(forKey: weightChartCaloriesKey) as? Bool { return raw }
+        return daysWithCaloriesInLastWeek >= 4
+    }
+
+    public static func setWeightChartCaloriesEnabled(_ value: Bool) {
+        UserDefaults.standard.set(value, forKey: weightChartCaloriesKey)
+    }
+
+    /// True when the user has set the toggle explicitly (used by the UI to
+    /// distinguish "auto-on by tracking pattern" from "user opted in").
+    public static var weightChartCaloriesUserSet: Bool {
+        UserDefaults.standard.object(forKey: weightChartCaloriesKey) != nil
     }
 }

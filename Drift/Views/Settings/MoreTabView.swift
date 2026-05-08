@@ -7,31 +7,73 @@ struct MoreTabView: View {
     @State private var hasCycleData = false
     @State private var showingAIRemoveConfirm = false
     @State private var showingAIRemoved = false
+    @State private var showingMailFallback = false
 
     var body: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 14) {
-                    // Report a Bug — prominent at top
-                    Link(destination: URL(string: "https://ashish-sadh.github.io/Drift/")!) {
-                        HStack(spacing: 12) {
-                            Image(systemName: "ant.fill")
-                                .foregroundStyle(.red)
-                                .frame(width: 24)
-                            VStack(alignment: .leading, spacing: 2) {
-                                Text("Report a Bug")
-                                    .font(.subheadline.weight(.semibold))
-                                    .foregroundStyle(.primary)
-                                Text("Found something wrong? Let us know")
-                                    .font(.caption2)
+                    // Report a Bug / Send Feedback — prominent at top
+                    VStack(spacing: 0) {
+                        Link(destination: URL(string: "https://ashish-sadh.github.io/Drift/")!) {
+                            HStack(spacing: 12) {
+                                Image(systemName: "ant.fill")
+                                    .foregroundStyle(.red)
+                                    .frame(width: 24)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Report a Bug")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(.primary)
+                                    Text("Found something wrong? Let us know")
+                                        .font(.caption2)
+                                        .foregroundStyle(.tertiary)
+                                }
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption)
                                     .foregroundStyle(.tertiary)
+                                    .accessibilityHidden(true)
                             }
-                            Spacer()
-                            Image(systemName: "arrow.up.right")
-                                .font(.caption)
-                                .foregroundStyle(.tertiary)
+                            .padding(.vertical, 10)
                         }
-                        .padding(.vertical, 10)
+                        Divider().overlay(Theme.separator)
+                        Button {
+                            let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+                            let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+                            let ios = UIDevice.current.systemVersion
+                            let model = UIDevice.current.model
+                            let body = "\n\n\n---\nDrift \(version) (\(build)) · \(model) · iOS \(ios)"
+                            let encoded = body.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+                            let urlStr = "mailto:asheesh.sadh@gmail.com?subject=Drift%20Feedback&body=\(encoded)"
+                            if let url = URL(string: urlStr) {
+                                UIApplication.shared.open(url) { success in
+                                    if !success { showingMailFallback = true }
+                                }
+                            } else {
+                                showingMailFallback = true
+                            }
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: "envelope.fill")
+                                    .foregroundStyle(Theme.accent)
+                                    .frame(width: 24)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Send Feedback")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(.primary)
+                                    Text("Tell us what's working and what isn't")
+                                        .font(.caption2)
+                                        .foregroundStyle(.tertiary)
+                                }
+                                Spacer()
+                                Image(systemName: "arrow.up.right")
+                                    .font(.caption)
+                                    .foregroundStyle(.tertiary)
+                                    .accessibilityHidden(true)
+                            }
+                            .padding(.vertical, 10)
+                        }
+                        .buttonStyle(.plain)
                     }
                     .card()
 
@@ -173,6 +215,11 @@ struct MoreTabView: View {
             .navigationTitle("More")
             .toolbarColorScheme(.dark, for: .navigationBar)
             .task { hasCycleData = await HealthKitService.shared.hasCycleData() }
+            .alert("Send Feedback", isPresented: $showingMailFallback) {
+                Button("OK") {}
+            } message: {
+                Text("Mail isn't set up on this device. Send feedback to: asheesh.sadh@gmail.com")
+            }
         }
         .id(navId)
         .onChange(of: selectedTab) { oldTab, newTab in
@@ -202,6 +249,7 @@ struct MoreTabView: View {
                 Image(systemName: "chevron.right")
                     .font(.caption2)
                     .foregroundStyle(.tertiary)
+                    .accessibilityHidden(true)
             }
             .contentShape(Rectangle())
             .padding(.vertical, 10)
@@ -421,6 +469,52 @@ struct SettingsView: View {
                 }
                 .card()
 
+                // Medication Dose Reminders — #592
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "pill.circle")
+                            .foregroundStyle(Theme.accent).frame(width: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("Medication Dose Reminders").font(.subheadline.weight(.medium))
+                            Text("Quiet nudge ~2h after your typical dose time, only if you haven't logged it yet today")
+                                .font(.caption2).foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        Toggle("", isOn: Binding(
+                            get: { Preferences.medicationRemindersEnabled },
+                            set: {
+                                Preferences.medicationRemindersEnabled = $0
+                                Task { await NotificationService.refreshScheduledAlerts() }
+                            }
+                        ))
+                        .labelsHidden().tint(Theme.accent)
+                    }
+                }
+                .card()
+
+                // GLP-1 Weekly Reminders — #620
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: 12) {
+                        Image(systemName: "syringe")
+                            .foregroundStyle(Theme.accent).frame(width: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("GLP-1 Weekly Reminders").font(.subheadline.weight(.medium))
+                            Text("Weekly notification on your injection day — only fires if you haven't logged a dose in the last 7 days")
+                                .font(.caption2).foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        Toggle("", isOn: Binding(
+                            get: { Preferences.glp1RemindersEnabled },
+                            set: {
+                                Preferences.glp1RemindersEnabled = $0
+                                Task { await NotificationService.refreshScheduledAlerts() }
+                            }
+                        ))
+                        .labelsHidden().tint(Theme.accent)
+                    }
+                }
+                .card()
+
                 // AI Chat Telemetry (opt-in, local only) — #261
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 12) {
@@ -531,6 +625,7 @@ struct SettingsView: View {
                         }
                         Spacer()
                         Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
                     }
                     .padding(.vertical, 10)
                 }
@@ -632,7 +727,7 @@ struct SettingsView: View {
             UserDefaults.standard.removeObject(forKey: "drift_default_templates_v3")
             UserDefaults.standard.removeObject(forKey: "drift_default_templates_v2")
             UserDefaults.standard.removeObject(forKey: "drift_default_templates_seeded")
-UserDefaults.standard.removeObject(forKey: "drift_cycle_fertile_window")
+            UserDefaults.standard.removeObject(forKey: "drift_cycle_fertile_window")
             Log.app.info("Factory reset performed")
             resetDone = true
         } catch {

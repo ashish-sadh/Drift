@@ -13,7 +13,8 @@
 #
 # Commands:
 #   pending               — design-doc issues needing a doc written (no doc-ready)
-#   in-review             — design-doc PRs with comments needing reply
+#   in-review             — design-doc PRs with unanswered comments (issue + inline + review)
+#   address-pr <PR>       — dump every comment surface on a PR + senior reply/revise protocol
 #   awaiting-approval     — doc-ready issues without approved (human reviewing, do NOT touch)
 #   approved-not-started  — approved issues without implementing label (create impl tasks now)
 #   create-impl-tasks <N> — create sprint-task issues, add implementing label, merge design PR
@@ -40,19 +41,88 @@ cmd_pending() {
 }
 
 cmd_in_review() {
-    # Find design-doc PRs with comments (general OR inline review comments)
-    local RESULT
-    RESULT=$(gh pr list --label design-doc --state open --json number,title,comments,reviewComments \
-        --jq '.[] | select(.comments > 0 or .reviewComments > 0) | "#\(.number) \(.title) (\(.comments + .reviewComments) comments)"' \
-        2>/dev/null || true)
+    # Three distinct comment surfaces on a PR:
+    #   issue-level   /issues/{N}/comments
+    #   inline review /pulls/{N}/comments  (file:line-tied)
+    #   review body   /pulls/{N}/reviews   (top-level body when "Submit review")
+    # `gh pr list --json` exposes only `.comments` (issue-level array). The
+    # previous version asked for `reviewComments` which is not a valid field;
+    # the whole query errored and the script silently reported "none". PR
+    # #582 sat with a review summary + 2 inline comments invisible to senior
+    # sessions for 2 days. Fix: query each surface separately per PR.
+    local PRS
+    PRS=$(gh pr list --label design-doc --state open --json number,title,comments \
+        --jq '.[] | "\(.number)|\(.comments | length)|\(.title)"' 2>/dev/null || true)
+    [ -z "$PRS" ] && { echo "none"; return; }
+
+    local RESULT=""
+    while IFS='|' read -r N IC TITLE; do
+        [ -z "$N" ] && continue
+        local RC RVB
+        RC=$(gh api "repos/$REPO/pulls/$N/comments" --jq 'length' 2>/dev/null || echo "0")
+        RVB=$(gh api "repos/$REPO/pulls/$N/reviews" \
+            --jq '[.[] | select(.body != "" and .body != null)] | length' 2>/dev/null || echo "0")
+        local TOTAL=$((IC + RC + RVB))
+        if [ "$TOTAL" -gt 0 ]; then
+            RESULT+="#$N $TITLE ($IC issue, $RC inline, $RVB review)"$'\n'
+        fi
+    done <<< "$PRS"
+
     if [ -z "$RESULT" ]; then
         echo "none"
     else
-        echo "$RESULT"
+        printf "%s" "$RESULT"
         echo ""
-        echo "Action: For each PR — read ALL comments (general + inline review), reply individually, then revise doc and push."
-        echo "Reply: gh api repos/$REPO/pulls/{PR}/comments/{ID}/replies -f body='Addressed: ...'"
+        echo "Action: scripts/design-service.sh address-pr <PR>  — dumps every comment surface and walks the reply+revise+push flow."
+        echo "Reply (issue-level): gh pr comment <PR> --body 'Addressed: ...'"
+        echo "Reply (inline):      gh api repos/$REPO/pulls/<PR>/comments/<COMMENT_ID>/replies -f body='Addressed: ...'"
     fi
+}
+
+cmd_address_pr() {
+    local PR="$1"
+    if [ -z "$PR" ]; then
+        echo "Usage: design-service.sh address-pr <PR-number>" >&2; exit 1
+    fi
+
+    local BRANCH
+    BRANCH=$(gh pr view "$PR" --json headRefName --jq '.headRefName' 2>/dev/null)
+    if [ -z "$BRANCH" ]; then
+        echo "PR #$PR not found" >&2; exit 1
+    fi
+
+    echo "=== PR #$PR (branch: $BRANCH) ==="
+    echo ""
+    echo "--- Issue-level comments (/issues/$PR/comments) ---"
+    gh api "repos/$REPO/issues/$PR/comments" \
+        --jq '.[] | "[id=\(.id)] @\(.user.login) \(.created_at):\n\(.body)\n"' 2>/dev/null \
+        || echo "(none)"
+    echo ""
+    echo "--- Review summaries (/pulls/$PR/reviews — body only) ---"
+    gh api "repos/$REPO/pulls/$PR/reviews" \
+        --jq '.[] | select(.body != "" and .body != null) | "[review_id=\(.id)] @\(.user.login) [\(.state)] \(.submitted_at):\n\(.body)\n"' 2>/dev/null \
+        || echo "(none)"
+    echo ""
+    echo "--- Inline review comments (/pulls/$PR/comments) ---"
+    gh api "repos/$REPO/pulls/$PR/comments" \
+        --jq '.[] | "[id=\(.id)] @\(.user.login) \(.path):\(.line // .original_line) \(.created_at):\n\(.body)\n"' 2>/dev/null \
+        || echo "(none)"
+    echo ""
+    echo "=== Senior protocol ==="
+    cat <<EOF
+1. Reply to each comment (don't drop any):
+   gh pr comment $PR --body 'Addressed: ...'                                    # issue-level
+   gh api repos/$REPO/pulls/$PR/comments/<COMMENT_ID>/replies -f body='...'     # inline thread
+2. If the doc needs revision (most reviews do):
+   git fetch origin $BRANCH && git checkout $BRANCH
+   # edit Docs/designs/...md
+   git commit -- Docs/designs/...md -m "docs(design): address review on PR #$PR"
+   git push
+   git checkout main
+3. ensure-clean-state.sh requires HEAD on main at session end — step 2's final
+   checkout matters. If you skip the revise step (replies were enough), still
+   stay on main; no checkout needed.
+EOF
 }
 
 cmd_awaiting_approval() {
@@ -155,11 +225,19 @@ cmd_summary() {
     echo ""
 
     echo "IN REVIEW (PR has comments to reply to):"
-    local IN_REVIEW
-    IN_REVIEW=$(gh pr list --label design-doc --state open --json number,title,comments,reviewComments \
-        --jq '.[] | select(.comments > 0 or .reviewComments > 0) | "  PR #\(.number) \(.title) (\(.comments + .reviewComments) comments)"' \
-        2>/dev/null || true)
-    [ -n "$IN_REVIEW" ] && echo "$IN_REVIEW" || echo "  none"
+    local IN_REVIEW_PRS IN_REVIEW=""
+    IN_REVIEW_PRS=$(gh pr list --label design-doc --state open --json number,title,comments \
+        --jq '.[] | "\(.number)|\(.comments | length)|\(.title)"' 2>/dev/null || true)
+    while IFS='|' read -r N IC TITLE; do
+        [ -z "$N" ] && continue
+        local RC RVB
+        RC=$(gh api "repos/$REPO/pulls/$N/comments" --jq 'length' 2>/dev/null || echo "0")
+        RVB=$(gh api "repos/$REPO/pulls/$N/reviews" \
+            --jq '[.[] | select(.body != "" and .body != null)] | length' 2>/dev/null || echo "0")
+        local TOTAL=$((IC + RC + RVB))
+        [ "$TOTAL" -gt 0 ] && IN_REVIEW+="  PR #$N $TITLE ($IC issue, $RC inline, $RVB review)"$'\n'
+    done <<< "$IN_REVIEW_PRS"
+    [ -n "$IN_REVIEW" ] && printf "%s" "$IN_REVIEW" || echo "  none"
     echo ""
 
     echo "AWAITING APPROVAL (human reviewing, do NOT implement):"
@@ -193,6 +271,7 @@ shift 2>/dev/null || true
 case "$CMD" in
     pending)              cmd_pending ;;
     in-review)            cmd_in_review ;;
+    address-pr)           cmd_address_pr "${1:-}" ;;
     awaiting-approval)    cmd_awaiting_approval ;;
     approved-not-started) cmd_approved_not_started ;;
     create-impl-tasks)    cmd_create_impl_tasks "${1:-}" ;;
@@ -200,7 +279,7 @@ case "$CMD" in
     summary)              cmd_summary ;;
     *)
         echo "Unknown command: $CMD" >&2
-        echo "Commands: pending, in-review, awaiting-approval, approved-not-started, create-impl-tasks, check-complete, summary" >&2
+        echo "Commands: pending, in-review, address-pr <PR>, awaiting-approval, approved-not-started, create-impl-tasks, check-complete, summary" >&2
         exit 1
         ;;
 esac

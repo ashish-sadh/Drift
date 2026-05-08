@@ -85,35 +85,61 @@ cmd_refresh() {
     local NOW
     NOW=$(date +%s)
 
-    # Write each issue list to temp files (avoids shell quoting fragility)
-    # --limit 100 on all calls: gh default is 30, which truncates busy repos
-    gh issue list --state open --label bug --label P0 --limit 100 --json number,title,labels \
-        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
-        > "$TMP_DIR/p0_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p0_bugs.json"
+    # Fetch ONE unfiltered list, then derive every bucket via jq. The previous
+    # code did 8 separate `gh issue list --label X` calls — each routed through
+    # GitHub's search index, which has a propagation lag (typically <5 min,
+    # observed up to 27+ min on 2026-05-07). Newly-labeled P0 bugs (#650, #651)
+    # were invisible to refresh until the index caught up, hiding both from
+    # sprint-state for nearly half an hour. Client-side filtering bypasses the
+    # search index entirely — slower per call but immune to lag.
+    # --limit 200 covers the cap of 100 sprint-tasks plus permanents/design
+    # docs/bugs comfortably.
+    gh issue list --state open --limit 200 --json number,title,labels,updatedAt \
+        > "$TMP_DIR/all.json" 2>/dev/null || echo "[]" > "$TMP_DIR/all.json"
 
-    gh issue list --state open --label feature-request --label P0 --limit 100 --json number,title,labels \
-        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
-        > "$TMP_DIR/p0_feats.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p0_feats.json"
+    # Each derivation: one jq pass over all.json. Keep `status: "pending"` for
+    # sprint/queue tasks, `status: "permanent"` for permanents (rotation
+    # logic depends on the tag). Permanents preserve updatedAt for ordering.
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select(($L|index("bug")) and ($L|index("P0")))
+        | {number, title, labels: $L, status: "pending"}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/p0_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p0_bugs.json"
 
-    gh issue list --state open --label sprint-task --label SENIOR --limit 100 --json number,title,labels \
-        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
-        > "$TMP_DIR/senior.json" 2>/dev/null || echo "[]" > "$TMP_DIR/senior.json"
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select(($L|index("feature-request")) and ($L|index("P0")))
+        | {number, title, labels: $L, status: "pending"}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/p0_feats.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p0_feats.json"
 
-    gh issue list --state open --label sprint-task --limit 100 --json number,title,labels \
-        --jq '[.[] | select(.labels | map(.name) | index("SENIOR") | not) | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
-        > "$TMP_DIR/junior.json" 2>/dev/null || echo "[]" > "$TMP_DIR/junior.json"
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select(($L|index("sprint-task")) and ($L|index("SENIOR")))
+        | {number, title, labels: $L, status: "pending"}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/senior.json" 2>/dev/null || echo "[]" > "$TMP_DIR/senior.json"
 
-    gh issue list --state open --label bug --label P1 --limit 100 --json number,title,labels \
-        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
-        > "$TMP_DIR/p1_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p1_bugs.json"
+    # Junior = sprint-task without SENIOR (matches old --label sprint-task + jq filter)
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select(($L|index("sprint-task")) and (($L|index("SENIOR")) | not))
+        | {number, title, labels: $L, status: "pending"}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/junior.json" 2>/dev/null || echo "[]" > "$TMP_DIR/junior.json"
 
-    gh issue list --state open --label bug --label P2 --limit 100 --json number,title,labels \
-        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "pending"}]' \
-        > "$TMP_DIR/p2_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p2_bugs.json"
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select($L|index("design-doc"))
+        | {number, title, labels: $L, status: "pending"}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/design_docs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/design_docs.json"
 
-    gh issue list --state open --label permanent-task --limit 100 --json number,title,labels,updatedAt \
-        --jq '[.[] | {"number": .number, "title": .title, "labels": [.labels[].name], "status": "permanent", "updatedAt": .updatedAt}]' \
-        > "$TMP_DIR/perm.json" 2>/dev/null || echo "[]" > "$TMP_DIR/perm.json"
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select(($L|index("bug")) and ($L|index("P1")))
+        | {number, title, labels: $L, status: "pending"}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/p1_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p1_bugs.json"
+
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select(($L|index("bug")) and ($L|index("P2")))
+        | {number, title, labels: $L, status: "pending"}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/p2_bugs.json" 2>/dev/null || echo "[]" > "$TMP_DIR/p2_bugs.json"
+
+    jq '[.[] | (.labels|map(.name)) as $L
+        | select($L|index("permanent-task"))
+        | {number, title, labels: $L, status: "permanent", updatedAt}]' \
+        "$TMP_DIR/all.json" > "$TMP_DIR/perm.json" 2>/dev/null || echo "[]" > "$TMP_DIR/perm.json"
 
     local NEW_STATE
     NEW_STATE=$(python3 - <<PYEOF
@@ -126,15 +152,16 @@ def load(f):
     except Exception:
         return []
 
-p0_bugs = load(f"{tmp}/p0_bugs.json")
-p1_bugs  = load(f"{tmp}/p1_bugs.json")
-p2_bugs  = load(f"{tmp}/p2_bugs.json")
-senior   = load(f"{tmp}/senior.json")
-junior   = load(f"{tmp}/junior.json")
-perm     = load(f"{tmp}/perm.json")
+p0_bugs     = load(f"{tmp}/p0_bugs.json")
+p1_bugs     = load(f"{tmp}/p1_bugs.json")
+p2_bugs     = load(f"{tmp}/p2_bugs.json")
+senior      = load(f"{tmp}/senior.json")
+junior      = load(f"{tmp}/junior.json")
+perm        = load(f"{tmp}/perm.json")
+design_docs = load(f"{tmp}/design_docs.json")
 
 seen, tasks = set(), []
-for t in p0_bugs + p1_bugs + p2_bugs + senior + junior + perm:
+for t in p0_bugs + p1_bugs + p2_bugs + senior + junior + perm + design_docs:
     if t["number"] not in seen:
         seen.add(t["number"])
         tasks.append(t)
@@ -257,6 +284,26 @@ if filter_mode in ("--senior", "--any"):
     for t in available:
         if has(t, "needs-review"): continue
         if has(t, "sprint-task") and has(t, "SENIOR"):
+            print(f"{t['number']} {t['title']}"); sys.exit(0)
+
+    # Priority 2 (cont): Design-doc issues routed to senior without sprint-task label.
+    # Routing conditions (both mean "document needs senior attention"):
+    #   - design-doc without doc-ready: document not yet written
+    #   - design-doc + approved without implementing: approved, impl tasks not yet spawned
+    # Excluded: doc-ready (awaiting PE review) and implementing (impl tasks already exist).
+    def is_senior_design_doc(t):
+        lbls = t.get("labels", [])
+        if "design-doc" not in lbls:
+            return False
+        if "doc-ready" in lbls:
+            return False
+        if "implementing" in lbls:
+            return False
+        return True
+
+    for t in available:
+        if has(t, "needs-review"): continue
+        if is_senior_design_doc(t):
             print(f"{t['number']} {t['title']}"); sys.exit(0)
 
     # Priority 3: Admin-approved P1/P2 bugs (sprint-task or approved, no SENIOR, no needs-review)
@@ -429,12 +476,81 @@ except Exception:
         echo "  Run \`gh issue edit ${NUM} --remove-label resumable\` after committing."
         echo ""
     fi
+
+    # Surface any orphan WIP from a prior dead session (snapshot_orphan_wip).
+    # Even if it's not for this exact issue, the diff may be relevant —
+    # senior protocol says read it before redoing work from scratch.
+    local LAST_ORPHAN="$HOME/drift-state/wip/last-orphan.patch"
+    if [ -L "$LAST_ORPHAN" ] || [ -f "$LAST_ORPHAN" ]; then
+        echo ""
+        echo "ℹ️  Orphan WIP exists at $LAST_ORPHAN (a prior unclaimed session died with"
+        echo "  uncommitted edits). Inspect: git apply --stat $LAST_ORPHAN"
+        echo "  If the diff is for this task, apply + continue. If unrelated, ignore + delete."
+        echo ""
+    fi
+
+    # Reset pre-claim Read budget so the next claim cycle starts fresh.
+    rm -f "$HOME/drift-state/preclaim-reads"
 }
 
 cmd_done() {
     local NUM="$1"
     local COMMIT="${2:-}"
     if [ -z "$NUM" ]; then echo "Usage: sprint-service.sh done <number> <commit>" >&2; exit 1; fi
+
+    # Fetch labels once — reused by the permanent-task guard and the
+    # design-doc guard below.
+    local LABELS_JSON
+    LABELS_JSON=$(gh issue view "$NUM" --json labels --jq '[.labels[].name]' 2>/dev/null || echo "[]")
+
+    # Design-doc guard: writing the doc is one step in a multi-stage lifecycle
+    # (doc-ready → approved → implementing → close). Auto-closing skips human
+    # review and impl-task creation. Senior should add doc-ready and stop —
+    # but if they call `done` (because senior protocol's recipe is uniform),
+    # redirect to that path. Without this, design-doc issues #665 #666 got
+    # auto-closed on 2026-05-07 with the doc unreviewed.
+    local IS_DESIGN_DOC
+    IS_DESIGN_DOC=$(echo "$LABELS_JSON" | jq -r 'index("design-doc") != null' 2>/dev/null || echo "false")
+    if [ "$IS_DESIGN_DOC" = "true" ]; then
+        local DD_NOTE=""
+        if [ -f "/tmp/done-note-$NUM" ]; then
+            DD_NOTE=$(cat "/tmp/done-note-$NUM")
+            rm -f "/tmp/done-note-$NUM"
+        fi
+        local DD_REF=""
+        [ -n "$COMMIT" ] && DD_REF=" Commit: $COMMIT"
+        local DD_COMMENT="Doc-ready. Design doc filed; awaiting human \`approved\` label before impl tasks file.${DD_REF}"
+        [ -n "$DD_NOTE" ] && DD_COMMENT="Doc-ready: $DD_NOTE${DD_REF}"
+        gh_loud "comment doc-ready on design #$NUM" -- issue comment "$NUM" --body "$DD_COMMENT" || true
+        gh_loud "add doc-ready label on #$NUM" -- issue edit "$NUM" --add-label doc-ready || true
+        echo "WARN: #$NUM is a design-doc — redirecting 'done' to 'session-done' + doc-ready label. Use 'session-done' next time." >&2
+        cmd_session_done "$NUM"
+        return
+    fi
+
+    # Permanent-task guard: `done` would close the issue, but permanents must
+    # recur. PreToolUse hook (guard-permanent-close.sh) can't see internal
+    # `gh issue close` calls from this script, so enforce here. Redirect to
+    # session-done semantics: post a Progress comment, never close.
+    # Without this, closed permanents drained the junior queue and armed the
+    # TestFlight/require-claim deadlock (#49 #50 #51 #52 #193, 2026-05-03/04).
+    local IS_PERM
+    IS_PERM=$(echo "$LABELS_JSON" | jq -r 'index("permanent-task") != null' 2>/dev/null || echo "false")
+    if [ "$IS_PERM" = "true" ]; then
+        local PROGRESS_NOTE=""
+        if [ -f "/tmp/done-note-$NUM" ]; then
+            PROGRESS_NOTE=$(cat "/tmp/done-note-$NUM")
+            rm -f "/tmp/done-note-$NUM"
+        fi
+        local PROGRESS_REF=""
+        [ -n "$COMMIT" ] && PROGRESS_REF=" Commit: $COMMIT"
+        local PROGRESS_COMMENT="Progress.${PROGRESS_REF}"
+        [ -n "$PROGRESS_NOTE" ] && PROGRESS_COMMENT="Progress: $PROGRESS_NOTE${PROGRESS_REF}"
+        gh_loud "comment progress on permanent #$NUM" -- issue comment "$NUM" --body "$PROGRESS_COMMENT" || true
+        echo "WARN: #$NUM is a permanent-task — redirecting 'done' to 'session-done'. Use 'session-done' next time." >&2
+        cmd_session_done "$NUM"
+        return
+    fi
 
     local NOTE=""
     if [ -f "/tmp/done-note-$NUM" ]; then
@@ -447,6 +563,42 @@ cmd_done() {
 
     local COMMENT="Done.${COMMIT_REF}"
     [ -n "$NOTE" ] && COMMENT="$NOTE${COMMIT_REF}"
+
+    # Reachability guard: refuse to close the issue if the commit isn't on
+    # origin/main. Drift is trunk-based for sprint tasks (see program.md);
+    # branches are reserved for design-doc / report / review. Sessions that
+    # drift off-protocol and use a feature branch (e.g. PR #671 / #669,
+    # 2026-05-08) leave the fix unmerged while cmd_done closes the issue —
+    # the work looks shipped but isn't. Refusing the close forces the
+    # session to either merge the PR or use session-done.
+    #
+    # The test harness passes synthetic hashes ("abc123", "hash999", etc.)
+    # that aren't real git objects — `cat-file -e` returns false, and we
+    # skip the reachability check in that case (preserves harness behavior).
+    if [ -n "$COMMIT" ] && git -C "$WORK_DIR" cat-file -e "$COMMIT" 2>/dev/null; then
+        # Refresh remote refs so the check sees freshly-pushed-to-origin
+        # commits (low-cost, just updates origin/main).
+        git -C "$WORK_DIR" fetch origin main --quiet 2>/dev/null || true
+        if ! git -C "$WORK_DIR" merge-base --is-ancestor "$COMMIT" origin/main 2>/dev/null; then
+            local CURRENT_BRANCH
+            CURRENT_BRANCH=$(git -C "$WORK_DIR" branch --show-current 2>/dev/null || echo "?")
+            cat >&2 <<EOF
+REFUSED: commit $COMMIT is not on origin/main (current branch: $CURRENT_BRANCH).
+
+Drift is trunk-based for sprint tasks. Branches are only for:
+  design/<N>-<slug>   — design docs (PR with --label design-doc)
+  report/exec-DATE    — daily exec reports (PR with --label report)
+  review/cycle-N      — product reviews (PR with --label report)
+
+If you used a feature branch by mistake:
+  - Merge the PR, then re-run done: gh pr merge <PR> --squash --delete-branch && git checkout main && git pull && sprint-service.sh done $NUM \$(git rev-parse HEAD)
+  - Or keep work-in-progress: sprint-service.sh session-done $NUM   (does not close)
+
+Refusing to close #$NUM until commit reaches origin/main.
+EOF
+            exit 2
+        fi
+    fi
 
     # Defensive check: if the GitHub issue is already CLOSED, skip the
     # duplicate comment + close calls. Prevents the "Done. Commit: reconcile"
@@ -642,8 +794,11 @@ pending = [t for t in tasks if t.get("status") == "pending"]
 done    = [t for t in tasks if t.get("status") == "done"]
 perm    = [t for t in tasks if t.get("status") == "permanent"]
 ip      = d.get("in_progress")
+def _is_senior_design_doc(t):
+    lbls = t.get("labels", [])
+    return "design-doc" in lbls and "doc-ready" not in lbls and "implementing" not in lbls
 p0      = [t for t in pending if "P0" in t.get("labels", [])]
-senior  = [t for t in pending if "sprint-task" in t.get("labels", []) and "SENIOR" in t.get("labels", [])]
+senior  = [t for t in pending if ("sprint-task" in t.get("labels", []) and "SENIOR" in t.get("labels", [])) or _is_senior_design_doc(t)]
 junior  = [t for t in pending if "sprint-task" in t.get("labels", []) and "SENIOR" not in t.get("labels", [])]
 age     = int(time.time()) - d.get("refreshed", 0)
 print(f"Sprint: {len(pending)} pending ({len(p0)} P0, {len(senior)} SENIOR, {len(junior)} junior) | {len(done)} done | {len(perm)} permanent")
@@ -663,8 +818,11 @@ try:
     ip  = d.get("in_progress")
     def has(t, l): return l in t.get("labels", [])
     av  = [t for t in d["tasks"] if t.get("status") != "done" and t.get("number") != ip]
+    def is_senior_design_doc(t):
+        lbls = t.get("labels", [])
+        return "design-doc" in lbls and "doc-ready" not in lbls and "implementing" not in lbls
     if   filt == "--p0":       print(len([t for t in av if has(t,"P0")]))
-    elif filt == "--senior":   print(len([t for t in av if has(t,"sprint-task") and has(t,"SENIOR")]))
+    elif filt == "--senior":   print(len([t for t in av if (has(t,"sprint-task") and has(t,"SENIOR")) or is_senior_design_doc(t)]))
     elif filt == "--junior":   print(len([t for t in av if has(t,"sprint-task") and not has(t,"SENIOR")]))
     elif filt == "--sprint":   print(len([t for t in av if has(t,"sprint-task")]))
     elif filt == "--permanent":print(len([t for t in av if has(t,"permanent-task")]))

@@ -61,6 +61,7 @@ struct GoalProgressCard: View {
                     Button { showTrendInfo = true } label: {
                         Image(systemName: "info.circle").font(.caption2).foregroundStyle(.quaternary)
                     }.buttonStyle(.plain)
+                    .accessibilityLabel("Trend weight info")
                     Spacer()
                 }
             }
@@ -72,6 +73,7 @@ struct GoalProgressCard: View {
                 Button { showStartedInfo = true } label: {
                     Image(systemName: "info.circle").font(.caption2).foregroundStyle(.quaternary)
                 }.buttonStyle(.plain)
+                .accessibilityLabel("Starting weight info")
                 if let startDate = DateFormatters.dateOnly.date(from: goal.startDate) {
                     Text("· \(DateFormatters.shortDisplay.string(from: startDate))")
                         .font(.caption2).foregroundStyle(.quaternary)

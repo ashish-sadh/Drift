@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-USDA FoodData Central batch import — parses local Foundation Foods JSON dump.
-Downloads the dump automatically if not present (~450 KB).
+USDA FoodData Central batch import — parses local Foundation Foods and SR Legacy JSON dumps.
+Downloads the dumps automatically if not present.
 
 Usage:
     python3 scripts/usda_import.py [--dry-run]
@@ -16,8 +16,22 @@ import io
 from pathlib import Path
 
 FOODS_JSON = Path(__file__).parent.parent / "DriftCore/Sources/DriftCore/Resources/foods.json"
-FOUNDATION_URL = "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_foundation_food_json_2024-10-31.zip"
-CACHE_PATH = Path("/tmp/usda_foundation/foundationDownload.json")
+
+# USDA FoodData Central downloadable JSON dumps
+SOURCES = [
+    {
+        "url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_foundation_food_json_2024-10-31.zip",
+        "cache": Path("/tmp/usda_foundation/foundationDownload.json"),
+        "key": "FoundationFoods",
+        "label": "Foundation Foods",
+    },
+    {
+        "url": "https://fdc.nal.usda.gov/fdc-datasets/FoodData_Central_sr_legacy_food_json_2018-04.zip",
+        "cache": Path("/tmp/usda_sr_legacy/srlegacyDownload.json"),
+        "key": "SRLegacyFoods",
+        "label": "SR Legacy",
+    },
+]
 
 DRY_RUN = "--dry-run" in sys.argv
 
@@ -55,18 +69,21 @@ CATEGORY_MAP = {
 }
 
 
-def ensure_dump() -> Path:
-    if CACHE_PATH.exists():
-        return CACHE_PATH
-    print("Downloading USDA Foundation Foods dump (~450 KB)...")
-    with urllib.request.urlopen(FOUNDATION_URL, timeout=60) as resp:
+def ensure_dump(source: dict) -> Path:
+    cache_path: Path = source["cache"]
+    if cache_path.exists():
+        return cache_path
+    label = source["label"]
+    url = source["url"]
+    print(f"Downloading USDA {label} dump...")
+    with urllib.request.urlopen(url, timeout=120) as resp:
         data = resp.read()
     with zipfile.ZipFile(io.BytesIO(data)) as zf:
         name = zf.namelist()[0]
-        CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
-        CACHE_PATH.write_bytes(zf.read(name))
-    print(f"Saved to {CACHE_PATH}")
-    return CACHE_PATH
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_bytes(zf.read(name))
+    print(f"Saved to {cache_path}")
+    return cache_path
 
 
 def nutrient_value(nutrients: list, *nids: int) -> float:
@@ -109,7 +126,6 @@ def clean_name(raw: str) -> str:
     Then simplify: strip trailing qualifiers like ', Raw' or ', Cooked' for brevity.
     """
     name = raw.strip().title()
-    # Shorten common USDA suffixes that add noise without meaning
     for suffix in (
         ", Raw", ", Cooked", ", Fresh", ", Plain", ", Dry", ", Unenriched",
         ", Enriched", ", Whole", ", Sliced", ", Chopped", ", Frozen", ", Canned",
@@ -131,13 +147,12 @@ def usda_to_entry(food: dict) -> dict | None:
     cal = nutrient_value(nutrients, 2048, 2047, NID["calories"])
     protein = nutrient_value(nutrients, NID["protein"])
     carbs = nutrient_value(nutrients, NID["carbs"])
-    fat = nutrient_value(nutrients, NID["fat"], 1085)  # 1085 = Total fat (NLEA), used by oils
+    fat = nutrient_value(nutrients, NID["fat"], 1085)  # 1085 = Total fat (NLEA)
     fiber = nutrient_value(nutrients, NID["fiber"])
     sodium = nutrient_value(nutrients, NID["sodium"])
     sugar = nutrient_value(nutrients, NID["sugar"])
 
     if cal <= 0:
-        # Fallback: Atwater general formula (works well for oils, butter, dry legumes)
         cal = round(protein * 4 + carbs * 4 + fat * 9, 1)
     if cal <= 0:
         return None
@@ -178,35 +193,41 @@ def normalize(name: str) -> str:
 
 
 def main():
-    dump_path = ensure_dump()
-    usda_data = json.loads(dump_path.read_text())
-    usda_foods = usda_data["FoundationFoods"]
-    print(f"USDA Foundation Foods: {len(usda_foods)}")
-
     existing = json.loads(FOODS_JSON.read_text())
     existing_names = {normalize(f["name"]) for f in existing}
     print(f"Existing Drift foods: {len(existing)}")
 
     new_entries: list[dict] = []
     seen: set[str] = set(existing_names)
-    skipped_no_cal = 0
-    skipped_dup = 0
 
-    for food in usda_foods:
-        entry = usda_to_entry(food)
-        if entry is None:
-            skipped_no_cal += 1
-            continue
-        key = normalize(entry["name"])
-        if key in seen:
-            skipped_dup += 1
-            continue
-        seen.add(key)
-        new_entries.append(entry)
+    for source in SOURCES:
+        dump_path = ensure_dump(source)
+        usda_data = json.loads(dump_path.read_text())
+        usda_foods = usda_data[source["key"]]
+        print(f"\nUSDA {source['label']}: {len(usda_foods)} foods")
 
-    print(f"Skipped (no calories): {skipped_no_cal}")
-    print(f"Skipped (duplicates):  {skipped_dup}")
-    print(f"New USDA foods:        {len(new_entries)}")
+        skipped_no_cal = 0
+        skipped_dup = 0
+        added = 0
+
+        for food in usda_foods:
+            entry = usda_to_entry(food)
+            if entry is None:
+                skipped_no_cal += 1
+                continue
+            key = normalize(entry["name"])
+            if key in seen:
+                skipped_dup += 1
+                continue
+            seen.add(key)
+            new_entries.append(entry)
+            added += 1
+
+        print(f"  Skipped (no calories): {skipped_no_cal}")
+        print(f"  Skipped (duplicates):  {skipped_dup}")
+        print(f"  New foods from {source['label']}: {added}")
+
+    print(f"\nTotal new USDA foods: {len(new_entries)}")
 
     if len(new_entries) < 300:
         print(f"WARNING: Only {len(new_entries)} new foods — below 300 target.")

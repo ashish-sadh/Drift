@@ -26,6 +26,7 @@ struct FoodTabView: View {
     @State private var showingPhotoLog = false
     @State private var suggestionFoodToLog: Food? = nil
     @AppStorage("foodDiaryMealGrouped") private var mealGrouped = true
+    @State private var collapsedSections: Set<MealType> = []
 
     /// Beta-gated: Photo Log entry point only appears when the user has
     /// opted in AND stored a cloud-vision key for the selected provider.
@@ -649,10 +650,18 @@ struct FoodTabView: View {
 
                 if mealGrouped {
                     ForEach(Array(mealGroups.enumerated()), id: \.element.mealType) { groupIdx, group in
-                        mealSectionHeader(group.mealType, entries: group.entries)
-                        ForEach(Array(group.entries.enumerated()), id: \.offset) { idx, entry in
-                            entryRow(entry)
-                            if idx < group.entries.count - 1 { Divider() }
+                        let collapsed = collapsedSections.contains(group.mealType)
+                        mealSectionHeader(group.mealType, entries: group.entries, isCollapsed: collapsed) {
+                            withAnimation(.easeInOut(duration: 0.2)) {
+                                if collapsed { collapsedSections.remove(group.mealType) }
+                                else { collapsedSections.insert(group.mealType) }
+                            }
+                        }
+                        if !collapsed {
+                            ForEach(Array(group.entries.enumerated()), id: \.offset) { idx, entry in
+                                entryRow(entry)
+                                if idx < group.entries.count - 1 { Divider() }
+                            }
                         }
                         if groupIdx < mealGroups.count - 1 { Divider().padding(.vertical, 4) }
                     }
@@ -682,7 +691,7 @@ struct FoodTabView: View {
         .card()
     }
 
-    private func mealSectionHeader(_ meal: MealType, entries: [FoodEntry]) -> some View {
+    private func mealSectionHeader(_ meal: MealType, entries: [FoodEntry], isCollapsed: Bool, onToggle: @escaping () -> Void) -> some View {
         let totalCal = entries.reduce(0) { $0 + $1.totalCalories }
         let times = entries.compactMap { parseTimestamp($0.loggedAt) }
         let timeRange: String? = {
@@ -706,6 +715,13 @@ struct FoodTabView: View {
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Add to \(meal.displayName)")
+            Button(action: onToggle) {
+                Image(systemName: isCollapsed ? "chevron.right" : "chevron.down")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(isCollapsed ? "Expand \(meal.displayName)" : "Collapse \(meal.displayName)")
         }
         .padding(.vertical, 6)
     }
@@ -775,6 +791,11 @@ struct FoodTabView: View {
             editingEntry = entry
         }
         .contextMenu {
+            Button {
+                editingEntry = entry
+            } label: {
+                Label("Edit", systemImage: "pencil")
+            }
             Button {
                 viewModel.toggleFavorite(name: entry.foodName, foodId: entry.foodId)
                 viewModel.loadSuggestions()

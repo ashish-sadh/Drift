@@ -1,7 +1,25 @@
 #!/bin/bash
 
 # Silent for non-autonomous (human) sessions — these hooks are autopilot-only.
+# DRIFT_AUTONOMOUS env var is the primary signal but can leak via process
+# inheritance (e.g. a watchdog-spawned shell that the user takes over). The
+# session-type file is the authoritative signal session-start.sh owns and
+# refreshes — belt-and-suspenders.
 [[ "${DRIFT_AUTONOMOUS:-0}" != "1" ]] && exit 0
+[[ "$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null)" == "human" ]] && exit 0
+
+# If a recent archive failed, suppress the publish injection entirely. The
+# previous build number didn't ship; re-archiving on every commit just floods
+# the session with retry prompts. Wait for the watchdog (or a human) to clear
+# the flag before resuming TestFlight publishes.
+ARCHIVE_FAILED_FLAG="$HOME/drift-state/testflight-archive-failed"
+if [ -f "$ARCHIVE_FAILED_FLAG" ]; then
+  FAIL_MTIME=$(stat -f %m "$ARCHIVE_FAILED_FLAG" 2>/dev/null || stat -c %Y "$ARCHIVE_FAILED_FLAG" 2>/dev/null || echo "0")
+  if (( $(date +%s) - FAIL_MTIME < 86400 )); then
+    exit 0
+  fi
+fi
+
 # Hook: PostToolUse on Bash(git commit *)
 # Publishes TestFlight when watchdog has marked it due (every 3h).
 # Watchdog writes ~/drift-state/testflight-due in its heartbeat loop.
@@ -39,6 +57,8 @@ HOURS=$(( ELAPSED / 3600 ))
 
 touch "$HOME/drift-state/testflight-publish-authorized"
 
+STEP1="1. Bump CURRENT_PROJECT_VERSION in project.yml (increment by 1)"
+
 FORCE_STEP=""
 if [ -n "$FORCE_ISSUE_NUM" ]; then
   FORCE_STEP="\\n7. Close force-release issue: gh issue close ${FORCE_ISSUE_NUM} --comment 'Published successfully.'"
@@ -48,7 +68,7 @@ cat <<ENDJSON
 {
   "hookSpecificOutput": {
     "hookEventName": "PostToolUse",
-    "additionalContext": "TESTFLIGHT PUBLISH REQUIRED (${HOURS}h since last publish${FORCE_ISSUE_NUM:+ — FORCED via issue #$FORCE_ISSUE_NUM}). Autopilot mode — do not defer to user. Mandatory before next claim.\n\nSteps:\n1. Bump CURRENT_PROJECT_VERSION in project.yml (increment by 1)\n2. Run: xcodegen generate\n3. Archive: xcodebuild archive -project Drift.xcodeproj -scheme Drift -destination 'generic/platform=iOS' -archivePath /tmp/Drift.xcarchive DEVELOPMENT_TEAM=ZJ5H5XH82A CODE_SIGN_STYLE=Automatic > /tmp/drift-archive.log 2>&1 && echo 'ARCHIVE OK' || (tail -20 /tmp/drift-archive.log && echo 'ARCHIVE FAILED')\n4. Export + Upload: xcodebuild -exportArchive -archivePath /tmp/Drift.xcarchive -exportPath /tmp/DriftExport -exportOptionsPlist ExportOptions.plist -allowProvisioningUpdates -authenticationKeyPath \"/Users/ashishsadh/important-ashisadh/key for apple app/AuthKey_623N7AD6BJ.p8\" -authenticationKeyID 623N7AD6BJ -authenticationKeyIssuerID ad762446-bede-4bcd-9776-a3613c669447 > /tmp/drift-upload.log 2>&1 && echo 'UPLOAD OK' || (tail -20 /tmp/drift-upload.log && echo 'UPLOAD FAILED')\n5. If successful:\n   a. echo \$(date +%s) > ~/drift-state/last-testflight-publish && rm -f ~/drift-state/testflight-due && rm -f ~/drift-state/testflight-publish-authorized\n   b. Update command-center/releases.json: read the file, append a new entry with {build: N, date: ISO date, description: commit summary, features: [user-visible changes since last build], fixes: [bugs fixed since last build]}. Get changes from git log since last TestFlight commit.\n   c. git add project.yml command-center/releases.json && git commit -m 'chore: TestFlight build' && git push\n6. If archive/upload fails: rm -f ~/drift-state/testflight-due ~/drift-state/testflight-publish-authorized, log the error, and continue — do NOT retry more than once.${FORCE_STEP}\n\nDo NOT skip this. Do NOT defer it to later."
+    "additionalContext": "TESTFLIGHT PUBLISH REQUIRED (${HOURS}h since last publish${FORCE_ISSUE_NUM:+ — FORCED via issue #$FORCE_ISSUE_NUM}). Autopilot mode — do not defer to user. Mandatory before next claim.\n\nSteps:\n${STEP1}\n2. Run: xcodegen generate\n3. Archive: xcodebuild archive -project Drift.xcodeproj -scheme Drift -destination 'generic/platform=iOS' -archivePath /tmp/Drift.xcarchive DEVELOPMENT_TEAM=ZJ5H5XH82A CODE_SIGN_STYLE=Automatic > /tmp/drift-archive.log 2>&1 && echo 'ARCHIVE OK' || (tail -20 /tmp/drift-archive.log && echo 'ARCHIVE FAILED')\n4. Export + Upload: xcodebuild -exportArchive -archivePath /tmp/Drift.xcarchive -exportPath /tmp/DriftExport -exportOptionsPlist ExportOptions.plist -allowProvisioningUpdates -authenticationKeyPath \"/Users/ashishsadh/important-ashisadh/key for apple app/AuthKey_623N7AD6BJ.p8\" -authenticationKeyID 623N7AD6BJ -authenticationKeyIssuerID ad762446-bede-4bcd-9776-a3613c669447 > /tmp/drift-upload.log 2>&1 && echo 'UPLOAD OK' || (tail -20 /tmp/drift-upload.log && echo 'UPLOAD FAILED')\n5. If successful:\n   a. echo \$(date +%s) > ~/drift-state/last-testflight-publish && rm -f ~/drift-state/testflight-due ~/drift-state/testflight-publish-authorized ~/drift-state/testflight-archive-failed\n   b. Update command-center/releases.json: read the file, append a new entry with {build: N, date: ISO date, description: commit summary, features: [user-visible changes since last build], fixes: [bugs fixed since last build]}. Get changes from git log since last TestFlight commit.\n   c. git add project.yml command-center/releases.json && git commit -m 'chore: TestFlight build' && git push\n6. If archive/upload fails: rm -f ~/drift-state/testflight-due ~/drift-state/testflight-publish-authorized && echo \$(date +%s) > ~/drift-state/testflight-archive-failed — then log the error and continue. Do NOT retry more than once.${FORCE_STEP}\n\nDo NOT skip this. Do NOT defer it to later."
   }
 }
 ENDJSON

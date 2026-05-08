@@ -36,6 +36,7 @@ extension DashboardView {
                     } label: {
                         Image(systemName: "info.circle").font(.caption).foregroundStyle(.tertiary)
                     }
+                    .accessibilityLabel("Daily average info")
                 }
             }
 

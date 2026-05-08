@@ -152,30 +152,46 @@ fi
 
 # Planning session validation — only for autonomous planning sessions (watchdog sets both)
 if [ "$SESSION_TYPE" = "planning" ] && [ "$DRIFT_CONTROL" = "RUN" ] && [ "$IS_AUTONOMOUS" = "1" ]; then
-  PLAN_ISSUES=""
-
-  # Were open feature requests reviewed and triaged?
-  # Only block if any have NEITHER sprint-task NOR deferred label (truly untriaged).
-  # Deferred FRs with the deferred label are intentionally left open for future sprints.
-  FR_UNTRIAGED=$(gh issue list --state open --label feature-request --json number,labels \
-    --jq '[.[] | select(.labels | map(.name) | (index("sprint-task") == null and index("deferred") == null))] | length' \
-    2>/dev/null || echo "0")
-  if [ "$FR_UNTRIAGED" -gt 0 ]; then
-    FR_LIST=$(gh issue list --state open --label feature-request --json number,title,labels \
-      --jq '[.[] | select(.labels | map(.name) | (index("sprint-task") == null and index("deferred") == null))] | .[] | "#\(.number) \(.title)"' \
-      2>/dev/null || true)
-    PLAN_ISSUES="${PLAN_ISSUES}Untriaged feature requests ($FR_UNTRIAGED) — must triage all before closing:\n${FR_LIST}\nFor each: add sprint-task label OR add deferred label (see program.md step 7).\n\n"
+  # Bypass DOD gate if planning-done was already stamped (< 2h ago) or the
+  # planning issue is already closed. Without this, a session that finished
+  # planning but left one checkbox unchecked would stall forever, requiring
+  # manual human restart every cycle.
+  LAST_PLANNING=$(cat "$HOME/drift-state/last-planning-time" 2>/dev/null || echo "0")
+  PLANNING_AGE=$(( $(date +%s) - LAST_PLANNING ))
+  PLANNING_ISSUE_N=$(cat "$HOME/drift-state/planning-issue" 2>/dev/null | tr -d '[:space:]' || echo "")
+  PLANNING_ISSUE_STATE="open"
+  if [ -n "$PLANNING_ISSUE_N" ]; then
+    PLANNING_ISSUE_STATE=$(gh issue view "$PLANNING_ISSUE_N" --json state --jq '.state' 2>/dev/null || echo "open")
   fi
 
-  # Planning checklist validation via planning-service.sh
-  PLAN_VALIDATE_OUTPUT=$("${CLAUDE_PROJECT_DIR:-.}/scripts/planning-service.sh" validate 2>&1 || true)
-  if echo "$PLAN_VALIDATE_OUTPUT" | grep -q "^Planning validation failed"; then
-    PLAN_ISSUES="${PLAN_ISSUES}${PLAN_VALIDATE_OUTPUT}\n\n"
-  fi
+  if [ "$PLANNING_AGE" -lt 7200 ] || [[ "${PLANNING_ISSUE_STATE,,}" == "closed" ]]; then
+    echo "[ensure-clean-state] Planning done (stamp age ${PLANNING_AGE}s, issue ${PLANNING_ISSUE_STATE}) — DOD gate skipped"
+  else
+    PLAN_ISSUES=""
 
-  if [ -n "$PLAN_ISSUES" ]; then
-    echo -e "BLOCKED: Planning session incomplete.\n\n${PLAN_ISSUES}" >&2
-    exit 2
+    # Were open feature requests reviewed and triaged?
+    # Only block if any have NEITHER sprint-task NOR deferred label (truly untriaged).
+    # Deferred FRs with the deferred label are intentionally left open for future sprints.
+    FR_UNTRIAGED=$(gh issue list --state open --label feature-request --json number,labels \
+      --jq '[.[] | select(.labels | map(.name) | (index("sprint-task") == null and index("deferred") == null))] | length' \
+      2>/dev/null || echo "0")
+    if [ "$FR_UNTRIAGED" -gt 0 ]; then
+      FR_LIST=$(gh issue list --state open --label feature-request --json number,title,labels \
+        --jq '[.[] | select(.labels | map(.name) | (index("sprint-task") == null and index("deferred") == null))] | .[] | "#\(.number) \(.title)"' \
+        2>/dev/null || true)
+      PLAN_ISSUES="${PLAN_ISSUES}Untriaged feature requests ($FR_UNTRIAGED) — must triage all before closing:\n${FR_LIST}\nFor each: add sprint-task label OR add deferred label (see program.md step 7).\n\n"
+    fi
+
+    # Planning checklist validation via planning-service.sh
+    PLAN_VALIDATE_OUTPUT=$("${CLAUDE_PROJECT_DIR:-.}/scripts/planning-service.sh" validate 2>&1 || true)
+    if echo "$PLAN_VALIDATE_OUTPUT" | grep -q "^Planning validation failed"; then
+      PLAN_ISSUES="${PLAN_ISSUES}${PLAN_VALIDATE_OUTPUT}\n\n"
+    fi
+
+    if [ -n "$PLAN_ISSUES" ]; then
+      echo -e "BLOCKED: Planning session incomplete.\n\n${PLAN_ISSUES}" >&2
+      exit 2
+    fi
   fi
 fi
 

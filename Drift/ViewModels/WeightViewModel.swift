@@ -17,6 +17,17 @@ final class WeightViewModel {
     var weightUnit: WeightUnit = Preferences.weightUnit
     var goal: WeightGoal? = WeightGoal.load()
 
+    // Calorie overlay (#669) — daily totals over the active chart range, plus
+    // last-7-day tracking density used as the auto-on heuristic.
+    var dailyCaloriesByDate: [String: Double] = [:]
+    var daysWithCaloriesInLastWeek: Int = 0
+    var showCaloriesOverlay: Bool {
+        get { Preferences.weightChartCaloriesEnabled(daysWithCaloriesInLastWeek: daysWithCaloriesInLastWeek) }
+        set {
+            Preferences.setWeightChartCaloriesEnabled(newValue)
+        }
+    }
+
     /// Is the user trying to lose weight? Based on current weight vs target.
     var isLosing: Bool {
         if let goal {
@@ -91,9 +102,35 @@ final class WeightViewModel {
             trend = WeightTrendCalculator.calculateTrend(entries: input)
 
             goal = WeightGoal.load()
+            loadCalorieOverlay()
             Log.weightTrend.info("Loaded \(self.entries.count)/\(self.allEntries.count) entries")
         } catch {
             Log.weightTrend.error("Failed to load: \(error.localizedDescription)")
+        }
+    }
+
+    private func loadCalorieOverlay() {
+        let today = Date()
+        let calendar = Calendar.current
+        let chartStart = entries.first.flatMap { DateFormatters.dateOnly.date(from: $0.date) }
+            ?? calendar.date(byAdding: .day, value: -7, to: today)
+            ?? today
+        let chartStartStr = DateFormatters.dateOnly.string(from: chartStart)
+        let todayStr = DateFormatters.dateOnly.string(from: today)
+        do {
+            dailyCaloriesByDate = try database.fetchDailyCalories(from: chartStartStr, to: todayStr)
+        } catch {
+            dailyCaloriesByDate = [:]
+            Log.weightTrend.error("Calorie overlay load failed: \(error.localizedDescription)")
+        }
+        let weekAgo = calendar.date(byAdding: .day, value: -7, to: today) ?? today
+        let weekAgoStr = DateFormatters.dateOnly.string(from: weekAgo)
+        let weekSlice = dailyCaloriesByDate.filter { $0.key >= weekAgoStr && $0.value > 0 }
+        // Reach back to the DB if the chart range is shorter than 7 days.
+        if weekAgoStr < chartStartStr {
+            daysWithCaloriesInLastWeek = (try? database.fetchDailyCalories(from: weekAgoStr, to: todayStr).filter { $0.value > 0 }.count) ?? 0
+        } else {
+            daysWithCaloriesInLastWeek = weekSlice.count
         }
     }
 
