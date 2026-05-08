@@ -2291,5 +2291,12 @@
       "Weight trend two-window endpoints now use median + actual time centers (smoother, less skew on sparse weeks)",
       "App launch defers notification scheduling + widget refresh so cold start stays under the iOS watchdog budget"
     ]
+  },
+  {
+    "build": 228,
+    "date": "2026-05-07T16:15:00-07:00",
+    "description": "Build 228 \u2014 docs-only refresh (no user-visible changes)",
+    "features": [],
+    "fixes": []
   }
 ]
