@@ -61,11 +61,13 @@ final class BackupPackagerTests: XCTestCase {
 
         let suite = "BackupPackagerTests-\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
-        defaults.set(150, forKey: "drift.weightGoal")
-        defaults.set(2200, forKey: "drift.dailyCalorieTarget")
-        defaults.set(true, forKey: "drift.backupEnabled")
+        // Use REAL production keys (#700) — `drift.weightGoal` etc. are
+        // fictional. Real keys come from Preferences.swift / WeightGoal.swift.
+        defaults.set("kg", forKey: "weight_unit")
+        defaults.set(2500.0, forKey: "drift_water_goal_ml")
+        defaults.set(true, forKey: "drift_health_nudges")
         // A non-allowlisted key — must NOT be in the snapshot
-        defaults.set("leaked", forKey: "drift.notAllowlisted")
+        defaults.set("leaked", forKey: "drift_not_allowlisted")
         // A system-namespaced key — must NOT be in the snapshot
         defaults.set("apple", forKey: "AppleLanguages")
 
@@ -104,10 +106,10 @@ final class BackupPackagerTests: XCTestCase {
         var prefsData = Data()
         _ = try archive.extract(prefsEntry) { prefsData.append($0) }
         let prefs = try JSONSerialization.jsonObject(with: prefsData) as? [String: Any] ?? [:]
-        XCTAssertEqual(prefs["drift.weightGoal"] as? Int, 150)
-        XCTAssertEqual(prefs["drift.dailyCalorieTarget"] as? Int, 2200)
-        XCTAssertEqual(prefs["drift.backupEnabled"] as? Bool, true)
-        XCTAssertNil(prefs["drift.notAllowlisted"])
+        XCTAssertEqual(prefs["weight_unit"] as? String, "kg")
+        XCTAssertEqual(prefs["drift_water_goal_ml"] as? Double, 2500.0)
+        XCTAssertEqual(prefs["drift_health_nudges"] as? Bool, true)
+        XCTAssertNil(prefs["drift_not_allowlisted"])
         XCTAssertNil(prefs["AppleLanguages"])
 
         // Restored DB has all 100 rows
@@ -134,8 +136,8 @@ final class BackupPackagerTests: XCTestCase {
 
         let suite = "BackupPackagerTests-\(UUID().uuidString)"
         let defaults = UserDefaults(suiteName: suite)!
-        // Set only one allowlisted key
-        defaults.set(150, forKey: "drift.weightGoal")
+        // Set only one allowlisted key (real key per #700)
+        defaults.set(true, forKey: "drift_health_nudges")
 
         let destination = workDir.appendingPathComponent("absent.driftbackup")
         try BackupPackager().package(
@@ -151,13 +153,48 @@ final class BackupPackagerTests: XCTestCase {
         _ = try archive.extract(prefsEntry) { data.append($0) }
         let prefs = try JSONSerialization.jsonObject(with: data) as? [String: Any] ?? [:]
         XCTAssertEqual(prefs.count, 1)
-        XCTAssertEqual(prefs["drift.weightGoal"] as? Int, 150)
+        XCTAssertEqual(prefs["drift_health_nudges"] as? Bool, true)
         // Confirm absent allowlisted keys are NOT serialized as null
-        XCTAssertNil(prefs["drift.tdeeConfig"])
+        XCTAssertNil(prefs["drift_water_goal_ml"])
         let json = String(data: data, encoding: .utf8) ?? ""
         XCTAssertFalse(json.contains("null"))
 
         UserDefaults().removePersistentDomain(forName: suite)
+    }
+
+    /// Regression for #700 — allowlist must contain only real keys that the
+    /// JSON pipeline can serialize (Bool / Int / Double / String). A future
+    /// session adding `drift_weight_goal` or similar Codable-Data key without
+    /// first lifting that limit would silently drop the value.
+    func testAllowlistContainsOnlyRealAndPrimitiveKeys() {
+        // Curated set as of #700. If you add a key, also add a writer in
+        // production code AND verify Packager.jsonSafeValue accepts the type.
+        let expected: Set<String> = [
+            "weight_unit",
+            "drift_weight_chart_calories",
+            "drift_cycle_fertile_window",
+            "drift_ai_enabled",
+            "drift_conversation_history_enabled",
+            "drift_chat_telemetry_enabled",
+            "drift_use_remote_model_on_wifi",
+            "drift_preferred_ai_backend",
+            "drift_photo_log_enabled",
+            "drift_health_nudges",
+            "drift_meal_reminders",
+            "drift_medication_reminders",
+            "drift_glp1_reminders",
+            "drift_online_food_search",
+            "drift_usda_api_key",
+            "drift_water_goal_ml",
+        ]
+        XCTAssertEqual(Set(BackupKeys.userDefaultsAllowlist), expected)
+        // No dotted-camelCase keys (the pre-#700 fictional set used these).
+        for key in BackupKeys.userDefaultsAllowlist {
+            XCTAssertFalse(
+                key.contains(".") && key.starts(with: "drift."),
+                "Allowlist key \(key) is dotted-camelCase — production code uses snake_case."
+            )
+        }
     }
 }
 

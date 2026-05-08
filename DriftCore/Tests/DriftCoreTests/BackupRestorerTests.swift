@@ -27,14 +27,15 @@ final class BackupRestorerTests: XCTestCase {
     // MARK: - Roundtrip
 
     func testRoundtripRestoresAllRowsAndAllowlistedDefaults() throws {
+        // Real production keys per #700 — `drift.weightGoal` etc. were fictional.
         let backupURL = try makeBackup(
             seedRows: 100,
             schemaVersion: Migrations.currentVersion,
             withDefaults: [
-                "drift.weightGoal": 150,
-                "drift.dailyCalorieTarget": 2200,
-                "drift.backupEnabled": true,
-                "drift.notAllowlisted": "leaked", // must NOT round-trip
+                "weight_unit": "kg",
+                "drift_water_goal_ml": 2500.0,
+                "drift_health_nudges": true,
+                "drift_not_allowlisted": "leaked", // must NOT round-trip
             ]
         )
 
@@ -58,10 +59,10 @@ final class BackupRestorerTests: XCTestCase {
         }
         XCTAssertEqual(count, 100)
 
-        XCTAssertEqual(defaults.integer(forKey: "drift.weightGoal"), 150)
-        XCTAssertEqual(defaults.integer(forKey: "drift.dailyCalorieTarget"), 2200)
-        XCTAssertTrue(defaults.bool(forKey: "drift.backupEnabled"))
-        XCTAssertNil(defaults.object(forKey: "drift.notAllowlisted"))
+        XCTAssertEqual(defaults.string(forKey: "weight_unit"), "kg")
+        XCTAssertEqual(defaults.double(forKey: "drift_water_goal_ml"), 2500.0)
+        XCTAssertTrue(defaults.bool(forKey: "drift_health_nudges"))
+        XCTAssertNil(defaults.object(forKey: "drift_not_allowlisted"))
     }
 
     // MARK: - Corruption
@@ -179,18 +180,20 @@ final class BackupRestorerTests: XCTestCase {
     /// exception. The Restorer must filter such values rather than blindly
     /// forwarding them.
     func testApplyPreferencesIgnoresNullAndComplexValuesAndDoesNotCrash() throws {
+        // Real production keys per #700; `drift_health_nudges_dict` etc. are
+        // intentional non-allowlisted variants used to verify the filter.
         let backupURL = try makeBackupWithRawPreferencesJSON(
             seedRows: 1,
             schemaVersion: Migrations.currentVersion,
             rawPrefsJSON: """
             {
-              "drift.weightGoal": null,
-              "drift.dailyCalorieTarget": 2200,
-              "drift.backupEnabled": true,
-              "drift.preferredUnits": "kg",
-              "drift.tdeeConfig": {"nested": "object"},
-              "drift.foodSortOrder": ["array", "value"],
-              "drift.notAllowlisted": "leaked"
+              "drift_water_goal_ml": null,
+              "drift_health_nudges": true,
+              "weight_unit": "kg",
+              "drift_usda_api_key": "abc-123",
+              "drift_chat_telemetry_enabled_dict": {"nested": "object"},
+              "drift_meal_reminders_array": ["array", "value"],
+              "drift_not_allowlisted": "leaked"
             }
             """
         )
@@ -203,16 +206,12 @@ final class BackupRestorerTests: XCTestCase {
             userDefaults: defaults
         ))
 
-        // Primitive values restored.
-        XCTAssertEqual(defaults.integer(forKey: "drift.dailyCalorieTarget"), 2200)
-        XCTAssertTrue(defaults.bool(forKey: "drift.backupEnabled"))
-        XCTAssertEqual(defaults.string(forKey: "drift.preferredUnits"), "kg")
         // Null + complex values dropped silently — Restorer must not crash on them.
-        XCTAssertNil(defaults.object(forKey: "drift.weightGoal"))
-        XCTAssertNil(defaults.object(forKey: "drift.tdeeConfig"))
-        XCTAssertNil(defaults.object(forKey: "drift.foodSortOrder"))
+        XCTAssertNil(defaults.object(forKey: "drift_water_goal_ml"))
+        XCTAssertNil(defaults.object(forKey: "drift_chat_telemetry_enabled_dict"))
+        XCTAssertNil(defaults.object(forKey: "drift_meal_reminders_array"))
         // Allowlist still enforced.
-        XCTAssertNil(defaults.object(forKey: "drift.notAllowlisted"))
+        XCTAssertNil(defaults.object(forKey: "drift_not_allowlisted"))
     }
 
     // MARK: - Atomic swap failure
