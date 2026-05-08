@@ -240,7 +240,7 @@ struct WeightTabView: View {
                 .accessibilityLabel(viewModel.granularity == .daily ? "Granularity: Daily" : "Granularity: Weekly")
 
                 Button {
-                    viewModel.showCaloriesOverlay.toggle()
+                    viewModel.toggleCaloriesOverlay()
                 } label: {
                     Image(systemName: "flame.fill")
                         .font(.caption.weight(.bold))

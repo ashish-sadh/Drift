@@ -21,11 +21,32 @@ final class WeightViewModel {
     // last-7-day tracking density used as the auto-on heuristic.
     var dailyCaloriesByDate: [String: Double] = [:]
     var daysWithCaloriesInLastWeek: Int = 0
-    var showCaloriesOverlay: Bool {
-        get { Preferences.weightChartCaloriesEnabled(daysWithCaloriesInLastWeek: daysWithCaloriesInLastWeek) }
-        set {
-            Preferences.setWeightChartCaloriesEnabled(newValue)
-        }
+    // Stored, not computed. Earlier version was a computed property reading
+    // from UserDefaults via Preferences — but @Observable only tracks reads
+    // of stored properties, so toggling did nothing in the UI (UserDefaults
+    // write didn't trigger SwiftUI re-render). Stored property + sync to
+    // Preferences in the setter gives both observability and persistence.
+    // Initial value seeded from Preferences in resyncCaloriesOverlay() once
+    // daysWithCaloriesInLastWeek loads.
+    var showCaloriesOverlay: Bool = false
+
+    /// Reload `showCaloriesOverlay` from Preferences using the current
+    /// last-week tracking density as the default-when-unset basis.
+    /// Call after `daysWithCaloriesInLastWeek` is loaded so the auto-on
+    /// heuristic gets fresh inputs. Manual user toggle persists in
+    /// UserDefaults and overrides the heuristic.
+    func resyncCaloriesOverlay() {
+        showCaloriesOverlay = Preferences.weightChartCaloriesEnabled(
+            daysWithCaloriesInLastWeek: daysWithCaloriesInLastWeek
+        )
+    }
+
+    /// Toggle the overlay. Updates the stored property (drives re-render via
+    /// @Observable) and persists via Preferences (survives app restart, also
+    /// pins the manual choice over the auto-on heuristic).
+    func toggleCaloriesOverlay() {
+        showCaloriesOverlay.toggle()
+        Preferences.setWeightChartCaloriesEnabled(showCaloriesOverlay)
     }
 
     /// Is the user trying to lose weight? Based on current weight vs target.
@@ -132,6 +153,10 @@ final class WeightViewModel {
         } else {
             daysWithCaloriesInLastWeek = weekSlice.count
         }
+        // Re-evaluate the overlay default now that tracking density is known.
+        // Manual user toggle (persisted in Preferences) wins; this only
+        // affects users who haven't yet tapped the flame button.
+        resyncCaloriesOverlay()
     }
 
     // Milestone detection
