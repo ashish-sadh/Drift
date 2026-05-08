@@ -8,6 +8,8 @@ struct WeightChartView: View {
     let granularity: WeightViewModel.Granularity
     var rawEntries: [WeightEntry] = []
     var rangeStart: Date? = nil
+    var dailyCaloriesByDate: [String: Double] = [:]
+    var showCaloriesOverlay: Bool = false
 
     @State private var selectedPoint: (date: Date, value: Double)? = nil
 
@@ -63,6 +65,22 @@ struct WeightChartView: View {
             }
 
             Chart {
+                // Optional calorie bars in the background — scaled to fit the
+                // weight Y range so a single scale renders cleanly. The
+                // trailing axis labels show calories explicitly so the
+                // shared scale isn't read as weight.
+                if showCaloriesOverlay, let calBars = scaledCalorieBars() {
+                    ForEach(calBars, id: \.date) { bar in
+                        BarMark(
+                            x: .value("", bar.date),
+                            yStart: .value("", bar.scaledMin),
+                            yEnd: .value("", bar.scaledMax)
+                        )
+                        .foregroundStyle(Theme.accent.opacity(0.18))
+                        .cornerRadius(2)
+                    }
+                }
+
                 // Current value reference line (accent, horizontal)
                 if let currentWeight = displayPoints.last?.ema {
                     RuleMark(y: .value("", currentWeight))
@@ -117,6 +135,15 @@ struct WeightChartView: View {
                 AxisMarks(position: .trailing) {
                     AxisValueLabel().foregroundStyle(.tertiary)
                 }
+                if showCaloriesOverlay, let bars = scaledCalorieBars() {
+                    AxisMarks(position: .leading, values: leadingAxisTicks(bars: bars)) { value in
+                        if let scaled = value.as(Double.self),
+                           let cal = unscaleCalorie(value: scaled, bars: bars) {
+                            AxisValueLabel { Text("\(Int(cal))").font(.caption2) }
+                                .foregroundStyle(Theme.accent.opacity(0.7))
+                        }
+                    }
+                }
             }
             .chartOverlay { proxy in
                 GeometryReader { geo in
@@ -163,5 +190,55 @@ struct WeightChartView: View {
     private var totalDifference: Double? {
         guard let f = displayPoints.first?.ema, let l = displayPoints.last?.ema else { return nil }
         return l - f
+    }
+
+    // MARK: - Calorie overlay helpers (#669)
+
+    private struct ScaledCalorieBar {
+        let date: Date
+        let calories: Double
+        let scaledMin: Double  // bar bottom — bottom of weight Y range
+        let scaledMax: Double  // bar top — calories projected onto weight Y range
+    }
+
+    private struct CalorieScaling {
+        let weightLow: Double
+        let weightHigh: Double
+        let maxCalories: Double
+    }
+
+    private func calorieScaling() -> CalorieScaling? {
+        let weights = displayPoints.map(\.ema) + displayPoints.compactMap(\.actual)
+        guard let lo = weights.min(), let hi = weights.max(), hi > lo else { return nil }
+        let cals = dailyCaloriesByDate.values.filter { $0 > 0 }
+        guard let maxCal = cals.max(), maxCal > 0 else { return nil }
+        // Pad weight range so calorie bars don't paint over weight extremes.
+        let pad = max(0.5, (hi - lo) * 0.1)
+        return CalorieScaling(weightLow: lo - pad, weightHigh: hi + pad, maxCalories: maxCal)
+    }
+
+    private func scaledCalorieBars() -> [ScaledCalorieBar]? {
+        guard let scaling = calorieScaling() else { return nil }
+        let span = scaling.weightHigh - scaling.weightLow
+        return dailyCaloriesByDate.compactMap { entry in
+            guard entry.value > 0, let date = DateFormatters.dateOnly.date(from: entry.key) else { return nil }
+            let frac = entry.value / scaling.maxCalories
+            let top = scaling.weightLow + frac * span
+            return ScaledCalorieBar(date: date, calories: entry.value, scaledMin: scaling.weightLow, scaledMax: top)
+        }.sorted { $0.date < $1.date }
+    }
+
+    private func leadingAxisTicks(bars: [ScaledCalorieBar]) -> [Double] {
+        guard let scaling = calorieScaling() else { return [] }
+        let span = scaling.weightHigh - scaling.weightLow
+        return [0.0, 0.5, 1.0].map { scaling.weightLow + $0 * span }
+    }
+
+    private func unscaleCalorie(value scaledY: Double, bars: [ScaledCalorieBar]) -> Double? {
+        guard let scaling = calorieScaling() else { return nil }
+        let span = scaling.weightHigh - scaling.weightLow
+        guard span > 0 else { return nil }
+        let frac = (scaledY - scaling.weightLow) / span
+        return frac * scaling.maxCalories
     }
 }

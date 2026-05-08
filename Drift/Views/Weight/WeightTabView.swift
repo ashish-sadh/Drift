@@ -23,9 +23,16 @@ struct WeightTabView: View {
                         timeRangeBar
 
                         // Chart — hero element
-                        WeightChartView(trend: viewModel.trend, unit: viewModel.weightUnit, granularity: viewModel.granularity, rawEntries: viewModel.entries,
-                                        rangeStart: viewModel.selectedTimeRange.days.flatMap { Calendar.current.date(byAdding: .day, value: -$0, to: Date()) })
-                            .frame(height: 260)
+                        WeightChartView(
+                            trend: viewModel.trend,
+                            unit: viewModel.weightUnit,
+                            granularity: viewModel.granularity,
+                            rawEntries: viewModel.entries,
+                            rangeStart: viewModel.selectedTimeRange.days.flatMap { Calendar.current.date(byAdding: .day, value: -$0, to: Date()) },
+                            dailyCaloriesByDate: viewModel.dailyCaloriesByDate,
+                            showCaloriesOverlay: viewModel.showCaloriesOverlay
+                        )
+                        .frame(height: 260)
 
                         // Big change banner
                         bigChangeBanner
@@ -214,22 +221,36 @@ struct WeightTabView: View {
 
             Spacer()
 
-            Menu {
-                Button { viewModel.granularity = .daily } label: {
-                    Label("Daily", systemImage: viewModel.granularity == .daily ? "checkmark" : "")
+            HStack(spacing: 6) {
+                Menu {
+                    Button { viewModel.granularity = .daily } label: {
+                        Label("Daily", systemImage: viewModel.granularity == .daily ? "checkmark" : "")
+                    }
+                    Button { viewModel.granularity = .weekly } label: {
+                        Label("Weekly", systemImage: viewModel.granularity == .weekly ? "checkmark" : "")
+                    }
+                } label: {
+                    Text(viewModel.granularity == .daily ? "D" : "W")
+                        .font(.caption.weight(.bold))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 6))
+                        .foregroundStyle(.secondary)
                 }
-                Button { viewModel.granularity = .weekly } label: {
-                    Label("Weekly", systemImage: viewModel.granularity == .weekly ? "checkmark" : "")
+                .accessibilityLabel(viewModel.granularity == .daily ? "Granularity: Daily" : "Granularity: Weekly")
+
+                Button {
+                    viewModel.showCaloriesOverlay.toggle()
+                } label: {
+                    Image(systemName: "flame.fill")
+                        .font(.caption.weight(.bold))
+                        .padding(.horizontal, 10)
+                        .padding(.vertical, 6)
+                        .background(viewModel.showCaloriesOverlay ? Theme.accent.opacity(0.3) : Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 6))
+                        .foregroundStyle(viewModel.showCaloriesOverlay ? Theme.accent : .secondary)
                 }
-            } label: {
-                Text(viewModel.granularity == .daily ? "D" : "W")
-                    .font(.caption.weight(.bold))
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 6)
-                    .background(Theme.cardBackgroundElevated, in: RoundedRectangle(cornerRadius: 6))
-                    .foregroundStyle(.secondary)
+                .accessibilityLabel(viewModel.showCaloriesOverlay ? "Hide calorie overlay" : "Show calorie overlay")
             }
-            .accessibilityLabel(viewModel.granularity == .daily ? "Granularity: Daily" : "Granularity: Weekly")
         }
     }
 
