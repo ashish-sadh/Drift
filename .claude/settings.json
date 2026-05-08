@@ -38,28 +38,69 @@
       },
       {
         "matcher": "Bash",
-        "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/pause-gate.sh", "timeout": 5 }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/pause-gate.sh",
+            "timeout": 5
+          }
+        ]
       },
       {
         "matcher": "Bash",
-        "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/sprint-cap.sh", "timeout": 10 }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/sprint-cap.sh",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/require-test-on-source-change.sh",
+            "timeout": 10
+          }
+        ]
       },
       {
         "matcher": "Bash|Read|Grep|Glob",
-        "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/require-claim-before-bash.sh", "timeout": 5 }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/require-claim-before-bash.sh",
+            "timeout": 5
+          }
+        ]
       },
       {
         "matcher": "Bash|Read|Grep|Glob",
-        "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/nudge-plan-comment.sh", "timeout": 5 }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/nudge-plan-comment.sh",
+            "timeout": 5
+          }
+        ]
       },
       {
         "matcher": "Bash",
         "if": "Bash(git commit *)",
-        "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/require-plan-comment.sh", "timeout": 10 }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/require-plan-comment.sh",
+            "timeout": 10
+          }
+        ]
       },
       {
         "matcher": "*",
-        "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/session-heartbeat.sh", "timeout": 3 }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/session-heartbeat.sh",
+            "timeout": 3
+          }
+        ]
       },
       {
         "matcher": "Glob|Grep",
@@ -74,7 +115,13 @@
     "PostToolUse": [
       {
         "matcher": "*",
-        "hooks": [{ "type": "command", "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/session-heartbeat.sh", "timeout": 3 }]
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/session-heartbeat.sh",
+            "timeout": 3
+          }
+        ]
       },
       {
         "matcher": "Edit|Write",
