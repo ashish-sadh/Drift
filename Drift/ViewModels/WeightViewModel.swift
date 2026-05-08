@@ -133,7 +133,14 @@ final class WeightViewModel {
     private func loadCalorieOverlay() {
         let today = Date()
         let calendar = Calendar.current
-        let chartStart = entries.first.flatMap { DateFormatters.dateOnly.date(from: $0.date) }
+        // entries is sorted by date DESCENDING (fetchWeightEntries orders
+        // .desc), so first = newest, last = oldest. Earlier code used
+        // entries.first as chartStart, which set it to today and limited
+        // the calorie query to a single day — overlay always reported
+        // "No calories logged in this range" for users with historical
+        // data in older months. Use min(by:) to be sort-order-agnostic.
+        let oldestEntryDate = entries.min(by: { $0.date < $1.date })?.date
+        let chartStart = oldestEntryDate.flatMap { DateFormatters.dateOnly.date(from: $0) }
             ?? calendar.date(byAdding: .day, value: -7, to: today)
             ?? today
         let chartStartStr = DateFormatters.dateOnly.string(from: chartStart)
