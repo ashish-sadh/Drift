@@ -8,9 +8,13 @@ Drift is single-device with no backup story. Users who lose, break, or upgrade t
 
 V1 delivers automatic daily backup to iCloud Drive so users can restore on a new device. Scope is backup-only, not sync.
 
+A second, smaller piece of V1 (review-driven, see section I): mark the on-device LLM model directory as `isExcludedFromBackup = true` so the system iCloud device backup stops shipping the ~2–3 GB model file. The model is re-downloadable from GitHub Releases on first launch — no value in backing it up — and excluding it materially shrinks every Drift user's iCloud usage.
+
 ## Proposal
 
 Write SQLite DB + UserDefaults snapshot to a `.driftbackup` file (zip: DB + JSON sidecar + manifest) in the app's iCloud Drive ubiquity container. Retain a ring buffer of 7 daily + 4 weekly = 11 snapshots. BGTaskScheduler fires nightly; a "Back up now" button bypasses the scheduler. Backup is opt-in; restore auto-detects on fresh install. No photos, no Keychain entries, no client-side encryption beyond what iCloud provides.
+
+Separately, exclude the LLM model directory from system iCloud backup at app init using `URLResourceValues.isExcludedFromBackup`. This is independent of the user-data `.driftbackup` flow above — it's about reducing the device's overall iCloud backup size, not the explicit Drift backup we create.
 
 ---
 
@@ -364,7 +368,60 @@ Not automatable in CI. Document as release acceptance criteria:
 
 ---
 
-## H. Defer to V2
+## H. Excluding the LLM Model from System iCloud Backup
+
+This is a **separate concern** from the `.driftbackup` flow above. The `.driftbackup` is the explicit user-data archive Drift creates and stores in iCloud Drive (sections A–F). System iCloud backup is the OS-level backup of the entire app sandbox that iOS performs nightly when the device is plugged in and on Wi-Fi. Today the model files in `Documents/DriftAI/` (~2–3 GB depending on tier) are swept into that system backup, bloating every Drift user's iCloud usage by the model size.
+
+The model is re-downloadable from `https://github.com/ashish-sadh/Drift/releases/download/models-v1` on first launch (see `AIModelManager.downloadModel()`). Backing it up provides no recovery value — restore would simply re-download it. Apple's File System Programming Guide explicitly calls out re-creatable files as the canonical case for `isExcludedFromBackup`.
+
+### Approach
+
+In `AIModelManager.modelsDirectory` (currently `DriftCore/Sources/DriftCore/AI/LLM/AIModelManager.swift:24-29`), after the directory is created, set the resource value:
+
+```swift
+private var modelsDirectory: URL {
+    let docs = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+    let dir = docs.appendingPathComponent("DriftAI")
+    try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
+
+    // Exclude from system iCloud backup — model files (~2–3 GB) are re-downloadable
+    // from GitHub Releases and bring no recovery value.
+    var values = URLResourceValues()
+    values.isExcludedFromBackup = true
+    var mutableDir = dir
+    try? mutableDir.setResourceValues(values)
+
+    return dir
+}
+```
+
+`isExcludedFromBackup` set on the directory propagates to its contents — every `.gguf` and projector file inside is excluded. The flag is persistent across launches once written.
+
+### Why not move models to Library/Application Support
+
+Apple's recommended home for app-managed re-downloadable data is `Library/Application Support/`, which is excluded from backup by default for files marked appropriately. We *could* migrate models there, but:
+
+1. Existing devices have models in `Documents/DriftAI/` already. Migrating means moving multi-GB files — slow and fragile mid-launch.
+2. `isExcludedFromBackup` on `Documents/DriftAI/` achieves the same backup-exclusion outcome with one line and zero migration risk.
+3. The model directory is invisible to the user either way (no public picker exposes it), so the "Documents is for user-visible files" guidance doesn't apply.
+
+V1 keeps the existing path and adds the backup-exclusion flag. V2+ may revisit if we ever need the directory to be user-visible (we won't).
+
+### Verification
+
+After applying: on a test device, run `xcrun simctl io booted backup-summary` (or check the device's iCloud Backup → Drift size in Settings → [Apple ID] → iCloud → Manage Account Storage → Backups → device → Drift). Pre-fix: ~2.5–3.0 GB. Post-fix: <100 MB (just the GRDB DB + UserDefaults plist).
+
+### Test
+
+`DriftCoreTests/AIModelManagerBackupExclusionTests.swift` (Tier 0):
+- After `AIModelManager.shared.modelsDirectory` is read, `URLResourceValues.isExcludedFromBackup` on the directory URL is `true`.
+- Test creates a temp directory mirroring the structure to avoid touching the real Documents dir.
+
+This is the only V1 implementation work for section I — a ~5-line change in `AIModelManager` plus a unit test. **Effort: 30 minutes**, filed as its own implementation sub-task so it can ship independently of the `.driftbackup` flow (which is ~30h).
+
+---
+
+## I. Defer to V2
 
 The V1 `.driftbackup` manifest uses `"backupFormatVersion": 1`. V2 additions must increment this field and add new top-level keys — not modify existing ones. Restore code reads V1 format; V2 restore code reads both.
 
@@ -432,6 +489,8 @@ Settings → Data → Backup
 | `Drift/Views/Settings/RestorePickerView.swift` | iOS | Restore list + confirmation sheet |
 | `DriftCoreTests/BackupManifestTests.swift` | Tier 0 | Manifest + ring buffer + roundtrip tests |
 | `DriftTests/BackupServiceTests.swift` | Tier 1 | iOS integration tests |
+| `DriftCore/.../AI/LLM/AIModelManager.swift` | DriftCore (edit) | Add `isExcludedFromBackup = true` to model directory (~5 LOC) |
+| `DriftCoreTests/AIModelManagerBackupExclusionTests.swift` | Tier 0 | Verify exclusion flag is set on model directory |
 
 ### DriftCore / iOS split rationale
 
@@ -473,7 +532,8 @@ None — all decisions locked per issue #561 operator alignment on 2026-04-30.
 | Settings UI + stale-backup banner | 4h |
 | Failure-mode handling | 3h |
 | Tests (Tier 0 + Tier 1) | 4h |
-| **Total** | **~31h** |
+| LLM model directory backup exclusion (section H) + Tier 0 test | 0.5h |
+| **Total** | **~31.5h** |
 
 ---
 
