@@ -62,6 +62,20 @@ struct WeightChartView: View {
                     Text("\(DateFormatters.shortDisplay.string(from: f)) – \(DateFormatters.shortDisplay.string(from: l))")
                         .font(.caption2).foregroundStyle(.tertiary)
                 }
+
+                // Toggle is ON but no bars rendered = no calorie data in
+                // chart range. Without this caption, tapping the flame looks
+                // like a silent no-op (most pronounced at 1W/1M when the
+                // user hasn't logged calories yet for the visible window).
+                if showCaloriesOverlay && scaledCalorieBars() == nil {
+                    HStack(spacing: 4) {
+                        Image(systemName: "flame.fill")
+                            .font(.caption2)
+                            .foregroundStyle(Theme.accent.opacity(0.7))
+                        Text("No calories logged in this range — log meals to see the overlay.")
+                            .font(.caption2).foregroundStyle(.secondary)
+                    }
+                }
             }
 
             Chart {
@@ -76,7 +90,11 @@ struct WeightChartView: View {
                             yStart: .value("", bar.scaledMin),
                             yEnd: .value("", bar.scaledMax)
                         )
-                        .foregroundStyle(Theme.accent.opacity(0.18))
+                        // 0.18 was too faint on dark theme — users reported
+                        // "I tap the flame and nothing happens". Bumped to
+                        // 0.35 so sparse-day bars are visibly purple against
+                        // the background without competing with the EMA line.
+                        .foregroundStyle(Theme.accent.opacity(0.35))
                         .cornerRadius(2)
                     }
                 }
