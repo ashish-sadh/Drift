@@ -2354,5 +2354,15 @@
     "fixes": [
       "Meal reminder notification body uses median time, not trigger"
     ]
+  },
+  {
+    "build": 235,
+    "date": "2026-05-09T08:35:51-07:00",
+    "description": "chore: TestFlight build 235",
+    "fixes": [],
+    "features": [
+      "BackupRingBuffer + BackupInfo for 7 daily + 4 weekly pruning (#676)",
+      "cycle_biomarker_correlation analytical tool (#689)"
+    ]
   }
 ]
