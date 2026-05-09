@@ -876,6 +876,9 @@ public enum ToolRegistration {
         // Glucose spike analysis — peak-based spike detection per meal, >30 mg/dL threshold. #631.
         GlucoseSpikeAnalysisTool.syncRegistration(registry: r)
 
+        // Cycle × biomarker correlation — does iron / D / ferritin shift across cycle phases? #689.
+        CycleBiomarkerInsightTool.syncRegistration(registry: r)
+
         // PhotoLog tool is registered separately by the iOS Drift app
         // after this base registration runs (it depends on iOS-only
         // CloudVision / Keychain).

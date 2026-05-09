@@ -4,14 +4,14 @@
 AI-first local health tracker. AI chat is the primary interface — every data entry doable through conversation. Traditional UI for visual analytics and fallback. No cloud, no accounts. Published on TestFlight as "Drift Fitness" (bundle: com.drift.health).
 
 ## Numbers
-- **Version:** 0.1.0, Build 224
-- **Tests:** ~1219 iOS DriftTests + 714 macOS DriftCoreTests (cross-platform pure-logic suite, ~8s warm); LLM eval ~160+ cases in DriftLLMEvalMacOS
+- **Version:** 0.1.0, Build 234
+- **Tests:** ~1253 iOS DriftTests + ~1253 macOS DriftCoreTests (cross-platform pure-logic suite, ~8s warm); LLM eval ~160+ cases in DriftLLMEvalMacOS
 - **AI Eval:** 400+ scenarios in eval harness + LLM eval (~130-case gold set in IntentRoutingEval)
 - **Per-tool Reliability (Gemma 4, 50-query gold set):** log_food 10/10 (100%), edit_meal 9/10 (90%, tuned +10% from 80%), log_weight 10/10 (100%), mark_supplement 10/10 (100%), food_info 9/10 (90%) — overall 48/50 (96%)
 - **Foods:** 11,072 (USDA SR Legacy Phase 2 import at build 217; includes full Indian, East/SE Asian, African, Middle Eastern, Latin American, European, and US cuisines)
 - **Exercises:** 960 (free-exercise-db)
 - **Biomarkers:** 71 across 9 categories
-- **AI Tools:** 34 registered tools (23 core + 11 insight); 10 analytical insight engines (cross_domain_insight, weight_trend_prediction, glp1_insight, supplement_insight, food_timing_insight, sleep_food_correlation, exercise_volume_summary, glucose_food_correlation, progressive_overload_check, glucose_spike_analysis)
+- **AI Tools:** 35 registered tools (23 core + 12 insight); 11 analytical insight engines (cross_domain_insight, weight_trend_prediction, glp1_insight, supplement_insight, food_timing_insight, sleep_food_correlation, exercise_volume_summary, glucose_food_correlation, progressive_overload_check, glucose_spike_analysis, cycle_biomarker_correlation)
 - **TTFT Benchmark:** ChatLatencyBenchmark (20 queries × 3 runs, 1.3× regression threshold, opt-in via DRIFT_LATENCY_BENCH=1) — 4 scenarios: single-item, multi-item (gates TTFT), confirmation-card (gates completion_ms), clarify-round-trip (gates turn1+turn2 total)
 - **AI Chat Features:** 25+ (see `Docs/ai-parity.md`)
 - **Confirmation Cards:** 8 types (food, weight, workout, navigation, supplement, sleep, glucose, biomarker)
