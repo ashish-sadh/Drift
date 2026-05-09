@@ -61,6 +61,24 @@ import Testing
     #expect(MultiIntentSplitter.split("rice and dal") == nil)
 }
 
+@Test func noSplitCompoundFoodNameFishAndChips() {
+    // Acceptance criterion (#688): "fish and chips" is a compound food name —
+    // splitter must NOT split it. Both "I had fish and chips" and bare
+    // "fish and chips" stay as a single message; the LLM handles them as
+    // one log_food call.
+    #expect(MultiIntentSplitter.split("I had fish and chips") == nil)
+    #expect(MultiIntentSplitter.split("fish and chips") == nil)
+    #expect(MultiIntentSplitter.split("ate fish and chips for lunch") == nil)
+}
+
+@Test func noSplitMacAndCheeseStyleCompounds() {
+    // Same shape as fish-and-chips: compound food names where neither
+    // segment carries a domain signal on its own.
+    #expect(MultiIntentSplitter.split("had mac and cheese") == nil)
+    #expect(MultiIntentSplitter.split("peanut butter and jelly sandwich") == nil)
+    #expect(MultiIntentSplitter.split("cookies and cream ice cream") == nil)
+}
+
 @Test func noSplitSameDomainSupplements() {
     #expect(MultiIntentSplitter.split("took vitamin d and creatine") == nil)
 }
