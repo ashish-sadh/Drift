@@ -57,12 +57,14 @@
 - Three P0 data-accuracy bugs: integer JSON params silently dropped (servings always defaulted to 1), "calcium" matching the calorie regex (phantom calorie logs), undo always deleting food. Fixes: Int branch in `parseResponse`, `\b` word boundary, `lastWriteAction` switch on `UndoableAction` enum.
 - Voice crash (`AVAudioEngine.prepare()` required before `inputNode.outputFormat`) only surfaces on real hardware. Real-device testing is non-negotiable for hardware features.
 - iOS 26.4 SDK archive blocker (17 builds dark): CLI SDK ≠ Xcode platform support files. Watchdog kept bumping `CURRENT_PROJECT_VERSION` despite zero successful archives — silent build counter lying. Fix: don't bump build when `testflight-archive-failed` flag exists.
+- cycle-counter ↔ commit-counter divergence: anything that auto-defaults across two state sources can drift without a fault signal. Standing rule: every counter has either a single source of truth, or a divergence guard that fails loudly when they don't match.
 - Two recent chat regressions (photo log JSON, recipe builder) shipped because no end-to-end chat smoke test existed. Fix: ChatPathSmokeTests Tier-1.
 - Telemetry-dependent sprint tasks (#535) are infeasible by design. Drift's chat telemetry is strictly on-device at `~/Library/Containers/<bundle>/Data/Documents/drift_telemetry.db`; no central pipeline aggregates it (privacy-first tenet, #111). Lesson: never decompose a campaign into work that needs central data Drift doesn't collect.
 - Planning session crashes (#381, #354, #407, #408): root cause is exit hook timing when DOD isn't cleanly reached. Manual restart cost every 6 hours. Fix is isolated to `planning-service.sh` exit path.
 - Five consecutive analytical-tool implementation crashes (#417, #418): WIP patches at `~/drift-state/wip/{id}.patch`. Reading the WIP diff before retry (~15 min) prevents N+1 crashes — blind retry is guaranteed to fail at the same point.
 
 ### Process & Discipline
+- When a fix ships, file a verification task within 1-2 cycles to confirm the fix actually fixed the problem. Documented fixes that didn't land are worse than open issues because they look closed. (NSNull/non-primitive filter #687 follow-up to allowlist hardening #700 was exactly this pattern.)
 - 500-cycle re-validation rule: any task created >500 cycles ago requires re-validation (root cause may have been partially addressed; referenced code may be renamed). Aggressive pruning is healthier than deferral — 32 stale closures in one cycle (113→81 queue) was net positive.
 - Queue cap 70; senior queue ≤15 = healthy drain. Senior task additions ≤2 per planning cycle when SENIOR queue >15. More tickets ≠ more throughput; senior drain rate is the only lever.
 - State.md refresh is Step 0 of every sprint, not cleanup. Stale State.md = wrong planning inferences about what's shipped.
@@ -73,17 +75,12 @@
 
 ## What I Learned (recent, not yet sedimented)
 
-### Review Cycle 9441 (2026-05-07)
-- When a fix ships, file a verification task within 1-2 cycles to confirm the fix actually fixed the problem. Documented fixes that didn't land are worse than open issues because they look closed.
+### Review Cycle 9760 (2026-05-09)
+- Engine-without-surface ≠ shipped. iCloud backup ran 6 issues across 2 cycles with rigorous architecture (atomic restore, ring buffer, integrity validation, allowlist+NSNull hardening), but with no user-facing Settings row + restore flow we have no field validation that wipe-and-restore actually works. Always pair the engine PR with the surface task in the *same* sprint, or flag the engine as not-yet-shipped.
+- `qa-tester` adversarial pass + `require-test-on-source-change` hooks went live (`d427f870`, `ba46cfa9`). They cost ~5-10 minutes per source commit; the value is ending multi-commit iteration on shipped UI bugs (calorie overlay #669 was the trigger). Risk to monitor: rubber-stamp verdicts that satisfy the hook without tracing the code path. If that emerges, tighten the hook to require commit hashes for "BUG FIXED" or file:line for "WORKS AS UPDATED".
 
 ### Planning Cycle 8945 (2026-05-04)
 - Planning checkpoints (`planning-service.sh checkpoint`) silently no-op when the planning issue body has no checklist format. Future planning issues should be created with the step checklist pre-populated.
-
-### Review Cycle 8938 (2026-05-04)
-- cycle-counter and commit-counter diverged silently because `report-service.sh start-review` defaulted to cycle-counter without an argument. Surfaced silent counter drift as an infra problem — anything that auto-defaults across two state sources can drift without a fault signal.
-
-### Review Cycle 8666 (2026-05-02)
-- Proposal: pre-commit hook reading `CURRENT_PROJECT_VERSION` from project.yml and comparing to State.md build number. Diverge >1 → warning (not block). Makes State.md lag a commit-time signal rather than a review-cycle finding.
 
 ## Preferences & Approach
 - Prefer boring, proven solutions over clever abstractions.

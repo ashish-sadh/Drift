@@ -11,7 +11,7 @@
 - Indian food coverage matters — users log dal, paneer, biryani, not just Western foods. Indian branded protein foods (MuscleBlaze, RiteBite, sattu, makhana) are the target user base's daily search.
 - Users want to type naturally in chat and have AI handle everything — "log breakfast: 2 eggs, toast, coffee with milk".
 - Privacy is a real selling point — users explicitly appreciate no-cloud, no-account.
-- Settings → Feedback is structurally load-bearing. Five+ consecutive zero-feedback cycles = signal channel broken; deferral 3+ cycles = P0 blocker. Fast response to user-filed bugs creates more bug filing; slow response kills it.
+- Settings → Feedback is structurally load-bearing. Five+ consecutive zero-feedback cycles = signal channel broken; deferral 3+ cycles = P0 blocker. Fast response to user-filed bugs creates more bug filing; slow response kills it. Shipping the channel is not activation — once the channel exists, activation is a separate problem (release-notes narrative, in-app prompts, direct DM asks). Plan both.
 - Five-bug batches from real-device dogfooding are the highest-quality signal we get. Protect the loop — respond same cycle.
 - TestFlight reach is part of the product. Features merged but invisible aren't shipped. Any infra blocker keeping the app off TestFlight >3 days is a P0 (the 17-build dark stretch was a credibility cliff).
 - Drift's chat telemetry is on-device only (privacy-first tenet, #111). No autopilot session can read user telemetry; no central pipeline aggregates it. Prompt-quality audits use `DriftLLMEvalMacOS` gold sets — deterministic, reproducible. User-reported regressions come in via bugs, not sweeps.
@@ -35,7 +35,7 @@
 - Read-only info cards (nutrition lookup, weight trend, "how many steps today") give glanceable answers without forcing a commit.
 - BYOK Photo Log is "premium capability without subscription" — user brings their own AI vision key, key lives in biometric Keychain. Differentiator vs MFP Premium+ at $20/mo.
 - Health-domain extension via mirror pattern: SupplementLog → DailyMedication, mark_supplement → log_medication. Logging foundation first, depth via user feedback.
-- Behavior insight cards on dashboard — proactive intelligence (protein adherence alerts, glucose spike detection, workout consistency, progressive overload) is the difference between "data logger" and "health coach."
+- Behavior insight cards on dashboard — proactive intelligence (protein adherence alerts, glucose spike detection, workout consistency, progressive overload) is the difference between "data logger" and "health coach." The TestFlight narrative testers see should read as "Drift now coaches you across N dimensions," not "we shipped 30 unrelated things." Lead release notes with the coaching identity, not the changelog.
 
 ### AI Chat UX Patterns
 - Multi-stage focused prompts beat one monolithic prompt on the 2B model. Smaller prompts = higher accuracy per token.
@@ -66,11 +66,9 @@
 
 ## What I Learned (recent, not yet sedimented)
 
-### Review Cycle 9441 (2026-05-07)
-- Settings → Feedback is shipped but activation isn't done. Mailto channel works; getting testers to actually use it is the next problem. In-app "what's new" sheet + release-notes proactive-coach narrative are the activation levers.
-
-### Review Cycle 8999 (2026-05-06)
-- The "proactive coach" identity is now coherent: protein adherence + glucose spike + workout consistency + progressive overload. The TestFlight diff testers see should read as "Drift now coaches you," not "we shipped 30 unrelated things."
+### Review Cycle 9760 (2026-05-09)
+- Always have ≥2 activation levers in flight. Admin shut down the in-app "what's new" sheet (PR #654 comment) and instantly the only remaining lever became TestFlight release-notes copy. A single-lever activation strategy is one decision-stroke away from being zero-lever; the design needs redundancy.
+- Multi-intent splitting (#688) and median-time meal reminders (#690) are *invisible polish* — testers won't articulate they like them, but the friction reduction is qualitative and they earn the "feels intelligent" verdict that #111-tenet-1 demands. Build more of these silently — the user signal is "they didn't complain about the friction, then they didn't notice the absence either."
 
 ## Preferences & Approach
 - Prefer opinionated design over configurability — make good defaults, don't add settings.
