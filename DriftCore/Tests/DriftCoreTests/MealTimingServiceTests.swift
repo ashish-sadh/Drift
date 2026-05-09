@@ -146,18 +146,31 @@ final class MealTimingServiceTests: XCTestCase {
 
     func testNotificationBodyDifferentiatesPatternVsDefault() {
         let pattern = MealTimingService.ReminderSlot(
-            mealPeriod: .lunch, triggerHour: 13, triggerMinute: 0, usedPattern: true
+            mealPeriod: .lunch, triggerHour: 13, triggerMinute: 0, medianHour: 12.5
         )
         let fallback = MealTimingService.ReminderSlot(
-            mealPeriod: .lunch, triggerHour: 13, triggerMinute: 0, usedPattern: false
+            mealPeriod: .lunch, triggerHour: 13, triggerMinute: 0, medianHour: nil
         )
         XCTAssertTrue(pattern.notificationBody.contains("you usually eat"))
         XCTAssertFalse(fallback.notificationBody.contains("you usually eat"))
     }
 
+    /// Regression for the QA finding (#690 review): `notificationBody` for
+    /// pattern-based slots used the *trigger* time string ("you usually eat
+    /// around 1:00 PM") even though the trigger is median+30min. Body must
+    /// reference the median itself, not the trigger.
+    func testNotificationBodyReferencesMedianNotTrigger() {
+        let slot = MealTimingService.ReminderSlot(
+            mealPeriod: .lunch, triggerHour: 13, triggerMinute: 0, medianHour: 12.5
+        )
+        XCTAssertTrue(slot.notificationBody.contains("12:30 PM"),
+                      "Body should reference the user's median (12:30) not the trigger (1:00)")
+        XCTAssertFalse(slot.notificationBody.contains("1:00 PM"))
+    }
+
     func testNotificationIdentifierIsStablePerMealPeriod() {
         let lunchSlot = MealTimingService.ReminderSlot(
-            mealPeriod: .lunch, triggerHour: 12, triggerMinute: 0, usedPattern: true
+            mealPeriod: .lunch, triggerHour: 12, triggerMinute: 0, medianHour: 12.0
         )
         XCTAssertEqual(lunchSlot.notificationIdentifier, "drift_meal_reminder_lunch")
     }

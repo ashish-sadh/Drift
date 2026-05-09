@@ -18,28 +18,32 @@ import Foundation
 public enum MealTimingService {
 
     /// One scheduled reminder slot. `triggerHour` / `triggerMinute` are
-    /// local time components. `usedPattern` indicates whether the time
-    /// came from the user's median (true) or the fixed default (false) —
-    /// used by copy and by tests that distinguish the two paths.
+    /// local time components — the iOS layer wraps them in a
+    /// `UNCalendarNotificationTrigger`. `medianHour` is the user's
+    /// pre-offset median (or nil for fixed-default slots) — kept
+    /// separately so the notification body can say "you usually eat
+    /// around 12:30" while the trigger fires at 13:00.
     public struct ReminderSlot: Sendable, Equatable {
         public let mealPeriod: MealType
         public let triggerHour: Int     // 0..23
         public let triggerMinute: Int   // 0..59
-        public let usedPattern: Bool
+        public let medianHour: Double?
 
-        public init(mealPeriod: MealType, triggerHour: Int, triggerMinute: Int, usedPattern: Bool) {
+        public var usedPattern: Bool { medianHour != nil }
+
+        public init(mealPeriod: MealType, triggerHour: Int, triggerMinute: Int, medianHour: Double?) {
             self.mealPeriod = mealPeriod
             self.triggerHour = triggerHour
             self.triggerMinute = triggerMinute
-            self.usedPattern = usedPattern
+            self.medianHour = medianHour
         }
 
         public var notificationBody: String {
-            let timeStr = formatHour(Double(triggerHour) + Double(triggerMinute) / 60.0)
             let meal = mealPeriod.displayName.lowercased()
-            return usedPattern
-                ? "Time to log \(meal) — you usually eat around \(timeStr)."
-                : "Did you log \(meal) yet?"
+            if let medianHour {
+                return "Time to log \(meal) — you usually eat around \(formatHour(medianHour))."
+            }
+            return "Did you log \(meal) yet?"
         }
 
         public var notificationIdentifier: String {
@@ -121,14 +125,14 @@ public enum MealTimingService {
                     mealPeriod: period,
                     triggerHour: (totalMin / 60) % 24,
                     triggerMinute: totalMin % 60,
-                    usedPattern: true
+                    medianHour: medianHour
                 ))
             } else if let fixed = fixedDefaultsByPeriod[period] {
                 slots.append(ReminderSlot(
                     mealPeriod: period,
                     triggerHour: fixed.hour,
                     triggerMinute: fixed.minute,
-                    usedPattern: false
+                    medianHour: nil
                 ))
             }
         }
