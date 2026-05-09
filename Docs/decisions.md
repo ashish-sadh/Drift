@@ -30,6 +30,17 @@ Append-only record of non-obvious decisions: architecture changes, harness rules
 
 ---
 
+## 2026-05-08
+
+### qa-tester subagent + verdict hook — adversarial pass before commit on UI/data-flow changes
+Calorie overlay (#669) shipped 4 unit tests but 3 bugs slipped through (empty data, sort-order mismatch, @Observable computed-property gotcha) — all three were scenarios a halfway-decent QA pass would have flagged. New senior protocol step before any commit touching `Drift/Views|ViewModels|Services` or `DriftCore/Sources/{Domain,AI,Persistence}`: invoke `qa-tester` subagent → it returns a markdown checklist of failure scenarios → senior must trace each through actual code paths and either fix or prove handled, then post `## QA scenarios (qa-tester)` block on the issue with one verdict per scenario. `require-qa-verdict.sh` PreToolUse hook blocks the commit if the latest issue comment lacks the verdict block or any scenario remains unchecked. The point is to collapse the multi-commit iteration into one shipping commit by *assuming the code is broken until traced*, not to write more tests after the fact. Commit `d427f870`.
+
+### require-test-on-source-change hook — every source commit ships with a test
+Companion to QA pass: `require-test-on-source-change.sh` PreToolUse hook blocks any commit that stages files under `Drift/Views|ViewModels|Services` or `DriftCore/Sources/DriftCore/{Domain,AI,Persistence}` without ALSO staging a test under `DriftCoreTests`, `DriftTests`, or `DriftLLMEvalMacOS`. Edge case (pure typo/comment/asset, genuinely untestable) → include `[no-test]` in the commit message; auditable, use sparingly. Driven by the same #669 calorie-overlay incident — the data-flow bugs would have been caught by even a basic data-flow test, not just the preferences-toggle tests that did ship. Commit `ba46cfa9`.
+
+### backup-allowlist-must-mirror-real-keys — string-typed UserDefaults dictionary is silent data loss waiting to happen
+`PreferencesBackup.allowlist` was hand-curated against the conceptual list of preferences the team thought was being persisted; multiple production keys (weightGoal, tdeeConfig, custom_exercises, etc.) didn't match the allowlist string-for-string and were silently dropped from backups for weeks. Two follow-on fixes: (a) #700 — the allowlist must be derived from or explicitly verified against `Preferences.swift` keys; an audit script (`scripts/preferences-allowlist-audit.sh` if it doesn't exist yet, file an issue) should fail CI when they diverge; (b) #701 — `Codable Data` and array-typed preferences (e.g. weightGoal, custom exercises) need first-class round-tripping in the backup encoder/decoder, not "primitive types only" string matching. General lesson: any string-keyed allowlist over a moving target is a silent-data-loss vector — either generate it from the source of truth or verify equality with a test. Commits `791f287a`, `cb87668c`.
+
 ## 2026-05-07
 
 ### launch-watchdog-budget — defer notification + widget refresh, do not await before syncComplete
