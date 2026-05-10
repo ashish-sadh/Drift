@@ -2380,5 +2380,15 @@
       "Refresh food database in Settings no longer freezes the app \u2014 runs off the main thread with a spinner, disabled button, and concrete success/error feedback (#705)"
     ],
     "features": []
+  },
+  {
+    "build": 238,
+    "date": "2026-05-10T09:30:00-07:00",
+    "description": "chore: TestFlight build 238",
+    "fixes": [
+      "USDA SR Legacy bulk-variants curated \u2014 food search results dropped from 11,162 to 5,420 distinct items so common foods rank higher (#717)",
+      "Backup ring buffer no longer crashes if the system has no default time zone \u2014 hardened against TimeZone force-unwrap (#715)"
+    ],
+    "features": []
   }
 ]
