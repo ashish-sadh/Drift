@@ -343,6 +343,153 @@ final class BackupRestorerTests: XCTestCase {
                        "original DB must be untouched after atomic swap failure")
     }
 
+    // MARK: - Production-schema round-trip (issue #708 dogfood gate)
+
+    /// Round-trip a fully-migrated production schema with at least one row in
+    /// each major user-data domain. Catches accidental table drops in
+    /// `VACUUM INTO`, missed forward migrations on restore, and silent loss
+    /// of any single domain's data — the engine-level half of #708's
+    /// "wipe-and-restore round-trips all major data domains losslessly"
+    /// acceptance criterion. (Manual device dogfood still gated on #708's
+    /// other criteria.)
+    func testRoundtripPreservesProductionSchemaAndAllDomainRows() throws {
+        // Arrange — file-backed source, run all production migrations.
+        let sourceURL = workDir.appendingPathComponent("prod-source.sqlite")
+        let sourceQueue = try DatabaseQueue(path: sourceURL.path)
+        try AppDatabase.runMigrations(on: sourceQueue)
+
+        // Snapshot the user-data table list (excluding sqlite + grdb internals).
+        let originalTables: [String] = try sourceQueue.read { db in
+            try String.fetchAll(db, sql: """
+                SELECT name FROM sqlite_master
+                WHERE type='table'
+                  AND name NOT LIKE 'sqlite_%'
+                  AND name NOT LIKE 'grdb_%'
+                ORDER BY name
+                """)
+        }
+        XCTAssertGreaterThan(originalTables.count, 5,
+                             "real migrator must produce multiple production tables")
+
+        // Insert one realistic row per major user-data domain. Rows are wrapped
+        // in `tableExists` checks so the test stays robust if a future migration
+        // renames or drops a table — the assertion is "every row we inserted
+        // round-trips", not "exactly these tables exist".
+        var insertedTables: [String] = []
+        try sourceQueue.write { db in
+            // Weight domain.
+            if try db.tableExists("weight_entry") {
+                try db.execute(sql: """
+                    INSERT INTO weight_entry (date, weight_kg, source)
+                    VALUES ('2026-05-10', 75.0, 'manual')
+                    """)
+                insertedTables.append("weight_entry")
+            }
+            // Food domain — meal_log + food_entry (food_entry FKs into meal_log).
+            if try db.tableExists("meal_log"), try db.tableExists("food_entry") {
+                try db.execute(sql: """
+                    INSERT INTO meal_log (date, meal_type) VALUES ('2026-05-10', 'breakfast')
+                    """)
+                let mealLogId = db.lastInsertedRowID
+                try db.execute(sql: """
+                    INSERT INTO food_entry
+                        (meal_log_id, food_name, serving_size_g, servings, calories,
+                         protein_g, carbs_g, fat_g, fiber_g)
+                    VALUES (?, 'idli', 30.0, 2.0, 80.0, 2.0, 16.0, 0.5, 1.0)
+                    """, arguments: [mealLogId])
+                insertedTables.append("meal_log")
+                insertedTables.append("food_entry")
+            }
+            // Supplement domain — supplement + supplement_log (FK).
+            if try db.tableExists("supplement"), try db.tableExists("supplement_log") {
+                try db.execute(sql: """
+                    INSERT INTO supplement (name, dosage, unit) VALUES ('Vitamin D', '2000', 'IU')
+                    """)
+                let supplementId = db.lastInsertedRowID
+                try db.execute(sql: """
+                    INSERT INTO supplement_log (supplement_id, date, taken)
+                    VALUES (?, '2026-05-10', 1)
+                    """, arguments: [supplementId])
+                insertedTables.append("supplement")
+                insertedTables.append("supplement_log")
+            }
+            // Workout domain — workout + workout_set (FK).
+            if try db.tableExists("workout"), try db.tableExists("workout_set") {
+                try db.execute(sql: """
+                    INSERT INTO workout (name, date) VALUES ('Push Day', '2026-05-10')
+                    """)
+                let workoutId = db.lastInsertedRowID
+                try db.execute(sql: """
+                    INSERT INTO workout_set
+                        (workout_id, exercise_name, set_order, weight_lbs, reps)
+                    VALUES (?, 'Bench Press', 1, 135.0, 8)
+                    """, arguments: [workoutId])
+                insertedTables.append("workout")
+                insertedTables.append("workout_set")
+            }
+            // Biomarker domain — lab_report + biomarker_result (FK).
+            if try db.tableExists("lab_report"), try db.tableExists("biomarker_result") {
+                try db.execute(sql: """
+                    INSERT INTO lab_report (report_date, file_name)
+                    VALUES ('2026-05-01', 'labs.pdf')
+                    """)
+                let reportId = db.lastInsertedRowID
+                try db.execute(sql: """
+                    INSERT INTO biomarker_result
+                        (report_id, biomarker_id, value, unit,
+                         normalized_value, normalized_unit)
+                    VALUES (?, 'ferritin', 45.0, 'ng/mL', 45.0, 'ng/mL')
+                    """, arguments: [reportId])
+                insertedTables.append("lab_report")
+                insertedTables.append("biomarker_result")
+            }
+        }
+        XCTAssertGreaterThanOrEqual(insertedTables.count, 5,
+                                     "at least 5 domain rows must seed for meaningful coverage")
+
+        // Act — package + restore.
+        let backupURL = workDir.appendingPathComponent("prod.driftbackup")
+        try BackupPackager().package(
+            dbWriter: sourceQueue,
+            userDefaults: defaults,
+            appMetadata: .init(
+                appBuild: "238",
+                appVersion: "2.1.0",
+                schemaVersion: Migrations.currentVersion
+            ),
+            destination: backupURL
+        )
+        let restoredURL = workDir.appendingPathComponent("prod-restored.sqlite")
+        try BackupRestorer().restore(
+            from: backupURL,
+            toDatabasePath: restoredURL,
+            userDefaults: defaults
+        )
+
+        // Assert — restored DB has the same table list and every seeded row.
+        let restoredQueue = try DatabaseQueue(path: restoredURL.path)
+        let restoredTables: [String] = try restoredQueue.read { db in
+            try String.fetchAll(db, sql: """
+                SELECT name FROM sqlite_master
+                WHERE type='table'
+                  AND name NOT LIKE 'sqlite_%'
+                  AND name NOT LIKE 'grdb_%'
+                ORDER BY name
+                """)
+        }
+        XCTAssertEqual(
+            restoredTables, originalTables,
+            "all production tables must round-trip; diff = \(Set(originalTables).symmetricDifference(Set(restoredTables)))"
+        )
+
+        for table in insertedTables {
+            let count: Int = try restoredQueue.read { db in
+                try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM \(table)") ?? 0
+            }
+            XCTAssertEqual(count, 1, "\(table) row must survive backup → restore")
+        }
+    }
+
     // MARK: - Helpers
 
     private func makeBackup(
