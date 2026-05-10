@@ -24,7 +24,7 @@ public enum BackupRingBuffer {
         guard !all.isEmpty else { return ([], []) }
 
         var calendar = Calendar(identifier: .iso8601)
-        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        calendar.timeZone = .gmt
 
         // Tie-break on URL so identical timestamps yield a deterministic order
         // — Swift's `Array.sorted` is not strictly stable on equal keys, and
