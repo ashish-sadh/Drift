@@ -54,6 +54,12 @@ scripts/planning-service.sh remaining
 
 8. **Daily exec report (if due):** `scripts/report-service.sh daily-due || true` — if due: `scripts/report-service.sh start-exec` → write report → PR with `--label report` → merge. Then: `echo $(date +%s) > ~/drift-state/last-report-time`
 
+9a. **Food DB curation check.** Read `wc -l DriftCore/Sources/DriftCore/Resources/foods.json` (or `jq length`). Per product-focus tenet #9, the ceiling is ≤6,000 foods. If above ceiling: file/keep a `food-db-curation` SENIOR sprint task to drop low-value entries (lab / "NS as to" / redundant variants). When triaging incoming food-DB feature requests:
+   - "Add 30 foods from X cuisine" → only if it fills a real gap with hand-vetted entries; **reject batch imports** (USDA / OpenFoodFacts dumps, scraped lists)
+   - "Import dataset Y" → reject without a curation plan attached
+   - Each entry must justify itself: high-frequency search miss, unique nutrition profile, regional gap users actually eat
+   - Today's state: 11,162 foods after build 217 USDA Phase 2 bulk import (commit `af3f50e9`, +7,556 entries); curation pass needed to bring back under ceiling
+
 9. **Triage queue + create sprint tasks (cap 100 open):**
 
    **First: triage existing queue.** Check the count:
