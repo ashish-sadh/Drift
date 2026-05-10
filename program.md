@@ -97,6 +97,12 @@ scripts/planning-service.sh remaining
     - **Prune.** Any dated entry >30 days old that didn't sediment is by definition not durable — delete it. Routine "I implemented X" lines without a *why* the next planner needs → delete. Don't keep noise.
     - **Stay ≤300 lines per persona file.** If growing past, sediment + prune harder.
     - The test: a future planner reading the persona cold should get sharp *character* in 2 minutes, not wade through dated logs.
+    - **Review qa-tester output quality.** The `qa-tester` subagent (`.claude/agents/qa-tester.md`) evolves on the same loop. Read the QA-verdict comments on the last 5–10 closed sprint-tasks (`gh issue list --state closed --limit 20 --json number,comments` and inspect those carrying a "QA verdict" comment). Look for three patterns:
+        - **Over-flagging**: scenarios marked `NOT APPLICABLE` at >40% across multiple issues → tighten the failure-mode generators (or remove a generator that consistently produces stale scenarios).
+        - **Under-generating**: post-shipped bugs filed within 7 days of close that *no* qa-tester scenario flagged → identify the missing failure category, add a generator.
+        - **Effective patterns**: scenarios that consistently caught real bugs across 2+ cycles → promote into the stable failure-mode generators block; delete the dated learnings entry once promoted.
+
+      If you spot a pattern, append to the **Learnings** section in `qa-tester.md` with the same bar as `decisions.md`: 1–3 sentences, pattern + how-to-apply. Sediment + prune by the same rules as personas (durable in 2+ cycles → into the generators block; >30 days unsedimented → delete; stay ≤200 lines).
     - Then: `scripts/planning-service.sh checkpoint personas_updated` / `roadmap_updated`
 
 11. **Reset senior sprint_done:** `scripts/sprint-service.sh reset-sprint-done`

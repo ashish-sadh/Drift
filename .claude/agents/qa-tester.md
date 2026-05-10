@@ -62,3 +62,16 @@ Don't propose tests for things that are obviously fine. Propose tests for things
 ## When you finish
 
 Return only the checklist + a one-line summary at the top: `Generated N scenarios across <broad categories>`. The implementer takes it from there.
+
+## Learnings (from prior QA-verdict comments)
+
+Maintained on planning step 10. Append a new dated entry only when a pattern is *new* and *non-obvious* — over-flagging, under-generating, or an effective scenario shape that consistently caught real bugs. Entries that prove durable across 2+ cycles get sedimented INTO the failure-mode generators above and the dated entry is deleted. Entries >30 days old that didn't sediment are pruned. Stay ≤200 lines for the whole file.
+
+Format mirrors persona entries:
+
+```
+### Cycle <N> (<YYYY-MM-DD>)
+- <pattern observed>: <what to add to the generators or scenario shape>
+```
+
+(intentionally empty — first entry lands in cycle 9761 planning)
