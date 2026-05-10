@@ -666,6 +666,14 @@ extension AppDatabase {
         UserDefaults.standard.set(currentHash, forKey: Self.foodsJSONHashKey)
     }
 
+    /// Count of rows in the food table. Used by Settings to show users a
+    /// concrete confirmation after manual refresh ("Refreshed N foods").
+    public func foodCount() throws -> Int {
+        try dbWriter.read { db in
+            try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM food") ?? 0
+        }
+    }
+
     /// Escape SQL LIKE special characters in user input.
     static func escapeLike(_ s: String) -> String {
         s.replacingOccurrences(of: "\\", with: "\\\\")

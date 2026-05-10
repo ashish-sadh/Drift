@@ -216,7 +216,9 @@ struct SettingsView: View {
     @State private var weightUnit: WeightUnit = Preferences.weightUnit
     @State private var showingFactoryReset = false
     @State private var resetDone = false
-    @State private var foodsRefreshedAt: Date? = nil
+    @State private var isRefreshingFoods = false
+    @State private var foodsRefreshError: String? = nil
+    @State private var refreshedFoodCount: Int? = nil
     @State private var syncStatus: String?
     @State private var telemetryEnabled: Bool = Preferences.chatTelemetryEnabled
     @State private var telemetryCount: Int = 0
@@ -610,28 +612,32 @@ struct SettingsView: View {
                 // if the automatic path missed (e.g. bundle cached).
                 VStack(alignment: .leading, spacing: 6) {
                     Button {
-                        UserDefaults.standard.removeObject(forKey: "drift_foods_json_hash")
-                        do {
-                            try AppDatabase.shared.seedFoodsFromJSON()
-                            foodsRefreshedAt = Date()
-                        } catch {
-                            foodsRefreshedAt = nil
-                        }
+                        refreshFoodDatabase()
                     } label: {
                         HStack {
-                            Image(systemName: "arrow.clockwise").foregroundStyle(Theme.accent)
+                            if isRefreshingFoods {
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                                    .tint(Theme.accent)
+                                    .frame(width: 24)
+                            } else {
+                                Image(systemName: "arrow.clockwise").foregroundStyle(Theme.accent)
+                            }
                             VStack(alignment: .leading, spacing: 2) {
                                 Text("Refresh food database").foregroundStyle(Theme.textPrimary)
-                                Text(foodsRefreshedAt != nil
-                                     ? "Refreshed just now"
-                                     : "Reload calories + macros from the bundled list. Use if you see stale values.")
-                                    .font(.caption2).foregroundStyle(.tertiary)
+                                Text(refreshFoodsSubtitle)
+                                    .font(.caption2)
+                                    .foregroundStyle(refreshFoodsSubtitleColor)
                             }
                             Spacer()
                         }
                         .padding(.vertical, 6)
                     }
                     .buttonStyle(.plain)
+                    .disabled(isRefreshingFoods)
+                    .accessibilityLabel("Refresh food database")
+                    .accessibilityValue(isRefreshingFoods ? "Refreshing" : refreshFoodsSubtitle)
+                    .accessibilityHint("Reloads bundled calorie and macro data")
                 }
                 .card()
 
@@ -671,6 +677,58 @@ struct SettingsView: View {
         .background(Theme.background.ignoresSafeArea())
         .navigationTitle("Settings")
         .toolbarColorScheme(.dark, for: .navigationBar)
+    }
+
+    private var refreshFoodsSubtitle: String {
+        if isRefreshingFoods {
+            return "Reloading bundled foods… please wait"
+        }
+        if let error = foodsRefreshError {
+            return "Refresh failed: \(error)"
+        }
+        if let count = refreshedFoodCount {
+            return "Refreshed — \(count.formatted()) foods loaded"
+        }
+        return "Reload calories + macros from the bundled list. Use if you see stale values like 0-cal coffee."
+    }
+
+    private var refreshFoodsSubtitleColor: Color {
+        if foodsRefreshError != nil { return Theme.surplus }
+        if refreshedFoodCount != nil { return Theme.accent }
+        return .secondary
+    }
+
+    private func refreshFoodDatabase() {
+        guard !isRefreshingFoods else { return }
+        isRefreshingFoods = true
+        foodsRefreshError = nil
+        refreshedFoodCount = nil
+        Task.detached(priority: .userInitiated) {
+            do {
+                UserDefaults.standard.removeObject(forKey: "drift_foods_json_hash")
+                try AppDatabase.shared.seedFoodsFromJSON()
+                let count = (try? AppDatabase.shared.foodCount()) ?? 0
+                // seedFoodsFromJSON returns silently when the bundled JSON is
+                // missing or unreadable. Detect that here so the user sees a
+                // real error instead of a green "Refreshed 0 foods" lie.
+                if count == 0 {
+                    await MainActor.run {
+                        foodsRefreshError = "bundled food list is missing"
+                        isRefreshingFoods = false
+                    }
+                    return
+                }
+                await MainActor.run {
+                    refreshedFoodCount = count
+                    isRefreshingFoods = false
+                }
+            } catch {
+                await MainActor.run {
+                    foodsRefreshError = error.localizedDescription
+                    isRefreshingFoods = false
+                }
+            }
+        }
     }
 
     private func clearStatus() {
