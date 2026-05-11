@@ -22,9 +22,12 @@ import Testing
 // MARK: - food_timing_insight: "when do I usually eat lunch"
 
 @Test @MainActor func chatSmoke_foodTimingInsight_isRegistered() {
-    if ToolRegistry.shared.allTools().isEmpty {
-        ToolRegistration.registerAll()
-    }
+    // ToolRegistry is a singleton shared across tests. Other tests that
+    // register a single tool via syncRegistration leave `allTools()`
+    // non-empty but missing the chat-path tools, so we can't rely on the
+    // "if empty then register" pattern. registerAll is idempotent —
+    // safer to always call it from the smoke path.
+    ToolRegistration.registerAll()
     let tool = ToolRegistry.shared.tool(named: FoodTimingInsightTool.toolName)
     #expect(tool != nil,
             "food_timing_insight must be registered for the chat path to reach it")
@@ -47,9 +50,12 @@ import Testing
 }
 
 @Test @MainActor func chatSmoke_foodTimingInsight_handlerProducesCard() async {
-    if ToolRegistry.shared.allTools().isEmpty {
-        ToolRegistration.registerAll()
-    }
+    // ToolRegistry is a singleton shared across tests. Other tests that
+    // register a single tool via syncRegistration leave `allTools()`
+    // non-empty but missing the chat-path tools, so we can't rely on the
+    // "if empty then register" pattern. registerAll is idempotent —
+    // safer to always call it from the smoke path.
+    ToolRegistration.registerAll()
     let call = ToolCall(
         tool: FoodTimingInsightTool.toolName,
         params: ToolCallParams(values: ["window_days": "14"])
@@ -66,9 +72,12 @@ import Testing
 // MARK: - cycle_biomarker_correlation: "how does my cycle affect my iron"
 
 @Test @MainActor func chatSmoke_cycleBiomarker_isRegistered() {
-    if ToolRegistry.shared.allTools().isEmpty {
-        ToolRegistration.registerAll()
-    }
+    // ToolRegistry is a singleton shared across tests. Other tests that
+    // register a single tool via syncRegistration leave `allTools()`
+    // non-empty but missing the chat-path tools, so we can't rely on the
+    // "if empty then register" pattern. registerAll is idempotent —
+    // safer to always call it from the smoke path.
+    ToolRegistration.registerAll()
     let tool = ToolRegistry.shared.tool(named: CycleBiomarkerInsightTool.toolName)
     #expect(tool != nil,
             "cycle_biomarker_correlation must be registered for the chat path to reach it")
@@ -92,9 +101,12 @@ import Testing
 }
 
 @Test @MainActor func chatSmoke_cycleBiomarker_handlerRunsWithoutCrash() async {
-    if ToolRegistry.shared.allTools().isEmpty {
-        ToolRegistration.registerAll()
-    }
+    // ToolRegistry is a singleton shared across tests. Other tests that
+    // register a single tool via syncRegistration leave `allTools()`
+    // non-empty but missing the chat-path tools, so we can't rely on the
+    // "if empty then register" pattern. registerAll is idempotent —
+    // safer to always call it from the smoke path.
+    ToolRegistration.registerAll()
     // Test environment has no HealthKit + no lab reports → tool surfaces a friendly
     // text degradation, never crashes. Asserts the chat path completes even
     // when the data isn't there.

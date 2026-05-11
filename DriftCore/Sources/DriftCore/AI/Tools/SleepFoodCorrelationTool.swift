@@ -37,18 +37,43 @@ public enum SleepFoodCorrelationTool {
 
         var pairs: [(lastMealHour: Double, sleepHours: Double)] = []
         for night in sleepNights {
+            // Skip nights where the watch wasn't worn / permission denied —
+            // 0-hour rows fake a strong correlation otherwise. #736 QA.
+            guard night.hours > 0 else { continue }
             let dateStr = DateFormatters.dateOnly.string(from: night.date)
             let entries = (try? AppDatabase.shared.fetchFoodEntries(for: dateStr)) ?? []
-            guard let lastHour = entries.compactMap({ FoodTimingInsightTool.parseLocalHour($0.loggedAt) }).max() else { continue }
+            guard let lastHour = lastDinnerHour(forEntries: entries) else { continue }
             pairs.append((lastMealHour: lastHour, sleepHours: night.hours))
         }
 
-        guard pairs.count >= 5 else {
-            return "Need at least 5 nights with both food logged and sleep tracked — have \(pairs.count) so far. Keep logging meals and check back."
+        guard pairs.count >= minPairs else {
+            return "Not enough data yet — \(pairs.count) night\(pairs.count == 1 ? "" : "s") with both food logged and sleep tracked, need at least \(minPairs). Keep logging meals and check back."
         }
 
         return formatResult(analyze(pairs: pairs))
     }
+
+    /// Extract the hour of the latest "dinner-window" meal on a day. A
+    /// breakfast-only log at 08:00 is not a dinner signal — without this
+    /// floor, sparse loggers would land in the "early dinner < 19" bucket
+    /// and receive a misleading "finish before 7pm" recommendation. Meals
+    /// logged 00:00–03:59 are treated as the *prior* day's late dinner
+    /// (hour + 24) so a midnight pizza outranks a 9pm dinner.
+    nonisolated public static func lastDinnerHour(forEntries entries: [FoodEntry]) -> Double? {
+        let hours = entries.compactMap { entry -> Double? in
+            guard let raw = FoodTimingInsightTool.parseLocalHour(entry.loggedAt) else { return nil }
+            // Wrap early-morning logs back to "previous-day late dinner".
+            let unwrapped = raw < 4.0 ? raw + 24.0 : raw
+            // Only post-noon meals count as a "last dinner" candidate.
+            // Breakfast-only days return nil → night is dropped.
+            return unwrapped >= 12.0 ? unwrapped : nil
+        }
+        return hours.max()
+    }
+
+    /// Minimum night-pair count before we'll emit a recommendation —
+    /// matches the #736 acceptance: <10 → "not enough data."
+    nonisolated public static let minPairs: Int = 10
 
     // MARK: - Pure analysis (testable)
 
@@ -115,12 +140,22 @@ public enum SleepFoodCorrelationTool {
         let direction = CrossDomainInsightTool.directionLabel(r)
         let rStr = String(format: "%+.2f", r)
         lines.append("Based on \(result.totalPairs) nights: last meal time vs sleep correlation r=\(rStr) (\(strength) \(direction)).")
-        if r < -0.3 {
-            lines.append("Later meals tend to be followed by shorter sleep.")
-            lines.append("Try finishing your last meal at least 2–3 hours before bed.")
+        // Effect threshold from #736 acceptance: |r| ≥ 0.25 with ≥10 nights.
+        if abs(r) >= effectThreshold {
+            if r < 0 {
+                lines.append("Later meals tend to be followed by shorter sleep.")
+                lines.append("Try finishing your last meal at least 2–3 hours before bed.")
+            } else {
+                lines.append("Curiously, later meals line up with longer sleep for you — other factors likely dominate.")
+            }
         } else {
             lines.append("No strong pattern detected — dinner timing may not be a major factor for you.")
         }
         return lines.joined(separator: "\n")
     }
+
+    /// `|r|` floor for emitting a recommendation in the Pearson fallback
+    /// path. Below this, the group-means signal isn't reliable enough to
+    /// nudge user behavior. From #736 acceptance.
+    nonisolated public static let effectThreshold: Double = 0.25
 }
