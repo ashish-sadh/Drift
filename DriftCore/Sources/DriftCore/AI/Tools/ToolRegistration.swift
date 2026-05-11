@@ -845,6 +845,11 @@ public enum ToolRegistration {
         // metrics over a window. Read-only. #317.
         CrossDomainInsightTool.syncRegistration(registry: r)
 
+        // Cross-domain pattern detector — proactively scans every metric
+        // pair and surfaces the 1-3 strongest signals. Different from
+        // cross_domain_insight: open-ended discovery vs. specific question. #739.
+        CrossDomainPatternDetectorTool.syncRegistration(registry: r)
+
         // Weight trend prediction — "when will I reach my goal weight?"
         // OLS regression on last 30 days → projected date + R² confidence. #402.
         WeightTrendPredictionTool.syncRegistration(registry: r)

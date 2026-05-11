@@ -727,6 +727,19 @@ final class IntentRoutingEval: XCTestCase {
         await assertRoutes("do I eat more on rest days", to: "cross_domain_insight")
     }
 
+    // MARK: - Cross-Domain Pattern Detector (#739)
+
+    /// Open-ended "what patterns / any insights" queries → proactive
+    /// detector. Different from cross_domain_insight which needs both
+    /// metrics named explicitly.
+    func testCrossDomainPatternDetector_routing() async {
+        await assertRoutes("what patterns do you see", to: "cross_domain_pattern_detector")
+        await assertRoutes("any insights from my data", to: "cross_domain_pattern_detector")
+        await assertRoutes("anything interesting in my logs", to: "cross_domain_pattern_detector")
+        await assertRoutes("show me trends in my data", to: "cross_domain_pattern_detector")
+        await assertRoutes("surface any patterns you can find", to: "cross_domain_pattern_detector")
+    }
+
     // MARK: - Weight Trend Prediction (#177)
 
     func testWeightTrendPrediction_routing() async {
