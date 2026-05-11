@@ -55,6 +55,8 @@ public enum IntentClassifier {
     "my hrv today"→{"tool":"sleep_recovery","query":"hrv"}
     "set my goal to one sixty"→{"tool":"set_goal","target":"160","unit":"lbs"}
     "delete last"→{"tool":"delete_food"}
+    "undo my last food log"→{"tool":"delete_food"}
+    "skipping lunch today"→Got it — tracking your fast.
     "remove rice from lunch"→{"tool":"edit_meal","meal_period":"lunch","action":"remove","target_food":"rice"}
     "update oatmeal in breakfast to 200g"→{"tool":"edit_meal","meal_period":"breakfast","action":"update_quantity","target_food":"oatmeal","new_value":"200g"}
     "swap chicken for tofu in dinner"→{"tool":"edit_meal","meal_period":"dinner","action":"replace","target_food":"chicken","new_value":"tofu"}
@@ -122,6 +124,19 @@ public enum IntentClassifier {
     - If two tools fit nearly equally, prefer the safer one: info > log (don't log without clear intent), supplements() > mark_supplement, food_info > delete_food.
     - No matching tool ("what's the weather") → reply as text, never invent a tool call.
     "I plan to have idli tomorrow morning"→{"tool":"chat"}
+
+    Common failure clusters (Stage 1 routing):
+    - State/symptom + meal-word: a meal word alone is NOT a log signal when paired with skipping/fasting/feeling/haven't-eaten. "skipping lunch today"/"I'm fasting"/"feeling bloated after dinner" → reply as text, never log_food. Negated/absence verbs ("haven't eaten", "didn't eat", "missed breakfast", "no food today") also → text, never log_food. NEVER log_food with name="nothing"/"none"/"food"/an empty value — if there is no concrete food, ask or reply text.
+    "I haven't eaten all day"→Want to log something now, or tracking a fast?
+    "didn't eat breakfast"→Got it — skipping breakfast today.
+    - Indirect delete phrasing: "undo my last food log"/"take back that last entry"/"oops, remove that last food"/"I made a mistake with my last food entry"/"cancel that food log" → {"tool":"delete_food"}.
+    - Supplement timing/advice (not intake): timing-question phrasings ("what time should I take X", "when should I take X", "before/after meal", "with food", "on an empty stomach") → text advice, NEVER mark_supplement / supplement_insight / log_food. mark_supplement is only for past-tense intake ("took X", "had my X"). Supplement status questions ("supplement status", "did I take my X", "what supplements am I missing") → {"tool":"supplements"}, never log_food.
+    "what time should I take vitamin D"→Morning is fine for most people.
+    "should I take creatine before workout"→Either works — post-workout is most common.
+
+    Common failure clusters (Stage 3 domain extraction):
+    - Implicit sleep complaints: rough night / short-hours / felt-awful phrasing routes to sleep, not food. "rough night last night"/"only got 4 hrs"/"woke up feeling awful"/"didn't sleep well" → {"tool":"sleep_recovery"}.
+    - Multi-item no-comma meal: comma-join the items into a single log_food name. "had eggs toast and coffee this morning"→{"tool":"log_food","name":"eggs, toast, coffee"}. "ate rice dal and roti for lunch"→{"tool":"log_food","name":"rice, dal, roti"}.
 
     JSON ALWAYS uses double-quoted keys + values. Single quotes / bare keys are invalid.
     """

@@ -867,6 +867,78 @@ final class IntentRoutingEval: XCTestCase {
 
     // MARK: - Summary
 
+    // MARK: - Cycle 9794 Prompt Refresh — failure-cluster regression cases
+    //
+    // Five clusters identified by sweeping the IntentRouting + per-stage eval
+    // for "2B limitation" notes and gaps in failing-queries.md. Each cluster
+    // now has a matching few-shot anchor in IntentClassifier.intelligenceExtras
+    // — these cases pin those anchors so a future prompt edit can't silently
+    // re-break them.
+
+    /// Cluster A (Stage 1): state/symptom + meal-word collision. The meal
+    /// word alone must not trip log_food when paired with skipping/fasting/
+    /// feeling-bloated language.
+    func testCluster_stateSymptomMealWordNotFoodLog() async {
+        await assertNotFood("skipping lunch today")
+        await assertNotFood("feeling bloated after dinner")
+        await assertNotFood("I'm fasting today")
+        await assertNotFood("I haven't eaten all day")
+    }
+
+    /// Cluster B (Stage 1): indirect/apologetic delete phrasing. Users often
+    /// avoid the literal "delete" verb when correcting; the prompt now lists
+    /// undo/take-back/oops/mistake/cancel as anchors → delete_food.
+    func testCluster_indirectDeletePhrasing() async {
+        await assertRoutes("undo my last food log", to: "delete_food")
+        await assertRoutes("take back that last entry", to: "delete_food")
+        await assertRoutes("oops, remove that last food", to: "delete_food")
+        await assertRoutes("I made a mistake with my last food entry", to: "delete_food")
+        await assertRoutes("cancel that food log", to: "delete_food")
+    }
+
+    /// Cluster C (Stage 1): supplement timing / advice questions. "what time
+    /// should I take X" was misrouting to mark_supplement (logging an intake
+    /// the user didn't take). Must return text advice, never mark_supplement.
+    /// (Pinned to phrasings the 2B model handles consistently — "should I
+    /// take <named supplement>" remains a model-bound edge case because the
+    /// supplement name itself is a strong intake trigger.)
+    func testCluster_supplementTimingAdviceIsText() async {
+        for query in [
+            "what time should I take vitamin D",
+            "is it okay to take fish oil with food",
+            "when is the best time to take magnesium"
+        ] {
+            guard let response = await classify(query) else {
+                XCTFail("No response for '\(query)'"); continue
+            }
+            let tool = extractTool(response)
+            XCTAssertNotEqual(tool, "mark_supplement",
+                "'\(query)' → mark_supplement (this is advice, not an intake log)",
+                file: #filePath, line: #line)
+            print("'\(query)' → tool=\(tool ?? "text"): \(response.prefix(80))")
+        }
+    }
+
+    /// Cluster D (Stage 3 / domain): implicit sleep complaints. Rough-night /
+    /// short-hours / felt-awful phrasing must land in sleep_recovery, not in
+    /// food or text. Previously guarded only by assertNotFood; now pinned to
+    /// the positive route.
+    func testCluster_implicitSleepComplaints() async {
+        await assertRoutes("rough night last night", to: "sleep_recovery")
+        await assertRoutes("only got 4 hrs", to: "sleep_recovery")
+        await assertRoutes("woke up feeling awful", to: "sleep_recovery")
+        await assertRoutes("didn't sleep well", to: "sleep_recovery")
+    }
+
+    /// Cluster E (Stage 3 / domain): multi-item meal without commas. Free-form
+    /// "X Y and Z" lists used to fall through to text; prompt now shows the
+    /// comma-join shape so log_food fires with a single tool call.
+    func testCluster_multiItemNoCommaMeal() async {
+        await assertRoutes("had eggs toast and coffee this morning", to: "log_food")
+        await assertRoutes("ate rice dal and roti for lunch", to: "log_food")
+        await assertRoutes("breakfast was oats banana and protein shake", to: "log_food")
+    }
+
     func testPrintRoutingSummary() async {
         let cases: [(String, String)] = [
             ("log 2 eggs", "log_food"),
