@@ -681,9 +681,12 @@ start_claude() {
 
     # 0. Resume interrupted planning session (crash recovery — takes priority over all routing).
     # Guards (added after #720 ran 5 resumes in 14h on a malformed tracking issue):
-    #   - Cap consecutive resumes at 3 per planning issue. Past that, auto-close
-    #     the tracking issue and skip planning for 24h cooldown — better to lose
-    #     one cycle than burn 5+ Opus sessions in a loop.
+    #   - Cap consecutive resumes at 10 per planning issue. Past that, auto-close
+    #     the tracking issue and skip planning for 24h cooldown. 10 leaves room
+    #     for transient stalls (network / 5xx / single-session distractions);
+    #     genuinely-stuck planning hits the cap and bails rather than looping
+    #     forever. (Original was 3 — too aggressive given planning's 13-step
+    #     complexity and frequent network-y stall causes.)
     #   - Sanity-check the tracking issue body has the standard Planning Checklist.
     #     If a previous gh-create failed silently and a session created a
     #     malformed tracking issue (#720 pattern), reset the file and re-create.
@@ -699,7 +702,7 @@ start_claude() {
             RESUME_COUNT=$(cat "$RESUME_FILE" 2>/dev/null || echo "0")
             RESUME_COUNT=$((RESUME_COUNT + 1))
             echo "$RESUME_COUNT" > "$RESUME_FILE"
-            if [[ "$RESUME_COUNT" -gt 3 ]]; then
+            if [[ "$RESUME_COUNT" -gt 10 ]]; then
                 log "Planning #$EXISTING_PLAN stuck after $RESUME_COUNT resume attempts — auto-closing, skipping for 24h cooldown."
                 gh issue close "$EXISTING_PLAN" --comment "Auto-closed by watchdog: $RESUME_COUNT consecutive stalls/resumes. Planning will re-trigger on next 24h window." 2>/dev/null || true
                 rm -f "$HOME/drift-state/planning-issue" "$RESUME_FILE"
@@ -721,7 +724,7 @@ start_claude() {
                     MODEL=$(get_model planning opus)
                     SESSION_TYPE="planning"
                     SESSION_PROMPT="run sprint planning — close Issue #$EXISTING_PLAN when done. RESUME CHECK first: run \`scripts/planning-service.sh remaining\` and skip already-completed steps."
-                    log "Resuming interrupted planning (Issue #$EXISTING_PLAN, attempt $RESUME_COUNT/3) — $MODEL"
+                    log "Resuming interrupted planning (Issue #$EXISTING_PLAN, attempt $RESUME_COUNT/10) — $MODEL"
                 fi
             fi
         fi
