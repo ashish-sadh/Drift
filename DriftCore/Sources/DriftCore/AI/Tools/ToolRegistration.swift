@@ -884,6 +884,9 @@ public enum ToolRegistration {
         // Cycle × biomarker correlation — does iron / D / ferritin shift across cycle phases? #689.
         CycleBiomarkerInsightTool.syncRegistration(registry: r)
 
+        // Protein consistency vs recovery — does day-to-day protein variance track HRV/sleep? #730.
+        ProteinConsistencyVsRecoveryTool.syncRegistration(registry: r)
+
         // PhotoLog tool is registered separately by the iOS Drift app
         // after this base registration runs (it depends on iOS-only
         // CloudVision / Keychain).

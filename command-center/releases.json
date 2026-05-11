@@ -2407,5 +2407,27 @@
     "description": "chore: TestFlight build 240 (heartbeat cycle, no user-visible changes)",
     "fixes": [],
     "features": []
+  },
+  {
+    "build": 241,
+    "date": "2026-05-11T10:00:00-07:00",
+    "description": "chore: TestFlight build 241 — chat prompt refresh (5 failure clusters)",
+    "fixes": [
+      "'I haven't eaten all day' / 'skipping lunch today' / 'feeling bloated after dinner' no longer silently log food entries — the meal word stops triggering log_food when paired with state/symptom verbs (#735)",
+      "'Undo my last food log' / 'take back that last entry' / 'oops, remove that last food' now route to delete instead of returning empty text (#735)",
+      "'What time should I take vitamin D' returns advice instead of secretly marking a supplement intake (#735)",
+      "Implicit sleep complaints ('rough night', 'only got 4 hrs', 'woke up feeling awful') route to sleep_recovery, not text (#735)",
+      "Multi-item meals without commas ('eggs toast and coffee this morning') now log as one food entry instead of falling through to text (#735)"
+    ],
+    "features": []
+  },
+  {
+    "build": 242,
+    "date": "2026-05-11T13:30:00-07:00",
+    "description": "chore: TestFlight build 242 — protein-consistency vs recovery analytical tool",
+    "fixes": [],
+    "features": [
+      "New analytical tool: ask 'is my protein affecting my recovery' and see how day-to-day protein variance lines up with HRV + sleep recovery score (#730)"
+    ]
   }
 ]

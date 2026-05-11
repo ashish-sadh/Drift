@@ -740,6 +740,18 @@ final class IntentRoutingEval: XCTestCase {
         await assertRoutes("surface any patterns you can find", to: "cross_domain_pattern_detector")
     }
 
+    // MARK: - Protein Consistency vs Recovery (#730)
+
+    /// Cross-domain tool added in #730: pairs daily protein with HRV/sleep
+    /// to surface whether intake variance tracks recovery. Routing must
+    /// land on `protein_consistency_vs_recovery`, not on the closer-looking
+    /// food_info or generic cross_domain_insight.
+    func testProteinConsistencyVsRecovery_routing() async {
+        await assertRoutes("is my protein affecting my recovery", to: "protein_consistency_vs_recovery")
+        await assertRoutes("does my protein variance matter for recovery", to: "protein_consistency_vs_recovery")
+        await assertRoutes("is my protein steady enough for recovery", to: "protein_consistency_vs_recovery")
+    }
+
     // MARK: - Weight Trend Prediction (#177)
 
     func testWeightTrendPrediction_routing() async {
