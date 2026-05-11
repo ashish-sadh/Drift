@@ -2400,5 +2400,12 @@
       "Test infra: production-schema backup round-trip with all major domain rows",
       "Infra: planning-loop maintenance step for the qa-tester subagent"
     ]
+  },
+  {
+    "build": 240,
+    "date": "2026-05-11T05:36:43-07:00",
+    "description": "chore: TestFlight build 240 (heartbeat cycle, no user-visible changes)",
+    "fixes": [],
+    "features": []
   }
 ]
