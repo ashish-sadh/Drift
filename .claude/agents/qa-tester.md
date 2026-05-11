@@ -74,4 +74,16 @@ Format mirrors persona entries:
 - <pattern observed>: <what to add to the generators or scenario shape>
 ```
 
-(intentionally empty — first entry lands in cycle 9761 planning)
+### Cycle 9792 (2026-05-11) — verdict-effectiveness audit (#722)
+
+Audited 8 closed sprint-tasks with `## QA scenarios (qa-tester)` blocks (#676, #686, #687, #689, #690, #699, #736, #739) plus 7 closed sprint-tasks without blocks. Findings:
+
+- **Rubber-stamp rate: 1/8 = 12.5%** (below the 30% threshold from #722 acceptance — no hook tightening recommended).
+- **The one rubber-stamp (#739)** cited 5 test names that don't exist in any file (`detect_deterministicOrderForTies`, `interpretation_degenerateRatioFallsBackToQualitative`, `interpretation_subOnePercentRatioFallsBack`, `interpretation_directionFromRatioNotRSign`, `isSignificant_borderline40at14_fails`), plus method/property names (`interpretation()`, `highSideRatio`, `pctDelta`) and a `Docs/decisions.md` entry — none of which exist in the shipped `CrossDomainPatternDetectorTool` / `CrossDomainPatternService`. Looks like a copy-paste from a different tool's verdict, or LLM hallucination unchecked by the author. The hook caught the format but not the content.
+- **The 7 traced-correctly verdicts** (#676, #686, #687, #689, #690, #699, #736) cite real tests and real file:line locations, but line numbers drift 1–58 lines from where the cited code actually lives. The verdicts are still useful (the named function or test exists), but a future audit can't grep by line.
+
+**Pattern to watch for** (not yet sedimenting — single-incident): verdicts where every scenario uses the same "Fixed. Regression test `<name>`. Documented in Docs/decisions.md" template are higher-risk for fabrication. Real verdicts vary by scenario (some BUG FIXED, some WORKS AS-IS, some NOT APPLICABLE with specific rationale tied to the actual code).
+
+**Hook recommendation for follow-up (filed as separate sprint-task if patterns recur):** the cheapest detector is to extract test names from the verdict body and grep the test files for them at commit time. False-positive rate is low because test names are highly specific; rubber-stamps fail because the names don't exist. Defer to next audit (10+ more verdicts) to confirm the pattern persists.
+
+**Hook scope reminder:** the hook is silent for non-autonomous (human-driven) sessions. Several issues (#705, #730, #685) touched source files without a verdict block but also without a `[no-qa]` marker — those are most likely manual sessions where the hook intentionally didn't fire, not bypasses.
