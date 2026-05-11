@@ -30,6 +30,16 @@ Append-only record of non-obvious decisions: architecture changes, harness rules
 
 ---
 
+## 2026-05-10
+
+### food-db-curated-not-exhaustive — ≤6,000 entry ceiling, batch imports rejected
+Build 217 USDA Phase 2 bulk import (`af3f50e9`, +7,556 entries) took foods.json to 11,162 (3.7 MB). SR Legacy is research-grade noise: "Beans, snap, raw, NS as to color", 50+ variants of one canonical food, industrial-ingredient strings. The food DB is a UX surface that ships *embedded* — bulk grows install size, slows cold-launch DB-init, dilutes search ranking for the Indian-food-first entries that justify the app's existence. New tenet (#9 in product focus): **curated, not exhaustive**. Planning step 9a now reads `wc -l foods.json` each cycle, files/keeps a curation task if above ceiling, and rejects batch-import feature requests without a curation plan attached. Each new entry must justify itself: high-frequency search miss, unique nutrition profile, regional gap users actually eat. The one-time pass (#717, `1e222ec6`) dropped 5,742 multi-comma-bulk + verbose-USDA entries to land at 5,420; new Tier-0 `FoodDBSizeTests` locks the ceiling so future imports can't silently bloat. Commits `603ae058`, `1e222ec6`.
+
+### qa-tester subagent gets its own maintenance loop in planning step 10
+The `qa-tester` subagent (added 2026-05-08) is itself a piece of harness that drifts: over-flagging means sessions stop trusting the verdicts; under-generating means real bugs slip through. Planning step 10 now also reviews the last 5–10 closed sprint-tasks' QA-verdict comments looking for: (a) >40% `NOT APPLICABLE` across multiple issues → tighten generators; (b) post-shipped bugs filed within 7 days that no QA scenario flagged → identify missing failure category, add generator; (c) scenarios that caught real bugs across 2+ cycles → promote into stable generators block. Same sediment-and-prune rules as personas (durable in 2+ cycles → into generators; >30 days unsedimented → delete; ≤200 lines). Without this loop the subagent calcifies and either gets ignored or becomes noise. Commit `1474a33b`.
+
+---
+
 ## 2026-05-08
 
 ### qa-tester subagent + verdict hook — adversarial pass before commit on UI/data-flow changes
