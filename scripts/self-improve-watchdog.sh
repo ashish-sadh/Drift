@@ -327,7 +327,7 @@ sync_stamps_from_main() {
         plan_state=$(gh issue view "$plan_issue" --json state --jq '.state' 2>/dev/null || echo "")
         if [[ "$plan_state" == "CLOSED" ]]; then
             atomic_write "$SD/last-planning-time" "$(date +%s)"
-            rm -f "$SD/planning-issue"
+            rm -f "$SD/planning-issue" "$SD/planning-resume-count-$plan_issue"
             log "Self-heal: planning Issue #$plan_issue is CLOSED — stamped last-planning-time and cleared tracking file"
         fi
     fi
@@ -679,17 +679,51 @@ start_claude() {
     log "Refreshing sprint state..."
     "$WORK_DIR/scripts/sprint-service.sh" refresh 2>/dev/null || log "Warning: sprint-service refresh failed, using stale state"
 
-    # 0. Resume interrupted planning session (crash recovery — takes priority over all routing)
+    # 0. Resume interrupted planning session (crash recovery — takes priority over all routing).
+    # Guards (added after #720 ran 5 resumes in 14h on a malformed tracking issue):
+    #   - Cap consecutive resumes at 3 per planning issue. Past that, auto-close
+    #     the tracking issue and skip planning for 24h cooldown — better to lose
+    #     one cycle than burn 5+ Opus sessions in a loop.
+    #   - Sanity-check the tracking issue body has the standard Planning Checklist.
+    #     If a previous gh-create failed silently and a session created a
+    #     malformed tracking issue (#720 pattern), reset the file and re-create.
     local EXISTING_PLAN
     EXISTING_PLAN=$(cat "$HOME/drift-state/planning-issue" 2>/dev/null | tr -d '[:space:]' || true)
     if [[ -n "$EXISTING_PLAN" ]]; then
         local PLAN_STATE
         PLAN_STATE=$(gh issue view "$EXISTING_PLAN" --json state --jq '.state' 2>/dev/null || echo "CLOSED")
         if [[ "$PLAN_STATE" == "OPEN" ]]; then
-            MODEL=$(get_model planning opus)
-            SESSION_TYPE="planning"
-            SESSION_PROMPT="run sprint planning — close Issue #$EXISTING_PLAN when done"
-            log "Resuming interrupted planning (Issue #$EXISTING_PLAN) — $MODEL"
+            # Resume count bound (added 2026-05-11). One resume = one increment.
+            local RESUME_FILE="$HOME/drift-state/planning-resume-count-$EXISTING_PLAN"
+            local RESUME_COUNT
+            RESUME_COUNT=$(cat "$RESUME_FILE" 2>/dev/null || echo "0")
+            RESUME_COUNT=$((RESUME_COUNT + 1))
+            echo "$RESUME_COUNT" > "$RESUME_FILE"
+            if [[ "$RESUME_COUNT" -gt 3 ]]; then
+                log "Planning #$EXISTING_PLAN stuck after $RESUME_COUNT resume attempts — auto-closing, skipping for 24h cooldown."
+                gh issue close "$EXISTING_PLAN" --comment "Auto-closed by watchdog: $RESUME_COUNT consecutive stalls/resumes. Planning will re-trigger on next 24h window." 2>/dev/null || true
+                rm -f "$HOME/drift-state/planning-issue" "$RESUME_FILE"
+                # Stamp last-planning-time so planning-due returns false for 24h
+                echo "$(date +%s)" > "$HOME/drift-state/last-planning-time"
+                EXISTING_PLAN=""
+            else
+                # Body sanity check — a properly-created tracking issue has the
+                # standard "## Planning Checklist" header. Malformed issues
+                # (created by a session after gh-create failed) lack it.
+                local PLAN_BODY
+                PLAN_BODY=$(gh issue view "$EXISTING_PLAN" --json body --jq '.body' 2>/dev/null || echo "")
+                if ! echo "$PLAN_BODY" | grep -q "## Planning Checklist"; then
+                    log "Planning #$EXISTING_PLAN has malformed body (no Planning Checklist) — closing as broken, re-creating below."
+                    gh issue close "$EXISTING_PLAN" --comment "Auto-closed: malformed tracking issue (no Planning Checklist header). Re-creating from watchdog template." 2>/dev/null || true
+                    rm -f "$HOME/drift-state/planning-issue" "$RESUME_FILE"
+                    EXISTING_PLAN=""
+                else
+                    MODEL=$(get_model planning opus)
+                    SESSION_TYPE="planning"
+                    SESSION_PROMPT="run sprint planning — close Issue #$EXISTING_PLAN when done. RESUME CHECK first: run \`scripts/planning-service.sh remaining\` and skip already-completed steps."
+                    log "Resuming interrupted planning (Issue #$EXISTING_PLAN, attempt $RESUME_COUNT/3) — $MODEL"
+                fi
+            fi
         fi
     fi
 
@@ -707,10 +741,7 @@ start_claude() {
 
         local CYCLE=$(cat "$HOME/drift-state/commit-counter" 2>/dev/null || echo "?")
         rm -f "$HOME/drift-state/planning-issue"
-        local PLAN_ISSUE=$(gh issue create \
-            --title "Sprint Planning — Cycle $CYCLE" \
-            --label planning --label SENIOR --label in-progress \
-            --body "## Planning Checklist
+        local PLAN_BODY="## Planning Checklist
 - [ ] Feedback drained — process-feedback.log reviewed, infra issues created
 - [ ] Admin replies — responded to all admin comments on report PRs
 - [ ] Product review — review-cycle-${CYCLE}.md PR merged to main
@@ -721,14 +752,35 @@ start_claude() {
 - [ ] Bug triage — P0/P1/P2 bugs reviewed, needs-review or approved labels applied
 - [ ] Design docs — pending design-doc issues noted, doc-ready ones reviewed
 - [ ] Feature requests — untriaged FRs reviewed, deferred or sprint-tasked
-- [ ] State assessed — Docs/state.md checked, build/test counts verified" \
-            --json number --jq '.number' 2>/dev/null || echo "")
+- [ ] State assessed — Docs/state.md checked, build/test counts verified"
+        # Retry gh issue create up to 3 times — observed silent failures during
+        # GitHub 5xx led to #720 (sessions self-created a malformed tracking
+        # issue when watchdog's create failed). Don't fall through silently.
+        local PLAN_ISSUE="" GH_ERR=""
+        for attempt in 1 2 3; do
+            PLAN_ISSUE=$(gh issue create \
+                --title "Sprint Planning — Cycle $CYCLE" \
+                --label planning --label SENIOR --label in-progress \
+                --body "$PLAN_BODY" \
+                --json number --jq '.number' 2>&1) || GH_ERR="$PLAN_ISSUE"
+            # gh emits the issue URL on success on some setups instead of just the number — extract.
+            PLAN_ISSUE=$(echo "$PLAN_ISSUE" | grep -oE '[0-9]+' | tail -1)
+            [[ -n "$PLAN_ISSUE" ]] && break
+            log "Planning tracking-issue create attempt $attempt/3 failed: $GH_ERR — retrying in $((attempt * 5))s"
+            sleep $((attempt * 5))
+        done
         if [[ -n "$PLAN_ISSUE" ]]; then
             log "Created planning tracking Issue #$PLAN_ISSUE"
             echo "$PLAN_ISSUE" > "$HOME/drift-state/planning-issue"
             SESSION_PROMPT="run sprint planning — close Issue #$PLAN_ISSUE when done"
         else
-            SESSION_PROMPT="run sprint planning"
+            log "ERROR: Planning tracking-issue create failed after 3 attempts. Aborting planning spawn — will retry next watchdog cycle."
+            # Don't spawn planning without a tracking issue — the session will
+            # create its own (malformed) one, which triggered the #720 loop.
+            # Roll back the routing decision so a sprint session can run instead.
+            SESSION_TYPE="junior"
+            MODEL=$(get_model junior sonnet)
+            SESSION_PROMPT="execute junior tasks"
         fi
 
     # 2. P0s, SENIOR tasks, or unhandled P1/P2 bugs? → senior session
