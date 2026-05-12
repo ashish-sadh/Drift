@@ -405,7 +405,10 @@
     async function loadIssues() {
       const el = document.getElementById('issues-list');
       try {
-        const issues = await api(`/repos/${OWNER}/${REPO}/issues?state=open&labels=bug&per_page=30`);
+        // Unfiltered fetch + client-side filter to bypass GitHub search-index
+        // lag. Same approach as getSprintPlan / loadDesignDocs.
+        const all = await api(`/repos/${OWNER}/${REPO}/issues?state=open&per_page=100`);
+        const issues = all.filter(i => !i.pull_request && i.labels && i.labels.some(l => l.name === 'bug'));
         if (issues.length === 0) {
           el.innerHTML = '<div class="empty">No open bugs.</div>';
           return;
@@ -437,7 +440,9 @@
     async function loadFixedBugs() {
       const el = document.getElementById('fixed-list');
       try {
-        const issues = await api(`/repos/${OWNER}/${REPO}/issues?state=closed&labels=bug&per_page=100&sort=updated&direction=desc`);
+        // Unfiltered fetch + client-side filter — same reason as loadIssues.
+        const all = await api(`/repos/${OWNER}/${REPO}/issues?state=closed&per_page=100&sort=updated&direction=desc`);
+        const issues = all.filter(i => !i.pull_request && i.labels && i.labels.some(l => l.name === 'bug'));
         if (issues.length === 0) {
           el.innerHTML = '<div class="empty">No fixed bugs yet.</div>';
           return;
@@ -467,13 +472,15 @@
     async function loadReviewItems() {
       const el = document.getElementById('review-list');
       try {
-        // 1. Issues needing review
-        const issues = await api(`/repos/${OWNER}/${REPO}/issues?state=open&labels=needs-review&per_page=50`);
+        // 1. Issues needing review — unfiltered + client-side filter (bypasses search index lag)
+        const allOpen = await api(`/repos/${OWNER}/${REPO}/issues?state=open&per_page=100`);
+        const issues = allOpen.filter(i => !i.pull_request && i.labels && i.labels.some(l => l.name === 'needs-review'));
 
-        // 2. PR feedback from non-owners on report PRs
+        // 2. PR feedback from non-owners on report PRs (unfiltered list, filter client-side)
         let prFeedback = [];
         try {
-          const reportPRs = await api(`/repos/${OWNER}/${REPO}/pulls?labels=report&state=all&per_page=20`);
+          const allPRs = await api(`/repos/${OWNER}/${REPO}/pulls?state=all&per_page=50`);
+          const reportPRs = allPRs.filter(pr => pr.labels && pr.labels.some(l => l.name === 'report')).slice(0, 20);
           for (const pr of reportPRs) {
             const comments = await api(`/repos/${OWNER}/${REPO}/issues/${pr.number}/comments`);
             const external = comments.filter(c => c.user.login !== OWNER);
@@ -596,7 +603,9 @@
       try {
         const reports = await listReports();
         // Get comment counts from PRs
-        const prs = await api(`/repos/${OWNER}/${REPO}/pulls?labels=report&state=all&per_page=50`);
+        // Unfiltered fetch + client-side filter (bypasses search index lag).
+        const allPRs = await api(`/repos/${OWNER}/${REPO}/pulls?state=all&per_page=100`);
+        const prs = allPRs.filter(pr => pr.labels && pr.labels.some(l => l.name === 'report')).slice(0, 50);
         const prCommentCounts = {};
         for (const pr of prs) {
           const comments = pr.review_comments || 0;
@@ -641,11 +650,10 @@
     async function loadFeedback() {
       const el = document.getElementById('feedback-list');
       try {
-        // Fetch report PRs and all PRs (to find design-doc labeled ones)
-        const [reportPRs, allPRs] = await Promise.all([
-          api(`/repos/${OWNER}/${REPO}/pulls?labels=report&state=all&per_page=50`),
-          api(`/repos/${OWNER}/${REPO}/pulls?state=all&per_page=50`)
-        ]);
+        // Fetch all PRs once, filter client-side for both report + design-doc
+        // (bypasses search index lag — previously two server-filtered queries).
+        const allPRs = await api(`/repos/${OWNER}/${REPO}/pulls?state=all&per_page=100`);
+        const reportPRs = allPRs.filter(pr => pr.labels && pr.labels.some(l => l.name === 'report')).slice(0, 50);
         const designPRs = allPRs.filter(pr =>
           pr.labels && pr.labels.some(l => l.name === 'design-doc') &&
           (pr.review_comments > 0 || pr.comments > 0)
@@ -872,10 +880,14 @@
       try {
         const isHuman = i => (i.body || '').includes('Feature request submitted via Drift Command Center');
         const hasDesignDoc = i => i.labels.some(l => l.name === 'design-doc');
-        const [openRaw, closedRaw] = await Promise.all([
-          api(`/repos/${OWNER}/${REPO}/issues?labels=feature-request&state=open&per_page=30`),
-          api(`/repos/${OWNER}/${REPO}/issues?labels=feature-request&state=closed&per_page=10&sort=updated&direction=desc`)
+        // Unfiltered fetch + client-side filter — bypasses GitHub search index lag.
+        const [allOpen, allClosed] = await Promise.all([
+          api(`/repos/${OWNER}/${REPO}/issues?state=open&per_page=100`),
+          api(`/repos/${OWNER}/${REPO}/issues?state=closed&per_page=50&sort=updated&direction=desc`)
         ]);
+        const hasFR = i => i.labels && i.labels.some(l => l.name === 'feature-request');
+        const openRaw = allOpen.filter(i => !i.pull_request && hasFR(i));
+        const closedRaw = allClosed.filter(i => !i.pull_request && hasFR(i)).slice(0, 10);
         const open = openRaw.filter(i => isHuman(i) && !hasDesignDoc(i));
         const closed = closedRaw.filter(isHuman);
 

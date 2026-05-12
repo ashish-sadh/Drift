@@ -87,10 +87,14 @@ async function smartApi(path) {
 }
 
 async function listReports() {
-  const [prs, contents] = await Promise.all([
-    smartApi(`/repos/${OWNER}/${REPO}/issues?labels=report&state=closed&sort=created&direction=desc&per_page=100`),
+  // Unfiltered issue fetch + client-side filter (bypasses GitHub search index lag,
+  // same pattern as getSprintPlan / loadDesignDocs). Reports are issues (not PRs) closed
+  // with `report` label — typically created by report PR merges.
+  const [allClosed, contents] = await Promise.all([
+    smartApi(`/repos/${OWNER}/${REPO}/issues?state=closed&sort=created&direction=desc&per_page=100`),
     smartApi(`/repos/${OWNER}/${REPO}/contents/Docs/reports`)
   ]);
+  const prs = allClosed.filter(i => !i.pull_request && i.labels && i.labels.some(l => l.name === 'report'));
 
   const fileSet = new Set(contents.filter(f => f.name.endsWith('.md')).map(f => f.name));
   const fileByName = Object.fromEntries(contents.filter(f => f.name.endsWith('.md')).map(f => [f.name, f]));
