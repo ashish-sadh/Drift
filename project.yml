@@ -41,7 +41,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.drift.health
         MARKETING_VERSION: "0.1.0"
-        CURRENT_PROJECT_VERSION: 242
+        CURRENT_PROJECT_VERSION: 243
         SWIFT_VERSION: "6.0"
         GENERATE_INFOPLIST_FILE: YES
         INFOPLIST_FILE: Drift/Info.plist
@@ -62,12 +62,6 @@ targets:
         com.apple.developer.healthkit: true
         com.apple.developer.healthkit.background-delivery: true
         com.apple.developer.kernel.increased-memory-limit: true
-        com.apple.developer.icloud-container-identifiers:
-          - iCloud.com.ashish-sadh.Drift
-        com.apple.developer.ubiquity-container-identifiers:
-          - iCloud.com.ashish-sadh.Drift
-        com.apple.developer.icloud-services:
-          - CloudDocuments
         com.apple.security.application-groups:
           - group.com.drift.health
 
@@ -80,7 +74,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.drift.health.widget
         MARKETING_VERSION: "0.1.0"
-        CURRENT_PROJECT_VERSION: 242
+        CURRENT_PROJECT_VERSION: 243
         SWIFT_VERSION: "6.0"
         INFOPLIST_FILE: DriftWidget/Info.plist
         DEVELOPMENT_TEAM: ZJ5H5XH82A
