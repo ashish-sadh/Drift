@@ -246,7 +246,9 @@ start_monitor() {
     stop_monitor
     local ISSUE_NUM=$(cat "$HOME/drift-state/live-status-issue" 2>/dev/null || echo "")
     if [[ -z "$ISSUE_NUM" ]] || ! gh issue view "$ISSUE_NUM" --json state --jq '.state' 2>/dev/null | grep -q "OPEN"; then
-        ISSUE_NUM=$(gh issue create --title "Drift Live Status" --label live-status --body "Starting..." --json number --jq '.number' 2>/dev/null || echo "")
+        local CREATE_OUT
+        CREATE_OUT=$(gh issue create --title "Drift Live Status" --label live-status --body "Starting..." 2>/dev/null || echo "")
+        ISSUE_NUM=$(echo "$CREATE_OUT" | grep -oE 'issues/[0-9]+' | grep -oE '[0-9]+' | tail -1 || echo "")
         [[ -n "$ISSUE_NUM" ]] && echo "$ISSUE_NUM" > "$HOME/drift-state/live-status-issue"
     fi
     if [[ -n "$ISSUE_NUM" ]] && [[ -n "$CURRENT_LOG" ]]; then
@@ -759,17 +761,21 @@ start_claude() {
         # Retry gh issue create up to 3 times — observed silent failures during
         # GitHub 5xx led to #720 (sessions self-created a malformed tracking
         # issue when watchdog's create failed). Don't fall through silently.
-        local PLAN_ISSUE="" GH_ERR=""
+        # `gh issue create` does NOT support --json — that flag is only on
+        # read commands (`view`, `list`). On success it prints the issue
+        # URL; on failure it prints usage text to stderr. Capture both via
+        # 2>&1, then extract the trailing number from the URL. The `|| true`
+        # on the grep pipeline is mandatory: under `set -euo pipefail`, an
+        # empty grep return-code propagates and kills the watchdog silently.
+        local PLAN_ISSUE="" PLAN_OUT="" GH_ERR=""
         for attempt in 1 2 3; do
-            PLAN_ISSUE=$(gh issue create \
+            PLAN_OUT=$(gh issue create \
                 --title "Sprint Planning — Cycle $CYCLE" \
                 --label planning --label SENIOR --label in-progress \
-                --body "$PLAN_BODY" \
-                --json number --jq '.number' 2>&1) || GH_ERR="$PLAN_ISSUE"
-            # gh emits the issue URL on success on some setups instead of just the number — extract.
-            PLAN_ISSUE=$(echo "$PLAN_ISSUE" | grep -oE '[0-9]+' | tail -1)
+                --body "$PLAN_BODY" 2>&1) || GH_ERR="$PLAN_OUT"
+            PLAN_ISSUE=$(echo "$PLAN_OUT" | grep -oE 'issues/[0-9]+' | grep -oE '[0-9]+' | tail -1 || true)
             [[ -n "$PLAN_ISSUE" ]] && break
-            log "Planning tracking-issue create attempt $attempt/3 failed: $GH_ERR — retrying in $((attempt * 5))s"
+            log "Planning tracking-issue create attempt $attempt/3 failed: ${GH_ERR:-$PLAN_OUT} — retrying in $((attempt * 5))s"
             sleep $((attempt * 5))
         done
         if [[ -n "$PLAN_ISSUE" ]]; then
