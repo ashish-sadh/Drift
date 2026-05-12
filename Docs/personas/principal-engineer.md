@@ -75,6 +75,10 @@
 
 ## What I Learned (recent, not yet sedimented)
 
+### Review Cycle 9851 (2026-05-12)
+- `Source: review-cycle-N` lines in sprint-task bodies are *necessary but not sufficient* for closing the loop between review and execution. A task can be filed correctly and still slip a cycle. Better gate: in addition to the `Source:` line, the task's acceptance criteria must include an *outcome metric* the next review can read in 60 seconds. #568's "fix or XCTSkipIf" is a good shape; #708's "wipe-and-restore on real device" is a good shape. "Diagnose root cause of X" should produce a documented root-cause string, not just "investigated."
+- LLM prompt audit tasks need a *cross-stage* eval gate, not just the changed gold-set. #735 (cycle 9794 prompt refresh) shipped without verifying IntentClassifier + DomainExtractor downstream. Standing rule (filed as #766): post-refresh eval = changed gold-set + IntentClassifierGoldSet + DomainExtractorGoldSet. Without this gate, prompt changes can regress one stage to fix another silently.
+
 ### Review Cycle 9760 (2026-05-09)
 - Engine-without-surface ≠ shipped. iCloud backup ran 6 issues across 2 cycles with rigorous architecture (atomic restore, ring buffer, integrity validation, allowlist+NSNull hardening), but with no user-facing Settings row + restore flow we have no field validation that wipe-and-restore actually works. Always pair the engine PR with the surface task in the *same* sprint, or flag the engine as not-yet-shipped.
 - `qa-tester` adversarial pass + `require-test-on-source-change` hooks went live (`d427f870`, `ba46cfa9`). They cost ~5-10 minutes per source commit; the value is ending multi-commit iteration on shipped UI bugs (calorie overlay #669 was the trigger). Risk to monitor: rubber-stamp verdicts that satisfy the hook without tracing the code path. If that emerges, tighten the hook to require commit hashes for "BUG FIXED" or file:line for "WORKS AS UPDATED".

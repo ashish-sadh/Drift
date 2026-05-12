@@ -66,6 +66,10 @@
 
 ## What I Learned (recent, not yet sedimented)
 
+### Review Cycle 9851 (2026-05-12)
+- Three consecutive reviews recommending the same activation lever (DM friends about Settings → Feedback) and no action means the loop is broken between *review-time decisions* and *between-review execution*. Reviews that produce repeat recommendations are reviews that aren't actually steering the product — they're documenting drift. New rule: a review recommendation that survives one cycle without action becomes a sprint-task, not a re-recommendation. The dashboard 7-day prompt (#759) is this cycle's enforcement.
+- Engine-shipped ≠ user-shipped is now a *third* time we've learned it (cycle 9760 backup engine, cycle 9792 still no surface, cycle 9851 surface shipped but no dogfood). Pattern: any multi-cycle feature thread must have the dogfood task filed *in the same sprint* as the surface PR, not after.
+
 ### Review Cycle 9760 (2026-05-09)
 - Always have ≥2 activation levers in flight. Admin shut down the in-app "what's new" sheet (PR #654 comment) and instantly the only remaining lever became TestFlight release-notes copy. A single-lever activation strategy is one decision-stroke away from being zero-lever; the design needs redundancy.
 - Multi-intent splitting (#688) and median-time meal reminders (#690) are *invisible polish* — testers won't articulate they like them, but the friction reduction is qualitative and they earn the "feels intelligent" verdict that #111-tenet-1 demands. Build more of these silently — the user signal is "they didn't complain about the friction, then they didn't notice the absence either."
