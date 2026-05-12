@@ -42,6 +42,20 @@ extension AppDatabase {
     /// Provides write access.
     public var writer: any DatabaseWriter { dbWriter }
 
+    /// True when the user-data tables (food entries, weight entries, workouts)
+    /// are all empty. Used by the first-launch restore sheet to decide whether
+    /// to offer recovery from an iCloud backup on a fresh install.
+    public func isEmpty() throws -> Bool {
+        try dbWriter.read { db in
+            let food = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM food_entry") ?? 0
+            if food > 0 { return false }
+            let weight = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM weight_entry") ?? 0
+            if weight > 0 { return false }
+            let workouts = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM workout") ?? 0
+            return workouts == 0
+        }
+    }
+
     /// Delete ALL data from ALL tables. Nuclear option for factory reset.
     public func factoryReset() throws {
         try dbWriter.write { db in

@@ -322,6 +322,27 @@ struct SettingsView: View {
                 }
                 .card()
 
+                // iCloud Backup
+                NavigationLink {
+                    BackupSettingsView()
+                } label: {
+                    HStack(spacing: 12) {
+                        Image(systemName: "icloud")
+                            .foregroundStyle(Theme.accent).frame(width: 24)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text("iCloud Backup").font(.subheadline.weight(.medium))
+                            Text("Daily snapshot of your data to iCloud Drive")
+                                .font(.caption2).foregroundStyle(.tertiary)
+                        }
+                        Spacer()
+                        Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
+                    }
+                    .padding(.vertical, 10)
+                }
+                .buttonStyle(.plain)
+                .card()
+
                 // Export
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Export Data")

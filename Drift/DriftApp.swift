@@ -7,6 +7,7 @@ struct DriftApp: App {
     @State private var hasRequestedHealthKit = false
     @State private var syncComplete = false
     @State private var launchStage: LaunchStage = .starting
+    @State private var showingFirstLaunchRestore = false
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -33,10 +34,27 @@ struct DriftApp: App {
                     if newPhase == .background || newPhase == .inactive {
                         NotificationCenter.default.post(name: .saveConversationState, object: nil)
                     }
+                    if newPhase == .active {
+                        BackupMonitor.shared.checkOnForeground()
+                    }
+                }
+                .sheet(isPresented: $showingFirstLaunchRestore) {
+                    NavigationStack { RestorePickerView() }
                 }
                 .task {
                     if !hasRequestedHealthKit {
                         hasRequestedHealthKit = true
+                        // First-launch restore: if this device's DB is fresh
+                        // AND a backup is sitting in the user's iCloud Drive
+                        // container, offer to restore before any other launch
+                        // work. The sheet is dismissible — user can choose
+                        // "Start Fresh" by canceling.
+                        if let dbEmpty = try? AppDatabase.shared.isEmpty(), dbEmpty {
+                            let available = BackupService.shared.availableBackups()
+                            if !available.isEmpty {
+                                showingFirstLaunchRestore = true
+                            }
+                        }
                         let launchStart = Date()
 #if targetEnvironment(simulator)
                         // 🧪 Uncomment ONE to test on simulator:

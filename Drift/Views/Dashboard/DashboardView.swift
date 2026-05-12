@@ -9,6 +9,8 @@ struct DashboardView: View {
     @AppStorage("drift_ai_enabled") private var aiEnabled = false
     @AppStorage("workout_consistency_dismissed_until") private var workoutConsistencyDismissedUntil: Double = 0
     @State private var showingWeightEntry = false
+    @State private var staleBackupDays: Int?
+    @State private var showingBackupSettings = false
 
     private var isWorkoutConsistencyDismissed: Bool {
         Date().timeIntervalSince1970 < workoutConsistencyDismissedUntil
@@ -35,6 +37,30 @@ struct DashboardView: View {
                             }
                             .padding(10)
                             .background(Theme.accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
+                        }.tint(.primary)
+                    }
+
+                    // Stale-backup banner (#561) — appears when last successful
+                    // iCloud backup is older than 3 days. Tap routes to Backup
+                    // settings.
+                    if let days = staleBackupDays {
+                        Button {
+                            showingBackupSettings = true
+                        } label: {
+                            HStack(spacing: 8) {
+                                Image(systemName: "icloud.slash")
+                                    .font(.subheadline).foregroundStyle(Theme.surplus)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Last backed up \(days) days ago")
+                                        .font(.caption.weight(.medium))
+                                    Text("Tap to fix")
+                                        .font(.caption2).foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                Image(systemName: "chevron.right").font(.caption2).foregroundStyle(.tertiary)
+                            }
+                            .padding(10)
+                            .background(Theme.surplus.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
                         }.tint(.primary)
                     }
 
@@ -257,6 +283,12 @@ struct DashboardView: View {
                         WeightServiceAPI.saveBodyComposition(&c)
                     }
                 )
+            }
+            .sheet(isPresented: $showingBackupSettings) {
+                NavigationStack { BackupSettingsView() }
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .backupStaleBanner)) { note in
+                staleBackupDays = note.userInfo?["daysSinceBackup"] as? Int
             }
         }
     }
