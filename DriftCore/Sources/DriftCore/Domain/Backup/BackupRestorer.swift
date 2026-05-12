@@ -35,11 +35,10 @@ public struct BackupRestorer {
         try FileManager.default.createDirectory(at: workDir, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: workDir) }
 
+        let manifest = try BackupPackager.readManifest(from: backupURL)
         guard let archive = Archive(url: backupURL, accessMode: .read) else {
             throw BackupError.invalidFormat("not a zip archive: \(backupURL.lastPathComponent)")
         }
-
-        let manifest = try readManifest(from: archive)
 
         // Format / schema version gates — fail fast before touching any files.
         if manifest.backupFormatVersion > BackupManifest.currentFormatVersion {
@@ -82,23 +81,6 @@ public struct BackupRestorer {
     }
 
     // MARK: - Steps
-
-    private func readManifest(from archive: Archive) throws -> BackupManifest {
-        guard let entry = archive[BackupKeys.manifestFileName] else {
-            throw BackupError.invalidFormat("missing \(BackupKeys.manifestFileName)")
-        }
-        var data = Data()
-        do {
-            _ = try archive.extract(entry) { data.append($0) }
-        } catch {
-            throw BackupError.invalidFormat("failed to read manifest: \(error)")
-        }
-        do {
-            return try BackupManifest.decoder().decode(BackupManifest.self, from: data)
-        } catch {
-            throw BackupError.invalidFormat("manifest decode failed: \(error)")
-        }
-    }
 
     private func extractAndVerify(
         archive: Archive,

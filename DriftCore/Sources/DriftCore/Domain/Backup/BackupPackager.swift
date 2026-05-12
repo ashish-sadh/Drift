@@ -146,4 +146,27 @@ extension BackupPackager {
         f.dateFormat = "yyyy-MM-dd'T'HHmmss"
         return "drift-backup-\(f.string(from: date)).\(BackupKeys.backupFileExtension)"
     }
+
+    /// Read the manifest from a `.driftbackup` archive without extracting any
+    /// other entries. Used by the iOS BackupService to populate the restore
+    /// picker cheaply (~one zip-directory read per file, no DB extract).
+    public static func readManifest(from url: URL) throws -> BackupManifest {
+        guard let archive = Archive(url: url, accessMode: .read) else {
+            throw BackupError.invalidFormat("not a zip archive: \(url.lastPathComponent)")
+        }
+        guard let entry = archive[BackupKeys.manifestFileName] else {
+            throw BackupError.invalidFormat("missing \(BackupKeys.manifestFileName)")
+        }
+        var data = Data()
+        do {
+            _ = try archive.extract(entry) { data.append($0) }
+        } catch {
+            throw BackupError.invalidFormat("failed to read manifest: \(error)")
+        }
+        do {
+            return try BackupManifest.decoder().decode(BackupManifest.self, from: data)
+        } catch {
+            throw BackupError.invalidFormat("manifest decode failed: \(error)")
+        }
+    }
 }

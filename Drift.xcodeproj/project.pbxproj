@@ -33,6 +33,7 @@
 		2CF22C2420F9E22D2F989C70 /* NotificationServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86B648E00469832A2C8FB56 /* NotificationServiceTests.swift */; };
 		2DDEA9907FA6338488A8E1CD /* AITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19E7517E5B4779CBBE1C7284 /* AITests.swift */; };
 		2F25E1E95107ADEC87765F7B /* UnitConversionEndToEndTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 722CE8B3925ADAFCD540ED0C /* UnitConversionEndToEndTests.swift */; };
+		3065362951037CD4ACD237FC /* BackupService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 620B4DC601D7027A53BA5129 /* BackupService.swift */; };
 		30B55EC5B59DEEF47A292DB0 /* AIChatView+BackendSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4CC80EEA446BCC82FAE612AB /* AIChatView+BackendSelector.swift */; };
 		30C7E754FFFD0B3E4FD62CC6 /* PlantPointsCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EC7D489024FD036D6FA417EA /* PlantPointsCardView.swift */; };
 		30F7D3160F146CA92713AD13 /* MoreTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F6D2AA89F46A33EAE39DEAC /* MoreTabView.swift */; };
@@ -54,6 +55,7 @@
 		4978523A1008B620BF04A6A7 /* DriftAppLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 893A2B9C27B65BD830B5A520 /* DriftAppLaunchTests.swift */; };
 		4C31E5F32057829ABAA0840A /* DriftApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6712FB46945A6FE1AAB0E0 /* DriftApp.swift */; };
 		51943F743F3F4638E4D7EBAA /* PhotoLogTool.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAC05282764E0169FEFB3D88 /* PhotoLogTool.swift */; };
+		51CBDEF0E20717FDB4B0460B /* BackupServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AE6A77FE92E8A4DDC4AFDC3 /* BackupServiceTests.swift */; };
 		51D36C1D00F25F64F54D70BF /* HealthKitService+Sleep.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4902DF0863C6F54F0D1BC3BA /* HealthKitService+Sleep.swift */; };
 		5284981F1135EBAFC55F5BFE /* llama.xcframework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4101CD9171B652C6B8D1BB4E /* llama.xcframework */; };
 		5922FEA8C28BC870E2677ED4 /* FoodService+Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = B45542A3C86D7B44E55451F5 /* FoodService+Logging.swift */; };
@@ -278,6 +280,7 @@
 		5DAC7F3DE02D237C91936A3C /* FoodServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodServiceTests.swift; sourceTree = "<group>"; };
 		5E85736ADE942E8D527F8160 /* MuscleHighlightCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuscleHighlightCard.swift; sourceTree = "<group>"; };
 		5F6D2AA89F46A33EAE39DEAC /* MoreTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreTabView.swift; sourceTree = "<group>"; };
+		620B4DC601D7027A53BA5129 /* BackupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupService.swift; sourceTree = "<group>"; };
 		664CF8C9378B65A23548F155 /* BiomarkersTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomarkersTabView.swift; sourceTree = "<group>"; };
 		668D8D5951EB119A1624DDB2 /* DriftTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = DriftTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6B6C02FCD909BDE67D229EC1 /* CycleCalculationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CycleCalculationTests.swift; sourceTree = "<group>"; };
@@ -286,6 +289,7 @@
 		72ADCE850F5C06D2C23A57DC /* SpeechRecognitionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechRecognitionService.swift; sourceTree = "<group>"; };
 		733818AD9667283F81C5D1C5 /* DashboardView+Cards.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DashboardView+Cards.swift"; sourceTree = "<group>"; };
 		734A43F9D7C58B37BC8B6C07 /* ChatLatencyBenchmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatLatencyBenchmark.swift; sourceTree = "<group>"; };
+		7AE6A77FE92E8A4DDC4AFDC3 /* BackupServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupServiceTests.swift; sourceTree = "<group>"; };
 		7E7A1FEC035003AE448E5C65 /* PhotoLogFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogFlowView.swift; sourceTree = "<group>"; };
 		7ED878D9FF93287B41B67503 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		7F4C6870115BE53081FA0CDE /* AISetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISetupView.swift; sourceTree = "<group>"; };
@@ -483,6 +487,7 @@
 			isa = PBXGroup;
 			children = (
 				19E7517E5B4779CBBE1C7284 /* AITests.swift */,
+				7AE6A77FE92E8A4DDC4AFDC3 /* BackupServiceTests.swift */,
 				E9FA0E48A2845CFA85AB7395 /* ChatSuggestionPillsTests.swift */,
 				1D2E86F78FA3B9DFA023EF4B /* ClarificationCardTests.swift */,
 				F86480D874FB7BC3461695E4 /* ClarificationFlowTests.swift */,
@@ -683,6 +688,7 @@
 		DF13210FEF8ED80B93DD4A50 /* Drift */ = {
 			isa = PBXGroup;
 			children = (
+				620B4DC601D7027A53BA5129 /* BackupService.swift */,
 				F78E3B6C1497F6A200DF8095 /* ContentView.swift */,
 				FF0DB0809C7110E3644208F2 /* Drift.entitlements */,
 				DC6712FB46945A6FE1AAB0E0 /* DriftApp.swift */,
@@ -957,6 +963,7 @@
 				897722DC29F4AAF58BDA1CCF /* ActiveWorkoutView.swift in Sources */,
 				8D8FB3814300848676740EC6 /* AddSupplementView.swift in Sources */,
 				421D57520E9C09C88A6A0B6B /* AlgorithmSettingsView.swift in Sources */,
+				3065362951037CD4ACD237FC /* BackupService.swift in Sources */,
 				43FCEE74704AB4A0A900510A /* BarcodeScannerView.swift in Sources */,
 				1E41F060499A92A9EFB59BE1 /* BiomarkerDetailView.swift in Sources */,
 				DD0B299251C0A89AE490CC73 /* BiomarkersTabView.swift in Sources */,
@@ -1049,6 +1056,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2DDEA9907FA6338488A8E1CD /* AITests.swift in Sources */,
+				51CBDEF0E20717FDB4B0460B /* BackupServiceTests.swift in Sources */,
 				64BFF27391CC32B927344BA1 /* ChatSuggestionPillsTests.swift in Sources */,
 				045B162C8175451BD63FF9C6 /* ClarificationCardTests.swift in Sources */,
 				15E39B1D0294AB6762CE9EE8 /* ClarificationFlowTests.swift in Sources */,

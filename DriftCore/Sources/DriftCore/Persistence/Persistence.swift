@@ -5,19 +5,28 @@ extension AppDatabase {
     /// The shared database for the application (production).
     public static let shared = makeShared()
 
+    /// Location of the live SQLite file. Exposed so backup/restore can swap
+    /// it atomically without re-deriving the path in three places.
+    public static func databaseFileURL() throws -> URL {
+        let appSupport = try FileManager.default.url(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: true
+        )
+        return appSupport
+            .appendingPathComponent("Drift", isDirectory: true)
+            .appendingPathComponent("drift.sqlite")
+    }
+
     private static func makeShared() -> AppDatabase {
         do {
-            let fileManager = FileManager.default
-            let appSupportURL = try fileManager.url(
-                for: .applicationSupportDirectory,
-                in: .userDomainMask,
-                appropriateFor: nil,
-                create: true
+            let databaseURL = try databaseFileURL()
+            try FileManager.default.createDirectory(
+                at: databaseURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true
             )
-            let directoryURL = appSupportURL.appendingPathComponent("Drift", isDirectory: true)
-            try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
 
-            let databaseURL = directoryURL.appendingPathComponent("drift.sqlite")
             Log.database.info("Opening database at \(databaseURL.path)")
             let dbPool = try DatabasePool(path: databaseURL.path, configuration: makeConfiguration())
             let database = try AppDatabase(dbPool)
@@ -36,15 +45,16 @@ extension AppDatabase {
             Log.database.fault("Database setup failed: \(error.localizedDescription). Attempting recovery...")
             // Recovery: delete corrupt database and try again
             do {
-                let fileManager = FileManager.default
-                let appSupportURL = try fileManager.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-                let dbURL = appSupportURL.appendingPathComponent("Drift/drift.sqlite")
-                try? fileManager.removeItem(at: dbURL)
-                try? fileManager.removeItem(at: URL(fileURLWithPath: dbURL.path + "-wal"))
-                try? fileManager.removeItem(at: URL(fileURLWithPath: dbURL.path + "-shm"))
+                let fm = FileManager.default
+                let dbURL = try databaseFileURL()
+                try? fm.removeItem(at: dbURL)
+                try? fm.removeItem(at: URL(fileURLWithPath: dbURL.path + "-wal"))
+                try? fm.removeItem(at: URL(fileURLWithPath: dbURL.path + "-shm"))
                 Log.database.info("Deleted corrupt database, recreating...")
-                let directoryURL = appSupportURL.appendingPathComponent("Drift", isDirectory: true)
-                try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+                try fm.createDirectory(
+                    at: dbURL.deletingLastPathComponent(),
+                    withIntermediateDirectories: true
+                )
                 let dbPool = try DatabasePool(path: dbURL.path, configuration: makeConfiguration())
                 let database = try AppDatabase(dbPool)
                 try database.seedFoodsFromJSON()
