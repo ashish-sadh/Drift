@@ -17,6 +17,7 @@
 		0FBD78DE2C75146EE2AA13AB /* PhotoLogToolTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBD371873F1D148C190AA7DB /* PhotoLogToolTests.swift */; };
 		11AFD9A7915929FB480CFE99 /* CycleCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6C02FCD909BDE67D229EC1 /* CycleCalculationTests.swift */; };
 		12608375BDCD57D211C64849 /* WeightLogListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E78D132A90B0FDC35353646 /* WeightLogListView.swift */; };
+		133EE1957A7EEB3394C0A926 /* BackupSchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F82FD7245B0E99CA6CB7090F /* BackupSchedulerTests.swift */; };
 		15E39B1D0294AB6762CE9EE8 /* ClarificationFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86480D874FB7BC3461695E4 /* ClarificationFlowTests.swift */; };
 		1706838F0C81E8CA30C39676 /* SleepRecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0EA24C208A1C32DB52709A4 /* SleepRecoveryView.swift */; };
 		1BF24E5EFE0ECE537D36EA2E /* FloatingAIAssistant.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFF155F20FB2EF069D634C95 /* FloatingAIAssistant.swift */; };
@@ -110,6 +111,7 @@
 		A30F63FA377687747C8CFC2F /* RestorePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64A47C3CBB0D20D0B0F2DCE9 /* RestorePickerView.swift */; };
 		A349C57E1A1A347C924B9FA1 /* DriftWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 0F759FA8F6D800CE5BAD454A /* DriftWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A459C9B6E82F83B1CC545F63 /* IntentClassifierEval.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEAFAA2ECC4A71FF1264A19F /* IntentClassifierEval.swift */; };
+		A5E780FAC20471D35ED35EF7 /* BackupScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 443FF1C2FE4B778340AC3D95 /* BackupScheduler.swift */; };
 		AA43792497E2FC36FF55F58C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 08E33CA6BE80D735A37ED745 /* Assets.xcassets */; };
 		AD32A3FE644C22A43CA474EF /* DebugSeedData.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCBE3BA3D70586AC0F3ED34E /* DebugSeedData.swift */; };
 		ADA6493D219411505EF2DA36 /* Preferences+PhotoLog.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CFCC1379789784011A217E4 /* Preferences+PhotoLog.swift */; };
@@ -268,6 +270,7 @@
 		418816F51F38F19F65BC3D77 /* NutritionLabelOCR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NutritionLabelOCR.swift; sourceTree = "<group>"; };
 		4200A9F331B35DB8ACB881A3 /* DomainExtractorEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DomainExtractorEval.swift; sourceTree = "<group>"; };
 		42A6CAF4720F61DC0C9BD2E7 /* FoodSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FoodSearchView.swift; sourceTree = "<group>"; };
+		443FF1C2FE4B778340AC3D95 /* BackupScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupScheduler.swift; sourceTree = "<group>"; };
 		45C8EDA85652D4AEF08487FB /* FallbackVisionClientTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FallbackVisionClientTests.swift; sourceTree = "<group>"; };
 		47334FA11098E0172ED4A19A /* EdgeCaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EdgeCaseTests.swift; sourceTree = "<group>"; };
 		483437CB4AFE28505FCFE44A /* AIChatView+MessageHandling.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AIChatView+MessageHandling.swift"; sourceTree = "<group>"; };
@@ -377,6 +380,7 @@
 		F57B8BA8C0B119CF10614F14 /* HealthKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitService.swift; sourceTree = "<group>"; };
 		F78E3B6C1497F6A200DF8095 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		F7D747073BCD9310AB76B496 /* LabReportUploadView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabReportUploadView.swift; sourceTree = "<group>"; };
+		F82FD7245B0E99CA6CB7090F /* BackupSchedulerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupSchedulerTests.swift; sourceTree = "<group>"; };
 		F86480D874FB7BC3461695E4 /* ClarificationFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClarificationFlowTests.swift; sourceTree = "<group>"; };
 		F86B648E00469832A2C8FB56 /* NotificationServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationServiceTests.swift; sourceTree = "<group>"; };
 		FA0DCFCDAFF06DBAD3CA13DB /* WidgetDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetDataTests.swift; sourceTree = "<group>"; };
@@ -498,6 +502,7 @@
 			children = (
 				19E7517E5B4779CBBE1C7284 /* AITests.swift */,
 				BBC007029A7A52990CE4FBDE /* BackupMonitorTests.swift */,
+				F82FD7245B0E99CA6CB7090F /* BackupSchedulerTests.swift */,
 				7AE6A77FE92E8A4DDC4AFDC3 /* BackupServiceTests.swift */,
 				AFB14EB9D844878B58DA9643 /* BackupSettingsViewTests.swift */,
 				E9FA0E48A2845CFA85AB7395 /* ChatSuggestionPillsTests.swift */,
@@ -701,6 +706,7 @@
 			isa = PBXGroup;
 			children = (
 				5FA6ED1844CBEB6F82E743EA /* BackupMonitor.swift */,
+				443FF1C2FE4B778340AC3D95 /* BackupScheduler.swift */,
 				620B4DC601D7027A53BA5129 /* BackupService.swift */,
 				F78E3B6C1497F6A200DF8095 /* ContentView.swift */,
 				FF0DB0809C7110E3644208F2 /* Drift.entitlements */,
@@ -979,6 +985,7 @@
 				8D8FB3814300848676740EC6 /* AddSupplementView.swift in Sources */,
 				421D57520E9C09C88A6A0B6B /* AlgorithmSettingsView.swift in Sources */,
 				EE5FAB515DD08A8837C600BB /* BackupMonitor.swift in Sources */,
+				A5E780FAC20471D35ED35EF7 /* BackupScheduler.swift in Sources */,
 				3065362951037CD4ACD237FC /* BackupService.swift in Sources */,
 				234789CE004676FA7E37A620 /* BackupSettingsView.swift in Sources */,
 				43FCEE74704AB4A0A900510A /* BarcodeScannerView.swift in Sources */,
@@ -1075,6 +1082,7 @@
 			files = (
 				2DDEA9907FA6338488A8E1CD /* AITests.swift in Sources */,
 				E3A1AAD6DC61707246AECDA8 /* BackupMonitorTests.swift in Sources */,
+				133EE1957A7EEB3394C0A926 /* BackupSchedulerTests.swift in Sources */,
 				51CBDEF0E20717FDB4B0460B /* BackupServiceTests.swift in Sources */,
 				C071908C17208D54A2738C23 /* BackupSettingsViewTests.swift in Sources */,
 				64BFF27391CC32B927344BA1 /* ChatSuggestionPillsTests.swift in Sources */,

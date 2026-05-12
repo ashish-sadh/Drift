@@ -22,6 +22,10 @@ struct DriftApp: App {
         // separately because it depends on iOS-only Keychain + gating.
         ToolRegistration.registerAll()
         PhotoLogTool.syncRegistration()
+        // BGTaskScheduler requires registration before the app finishes
+        // launching — i.e. synchronously during init. Submission of the next
+        // request happens later from the launch task once setup completes.
+        BackupScheduler.registerBackgroundTask()
     }
 
     var body: some Scene {
