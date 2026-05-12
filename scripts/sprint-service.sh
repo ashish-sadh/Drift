@@ -224,7 +224,7 @@ cmd_next() {
 
     local RESULT
     RESULT=$(python3 - "$FILTER" "$STATE_FILE" <<'PYEOF'
-import json, sys
+import json, sys, os
 
 filter_mode = sys.argv[1]
 state_file  = sys.argv[2]
@@ -239,12 +239,18 @@ in_progress = state.get("in_progress")
 
 def has(t, label): return label in t.get("labels", [])
 
-# Session budget: max 10 implementation tasks per session (senior or junior).
-# Was 5 — raised after observing sessions exit early with productive capacity
-# left, especially seniors on multi-file tasks but also juniors crunching
-# through a UI/DB queue. Not enforced for --any (used by tests / planning).
+# Session budget: ONE implementation task per session. After it completes,
+# session exits and watchdog respawns within ~60s. Was 10 → 1 (2026-05-12).
+# Rationale: at 10 tasks/session the model's context bloated with stale state
+# from prior tasks — task N got worse output than task 1 because of carry-over
+# (irrelevant file reads, prior plan comments, prior QA verdicts polluting the
+# attention). Per-session overhead (~60s respawn + 5min context-load) is small
+# vs task wall-time (30-60min including iOS sim tests) so the cost is fine.
+# Tests still override via DRIFT_TEST_BUDGET env var.
+# Not enforced for --any (used by tests / planning).
+_BUDGET = int(os.environ.get("DRIFT_TEST_BUDGET", "1"))
 if filter_mode in ("--senior", "--junior"):
-    if state.get("session_tasks", 0) >= 10:
+    if state.get("session_tasks", 0) >= _BUDGET:
         print("none"); sys.exit(0)
 
 # Skip done and currently claimed

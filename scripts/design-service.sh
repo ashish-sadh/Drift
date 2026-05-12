@@ -177,13 +177,24 @@ cmd_create_impl_tasks() {
     echo "After creating ALL implementation tasks:"
     echo "  gh issue edit $DESIGN_NUM --add-label implementing"
     echo ""
-    echo "Then find and merge the design PR:"
-    DESIGN_PR=$(gh pr list --label design-doc --state open --json number,title \
-        --jq ".[] | select(.title | test(\"$DESIGN_NUM\")) | .number" 2>/dev/null | head -1 || true)
-    if [ -n "$DESIGN_PR" ]; then
-        echo "  gh pr merge $DESIGN_PR --squash --delete-branch && git checkout main && git pull"
+    # Find + auto-merge the design PR (instead of just printing the command —
+    # we observed PRs sitting OPEN for days because no session actually ran
+    # the merge step. #574 PR #576, #665 PR #670 both stale until 2026-05-12).
+    echo "Attempting to merge design PR..."
+    DESIGN_PR=$(gh pr list --state open --json number,title,labels \
+        --jq "[.[] | select(.labels | map(.name) | index(\"design-doc\")) | select(.title | test(\"$DESIGN_NUM\"))] | .[0].number" 2>/dev/null)
+    if [ -n "$DESIGN_PR" ] && [ "$DESIGN_PR" != "null" ]; then
+        echo "  Found PR #$DESIGN_PR — merging…"
+        if gh pr merge "$DESIGN_PR" --squash --delete-branch 2>&1 | tail -5; then
+            git checkout main 2>/dev/null && git pull --ff-only origin main 2>/dev/null
+            echo "  Design PR #$DESIGN_PR merged."
+        else
+            echo "  WARN: auto-merge failed (likely merge conflicts). Resolve locally:"
+            echo "    gh pr checkout $DESIGN_PR && git fetch origin main && git merge origin/main"
+            echo "  Or land the doc directly to main as a fresh commit + close PR as redundant."
+        fi
     else
-        echo "  (find the design PR: gh pr list --label design-doc --state open)"
+        echo "  No open design-doc PR found for #$DESIGN_NUM — doc may already be in main."
     fi
     echo ""
     echo "Finally: scripts/sprint-service.sh refresh (picks up new impl tasks)"

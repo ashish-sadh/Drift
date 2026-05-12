@@ -129,7 +129,7 @@ scripts/planning-service.sh remaining
 
 ### YOUR ONE JOB — sprint throughput
 
-Loop until budget (10) exhausted or queue empty:
+One task per session. After 1 commit, `next --senior --claim` returns "none" — session exits, watchdog respawns within ~60s with fresh context. Past sessions ran 10 tasks each; context bloated by task 5, output quality dropped, the cost of carry-over exceeded the cost of respawn.
 
 ```
 1. CLAIM    scripts/sprint-service.sh next --senior --claim   ← gives you #N
@@ -151,7 +151,7 @@ If you find a real architectural problem mid-task: file a NEW issue (`gh issue c
 
 **The Plan comment in step 2 is non-negotiable.** Other sessions and humans can not see what you are doing without it. Hooks will nudge you at 5/10/15 min if you skip it.
 
-session-start.sh has injected your context, created the overhead tracking issue, and reset your 10-task budget. `scripts/sprint-service.sh next --senior` returns "none" automatically after 10 tasks.
+session-start.sh has injected your context, created the overhead tracking issue, and reset your 1-task budget. `scripts/sprint-service.sh next --senior` returns "none" automatically after 1 task — exit cleanly; watchdog respawns within ~60s.
 
 ### Detailed protocol
 
@@ -195,7 +195,7 @@ session-compliance.sh closes the overhead issue and writes the session summary a
 
 ### YOUR ONE JOB — sprint throughput
 
-Loop until budget (10) exhausted or queue empty:
+One task per session (same model as senior — context-bloat fix):
 
 ```
 1. CLAIM    scripts/sprint-service.sh next --junior --claim   ← gives you #N
@@ -213,7 +213,7 @@ Loop until budget (10) exhausted or queue empty:
 - Refactoring outside the claimed issue's scope
 - Posting status text to chat that isn't a `Plan:` / `Progress:` / `Resolution:` comment on the issue
 
-session-start.sh has injected your context, created the overhead tracking issue, and reset your 10-task budget. `scripts/sprint-service.sh next --junior` returns "none" automatically after 10 tasks.
+session-start.sh has injected your context, created the overhead tracking issue, and reset your 1-task budget. `scripts/sprint-service.sh next --junior` returns "none" automatically after 1 task — exit cleanly; watchdog respawns within ~60s.
 
 ### Detailed protocol
 

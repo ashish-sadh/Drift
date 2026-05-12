@@ -97,6 +97,9 @@ assert_exit_nonzero() {
 TMPDIR_TEST=$(mktemp -d)
 export HOME="$TMPDIR_TEST"
 export DRIFT_STATE="$TMPDIR_TEST/drift-state"
+# Production budget is 1 task/session (context-bloat fix, 2026-05-12).
+# Tests assert the historical 10-task contract via this override.
+export DRIFT_TEST_BUDGET=10
 mkdir -p "$DRIFT_STATE"
 
 STATE_FILE="$DRIFT_STATE/sprint-state.json"
