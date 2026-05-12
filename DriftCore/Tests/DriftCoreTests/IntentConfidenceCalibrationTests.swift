@@ -106,18 +106,46 @@ private func shouldClarify(_ tool: String, _ confidence: String, _ complete: Boo
 
 // MARK: - Weight
 
-@Test func weight_highAndMediumAlwaysProceed() {
-    for conf in ["high", "medium"] {
-        for complete in [true, false] {
-            #expect(shouldClarify("log_weight", conf, complete) == .proceed)
-            #expect(shouldClarify("weight_info", conf, complete) == .proceed)
-            #expect(shouldClarify("set_goal", conf, complete) == .proceed)
-        }
-    }
+@Test func weight_highAlwaysProceeds() {
+    // High confidence always proceeds regardless of param completeness.
+    #expect(shouldClarify("log_weight", "high", true) == .proceed)
+    #expect(shouldClarify("log_weight", "high", false) == .proceed)
+    #expect(shouldClarify("weight_info", "high", true) == .proceed)
+    #expect(shouldClarify("weight_info", "high", false) == .proceed)
+    #expect(shouldClarify("set_goal", "high", true) == .proceed)
+    #expect(shouldClarify("set_goal", "high", false) == .proceed)
 }
 
-@Test func weight_lowBehaviorMatchesLegacy() {
-    // Preserve pre-#302 semantics: clarify only on low+incomplete.
+@Test func weight_readToolProceedsAtAnyConfidence() {
+    // weight_info is read-only — no false-confirm risk. Same liberal policy
+    // as food: clarify only on low + incomplete.
+    for conf in ["high", "medium"] {
+        for complete in [true, false] {
+            #expect(shouldClarify("weight_info", conf, complete) == .proceed,
+                    "weight_info \(conf)/\(complete) should proceed (read-only, no FC risk)")
+        }
+    }
+    #expect(shouldClarify("weight_info", "low", true) == .proceed)
+    #expect(shouldClarify("weight_info", "low", false) == .clarify)
+}
+
+@Test func weight_writeToolClarifiesOnMediumIncomplete() {
+    // **Asymmetric cell.** log_weight / set_goal are high false-confirm
+    // sensitivity — "log 165" without a unit could be 165 kg (364 lbs) or
+    // 165 lbs (75 kg), a ~60% mass swing. At medium confidence + missing
+    // unit, the right call is CLARIFY, not silently default. Compare with
+    // food which proceeds at medium+incomplete because re-logging a wrong
+    // food costs one tap, not chart corruption.
+    #expect(shouldClarify("log_weight", "medium", false) == .clarify)
+    #expect(shouldClarify("set_goal", "medium", false) == .clarify)
+    // Complete params bypass the asymmetric rule — "I weigh 165 lbs" goes
+    // through.
+    #expect(shouldClarify("log_weight", "medium", true) == .proceed)
+    #expect(shouldClarify("set_goal", "medium", true) == .proceed)
+}
+
+@Test func weight_writeToolClarifiesOnLowIncomplete() {
+    // Low + incomplete → always clarify, regardless of sensitivity.
     #expect(shouldClarify("log_weight", "low", true) == .proceed)
     #expect(shouldClarify("log_weight", "low", false) == .clarify)
     #expect(shouldClarify("set_goal", "low", true) == .proceed)
@@ -145,20 +173,33 @@ private func shouldClarify(_ tool: String, _ confidence: String, _ complete: Boo
 
 // MARK: - Supplements
 
-@Test func supplements_highAndMediumAlwaysProceed() {
+@Test func supplements_readToolProceedsAtAnyConfidence() {
+    // supplements() (status query) — read-only, no false-confirm risk.
     for conf in ["high", "medium"] {
         for complete in [true, false] {
-            #expect(shouldClarify("mark_supplement", conf, complete) == .proceed)
             #expect(shouldClarify("supplements", conf, complete) == .proceed)
         }
     }
-}
-
-@Test func supplements_lowBehaviorMatchesLegacy() {
-    #expect(shouldClarify("mark_supplement", "low", true) == .proceed)
-    #expect(shouldClarify("mark_supplement", "low", false) == .clarify)
     #expect(shouldClarify("supplements", "low", true) == .proceed)
     #expect(shouldClarify("supplements", "low", false) == .clarify)
+}
+
+@Test func supplements_writeToolClarifiesOnMediumIncomplete() {
+    // **Asymmetric cell.** mark_supplement (and log_medication) are
+    // high false-confirm sensitivity — marking the wrong med taken
+    // breaks adherence tracking with medical implications. Clarify on
+    // medium + incomplete (name unknown), proceed when name is concrete.
+    #expect(shouldClarify("mark_supplement", "medium", false) == .clarify)
+    #expect(shouldClarify("mark_supplement", "medium", true) == .proceed)
+    #expect(shouldClarify("log_medication", "medium", false) == .clarify)
+    #expect(shouldClarify("log_medication", "medium", true) == .proceed)
+}
+
+@Test func supplements_writeToolClarifiesOnLowIncomplete() {
+    #expect(shouldClarify("mark_supplement", "high", true) == .proceed)
+    #expect(shouldClarify("mark_supplement", "high", false) == .proceed)
+    #expect(shouldClarify("mark_supplement", "low", true) == .proceed)
+    #expect(shouldClarify("mark_supplement", "low", false) == .clarify)
 }
 
 // MARK: - Data: never clarifies
@@ -226,4 +267,43 @@ private func shouldClarify(_ tool: String, _ confidence: String, _ complete: Boo
     let decision = shouldClarify("log_food", "medium", false)
     #expect(decision == .proceed,
             "If you changed food to clarify on medium, the ~96% IntentRoutingEval pass rate will regress.")
+}
+
+// MARK: - Per-domain asymmetry: false-confirm sensitivity
+
+@Test func sensitivityClassification_matchesIntent() {
+    // Lock the high-sensitivity list. Adding a tool here is a deliberate
+    // policy choice — the default `.low` should cover most additions.
+    let highSensitivity = ["log_weight", "set_goal", "mark_supplement", "log_medication"]
+    for tool in highSensitivity {
+        #expect(IntentThresholds.FalseConfirmSensitivity.of(tool: tool) == .high,
+                "\(tool) should be high false-confirm sensitivity")
+    }
+    // Spot-check defaults: high-volume + recoverable writes stay low.
+    let lowSensitivity = ["log_food", "log_activity", "weight_info", "food_info", "supplements", "start_workout"]
+    for tool in lowSensitivity {
+        #expect(IntentThresholds.FalseConfirmSensitivity.of(tool: tool) == .low,
+                "\(tool) should be low false-confirm sensitivity")
+    }
+}
+
+@Test func asymmetry_foodVsWeightOnMediumIncomplete() {
+    // The core asymmetry: same confidence × completeness inputs, different
+    // decisions because the cost ratio differs.
+    let foodDecision = shouldClarify("log_food", "medium", false)
+    let weightDecision = shouldClarify("log_weight", "medium", false)
+    #expect(foodDecision == .proceed,
+            "Food false-clarify cost (friction) > false-confirm cost (easy undo) → proceed")
+    #expect(weightDecision == .clarify,
+            "Weight false-confirm cost (unit ambiguity → 60% mass swing) > friction → clarify")
+    #expect(foodDecision != weightDecision,
+            "Per-domain calibration: food and weight must differ at medium+incomplete")
+}
+
+@Test func asymmetry_supplementWriteVsRead() {
+    // Same medium+incomplete inputs, different outcomes for write vs read.
+    #expect(shouldClarify("mark_supplement", "medium", false) == .clarify,
+            "Marking wrong med taken breaks adherence — clarify when name unknown")
+    #expect(shouldClarify("supplements", "medium", false) == .proceed,
+            "Reading supplement status has no false-confirm risk — proceed")
 }

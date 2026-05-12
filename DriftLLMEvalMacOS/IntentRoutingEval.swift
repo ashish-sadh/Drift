@@ -139,6 +139,29 @@ final class IntentRoutingEval: XCTestCase {
         await assertRoutes("am I on track for my goal", to: "weight_info")
     }
 
+    // MARK: - Per-Domain Calibration (#762)
+    // High false-confirm sensitivity tools (log_weight, set_goal, mark_supplement,
+    // log_medication) get a stricter clarify threshold downstream in
+    // IntentThresholds. The LLM's job here is unchanged: route to the right
+    // tool. These cases lock in routing for the asymmetric domains so the
+    // tightened threshold doesn't silently regress LLM-side recall.
+
+    func testPerDomainCalibration_weightWriteRoutes() async {
+        // log_weight with full unit + value — must route cleanly even though
+        // downstream is stricter on this tool.
+        await assertRoutes("I weigh 165 lbs", to: "log_weight")
+        await assertRoutes("logged 73.2 kg this morning", to: "log_weight")
+        // set_goal with explicit unit — proceeds at any confidence.
+        await assertRoutes("set my weight goal to 70 kg", to: "set_goal")
+    }
+
+    func testPerDomainCalibration_supplementWriteRoutes() async {
+        // Named supplement — proceeds. Tightened threshold only kicks in when
+        // the name is missing.
+        await assertRoutes("took my vitamin d this morning", to: "mark_supplement")
+        await assertRoutes("had my creatine", to: "mark_supplement")
+    }
+
     func testNonFood_health() async {
         await assertNotFood("how's my body fat")
         await assertNotFood("show me my biomarkers")

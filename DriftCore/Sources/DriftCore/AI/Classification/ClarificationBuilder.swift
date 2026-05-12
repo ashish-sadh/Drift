@@ -58,7 +58,10 @@ public enum ClarificationBuilder {
     ///
     /// - For `log_food`: need a name + at least one quantity signal.
     /// - For `log_weight`: need a value + unit.
+    /// - For `set_goal`: need a target + (goal_type non-weight OR unit), so a
+    ///   bare "set goal to 160" (weight, unit missing) registers as incomplete.
     /// - For `log_activity`: need a name + duration or distance.
+    /// - For `mark_supplement`: need a name (no quantity required — adherence).
     /// - For info/lookup tools: any non-empty `query` or `name` is enough.
     public static func hasCompleteParams(tool: String, params: [String: String]) -> Bool {
         func nonEmpty(_ key: String) -> Bool {
@@ -70,8 +73,16 @@ public enum ClarificationBuilder {
             return nonEmpty("name") && hasQty
         case "log_weight":
             return nonEmpty("value") && nonEmpty("unit")
+        case "set_goal":
+            guard nonEmpty("target") else { return false }
+            let goalType = params["goal_type"]?.lowercased() ?? "weight"
+            // weight goals need an explicit unit (kg vs lbs — 60% mass swing).
+            // calorie/protein/etc. goals carry the unit in goal_type itself.
+            return goalType == "weight" ? nonEmpty("unit") : true
         case "log_activity":
             return nonEmpty("name") && (nonEmpty("duration_min") || nonEmpty("duration") || nonEmpty("distance"))
+        case "mark_supplement":
+            return nonEmpty("name")
         case "food_info", "supplements", "nutrition_lookup":
             return nonEmpty("query") || nonEmpty("name")
         default:

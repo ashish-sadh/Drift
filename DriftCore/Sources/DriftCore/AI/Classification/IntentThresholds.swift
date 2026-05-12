@@ -89,38 +89,72 @@ public enum IntentThresholds {
     ///   to proceed — matches the pre-existing fallback behavior.
     public enum Decision: Equatable, Sendable { case proceed, clarify }
 
+    /// False-confirm sensitivity tier for write tools. Encodes the cost
+    /// asymmetry between asking a redundant clarifier vs silently committing
+    /// the wrong data. Read-only tools never reach this branch — they're
+    /// routed via `IntentDomain.data` or via the param-complete path.
+    ///
+    /// - `.low`: false-confirm is cheap and recoverable. The user can undo a
+    ///   misclassified food log with one tap, and the cost of a redundant
+    ///   "what did you have?" is high friction during a frequent, fast
+    ///   workflow. Bias: PROCEED. Applies to log_food and log_activity.
+    /// - `.high`: false-confirm corrupts the data model in a way that's
+    ///   either hard to notice or hard to repair. Bias: CLARIFY earlier (at
+    ///   medium + incomplete params, not just low). Applies to log_weight,
+    ///   set_goal (weight unit ambiguity = 60% mass swing — wrong kg/lbs
+    ///   poisons trend chart, ETA prediction, calorie target), and
+    ///   mark_supplement (medical-adherence accuracy beats friction).
+    public enum FalseConfirmSensitivity: String, Sendable {
+        case low, high
+
+        /// Tools where the cost of a silent miscoding outweighs the friction
+        /// of an extra question. Keep this list short and explicit — the
+        /// default is `.low` so adding a tool to the prompt doesn't
+        /// accidentally inherit a stricter policy.
+        public static func of(tool: String) -> FalseConfirmSensitivity {
+            switch tool {
+            case "log_weight", "set_goal", "mark_supplement", "log_medication":
+                return .high
+            default:
+                return .low
+            }
+        }
+    }
+
     /// The single decision function. Pure, `nonisolated`, and small enough
     /// to unit-test exhaustively.
     ///
-    /// Truth table (rows = domain, columns = confidence × complete-params):
+    /// Per-domain calibration captures **false-clarify cost vs false-confirm
+    /// cost** asymmetry. Three buckets matter here:
     ///
-    /// | domain       | high/any | medium+complete | medium+incomplete | low+complete | low+incomplete |
-    /// |--------------|----------|-----------------|-------------------|--------------|----------------|
-    /// | food         | proceed  | proceed         | proceed           | proceed      | clarify        |
-    /// | weight       | proceed  | proceed         | proceed           | proceed      | clarify        |
-    /// | exercise     | proceed  | proceed         | proceed           | proceed      | clarify        |
-    /// | supplements  | proceed  | proceed         | proceed           | proceed      | clarify        |
-    /// | data         | proceed  | proceed         | proceed           | proceed      | proceed        |
-    /// | meta         | proceed  | clarify         | clarify           | clarify      | clarify        |
-    /// | other        | proceed  | proceed         | proceed           | proceed      | clarify        |
+    /// 1. **High false-clarify cost, low false-confirm cost** (food, exercise,
+    ///    read tools): user is in a fast workflow; an extra "what did you
+    ///    mean?" prompt costs more than a wrong tool call they can redo.
+    ///    Threshold: clarify only on `low + incomplete`. Existing behavior.
+    /// 2. **High false-confirm cost, moderate false-clarify cost** (log_weight,
+    ///    set_goal, mark_supplement, log_medication): a silent miscoding
+    ///    corrupts the trend chart or medical-adherence log. Threshold:
+    ///    clarify on `medium + incomplete` AND `low + incomplete`. Note that
+    ///    `hasCompleteParams` for these tools requires unit/name explicitly,
+    ///    so "I weigh 165" with unit known still proceeds at medium.
+    /// 3. **High false-confirm cost on screen routing** (navigate_to): "show
+    ///    me my chart" could mean body_comp, weight, calories, glucose.
+    ///    Demand `high` confidence; otherwise clarify. Existing behavior.
     ///
-    /// Rationales:
-    /// - **food**: "chicken rice", "biryani 1 plate" — extractor emits
-    ///   `medium` frequently but name+quantity is enough to proceed. Gold-set
-    ///   failure: bare-food log ("had biryani") clarifying when the
-    ///   extractor produced `{name:biryani}`. Proceed on medium; clarify only
-    ///   when low AND incomplete.
-    /// - **weight/exercise/supplements**: current behavior — clarify only on
-    ///   low + incomplete. Preserves pass-through for "I weigh 165",
-    ///   "did yoga 30 min", "took vitamin d".
-    /// - **data**: body_comp/glucose/biomarkers take no required params;
-    ///   clarification has nothing to disambiguate. Always proceed.
-    /// - **meta**: navigate_to is *the* case the task calls out — "show me
-    ///   my chart" routes to `navigate_to(screen:"weight")` at `medium`
-    ///   confidence, but the user might have meant "show my body comp" or
-    ///   "show calories today". Demand `high` to proceed; otherwise clarify.
-    ///   Sensitivity: downgrading this to `proceed on medium` breaks the
-    ///   dedicated meta test in `IntentConfidenceCalibrationTests`.
+    /// Truth table (rows = sensitivity bucket, columns = confidence × complete-params):
+    ///
+    /// | bucket                              | high/any | med+complete | med+incomplete | low+complete | low+incomplete |
+    /// |-------------------------------------|----------|--------------|----------------|--------------|----------------|
+    /// | food/exercise/other (low FC-sens)   | proceed  | proceed      | proceed        | proceed      | clarify        |
+    /// | weight/supplements WRITE (high FC)  | proceed  | proceed      | **clarify**    | proceed      | clarify        |
+    /// | weight/supplements READ             | proceed  | proceed      | proceed        | proceed      | clarify        |
+    /// | data                                | proceed  | proceed      | proceed        | proceed      | proceed        |
+    /// | meta (navigate_to)                  | proceed  | clarify      | clarify        | clarify      | clarify        |
+    ///
+    /// The asymmetric cell (**clarify** at medium+incomplete for high-FC tools)
+    /// is the per-domain calibration this function adds over the legacy
+    /// symmetric rule. Test drift here is intentional — any change should
+    /// surface in `IntentConfidenceCalibrationTests`.
     public nonisolated static func shouldClarify(
         tool: String,
         confidence: String,
@@ -134,7 +168,16 @@ public enum IntentThresholds {
         case .meta:
             return conf == .high ? .proceed : .clarify
         case .food, .weight, .exercise, .supplements, .other:
+            // Low + incomplete is always a clarify across writeable domains.
             if conf == .low && !hasCompleteParams { return .clarify }
+            // Asymmetric tightening: high-sensitivity write tools also
+            // clarify on medium + incomplete because a silent miscoded log
+            // (wrong unit, wrong supplement) corrupts data downstream. See
+            // `FalseConfirmSensitivity` rationale.
+            if conf == .medium && !hasCompleteParams
+                && FalseConfirmSensitivity.of(tool: tool) == .high {
+                return .clarify
+            }
             return .proceed
         }
     }

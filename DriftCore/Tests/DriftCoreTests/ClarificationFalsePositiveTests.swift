@@ -141,3 +141,32 @@ import Testing
     #expect(ClarificationBuilder.hasCompleteParams(tool: "log_food",
         params: ["name": "eggs", "servings": "   "]) == false)
 }
+
+@Test func hasCompleteParamsForMarkSupplementRequiresName() {
+    // mark_supplement is high false-confirm sensitivity (#762) — incomplete
+    // params route to clarify at medium confidence. Anchors that behavior.
+    #expect(ClarificationBuilder.hasCompleteParams(tool: "mark_supplement",
+        params: ["name": "vitamin d"]))
+    #expect(ClarificationBuilder.hasCompleteParams(tool: "mark_supplement",
+        params: [:]) == false)
+    #expect(ClarificationBuilder.hasCompleteParams(tool: "mark_supplement",
+        params: ["name": "  "]) == false, "whitespace-only name doesn't count")
+}
+
+@Test func hasCompleteParamsForSetGoalRequiresUnitOnWeight() {
+    // Weight goals — target + unit needed. "set goal to 160" is incomplete
+    // (kg vs lbs ambiguity); "set goal to 160 lbs" is complete.
+    #expect(ClarificationBuilder.hasCompleteParams(tool: "set_goal",
+        params: ["target": "160", "unit": "lbs"]))
+    #expect(ClarificationBuilder.hasCompleteParams(tool: "set_goal",
+        params: ["target": "160"]) == false, "weight goal needs unit")
+    // Calorie/protein goals carry the unit in goal_type — no separate unit
+    // param needed.
+    #expect(ClarificationBuilder.hasCompleteParams(tool: "set_goal",
+        params: ["target": "2200", "goal_type": "calorie"]))
+    #expect(ClarificationBuilder.hasCompleteParams(tool: "set_goal",
+        params: ["target": "150", "goal_type": "protein"]))
+    // Missing target — never complete.
+    #expect(ClarificationBuilder.hasCompleteParams(tool: "set_goal",
+        params: ["goal_type": "weight", "unit": "kg"]) == false)
+}
