@@ -32,7 +32,7 @@ scripts/planning-service.sh remaining
 
 3. **Bug triage:** `gh issue list --state open --label bug` — note high-priority ones. Senior handles all bug investigation.
 
-4. **Design docs:** Note status of open design-doc Issues/PRs. Do NOT write docs or create impl tasks — senior handles all design work.
+4. **Design docs:** Note status of open design-doc Issues/PRs. Do NOT write design docs — senior handles design authoring. **BUT: planning DOES file impl tasks for approved designs.** Run `scripts/design-service.sh approved-not-started`. For each issue it returns: read the design doc's *Implementation Plan* section, file 2-5 sprint-task issues with label `design-impl-<N>` (plus appropriate SENIOR/JUNIOR), each scoped to one session. Then `gh issue edit <N> --add-label implementing` on the design issue. Without this step, approved designs sit indefinitely at `approved+doc-ready` because senior's `approved-not-started` check is opportunistic-only — observed: #274/#561/#665/#574 all stalled at this gate for 3–11 days.
 
 5. **Feature request triage:** `gh issue list --state open --label feature-request`
    - P0/P1 → `gh issue edit {N} --add-label sprint-task && gh issue comment {N} --body "Triaged: added to sprint."`
