@@ -561,14 +561,23 @@ sweep_stale_in_progress_labels() {
     done
 }
 
-# Commit heartbeat.json on a hybrid schedule:
-#   a) every 10 min if the file changed
-#   b) immediately if main HEAD advanced via some other commit (piggyback —
-#      since we're pushing anyway, ride along)
-# Runs regardless of session liveness so the Pages view doesn't freeze mid-
-# session. `git add <specific-file>` is scoped to heartbeat.json only; if
-# the session races a push we just retry next tick.
-commit_heartbeat_if_due() {
+# Push heartbeat.json to the `heartbeat-data` side branch so the deployed
+# Command Center can fetch fresh data without polluting main's git log.
+# Uses git plumbing (hash-object / mktree / commit-tree / update-ref) so
+# the working tree on main stays untouched — no `git add`, no commit on
+# main, no race with concurrent sessions.
+#
+# Cadence: throttle to once per 10 min. No piggyback rule (the branch is
+# hidden, so there's no benefit to extra freshness on HEAD moves).
+#
+# History on the side branch keeps growing but is hidden from `git log main`
+# and from anyone who didn't ask for it. Storage is negligible (one small
+# JSON blob per commit, deduped by git's pack).
+#
+# Was #758: prior version (`commit_heartbeat_if_due`) committed to main
+# producing ~5 heartbeats per real commit in `git log`. See #758 + the
+# revert commit 5d734a69 for the history of the trade-off.
+commit_heartbeat_to_branch() {
     local hb="$WORK_DIR/command-center/heartbeat.json"
     [[ -f "$hb" ]] || return
 
@@ -576,7 +585,7 @@ commit_heartbeat_if_due() {
 
     local SD="$HOME/drift-state"
     local stamp_ts="$SD/last-heartbeat-commit"
-    local stamp_head="$SD/last-heartbeat-head"
+    local stamp_blob="$SD/last-heartbeat-blob"
 
     local now
     now=$(date +%s)
@@ -584,40 +593,45 @@ commit_heartbeat_if_due() {
     last_commit=$(cat "$stamp_ts" 2>/dev/null || echo "0")
     local elapsed=$(( now - last_commit ))
 
-    local cur_head last_head
-    cur_head=$(git rev-parse HEAD 2>/dev/null || echo "")
-    last_head=$(cat "$stamp_head" 2>/dev/null || echo "")
+    # Throttle: at most once per 10 min.
+    (( elapsed < 600 )) && return
 
-    local head_moved=0
-    [[ -n "$last_head" && -n "$cur_head" && "$last_head" != "$cur_head" ]] && head_moved=1
-
-    # Neither rule triggered — wait for the next tick.
-    if (( elapsed < 600 )) && (( head_moved == 0 )); then
-        [[ -n "$cur_head" ]] && echo "$cur_head" > "$stamp_head"
-        return
-    fi
-
-    # Nothing actually changed in the file — just refresh stamps so we
-    # don't keep retrying.
-    if git diff --quiet -- command-center/heartbeat.json 2>/dev/null; then
+    # Skip if the file content hasn't changed since last push.
+    local blob
+    blob=$(git hash-object -w "$hb" 2>/dev/null || echo "")
+    [[ -z "$blob" ]] && return
+    local last_blob
+    last_blob=$(cat "$stamp_blob" 2>/dev/null || echo "")
+    if [[ "$blob" == "$last_blob" ]]; then
         echo "$now" > "$stamp_ts"
-        [[ -n "$cur_head" ]] && echo "$cur_head" > "$stamp_head"
         return
     fi
 
-    git add command-center/heartbeat.json 2>/dev/null || return
-    if git commit -m "chore: heartbeat snapshot" >/dev/null 2>&1; then
-        if git push origin main >/dev/null 2>&1; then
-            local new_head
-            new_head=$(git rev-parse HEAD 2>/dev/null || echo "$cur_head")
-            echo "$now" > "$stamp_ts"
-            echo "$new_head" > "$stamp_head"
-            log "Heartbeat snapshot committed + pushed (elapsed=${elapsed}s, piggyback=${head_moved})"
-        else
-            # Push failed (e.g. behind remote) — undo the commit so we retry cleanly next tick.
-            git reset --soft HEAD~1 >/dev/null 2>&1 || true
-            git reset -- command-center/heartbeat.json >/dev/null 2>&1 || true
-        fi
+    # Build tree: command-center/heartbeat.json
+    local sub_tree
+    sub_tree=$(printf "100644 blob %s\theartbeat.json\n" "$blob" | git mktree 2>/dev/null) || return
+    local top_tree
+    top_tree=$(printf "040000 tree %s\tcommand-center\n" "$sub_tree" | git mktree 2>/dev/null) || return
+
+    # Parent: local ref if it exists, else remote, else orphan.
+    local parent_arg=""
+    local parent
+    parent=$(git rev-parse --verify --quiet refs/heads/heartbeat-data 2>/dev/null \
+          || git rev-parse --verify --quiet refs/remotes/origin/heartbeat-data 2>/dev/null \
+          || echo "")
+    [[ -n "$parent" ]] && parent_arg="-p $parent"
+
+    local commit
+    # shellcheck disable=SC2086  # parent_arg is intentionally unquoted
+    commit=$(git commit-tree "$top_tree" $parent_arg -m "chore: heartbeat snapshot" 2>/dev/null) || return
+    [[ -z "$commit" ]] && return
+
+    git update-ref refs/heads/heartbeat-data "$commit" 2>/dev/null || return
+
+    if git push origin "refs/heads/heartbeat-data:refs/heads/heartbeat-data" >/dev/null 2>&1; then
+        echo "$now" > "$stamp_ts"
+        echo "$blob" > "$stamp_blob"
+        log "Heartbeat snapshot pushed to heartbeat-data branch (elapsed=${elapsed}s)"
     fi
 }
 
@@ -1099,13 +1113,11 @@ while true; do
             check_stale_claim
             snapshot_wip_if_in_progress
             sweep_stale_in_progress_labels
-            # heartbeat.json must be committed so the deployed Command Center
-            # (GitHub Pages) can fetch it. #642 removed this call to stop log
-            # pollution but broke the deployed UI — Pages and raw.githubusercontent
-            # both 404'd, JSON.parse choked on the 404 body. Restored with the
-            # original hybrid cadence (commit when elapsed > 10 min OR HEAD moved
-            # for piggyback). Worst-case noise: ~6 standalone heartbeat commits/hr.
-            commit_heartbeat_if_due
+            # heartbeat.json is pushed to the `heartbeat-data` side branch
+            # (#758) so the deployed Command Center can fetch fresh data
+            # without polluting main's git log. The deployed UI fetches
+            # from `heartbeat-data/command-center/heartbeat.json`.
+            commit_heartbeat_to_branch
             # Check if autopilot is dead
             if ! is_claude_alive; then
                 stop_monitor

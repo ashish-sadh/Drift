@@ -1468,7 +1468,7 @@
           if (!resp.ok) throw new Error();
           data = await resp.json();
         } catch {
-          const resp = await fetch(`https://raw.githubusercontent.com/${OWNER}/${REPO}/main/command-center/heartbeat.json`, { cache: 'no-store' });
+          const resp = await fetch(`https://raw.githubusercontent.com/${OWNER}/${REPO}/heartbeat-data/command-center/heartbeat.json`, { cache: 'no-store' });
           data = await resp.json();
         }
       } catch (e) {

@@ -48,7 +48,8 @@ graphify-out/graph.html
 *.anthropic-key
 /tmp/drift-test-*
 
-# NOTE: command-center/heartbeat.json IS tracked. #642 ignored it to stop
-# git-log pollution but broke the deployed Command Center (Pages 404). Now
-# committed via commit_heartbeat_if_due() with hybrid cadence (≥10 min or
-# HEAD-moved piggyback) to keep noise low without breaking the UI.
+# command-center/heartbeat.json is NOT tracked on main (#758). The
+# watchdog pushes it to the `heartbeat-data` side branch via git plumbing,
+# so the deployed Command Center can fetch fresh data without polluting
+# main's git log. See scripts/self-improve-watchdog.sh:commit_heartbeat_to_branch.
+command-center/heartbeat.json
