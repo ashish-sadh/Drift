@@ -87,6 +87,24 @@ public enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: fmWorkoutExtractKey) }
     }
 
+    private static let fmCompositeFoodExtractKey = "drift_fm_composite_food_extract"
+
+    /// When enabled, composite-food queries ("coffee with milk", "biryani
+    /// with raita", "idli sambar") route through Apple Foundation Models
+    /// (`@Generable FMCompositeFoodSchema`) on iOS 26+/macOS 26+ before
+    /// falling back to the hardcoded-connector regex path. Per design-666
+    /// QW2 — replaces the static connector list `["served with",
+    /// "alongside", "plus", "with"]` with FM understanding of Indian
+    /// composites and regional connectors. Kill-switch: flip OFF to revert
+    /// to regex everywhere.
+    public static var fmCompositeFoodExtractEnabled: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: fmCompositeFoodExtractKey) == nil { return true }
+            return UserDefaults.standard.bool(forKey: fmCompositeFoodExtractKey)
+        }
+        set { UserDefaults.standard.set(newValue, forKey: fmCompositeFoodExtractKey) }
+    }
+
     // MARK: - Health Nudges
 
     private static let healthNudgesKey = "drift_health_nudges"
