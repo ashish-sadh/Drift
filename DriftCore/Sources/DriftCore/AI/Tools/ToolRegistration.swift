@@ -751,7 +751,7 @@ public enum ToolRegistration {
 
         r.register(ToolSchema(
             id: "health.log_medication", name: "log_medication", service: "medication",
-            description: "User LOGGED a medication. Use when they say 'took Ozempic', 'injected semaglutide', 'took my metformin', 'log GLP-1', 'took insulin'.",
+            description: "User LOGGED a medication dose. Use when they say 'took Ozempic', 'injected semaglutide', 'took my metformin', 'log GLP-1', 'took insulin'. NOT for adding a new medication to their profile (use add_medication for that).",
             parameters: [
                 ToolParam("name", "string", "Medication name (e.g. 'Ozempic', 'metformin', 'semaglutide')"),
                 ToolParam("dose", "number", "Dose amount (e.g. 0.5, 500, 2)", required: false),
@@ -763,6 +763,51 @@ public enum ToolRegistration {
                     name: name,
                     doseMg: params.double("dose"),
                     doseUnit: params.string("unit")
+                ))
+            }
+        ))
+
+        r.register(ToolSchema(
+            id: "health.add_medication", name: "add_medication", service: "medication",
+            description: "User wants to ADD a new medication to their profile. Use when they say 'I'm on Wegovy', 'I started Ozempic', 'add metformin 500mg daily', 'I was prescribed atorvastatin'. NOT for logging a dose (use log_medication for that).",
+            parameters: [
+                ToolParam("name", "string", "Generic medication name (e.g. 'semaglutide', 'metformin')"),
+                ToolParam("brand", "string", "Brand name if user mentioned one (e.g. 'Ozempic', 'Wegovy')", required: false),
+                ToolParam("dose", "number", "Prescribed dose amount (e.g. 0.5, 500)"),
+                ToolParam("unit", "string", "Dose unit: mg, mcg, mL, units, IU (default mg)", required: false),
+                ToolParam("schedule", "string", "Schedule: daily | weekly | biweekly | asneeded (default daily)", required: false),
+                ToolParam("reminder_time", "string", "HH:mm reminder time if user wants one", required: false),
+                ToolParam("reminder_day", "number", "0-6 Sun-Sat for weekly/biweekly schedules", required: false),
+                ToolParam("start_date", "string", "YYYY-MM-DD start date (for chart markers)", required: false)
+            ],
+            preHook: { params in
+                guard let name = params.string("name")?.trimmingCharacters(in: .whitespaces),
+                      !name.isEmpty else {
+                    return .invalid(reason: "What medication should I add?")
+                }
+                guard params.double("dose") != nil else {
+                    return .invalid(reason: "What dose are you on?")
+                }
+                return .transform(params)
+            },
+            handler: { params in
+                guard let name = params.string("name") else { return .error("Which medication?") }
+                guard let dose = params.double("dose"), dose > 0 else {
+                    return .error("What dose? e.g. '0.5mg' or '500mg'.")
+                }
+                let unit = params.string("unit") ?? "mg"
+                let schedule = (params.string("schedule") ?? "daily").lowercased()
+                let validSchedules: Set<String> = ["daily", "weekly", "biweekly", "asneeded"]
+                let resolvedSchedule = validSchedules.contains(schedule) ? schedule : "daily"
+                return .text(MedicationService.addMedicationProfile(
+                    name: name,
+                    brandName: params.string("brand"),
+                    doseAmount: dose,
+                    doseUnit: unit,
+                    scheduleType: resolvedSchedule,
+                    reminderTime: params.string("reminder_time"),
+                    reminderDay: params.int("reminder_day"),
+                    startDate: params.string("start_date")
                 ))
             }
         ))
