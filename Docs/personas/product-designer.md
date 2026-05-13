@@ -11,7 +11,10 @@
 - Indian food coverage matters — users log dal, paneer, biryani, not just Western foods. Indian branded protein foods (MuscleBlaze, RiteBite, sattu, makhana) are the target user base's daily search.
 - Users want to type naturally in chat and have AI handle everything — "log breakfast: 2 eggs, toast, coffee with milk".
 - Privacy is a real selling point — users explicitly appreciate no-cloud, no-account.
-- Settings → Feedback is structurally load-bearing. Five+ consecutive zero-feedback cycles = signal channel broken; deferral 3+ cycles = P0 blocker. Fast response to user-filed bugs creates more bug filing; slow response kills it. Shipping the channel is not activation — once the channel exists, activation is a separate problem (release-notes narrative, in-app prompts, direct DM asks). Plan both.
+- Settings → Feedback is structurally load-bearing. Five+ consecutive zero-feedback cycles = signal channel broken; deferral 3+ cycles = P0 blocker. Fast response to user-filed bugs creates more bug filing; slow response kills it. Shipping the channel is not activation — once the channel exists, activation is a separate problem (release-notes narrative, in-app prompts, direct DM asks). Plan both. **Always have ≥2 activation levers in flight; one decision-stroke (admin shutting down a lever) shouldn't drop us to zero.** Passive levers (dashboard banners) are half-levers — pair with active asks (human DM) for redundancy and signal velocity.
+- Engine-shipped ≠ user-shipped. Surface, dogfood, and release-note narrative all ship in the same sprint as the engine, or the engine is "shipped in code, not in product." Multi-cycle feature threads must file the dogfood task *with* the surface PR, not after.
+- TestFlight reach is part of the product. A failed archive within 24h is auto-P0 — the cycle 8799 17-build dark stretch started with one ignored interruption.
+- Invisible polish counts. Multi-intent splitting, median-time meal reminders, per-stage elapsed indicators — testers won't articulate they like them, but the friction reduction earns the "feels intelligent" verdict tenet #1 demands. Build these silently.
 - Five-bug batches from real-device dogfooding are the highest-quality signal we get. Protect the loop — respond same cycle.
 - TestFlight reach is part of the product. Features merged but invisible aren't shipped. Any infra blocker keeping the app off TestFlight >3 days is a P0 (the 17-build dark stretch was a credibility cliff).
 - Drift's chat telemetry is on-device only (privacy-first tenet, #111). No autopilot session can read user telemetry; no central pipeline aggregates it. Prompt-quality audits use `DriftLLMEvalMacOS` gold sets — deterministic, reproducible. User-reported regressions come in via bugs, not sweeps.
@@ -66,13 +69,13 @@
 
 ## What I Learned (recent, not yet sedimented)
 
+### Review Cycle 10262 (2026-05-13)
+- TestFlight reach is a *measurable* part of the product, not a tenet aspiration. Build 243's archive failure yesterday means the FM extraction breakthrough, GLP-1 data model, and activation banner are all invisible to testers — 24h of best-in-history velocity translates to zero user signal until the archive unblocks. Standing rule: any failed archive within the last 24h is a P0 senior task automatically (no manual triage gap). Filed as #770.
+- A passive activation lever (#759 dashboard banner) is half a lever — it ships the surface but defers the *act of asking*. Pair every passive lever with one active ask (human DM in parallel). Cycle 10262 finally shipped the banner after 3 cycles of recommendation; the test of whether the lever works is *traffic*, not *deploy*.
+- Apple Foundation Models is the right platform bet to lean into. 4 surfaces migrated in 24h with @Generable schemas, behind a feature flag with eval-gated cutover. Platform-leverage moves like this justify "AI-first, privacy-first" — Apple did the model work, we integrate. Lean in more.
+
 ### Review Cycle 9851 (2026-05-12)
 - Three consecutive reviews recommending the same activation lever (DM friends about Settings → Feedback) and no action means the loop is broken between *review-time decisions* and *between-review execution*. Reviews that produce repeat recommendations are reviews that aren't actually steering the product — they're documenting drift. New rule: a review recommendation that survives one cycle without action becomes a sprint-task, not a re-recommendation. The dashboard 7-day prompt (#759) is this cycle's enforcement.
-- Engine-shipped ≠ user-shipped is now a *third* time we've learned it (cycle 9760 backup engine, cycle 9792 still no surface, cycle 9851 surface shipped but no dogfood). Pattern: any multi-cycle feature thread must have the dogfood task filed *in the same sprint* as the surface PR, not after.
-
-### Review Cycle 9760 (2026-05-09)
-- Always have ≥2 activation levers in flight. Admin shut down the in-app "what's new" sheet (PR #654 comment) and instantly the only remaining lever became TestFlight release-notes copy. A single-lever activation strategy is one decision-stroke away from being zero-lever; the design needs redundancy.
-- Multi-intent splitting (#688) and median-time meal reminders (#690) are *invisible polish* — testers won't articulate they like them, but the friction reduction is qualitative and they earn the "feels intelligent" verdict that #111-tenet-1 demands. Build more of these silently — the user signal is "they didn't complain about the friction, then they didn't notice the absence either."
 
 ## Preferences & Approach
 - Prefer opinionated design over configurability — make good defaults, don't add settings.

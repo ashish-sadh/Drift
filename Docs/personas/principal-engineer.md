@@ -40,6 +40,8 @@
 
 ### Testing & Quality
 - Test infrastructure is 5-tier: Tier 0 DriftCore `swift test` (~0.1s warm, every save) → Tier 1 iOS DriftTests + ChatPathSmokeTests (~25s, every commit) → Tier 2 deterministic LLM eval → Tier 3 real-LLM `DriftLLMEvalMacOS` (~12 min, pre-TestFlight) → Tier 4 env-gated benchmarks. One tier per file.
+- `qa-tester` adversarial pass + `require-test-on-source-change` hooks (live since 2026-05-08) cost ~5-10 min per source commit; they end multi-commit iteration on shipped UI bugs. Risk to monitor: rubber-stamp verdicts. If that emerges, tighten the hook to require commit hashes for "BUG FIXED" or file:line for "WORKS AS UPDATED".
+- Platform-API integration template (FM cutover, future provider swaps): ship behind feature flag with flag-off path tested against existing baseline; the flag-on cutover blocks on an eval gate showing parity. Never flip a flag for a stochastic-output API change without the gate.
 - Coverage gate (80% pure logic, 50% services/viewmodels/database) caught the state machine refactor regressions cleanly. Boy scout rule + coverage gate is sufficient for ongoing maintenance — no dedicated coverage sprints needed.
 - The "stochastic LLM coverage ceiling" is a myth. IntentClassifier 63% → 99% via extracting `buildUserMessage` and `mapResponse` as pure functions — test deterministic wrappers, not stochastic calls. Apply to any future ML-adjacent code.
 - Eval coverage ships in the same commit as the feature, not as a follow-up task. "File eval cases later" is the root cause of eval coverage debt — it never gets claimed because the feature is "done."
@@ -64,6 +66,7 @@
 - Five consecutive analytical-tool implementation crashes (#417, #418): WIP patches at `~/drift-state/wip/{id}.patch`. Reading the WIP diff before retry (~15 min) prevents N+1 crashes — blind retry is guaranteed to fail at the same point.
 
 ### Process & Discipline
+- Engine-without-surface is half-shipped. iCloud backup (6 issues across 2 cycles) was the canonical case: rigorous architecture, no user-facing entry, no field validation. Always pair the engine PR with the surface task in the *same* sprint, or flag the engine as not-yet-shipped.
 - When a fix ships, file a verification task within 1-2 cycles to confirm the fix actually fixed the problem. Documented fixes that didn't land are worse than open issues because they look closed. (NSNull/non-primitive filter #687 follow-up to allowlist hardening #700 was exactly this pattern.)
 - 500-cycle re-validation rule: any task created >500 cycles ago requires re-validation (root cause may have been partially addressed; referenced code may be renamed). Aggressive pruning is healthier than deferral — 32 stale closures in one cycle (113→81 queue) was net positive.
 - Queue cap 70; senior queue ≤15 = healthy drain. Senior task additions ≤2 per planning cycle when SENIOR queue >15. More tickets ≠ more throughput; senior drain rate is the only lever.
@@ -75,16 +78,14 @@
 
 ## What I Learned (recent, not yet sedimented)
 
+### Review Cycle 10262 (2026-05-13)
+- Apple Foundation Models with `@Generable` is now a production architecture pattern in Drift. 4 surfaces migrated in 24h (CompositeFood split, Workout unified, Nutrition label OCR, Lab report hybrid) all behind a feature flag, flag-off path verified against regex baseline (47 Tier-0 tests). Cutover discipline (#771): Tier 3 `DriftLLMEvalMacOS` eval gate must show ≥95% parity with regex baseline + ≥98% on critical cases before flipping. **The flag-off + eval-gated cutover is the new template for any platform-API integration that affects extraction or classification.** Replicate before the next API rolls.
+- A "known-failing test" claim carried 7 review cycles when the underlying fix had shipped 10 days prior (#568 → #757 closure). The failure was state-tracking, not code. Standing rule: review template's known-failing scorecard line requires re-running the test in the planning cycle before carrying it forward (#780).
+- Heartbeat noise was a destination problem, not a frequency problem. #642 batched the commits but they were still going to `main`. Three reviews of "still flagged" because the fix addressed the wrong layer. Lesson: when a recurring complaint outlives its "fix" across 3+ reviews, the diagnosis is wrong — re-investigate the layer, don't re-verify the patch. Fixed via #758 routing to a side branch.
+
 ### Review Cycle 9851 (2026-05-12)
 - `Source: review-cycle-N` lines in sprint-task bodies are *necessary but not sufficient* for closing the loop between review and execution. A task can be filed correctly and still slip a cycle. Better gate: in addition to the `Source:` line, the task's acceptance criteria must include an *outcome metric* the next review can read in 60 seconds. #568's "fix or XCTSkipIf" is a good shape; #708's "wipe-and-restore on real device" is a good shape. "Diagnose root cause of X" should produce a documented root-cause string, not just "investigated."
 - LLM prompt audit tasks need a *cross-stage* eval gate, not just the changed gold-set. #735 (cycle 9794 prompt refresh) shipped without verifying IntentClassifier + DomainExtractor downstream. Standing rule (filed as #766): post-refresh eval = changed gold-set + IntentClassifierGoldSet + DomainExtractorGoldSet. Without this gate, prompt changes can regress one stage to fix another silently.
-
-### Review Cycle 9760 (2026-05-09)
-- Engine-without-surface ≠ shipped. iCloud backup ran 6 issues across 2 cycles with rigorous architecture (atomic restore, ring buffer, integrity validation, allowlist+NSNull hardening), but with no user-facing Settings row + restore flow we have no field validation that wipe-and-restore actually works. Always pair the engine PR with the surface task in the *same* sprint, or flag the engine as not-yet-shipped.
-- `qa-tester` adversarial pass + `require-test-on-source-change` hooks went live (`d427f870`, `ba46cfa9`). They cost ~5-10 minutes per source commit; the value is ending multi-commit iteration on shipped UI bugs (calorie overlay #669 was the trigger). Risk to monitor: rubber-stamp verdicts that satisfy the hook without tracing the code path. If that emerges, tighten the hook to require commit hashes for "BUG FIXED" or file:line for "WORKS AS UPDATED".
-
-### Planning Cycle 8945 (2026-05-04)
-- Planning checkpoints (`planning-service.sh checkpoint`) silently no-op when the planning issue body has no checklist format. Future planning issues should be created with the step checklist pre-populated.
 
 ## Preferences & Approach
 - Prefer boring, proven solutions over clever abstractions.

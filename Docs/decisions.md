@@ -30,6 +30,19 @@ Append-only record of non-obvious decisions: architecture changes, harness rules
 
 ---
 
+## 2026-05-13
+
+### fm-extractor-flag-off-then-tier3-eval — Foundation Models cutover requires eval gate, not direct flip
+The four FM extraction migrations this cycle (#744 CompositeFoodEntry, #745 WorkoutEntry, #748 nutrition label OCR, #749 lab report hybrid) all ship with a feature flag — flag-off path verified by 47 Tier-0 fixture tests against the regex baseline, flag-on path (actual `FoundationModels` calls via `@Generable`) deliberately unverified. Standing rule for any platform-API integration: the flag-off path is the safe ship, the flag-on cutover blocks on a Tier-3 `DriftLLMEvalMacOS` gate that proves ≥95% parity with the regex baseline on the same fixture rows + ≥98% on cases tagged 'critical' (Indian dishes, multi-piece, compound names). This mirrors the cycle 8666 "eval before LLM swap" principle: a regression in extraction would manifest weeks later via friend reports, with no telemetry to catch it. Filed as #771; landing it before flipping the flag is non-negotiable. Commits `b4831b09`, `a65f474b`, `9c6922aa`, `ecd7e103`.
+
+### known-failing-test-must-be-reverified-each-planning — never carry forward a 'still open' claim without re-running
+#568 (testPortionScaling_DecimalServings) was carried through 7 consecutive reviews as 'still open' when the underlying fix had actually shipped 2026-05-03 via `9a5b06ea` (#571 cup-to-gram gold-set update). The flag came from stale GitHub state, not stale code. Standing rule: the review template's known-failing-test scorecard line must include a re-verification step — for each test referenced as 'open' or 'still failing' in any prior review's Technical Debt, re-run it locally in the planning cycle; if it passes, close the issue and remove from carry-forward. Without this, review recommendations become noise that suppresses other work. Filed as #780 (template update). Commit `272d8293` (close + reset).
+
+### heartbeat-side-branch-not-throttle — operational state belongs off `main`, not slow-on-main
+Heartbeat noise persisted across cycles 9688/9760/9792/9851 *after* #642 batching shipped — three reviews of "still flagged." Root cause (#758): the batching reduced commit frequency but didn't change the destination. Snapshots were still landing on `main` at ~30 per real ship commit. New invariant: operational state never goes on `main`. The fix routes heartbeat snapshots to a dedicated side branch (commit `272d8293`). General lesson: when the same complaint appears in 3+ reviews after a "fix" was applied, assume the fix addressed the wrong layer — re-diagnose, don't re-verify.
+
+---
+
 ## 2026-05-10
 
 ### food-db-curated-not-exhaustive — ≤6,000 entry ceiling, batch imports rejected
