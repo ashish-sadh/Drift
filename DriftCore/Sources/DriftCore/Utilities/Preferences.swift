@@ -71,6 +71,22 @@ public enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: fmNutritionExtractKey) }
     }
 
+    private static let fmWorkoutExtractKey = "drift_fm_workout_extract"
+
+    /// When enabled, free-text workout descriptions route through Apple
+    /// Foundation Models (`@Generable FMWorkoutSchema`) on iOS 26+/macOS 26+
+    /// before falling back to the regex path. Per design-666 QW3 — unifies
+    /// "3x10 bench at 135", "3 sets of 10", "RPE 8", "30 min yoga", "for
+    /// half an hour" into one typed call. Kill-switch: flip OFF to revert
+    /// to regex everywhere.
+    public static var fmWorkoutExtractEnabled: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: fmWorkoutExtractKey) == nil { return true }
+            return UserDefaults.standard.bool(forKey: fmWorkoutExtractKey)
+        }
+        set { UserDefaults.standard.set(newValue, forKey: fmWorkoutExtractKey) }
+    }
+
     // MARK: - Health Nudges
 
     private static let healthNudgesKey = "drift_health_nudges"

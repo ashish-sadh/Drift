@@ -96,20 +96,66 @@ public enum AIActionParser {
     }
 
     /// Parse "Push Ups 3x15, Bench Press 3x10@135" into WorkoutExercise array.
+    /// Regex-only synchronous path — callers that want the FM-first path call
+    /// `parseWorkoutExercisesAsync` instead. Kept as a stable entry point for
+    /// the synchronous callers in `actionFromToolCall`.
     public static func parseWorkoutExercises(_ input: String) -> [WorkoutExercise] {
-        input.split(separator: ",").compactMap { part in
+        input.split(separator: ",").compactMap { Self.parseSingleExerciseRegex($0) }
+    }
+
+    /// FM-first variant: when `Preferences.fmWorkoutExtractEnabled` and the
+    /// platform supports FoundationModels (iOS 26+), each comma-split segment
+    /// goes through `WorkoutEntryExtractor`; on any failure the segment falls
+    /// back to the regex path. Returns the same `WorkoutExercise` shape so
+    /// existing callers don't need to know which path ran.
+    public static func parseWorkoutExercisesAsync(_ input: String) async -> [WorkoutExercise] {
+        guard Preferences.fmWorkoutExtractEnabled else { return parseWorkoutExercises(input) }
+        var results: [WorkoutExercise] = []
+        for part in input.split(separator: ",") {
             let trimmed = part.trimmingCharacters(in: .whitespaces)
-            let pattern = #"(.+?)\s+(\d+)x(\d+)(?:@(\d+\.?\d*))?"#
-            guard let regex = try? NSRegularExpression(pattern: pattern),
-                  let match = regex.firstMatch(in: trimmed, range: NSRange(trimmed.startIndex..., in: trimmed)) else {
-                return trimmed.isEmpty ? nil : WorkoutExercise(name: trimmed, sets: 3, reps: 10, weight: nil)
+            guard !trimmed.isEmpty else { continue }
+            if let fm = await fmExtractOrNil(trimmed) {
+                results.append(fm)
+            } else if let regex = Self.parseSingleExerciseRegex(trimmed[...]) {
+                results.append(regex)
             }
-            let name = Range(match.range(at: 1), in: trimmed).map { String(trimmed[$0]).trimmingCharacters(in: .whitespaces) } ?? trimmed
-            let sets = Range(match.range(at: 2), in: trimmed).flatMap { Int(trimmed[$0]) } ?? 3
-            let reps = Range(match.range(at: 3), in: trimmed).flatMap { Int(trimmed[$0]) } ?? 10
-            let weight = Range(match.range(at: 4), in: trimmed).flatMap { Double(trimmed[$0]) }
-            return WorkoutExercise(name: name, sets: sets, reps: reps, weight: weight)
         }
+        return results
+    }
+
+    /// Map a single `FMWorkoutEntry` (strength-shaped) to the existing
+    /// `WorkoutExercise`; returns nil for non-strength categories so the
+    /// caller doesn't synthesize empty sets/reps for cardio.
+    private static func fmExtractOrNil(_ text: String) async -> WorkoutExercise? {
+        do {
+            let entry = try await WorkoutEntryExtractor.extract(text: text)
+            guard entry.category == .strength else { return nil }
+            return WorkoutExercise(
+                name: entry.exerciseName,
+                sets: entry.sets ?? 3,
+                reps: entry.reps ?? 10,
+                weight: entry.weight
+            )
+        } catch {
+            return nil
+        }
+    }
+
+    /// Synchronous regex parser for one segment — shared between the sync and
+    /// async entry points so they always agree on the fallback behavior.
+    private static func parseSingleExerciseRegex(_ part: Substring) -> WorkoutExercise? {
+        let trimmed = part.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return nil }
+        let pattern = #"(.+?)\s+(\d+)x(\d+)(?:@(\d+\.?\d*))?"#
+        guard let regex = try? NSRegularExpression(pattern: pattern),
+              let match = regex.firstMatch(in: trimmed, range: NSRange(trimmed.startIndex..., in: trimmed)) else {
+            return WorkoutExercise(name: trimmed, sets: 3, reps: 10, weight: nil)
+        }
+        let name = Range(match.range(at: 1), in: trimmed).map { String(trimmed[$0]).trimmingCharacters(in: .whitespaces) } ?? trimmed
+        let sets = Range(match.range(at: 2), in: trimmed).flatMap { Int(trimmed[$0]) } ?? 3
+        let reps = Range(match.range(at: 3), in: trimmed).flatMap { Int(trimmed[$0]) } ?? 10
+        let weight = Range(match.range(at: 4), in: trimmed).flatMap { Double(trimmed[$0]) }
+        return WorkoutExercise(name: name, sets: sets, reps: reps, weight: weight)
     }
 
     private static func actionFromToolCall(_ call: ToolCall) -> Action {
