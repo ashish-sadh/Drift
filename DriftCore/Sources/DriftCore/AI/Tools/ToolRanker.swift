@@ -438,7 +438,33 @@ public enum ToolRanker {
                        ("took my wegovy", 6.5), ("took my tirzepatide", 6.5)],
             logBoost: 2, queryBoost: -1,
             screens: [:],
-            antiKeywords: ["food", "weight", "supplement", "workout", "what", "how", "when", "last", "history", "how often", "pattern", "did", "time"]
+            // Single-word antis (the scoring loop is word-membership only — multi-word
+            // antis are dead, so we keep these tokens that actually fire). "add"/"i'm"
+            // push "add metformin" / "i'm on ozempic" to add_medication; "started"/
+            // "prescribed" do the same for prescription-onboarding phrasing.
+            antiKeywords: ["food", "weight", "supplement", "workout", "what", "how", "when", "last", "history", "pattern", "did", "time",
+                           "started", "starting", "prescribed", "add", "i'm"]
+        )
+
+        p["add_medication"] = ToolProfile(
+            triggers: [("add medication", 6), ("add a medication", 6), ("add to my meds", 5.5),
+                       ("started ozempic", 6), ("started wegovy", 6), ("started mounjaro", 6),
+                       ("started semaglutide", 6), ("started metformin", 5.5), ("started tirzepatide", 6),
+                       ("starting ozempic", 5.5), ("starting wegovy", 5.5),
+                       ("i'm on ozempic", 6), ("i'm on wegovy", 6), ("i'm on mounjaro", 6),
+                       ("i'm on metformin", 5.5), ("i'm on glp", 5.5), ("im on ozempic", 6),
+                       // "i am on X" variants — common LLM-normalized expansion of "i'm on"
+                       ("i am on ozempic", 6), ("i am on wegovy", 6), ("i am on mounjaro", 6),
+                       ("i am on metformin", 5.5), ("i am on glp", 5.5),
+                       ("prescribed", 4.5), ("was prescribed", 5.5), ("got prescribed", 5.5),
+                       ("new prescription", 5), ("new medication", 5), ("add ozempic", 5),
+                       ("add wegovy", 5), ("add metformin", 5), ("add mounjaro", 5),
+                       ("add tirzepatide", 5), ("add semaglutide", 5), ("add insulin", 5)],
+            logBoost: 0, queryBoost: -2,
+            screens: [:],
+            // "took"/"injected"/"logged" → log_medication (a single dose), not add.
+            // Single-word only — see note on log_medication antis above.
+            antiKeywords: ["took", "injected", "logged"]
         )
 
         p["medication_info"] = ToolProfile(
