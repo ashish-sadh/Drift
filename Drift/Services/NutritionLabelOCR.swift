@@ -17,6 +17,11 @@ enum NutritionLabelOCR {
     }
 
     /// Run OCR on an image and extract nutrition facts.
+    /// Per design-665: on iOS 26+ with `Preferences.fmNutritionExtractEnabled` (default ON),
+    /// route the OCR text through Apple FoundationModels first. Regex remains
+    /// the fallback for iOS<26 / FM unavailable / FM bounds violation /
+    /// FM session failure / flag disabled — guarantees no regression for
+    /// users who hit a regression edge case.
     static func extract(from image: UIImage) async throws -> ExtractedNutrition {
         guard let cgImage = image.cgImage else {
             throw OCRError.invalidImage
@@ -25,7 +30,38 @@ enum NutritionLabelOCR {
         let recognizedText = try await recognizeText(in: cgImage)
         Log.foodLog.info("OCR recognized \(recognizedText.count) lines")
 
+        if Preferences.fmNutritionExtractEnabled,
+           let fmResult = await extractViaFMIfAvailable(lines: recognizedText) {
+            return fmResult
+        }
         return parseNutritionFromText(recognizedText)
+    }
+
+    /// Returns the FM-extracted nutrition (mapped to ExtractedNutrition) on
+    /// success, nil on any failure path so the caller falls through to regex.
+    private static func extractViaFMIfAvailable(lines: [String]) async -> ExtractedNutrition? {
+        let text = lines.joined(separator: "\n")
+        do {
+            let fm = try await NutritionExtractor.extract(text: text)
+            Log.foodLog.info("FM nutrition: \(fm.calories)cal \(Int(fm.proteinG))P \(Int(fm.carbsG))C \(Int(fm.fatG))F \(Int(fm.fiberG))fiber")
+            return ExtractedNutrition(
+                name: fm.name,
+                calories: Double(fm.calories),
+                proteinG: fm.proteinG,
+                carbsG: fm.carbsG,
+                fatG: fm.fatG,
+                fiberG: fm.fiberG,
+                servingSize: fm.servingSize
+            )
+        } catch FMNutritionExtractorError.unavailable {
+            return nil   // iOS<26 / macOS<26 — fall through silently
+        } catch FMNutritionExtractorError.bounded(let field, let value) {
+            Log.foodLog.info("FM nutrition rejected — \(field)=\(value) out of bounds; falling back to regex")
+            return nil
+        } catch {
+            Log.foodLog.info("FM nutrition failed: \(String(describing: error)); falling back to regex")
+            return nil
+        }
     }
 
     private static func recognizeText(in image: CGImage) async throws -> [String] {

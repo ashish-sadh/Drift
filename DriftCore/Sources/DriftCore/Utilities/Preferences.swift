@@ -52,6 +52,25 @@ public enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: onlineFoodSearchKey) }
     }
 
+    // MARK: - Apple Foundation Models extraction (design-665)
+
+    private static let fmNutritionExtractKey = "drift_fm_nutrition_extract"
+
+    /// When enabled, nutrition label OCR runs through Apple Foundation Models
+    /// (`@Generable FMNutritionFacts`) on iOS 26+/macOS 26+ before falling
+    /// back to regex. Per design-665 eval: 100% exact-match on US/Indian/
+    /// Spanish fixtures, p50 ≈1.9s, fixes non-English regex zero-out bug.
+    /// Default: ON. Off-platform / FM-unavailable / flag-off paths all fall
+    /// through to the existing regex parser, so this flag is a kill-switch
+    /// for users who hit a regression.
+    public static var fmNutritionExtractEnabled: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: fmNutritionExtractKey) == nil { return true }
+            return UserDefaults.standard.bool(forKey: fmNutritionExtractKey)
+        }
+        set { UserDefaults.standard.set(newValue, forKey: fmNutritionExtractKey) }
+    }
+
     // MARK: - Health Nudges
 
     private static let healthNudgesKey = "drift_health_nudges"
