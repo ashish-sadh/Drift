@@ -227,4 +227,52 @@ public enum Preferences {
     public static var weightChartCaloriesUserSet: Bool {
         UserDefaults.standard.object(forKey: weightChartCaloriesKey) != nil
     }
+
+    // MARK: - Install Date + Feedback Prompt (#759)
+
+    private static let installDateKey = "drift_install_date"
+    private static let feedbackPromptSeenKey = "drift_feedback_prompt_seen"
+
+    /// Epoch seconds when Drift was first launched on this device. Nil until
+    /// `seedInstallDateIfNeeded()` runs (called from app launch). Used to gate
+    /// the 7-day Feedback activation banner on the dashboard.
+    public static var installDate: Date? {
+        get {
+            let v = UserDefaults.standard.double(forKey: installDateKey)
+            return v > 0 ? Date(timeIntervalSince1970: v) : nil
+        }
+        set {
+            if let v = newValue {
+                UserDefaults.standard.set(v.timeIntervalSince1970, forKey: installDateKey)
+            } else {
+                UserDefaults.standard.removeObject(forKey: installDateKey)
+            }
+        }
+    }
+
+    /// Seed `installDate` to `now` if unset. No-op if a value already exists.
+    /// Called once from DriftApp launch so the install timestamp survives
+    /// across app updates.
+    public static func seedInstallDateIfNeeded(now: Date = Date()) {
+        if UserDefaults.standard.double(forKey: installDateKey) <= 0 {
+            UserDefaults.standard.set(now.timeIntervalSince1970, forKey: installDateKey)
+        }
+    }
+
+    /// True once the user has tapped (or dismissed) the dashboard Feedback
+    /// banner. Banner predicate uses this to suppress redisplay forever.
+    public static var hasSeenFeedbackPrompt: Bool {
+        get { UserDefaults.standard.bool(forKey: feedbackPromptSeenKey) }
+        set { UserDefaults.standard.set(newValue, forKey: feedbackPromptSeenKey) }
+    }
+
+    /// Pure predicate: show the dashboard Feedback banner when the user is in
+    /// days 7..<14 since install AND hasn't acknowledged it yet. Returns
+    /// false when `installDate` is nil, the user has seen it, the window
+    /// hasn't opened (< 7 days), or auto-dismiss is past (≥ 14 days). #759.
+    public static func shouldShowFeedbackPrompt(now: Date, installDate: Date?, hasSeen: Bool) -> Bool {
+        guard let installDate, !hasSeen else { return false }
+        let days = now.timeIntervalSince(installDate) / 86400
+        return days >= 7 && days < 14
+    }
 }

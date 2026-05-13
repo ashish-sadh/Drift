@@ -11,9 +11,26 @@ struct DashboardView: View {
     @State private var showingWeightEntry = false
     @State private var staleBackupDays: Int?
     @State private var showingBackupSettings = false
+    @State private var showFeedbackPrompt = false
+    @Environment(\.scenePhase) private var scenePhase
 
     private var isWorkoutConsistencyDismissed: Bool {
         Date().timeIntervalSince1970 < workoutConsistencyDismissedUntil
+    }
+
+    /// Recomputes the 7-day Feedback banner visibility from Preferences. Called
+    /// on appear, on scene → active (day-boundary crossings during foreground),
+    /// and from the 180s `.task` poll (auto-dismiss after day 14 without
+    /// requiring the user to leave + revisit the tab). #759.
+    private func refreshFeedbackPrompt() {
+        let next = Preferences.shouldShowFeedbackPrompt(
+            now: Date(),
+            installDate: Preferences.installDate,
+            hasSeen: Preferences.hasSeenFeedbackPrompt
+        )
+        if next != showFeedbackPrompt {
+            withAnimation { showFeedbackPrompt = next }
+        }
     }
 
     var body: some View {
@@ -38,6 +55,51 @@ struct DashboardView: View {
                             .padding(10)
                             .background(Theme.accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
                         }.tint(.primary)
+                    }
+
+                    // 7-day Feedback activation banner (#759) — surfaces once
+                    // per install between days 7..<14. Main row routes to More
+                    // tab (where Report a Bug sits at top); the trailing xmark
+                    // dismisses in place. Two side-by-side Buttons so the
+                    // xmark hit-target can't bleed into the engage action.
+                    if showFeedbackPrompt {
+                        HStack(spacing: 4) {
+                            Button {
+                                Preferences.hasSeenFeedbackPrompt = true
+                                showFeedbackPrompt = false
+                                selectedTab = 4
+                            } label: {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "hand.wave.fill")
+                                        .font(.subheadline).foregroundStyle(Theme.accent)
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("How's it going?")
+                                            .font(.caption.weight(.medium))
+                                        Text("Tap to send a quick note")
+                                            .font(.caption2).foregroundStyle(.secondary)
+                                    }
+                                    Spacer(minLength: 0)
+                                }
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("How's it going? Tap to send a quick note")
+
+                            Button {
+                                Preferences.hasSeenFeedbackPrompt = true
+                                withAnimation { showFeedbackPrompt = false }
+                            } label: {
+                                Image(systemName: "xmark")
+                                    .font(.caption2)
+                                    .foregroundStyle(.tertiary)
+                                    .padding(8)
+                                    .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel("Dismiss feedback prompt")
+                        }
+                        .padding(10)
+                        .background(Theme.accent.opacity(0.08), in: RoundedRectangle(cornerRadius: 10))
                     }
 
                     // Stale-backup banner (#561) — appears when last successful
@@ -249,6 +311,10 @@ struct DashboardView: View {
             .onAppear {
                 AIScreenTracker.shared.currentScreen = .dashboard
                 Task { await viewModel.loadToday() }
+                refreshFeedbackPrompt()
+            }
+            .onChange(of: scenePhase) { _, phase in
+                if phase == .active { refreshFeedbackPrompt() }
             }
             .task {
                 await viewModel.loadToday()
@@ -256,6 +322,7 @@ struct DashboardView: View {
                 while !Task.isCancelled {
                     try? await Task.sleep(for: .seconds(180))
                     await viewModel.loadToday()
+                    refreshFeedbackPrompt()
                 }
             }
             .refreshable { await viewModel.loadToday() }
