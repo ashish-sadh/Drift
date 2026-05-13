@@ -1,0 +1,17 @@
+{
+  "format": "labcorp",
+  "labName": "LabCorp",
+  "reportDate": "2025-08-10",
+  "biomarkers": [
+    { "id": "glucose", "value": 92, "unit": "mg/dL", "refLow": 65, "refHigh": 99 },
+    { "id": "hba1c", "value": 5.2, "unit": "%", "refLow": 4.8, "refHigh": 5.6 },
+    { "id": "totalCholesterol", "value": 178, "unit": "mg/dL", "refLow": 100, "refHigh": 199 },
+    { "id": "ldl", "value": 96, "unit": "mg/dL", "refLow": 0, "refHigh": 99 },
+    { "id": "hdl", "value": 62, "unit": "mg/dL", "refLow": 39, "refHigh": null },
+    { "id": "triglycerides", "value": 102, "unit": "mg/dL", "refLow": 0, "refHigh": 149 },
+    { "id": "vitaminD", "value": 34, "unit": "ng/mL", "refLow": 30, "refHigh": 100 },
+    { "id": "ferritin", "value": 110, "unit": "ng/mL", "refLow": 30, "refHigh": 400 },
+    { "id": "tsh", "value": 2.05, "unit": "uIU/mL", "refLow": 0.45, "refHigh": 4.5 },
+    { "id": "vitaminB12", "value": 480, "unit": "pg/mL", "refLow": 232, "refHigh": 1245 }
+  ]
+}

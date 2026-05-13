@@ -1,0 +1,6 @@
+BodySpec
+Whole Body Composition
+
+SUMMARY RESULTS
+Measured Date  Total Mass (lbs)  Total Body Fat %  Fat Tissue (lbs)  Lean Tissue (lbs)  Bone Mineral Content (lbs)
+6/30/2025  142.0  16.2%  23.0  114.5  4.5

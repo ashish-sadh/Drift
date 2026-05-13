@@ -81,15 +81,64 @@ enum LabReportOCR {
     }
 
     /// Route to the appropriate LLM strategy based on the loaded model.
-    /// Gemma 4 (large): LLM-first — LLM extracts all biomarkers, regex fills gaps + validates.
-    /// SmolLM (small): regex-first — AI only supplements when regex found fewer than 10 results.
+    /// Step 1 (design-665 / #749): Apple Foundation Models gap-filler — on iOS 26+
+    /// run FM whenever regex returned <5 biomarkers OR is missing any high-priority
+    /// biomarker (HbA1c, LDL, ferritin, vitaminD, TSH). Confidence ≥0.7 gate.
+    /// FM is on-device, zero-cost, and runs without the loaded Gemma model.
+    /// Step 2: Gemma 4 (large) — LLM-first if loaded.
+    /// Step 3: SmolLM (small) — regex-first supplement when <10 results.
     private static func buildFinalOutput(regexResult: ExtractionOutput, rawText: String) async -> ExtractionOutput {
-        guard Preferences.aiEnabled, await LocalAIService.shared.isModelLoaded else { return regexResult }
+        let afterFM = await applyFMGapFillerIfNeeded(regexResult: regexResult, rawText: rawText)
+        guard Preferences.aiEnabled, await LocalAIService.shared.isModelLoaded else { return afterFM }
         if await LocalAIService.shared.isLargeModel {
-            return await extractLLMFirst(regexResult: regexResult, rawText: rawText)
+            return await extractLLMFirst(regexResult: afterFM, rawText: rawText)
         }
-        guard regexResult.results.count < 10 else { return regexResult }
-        return await enhanceWithAI(regexResult: regexResult, rawText: rawText)
+        guard afterFM.results.count < 10 else { return afterFM }
+        return await enhanceWithAI(regexResult: afterFM, rawText: rawText)
+    }
+
+    // MARK: - Apple FM Gap-Filler (design-665 hybrid path)
+
+    /// Gap-filler stage that runs the Apple Foundation Models extractor when
+    /// the regex result is short or missing a high-priority biomarker. FM
+    /// extractions are merged into the regex result only when their
+    /// confidence meets `LabReportExtractor.confidenceThreshold`, and regex
+    /// always wins on overlap (FM is a refinement layer, not a replacement).
+    private static func applyFMGapFillerIfNeeded(regexResult: ExtractionOutput, rawText: String) async -> ExtractionOutput {
+        let regexIDs = regexResult.results.map { $0.biomarkerId }
+        guard LabExtractionPriority.shouldFallBackToFM(regexBiomarkerIDs: regexIDs) else { return regexResult }
+
+        let fmResults: [FMLabBiomarker]
+        do {
+            fmResults = try await LabReportExtractor.extract(text: rawText)
+        } catch FMLabExtractorError.unavailable {
+            return regexResult  // iOS<26 / macOS<26 — FM not present
+        } catch {
+            Log.biomarkers.info("FM extractor failed, keeping regex result: \(String(describing: error))")
+            return regexResult
+        }
+
+        let gated = LabReportExtractor.filterByConfidence(fmResults)
+        let existing = Set(regexResult.results.map { $0.biomarkerId.lowercased() })
+        var merged = regexResult.results
+        for fm in gated where !existing.contains(fm.id.lowercased()) {
+            merged.append(ExtractedResult(
+                biomarkerId: fm.id,
+                value: fm.value,
+                unit: fm.unit,
+                referenceLow: fm.referenceLow,
+                referenceHigh: fm.referenceHigh,
+                isAIParsed: true,
+                confidence: fm.confidence
+            ))
+        }
+        Log.biomarkers.info("FM gap-filler: regex=\(regexResult.results.count) + fm-gated=\(gated.count) → \(merged.count)")
+        return ExtractionOutput(
+            results: merged,
+            labName: regexResult.labName,
+            reportDate: regexResult.reportDate,
+            isLLMParsed: regexResult.isLLMParsed || !gated.isEmpty
+        )
     }
 
     // MARK: - Gemma LLM-First Pipeline

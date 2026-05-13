@@ -1,0 +1,18 @@
+{
+  "format": "quest",
+  "labName": "Quest Diagnostics",
+  "reportDate": "2025-09-01",
+  "biomarkers": [
+    { "id": "totalCholesterol", "value": 192, "unit": "mg/dL", "refLow": null, "refHigh": 200 },
+    { "id": "hdl", "value": 55, "unit": "mg/dL", "refLow": 40, "refHigh": null },
+    { "id": "triglycerides", "value": 134, "unit": "mg/dL", "refLow": null, "refHigh": 150 },
+    { "id": "ldl", "value": 110, "unit": "mg/dL", "refLow": null, "refHigh": 100 },
+    { "id": "glucose", "value": 105, "unit": "mg/dL", "refLow": 65, "refHigh": 99 },
+    { "id": "bun", "value": 14, "unit": "mg/dL", "refLow": 7, "refHigh": 25 },
+    { "id": "creatinine", "value": 0.92, "unit": "mg/dL", "refLow": 0.6, "refHigh": 1.35 },
+    { "id": "tsh", "value": 1.85, "unit": "mIU/L", "refLow": 0.4, "refHigh": 4.5 },
+    { "id": "freeT4", "value": 1.10, "unit": "ng/dL", "refLow": 0.82, "refHigh": 1.77 },
+    { "id": "hemoglobin", "value": 14.2, "unit": "g/dL", "refLow": 13.5, "refHigh": 17.5 },
+    { "id": "ferritin", "value": 65, "unit": "ng/mL", "refLow": 20, "refHigh": 380 }
+  ]
+}

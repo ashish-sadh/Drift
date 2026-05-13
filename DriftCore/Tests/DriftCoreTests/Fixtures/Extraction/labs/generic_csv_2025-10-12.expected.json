@@ -1,0 +1,22 @@
+{
+  "format": "generic_csv",
+  "labName": null,
+  "reportDate": "2025-10-12",
+  "biomarkers": [
+    { "id": "glucose", "value": 89, "unit": "mg/dL", "refLow": 70, "refHigh": 99 },
+    { "id": "hba1c", "value": 5.4, "unit": "%", "refLow": null, "refHigh": 5.7 },
+    { "id": "totalCholesterol", "value": 210, "unit": "mg/dL", "refLow": null, "refHigh": 200 },
+    { "id": "hdl", "value": 48, "unit": "mg/dL", "refLow": 40, "refHigh": null },
+    { "id": "ldl", "value": 135, "unit": "mg/dL", "refLow": null, "refHigh": 100 },
+    { "id": "triglycerides", "value": 142, "unit": "mg/dL", "refLow": null, "refHigh": 150 },
+    { "id": "alt", "value": 22, "unit": "U/L", "refLow": 7, "refHigh": 35 },
+    { "id": "ast", "value": 18, "unit": "U/L", "refLow": 8, "refHigh": 33 },
+    { "id": "vitaminD", "value": 28, "unit": "ng/mL", "refLow": 30, "refHigh": 100 },
+    { "id": "vitaminB12", "value": 612, "unit": "pg/mL", "refLow": 180, "refHigh": 914 },
+    { "id": "iron", "value": 98, "unit": "ug/dL", "refLow": 50, "refHigh": 170 },
+    { "id": "ferritin", "value": 55, "unit": "ng/mL", "refLow": 15, "refHigh": 150 },
+    { "id": "tsh", "value": 2.4, "unit": "mIU/L", "refLow": 0.45, "refHigh": 4.5 },
+    { "id": "sodium", "value": 140, "unit": "mmol/L", "refLow": 135, "refHigh": 145 },
+    { "id": "potassium", "value": 4.2, "unit": "mmol/L", "refLow": 3.5, "refHigh": 5.0 }
+  ]
+}

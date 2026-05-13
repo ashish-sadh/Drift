@@ -1,0 +1,18 @@
+Test,Result,Units,Range,Flag
+Glucose Fasting,89,mg/dL,70-99,
+HbA1c,5.4,%,<5.7,
+Total Cholesterol,210,mg/dL,<200,H
+HDL Cholesterol,48,mg/dL,>40,
+LDL Cholesterol,135,mg/dL,<100,H
+Triglycerides,142,mg/dL,<150,
+ALT (SGPT),22,U/L,7-35,
+AST (SGOT),18,U/L,8-33,
+Vitamin D 25-OH,28,ng/mL,30-100,L
+B-12,612,pg/mL,180-914,
+Iron,98,ug/dL,50-170,
+Ferritin,55,ng/mL,15-150,
+TSH,2.4,mIU/L,0.45-4.5,
+Sodium,140,mmol/L,135-145,
+Potassium,4.2,mmol/L,3.5-5.0,
+Collected: 10/12/2025
+Patient: synthetic-3

@@ -1,0 +1,13 @@
+{
+  "format": "bodyspec_dexa",
+  "scans": [
+    {
+      "date": "2025-06-30",
+      "totalMassLbs": 142.0,
+      "bodyFatPct": 16.2,
+      "fatMassLbs": 23.0,
+      "leanMassLbs": 114.5,
+      "bmcLbs": 4.5
+    }
+  ]
+}
