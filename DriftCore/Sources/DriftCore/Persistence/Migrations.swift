@@ -595,5 +595,40 @@ public enum Migrations {
             }
             try db.create(index: "idx_daily_medication_logged_at", on: "daily_medication", columns: ["logged_at"])
         }
+
+        // v38: Medication profile + per-dose log (Docs/designs/574-glp1-medication-tracking.md).
+        // Separate from `daily_medication` (which stays for legacy per-event logs).
+        // The profile (`medication`) holds prescribed dose, schedule, and reminders;
+        // `medication_log` holds the actual administration history with optional
+        // dose override and side-effect note. PHI isolation rationale lives in the
+        // design doc — do not extend `supplement`.
+        migrator.registerMigration("v38_medication_profile") { db in
+            try db.create(table: "medication") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("name", .text).notNull()
+                t.column("brand_name", .text)
+                t.column("dose_amount", .double).notNull()
+                t.column("dose_unit", .text).notNull()
+                t.column("schedule_type", .text).notNull().defaults(to: "daily")
+                t.column("reminder_time", .text)
+                t.column("reminder_day", .integer)
+                t.column("start_date", .text)
+                t.column("is_active", .boolean).notNull().defaults(to: true)
+                t.column("notes", .text)
+            }
+            try db.create(index: "idx_medication_active", on: "medication", columns: ["is_active"])
+
+            try db.create(table: "medication_log") { t in
+                t.autoIncrementedPrimaryKey("id")
+                t.column("medication_id", .integer).notNull()
+                    .references("medication", onDelete: .cascade)
+                t.column("taken_at", .text).notNull()
+                t.column("dose_amount", .double)
+                t.column("side_effects", .text)
+                t.column("notes", .text)
+            }
+            try db.create(index: "idx_medication_log_taken_at", on: "medication_log", columns: ["taken_at"])
+            try db.create(index: "idx_medication_log_med_taken", on: "medication_log", columns: ["medication_id", "taken_at"])
+        }
     }
 }

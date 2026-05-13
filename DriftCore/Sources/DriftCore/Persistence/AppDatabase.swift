@@ -80,6 +80,8 @@ extension AppDatabase {
             try db.execute(sql: "DELETE FROM food_usage")
             try? db.execute(sql: "DELETE FROM chat_turn")
             try? db.execute(sql: "DELETE FROM water_entry")
+            try? db.execute(sql: "DELETE FROM medication_log")
+            try? db.execute(sql: "DELETE FROM medication")
         }
         // Clear the seed hash so seedFoodsFromJSON() actually runs (hash-gated
         // skip otherwise — would leave the food table empty after the wipe).
@@ -465,7 +467,119 @@ extension AppDatabase {
     }
 }
 
-// MARK: - Medication Operations
+// MARK: - Medication Profile + Log (design-574)
+//
+// Profile = the prescription/schedule (one row per drug the user is on).
+// Log     = the per-dose event (many rows per profile).
+// Older `daily_medication` table (above) is the legacy flat log shipped in
+// #580; new code should use the profile + log pair. Both coexist until the
+// chat tool migration in #752 lets us drop the legacy path.
+
+extension AppDatabase {
+    public func saveMedicationProfile(_ med: inout Medication) throws {
+        let isNew = med.id == nil
+        try dbWriter.write { [med] db in
+            var mutable = med
+            try mutable.save(db)
+        }
+        if isNew {
+            // GRDB's didInsert hook on the local `mutable` copy won't propagate
+            // back to the caller's inout — re-fetch by name+brand+startDate to
+            // get the assigned rowID. Match Supplement save semantics.
+            med = try dbWriter.read { db in
+                try Medication
+                    .filter(Column("name") == med.name)
+                    .filter(Column("brand_name") == med.brandName)
+                    .filter(Column("start_date") == med.startDate)
+                    .order(Column("id").desc)
+                    .fetchOne(db)
+            } ?? med
+        }
+    }
+
+    public func fetchActiveMedications() throws -> [Medication] {
+        try dbWriter.read { db in
+            try Medication
+                .filter(Column("is_active") == true)
+                .order(Column("name"))
+                .fetchAll(db)
+        }
+    }
+
+    public func fetchAllMedications(includeArchived: Bool = true) throws -> [Medication] {
+        try dbWriter.read { db in
+            var request: QueryInterfaceRequest<Medication> = Medication.all()
+            if !includeArchived {
+                request = request.filter(Column("is_active") == true)
+            }
+            return try request.order(Column("name")).fetchAll(db)
+        }
+    }
+
+    /// Find a medication by name OR brand_name, case-insensitive. Returns the
+    /// active row if present, else any matching row, else nil. Used by the
+    /// `log_medication` tool to resolve "took my Ozempic" to a profile id.
+    public func findMedication(named query: String) throws -> Medication? {
+        try dbWriter.read { db in
+            let lower = query.lowercased()
+            let match = try Medication
+                .filter(sql: "LOWER(name) = ? OR LOWER(brand_name) = ?", arguments: [lower, lower])
+                .fetchAll(db)
+            return match.first(where: { $0.isActive }) ?? match.first
+        }
+    }
+
+    public func deleteMedicationProfile(id: Int64) throws {
+        // FK cascade on medication_log removes logs automatically.
+        try dbWriter.write { db in try Medication.deleteOne(db, id: id) }
+    }
+
+    public func saveMedicationLog(_ log: inout MedicationLog) throws {
+        let isNew = log.id == nil
+        try dbWriter.write { [log] db in
+            var mutable = log
+            try mutable.save(db)
+        }
+        if isNew {
+            log = try dbWriter.read { db in
+                try MedicationLog
+                    .filter(Column("medication_id") == log.medicationId)
+                    .filter(Column("taken_at") == log.takenAt)
+                    .order(Column("id").desc)
+                    .fetchOne(db)
+            } ?? log
+        }
+    }
+
+    public func fetchMedicationLogs(medicationId: Int64, days: Int = 30) throws -> [MedicationLog] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        let cutoffStr = ISO8601DateFormatter().string(from: cutoff)
+        return try dbWriter.read { db in
+            try MedicationLog
+                .filter(Column("medication_id") == medicationId)
+                .filter(Column("taken_at") >= cutoffStr)
+                .order(Column("taken_at").desc)
+                .fetchAll(db)
+        }
+    }
+
+    public func fetchAllMedicationLogs(days: Int = 30) throws -> [MedicationLog] {
+        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        let cutoffStr = ISO8601DateFormatter().string(from: cutoff)
+        return try dbWriter.read { db in
+            try MedicationLog
+                .filter(Column("taken_at") >= cutoffStr)
+                .order(Column("taken_at").desc)
+                .fetchAll(db)
+        }
+    }
+
+    public func deleteMedicationLog(id: Int64) throws {
+        try dbWriter.write { db in try MedicationLog.deleteOne(db, id: id) }
+    }
+}
+
+// MARK: - Legacy DailyMedication (one-shot log; see design-574 for replacement)
 
 extension AppDatabase {
     public func saveMedication(_ med: inout DailyMedication) throws {
