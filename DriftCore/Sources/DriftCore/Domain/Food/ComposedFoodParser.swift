@@ -6,9 +6,47 @@ public enum ComposedFoodParser {
 
     // MARK: - Public API
 
+    /// FM-first variant: when `Preferences.fmCompositeFoodExtractEnabled` is
+    /// ON and the platform supports FoundationModels (iOS 26+ / macOS 26+),
+    /// the message routes through `CompositeFoodExtractor`; on `.unavailable`,
+    /// `.sessionFailed`, `.notComposite`, or `.bounded` the call falls back
+    /// to the regex parser. Returns the same `[FoodIntent]?` shape as
+    /// `parse(_:)` so existing callers don't need to branch on backend.
+    /// Per design-666 QW2.
+    public static func parseAsync(_ text: String) async -> [FoodIntent]? {
+        guard Preferences.fmCompositeFoodExtractEnabled else { return parse(text) }
+        if let fm = await fmExtractOrNil(text) { return fm }
+        return parse(text)
+    }
+
+    /// Map a successful `FMCompositeFoodEntry` to the existing
+    /// `[FoodIntent]`. Returns nil on any FM error so the async caller falls
+    /// back to the regex parser. The extractor's component list is the
+    /// source of truth for *what* the foods are — but each component still
+    /// runs through `AIActionExecutor.extractAmount` so food-aware gram
+    /// math (honey density, milk ml) lands on the `FoodIntent` exactly
+    /// like the regex path produces it.
+    private static func fmExtractOrNil(_ text: String) async -> [FoodIntent]? {
+        do {
+            let entry = try await CompositeFoodExtractor.extract(text: text)
+            var intents: [FoodIntent] = []
+            for component in entry.components {
+                let (amt, food, grams) = AIActionExecutor.extractAmount(from: component.foodName)
+                let resolvedName = food.isEmpty ? component.foodName : food
+                guard !resolvedName.isEmpty else { continue }
+                intents.append(FoodIntent(query: resolvedName, servings: amt, gramAmount: grams))
+            }
+            return intents.count > 1 ? intents : nil
+        } catch {
+            return nil
+        }
+    }
+
     /// "log coffee with milk" → [FoodIntent("coffee"), FoodIntent("milk")]
     /// "oatmeal with milk and honey" → [FoodIntent("oatmeal"), FoodIntent("milk"), FoodIntent("honey")]
     /// Returns nil when no composition connector is found.
+    /// Regex-only synchronous path — kept as the stable fallback used by
+    /// `parseAsync` when FM is unavailable / refuses / returns out-of-bounds.
     public static func parse(_ text: String) -> [FoodIntent]? {
         let lower = text.lowercased().trimmingCharacters(in: .whitespaces)
 
