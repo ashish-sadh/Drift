@@ -153,6 +153,7 @@
 		E3A1AAD6DC61707246AECDA8 /* BackupMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC007029A7A52990CE4FBDE /* BackupMonitorTests.swift */; };
 		E3CB0A9B3B0ECCDBD1210A36 /* WorkoutConsistencyCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20F12007183DC0602FA4B0F3 /* WorkoutConsistencyCard.swift */; };
 		E3CEF38E5F1D8E62C22B5543 /* FoodLogSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 029FE8C8F52268339F742BFA /* FoodLogSheet.swift */; };
+		E53B2B166E38DEC251474280 /* BackupOnboardingSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85B104D3EEC732EC50782802 /* BackupOnboardingSheet.swift */; };
 		E5611698773A5EEF24F10014 /* EditFoodEntrySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = F30EC2EF2E12E44F63B37582 /* EditFoodEntrySheet.swift */; };
 		E5C9ACF7CCAED656F70B23F9 /* PhotoLogReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A19A30BB3C9CCE28A9A758EF /* PhotoLogReviewView.swift */; };
 		E63F9BB35572B3EF11BF9DE5 /* HardEvalSet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2DEC3049742676C1201A6847 /* HardEvalSet.swift */; };
@@ -305,6 +306,7 @@
 		7ED878D9FF93287B41B67503 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
 		7F4C6870115BE53081FA0CDE /* AISetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AISetupView.swift; sourceTree = "<group>"; };
 		7F7F3BAFA978301368D148CF /* ServingInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServingInputView.swift; sourceTree = "<group>"; };
+		85B104D3EEC732EC50782802 /* BackupOnboardingSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupOnboardingSheet.swift; sourceTree = "<group>"; };
 		893A2B9C27B65BD830B5A520 /* DriftAppLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriftAppLaunchTests.swift; sourceTree = "<group>"; };
 		8E78D132A90B0FDC35353646 /* WeightLogListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WeightLogListView.swift; sourceTree = "<group>"; };
 		8EAD396A0ED458F8F26650FA /* MultiTurnRegressionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MultiTurnRegressionTests.swift; sourceTree = "<group>"; };
@@ -757,6 +759,7 @@
 			isa = PBXGroup;
 			children = (
 				EE2D9672D96D6738FA36D4F2 /* AlgorithmSettingsView.swift */,
+				85B104D3EEC732EC50782802 /* BackupOnboardingSheet.swift */,
 				FA787634824828D47A81583C /* BackupSettingsView.swift */,
 				6E7AB5CF548B4E61C45C1485 /* GoalSetupView.swift */,
 				3258B6E91169170587AAB02B /* GoalView.swift */,
@@ -988,6 +991,7 @@
 				8D8FB3814300848676740EC6 /* AddSupplementView.swift in Sources */,
 				421D57520E9C09C88A6A0B6B /* AlgorithmSettingsView.swift in Sources */,
 				EE5FAB515DD08A8837C600BB /* BackupMonitor.swift in Sources */,
+				E53B2B166E38DEC251474280 /* BackupOnboardingSheet.swift in Sources */,
 				A5E780FAC20471D35ED35EF7 /* BackupScheduler.swift in Sources */,
 				3065362951037CD4ACD237FC /* BackupService.swift in Sources */,
 				234789CE004676FA7E37A620 /* BackupSettingsView.swift in Sources */,

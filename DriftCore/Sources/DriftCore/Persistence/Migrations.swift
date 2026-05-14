@@ -3,10 +3,13 @@ import GRDB
 
 /// All database schema migrations.
 public enum Migrations {
-    /// Current schema version — count of registered migrations. Bump when adding a
-    /// new migration. Stamped into the backup manifest so restore can detect a
+    /// Current schema version — MUST equal the count of `registerMigration`
+    /// calls in `registerAll` below. Bump in the same commit as the new
+    /// migration; otherwise `BackupRestorerTests.testOlderSchemaVersionRunsForwardMigrations`
+    /// fails with `Int.fetchOne(grdb_migrations) != currentVersion`.
+    /// Stamped into the backup manifest so restore can detect a
     /// forward/backward migration scenario.
-    public static let currentVersion = 37
+    public static let currentVersion = 38
 
     public static func registerAll(_ migrator: inout DatabaseMigrator) {
         // v1: Weight tracking

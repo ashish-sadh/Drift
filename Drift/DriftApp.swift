@@ -8,6 +8,7 @@ struct DriftApp: App {
     @State private var syncComplete = false
     @State private var launchStage: LaunchStage = .starting
     @State private var showingFirstLaunchRestore = false
+    @State private var showingBackupOnboarding = false
     @Environment(\.scenePhase) private var scenePhase
 
     init() {
@@ -48,6 +49,9 @@ struct DriftApp: App {
                 .sheet(isPresented: $showingFirstLaunchRestore) {
                     NavigationStack { RestorePickerView() }
                 }
+                .sheet(isPresented: $showingBackupOnboarding) {
+                    BackupOnboardingSheet()
+                }
                 .task {
                     if !hasRequestedHealthKit {
                         hasRequestedHealthKit = true
@@ -56,11 +60,22 @@ struct DriftApp: App {
                         // container, offer to restore before any other launch
                         // work. The sheet is dismissible — user can choose
                         // "Start Fresh" by canceling.
-                        if let dbEmpty = try? AppDatabase.shared.isEmpty(), dbEmpty {
+                        // `iCloudAvailable` is the single signal we need from BackupService here:
+                        // - true → there's a usable iCloud Drive container to back up to or restore from
+                        // - false → iCloud Drive is off / user signed out; skip both sheets silently
+                        let iCloudAvailable = (try? BackupService.shared.containerURL()) != nil
+                        if iCloudAvailable, let dbEmpty = try? AppDatabase.shared.isEmpty(), dbEmpty {
                             let available = BackupService.shared.availableBackups()
                             if !available.isEmpty {
                                 showingFirstLaunchRestore = true
                             }
+                        }
+                        // One-time backup-enable nudge. Only fires if the restore sheet
+                        // didn't (no point asking to enable backup when we're about to
+                        // restore one, or when iCloud Drive is unavailable).
+                        if !showingFirstLaunchRestore,
+                           BackupOnboardingDecision.shouldShow(iCloudAvailable: iCloudAvailable) {
+                            showingBackupOnboarding = true
                         }
                         let launchStart = Date()
 #if targetEnvironment(simulator)
