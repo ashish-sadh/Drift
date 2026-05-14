@@ -2429,5 +2429,22 @@
     "features": [
       "New analytical tool: ask 'is my protein affecting my recovery' and see how day-to-day protein variance lines up with HRV + sleep recovery score (#730)"
     ]
+  },
+  {
+    "build": 244,
+    "date": "2026-05-13T22:32:43-07:00",
+    "description": "chore: TestFlight build 244 — cycle×biomarker symmetric drop/rise + FM extraction polish",
+    "features": [
+      "Cycle×biomarker insight now detects both drops AND rises (estrogen-driven biomarkers spiking in luteal were silently unflagged before) — and the response shows per-phase reading count instead of implying the whole sample (#778)",
+      "Composite food (recipe) entries now use Apple Foundation Models extraction — 'log my chana masala 1.5 servings' parses ingredients + scaling more reliably (#744, design-666 QW2)",
+      "Workout entries unified under Foundation Models extraction — 'logged 3x10 bench at 135' parses sets/reps/weight more reliably (#745, design-666 QW3)",
+      "Nutrition-label OCR migrated to Apple Foundation Models extraction — fewer parse failures on packaged food photos (#748, design-665)",
+      "Lab report parsing now hybrid: regex first, Foundation Models gap-filler — biomarkers that the regex pipeline missed are now captured (#749, design-665)",
+      "Medication profile + log schema landed — basis for upcoming GLP-1, statin, and supplement timing insights (#751, design-574)",
+      "7-day Feedback activation banner on dashboard for new users (#759)"
+    ],
+    "fixes": [
+      "Cycle×biomarker tool: when user names a specific biomarker but no readings exist for it, response is now biomarker-specific instead of the generic 'no overlap' message (#778)"
+    ]
   }
 ]
