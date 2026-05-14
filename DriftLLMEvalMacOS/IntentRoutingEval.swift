@@ -775,6 +775,30 @@ final class IntentRoutingEval: XCTestCase {
         await assertRoutes("is my protein steady enough for recovery", to: "protein_consistency_vs_recovery")
     }
 
+    // MARK: - Cycle × Biomarker Correlation (#689 / #778 polish)
+
+    /// Cycle-aware biomarker insight: queries that explicitly tie a biomarker
+    /// to menstrual cycle phase must route to `cycle_biomarker_correlation`,
+    /// not the generic `biomarkers` tool which has no cycle awareness.
+    /// Regression: pre-#778 this routing had zero LLM-eval coverage.
+    func testCycleBiomarkerCorrelation_routing() async {
+        await assertRoutes("does my iron drop during my period", to: "cycle_biomarker_correlation")
+        await assertRoutes("is my ferritin worse in the luteal phase", to: "cycle_biomarker_correlation")
+        await assertRoutes("how does vitamin D track with my cycle", to: "cycle_biomarker_correlation")
+        await assertRoutes("do my hemoglobin levels change with my period", to: "cycle_biomarker_correlation")
+        await assertRoutes("does my B12 shift during ovulation", to: "cycle_biomarker_correlation")
+    }
+
+    /// Negative cases: plain biomarker questions WITHOUT cycle phrasing must
+    /// route to the regular `biomarkers` tool, not the cycle-correlation tool.
+    /// Catches the failure mode where the LLM gets too eager about the cycle
+    /// tool just because a female-coded biomarker (ferritin/iron) appears.
+    func testCycleBiomarker_negativeNoCyclePhrasing() async {
+        await assertRoutes("check my ferritin", to: "biomarkers")
+        await assertRoutes("what's my iron level", to: "biomarkers")
+        await assertRoutes("show my vitamin D", to: "biomarkers")
+    }
+
     // MARK: - Weight Trend Prediction (#177)
 
     func testWeightTrendPrediction_routing() async {

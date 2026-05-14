@@ -70,6 +70,11 @@ public enum CycleBiomarkerInsight {
         public let mean: Double
     }
 
+    public enum FlagDirection: String, Sendable {
+        case drop
+        case rise
+    }
+
     public struct CorrelationResult: Sendable {
         public let biomarkerId: String
         public let displayName: String
@@ -81,6 +86,8 @@ public enum CycleBiomarkerInsight {
         public let phaseStats: [PhaseStats]
         public let flaggedPhase: Phase?
         public let flaggedMean: Double?
+        public let flaggedCount: Int?
+        public let flaggedDirection: FlagDirection?
         public let belowThreshold: String?
     }
 
@@ -97,29 +104,17 @@ public enum CycleBiomarkerInsight {
     ) -> CorrelationResult {
         if cyclesTracked < minCycles {
             let cyclesNeeded = max(0, minCycles - cyclesTracked)
-            return CorrelationResult(
-                biomarkerId: biomarkerId,
-                displayName: displayName,
-                unit: unit,
-                totalReadings: readings.count,
-                cyclesTracked: cyclesTracked,
-                overallMean: 0, overallStd: 0,
-                phaseStats: [],
-                flaggedPhase: nil, flaggedMean: nil,
-                belowThreshold: "I need more data — track \(cyclesNeeded) more cycle\(cyclesNeeded == 1 ? "" : "s") and re-upload your labs."
+            return belowThresholdResult(
+                biomarkerId: biomarkerId, displayName: displayName, unit: unit,
+                totalReadings: readings.count, cyclesTracked: cyclesTracked,
+                reason: "I need more data — track \(cyclesNeeded) more cycle\(cyclesNeeded == 1 ? "" : "s") and re-upload your labs."
             )
         }
         if readings.count < minTotalReadings {
-            return CorrelationResult(
-                biomarkerId: biomarkerId,
-                displayName: displayName,
-                unit: unit,
-                totalReadings: readings.count,
-                cyclesTracked: cyclesTracked,
-                overallMean: 0, overallStd: 0,
-                phaseStats: [],
-                flaggedPhase: nil, flaggedMean: nil,
-                belowThreshold: "Only \(readings.count) \(displayName) reading\(readings.count == 1 ? "" : "s") line up with your cycle history. Need at least \(minTotalReadings) — upload more lab reports."
+            return belowThresholdResult(
+                biomarkerId: biomarkerId, displayName: displayName, unit: unit,
+                totalReadings: readings.count, cyclesTracked: cyclesTracked,
+                reason: "Only \(readings.count) \(displayName) reading\(readings.count == 1 ? "" : "s") line up with your cycle history. Need at least \(minTotalReadings) — upload more lab reports."
             )
         }
 
@@ -130,18 +125,25 @@ public enum CycleBiomarkerInsight {
 
         let grouped = Dictionary(grouping: readings, by: \.phase)
         var stats: [PhaseStats] = []
-        var flagged: (phase: Phase, mean: Double, drop: Double)? = nil
+        // Flag the phase with the largest absolute deviation from the overall
+        // mean — drop or rise — provided it exceeds 1 std. Tracks count so the
+        // formatter can show "across N readings in <phase>" honestly.
+        var flagged: (phase: Phase, mean: Double, count: Int, deviation: Double, direction: FlagDirection)? = nil
 
         for phase in Phase.allCases {
             let vs = grouped[phase]?.map(\.value) ?? []
             guard vs.count >= minReadingsPerPhase else { continue }
             let mean = vs.reduce(0, +) / Double(vs.count)
             stats.append(PhaseStats(phase: phase, count: vs.count, mean: mean))
-            if std > 0, mean < overallMean - std {
-                let drop = overallMean - mean
-                if flagged == nil || drop > flagged!.drop {
-                    flagged = (phase, mean, drop)
-                }
+            guard std > 0 else { continue }
+
+            let signedDeviation = mean - overallMean
+            let absDeviation = abs(signedDeviation)
+            guard absDeviation > std else { continue }
+
+            let direction: FlagDirection = signedDeviation < 0 ? .drop : .rise
+            if flagged == nil || absDeviation > flagged!.deviation {
+                flagged = (phase, mean, vs.count, absDeviation, direction)
             }
         }
 
@@ -156,7 +158,24 @@ public enum CycleBiomarkerInsight {
             phaseStats: stats,
             flaggedPhase: flagged?.phase,
             flaggedMean: flagged?.mean,
+            flaggedCount: flagged?.count,
+            flaggedDirection: flagged?.direction,
             belowThreshold: nil
+        )
+    }
+
+    nonisolated private static func belowThresholdResult(
+        biomarkerId: String, displayName: String, unit: String,
+        totalReadings: Int, cyclesTracked: Int, reason: String
+    ) -> CorrelationResult {
+        CorrelationResult(
+            biomarkerId: biomarkerId, displayName: displayName, unit: unit,
+            totalReadings: totalReadings, cyclesTracked: cyclesTracked,
+            overallMean: 0, overallStd: 0,
+            phaseStats: [],
+            flaggedPhase: nil, flaggedMean: nil,
+            flaggedCount: nil, flaggedDirection: nil,
+            belowThreshold: reason
         )
     }
 
@@ -165,11 +184,16 @@ public enum CycleBiomarkerInsight {
     nonisolated public static func formatResult(_ r: CorrelationResult) -> String {
         if let reason = r.belowThreshold { return reason }
 
-        if let phase = r.flaggedPhase, let phaseMean = r.flaggedMean {
+        if let phase = r.flaggedPhase,
+           let phaseMean = r.flaggedMean,
+           let phaseCount = r.flaggedCount,
+           let direction = r.flaggedDirection {
             let phaseLabel = phase.displayName
             let phaseStr = formatValue(phaseMean, unit: r.unit)
             let overallStr = formatValue(r.overallMean, unit: r.unit)
-            return "Your \(r.displayName) tends to drop during \(phaseLabel) (mean \(phaseStr) vs your overall \(overallStr) across \(r.totalReadings) readings)."
+            let verb = direction == .drop ? "drop" : "rise"
+            let readingNoun = phaseCount == 1 ? "reading" : "readings"
+            return "Your \(r.displayName) tends to \(verb) during \(phaseLabel) (mean \(phaseStr) across \(phaseCount) \(readingNoun) vs your overall \(overallStr) across \(r.totalReadings) total)."
         }
 
         // "Fairly consistent" only earns its message when at least 2 phases
@@ -180,7 +204,7 @@ public enum CycleBiomarkerInsight {
         }
 
         let overallStr = formatValue(r.overallMean, unit: r.unit)
-        return "Your \(r.displayName) is fairly consistent across cycle phases (overall \(overallStr), \(r.totalReadings) readings)."
+        return "Your \(r.displayName) is fairly consistent across cycle phases (overall \(overallStr), \(r.totalReadings) readings across \(r.phaseStats.count) phases)."
     }
 
     nonisolated static func formatValue(_ value: Double, unit: String) -> String {

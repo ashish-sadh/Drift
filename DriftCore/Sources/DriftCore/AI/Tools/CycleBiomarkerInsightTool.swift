@@ -96,6 +96,15 @@ public enum CycleBiomarkerInsightTool {
         if let fallback {
             return CycleBiomarkerInsight.formatResult(fallback)
         }
+        // User named a biomarker but no readings exist for it — be specific.
+        // Generic "no overlap" is misleading when other biomarkers may be on file.
+        if let raw = biomarker {
+            let id = normalizeBiomarkerId(raw)
+            // Fall back to the normalized id (trimmed + lowercased) rather than raw,
+            // so accidental whitespace from upstream doesn't leak into the message.
+            let display = CycleBiomarkerInsight.displayName[id] ?? id
+            return "No \(display) readings found yet. Upload a lab report that includes \(display) and re-ask."
+        }
         return "No biomarker readings overlap your tracked cycles yet. Upload a lab report dated within the cycle history window."
     }
 
