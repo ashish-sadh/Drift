@@ -105,6 +105,24 @@ public enum Preferences {
         set { UserDefaults.standard.set(newValue, forKey: fmCompositeFoodExtractKey) }
     }
 
+    private static let fmFoodIntentExtractKey = "drift_fm_food_intent_extract"
+
+    /// When enabled, free-text food-log messages ("ate 2 eggs", "log 1/3
+    /// avocado", "double the rice", "chicken and rice for lunch") route
+    /// through Apple Foundation Models (`@Generable FMFoodLogIntentSchema`)
+    /// on iOS 26+/macOS 26+ before falling back to the regex chain
+    /// (`parseFoodIntent` + `parseMultiFoodIntent` + `extractAmount` +
+    /// `matchIngredient` — ~340 LOC). Per design-666 QW1 — collapses the
+    /// per-stage regex pipeline into one typed call. Kill-switch: flip OFF
+    /// to revert to regex everywhere.
+    public static var fmFoodIntentExtractEnabled: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: fmFoodIntentExtractKey) == nil { return true }
+            return UserDefaults.standard.bool(forKey: fmFoodIntentExtractKey)
+        }
+        set { UserDefaults.standard.set(newValue, forKey: fmFoodIntentExtractKey) }
+    }
+
     // MARK: - Health Nudges
 
     private static let healthNudgesKey = "drift_health_nudges"
