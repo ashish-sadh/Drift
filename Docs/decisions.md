@@ -122,6 +122,9 @@ Planning's old order ("P0 → product focus → admin feedback → roadmap → p
 ### Design tenets in CLAUDE.md (philosophy, not procedure)
 Sessions had no prescriptive philosophy doc — only the 4-line Color Philosophy. Added 10 tenets covering: AI chat as showstopper, privacy-first, goal-aware color, Indian food bar, friend feedback over telemetry, DriftCore-by-default, one-tier-per-test-file, no compat shims, three-lines-before-abstraction, build-test-after-every-change. Tenets, not patterns/file paths — survive folder moves. Commit `a690d43`.
 
+### FM composite-food extractor cutover blocked — Tier-3 eval gate quantified the gap
+Design-666 QW2 shipped `CompositeFoodExtractor` (Apple Foundation Models) with a flag default of ON, but the flag-on path had no Tier-3 quality measurement — flipping was a leap. New eval target `CompositeFoodExtractorFMEval` (#771) replays the 30-row gold set against the real `@Generable` schema on macOS 26. Measured today: **90% overall (27/30), 40% on FM-win rows (2/5)** — the bare-juxtaposition Indian compounds "dal chawal" and "rajma chawal" come back as `.notComposite` (model treats them as single dish names rather than splitting). That's below the design-666 QW2 cutover bar (≥95% overall, ≥98% FM-win). Eval split into a regression-floor test that runs always (locks current quality so a drop is loud) and an `DRIFT_FM_EVAL_GATE_STRICT=1` env-gated test that enforces the cutover bar. Run the strict gate twice green before flipping; the gap closure (prompt tweak / fallback rule for bare-juxtaposition / fine-tune) is a separate work item. Workout / Nutrition / LabReport extractor evals deferred — same pattern, different structured comparators.
+
 ---
 
 *Older decisions live in commit messages, `Docs/refactor/`, `Docs/audits/`. This file starts here.*

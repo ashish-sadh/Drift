@@ -18,6 +18,7 @@
 		11AFD9A7915929FB480CFE99 /* CycleCalculationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6B6C02FCD909BDE67D229EC1 /* CycleCalculationTests.swift */; };
 		12608375BDCD57D211C64849 /* WeightLogListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E78D132A90B0FDC35353646 /* WeightLogListView.swift */; };
 		133EE1957A7EEB3394C0A926 /* BackupSchedulerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F82FD7245B0E99CA6CB7090F /* BackupSchedulerTests.swift */; };
+		14837F24BC4C9D932FF61765 /* CompositeFoodExtractorFMEval.swift in Sources */ = {isa = PBXBuildFile; fileRef = D573CD42E3A315491B5DD60D /* CompositeFoodExtractorFMEval.swift */; };
 		15E39B1D0294AB6762CE9EE8 /* ClarificationFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F86480D874FB7BC3461695E4 /* ClarificationFlowTests.swift */; };
 		1706838F0C81E8CA30C39676 /* SleepRecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0EA24C208A1C32DB52709A4 /* SleepRecoveryView.swift */; };
 		1BF24E5EFE0ECE537D36EA2E /* FloatingAIAssistant.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFF155F20FB2EF069D634C95 /* FloatingAIAssistant.swift */; };
@@ -353,6 +354,7 @@
 		D40A67C320513F5DD21FE3EB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D4683CA86D3045B1534504B0 /* ManualFoodEntrySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ManualFoodEntrySheet.swift; sourceTree = "<group>"; };
 		D5286E0309471AF898D70E3C /* BodyMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyMapView.swift; sourceTree = "<group>"; };
+		D573CD42E3A315491B5DD60D /* CompositeFoodExtractorFMEval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CompositeFoodExtractorFMEval.swift; sourceTree = "<group>"; };
 		D692B540EF483EFFC8EB0569 /* latency-baseline.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "latency-baseline.json"; sourceTree = "<group>"; };
 		DC6712FB46945A6FE1AAB0E0 /* DriftApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DriftApp.swift; sourceTree = "<group>"; };
 		DD2565511DFA43570D0CE9EA /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
@@ -783,6 +785,7 @@
 				3053C86565C8B26D3B16A0A2 /* AutoResearchTests.swift */,
 				734A43F9D7C58B37BC8B6C07 /* ChatLatencyBenchmark.swift */,
 				1D6EEDE4BB88D55A2579A27D /* ComposedFoodEval.swift */,
+				D573CD42E3A315491B5DD60D /* CompositeFoodExtractorFMEval.swift */,
 				2DEC3049742676C1201A6847 /* HardEvalSet.swift */,
 				A048685BCBAD258ADEEB3E22 /* IntentRoutingEval.swift */,
 				1BBFE4D3A672CECBACA7F08D /* MultiIntentDeterministicEval.swift */,
@@ -1124,6 +1127,7 @@
 				23BF8720FC949BA82AFA68B2 /* AutoResearchTests.swift in Sources */,
 				69761B4EBFEFDC857FE06E89 /* ChatLatencyBenchmark.swift in Sources */,
 				1D4B4658B68B40350E20F753 /* ComposedFoodEval.swift in Sources */,
+				14837F24BC4C9D932FF61765 /* CompositeFoodExtractorFMEval.swift in Sources */,
 				D8E7B7B5446C1B3CB3BBF5FC /* DomainExtractorEval.swift in Sources */,
 				E63F9BB35572B3EF11BF9DE5 /* HardEvalSet.swift in Sources */,
 				A459C9B6E82F83B1CC545F63 /* IntentClassifierEval.swift in Sources */,
