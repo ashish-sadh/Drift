@@ -68,6 +68,12 @@ public enum AIBackendType: String, Sendable {
     case llamaCpp
     case mlx
     case remote
+    /// Apple Foundation Models — on-device, system-managed weights, iOS 26+
+    /// + Apple-Intelligence-eligible devices. `FoundationModelsBackend`
+    /// returns false from `isLoaded` if the runtime check fails, so the
+    /// chat layer routes around it the same way it routes around an
+    /// undownloaded local model.
+    case foundationModels
 }
 
 // MARK: - Device Capability Detection

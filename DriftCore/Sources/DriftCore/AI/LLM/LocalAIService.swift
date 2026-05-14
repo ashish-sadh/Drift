@@ -299,6 +299,32 @@ public final class LocalAIService {
         state = modelManager.isModelDownloaded ? .ready : .notSetUp
     }
 
+    // MARK: - Foundation Models Backend (Apple Intelligence on-device)
+
+    /// Install the Apple Foundation Models backend. Caller must verify
+    /// availability first (`FoundationModelsBackend.isAvailableNow`) — this
+    /// method assumes the runtime check has already passed. Mid-thread
+    /// switch is safe: history lives in `AIChatViewModel.messages`, not in
+    /// the backend instance.
+    public func useFoundationModelsBackend() {
+        backend?.unload()
+        backend = FoundationModelsBackend()
+        activeBackendType = .foundationModels
+        // FM has no separate load step — system manages weights.
+        state = .ready
+    }
+
+    /// Drop the FM backend. Used when the user flips away from FM in
+    /// Settings, or when availability changes. Caller is responsible for
+    /// installing the replacement (local model load or remote install).
+    public func clearFoundationModelsBackend() {
+        guard activeBackendType == .foundationModels else { return }
+        backend?.unload()
+        backend = nil
+        activeBackendType = .llamaCpp
+        state = modelManager.isModelDownloaded ? .ready : .notSetUp
+    }
+
     /// True when the user has an installed local model OR a configured remote
     /// backend. Drives the empty-state chooser CTA — when this returns false,
     /// the chat shows the cloud-vs-on-device chooser instead of the input bar.

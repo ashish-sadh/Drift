@@ -159,10 +159,13 @@ public enum IntentClassifier {
     /// Picks the right prompt for the active backend type. Remote backends
     /// (cloud BYOK) get `remotePrompt` — strict brevity targets baked in to
     /// reshape verbose cloud-LLM defaults toward Drift's terse house style.
+    /// On-device backends (local llama.cpp + Apple Foundation Models) share
+    /// `intelligencePrompt` — same role, same prompt-shape constraints,
+    /// validated against FM during the #662 eval.
     public static func activeSystemPrompt(backend: AIBackendType) -> String {
         switch backend {
         case .remote: return remotePrompt
-        case .llamaCpp, .mlx: return intelligencePrompt
+        case .llamaCpp, .mlx, .foundationModels: return intelligencePrompt
         }
     }
 

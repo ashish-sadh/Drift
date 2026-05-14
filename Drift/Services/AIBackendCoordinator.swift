@@ -22,6 +22,15 @@ enum AIBackendCoordinator {
         AIModelManager.shared.isModelDownloaded
     }
 
+    /// Whether Apple Foundation Models is available right now (iOS 26+,
+    /// Apple-Intelligence-eligible hardware, AI enabled in Settings).
+    /// Read by `applyPreferredBackend` to decide whether `.foundationModels`
+    /// is a reachable choice; also by the chat empty-state to decide
+    /// whether to offer "Use Apple Intelligence" as a setup option.
+    static var hasFoundationModels: Bool {
+        FoundationModelsBackend.isAvailableNow
+    }
+
     /// Whether BOTH backends are available — the in-chat cpu/cloud toggle
     /// only renders when this is true. With only one backend the toggle
     /// would be a no-op and just clutter the input bar.
@@ -60,6 +69,8 @@ enum AIBackendCoordinator {
             return await installRemoteBackend()
         case .llamaCpp, .mlx:
             return installLocalBackend()
+        case .foundationModels:
+            return installFoundationModelsBackend()
         }
     }
 
@@ -97,8 +108,26 @@ enum AIBackendCoordinator {
         if svc.activeBackendType == .remote {
             svc.clearRemoteBackend()
         }
+        if svc.activeBackendType == .foundationModels {
+            svc.clearFoundationModelsBackend()
+        }
         guard hasLocalBrain else { return false }
         if !svc.isModelLoaded { svc.loadModel() }
+        return true
+    }
+
+    /// Install the Apple Foundation Models backend. Returns false when FM
+    /// is unavailable on this device (iOS < 26, AI-ineligible hardware, or
+    /// Apple Intelligence disabled in Settings) — caller should fall back
+    /// to BYOK or show the setup chooser.
+    @discardableResult
+    static func installFoundationModelsBackend() -> Bool {
+        guard hasFoundationModels else { return false }
+        let svc = LocalAIService.shared
+        if svc.activeBackendType == .remote {
+            svc.clearRemoteBackend()
+        }
+        svc.useFoundationModelsBackend()
         return true
     }
 
