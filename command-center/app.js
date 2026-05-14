@@ -454,14 +454,22 @@ async function getTestFlightStatus() {
   if (metrics && metrics.lastTestFlight) {
     return { timestamp: new Date(metrics.lastTestFlight).getTime() / 1000 };
   }
-  // Fallback: search commits for TestFlight builds (check more commits)
+  // Fallback: search commits for TestFlight builds. The pattern `TestFlight \d`
+  // (the build number) catches both `chore: TestFlight build N` and any commit
+  // whose message references TestFlight build N (e.g. `feat(#X) + TestFlight N`).
+  // Widen to 250 commits so heartbeat-snapshot churn (each ~1 commit/10min) can't
+  // push the last real TestFlight commit out of the lookup window.
   try {
+    const tfRegex = /TestFlight\s+(?:build\s+)?\d+/i;
     const commits = await smartApi(`/repos/${OWNER}/${REPO}/commits?per_page=100`);
-    const tfCommit = commits.find(c =>
-      c.commit.message.includes('TestFlight build') ||
-      c.commit.message.includes('TestFlight Build') ||
-      c.commit.message.includes('chore: TestFlight')
-    );
+    let tfCommit = commits.find(c => tfRegex.test(c.commit.message));
+    if (!tfCommit && commits.length >= 100) {
+      // Walk back one more page; with the heartbeat-data fix in place this
+      // should rarely trigger, but keeps the panel honest on older repos.
+      const sha = commits[commits.length - 1].sha;
+      const more = await smartApi(`/repos/${OWNER}/${REPO}/commits?per_page=100&sha=${sha}`);
+      tfCommit = more.find(c => tfRegex.test(c.commit.message));
+    }
     if (tfCommit) {
       return {
         timestamp: new Date(tfCommit.commit.committer.date).getTime() / 1000,

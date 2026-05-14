@@ -1558,8 +1558,30 @@
         statCard('Since', sinceLabel, '#8b949e'),
         statCard('Tool calls (4h)', total4h.toLocaleString(), '#3fb950'),
         statCard('Tool calls (24h)', total24.toLocaleString(), '#3fb950'),
+        statCard('Resolved (1h)', '<span id="admin-resolved-1h" style="color:var(--text-muted);">…</span>', '#3fb950'),
         statCard('Stalls / crashes (24h)', stallCount, stallCount ? '#f85149' : '#6e7681'),
       ].join('');
+
+      // Async fill: GitHub issues closed in the last 1h. `since=` filters
+      // by update-time so we client-side filter on closed_at. Fire-and-forget
+      // so a slow API call doesn't block the activity tab.
+      (async () => {
+        try {
+          const oneHourAgo = new Date(Date.now() - 3600 * 1000).toISOString();
+          const issues = await publicApi(`/repos/${OWNER}/${REPO}/issues?state=closed&since=${encodeURIComponent(oneHourAgo)}&per_page=100`);
+          const cutoff = Date.now() - 3600 * 1000;
+          const recent = issues.filter(i =>
+            !i.pull_request && i.closed_at && new Date(i.closed_at).getTime() >= cutoff
+          );
+          const el = document.getElementById('admin-resolved-1h');
+          if (el) el.outerHTML = recent.length === 0
+            ? '0'
+            : `<a href="https://github.com/${OWNER}/${REPO}/issues?q=is%3Aissue+is%3Aclosed+closed%3A%3E%3D${encodeURIComponent(oneHourAgo)}" target="_blank" style="color:var(--green);text-decoration:none;">${recent.length}</a>`;
+        } catch (e) {
+          const el = document.getElementById('admin-resolved-1h');
+          if (el) el.textContent = '–';
+        }
+      })();
 
       // ── ECG-style heartbeat line ──────────────────────────────────────
       if (buckets.length === 0) {
