@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Drift v6 · Modern</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+  html, body, #root { margin: 0; padding: 0; height: 100%; }
+  body {
+    font-family: "Inter", -apple-system, system-ui, sans-serif;
+    background: oklch(0.94 0.003 250);
+    color: oklch(0.18 0.012 260);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  * { box-sizing: border-box; }
+  ::-webkit-scrollbar { width: 0; height: 0; display: none; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- Frame + tweaks scaffolding -->
+<script type="text/babel" src="ios-frame.jsx"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+
+<!-- Data -->
+<script type="text/babel" src="drift-data.jsx"></script>
+
+<!-- v6 layer -->
+<script type="text/babel" src="v6/v6-theme.jsx"></script>
+<script type="text/babel" src="v6/v6-chrome.jsx"></script>
+<script type="text/babel" src="v6/v6-rings.jsx"></script>
+<script type="text/babel" src="v6/v6-today.jsx"></script>
+<script type="text/babel" src="v6/v6-body.jsx"></script>
+<script type="text/babel" src="v6/v6-more.jsx"></script>
+<script type="text/babel" src="v6/v6-subs.jsx"></script>
+<script type="text/babel" src="v6/v6-log-sheet.jsx"></script>
+<script type="text/babel" src="v6/v6-weight-log.jsx"></script>
+<script type="text/babel" src="v6/v6-ai.jsx"></script>
+<script type="text/babel" src="v6/v6-app.jsx"></script>
+
+<script type="text/babel" data-presets="env,react">
+const { useState, useEffect } = React;
+
+const ACCENTS = {
+  coral:   { color: 'oklch(0.66 0.22 25)',  soft: 'oklch(0.94 0.06 25)'  },
+  emerald: { color: 'oklch(0.66 0.16 150)', soft: 'oklch(0.94 0.07 150)' },
+  azure:   { color: 'oklch(0.62 0.18 240)', soft: 'oklch(0.94 0.05 240)' },
+  violet:  { color: 'oklch(0.58 0.20 295)', soft: 'oklch(0.94 0.05 295)' },
+};
+
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "accent": "coral"
+}/*EDITMODE-END*/;
+
+function useTweaks(defaults) {
+  const [t, setT] = useState(defaults);
+  const setTweak = (k, v) => {
+    const next = typeof k === 'object' ? { ...t, ...k } : { ...t, [k]: v };
+    setT(next);
+    try { window.parent.postMessage({ type: '__edit_mode_set_keys', edits: next }, '*'); } catch (e) {}
+  };
+  return [t, setTweak];
+}
+
+function V6Tweaks({ tweaks, setTweak }) {
+  return (
+    <TweaksPanel title="Tweaks">
+      <TweakSection label="Accent color">
+        <TweakRadio
+          value={tweaks.accent}
+          onChange={(v) => setTweak('accent', v)}
+          options={[
+            { value: 'coral',   label: 'Coral' },
+            { value: 'emerald', label: 'Mint' },
+            { value: 'azure',   label: 'Azure' },
+            { value: 'violet',  label: 'Violet' },
+          ]}
+        />
+      </TweakSection>
+    </TweaksPanel>
+  );
+}
+
+function Root() {
+  const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const [scale, setScale] = useState(1);
+  const [showTweaks, setShowTweaks] = useState(false);
+
+  useEffect(() => {
+    const W = 402, H = 874, pad = 24;
+    const fit = () => {
+      const s = Math.min((window.innerWidth - pad*2) / W, (window.innerHeight - pad*2) / H, 1);
+      setScale(s);
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, []);
+
+  // Wire tweaks toggle
+  useEffect(() => {
+    const onMsg = (e) => {
+      if (e.data?.type === '__activate_edit_mode') setShowTweaks(true);
+      if (e.data?.type === '__deactivate_edit_mode') setShowTweaks(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  // Override accent on V6 theme
+  useEffect(() => {
+    const a = ACCENTS[tweaks.accent] || ACCENTS.coral;
+    window.V6.accent = a.color;
+    window.V6.accentSoft = a.soft;
+  }, [tweaks.accent]);
+
+  return (
+    <div style={{
+      width: '100vw', height: '100vh', overflow: 'hidden',
+      background: 'oklch(0.94 0.003 250)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+    }}>
+      <div style={{ transform: `scale(${scale})`, transformOrigin: 'center center' }}>
+        <IOSDevice width={402} height={874}>
+          <V6App data={window.DRIFT_DATA} tweaks={{ accent: ACCENTS[tweaks.accent]?.color }}/>
+        </IOSDevice>
+      </div>
+      {showTweaks && <V6Tweaks tweaks={tweaks} setTweak={setTweak}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<Root/>);
+</script>
+</body>
+</html>
