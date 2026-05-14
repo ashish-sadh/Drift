@@ -27,16 +27,59 @@ REPO=$(gh repo view --json nameWithOwner --jq '.nameWithOwner' 2>/dev/null || ec
 WORK_DIR="/Users/ashishsadh/workspace/Drift"
 
 cmd_pending() {
-    local RESULT
-    RESULT=$(gh issue list --state open --label design-doc --json number,title,labels \
-        --jq '[.[] | select(.labels | map(.name) | index("doc-ready") | not)] | .[] | "#\(.number) \(.title)"' \
+    # Two failure modes the workflow can be in:
+    #   PENDING — issue filed, no design/{N}-* branch exists yet. Real work to do.
+    #   ORPHAN  — design/{N}-* branch exists (often with the doc committed), but
+    #             no PR was opened and doc-ready was never flipped. Single-point-
+    #             failure recovery; #662 sat orphaned for 5 days in 2026-05.
+    # The script trusts doc-ready as the workflow signal, so an orphan looks
+    # identical to "needs doc written" without scanning git refs.
+    local RAW
+    RAW=$(gh issue list --state open --label design-doc --json number,title,labels \
+        --jq '[.[] | select(.labels | map(.name) | index("doc-ready") | not)] | .[] | "\(.number)|\(.title)"' \
         2>/dev/null || true)
-    if [ -z "$RESULT" ]; then
+    if [ -z "$RAW" ]; then
         echo "none"
-    else
-        echo "$RESULT"
+        return
+    fi
+
+    # One ls-remote covers all design/* branches; cheaper than per-issue calls.
+    local BRANCHES
+    BRANCHES=$(git ls-remote --heads origin 'refs/heads/design/*' 2>/dev/null \
+        | awk '{print $2}' | sed 's|refs/heads/||')
+
+    local PENDING="" ORPHAN=""
+    while IFS='|' read -r N TITLE; do
+        [ -z "$N" ] && continue
+        # Match design/{N}- or design/{N}/ (exact issue number boundary —
+        # otherwise design/6620 would falsely match issue #662).
+        local BRANCH
+        # `|| true` guards against grep-no-match (exit 1) propagating under
+        # `set -euo pipefail` and killing the script.
+        BRANCH=$(echo "$BRANCHES" | grep -E "^design/${N}(-|/|$)" | head -1 || true)
+        if [ -n "$BRANCH" ]; then
+            ORPHAN+="#$N $TITLE — orphan branch: $BRANCH"$'\n'
+        else
+            PENDING+="#$N $TITLE"$'\n'
+        fi
+    done <<< "$RAW"
+
+    if [ -n "$PENDING" ]; then
+        echo "PENDING (write doc + open PR + flip doc-ready):"
+        printf "%s" "$PENDING"
+    fi
+    if [ -n "$ORPHAN" ]; then
+        [ -n "$PENDING" ] && echo ""
+        echo "RECOVERY (design branch exists, no PR — verify doc, open PR, flip doc-ready):"
+        printf "%s" "$ORPHAN"
         echo ""
-        echo "Action: For each, create branch (design/{N}-name), write doc, create PR with --label design-doc, then: gh issue edit {N} --add-label doc-ready"
+        echo "Action: git fetch origin <branch> && gh pr create --base main --head <branch> --label design-doc -t '<title>' && gh issue edit <N> --add-label doc-ready"
+    fi
+    if [ -z "$PENDING" ] && [ -n "$ORPHAN" ]; then
+        :  # ORPHAN block already printed its action
+    elif [ -n "$PENDING" ]; then
+        echo ""
+        echo "Action (PENDING): create branch design/{N}-name, write doc, create PR with --label design-doc, then: gh issue edit {N} --add-label doc-ready"
     fi
 }
 
