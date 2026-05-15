@@ -2468,5 +2468,12 @@
       "V6 design reference (HTML/JSX prototype + V3/V4 screenshots) mirrored into the repo so future SwiftUI translation work can reference the source without leaving the working directory (#782)"
     ],
     "fixes": []
+  },
+  {
+    "build": 247,
+    "date": "2026-05-14T23:22:04-07:00",
+    "description": "chore: TestFlight build 247 — cadence rebuild (no user-visible changes since 246)",
+    "features": [],
+    "fixes": []
   }
 ]
