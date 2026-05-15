@@ -45,36 +45,60 @@ struct WeightInsightsView: View {
                 }
                 .buttonStyle(.plain)
 
-                let rate = trend.weeklyRateKg
-                metricCell(
-                    id: "weekly",
-                    label: "Weekly",
-                    value: String(format: "%+.2f", unit.convert(fromKg: rate)),
-                    valueUnit: "\(unit.displayName)/wk",
-                    color: changeColor(rate),
-                    direction: directionIcon(rate),
-                    directionColor: changeColor(rate),
-                    tooltip: "Your typical weekly rate of change over the past \(trend.rateWindowDays) days.",
-                    nudge: "Based on last \(trend.rateWindowDays) days"
-                )
+                if trend.hasInsufficientData {
+                    metricCell(
+                        id: "weekly",
+                        label: "Weekly",
+                        value: "—",
+                        valueUnit: "\(unit.displayName)/wk",
+                        color: .secondary,
+                        tooltip: "Need at least 4 weigh-ins across 2 weeks to estimate a weekly rate.",
+                        nudge: "Log a few more days"
+                    )
+                } else {
+                    let rate = trend.weeklyRateKg
+                    metricCell(
+                        id: "weekly",
+                        label: "Weekly",
+                        value: String(format: "%+.2f", unit.convert(fromKg: rate)),
+                        valueUnit: "\(unit.displayName)/wk",
+                        color: changeColor(rate),
+                        direction: directionIcon(rate),
+                        directionColor: changeColor(rate),
+                        tooltip: "Your typical weekly rate of change over the past \(trend.rateWindowDays) days.",
+                        nudge: "Based on last \(trend.rateWindowDays) days"
+                    )
+                }
             }
 
             HStack(spacing: 8) {
-                let deficit = trend.estimatedDailyDeficit
-                let deficitColor = isLosing
-                    ? (deficit < 0 ? Theme.deficit : Theme.surplus)
-                    : (deficit > 0 ? Theme.deficit : Theme.surplus)
-                metricCell(
-                    id: "deficit",
-                    label: deficit < 0 ? "Est. Deficit" : "Est. Surplus",
-                    value: String(format: "%+.0f", deficit),
-                    valueUnit: "kcal/day",
-                    color: deficitColor,
-                    direction: directionIcon(deficit),
-                    directionColor: deficitColor,
-                    tooltip: "Estimated daily caloric \(deficit < 0 ? "deficit" : "surplus") based on your weight trend over the past \(trend.rateWindowDays) days.",
-                    nudge: "Based on last \(trend.rateWindowDays) days"
-                )
+                if trend.hasInsufficientData {
+                    metricCell(
+                        id: "deficit",
+                        label: "Est. Balance",
+                        value: "—",
+                        valueUnit: "kcal/day",
+                        color: .secondary,
+                        tooltip: "Need at least 4 weigh-ins across 2 weeks to estimate your daily energy balance.",
+                        nudge: "Log a few more days"
+                    )
+                } else {
+                    let deficit = trend.estimatedDailyDeficit
+                    let deficitColor = isLosing
+                        ? (deficit < 0 ? Theme.deficit : Theme.surplus)
+                        : (deficit > 0 ? Theme.deficit : Theme.surplus)
+                    metricCell(
+                        id: "deficit",
+                        label: deficit < 0 ? "Est. Deficit" : "Est. Surplus",
+                        value: String(format: "%+.0f", deficit),
+                        valueUnit: "kcal/day",
+                        color: deficitColor,
+                        direction: directionIcon(deficit),
+                        directionColor: deficitColor,
+                        tooltip: "Estimated daily caloric \(deficit < 0 ? "deficit" : "surplus") based on your weight trend over the past \(trend.rateWindowDays) days.",
+                        nudge: "Based on last \(trend.rateWindowDays) days"
+                    )
+                }
 
                 if let proj = trend.projection30Day {
                     metricCell(

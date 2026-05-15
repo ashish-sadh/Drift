@@ -1103,3 +1103,61 @@ private func dateStr(_ d: Date) -> String {
     // One huge outlier doesn't move the median
     #expect(WeightTrendCalculator.median(of: [1.0, 2.0, 3.0, 100.0]) == 2.5)
 }
+
+// MARK: - Insufficient-data guards
+//
+// Bug observed 2026-05-14: 2 weight entries spanning ~5 days produced
+// "+4.41 lbs/wk" weekly rate and "+1714 kcal/day surplus", both labelled
+// "based on last 21 days" — the UI extrapolated a multi-day delta to a
+// week and lied about the window. The calculator now publishes a rate
+// only when there are ≥ 4 points spanning ≥ 14 days.
+
+@Test func insufficientData_twoPointsCloseTogether_returnsNilRate() {
+    // Reproduce the exact shape from the 2026-05-14 screenshot: 2 entries
+    // a few days apart, small gain. Previously produced +4.41 lbs/wk.
+    let entries = recentDailyEntries(count: 2) { i in i == 0 ? 58.9 : 59.5 } // ~1.3 lbs gain
+    let trend = WeightTrendCalculator.calculateTrend(entries: entries)
+    #expect(trend != nil)
+    #expect(trend?.hasInsufficientData == true,
+            "2 points must be flagged insufficient — extrapolation is the bug we just fixed.")
+    #expect(trend?.weeklyRateKg == 0,
+            "Insufficient data must return 0 as a placeholder, not a fictional rate.")
+    #expect(trend?.estimatedDailyDeficit == 0,
+            "Insufficient data must zero out deficit too — same reason.")
+    #expect(trend?.projection30Day == nil,
+            "Insufficient data must not project 30 days from a placeholder rate.")
+}
+
+@Test func insufficientData_threePoints_stillInsufficient() {
+    // 3 points across 4 days — minimum-data gate requires 4 points + 14 days.
+    let entries = recentDailyEntries(count: 3) { i in 60.0 + Double(i) * 0.1 }
+    let trend = WeightTrendCalculator.calculateTrend(entries: entries)
+    #expect(trend?.hasInsufficientData == true)
+}
+
+@Test func insufficientData_fourPointsTightWindow_stillInsufficient() {
+    // 4 points but only 4 days apart — span < 14 days gate.
+    let entries = recentDailyEntries(count: 4) { i in 60.0 + Double(i) * 0.1 }
+    let trend = WeightTrendCalculator.calculateTrend(entries: entries)
+    #expect(trend?.hasInsufficientData == true,
+            "4 points spanning 4 days is still noise — span gate must fire.")
+}
+
+@Test func sufficientData_fourPointsAcrossTwoWeeks_publishesRate() {
+    // 4 entries spanning 14 days — minimum acceptable. Linear gain.
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd"
+    formatter.locale = Locale(identifier: "en_US_POSIX")
+    let today = Date()
+    let entries: [(date: String, weightKg: Double)] = [0, 5, 10, 14].map { offset in
+        let d = Calendar.current.date(byAdding: .day, value: -offset, to: today)!
+        // Most recent (offset=0) is the latest = heaviest; older entries are lighter.
+        let kg = 60.0 + Double(14 - offset) * 0.05
+        return (date: formatter.string(from: d), weightKg: kg)
+    }.sorted { $0.date < $1.date }
+    let trend = WeightTrendCalculator.calculateTrend(entries: entries)
+    #expect(trend?.hasInsufficientData == false,
+            "4 points spanning 14 days must publish a rate.")
+    #expect(trend?.weeklyRateKg != 0,
+            "Real consistent gain → non-zero rate.")
+}

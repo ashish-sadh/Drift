@@ -113,8 +113,13 @@ public enum WeightTrendCalculator {
         /// Actual window (days) used to compute weeklyRateKg — may differ from
         /// config.regressionWindowDays when widening or gap-clipping applies.
         public let rateWindowDays: Int
+        /// True when there aren't enough weigh-ins for a trustworthy rate.
+        /// In that case `weeklyRateKg` and `estimatedDailyDeficit` are 0 as
+        /// safe placeholders; the UI must render "—" instead of the value.
+        /// Threshold: see `hasSufficientData` (≥ 4 points spanning ≥ 14 days).
+        public let hasInsufficientData: Bool
 
-        init(currentEMA: Double, previousEMA: Double, weeklyRateKg: Double, estimatedDailyDeficit: Double, trendDirection: TrendDirection, projection30Day: Double?, dataPoints: [WeightDataPoint], weightChanges: WeightChanges, config: AlgorithmConfig, rateWindowDays: Int) {
+        init(currentEMA: Double, previousEMA: Double, weeklyRateKg: Double, estimatedDailyDeficit: Double, trendDirection: TrendDirection, projection30Day: Double?, dataPoints: [WeightDataPoint], weightChanges: WeightChanges, config: AlgorithmConfig, rateWindowDays: Int, hasInsufficientData: Bool = false) {
             self.currentEMA = currentEMA
             self.previousEMA = previousEMA
             self.weeklyRateKg = weeklyRateKg
@@ -125,6 +130,7 @@ public enum WeightTrendCalculator {
             self.weightChanges = weightChanges
             self.config = config
             self.rateWindowDays = rateWindowDays
+            self.hasInsufficientData = hasInsufficientData
         }
     }
 
@@ -265,6 +271,12 @@ public enum WeightTrendCalculator {
         )
         let weeklyRateKg: Double
         let rateWindowDays: Int
+        // `widenedRate` and `hasInsufficientData` decided inside the branches
+        // below; default to "we have a rate" and let the insufficient-data
+        // path flip it. The flag drives the UI's "—" rendering — without it,
+        // the 0.0 sentinel would render as "0.00 lbs/wk" which is no better
+        // than the previous "+4.41 lbs/wk extrapolated from 2 points" bug.
+        var hasInsufficientData = false
         if let primary, abs(primary) >= config.widenSlopeThresholdKgPerWeek {
             weeklyRateKg = primary
             rateWindowDays = config.regressionWindowDays
@@ -299,13 +311,23 @@ public enum WeightTrendCalculator {
                         weeklyRateKg = widened
                         rateWindowDays = max(usableSpan, config.regressionWindowDays)
                     }
-                } else {
-                    weeklyRateKg = primary ?? 0
+                } else if let p = primary {
+                    weeklyRateKg = p
                     rateWindowDays = config.regressionWindowDays
+                } else {
+                    // Neither window produced a rate → insufficient data.
+                    weeklyRateKg = 0
+                    rateWindowDays = config.regressionWindowDays
+                    hasInsufficientData = true
                 }
-            } else {
-                weeklyRateKg = primary ?? 0
+            } else if let p = primary {
+                weeklyRateKg = p
                 rateWindowDays = config.regressionWindowDays
+            } else {
+                // Primary returned nil and not enough history to widen.
+                weeklyRateKg = 0
+                rateWindowDays = config.regressionWindowDays
+                hasInsufficientData = true
             }
         }
 
@@ -334,11 +356,15 @@ public enum WeightTrendCalculator {
             weeklyRateKg: weeklyRateKg,
             estimatedDailyDeficit: estimatedDailyDeficit,
             trendDirection: trendDirection,
-            projection30Day: projection30Day,
+            // Don't project from a placeholder rate — would mislead the
+            // "Projected weight in 30 days" tile the same way the surplus
+            // tile was misleading. Hide projection when insufficient.
+            projection30Day: hasInsufficientData ? nil : projection30Day,
             dataPoints: dataPoints,
             weightChanges: calculateWeightChanges(dataPoints: dataPoints),
             config: config,
-            rateWindowDays: rateWindowDays
+            rateWindowDays: rateWindowDays,
+            hasInsufficientData: hasInsufficientData
         )
     }
 
@@ -497,8 +523,17 @@ public enum WeightTrendCalculator {
     /// at the latest entry. Tries two-window endpoint method first
     /// (robust to noise + regime-change-correct), falls back to plain OLS
     /// on raw weights when too few entries per endpoint, falls back to a
-    /// 2-point delta when the window is sparse. Returns nil only when
-    /// fewer than 2 points exist anywhere — slope is meaningless then.
+    /// Returns nil when the data is too sparse for a trustworthy weekly rate.
+    /// Two failure modes the previous implementation produced — both observed
+    /// on real device, 2026-05-14, with 2 weigh-ins close together:
+    ///   1. A multi-day delta extrapolated to a weekly rate (e.g. 1.3 lbs
+    ///      gained over 5 days → "+4.41 lbs/wk").
+    ///   2. The UI labelling that result "based on last 21 days" because
+    ///      `rateWindowDays` was returned from the config, not from the
+    ///      actual span of points used.
+    /// Rule now: a weekly rate is published only when the regression has
+    /// real signal — at least 4 points spanning at least 14 days. Anything
+    /// shorter is noise dressed up as a trend.
     static func weeklyRateForWindow(
         dataPoints: [WeightDataPoint],
         windowDays: Int
@@ -506,21 +541,23 @@ public enum WeightTrendCalculator {
         guard let windowStart = Calendar.current.date(byAdding: .day, value: -windowDays, to: Date()) else { return nil }
         let windowed = dataPoints.filter { $0.date >= windowStart }
 
+        // Minimum-data gate. Insufficient → nil → UI shows "—".
+        guard hasSufficientData(windowed) else { return nil }
+
         if let twoWindow = slopeViaTwoWindowEndpoints(points: windowed, windowDays: windowDays) {
             return twoWindow
         }
-        if windowed.count >= 3 {
-            return linearRegressionSlopeOnActualWeight(points: windowed) * 7
-        }
-        if dataPoints.count >= 2 {
-            let last = dataPoints[dataPoints.count - 1]
-            let prev = dataPoints[dataPoints.count - 2]
-            let lastW = last.actualWeight ?? last.emaWeight
-            let prevW = prev.actualWeight ?? prev.emaWeight
-            let days = daysBetween(prev.date, last.date)
-            return days > 0 ? (lastW - prevW) / Double(days) * 7 : nil
-        }
-        return nil
+        return linearRegressionSlopeOnActualWeight(points: windowed) * 7
+    }
+
+    /// Minimum-data threshold for publishing a weekly rate. Tuned for the
+    /// noise floor of casual daily weigh-ins (~0.5–1 kg natural fluctuation
+    /// day to day from water + glycogen). Below this, any regression slope
+    /// is more noise than signal.
+    static func hasSufficientData(_ points: [WeightDataPoint]) -> Bool {
+        guard points.count >= 4 else { return false }
+        let span = daysBetween(points.first!.date, points.last!.date)
+        return span >= 14
     }
 
     // MARK: - Weight Changes
