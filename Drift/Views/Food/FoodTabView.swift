@@ -215,6 +215,16 @@ struct FoodTabView: View {
                 Text("Copy \(viewModel.todayEntries.count) items (\(Int(totalCal)) cal) to today?")
             }
             .onAppear { AIScreenTracker.shared.currentScreen = .food; weekOffset = 0; reload() }
+            .onReceive(NotificationCenter.default.publisher(for: .openPhotoLog)) { _ in
+                // V6 Dashboard Snap chip. PhotoLogFlowView shows its own opt-in
+                // onboarding when CloudVisionKey isn't configured, so no gate
+                // here. Sheet binding is idempotent — rapid double-tap is safe.
+                showingPhotoLog = true
+            }
+            .onReceive(NotificationCenter.default.publisher(for: .openFoodSearch)) { _ in
+                // V6 Dashboard Search chip.
+                showingSearch = true
+            }
             .onChange(of: showingSearch) { _, showing in if !showing { searchMealType = nil; reload() } }
             .onChange(of: showingRecipeBuilder) { _, showing in if !showing { reload() } }
             .onChange(of: showingScanner) { _, showing in if !showing { reload() } }

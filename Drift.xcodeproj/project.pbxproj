@@ -134,6 +134,7 @@
 		CEB85B35AA4574A97AF3E021 /* FallbackVisionClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 45C8EDA85652D4AEF08487FB /* FallbackVisionClientTests.swift */; };
 		CF5BB4A5266F949DA9DEE006 /* LabReportUploadView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F7D747073BCD9310AB76B496 /* LabReportUploadView.swift */; };
 		CFCC147069ADCB2E367DA3D4 /* MealLogUnificationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B637DFADAD7FF587E499B6A7 /* MealLogUnificationTests.swift */; };
+		D032F1C198860BE7CFEFC2C2 /* V6QuickLogRowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 60FD08F783DB315A82419CA8 /* V6QuickLogRowTests.swift */; };
 		D1D942D61F82FB570F804517 /* CloudVisionClientTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57BE014AD72F4F5691483658 /* CloudVisionClientTests.swift */; };
 		D1F92D043D241D539585C068 /* ServingInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7F7F3BAFA978301368D148CF /* ServingInputView.swift */; };
 		D2E596AFDCE5C6C9C49B5410 /* USDAFallbackEval.swift in Sources */ = {isa = PBXBuildFile; fileRef = C92BBFFC16E3948FD5DABA59 /* USDAFallbackEval.swift */; };
@@ -150,6 +151,7 @@
 		E0F86EB4273E7AC079F525CE /* LabReportOCR.swift in Sources */ = {isa = PBXBuildFile; fileRef = E342C8090873CF9612C8A63E /* LabReportOCR.swift */; };
 		E10A3A33C9E718C1D077AC02 /* WeightEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 217B3F5DA6C6AA9BB267D9F3 /* WeightEntryView.swift */; };
 		E16388BC43C225F2C6B7368A /* AIChatView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FA2C56E731BE5610FDC5B12 /* AIChatView.swift */; };
+		E1FE09769EF8F02ECF537EBF /* V6QuickLogRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99672FF01D5ED00EC42A120D /* V6QuickLogRow.swift */; };
 		E220B46BAB957B8242ABA44A /* IntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24EBC73AF46E92F7FF6A10FF /* IntegrationTests.swift */; };
 		E312846BA4FBD129108D7C82 /* ExerciseBrowserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 21311CD0AE82F339C988BDD2 /* ExerciseBrowserView.swift */; };
 		E3A1AAD6DC61707246AECDA8 /* BackupMonitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBC007029A7A52990CE4FBDE /* BackupMonitorTests.swift */; };
@@ -295,6 +297,7 @@
 		5E85736ADE942E8D527F8160 /* MuscleHighlightCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MuscleHighlightCard.swift; sourceTree = "<group>"; };
 		5F6D2AA89F46A33EAE39DEAC /* MoreTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MoreTabView.swift; sourceTree = "<group>"; };
 		5FA6ED1844CBEB6F82E743EA /* BackupMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupMonitor.swift; sourceTree = "<group>"; };
+		60FD08F783DB315A82419CA8 /* V6QuickLogRowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = V6QuickLogRowTests.swift; sourceTree = "<group>"; };
 		620B4DC601D7027A53BA5129 /* BackupService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackupService.swift; sourceTree = "<group>"; };
 		64A47C3CBB0D20D0B0F2DCE9 /* RestorePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RestorePickerView.swift; sourceTree = "<group>"; };
 		664CF8C9378B65A23548F155 /* BiomarkersTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiomarkersTabView.swift; sourceTree = "<group>"; };
@@ -318,6 +321,7 @@
 		92DFDDFA5C14E5C409B99B08 /* PhotoLogBetaSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogBetaSettingsTests.swift; sourceTree = "<group>"; };
 		9317E4AADEC72D6DC385E722 /* LabReportDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabReportDetailView.swift; sourceTree = "<group>"; };
 		967917DDF4130B1A30B42ABA /* CloudVisionClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudVisionClient.swift; sourceTree = "<group>"; };
+		99672FF01D5ED00EC42A120D /* V6QuickLogRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = V6QuickLogRow.swift; sourceTree = "<group>"; };
 		9A4575ED692EF5D3BFDBC775 /* AIChatInsightsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIChatInsightsView.swift; sourceTree = "<group>"; };
 		9ADFC025483E1D1D5A39857E /* ClarificationCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClarificationCard.swift; sourceTree = "<group>"; };
 		9BA072B74254D7004020703A /* PhotoLogEntryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLogEntryTests.swift; sourceTree = "<group>"; };
@@ -540,6 +544,7 @@
 				B39F11EC4CFD7DA3C49DA882 /* SpeechRecognitionTests.swift */,
 				E1A5DA3E3543A99260250279 /* UIFlowTests.swift */,
 				722CE8B3925ADAFCD540ED0C /* UnitConversionEndToEndTests.swift */,
+				60FD08F783DB315A82419CA8 /* V6QuickLogRowTests.swift */,
 				3CAFF7147516FE2E4E416B06 /* V6RingsTests.swift */,
 				FA0DCFCDAFF06DBAD3CA13DB /* WidgetDataTests.swift */,
 				A42C87894C6E122BBE55A961 /* Fixtures */,
@@ -574,6 +579,7 @@
 			children = (
 				0362D19A4F7D1ABB43FB48F8 /* GoalProgressCard.swift */,
 				A411F4544692EA6196F07C9C /* MacroRingsView.swift */,
+				99672FF01D5ED00EC42A120D /* V6QuickLogRow.swift */,
 				35655D26FCDB45A9D01AD273 /* V6Rings.swift */,
 			);
 			path = Shared;
@@ -1068,6 +1074,7 @@
 				EE6A23C25BA80D02C16DFC47 /* TemplatePreviewSheet.swift in Sources */,
 				5F4476C2F1B7DC3E662A1DBC /* Theme.swift in Sources */,
 				07703998EC9E02AD418576E8 /* TypingDotsView.swift in Sources */,
+				E1FE09769EF8F02ECF537EBF /* V6QuickLogRow.swift in Sources */,
 				0905877698D1E8F326D639E6 /* V6Rings.swift in Sources */,
 				DFFA7CC42D60E67CB40222E8 /* WeightChartView.swift in Sources */,
 				E10A3A33C9E718C1D077AC02 /* WeightEntryView.swift in Sources */,
@@ -1126,6 +1133,7 @@
 				C29B1BD9EF5C4235CA2FDBDC /* SpeechRecognitionTests.swift in Sources */,
 				98FF97CFE71A6BBCFF976259 /* UIFlowTests.swift in Sources */,
 				2F25E1E95107ADEC87765F7B /* UnitConversionEndToEndTests.swift in Sources */,
+				D032F1C198860BE7CFEFC2C2 /* V6QuickLogRowTests.swift in Sources */,
 				77253644F3DB8C702B9AAB5F /* V6RingsTests.swift in Sources */,
 				B8CAE0734166CD113EE590E8 /* WidgetDataTests.swift in Sources */,
 			);

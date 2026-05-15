@@ -84,6 +84,11 @@ struct FloatingAIAssistant: View {
             // Collapse chat so user sees the target screen
             if isExpanded { withAnimation { isExpanded = false } }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .expandAIAssistant)) { _ in
+            // V6 Dashboard Voice chip — open the chat so the mic button is one
+            // tap away rather than stranded behind the corner bubble.
+            if !isExpanded { withAnimation { isExpanded = true } }
+        }
         .onChange(of: modelManager.downloadState) { old, new in
             if case .downloading = new, isExpanded { isExpanded = false }
             if case .completed = new {

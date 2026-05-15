@@ -5,6 +5,18 @@ import Foundation
 public extension Notification.Name {
     static let navigateToTab = Notification.Name("drift.navigateToTab")
     static let saveConversationState = Notification.Name("drift.saveConversationState")
+    /// Posted by the V6 Dashboard quick-log row's "Snap" chip. FoodTabView
+    /// listens and flips its `showingPhotoLog` binding; PhotoLogFlowView
+    /// renders its own opt-in onboarding when CloudVisionKey isn't configured,
+    /// so no separate gate is needed at the call site.
+    static let openPhotoLog = Notification.Name("drift.openPhotoLog")
+    /// Posted by the V6 Dashboard quick-log row's "Search" chip. FoodTabView
+    /// flips `showingSearch` to present FoodSearchView.
+    static let openFoodSearch = Notification.Name("drift.openFoodSearch")
+    /// Posted by the V6 Dashboard quick-log row's "Voice" chip after enabling
+    /// AI. FloatingAIAssistant listens and auto-expands so the user sees the
+    /// chat + mic button on the first tap instead of a stranded corner bubble.
+    static let expandAIAssistant = Notification.Name("drift.expandAIAssistant")
 }
 
 // MARK: - Tool Registry Execution (iOS-side)

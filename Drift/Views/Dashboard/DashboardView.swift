@@ -142,6 +142,13 @@ struct DashboardView: View {
                     // Nutrition hero (macro rings) → Food tab
                     Button { selectedTab = 2 } label: { calorieBalanceCard }.buttonStyle(.plain)
 
+                    // V6 quick-log row — Snap · Voice · Search · Recent.
+                    // Per v6-today.jsx anatomy, this sits between the hero and
+                    // the Body section; always visible regardless of whether
+                    // food was logged so first-time users have 4 clear entry
+                    // points into logging.
+                    V6QuickLogRow(selectedTab: $selectedTab, aiEnabled: $aiEnabled)
+
                     // ── Body ──
                     sectionHeader("Body")
 
