@@ -8,7 +8,8 @@ struct DashboardView: View {
     @State var showDeficitExplainer = false
     @AppStorage("drift_ai_enabled") private var aiEnabled = false
     @AppStorage("workout_consistency_dismissed_until") private var workoutConsistencyDismissedUntil: Double = 0
-    @State private var showingWeightEntry = false
+    @State var showingWeightEntry = false
+    @State var showingSleepRecovery = false
     @State private var staleBackupDays: Int?
     @State private var showingBackupSettings = false
     @State private var showFeedbackPrompt = false
@@ -152,59 +153,14 @@ struct DashboardView: View {
                     // ── Body ──
                     sectionHeader("Body")
 
-                    // Weight + Trend tile — tap to log
-                    Button {
-                        showingWeightEntry = true
-                    } label: {
-                        HStack(spacing: 12) {
-                            VStack(alignment: .leading, spacing: 2) {
-                                Label("Weight", systemImage: "scalemass").font(.caption).foregroundStyle(.secondary)
-                                if let w = viewModel.latestWeight ?? viewModel.trendWeight {
-                                    HStack(alignment: .firstTextBaseline, spacing: 3) {
-                                        Text(String(format: "%.1f", Preferences.weightUnit.convert(fromKg: w)))
-                                            .font(.title2.weight(.bold).monospacedDigit())
-                                        Text(Preferences.weightUnit.displayName).font(.caption2).foregroundStyle(.tertiary)
-                                    }
-                                    if WeightTrendService.shared.isStale {
-                                        Text("Tap to update").font(.caption2).foregroundStyle(Theme.fatYellow)
-                                    } else {
-                                        Text("Tap to update").font(.caption2).foregroundStyle(.quaternary)
-                                    }
-                                } else {
-                                    Text("Log weight").font(.subheadline.weight(.medium)).foregroundStyle(Theme.accent)
-                                }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .accessibilityElement(children: .combine)
-                            .accessibilityLabel(viewModel.trendWeight.map {
-                                "Weight: \(String(format: "%.1f", Preferences.weightUnit.convert(fromKg: $0))) \(Preferences.weightUnit.displayName)"
-                            } ?? "Weight: no data")
-
-                            VStack(alignment: .leading, spacing: 2) {
-                                Label("Trend", systemImage: "chart.line.downtrend.xyaxis").font(.caption).foregroundStyle(.secondary)
-                                if let rate = viewModel.weeklyRate {
-                                    let display = Preferences.weightUnit.convert(fromKg: rate)
-                                    let good = isGoalAligned(rate < 0 ? -1 : 1)
-                                    HStack(alignment: .firstTextBaseline, spacing: 3) {
-                                        Text(String(format: "%+.2f", display))
-                                            .font(.title2.weight(.bold).monospacedDigit())
-                                            .foregroundStyle(good ? Theme.deficit : Theme.surplus)
-                                        Text("\(Preferences.weightUnit.displayName)/wk").font(.caption2).foregroundStyle(.tertiary)
-                                    }
-                                } else {
-                                    Text("--").font(.title2.weight(.bold)).foregroundStyle(.tertiary)
-                                }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .card()
-                    }
-                    .buttonStyle(.plain)
-                    .contextMenu {
-                        Button { selectedTab = 1 } label: {
-                            Label("Weight History", systemImage: "clock")
-                        }
-                    }
+                    // V6 Body tile row — Weight + Sleep + Readiness. Per
+                    // v6-today.jsx anatomy step 5, three small tiles replace
+                    // the legacy full-width Weight+Trend card so the user
+                    // sees current weight, last-night sleep, and recovery at
+                    // a glance. Detail entry points are unchanged: Weight tap
+                    // opens the entry sheet (with "+" inline log button),
+                    // Sleep / Readiness route into SleepRecoveryView.
+                    v6BodyTileRow
 
                     // Proactive alerts — urgent, actionable
                     if !viewModel.proactiveAlerts.isEmpty {
@@ -360,6 +316,9 @@ struct DashboardView: View {
             }
             .sheet(isPresented: $showingBackupSettings) {
                 NavigationStack { BackupSettingsView() }
+            }
+            .navigationDestination(isPresented: $showingSleepRecovery) {
+                SleepRecoveryView()
             }
             .onReceive(NotificationCenter.default.publisher(for: .backupStaleBanner)) { note in
                 staleBackupDays = note.userInfo?["daysSinceBackup"] as? Int
