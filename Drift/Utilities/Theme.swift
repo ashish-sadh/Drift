@@ -94,6 +94,25 @@ enum Theme {
         colors: [accent, accentSecondary],
         startPoint: .topLeading, endPoint: .bottomTrailing
     )
+
+    // MARK: - V6 Palette (Apple Fitness DNA — additive, namespaced)
+
+    /// Vivid Apple-Fitness ring palette + soft tint backgrounds. Lives under
+    /// Theme.V6 so the legacy dark palette stays untouched until the V6
+    /// light/dark switch lands. sRGB approximations of the OKLCH source in
+    /// Docs/design-references/v6-2026-05-14/v6/v6-theme.jsx.
+    enum V6 {
+        static let ringMove = Color(hex: "FF375F")
+        static let ringMoveBg = Color(hex: "FFE0E6")
+        static let ringEx = Color(hex: "7BE619")
+        static let ringExBg = Color(hex: "E2F6CC")
+        static let ringStand = Color(hex: "35C4E5")
+        static let ringStandBg = Color(hex: "D6EEF7")
+        static let ringCarbs = Color(hex: "F0AD2F")
+        static let ringCarbsBg = Color(hex: "FAEBC8")
+        static let ringFat = Color(hex: "FF8F2C")
+        static let ringFatBg = Color(hex: "FCE3CB")
+    }
 }
 
 extension Color {

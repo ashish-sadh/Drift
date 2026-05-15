@@ -169,26 +169,18 @@ extension DashboardView {
                         Text("Today").font(.caption).foregroundStyle(.tertiary)
                     }
 
-                    // Macro rings hero
-                    MacroRingsView(
-                        calories: viewModel.todayNutrition.calories,
-                        calorieTarget: targets.calorieTarget,
-                        protein: viewModel.todayNutrition.proteinG,
-                        proteinTarget: targets.proteinG,
-                        carbs: viewModel.todayNutrition.carbsG,
-                        carbsTarget: targets.carbsG,
-                        fat: viewModel.todayNutrition.fatG,
-                        fatTarget: targets.fatG
-                    )
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 4)
+                    // V6 hero: 3 concentric rings (kcal / protein / fiber)
+                    v6RingsHero(targets: targets)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 4)
 
-                    // Ring legend
+                    // Carbs + fat sit below the hero — the V6 reference uses
+                    // a 2-up legend row for the macros that aren't on the rings.
+                    // Colors come from Theme.V6 so the strip below the hero
+                    // matches the Apple-Fitness palette, not the legacy macros.
                     HStack(spacing: 12) {
-                        macroLegend("Cal", value: viewModel.todayNutrition.calories, target: targets.calorieTarget, color: Theme.calorieBlue, unit: "")
-                        macroLegend("Pro", value: viewModel.todayNutrition.proteinG, target: targets.proteinG, color: Theme.proteinRed, unit: "g")
-                        macroLegend("Carb", value: viewModel.todayNutrition.carbsG, target: targets.carbsG, color: Theme.carbsGreen, unit: "g")
-                        macroLegend("Fat", value: viewModel.todayNutrition.fatG, target: targets.fatG, color: Theme.fatYellow, unit: "g")
+                        macroLegend("Carb", value: viewModel.todayNutrition.carbsG, target: targets.carbsG, color: Theme.V6.ringCarbs, unit: "g")
+                        macroLegend("Fat", value: viewModel.todayNutrition.fatG, target: targets.fatG, color: Theme.V6.ringFat, unit: "g")
                     }
                 } else {
                     // No goal: just show eaten + macros
@@ -230,6 +222,58 @@ extension DashboardView {
             }
         }
         .card()
+    }
+
+    /// V6 Apple-Fitness hero: kcal / protein / fiber concentric rings with the
+    /// "kcal eaten" V6 numeral in the center. The ring colors come from
+    /// `Theme.V6` so this stays additive to the legacy dark palette until V6
+    /// landed end-to-end. Carbs and fat live in the legend row below the hero.
+    ///
+    /// Track colors are V6 tints at 35% opacity — the raw V6 pastels are
+    /// designed for the future light theme; on the current dark
+    /// `Theme.cardBackground` they would otherwise read as a second filled
+    /// ring and bury the actual fill.
+    @ViewBuilder
+    func v6RingsHero(targets: WeightGoal.MacroTargets) -> some View {
+        let nutrition = viewModel.todayNutrition
+        let rings: [V6Ring] = [
+            V6Ring(label: "kcal", unit: "",
+                   value: nutrition.calories, target: targets.calorieTarget,
+                   color: Theme.V6.ringMove, trackColor: Theme.V6.ringMoveBg.opacity(0.35)),
+            V6Ring(label: "protein", unit: "g",
+                   value: nutrition.proteinG, target: targets.proteinG,
+                   color: Theme.V6.ringEx, trackColor: Theme.V6.ringExBg.opacity(0.35)),
+            V6Ring(label: "fiber", unit: "g",
+                   value: nutrition.fiberG, target: targets.fiberG,
+                   color: Theme.V6.ringStand, trackColor: Theme.V6.ringStandBg.opacity(0.35)),
+        ]
+        let kcal = max(0, Int(nutrition.calories.isFinite ? nutrition.calories : 0))
+        // Step font down for 4+ digit kcal so a 4500-kcal day doesn't overflow
+        // the inner-ring radius. Comma separator from Locale.current so en-IN
+        // users see "1,45,000" not "145,000".
+        let kcalFont: Font = kcal >= 10_000
+            ? .system(size: 22, weight: .bold, design: .rounded).monospacedDigit()
+            : kcal >= 1_000
+                ? .system(size: 26, weight: .bold, design: .rounded).monospacedDigit()
+                : .system(size: 30, weight: .bold, design: .rounded).monospacedDigit()
+        VStack(spacing: 10) {
+            V6Rings(
+                rings: rings,
+                size: 180,
+                stroke: 16,
+                center: AnyView(
+                    VStack(spacing: 2) {
+                        Text(kcal, format: .number)
+                            .font(kcalFont)
+                        Text("KCAL")
+                            .font(.system(size: 10, weight: .semibold))
+                            .tracking(1.5)
+                            .foregroundStyle(.secondary)
+                    }
+                )
+            )
+            V6RingLegend(rings: rings)
+        }
     }
 
     private func macroLegend(_ label: String, value: Double, target: Double, color: Color, unit: String) -> some View {
