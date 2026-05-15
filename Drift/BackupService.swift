@@ -7,9 +7,9 @@ import DriftCore
 /// `BackupRestorer`. Pure orchestration — all packaging / restoring logic lives
 /// in DriftCore so this file stays iOS-only.
 public final class BackupService: @unchecked Sendable {
-    /// iCloud container identifier — matches `iCloud.com.ashish-sadh.Drift`
+    /// iCloud container identifier — matches `iCloud.com.drift.health`
     /// declared in entitlements + project.yml.
-    public static let ubiquityContainerIdentifier = "iCloud.com.ashish-sadh.Drift"
+    public static let ubiquityContainerIdentifier = "iCloud.com.drift.health"
 
     /// Subdirectory inside the ubiquity container where `.driftbackup` files
     /// live. Created on first backup.

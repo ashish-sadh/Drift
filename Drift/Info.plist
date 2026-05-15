@@ -4,7 +4,7 @@
 <dict>
 	<key>BGTaskSchedulerPermittedIdentifiers</key>
 	<array>
-		<string>com.ashish-sadh.Drift.dailyBackup</string>
+		<string>com.drift.health.dailyBackup</string>
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>

@@ -26,11 +26,11 @@ Separately, exclude the LLM model directory from system iCloud backup at app ini
 ```xml
 <key>com.apple.developer.icloud-container-identifiers</key>
 <array>
-    <string>iCloud.com.ashish-sadh.Drift</string>
+    <string>iCloud.com.drift.health</string>
 </array>
 <key>com.apple.developer.ubiquitous-container-identifiers</key>
 <array>
-    <string>iCloud.com.ashish-sadh.Drift</string>
+    <string>iCloud.com.drift.health</string>
 </array>
 <key>com.apple.developer.icloud-services</key>
 <array>
@@ -167,12 +167,12 @@ Before unpacking a backup during restore:
 
 ### Task identifier
 
-`com.ashish-sadh.Drift.dailyBackup` — registered in `Info.plist`:
+`com.drift.health.dailyBackup` — registered in `Info.plist`:
 
 ```xml
 <key>BGTaskSchedulerPermittedIdentifiers</key>
 <array>
-    <string>com.ashish-sadh.Drift.dailyBackup</string>
+    <string>com.drift.health.dailyBackup</string>
 </array>
 ```
 
@@ -181,7 +181,7 @@ Before unpacking a backup during restore:
 ```swift
 // In DriftApp.init() or AppDelegate.application(_:didFinishLaunchingWithOptions:)
 BGTaskScheduler.shared.register(
-    forTaskWithIdentifier: "com.ashish-sadh.Drift.dailyBackup",
+    forTaskWithIdentifier: "com.drift.health.dailyBackup",
     using: nil
 ) { task in
     BackupScheduler.shared.handleBackgroundTask(task as! BGProcessingTask)
@@ -194,7 +194,7 @@ BGTaskScheduler.shared.register(
 
 ```swift
 func scheduleNextBackup() {
-    let request = BGProcessingTaskRequest(identifier: "com.ashish-sadh.Drift.dailyBackup")
+    let request = BGProcessingTaskRequest(identifier: "com.drift.health.dailyBackup")
     request.earliestBeginDate = Calendar.current.nextDate(
         after: Date(),
         matching: DateComponents(hour: 3, minute: 0),
@@ -348,8 +348,8 @@ Banner implementation: `BackupMonitor` (new service, iOS-only, lives in `Drift/`
 ### Tier 1 — DriftTests (iOS Simulator)
 
 `DriftTests/BackupServiceTests.swift`
-- BGTaskScheduler task registration: `BGTaskScheduler.shared.registeredTaskIdentifiers` contains `com.ashish-sadh.Drift.dailyBackup`
-- Ubiquity container access: `FileManager.default.url(forUbiquityContainerIdentifier: "iCloud.com.ashish-sadh.Drift")` returns non-nil in test environment
+- BGTaskScheduler task registration: `BGTaskScheduler.shared.registeredTaskIdentifiers` contains `com.drift.health.dailyBackup`
+- Ubiquity container access: `FileManager.default.url(forUbiquityContainerIdentifier: "iCloud.com.drift.health")` returns non-nil in test environment
 - `BackupService.containerURL()` returns nil when `FileManager` mock returns nil; throws `BackupError.iCloudUnavailable`
 - Restore picker UI: given 3 mock `BackupInfo` items, `RestorePickerView` renders 3 rows
 

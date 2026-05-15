@@ -27,7 +27,7 @@ final class BackupSchedulerTests: XCTestCase {
         // diverges from the plist Apple asserts at registration time.
         XCTAssertEqual(
             BackupScheduler.taskIdentifier,
-            "com.ashish-sadh.Drift.dailyBackup"
+            "com.drift.health.dailyBackup"
         )
     }
 

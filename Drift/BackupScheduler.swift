@@ -30,7 +30,7 @@ public final class BackupScheduler: @unchecked Sendable {
     /// Must match the identifier in `BGTaskSchedulerPermittedIdentifiers` in
     /// `Drift/Info.plist` exactly. Apple asserts at registration time if the
     /// two diverge.
-    public static let taskIdentifier = "com.ashish-sadh.Drift.dailyBackup"
+    public static let taskIdentifier = "com.drift.health.dailyBackup"
 
     public static let shared = BackupScheduler()
 
