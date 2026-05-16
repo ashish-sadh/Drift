@@ -30,6 +30,16 @@ Append-only record of non-obvious decisions: architecture changes, harness rules
 
 ---
 
+## 2026-05-16
+
+### human-action-register-replaces-cycle-relabeling — named owner + deadline is the missing mechanism
+#708 backup E2E dogfood entered its 4th consecutive cycle open despite cycle 10262's "escalate to human-action in daily exec" recommendation being followed (relabel succeeded). The relabel didn't produce action because the escalation mechanism was missing (1) named owner, (2) deadline, (3) what-happens-when-deadline-passes. Filed #789 to build `Docs/human-action.md` register + `human-action-service.sh` + EXEC-TEMPLATE integration. Standing rule: items that need a human-not-Claude action are not sprint-tasks — they belong in the register with owner + deadline + visible fallback. After deadline passes, the feature ships flagged "engine validated, restore not field-tested" rather than carrying as "still open." Commit `46ec7d41` (review cycle 10888 PR #787).
+
+### testflight-archive-pipeline-is-resilient — 6 builds shipped in 72h after cycle-10262 archive failure
+The cycle-10262 standing rule ("failed archive within 24h = auto-P0") fired correctly via #770 and the pipeline shipped 6 builds (244-250) in 72 hours. The standing rule worked end-to-end for the first observable test. Lesson: when a tenet ("TestFlight reach is part of the product") is operationalized into a P0-trigger rule, AND the rule has a single owner discipline, AND the diagnostic is documented (xcodebuild log analysis path), the recovery time collapses from 17 builds (cycle 8799) to 1 day (cycle 10262). The architecture is the discipline.
+
+---
+
 ## 2026-05-13
 
 ### fm-extractor-flag-off-then-tier3-eval — Foundation Models cutover requires eval gate, not direct flip
