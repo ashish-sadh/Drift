@@ -2484,5 +2484,24 @@
       "Today screen leads with the V6 design's Apple-Fitness-style triple-ring hero: nested calorie/protein/fiber rings with the calorie deficit/surplus number centered, animating to current progress (#782)"
     ],
     "fixes": []
+  },
+  {
+    "build": 250,
+    "date": "2026-05-15T17:00:00-07:00",
+    "description": "chore: TestFlight build 250 \u2014 V6 visual evolution elements 2 & 3 + honest weight projection",
+    "features": [
+      "Dashboard adds the V6 design's quick-log chip row beneath the rings hero \u2014 one-tap entry to log food, weight, water, supplements without entering a sub-screen (#782, element 2)",
+      "Dashboard Body tile row landed \u2014 at-a-glance body composition tiles surfacing weight trend, recovery, and recent activity from the V6 design reference (#782, element 3)"
+    ],
+    "fixes": [
+      "Weight goal projection no longer extrapolates a weekly rate from 2 data points \u2014 was producing fictional 'you'll hit goal in 3 weeks' claims off two morning readings. Now shows 'need more data' when sample is too small to project honestly"
+    ]
+  },
+  {
+    "build": 251,
+    "date": "2026-05-16T12:30:00-07:00",
+    "description": "chore: TestFlight build 251 \u2014 planning + review cycle 10888",
+    "features": [],
+    "fixes": []
   }
 ]
