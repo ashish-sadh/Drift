@@ -873,28 +873,51 @@ cmd_planning_done() {
 # product review this round. Folded here so review has a single cadence (sprint
 # planning), not a separate timer that drifts.
 #
+# As of cycle 10950, the trigger is wall-clock (PRODUCT_REVIEW_INTERVAL_DAYS,
+# default 5) rather than cycle-count. Cycle-count stats are still emitted for
+# telemetry — humans like seeing "23 cycles since last review" in exec briefings
+# — but they are no longer the gate. See report-service.sh cmd_review_due.
+#
 # Usage: scripts/sprint-service.sh planning-context
 # Outputs (one line each, key=value):
 #   cycle_count=<int>
 #   last_review_cycle=<int>
-#   cycles_since_last_review=<int>
-#   review_due=<true|false>           # true when cycles_since_last_review >= REVIEW_CYCLE_INTERVAL
-#   review_cycle_interval=<int>       # default 20, override via PRODUCT_REVIEW_CYCLE_INTERVAL env
+#   cycles_since_last_review=<int>        # telemetry only
+#   last_review_time=<unix-seconds>
+#   days_since_last_review=<int>          # the trigger
+#   review_due=<true|false>               # true when days_since_last_review >= review_interval_days
+#   review_interval_days=<int>            # default 5, override via PRODUCT_REVIEW_INTERVAL_DAYS env
+#   review_cycle_interval=<int>           # legacy telemetry only — no longer the trigger
 cmd_planning_context() {
-    local INTERVAL="${PRODUCT_REVIEW_CYCLE_INTERVAL:-20}"
+    local INTERVAL_DAYS="${PRODUCT_REVIEW_INTERVAL_DAYS:-5}"
+    local LEGACY_CYCLE_INTERVAL="${PRODUCT_REVIEW_CYCLE_INTERVAL:-20}"
     local CYCLE
     CYCLE=$(cat "$HOME/drift-state/commit-counter" 2>/dev/null || echo "0")
     local LAST_REVIEW_CYCLE
     LAST_REVIEW_CYCLE=$(cat "$HOME/drift-state/last-review-cycle" 2>/dev/null || echo "0")
-    local SINCE=$(( CYCLE - LAST_REVIEW_CYCLE ))
-    [ "$SINCE" -lt 0 ] && SINCE=0
+    local CYCLES_SINCE=$(( CYCLE - LAST_REVIEW_CYCLE ))
+    [ "$CYCLES_SINCE" -lt 0 ] && CYCLES_SINCE=0
+
+    local LAST_REVIEW_TIME
+    LAST_REVIEW_TIME=$(cat "$HOME/drift-state/last-review-time" 2>/dev/null || echo "0")
+    local NOW
+    NOW=$(date +%s)
+    local SECONDS_SINCE=$(( NOW - LAST_REVIEW_TIME ))
+    [ "$SECONDS_SINCE" -lt 0 ] && SECONDS_SINCE=0
+    local DAYS_SINCE=$(( SECONDS_SINCE / 86400 ))
+
+    local INTERVAL_SECONDS=$(( INTERVAL_DAYS * 86400 ))
     local DUE="false"
-    [ "$SINCE" -ge "$INTERVAL" ] && DUE="true"
+    [ "$SECONDS_SINCE" -ge "$INTERVAL_SECONDS" ] && DUE="true"
+
     echo "cycle_count=$CYCLE"
     echo "last_review_cycle=$LAST_REVIEW_CYCLE"
-    echo "cycles_since_last_review=$SINCE"
+    echo "cycles_since_last_review=$CYCLES_SINCE"
+    echo "last_review_time=$LAST_REVIEW_TIME"
+    echo "days_since_last_review=$DAYS_SINCE"
     echo "review_due=$DUE"
-    echo "review_cycle_interval=$INTERVAL"
+    echo "review_interval_days=$INTERVAL_DAYS"
+    echo "review_cycle_interval=$LEGACY_CYCLE_INTERVAL"
 }
 
 # ── Dispatch ──────────────────────────────────────────────────────────────────

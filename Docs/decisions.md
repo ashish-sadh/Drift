@@ -30,6 +30,13 @@ Append-only record of non-obvious decisions: architecture changes, harness rules
 
 ---
 
+## 2026-05-18
+
+### review-cadence-wall-clock-replaces-cycle-count — anchor the gate to real time, not autopilot velocity
+Product review was triggering on a 20-cycle gap. Cycle 10950 review observed this had collapsed to a daily review because autopilot cycles now complete in ~20 minutes (70+ cycles/day), not the ~5–6 cycles/day the original interval was set against. Reviews ran every day after every exec briefing — overweighting process work and burning a fresh GitHub Issue per cycle. Replaced with a single wall-clock gate (`PRODUCT_REVIEW_INTERVAL_DAYS`, default 5) in `cmd_review_due` and `cmd_planning_context`; the old cycle-count fields stay in `planning-context` output for telemetry only. Standing rule: any cadence in the harness must anchor to wall time, not cycle count — otherwise it drifts silently as autopilot speed changes. Commit will land via #803.
+
+---
+
 ## 2026-05-17
 
 ### honest-uncertainty-beats-clever-extrapolation — refuse to project when the sample doesn't support it

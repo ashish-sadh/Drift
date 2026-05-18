@@ -294,17 +294,16 @@ sync_stamps_from_main() {
         fi
     fi
 
-    # Self-heal last-review-cycle: when the cycle stamp is missing, set it to
-    # (cycle - INTERVAL) so the very next sprint planning session does the
-    # review. Avoids the 3036-cycle drift failure mode permanently.
-    local INTERVAL="${PRODUCT_REVIEW_CYCLE_INTERVAL:-20}"
+    # Self-heal last-review-cycle (telemetry only as of cycle 10950 — the actual
+    # review trigger is now wall-clock via last-review-time, not cycle count).
+    # We still stamp this so the "cycles since last review" telemetry in
+    # planning-context / exec briefings reads as a recent number instead of "47
+    # cycles since cycle 0" on a fresh state.
     local cycle_now
     cycle_now=$(cat "$SD/cycle-counter" 2>/dev/null || echo "0")
     if [[ ! -s "$SD/last-review-cycle" ]] && (( cycle_now > 0 )); then
-        local seed=$(( cycle_now - INTERVAL ))
-        (( seed < 0 )) && seed=0
-        atomic_write "$SD/last-review-cycle" "$seed"
-        log "Self-heal: stamped last-review-cycle = $seed (cycle_now=$cycle_now, interval=$INTERVAL) so next planning does the review"
+        atomic_write "$SD/last-review-cycle" "$cycle_now"
+        log "Self-heal: stamped last-review-cycle = $cycle_now (telemetry only — wall-clock trigger lives on last-review-time)"
     fi
 
     # Most recent exec report merge → last-report-time. Matches the squash-

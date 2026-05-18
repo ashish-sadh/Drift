@@ -45,12 +45,12 @@ scripts/planning-service.sh remaining
    - **Archive old entries.** Anything >30 days old that's now common knowledge / fully absorbed into CLAUDE.md or other docs → delete (decisions.md isn't a museum; it's a working memory).
    - The file should stay <300 lines. If it's growing past that, prune harder.
 
-7. **Product review (if due):** product review has NO independent cadence — it rides on sprint planning. Check the cycle gap:
+7. **Product review (if due):** product review has NO independent cadence — it rides on sprint planning. The trigger is wall-clock (default 5 days since last review), not cycle count. Check it:
    ```bash
    eval "$(scripts/sprint-service.sh planning-context)"
-   echo "cycles since last review: $cycles_since_last_review (interval $review_cycle_interval)"
+   echo "days since last review: $days_since_last_review (interval $review_interval_days)"
    ```
-   If `review_due=true`: `scripts/report-service.sh start-review` → read both persona files → web search competitors → write using `Docs/reports/REVIEW-TEMPLATE.md` (every section required, filename `review-cycle-{N}.md`) → PR → `scripts/report-service.sh finish` (stamps `last-review-cycle` → trigger resets). **Then file a sprint-task for every finding** with `Source: review-cycle-<N>` in the body, the appropriate SENIOR/JUNIOR label, and standard Goal/Files/Approach/Tests/Acceptance scaffolding. A review that produces findings without filed tasks is a review that did nothing. Then: `scripts/planning-service.sh checkpoint review_merged`. If not due, skip — DO NOT do reviews on a separate timer.
+   If `review_due=true`: `scripts/report-service.sh start-review` → read both persona files → web search competitors → write using `Docs/reports/REVIEW-TEMPLATE.md` (every section required, filename `review-cycle-{N}.md`) → PR → `scripts/report-service.sh finish` (stamps `last-review-time` → trigger resets). **Then file a sprint-task for every finding** with `Source: review-cycle-<N>` in the body, the appropriate SENIOR/JUNIOR label, and standard Goal/Files/Approach/Tests/Acceptance scaffolding. A review that produces findings without filed tasks is a review that did nothing. Then: `scripts/planning-service.sh checkpoint review_merged`. If not due, skip — DO NOT do reviews on a separate timer.
 
 8. **Daily exec report (if due):** `scripts/report-service.sh daily-due || true` — if due: `scripts/report-service.sh start-exec` → write report → PR with `--label report` → merge. Then: `echo $(date +%s) > ~/drift-state/last-report-time`
 
