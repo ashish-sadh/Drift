@@ -69,6 +69,10 @@
 
 ## What I Learned (recent, not yet sedimented)
 
+### Review Cycle 10950 (2026-05-17)
+- "Build 251 was process-only" is an acceptable line item *once*. Two zero-feature ships in a row would be cadence theater (TestFlight publishes that don't carry user-visible change), and undermines the cycle-10262 rule operationalizing "TestFlight reach is part of the product." The rule was about *unblocking* archives; it implicitly assumed every archive carries a meaningful payload. Add the implicit assumption to the rule: a TestFlight build with no user-visible features in the description should auto-flag for review at the next planning cycle. Not necessarily blocking — just visible.
+- Three reviews in a row pointing at Feedback null traffic. Cycle 9851, 10262, 10888 all said the same thing. Cycle 10888 escalated to #789 (human-action.md register) as the structural fix. The test is whether #789 lands within 48h with the DM as its FIRST entry, not as a scaffolded-but-empty register. Acceptance criterion update queued for #789 (per cycle 10950 review debate).
+
 ### Review Cycle 10888 (2026-05-16)
 - The cycle-10262 standing rule ("failed archive within 24h = auto-P0") WORKED — 6 TestFlight builds shipped in 72h after the 243 failure. Lesson: when a tenet is operationalized into a P0-trigger rule with a documented diagnostic path, recovery time collapses by an order of magnitude (17 builds → 1 day). Tenets without rules are aspirations; tenets WITH rules are infrastructure. Lean into this for activation: my "passive levers are half-levers" tenet is currently an aspiration, not a rule. Promote it to a rule that fires automatically: when a passive activation lever ships, file a paired human-DM ask in the same sprint.
 - I'm in violation of my own learning from cycle 10262. Three V6 elements + Feedback banner shipped in this cycle with ZERO friend-tester DM. The passive-vs-active anti-pattern is back and I named it last cycle. Filed #789 (human-action register) to make the active-half a structural ask, not a recommendation I might or might not file. Mechanism > intent.

@@ -78,6 +78,10 @@
 
 ## What I Learned (recent, not yet sedimented)
 
+### Review Cycle 10950 (2026-05-17)
+- The cycle-count-based review interval is a calibration debt. 70 cycles elapsed in 24h producing a daily review when wall-clock should drive cadence. Lesson: any auto-triggered cadence built on a unit that's not wall-clock will silently shift as the unit's velocity changes. When designing a trigger, anchor it to the thing the human reads it against (clock time for reviews, commit count for code maturity, etc.) — not to the internal counter that happened to be convenient. Filed #803.
+- The 5a3f6eec 2-point extrapolation bug is a *class*, not an isolated patch. UI labels asserting confidence the math doesn't earn ("based on last 21 days" over 2 data points) is the pattern. Sibling sites likely exist in macro window averages, TDEE projections, glucose averages, supplement adherence. Class-of-bug audits earn their slot when a single fix shows the shape clearly — file the audit when you write the patch, not later. Filed #801.
+
 ### Review Cycle 10888 (2026-05-16)
 - The flag-off + eval-gated cutover template from cycle 10262 (#771) is now templated across BOTH extraction AND chat surfaces (`.foundationModels` backend wired this cycle, #797 files the chat parity eval gate). Pattern: ship the wiring with default-off, file the eval gate immediately, cutover when parity is measured. This is now the standing shape for any platform-API integration affecting stochastic output. Replicate before the next API rolls.
 - "Human action required" is a third work-item category alongside sprint-task and design-doc, and we've been mis-routing it as sprint-task for 4 cycles (#708). Sprint tasks are things sessions can complete; design docs are things sessions write; human-action items are things only the human can do (wipe-and-restore a device, DM a friend tester). They need their own register with owner + deadline + visible fallback. Filed #789 to build it. Lesson: process-mismatch (wrong work-item type for the work) produces silent slip across cycles because the queue mechanism never surfaces "this isn't actionable by sessions."
