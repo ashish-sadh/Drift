@@ -54,8 +54,16 @@ import GRDB
 @Test func weightTrendConfigCustomAlpha() async throws {
     var config = WeightTrendCalculator.AlgorithmConfig.default
     config.emaAlpha = 0.5
-    let entries: [(String, Double)] = (0..<14).map {
-        (String(format: "2026-03-%02d", $0 + 1), 70.0 - Double($0) * 0.1)
+    // Use rolling-now dates so the entries land inside the 21-day regression
+    // window — hardcoded `2026-03-XX` strings silently roll outside it after
+    // a couple of months and the calculator (correctly) falls back to
+    // `hasInsufficientData=true, weeklyRateKg=0`, which flips the asserted
+    // direction from `.losing` to `.maintaining`.
+    let today = Date()
+    let entries: [(String, Double)] = (0..<15).map { day in
+        let d = Calendar.current.date(byAdding: .day, value: -14 + day, to: today)!
+        let f = DateFormatter(); f.dateFormat = "yyyy-MM-dd"; f.locale = Locale(identifier: "en_US_POSIX")
+        return (f.string(from: d), 70.0 - Double(day) * 0.1)
     }
     let t = WeightTrendCalculator.calculateTrend(entries: entries, config: config)
     #expect(t != nil)
