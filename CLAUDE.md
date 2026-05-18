@@ -40,7 +40,7 @@ Each entry tagged with its maintenance status. **Auto-maintained** = a script or
 
 | Doc | Status | What it is |
 |-----|--------|-----------|
-| `program.md` | **Auto/manual** | **Drift Autopilot** — the single autonomous loop program. Edited as the harness evolves. |
+| `program.md` | Reference (pointer doc) | **Drift Autopilot pointer** — mode summary, "run autopilot" standalone loop, human takeover commands. Phase logic lives in `.claude/skills/<role>/SKILL.md`. |
 | `Docs/roadmap.md` | **Auto-maintained** (planning step 10) | Product roadmap — unified, domain-sectioned. Re-read every cycle. |
 | `Docs/personas/` | **Auto-maintained** (planning step 10) | Evolving Product Designer + Principal Engineer persona files. |
 | `Docs/reports/` | **Auto-maintained** (review/exec PR workflows) | Exec reports + product review reports. Published as GitHub PRs. |
