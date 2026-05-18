@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "drift-mcp"
+version = "0.1.0"
+description = "MCP server exposing Drift autopilot operations (sprint, design-doc, issues, reports, state, verify, testflight) as typed tools to Claude Code sessions."
+requires-python = ">=3.11"
+dependencies = [
+    "mcp>=1.26.0",
+    "lxml>=5.0.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+]
+
+[project.scripts]
+drift-mcp = "drift_mcp.server:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["drift_mcp*"]

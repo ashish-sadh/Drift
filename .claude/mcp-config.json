@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "drift": {
+      "command": "/opt/homebrew/bin/python3.11",
+      "args": [
+        "-m",
+        "drift_mcp.server"
+      ],
+      "env": {
+        "PYTHONPATH": "${CLAUDE_PROJECT_DIR}/drift-mcp",
+        "DRIFT_REPO": "${CLAUDE_PROJECT_DIR}"
+      }
+    }
+  }
+}

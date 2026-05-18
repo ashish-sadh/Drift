@@ -53,3 +53,8 @@ graphify-out/graph.html
 # so the deployed Command Center can fetch fresh data without polluting
 # main's git log. See scripts/self-improve-watchdog.sh:commit_heartbeat_to_branch.
 command-center/heartbeat.json
+
+# Python build artifacts (drift-mcp)
+__pycache__/
+*.pyc
+.pytest_cache/
