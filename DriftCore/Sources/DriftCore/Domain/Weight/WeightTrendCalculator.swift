@@ -288,9 +288,11 @@ public enum WeightTrendCalculator {
                 let usablePoints = largestGapBetweenConsecutive(widenedPoints) > config.regimeChangeGapThresholdDays
                     ? pointsAfterLastGap(widenedPoints, gapThresholdDays: config.regimeChangeGapThresholdDays)
                     : widenedPoints
-                let usableSpan = usablePoints.count >= 2
-                    ? daysBetween(usablePoints.first!.date, usablePoints.last!.date)
-                    : 0
+                let usableSpan: Int = {
+                    guard let first = usablePoints.first, let last = usablePoints.last,
+                          usablePoints.count >= 2 else { return 0 }
+                    return daysBetween(first.date, last.date)
+                }()
                 if let widened = weeklyRateForWindow(dataPoints: usablePoints, windowDays: config.widenWindowDays) {
                     // Regime-change guard (no-gap variant): if the widened
                     // slope flips sign relative to a meaningful primary, trust
@@ -555,8 +557,10 @@ public enum WeightTrendCalculator {
     /// day to day from water + glycogen). Below this, any regression slope
     /// is more noise than signal.
     static func hasSufficientData(_ points: [WeightDataPoint]) -> Bool {
-        guard points.count >= 4 else { return false }
-        let span = daysBetween(points.first!.date, points.last!.date)
+        guard points.count >= 4,
+              let first = points.first,
+              let last = points.last else { return false }
+        let span = daysBetween(first.date, last.date)
         return span >= 14
     }
 

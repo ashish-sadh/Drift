@@ -368,3 +368,51 @@ import Testing
     #expect(CycleBiomarkerInsight.phaseFor(cycleDay: 10, cycleLength: 21) == .ovulation)
     #expect(CycleBiomarkerInsight.phaseFor(cycleDay: 12, cycleLength: 21) == .luteal)
 }
+
+// MARK: - flagged-phase tie-breaking crash hunt (cycle 10950)
+// Covers the now-safe path after removing the `flagged!.deviation` force-unwrap.
+// The previous code short-circuited via `flagged == nil ||` so was logically
+// safe; the refactor uses `if let current` so the bang is gone but the
+// tie-break semantics — "keep the phase with the larger absolute deviation" —
+// must be preserved.
+
+@Test func cycleBiomarker_analyze_largerDeviationPhaseWins() {
+    // Three eligible phases. Menstrual is closest to overall mean,
+    // follicular is moderately off, luteal is the most extreme. Verify the
+    // most-extreme phase (luteal) gets flagged — i.e. the absDeviation
+    // comparison correctly replaces an already-set flagged tuple.
+    let readings: [(value: Double, phase: CycleBiomarkerInsight.Phase)] = [
+        (29, .menstrual), (30, .menstrual), (31, .menstrual),
+        (35, .follicular), (36, .follicular), (34, .follicular),
+        (55, .luteal), (56, .luteal), (54, .luteal),
+    ]
+    let result = CycleBiomarkerInsight.analyze(
+        readings: readings,
+        biomarkerId: "x",
+        displayName: "x",
+        unit: "u",
+        cyclesTracked: 3
+    )
+    #expect(result.flaggedPhase == .luteal,
+            "phase with the largest absDeviation must be flagged (refactored tie-break)")
+}
+
+@Test func cycleBiomarker_analyze_uniformReadingsLeaveFlaggedNil() {
+    // Re-asserts the no-flagged code path under the refactored conditional.
+    // With std == 0, the inner `guard std > 0 else { continue }` skips every
+    // phase before the flagged-tracking branch executes; flagged must stay nil.
+    let readings: [(value: Double, phase: CycleBiomarkerInsight.Phase)] = [
+        (30, .menstrual), (30, .menstrual), (30, .menstrual),
+        (30, .follicular), (30, .follicular), (30, .follicular),
+        (30, .ovulation), (30, .ovulation), (30, .ovulation),
+        (30, .luteal), (30, .luteal), (30, .luteal),
+    ]
+    let result = CycleBiomarkerInsight.analyze(
+        readings: readings,
+        biomarkerId: "x",
+        displayName: "x",
+        unit: "u",
+        cyclesTracked: 3
+    )
+    #expect(result.flaggedPhase == nil)
+}

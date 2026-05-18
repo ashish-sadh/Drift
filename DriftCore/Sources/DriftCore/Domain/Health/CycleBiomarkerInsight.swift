@@ -142,7 +142,11 @@ public enum CycleBiomarkerInsight {
             guard absDeviation > std else { continue }
 
             let direction: FlagDirection = signedDeviation < 0 ? .drop : .rise
-            if flagged == nil || absDeviation > flagged!.deviation {
+            if let current = flagged {
+                if absDeviation > current.deviation {
+                    flagged = (phase, mean, vs.count, absDeviation, direction)
+                }
+            } else {
                 flagged = (phase, mean, vs.count, absDeviation, direction)
             }
         }

@@ -1161,3 +1161,77 @@ private func dateStr(_ d: Date) -> String {
     #expect(trend?.weeklyRateKg != 0,
             "Real consistent gain → non-zero rate.")
 }
+
+// MARK: - hasSufficientData crash hunt (cycle 10950)
+// These cover the now-safe paths after removing force-unwraps on
+// `points.first!.date` / `.last!.date`. The original code was guarded by
+// count>=4, but the unwraps were compiler-unverifiable; the new code uses
+// `guard let` so an empty/short array can never reach `daysBetween`.
+
+@Test func hasSufficientData_empty_returnsFalse() {
+    #expect(WeightTrendCalculator.hasSufficientData([]) == false)
+}
+
+@Test func hasSufficientData_belowCountFloor_returnsFalse() {
+    let today = Date()
+    let points: [WeightTrendCalculator.WeightDataPoint] = (0..<3).map { i in
+        WeightTrendCalculator.WeightDataPoint(
+            date: Calendar.current.date(byAdding: .day, value: -i, to: today)!,
+            dateString: "",
+            actualWeight: 70.0,
+            emaWeight: 70.0
+        )
+    }
+    #expect(WeightTrendCalculator.hasSufficientData(points) == false,
+            "3 points (below the count>=4 floor) must return false without crashing.")
+}
+
+@Test func hasSufficientData_fourPointsSpanningLessThanTwoWeeks_returnsFalse() {
+    let today = Date()
+    let points: [WeightTrendCalculator.WeightDataPoint] = (0..<4).map { i in
+        WeightTrendCalculator.WeightDataPoint(
+            date: Calendar.current.date(byAdding: .day, value: -i, to: today)!,
+            dateString: "",
+            actualWeight: 70.0,
+            emaWeight: 70.0
+        )
+    }
+    // 4 points across 3 days fail the span>=14 check.
+    #expect(WeightTrendCalculator.hasSufficientData(points) == false)
+}
+
+@Test func hasSufficientData_fourPointsSpanningTwoWeeks_returnsTrue() {
+    // Points are emitted oldest→newest (the order calculateTrend produces);
+    // hasSufficientData reads points.first/.last and expects ascending dates.
+    let today = Date()
+    let offsets = [14, 9, 5, 0]
+    let points: [WeightTrendCalculator.WeightDataPoint] = offsets.map { offset in
+        WeightTrendCalculator.WeightDataPoint(
+            date: Calendar.current.date(byAdding: .day, value: -offset, to: today)!,
+            dateString: "",
+            actualWeight: 70.0,
+            emaWeight: 70.0
+        )
+    }
+    #expect(WeightTrendCalculator.hasSufficientData(points) == true)
+}
+
+@Test func calculateTrend_widenWindowFallback_emptyPostGap_doesNotCrash() async throws {
+    // Stresses the line 292 fix: the primary regression returns near-zero
+    // slope (forcing widen), and the largest gap pushes pointsAfterLastGap to
+    // a degenerate (count<2) array. Without the fix, `usablePoints.first!` /
+    // `.last!` would crash on a 0- or 1-element slice. With the fix,
+    // `usableSpan` returns 0 and the function returns without crashing.
+    let cal = Calendar.current
+    let today = Date()
+    // Two recent points (anchor primary slope to maintain) and then one very
+    // old isolated point — the gap-after-last-gap slice becomes a single point.
+    let entries: [(date: String, weightKg: Double)] = [
+        (DateFormatters.dateOnly.string(from: cal.date(byAdding: .day, value: -45, to: today)!), 70.0),
+        (DateFormatters.dateOnly.string(from: cal.date(byAdding: .day, value: -2, to: today)!), 70.05),
+        (DateFormatters.dateOnly.string(from: cal.date(byAdding: .day, value: -1, to: today)!), 70.04),
+        (DateFormatters.dateOnly.string(from: today), 70.03)
+    ]
+    let trend = WeightTrendCalculator.calculateTrend(entries: entries)
+    #expect(trend != nil, "Degenerate widen-window slice must not crash.")
+}
