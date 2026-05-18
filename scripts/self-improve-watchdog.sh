@@ -852,20 +852,29 @@ start_claude() {
     local FALLBACK=""
     [[ "$MODEL" == "opus" ]] && FALLBACK="--fallback-model sonnet"
 
-    # Skills cutover: when DRIFT_USE_SKILLS=1, spawn with a slash-command
-    # prompt that resolves to .claude/skills/<skill>/SKILL.md instead of the
-    # giant SESSION_PROMPT. Per-phase context shrinks ~60-70% and the entire
-    # program.md monolith stops being loaded into every session.
+    # Skills cutover: when DRIFT_USE_SKILLS=1 (env var OR file flag), spawn
+    # with a slash-command prompt that resolves to .claude/skills/<skill>/SKILL.md
+    # instead of the giant SESSION_PROMPT. Per-phase context shrinks ~60-70%.
     #
     # SESSION_TYPE → /skill mapping:
     #   planning → /planning  (Opus)
     #   senior   → /senior    (Opus)
     #   junior   → /junior    (Sonnet)
     #
-    # If DRIFT_USE_SKILLS is unset/0, fall back to SESSION_PROMPT (legacy path).
-    # Rollback at any step: set DRIFT_USE_SKILLS=0 in the watchdog env or unset.
+    # Flag source priority: env DRIFT_USE_SKILLS first, then file
+    # ~/drift-state/use-skills.flag (1 = on). Using a file flag means
+    # launchd-managed watchdog respawns inherit the choice without env
+    # mutation. Flip on:  echo 1 > ~/drift-state/use-skills.flag
+    # Flip off:           rm -f  ~/drift-state/use-skills.flag
+    local USE_SKILLS="${DRIFT_USE_SKILLS:-}"
+    if [[ -z "$USE_SKILLS" ]] && [[ -f "$HOME/drift-state/use-skills.flag" ]]; then
+        USE_SKILLS=$(cat "$HOME/drift-state/use-skills.flag" 2>/dev/null | tr -d '[:space:]')
+    fi
+    USE_SKILLS="${USE_SKILLS:-0}"
+
     local PROMPT_ARG
-    if [[ "${DRIFT_USE_SKILLS:-0}" == "1" ]]; then
+    local MCP_CONFIG_ARG=""
+    if [[ "$USE_SKILLS" == "1" ]]; then
         case "$SESSION_TYPE" in
             planning) PROMPT_ARG="/planning" ;;
             senior)   PROMPT_ARG="/senior" ;;
@@ -875,12 +884,19 @@ start_claude() {
                 PROMPT_ARG="$SESSION_PROMPT"
                 ;;
         esac
-        log "Skill-based spawn: $PROMPT_ARG (model=$MODEL)"
+        # Pass the drift-mcp config so typed tools (sprint_*, design_*,
+        # issues_*, state_*, verify_*, testflight_*) are available. The new
+        # skill bodies expect these.
+        if [[ -f "$WORK_DIR/.claude/mcp-config.json" ]]; then
+            MCP_CONFIG_ARG="--mcp-config $WORK_DIR/.claude/mcp-config.json"
+        fi
+        log "Skill-based spawn: $PROMPT_ARG (model=$MODEL, mcp=$([ -n "$MCP_CONFIG_ARG" ] && echo on || echo off))"
     else
         PROMPT_ARG="$SESSION_PROMPT"
     fi
 
-    DRIFT_AUTONOMOUS=1 DRIFT_USE_SKILLS="${DRIFT_USE_SKILLS:-0}" DRIFT_SESSION_TYPE="$SESSION_TYPE" claude -p "$PROMPT_ARG" \
+    DRIFT_AUTONOMOUS=1 DRIFT_USE_SKILLS="$USE_SKILLS" DRIFT_SESSION_TYPE="$SESSION_TYPE" claude -p "$PROMPT_ARG" \
+        $MCP_CONFIG_ARG \
         --dangerously-skip-permissions \
         --model "$MODEL" \
         $FALLBACK \
