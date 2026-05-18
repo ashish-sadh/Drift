@@ -30,6 +30,13 @@ Append-only record of non-obvious decisions: architecture changes, harness rules
 
 ---
 
+## 2026-05-17
+
+### honest-uncertainty-beats-clever-extrapolation — refuse to project when the sample doesn't support it
+A real-device 2-weigh-in install ("+1.3 lbs over 5 days") was displayed as "+4.41 lbs/wk" and "+1714 cal/day surplus" both labelled "based on last 21 days" because `WeightTrendCalculator`'s fallback path projected the most recent 2 points to a weekly cadence when the regression and two-window methods lacked data. The label-mismatch was as bad as the number — the UI claimed 21-day evidence for a 2-point extrapolation. Standing rule for any UI surface displaying a derived metric over a window: the displayed window has to match the actual evidence used. When evidence is too thin to project honestly, ship a "need more data" affordance rather than fabricated certainty. Commit `5a3f6eec`.
+
+---
+
 ## 2026-05-16
 
 ### human-action-register-replaces-cycle-relabeling — named owner + deadline is the missing mechanism
