@@ -7,8 +7,8 @@
         "drift_mcp.server"
       ],
       "env": {
-        "PYTHONPATH": "${CLAUDE_PROJECT_DIR}/drift-mcp",
-        "DRIFT_REPO": "${CLAUDE_PROJECT_DIR}"
+        "PYTHONPATH": "/Users/ashishsadh/workspace/Drift/drift-mcp",
+        "DRIFT_REPO": "/Users/ashishsadh/workspace/Drift"
       }
     }
   }
