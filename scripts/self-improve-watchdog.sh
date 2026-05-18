@@ -745,7 +745,40 @@ start_claude() {
         fi
     fi
 
-    if [[ "$SESSION_TYPE" != "planning" ]]; then
+    # 0.5. TestFlight publish slot (only under DRIFT_USE_SKILLS, gated by
+    # is-clean-state). Runs BEFORE planning/senior/junior so it never
+    # collides with an in-flight session — the watchdog only runs ONE
+    # claude -p at a time, so slotting TF into that queue gives us zero
+    # concurrency on xcodebuild + the main branch commit window.
+    #
+    # Why not launchd cron: launchd fires fire-and-forget; a senior
+    # session running `xcodebuild test` while launchd-driven TF runs
+    # `xcodebuild archive` could deadlock the simulator (CLAUDE.md rule)
+    # or race on the main branch commit. Watchdog-driven scheduling
+    # solves both via existing single-session serialization.
+    local USE_SKILLS_CHECK="${DRIFT_USE_SKILLS:-}"
+    if [[ -z "$USE_SKILLS_CHECK" ]] && [[ -f "$HOME/drift-state/use-skills.flag" ]]; then
+        USE_SKILLS_CHECK=$(cat "$HOME/drift-state/use-skills.flag" 2>/dev/null | tr -d '[:space:]')
+    fi
+    USE_SKILLS_CHECK="${USE_SKILLS_CHECK:-0}"
+
+    if [[ "$USE_SKILLS_CHECK" == "1" ]] && [[ "$SESSION_TYPE" != "planning" ]]; then
+        local TF_LAST TF_AGE
+        TF_LAST=$(cat "$HOME/drift-state/last-testflight-publish" 2>/dev/null || echo 0)
+        TF_AGE=$(( $(date +%s) - TF_LAST ))
+        # 10800s = 3h cadence (TestFlight publish-window minimum)
+        if [[ "$TF_AGE" -ge 10800 ]] && "$WORK_DIR/scripts/is-clean-state.sh" > /dev/null 2>&1; then
+            MODEL="haiku"
+            SESSION_TYPE="testflight"
+            SESSION_PROMPT="/testflight-publish"
+            log "TestFlight slot — ${TF_AGE}s since last + state clean — spawning /testflight-publish (haiku)"
+            # Write the auth flag the guard-testflight.sh hook expects.
+            mkdir -p "$HOME/drift-state"
+            touch "$HOME/drift-state/testflight-publish-authorized"
+        fi
+    fi
+
+    if [[ "$SESSION_TYPE" != "planning" ]] && [[ "$SESSION_TYPE" != "testflight" ]]; then
     # 1. Planning due?
     if "$WORK_DIR/scripts/sprint-service.sh" planning-due 2>/dev/null; then
         MODEL=$(get_model planning opus)
@@ -876,9 +909,10 @@ start_claude() {
     local MCP_CONFIG_ARG=""
     if [[ "$USE_SKILLS" == "1" ]]; then
         case "$SESSION_TYPE" in
-            planning) PROMPT_ARG="/planning" ;;
-            senior)   PROMPT_ARG="/senior" ;;
-            junior)   PROMPT_ARG="/junior" ;;
+            planning)   PROMPT_ARG="/planning" ;;
+            senior)     PROMPT_ARG="/senior" ;;
+            junior)     PROMPT_ARG="/junior" ;;
+            testflight) PROMPT_ARG="/testflight-publish" ;;
             *)
                 log "DRIFT_USE_SKILLS=1 but unknown SESSION_TYPE=$SESSION_TYPE — falling back to legacy prompt"
                 PROMPT_ARG="$SESSION_PROMPT"

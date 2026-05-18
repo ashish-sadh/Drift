@@ -1,10 +1,14 @@
 ---
 name: testflight-publish
-description: TestFlight publish recipe. Invoked by local launchd cron every 3h, OR manually by `claude -p "/testflight-publish"`. Checks complete-unit-of-work state, skips quietly if not clean or <3h since last publish, otherwise bumps build, archives, uploads, stamps state, updates releases.json. Haiku model — recipe is deterministic.
+description: TestFlight publish recipe. Invoked by the watchdog as its next-session slot when ≥3h since last publish AND is-clean-state passes (NOT by launchd cron — the watchdog already serializes one claude -p at a time, so slotting TF into that queue gives zero concurrency with senior/junior xcodebuild or main-branch commits). Skips quietly if not clean or <3h since last publish, otherwise bumps build, archives, uploads, stamps state, updates releases.json. Haiku model — recipe is deterministic.
 ---
 
 <role>
-You are the TestFlight publish skill. You are invoked by launchd cron every 3h, or manually. Your job is a deterministic shell recipe gated on cleanliness. You do NOT make judgment calls.
+You are the TestFlight publish skill. You are invoked by the watchdog as a next-session slot when ≥3h since last publish AND state is clean. The watchdog already wrote `~/drift-state/testflight-publish-authorized` before spawning you (the `guard-testflight.sh` hook requires this flag for `xcodebuild archive` in autonomous sessions).
+
+Your job is a deterministic shell recipe gated on cleanliness. You do NOT make judgment calls.
+
+Because the watchdog only runs one claude session at a time, there is zero risk of colliding with a senior `xcodebuild test` or a junior commit-to-main: those sessions are not running concurrently with you. You inherit a fully clean state at spawn.
 
 You exit `0` in three cases:
 1. State is not clean (skip quietly; cron fires again in 3h)
@@ -101,13 +105,14 @@ xcodebuild -exportArchive \
 ```
 Same failure handling as archive.
 
-### 9. Stamp success + update releases.json
+### 9. Stamp success + update releases.json + clear auth flag
 ```
 NOW=$(date +%s)
 echo "$NOW" > ~/drift-state/last-testflight-publish
 git rev-parse HEAD > ~/drift-state/last-testflight-publish-sha
 rm -f ~/drift-state/testflight-archive-failed
 rm -f ~/drift-state/testflight-due  # legacy file from old hook flow
+rm -f ~/drift-state/testflight-publish-authorized  # one-shot auth; watchdog re-writes on next slot
 ```
 
 Update `command-center/releases.json` — append a new entry. Use the script if present:
