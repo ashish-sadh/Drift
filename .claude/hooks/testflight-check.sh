@@ -1,12 +1,14 @@
 #!/bin/bash
 
 # Silent for non-autonomous (human) sessions — these hooks are autopilot-only.
-# DRIFT_AUTONOMOUS env var is the primary signal but can leak via process
-# inheritance (e.g. a watchdog-spawned shell that the user takes over). The
-# session-type file is the authoritative signal session-start.sh owns and
-# refreshes — belt-and-suspenders.
 [[ "${DRIFT_AUTONOMOUS:-0}" != "1" ]] && exit 0
 [[ "$(cat "$HOME/drift-state/cache-session-type" 2>/dev/null)" == "human" ]] && exit 0
+
+# Silent when DRIFT_USE_SKILLS=1 — TestFlight publish is now owned by a
+# local launchd cron firing claude -p "/testflight-publish". Keep this hook
+# as no-op fallback until launchd cron is verified stable; can be deleted in
+# a later cleanup commit.
+[[ "${DRIFT_USE_SKILLS:-0}" == "1" ]] && exit 0
 
 # If a recent archive failed, suppress the publish injection entirely. The
 # previous build number didn't ship; re-archiving on every commit just floods

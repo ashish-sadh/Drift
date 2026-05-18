@@ -852,7 +852,35 @@ start_claude() {
     local FALLBACK=""
     [[ "$MODEL" == "opus" ]] && FALLBACK="--fallback-model sonnet"
 
-    DRIFT_AUTONOMOUS=1 claude -p "$SESSION_PROMPT" \
+    # Skills cutover: when DRIFT_USE_SKILLS=1, spawn with a slash-command
+    # prompt that resolves to .claude/skills/<skill>/SKILL.md instead of the
+    # giant SESSION_PROMPT. Per-phase context shrinks ~60-70% and the entire
+    # program.md monolith stops being loaded into every session.
+    #
+    # SESSION_TYPE → /skill mapping:
+    #   planning → /planning  (Opus)
+    #   senior   → /senior    (Opus)
+    #   junior   → /junior    (Sonnet)
+    #
+    # If DRIFT_USE_SKILLS is unset/0, fall back to SESSION_PROMPT (legacy path).
+    # Rollback at any step: set DRIFT_USE_SKILLS=0 in the watchdog env or unset.
+    local PROMPT_ARG
+    if [[ "${DRIFT_USE_SKILLS:-0}" == "1" ]]; then
+        case "$SESSION_TYPE" in
+            planning) PROMPT_ARG="/planning" ;;
+            senior)   PROMPT_ARG="/senior" ;;
+            junior)   PROMPT_ARG="/junior" ;;
+            *)
+                log "DRIFT_USE_SKILLS=1 but unknown SESSION_TYPE=$SESSION_TYPE — falling back to legacy prompt"
+                PROMPT_ARG="$SESSION_PROMPT"
+                ;;
+        esac
+        log "Skill-based spawn: $PROMPT_ARG (model=$MODEL)"
+    else
+        PROMPT_ARG="$SESSION_PROMPT"
+    fi
+
+    DRIFT_AUTONOMOUS=1 DRIFT_USE_SKILLS="${DRIFT_USE_SKILLS:-0}" DRIFT_SESSION_TYPE="$SESSION_TYPE" claude -p "$PROMPT_ARG" \
         --dangerously-skip-permissions \
         --model "$MODEL" \
         $FALLBACK \

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+launchd job for Drift TestFlight publish.
+
+Fires `claude -p "/testflight-publish"` every 3 hours (10800 seconds). The
+skill body is the single source of truth for the publish recipe; this plist
+just provides the trigger cadence.
+
+Install:
+  cp .claude/launchd/com.drift.testflight-publish.plist ~/Library/LaunchAgents/
+  launchctl load ~/Library/LaunchAgents/com.drift.testflight-publish.plist
+
+Uninstall:
+  launchctl unload ~/Library/LaunchAgents/com.drift.testflight-publish.plist
+  rm ~/Library/LaunchAgents/com.drift.testflight-publish.plist
+
+Inspect status:
+  launchctl list | grep com.drift.testflight-publish
+  tail -50 ~/drift-state/launchd/testflight-publish.stdout.log
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.drift.testflight-publish</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/Users/ashishsadh/workspace/Drift/.claude/launchd/run-testflight-publish.sh</string>
+    </array>
+
+    <key>StartInterval</key>
+    <integer>10800</integer>
+
+    <key>RunAtLoad</key>
+    <false/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/ashishsadh/drift-state/launchd/testflight-publish.stdout.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/Users/ashishsadh/drift-state/launchd/testflight-publish.stderr.log</string>
+
+    <key>WorkingDirectory</key>
+    <string>/Users/ashishsadh/workspace/Drift</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        <key>HOME</key>
+        <string>/Users/ashishsadh</string>
+    </dict>
+</dict>
+</plist>
