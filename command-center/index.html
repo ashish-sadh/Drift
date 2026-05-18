@@ -1146,12 +1146,14 @@
         el.style.display = 'none';
       }
     }
-    // Auto-refresh live status + sprint plan every 30s when Sprint tab is active.
-    // Catches: in-progress label changes (claim/done), new sprint-tasks created
-    // by planning, P0 bugs filed, awaiting-approval bugs that flip to sprint.
+    // Auto-refresh live status + sprint plan every 30s — regardless of which
+    // tab is active. Previously gated on Sprint-tab-active, which meant users
+    // watching Reports/Bugs/Features/Designs would miss new sprint-tasks
+    // entirely until they switched tabs (observed: #813 filed 15:30 UTC, did
+    // not appear on CC's sprint list while the user was on a different tab).
+    // Sprint state is small + cached client-side, so refreshing always is cheap.
     setInterval(() => {
       if (!getToken()) return;
-      if (document.querySelector('.tab.active')?.dataset.tab !== 'sprint') return;
       loadLiveStatus();
       loadSprint();
     }, 30000);
