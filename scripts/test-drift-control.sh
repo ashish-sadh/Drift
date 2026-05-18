@@ -1624,12 +1624,82 @@ IP=$(python3 -c "import json; d=json.load(open('$STATE_FILE')); print(d.get('in_
 assert_eq "15.15: in_progress unchanged after rejected concurrent claim" "900" "$IP"
 }
 
+run_nudge_plan_block() {
+echo ""
+echo "══ nudge-plan-comment.sh: HARD-BLOCK after Edit budget ═══════════════════"
+
+# nudge-plan-comment.sh blocks Edit/Write after EDIT_BUDGET (3) attempts on
+# a claimed issue without a <plan> XML block in any comment. This is the
+# safeguard discovered while watching #801 (senior spent 21 min editing tests
+# without ever posting a plan; the eventual commit would have been rejected
+# by require-qa-verdict.sh, but the test iteration was wasted).
+HOOK=".claude/hooks/nudge-plan-comment.sh"
+
+# Set up: autopilot, senior session, claimed issue, claim aged past 5 min
+export DRIFT_AUTONOMOUS=1
+mkdir -p "$HOME/drift-state"
+echo "senior" > "$HOME/drift-state/cache-session-type"
+# Write a sprint-state with an in-progress issue and a claim_started 10 min ago
+OLD_TS=$(( $(date +%s) - 600 ))
+cat > "$HOME/drift-state/sprint-state.json" <<EOF
+{
+  "in_progress": 999000,
+  "claim_started": $OLD_TS,
+  "session_tasks": 0,
+  "tasks": []
+}
+EOF
+
+# Clear any stale state for issue 999000 (test sentinel — won't actually exist on GH)
+rm -f "$HOME/drift-state/plan-posted/999000"
+rm -f "$HOME/drift-state/edit-count-since-plan/999000"
+
+# Make the hook input that would arrive for an Edit tool call
+make_input() {
+    cat <<EOF
+{"tool_name":"Edit","tool_input":{"file_path":"/tmp/x"}}
+EOF
+}
+
+# First 3 Edit calls: within budget, hook should exit 0 (advisory + counting).
+# Note: the hook also calls `gh issue view 999000` which will fail because
+# 999000 doesn't exist on the live repo — that's fine; HAS_PLAN stays 0 and
+# the counter increments.
+RES1=$(make_input | bash "$HOOK" 2>&1; echo "EXIT:$?")
+RES2=$(make_input | bash "$HOOK" 2>&1; echo "EXIT:$?")
+RES3=$(make_input | bash "$HOOK" 2>&1; echo "EXIT:$?")
+assert_eq "nudge-plan-block: edit #1 within budget (exit 0)" "0" "$(echo "$RES1" | tail -1 | cut -d: -f2)"
+assert_eq "nudge-plan-block: edit #2 within budget (exit 0)" "0" "$(echo "$RES2" | tail -1 | cut -d: -f2)"
+assert_eq "nudge-plan-block: edit #3 within budget (exit 0)" "0" "$(echo "$RES3" | tail -1 | cut -d: -f2)"
+
+# 4th Edit: budget exceeded → exit 2 with explanatory stderr
+RES4=$(make_input | bash "$HOOK" 2>&1; echo "EXIT:$?")
+EXIT4=$(echo "$RES4" | tail -1 | cut -d: -f2)
+assert_eq "nudge-plan-block: edit #4 BLOCKED (exit 2)" "2" "$EXIT4"
+
+# Stderr should mention the new XML <plan> recipe so the model knows the format
+if echo "$RES4" | grep -q "<plan>"; then
+    echo "  ✓ nudge-plan-block: blocking message includes <plan> XML recipe"
+    PASS=$((PASS+1))
+else
+    echo "  ✗ nudge-plan-block: missing <plan> recipe in blocking message"
+    FAIL=$((FAIL+1))
+    FAILURES+=("nudge-plan-block: missing <plan> recipe in stderr")
+fi
+
+# Cleanup test sentinel
+rm -f "$HOME/drift-state/edit-count-since-plan/999000"
+rm -f "$HOME/drift-state/sprint-state.json"
+unset DRIFT_AUTONOMOUS
+}
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # Run selected categories
 # ═══════════════════════════════════════════════════════════════════════════════
 
 case "$FILTER" in
     happy)          run_happy ;;
+    nudge_plan)     run_nudge_plan_block ;;
     priority)       run_priority ;;
     crashes)        run_crashes ;;
     routing)        run_routing ;;
@@ -1660,6 +1730,7 @@ case "$FILTER" in
         run_lifecycle
         run_extended_priority
         run_error_handling
+        run_nudge_plan_block
         ;;
 esac
 
