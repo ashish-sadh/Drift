@@ -2503,5 +2503,12 @@
     "description": "chore: TestFlight build 251 \u2014 planning + review cycle 10888",
     "features": [],
     "fixes": []
+  },
+  {
+    "build": 252,
+    "date": "2026-05-18T00:00:00-07:00",
+    "description": "chore: TestFlight build 252 \u2014 cadence build (no user-visible changes since 251)",
+    "features": [],
+    "fixes": []
   }
 ]
